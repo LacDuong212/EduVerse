@@ -188,4 +188,71 @@ export const isAuthenticated = (req, res) => {
     } catch (error) {
         return res.json({ success: false, message: "Invalid token" });
     }
+}
+;
+// Send OTP to reset password
+export const forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+        const user = await userModel.findOne({ email });
+
+        if (!user) {
+            return res.json({ success: false, message: "User not found" });
+        }
+        if (!user.isVerified){
+            return res.json({ success: false, message: "Account not verified" }); 
+        }
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+        user.verifyOtp = otp;
+        user.verifyOtpExpireAt = Date.now() + 10 * 60 * 1000; // 10 phút
+        await user.save();
+
+        await transporter.sendMail({
+            from: process.env.EMAIL_USER,
+            to: user.email,
+            subject: "OTP để lấy lại mật khẩu",
+            text: `Hello ${user.name},\n\nOTP khôi phục tai khoan cua ban ${otp}\nValid for 10 minutes.\n\nThank you!`
+        });
+
+        return res.json({ success: true, message: "New OTP sent to your email" });
+    } catch (error) {
+        return res.json({ success: false, message: error.message });
+    }
 };
+// Verify ResetOTP
+export const verifyResetOtp = async(req, res) => {
+    try {
+        
+        const { email, otp, newPassword } = req.body;
+        const user = await userModel.findOne({ email });
+
+        if(!user) {
+            return res.json({ success: false, message: "User not found" });
+        }
+
+        if (!user.isVerified){
+            return res.json({ success: false, message: "Account not verified" }); 
+        }
+
+        if(user.verifyOtp !== otp) {
+            return res.json({ success: false, message: "Invalid OTP" });
+        }
+
+        if(user.verifyOtpExpireAt < Date.now()) {
+            return res.json({ success: false, message: "OTP has expired" });
+        }
+        
+        const hashedNewPassword = await bycrypt.hash(newPassword, 10);
+        user.password = hashedNewPassword;
+        user.verifyOtp = '';
+        user.verifyOtpExpireAt = 0;
+
+        await user.save();
+
+        return res.json({ success: true, message: "Password reset successfully" });
+
+    } catch (error) {
+        return res.json({ success: false, message: error.message });
+    }
+}
