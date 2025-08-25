@@ -1,24 +1,26 @@
 import jwt from 'jsonwebtoken';
 
 const userAuth = (req, res, next) => {
-    const token = req.cookies.token;
+    const { token } = req.cookies;
 
     if (!token) {
-        return res.status(401).json({ success: false, message: "Unauthorized: No token provided" });
+        return res.json({ success: false, message: "Unauthorized: No token provided" });
     }
 
     try {
 
-        const tokenDecoded = jwt.verify(token, process.env.JWT_SECRET);
+        const tokenDecode = jwt.verify(token, process.env.JWT_SECRET);
         
-        if (!tokenDecoded) {
-            return res.status(401).json({ success: false, message: "Unauthorized: Invalid token" });
+        if (tokenDecode.id) {
+            req.userId = tokenDecode.id
+        } else {
+            return res.json({ success: false, message: "Unauthorized: Invalid token" });
         }
-        req.userId = tokenDecoded.id;
+
         next();
 
     } catch (error) {
-        return res.status(401).json({ success: false, message: "Unauthorized: Invalid token" });
+        return res.json({ success: false, message: error.message });
     }
 }
 
