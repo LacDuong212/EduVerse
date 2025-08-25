@@ -49,7 +49,7 @@ export const register = async (req, res) => {
             text: `Hello ${user.name},\n\nYour OTP for email verification is: ${otp}\nThis OTP is valid for 10 minutes.\n\nThank you!\n`
         };
 
-        await transporter.sendMail(mailOptions); 
+        await transporter.sendMail(mailOptions);
 
         res.json({ success: true, message: "Registration successful. Please verify your email with OTP." });
 
@@ -101,7 +101,7 @@ export const login = async (req, res) => {
 
 export const logout = async(req, res) => {
     try {
-        
+
         res.clearCookie('token', {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
@@ -163,7 +163,7 @@ export const isAuthenticated = (req, res) => {
         return res.json({ success: false, message: "Invalid token" });
     }
 }
-;
+    ;
 // Send OTP to reset password
 export const forgotPassword = async (req, res) => {
     try {
@@ -173,50 +173,48 @@ export const forgotPassword = async (req, res) => {
         if (!user) {
             return res.json({ success: false, message: "User not found" });
         }
-        if (!user.isVerified){
-            return res.json({ success: false, message: "Account not verified" }); 
+        if(!user.isVerified) {
+            return res.json({ success: false, message: "Account not verified" });
         }
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
         user.verifyOtp = otp;
         user.verifyOtpExpireAt = Date.now() + 10 * 60 * 1000; // 10 phút
         await user.save();
-
         await transporter.sendMail({
             from: process.env.EMAIL_USER,
             to: user.email,
-            subject: "OTP để lấy lại mật khẩu",
-            text: `Hello ${user.name},\n\nOTP khôi phục tai khoan cua ban ${otp}\nValid for 10 minutes.\n\nThank you!`
+            subject: "Password Reset OTP",
+            text: `Hello ${user.name},\n\nYour account recovery OTP is: ${otp}\nThis code is valid for 10 minutes.\n\nThank you!`
         });
-
         return res.json({ success: true, message: "New OTP sent to your email" });
     } catch (error) {
         return res.json({ success: false, message: error.message });
     }
 };
 // Verify ResetOTP
-export const verifyResetOtp = async(req, res) => {
+export const resetPassword = async (req, res) => {
     try {
-        
+
         const { email, otp, newPassword } = req.body;
         const user = await userModel.findOne({ email });
 
-        if(!user) {
+        if (!user) {
             return res.json({ success: false, message: "User not found" });
         }
 
-        if (!user.isVerified){
-            return res.json({ success: false, message: "Account not verified" }); 
+        if (!user.isVerified) {
+            return res.json({ success: false, message: "Account not verified" });
         }
 
-        if(user.verifyOtp !== otp) {
+        if (user.verifyOtp !== otp) {
             return res.json({ success: false, message: "Invalid OTP" });
         }
-
-        if(user.verifyOtpExpireAt < Date.now()) {
+        
+        if (user.verifyOtpExpireAt < Date.now()) {
             return res.json({ success: false, message: "OTP has expired" });
         }
-        
+
         const hashedNewPassword = await bycrypt.hash(newPassword, 10);
         user.password = hashedNewPassword;
         user.verifyOtp = '';
@@ -230,3 +228,32 @@ export const verifyResetOtp = async(req, res) => {
         return res.json({ success: false, message: error.message });
     }
 }
+
+// ✅ Chỉ check OTP hợp lệ (không đổi password)
+export const checkResetOtp = async (req, res) => {
+    try {
+        const { email, otp } = req.body;
+        const user = await userModel.findOne({ email });
+
+        if (!user) {
+            return res.json({ success: false, message: "User not found" });
+        }
+
+        if (!user.isVerified) {
+            return res.json({ success: false, message: "Account not verified" });
+        }
+
+        if (user.verifyOtp !== otp) {
+            return res.json({ success: false, message: "Invalid OTP" });
+        }
+
+        if (user.verifyOtpExpireAt < Date.now()) {
+            return res.json({ success: false, message: "OTP has expired" });
+        }
+
+        return res.json({ success: true, message: "OTP verified successfully" });
+
+    } catch (error) {
+        return res.json({ success: false, message: error.message });
+    }
+};
