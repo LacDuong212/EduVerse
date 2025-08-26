@@ -1,7 +1,9 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useDispatch, useSelector } from "react-redux";
+import { setLogin, setLogout } from "../redux/authSlice";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,13 +12,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LogOut } from "lucide-react";
 
-import { AppContent } from "../context/AppContext";
-
 export default function ProfilePage() {
   const navigate = useNavigate();
-  const { backendUrl } = useContext(AppContent);
+  const disPatch = useDispatch();
 
-  const [userData, setUserData] = useState(null);
+  const backendUrl = import.meta.env.VITE_BACKEND_URL
+  const { userData, isLoggedIn } = useSelector((state) => state.auth);
+
   const [isLoading, setIsLoading] = useState(true);
 
   // Fetch user profile
@@ -24,15 +26,15 @@ export default function ProfilePage() {
     const fetchProfile = async () => {
       try {
         axios.defaults.withCredentials = true;
-        const { data } = await axios.get(`${backendUrl}/api/user/profile`);
+        const { data } = await axios.get(backendUrl + '/api/user/profile');
         if (data.success) {
-          setUserData(data.user);
+          disPatch(setLogin(data.user));
         } else {
-          setUserData(null);
+          disPatch(setLogout());
           navigate("/login");
         }
       } catch (error) {
-        setUserData(null);
+        disPatch(setLogout());
         navigate("/login");
       } finally {
         setIsLoading(false);
@@ -40,15 +42,15 @@ export default function ProfilePage() {
     };
 
     fetchProfile();
-  }, [backendUrl, navigate]);
+  }, [backendUrl, disPatch, navigate]);
 
   // Logout
   const logout = async () => {
     try {
       axios.defaults.withCredentials = true;
-      const { data } = await axios.post(`${backendUrl}/api/auth/logout`);
+      const { data } = await axios.post(backendUrl + '/api/auth/logout');
       if (data.success) {
-        setUserData(null);
+        disPatch(setLogout())
         navigate("/login");
       }
     } catch (error) {
@@ -72,6 +74,10 @@ export default function ProfilePage() {
     );
   }
 
+  if (!isLoggedIn) {
+    return null; // tránh render khi chưa có user
+  }
+  
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}

@@ -1,18 +1,18 @@
 import React, { useContext, useState } from "react";
 import axios from "axios";
-import { AppContent } from "../context/AppContext";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 
 const ForgotPassword = () => {
-  const { backendUrl } = useContext(AppContent);
   const [email, setEmail] = useState("");
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
   const onSubmithandler = async (e) => {
     e.preventDefault();
-    if (loading) return; // chặn click liên tiếp
+    if (loading) return;
     setLoading(true);
 
     try {
@@ -42,7 +42,6 @@ const ForgotPassword = () => {
         <h2 className="text-3xl font-semibold text-white text-center mb-3">
           Forgot Password
         </h2>
-        {/* 🟢 đổi chữ cho đúng flow OTP */}
         <p className="text-center text-sm mb-6">
           Enter your email to receive OTP
         </p>

@@ -1,17 +1,16 @@
-import React, { useContext, useRef, useState, useEffect } from "react";
-import { AppContent } from "../context/AppContext";
+import React, { useRef, useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const CheckResetOtp = () => {
-  const { backendUrl } = useContext(AppContent);
   const [email, setEmail] = useState("");
   const inputRefs = useRef([]);
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Nếu có email truyền từ ForgotPassword → set sẵn
+  const backendUrl = import.meta.env.VITE_BACKEND_URL
+
   useEffect(() => {
     if (location.state?.email) {
       setEmail(location.state.email);
@@ -87,7 +86,7 @@ const CheckResetOtp = () => {
               <input
                 type="email"
                 placeholder="Email"
-                value={userEmail}
+                value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 className="bg-transparent outline-none text-white w-full"

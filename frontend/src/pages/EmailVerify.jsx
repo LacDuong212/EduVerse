@@ -1,18 +1,20 @@
 import axios from 'axios';
-import React, { useContext, useEffect, useState } from 'react'
-import { AppContent } from '../context/AppContext';
+import React, { useEffect, useState } from 'react'
 import { toast } from 'react-toastify';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { setUserData } from '../redux/authSlice'
 
 const EmailVerify = () => {
-
   axios.defaults.withCredentials = true;
-  const {backendUrl, isLoggedIn, userData, getUserData} = useContext(AppContent)
-  const [userEmail, setUserEmail] = useState('')
 
+  const disPatch = useDispatch()
   const navigate = useNavigate()
   const location = useLocation()
 
+  const { isLoggedIn, userData } = useSelector((state) => state.auth)
+  
+  const [userEmail, setUserEmail] = useState('')
   const inputRefs = React.useRef([])
 
   const handleInput = (e, index)=>{
@@ -38,19 +40,21 @@ const EmailVerify = () => {
   }
 
   const onSubmithandler = async(e)=>{
+    e.preventDefault();
+
     try {
-      e.preventDefault();
       const otpArray = inputRefs.current.map(e => e.value)
       const otp = otpArray.join('')
 
-      const {data} = await axios.post(backendUrl + '/api/auth/verify-otp', {
+      const backendUrl = import.meta.env.VITE_BACKEND_URL
+      const { data } = await axios.post(backendUrl + '/api/auth/verify-otp', {
         email: userEmail,
         otp:  otp
       })
 
       if(data.success){
         toast.success(data.message)
-        getUserData()
+        disPatch(setUserData(data.user))
         navigate('/')
       }else{
         toast.error(data.message)
@@ -61,11 +65,9 @@ const EmailVerify = () => {
   }
 
   useEffect(() => {
-    // LẤY EMAIL TỪ ROUTE STATE
     if (location.state?.email) {
       setUserEmail(location.state.email);
     } else {
-      // FALLBACK: NẾU KHÔNG CÓ ROUTE STATE, THỬ LẤY TỪ USERDATA HOẶC REDIRECT
       if (userData && userData.email) {
         setUserEmail(userData.email);
       } else {
@@ -75,9 +77,11 @@ const EmailVerify = () => {
     }
   }, [location.state, userData, navigate]);
 
-  useEffect(()=>{
-    isLoggedIn && userData && userData.isVerified && navigate('/')
-  },[isLoggedIn, userData])
+  useEffect(() => {
+    if (isLoggedIn && userData && userData.isVerified) {
+      navigate('/')
+    }
+  }, [isLoggedIn, userData, navigate])
 
   return (
     <div className='flex items-center justify-center min-h-screen'>

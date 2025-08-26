@@ -1,15 +1,17 @@
-import React, { useContext, useState } from 'react'
+import React, { useState } from 'react'
 import { assets } from '../assets/assets'
 import { useNavigate } from 'react-router-dom'
-import { AppContent } from '../context/AppContext'
 import axios from 'axios'
 import { toast } from 'react-toastify'
+import { useDispatch } from 'react-redux'
+import { setLogin } from '../redux/authSlice'
 
 const Login = () => {
 
     const navigate = useNavigate()
+    const disPatch = useDispatch()
 
-    const {backendUrl, setIsLoggedIn, getUserData} = useContext(AppContent)
+    const backendUrl = import.meta.env.VITE_BACKEND_URL
 
     const [state, setState] = useState('Login')
     const [name, setName] = useState('')
@@ -17,17 +19,16 @@ const Login = () => {
     const [password, setPassword] = useState('')
 
     const onSubmithandler = async (e) => {
+        e.preventDefault();
         try {
-            e.preventDefault();
-
             axios.defaults.withCredentials = true
 
             if(state === 'Sign Up') {
-                const {data} = await axios.post(backendUrl + `/api/auth/register`, { name, email, password})
+                const { data } = await axios.post(backendUrl + `/api/auth/register`, { name, email, password })
 
                 if(data.success) {
-                    setIsLoggedIn(true)
-                    navigate('/email-verify', { state: {email: email} });
+                    disPatch(setLogin({ name, email }))
+                    navigate('/email-verify', { state: { email } });
                 }else {
                     toast.error(data.message)
                 }
@@ -35,8 +36,7 @@ const Login = () => {
                 const {data} = await axios.post(backendUrl + `/api/auth/login`, { email, password})
 
                 if(data.success) {
-                    setIsLoggedIn(true)
-                    getUserData()
+                    disPatch(setLogin(data.user))
                     navigate('/')
                 }else {
                     toast.error(data.message)

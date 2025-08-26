@@ -1,22 +1,26 @@
-import React, { useContext } from 'react'
+import React from 'react'
 import { assets } from '../assets/assets'
 import { useNavigate } from 'react-router-dom'
-import { AppContent } from '../context/AppContext'
 import axios from 'axios'
 import { toast } from 'react-toastify'
+import { useDispatch, useSelector } from 'react-redux'
+import { setLogout } from '../redux/authSlice'
 
 const Navbar = () => {
 
     const navigate = useNavigate()
-    const { userData, backendUrl, setUserData, setIsLoggedIn } = useContext(AppContent)
+    const disPatch = useDispatch()
+    const { userData } = useSelector((state) => state.auth)
+    const backendUrl  = import.meta.env.VITE_BACKEND_URL
 
     const logout = async () => {
         try {
             axios.defaults.withCredentials = true
             const { data } = await axios.post(backendUrl + '/api/auth/logout')
-            data.success && setIsLoggedIn(false)
-            data.success && setUserData(false)
-            navigate('/')
+            if (data.success) {
+                disPatch(setLogout())
+                navigate('/')
+            }
 
         } catch (error) {
             toast.error(error.message)

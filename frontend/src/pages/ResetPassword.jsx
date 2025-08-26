@@ -1,11 +1,9 @@
 import React, { useContext, useState } from "react";
-import { AppContent } from "../context/AppContext";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const ResetPassword = () => {
-  const { backendUrl } = useContext(AppContent);
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const navigate = useNavigate();
@@ -13,6 +11,7 @@ const ResetPassword = () => {
 
   const email = location.state?.email;
   const otp = location.state?.otp;
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
