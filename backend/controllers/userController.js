@@ -1,12 +1,17 @@
 import userModel from "../models/userModel.js";
 
-// GET /users/profile
+// GET /user/profile
 export const getProfile = async (req, res) => {
-  // req.userId is set by userAuth middleware in userRouters
   try {
-    const user = await userModel.findById(req.userId).select("name email isVerified");
+    const user = await userModel
+      .findById(req.userId)
+      .select("name email phonenumber bio website socials isVerified");
+
     if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
     }
 
     res.json({
@@ -14,34 +19,47 @@ export const getProfile = async (req, res) => {
       user,
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Server error", error: error.message });
+    console.error("Profile fetch error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while fetching profile",
+      error: error.message,
+    });
   }
 };
 
-// PATCH /users/profile
+// PATCH /user/profile
 export const updateProfile = async (req, res) => {
   try {
-    const updates = req.body;
+    const { password, ...updates } = req.body; // prevent password from being updated here
 
-    // Never allow password updates here (make a separate endpoint for password change)
-    delete updates.password;
+    const user = await userModel
+      .findByIdAndUpdate(req.userId, updates, { new: true, runValidators: true })
+      .select("name email phonenumber bio website socials isVerified");
 
-    const user = await userModel.findByIdAndUpdate(req.userId, updates, { new: true }).select("name email isVerified");
     if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
     }
 
     res.json({
       success: true,
-      message: "User profile updated",
+      message: "User profile updated successfully",
       user,
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Server error", error: error.message });
+    console.error("Profile update error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while updating profile",
+      error: error.message,
+    });
   }
 };
 
-// DELETE /users/profile
+// DELETE /user/profile
 export const deleteAccount = async (req, res) => {
   try {
     const user = await userModel.findByIdAndDelete(req.userId);
@@ -58,6 +76,7 @@ export const deleteAccount = async (req, res) => {
   }
 };
 
+// GET /user/data
 export const getUserData = async (req, res) => {
     try {
         const userId = req.userId;

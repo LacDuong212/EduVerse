@@ -28,7 +28,7 @@ const Navbar = () => {
     }
 
     return (
-        <div className='w-full flex justify-between items-center p-4 sm:p-6 sm:px-24 absolute top-0'>
+        <div className='w-full flex justify-end items-center p-4 sm:p-6 sm:px-10 absolute top-0'>
             {userData ? (
                 <div className='w-8 h-8 flex justify-center items-center rounded-full bg-black text-white relative group cursor-pointer'>
                     {userData.name[0].toUpperCase()}
@@ -36,7 +36,7 @@ const Navbar = () => {
                     <div className='absolute hidden group-hover:block top-0 right-0 z-10 text-black rounded pt-10'>
                         <ul className='list-none m-0 p-2 bg-gray-100 text-sm shadow-md rounded'>
                             <li
-                                onClick={() => navigate('/profile')}
+                                onClick={() => navigate('/account')}
                                 className='py-1 px-2 hover:bg-gray-200 cursor-pointer rounded'
                             >
                                 Profile
