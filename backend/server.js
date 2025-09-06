@@ -6,7 +6,7 @@ import cookieParser from 'cookie-parser';
 import connectDB from './configs/mongodb.js';
 import authRouter from './routes/authRouters.js';
 import userRouter from './routes/userRouters.js';
-import courseRouter from "./routes/courseRouters.js";
+import courseRouter from './routes/courseRoutes.js';
 
 //Initialize Express
 const app = express();
@@ -25,7 +25,7 @@ app.use(cors({origin: allowedOrigins, credentials: true}));
 app.get('/', (req, res) => res.send("API is running"));
 app.use('/api/auth', authRouter);
 app.use('/api/user', userRouter);
-app.use("/api/course", courseRouter);
+app.use('/api/courses', courseRouter);
 
 // Port
 const PORT = process.env.PORT || 5000;

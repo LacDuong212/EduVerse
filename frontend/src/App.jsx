@@ -9,12 +9,14 @@ import 'react-toastify/dist/ReactToastify.css';
 import ForgotPassword from "./pages/ForgotPassword";
 import CheckResetOtp from "./pages/CheckResetOtp";
 import ResetPassword from "./pages/ResetPassword";
+import Navbar from './components/Navbar'
 import CourseDetail from "./pages/CourseDetail";
 
 const App = () => {
   return (
     <div>
       <ToastContainer />
+      <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />

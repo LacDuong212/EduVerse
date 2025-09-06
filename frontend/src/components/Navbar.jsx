@@ -28,37 +28,77 @@ const Navbar = () => {
     }
 
     return (
-        <div className='w-full flex justify-between items-center p-4 sm:p-6 sm:px-24 absolute top-0'>
-            {userData ? (
-                <div className='w-8 h-8 flex justify-center items-center rounded-full bg-black text-white relative group cursor-pointer'>
-                    {userData.name[0].toUpperCase()}
-                    {/* Dropdown */}
-                    <div className='absolute hidden group-hover:block top-0 right-0 z-10 text-black rounded pt-10'>
-                        <ul className='list-none m-0 p-2 bg-gray-100 text-sm shadow-md rounded'>
-                            <li
-                                onClick={() => navigate('/profile')}
-                                className='py-1 px-2 hover:bg-gray-200 cursor-pointer rounded'
-                            >
-                                Profile
-                            </li>
-                            <li
-                                onClick={logout}
-                                className='py-1 px-2 hover:bg-gray-200 cursor-pointer rounded'
-                            >
-                                Logout
-                            </li>
-                        </ul>
+        <div className='w-full flex items-center p-4 sm:px-12 md:px-24 fixed top-0 left-0 bg-white shadow z-50'>
+            {/* Logo */}
+            <div className='flex-1'>
+                <img src={assets.logo} alt='logo' 
+                    className='w-32 sm:w-40 md:w-48 cursor-pointer object-contain' 
+                    onClick={() => navigate('/')}/>
+            </div>
+            
+            {/* Navigation Menu */}
+            <div className="absolute left-1/2 transform -translate-x-1/2">
+                <ul className="hidden md:flex gap-8 text-gray-700 font-medium text-sm lg:text-base">
+                    <li
+                        onClick={() => navigate('/')}
+                        className="cursor-pointer hover:text-blue-600 transition"
+                    >
+                        Home
+                    </li>
+                    <li
+                        onClick={() => navigate('/courses')}
+                        className="cursor-pointer hover:text-blue-600 transition"
+                    >
+                        Courses
+                    </li>
+                    <li
+                        onClick={() => navigate('/about')}
+                        className="cursor-pointer hover:text-blue-600 transition"
+                    >
+                        About
+                    </li>
+                    <li
+                        onClick={() => navigate('/contact')}
+                        className="cursor-pointer hover:text-blue-600 transition"
+                    >
+                        Contact
+                    </li>
+                </ul>
+            </div>
+
+            {/* Right Section */}
+            <div className="flex-1 flex justify-end">
+                {userData ? (
+                    <div className='w-10 h-10 flex justify-center items-center rounded-full bg-black text-white text-lg font-semibold cursor-pointer'>
+                        {userData.name[0].toUpperCase()}
+                        {/* Dropdown */}
+                        <div className='absolute hidden group-hover:block right-0 mt-2 z-10 text-black rounded'>
+                            <ul className='list-none m-0 p-2 bg-gray-100 text-sm shadow-md rounded w-32'>
+                                <li
+                                    onClick={() => navigate('/profile')}
+                                    className='py-2 px-3 hover:bg-gray-200 cursor-pointer rounded'
+                                >
+                                    Profile
+                                </li>
+                                <li
+                                    onClick={logout}
+                                    className='py-2 px-3 hover:bg-gray-200 cursor-pointer rounded'
+                                >
+                                    Logout
+                                </li>
+                            </ul>
+                        </div>
                     </div>
-                </div>
-            ) : (
-                <button
-                    onClick={() => navigate('/login')}
-                    className='flex items-center gap-2 border border-gray-500 rounded-full px-6 py-2 text-gray-800 hover:bg-gray-100 transition-all'
-                >
-                    Login
-                    <img src={assets.arrow_icon} alt='arrow icon' />
-                </button>
-            )}
+                ) : (
+                    <button
+                        onClick={() => navigate('/login')}
+                        className='flex items-center gap-2 border border-gray-500 rounded-full px-5 py-2 text-gray-800 hover:bg-gray-100 transition-all text-sm sm:text-base'
+                    >
+                        Login
+                        <img src={assets.arrow_icon} alt='arrow icon' className="w-4 h-4" />
+                    </button>
+                )}
+            </div>
         </div>
     )
 }
