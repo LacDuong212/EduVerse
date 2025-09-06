@@ -9,6 +9,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import ForgotPassword from "./pages/ForgotPassword";
 import CheckResetOtp from "./pages/CheckResetOtp";
 import ResetPassword from "./pages/ResetPassword";
+import CourseDetail from "./pages/CourseDetail";
 
 const App = () => {
   return (
@@ -21,6 +22,7 @@ const App = () => {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/check-reset-otp" element={<CheckResetOtp />} />
+        <Route path="/course/:id" element={<CourseDetail />} />
 
         <Route path="/profile" element={<Profile />} />
       </Routes>
