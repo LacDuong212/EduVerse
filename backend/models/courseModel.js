@@ -9,11 +9,10 @@ const courseSchema = new mongoose.Schema({
   language: { type: String },
   instructor: {
     name: { type: String },
-    bio: { type: String },
     avatar: { type: String }
   },
   level: { type: String, enum: ["Beginner", "Intermediate", "Advanced"] },
-  duration: Number, // giờ học
+  duration: Number,
   lecturesCount: Number,
   sections: [
     {
@@ -27,8 +26,6 @@ const courseSchema = new mongoose.Schema({
       ]
     }
   ],
-  requirements: [String],
-  outcomes: [String],
   studentsEnrolled: { type: Number, default: 0 },
   rating: {
     average: { type: Number, default: 0 },
@@ -37,6 +34,8 @@ const courseSchema = new mongoose.Schema({
   thumbnail: String,
   previewVideo: String,
   tags: [String],
+  price: { type: Number, required: true },
+  discountPrice: { type: Number, default: null },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });
