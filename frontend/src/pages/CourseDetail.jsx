@@ -11,7 +11,7 @@ const CourseDetail = () => {
   useEffect(() => {
     const fetchCourse = async () => {
       try {
-        const { data } = await axios.get(`${backendUrl}/api/course/${id}`);
+        const { data } = await axios.get(`${backendUrl}/api/courses/${id}`);
         if (data.success) {
           setCourse(data.course);
         }
