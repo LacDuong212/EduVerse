@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
-import { setLogin, setLogout } from "../redux/authSlice";
+import { setLogout } from "../redux/authSlice";
 
 // ui
 import { Card } from "@/components/ui/card";
@@ -20,31 +20,7 @@ export default function AccountPage() {
   const disPatch = useDispatch();
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-  const { userData, isLoggedIn } = useSelector((state) => state.auth);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Fetch user profile
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        axios.defaults.withCredentials = true;
-        const { data } = await axios.get(backendUrl + '/api/user/profile');
-        if (data.success) {
-          disPatch(setLogin(data.user));
-        } else {
-          disPatch(setLogout());
-          navigate("/login");
-        }
-      } catch (error) {
-        disPatch(setLogout());
-        navigate("/login");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchProfile();
-  }, [backendUrl, disPatch, navigate]);
+  const { userData } = useSelector((state) => state.auth);
 
   // Logout
   const logout = async () => {
@@ -67,24 +43,24 @@ export default function AccountPage() {
         return <ProfileTab userData={userData} />;
       case "avatar":
         return <AvatarTab />;
-      case "security":
-        return <SecurityTab />;
-      case "subscriptions":
-        return <SubscriptionTab />;
-      case "payment":
-        return <PaymentTab />;
-      case "privacy":
-        return <PrivacyTab />;
-      case "notifications":
-        return <NotificationTab />;
-      case "deactivate":
-        return <DeactivateTab />;
+      // case "security":
+      //   return <SecurityTab />;
+      // case "subscriptions":
+      //   return <SubscriptionTab />;
+      // case "payment":
+      //   return <PaymentTab />;
+      // case "privacy":
+      //   return <PrivacyTab />;
+      // case "notifications":
+      //   return <NotificationTab />;
+      // case "deactivate":
+      //   return <DeactivateTab />;
       default:
         return <ProfileTab userData={userData} />;
     }
   };
 
-  if (isLoading) {
+  if (!userData) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <p>Loading...</p>
@@ -92,12 +68,10 @@ export default function AccountPage() {
     );
   }
 
-  if (!isLoggedIn) { return null; } // to avoid rendering when not logged in
-
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50 flex pt-20">
       {/* Sidebar */}
-      <aside className="w-64 bg-white shadow-md p-4 space-y-4 sticky top-0 h-screen overflow-y-auto">
+      <aside className="w-50 bg-white shadow-md p-4 space-y-4 h-[calc(100vh-5rem)] sticky top-20">
         {/* Back Button */}
         <Button
           variant="ghost"
@@ -110,8 +84,16 @@ export default function AccountPage() {
 
         {/* User Info */}
         <div className="flex flex-col items-center mb-6">
-          <div className='w-16 h-16 flex justify-center items-center rounded-full bg-black text-white relative group cursor-pointer text-3xl'>
-            {userData?.name[0].toUpperCase()}
+          <div className="w-16 h-16 flex justify-center items-center rounded-full bg-black text-white overflow-hidden text-3xl">
+            {userData?.pfpImg ? (
+              <img
+                src={userData.pfpImg}
+                alt="User avatar"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              (userData?.name?.[0] || "U").toUpperCase()
+            )}
           </div>
           <p className="font-semibold pt-2 pb-1">{userData?.name}</p>
           <p className="text-xs text-gray-500">{userData?.role ? userData.role : "User"}</p>
@@ -189,7 +171,7 @@ export default function AccountPage() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-6 overflow-y-auto h-screen">
+      <main className="flex-1 p-6">
         <Card className="shadow-lg rounded-2xl">
           {renderContent()}
         </Card>

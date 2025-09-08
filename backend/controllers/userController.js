@@ -1,11 +1,14 @@
 import userModel from "../models/userModel.js";
+import { uploadAvatar } from "../configs/cloudinary.js";
+import fs from "fs";
+
 
 // GET /user/profile
 export const getProfile = async (req, res) => {
   try {
     const user = await userModel
       .findById(req.userId)
-      .select("name email phonenumber bio website socials isVerified");
+      .select("name email phonenumber bio website socials pfpImg isVerified");
 
     if (!user) {
       return res.status(404).json({
@@ -73,6 +76,35 @@ export const deleteAccount = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ success: false, message: "Server error", error: error.message });
+  }
+};
+
+// POST /user/avatar
+export const uploadUserAvatar = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    const userId = req.userId; // comes from auth middleware
+    const result = await uploadAvatar(req.file.path, userId); // upload to cloudinary
+
+    // update DB with new avatar URL
+    await userModel.findByIdAndUpdate(userId, { pfpImg: result.secure_url });
+
+    // cleanup temp file after upload (multer stuff)
+    fs.unlink(req.file.path, (err) => {
+      if (err) console.error("Temp file cleanup failed:", err);
+    });
+
+    res.json({
+      success: true,
+      message: "Avatar uploaded successfully",
+      avatarUrl: result.secure_url,
+    });
+  } catch (err) {
+    console.error("Avatar upload error:", err);
+    res.status(500).json({ message: "Error uploading avatar" });
   }
 };
 

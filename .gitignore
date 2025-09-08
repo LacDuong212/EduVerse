@@ -149,3 +149,7 @@ vite.config.ts.timestamp-*
 
 # Built Visual Studio Code Extensions
 *.vsix
+
+
+# Temp folder for multer
+tmp/
