@@ -11,7 +11,7 @@ const Navbar = () => {
     const navigate = useNavigate()
     const disPatch = useDispatch()
     const { userData } = useSelector((state) => state.auth)
-    const backendUrl  = import.meta.env.VITE_BACKEND_URL
+    const backendUrl = import.meta.env.VITE_BACKEND_URL
 
     const logout = async () => {
         try {
@@ -28,17 +28,17 @@ const Navbar = () => {
     }
 
     return (
-        <div className='w-full flex items-center p-4 sm:px-12 md:px-24 fixed top-0 left-0 bg-white shadow z-50'>
+        <div className="w-full flex items-center px-4 sm:px-6 md:px-12 lg:px-24 py-4 fixed top-0 left-0 bg-white shadow z-50">
             {/* Logo */}
             <div className='flex-1'>
-                <img src={assets.logo} alt='logo' 
-                    className='w-32 sm:w-40 md:w-48 cursor-pointer object-contain' 
-                    onClick={() => navigate('/')}/>
+                <img src={assets.logo} alt='logo'
+                    className='w-32 sm:w-40 md:w-48 cursor-pointer object-contain'
+                    onClick={() => navigate('/')} />
             </div>
-            
+
             {/* Navigation Menu */}
-            <div className="absolute left-1/2 transform -translate-x-1/2">
-                <ul className="hidden md:flex gap-8 text-gray-700 font-medium text-sm lg:text-base">
+            <div className="flex-1 flex justify-center">
+                <ul className="flex flex-wrap gap-x-4 gap-y-2 text-gray-700 font-medium text-sm lg:text-base justify-center">
                     <li
                         onClick={() => navigate('/')}
                         className="cursor-pointer hover:text-blue-600 transition"
@@ -69,20 +69,31 @@ const Navbar = () => {
             {/* Right Section */}
             <div className="flex-1 flex justify-end">
                 {userData ? (
-                    <div className='w-10 h-10 flex justify-center items-center rounded-full bg-black text-white text-lg font-semibold cursor-pointer'>
-                        {userData.name[0].toUpperCase()}
+                    <div className="relative group cursor-pointer">
+                        <div className="w-10 h-10 rounded-full overflow-hidden bg-black flex items-center justify-center text-white text-lg">
+                            {userData?.pfpImg ? (
+                                <img
+                                    src={userData.pfpImg}
+                                    alt="User avatar"
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : (
+                                (userData?.name?.[0] || "U").toUpperCase()
+                            )}
+                        </div>
+
                         {/* Dropdown */}
-                        <div className='absolute hidden group-hover:block right-0 mt-2 z-10 text-black rounded'>
-                            <ul className='list-none m-0 p-2 bg-gray-100 text-sm shadow-md rounded w-32'>
+                        <div className="absolute hidden group-hover:block top-0 right-0 z-10 text-black rounded pt-12">
+                            <ul className="list-none m-0 p-2 bg-gray-100 text-sm shadow-md rounded">
                                 <li
-                                    onClick={() => navigate('/profile')}
-                                    className='py-2 px-3 hover:bg-gray-200 cursor-pointer rounded'
+                                    onClick={() => navigate('/account')}
+                                    className="py-1 px-2 hover:bg-gray-200 cursor-pointer rounded"
                                 >
                                     Profile
                                 </li>
                                 <li
                                     onClick={logout}
-                                    className='py-2 px-3 hover:bg-gray-200 cursor-pointer rounded'
+                                    className="py-1 px-2 hover:bg-gray-200 cursor-pointer rounded"
                                 >
                                     Logout
                                 </li>
