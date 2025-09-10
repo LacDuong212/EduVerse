@@ -1,9 +1,9 @@
 import express from "express";
 import { getAllCourses, getHomeCourses } from "../controllers/courseController.js";
 
-const router = express.Router();
+const courseRoute = express.Router();
 
-router.get("/home", getHomeCourses);
-router.get("/", getAllCourses);
+courseRoute.get("/home", getHomeCourses);
+courseRoute.get("/", getAllCourses);
 
-export default router;
+export default courseRoute;
