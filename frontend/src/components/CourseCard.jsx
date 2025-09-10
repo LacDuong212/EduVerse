@@ -9,7 +9,7 @@ const CourseCard = ({course}) => {
     const avgRating = course.rating?.average || 0;
 
   return (
-    <Link to={'/course/' + course._id} onClick={() => scrollTo(0,0,)}
+    <Link to={'/courses/' + course._id} onClick={() => scrollTo(0,0,)}
         className='border border-gray-500/30 pb-6 overflow-hidden rounded-lg'>
         <img className='w-full h-40 object-cover' src={course.thumbnail} alt="" />
         <div className='p-3 text-left'>

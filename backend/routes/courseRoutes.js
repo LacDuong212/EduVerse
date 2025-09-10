@@ -3,8 +3,8 @@ import { getCourseById, getHomeCourses, getAllCourses } from "../controllers/cou
 
 const courseRouter = express.Router();
 
-courseRouter.get("/:id", getCourseById);
 courseRouter.get("/home", getHomeCourses);
+courseRouter.get("/:id", getCourseById);
 courseRouter.get("/", getAllCourses);
 
 export default courseRouter;

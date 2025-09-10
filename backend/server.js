@@ -4,9 +4,9 @@ import 'dotenv/config';
 import cookieParser from 'cookie-parser';
 
 import connectDB from './configs/mongodb.js';
-import authRouter from './routes/authRouters.js';
-import userRouter from './routes/userRouters.js';
-import courseRouter from './routes/courseRouters.js';
+import authRouter from './routes/authRoutes.js';
+import userRouter from './routes/userRoutes.js';
+import courseRouter from './routes/courseRoutes.js';
 
 //Initialize Express
 const app = express();
