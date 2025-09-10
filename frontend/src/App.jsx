@@ -13,10 +13,11 @@ import Profile from "./pages/Account";
 import ForgotPassword from "./pages/ForgotPassword";
 import CheckResetOtp from "./pages/CheckResetOtp";
 import ResetPassword from "./pages/ResetPassword";
+import CourseDetail from "./pages/CourseDetail";
 
 import { setLogin, setLogout } from "./redux/authSlice";
 
-axios.defaults.withCredentials = true; // ✅ set globally once
+axios.defaults.withCredentials = true; // ? set globally once
 
 const App = () => {
   const dispatch = useDispatch();
@@ -51,6 +52,9 @@ const App = () => {
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/check-reset-otp" element={<CheckResetOtp />} />
         <Route path="/account" element={<Profile />} />
+        <Route path="/courses/:id" element={<CourseDetail />} />
+
+        <Route path="/profile" element={<Profile />} />
       </Routes>
     </div>
   );
