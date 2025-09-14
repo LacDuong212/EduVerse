@@ -1,13 +1,16 @@
 import express from 'express';
 import userAuth from '../middlewares/userAuth.js';
-import { getProfile, updateProfile, deleteAccount, getUserData } from '../controllers/userController.js';
+import { getProfile, updateProfile, deleteAccount, getUserData, uploadUserAvatar } from '../controllers/userController.js';
+import multer from 'multer';
 
-const userRouter = express.Router();
-userRouter.get('/profile', userAuth, getProfile);
-userRouter.patch('/profile', userAuth, updateProfile);
-userRouter.delete('/profile', userAuth, deleteAccount);
+const upload = multer({ dest: "tmp/" });
 
-userRouter.get('/data', userAuth, getUserData);
+const userRoute = express.Router();
+userRoute.get('/profile', userAuth, getProfile);
+userRoute.patch('/profile', userAuth, updateProfile);
+userRoute.delete('/profile', userAuth, deleteAccount);
+userRoute.post('/avatar', userAuth, upload.single("avatar"), uploadUserAvatar);
 
+userRoute.get('/data', userAuth, getUserData);
 
-export default userRouter;
+export default userRoute;

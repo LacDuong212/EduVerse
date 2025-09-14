@@ -4,14 +4,15 @@ import { isAuthenticated, register, login, logout,
     checkResetOtp} from '../controllers/authController.js';
 import userAuth from '../middlewares/userAuth.js';
 
-const authRouter = express.Router();
+const authRoute = express.Router();
 
-authRouter.post('/register', register);
-authRouter.post('/login', login);
-authRouter.post('/logout', logout);
-authRouter.get('/is-auth', userAuth, isAuthenticated);
-authRouter.post('/verify-otp', verifyOtp);
-authRouter.post('/forgot-password', forgotPassword);
-authRouter.post("/check-reset-otp", checkResetOtp); 
-authRouter.post("/reset-password", resetPassword);    
-export default authRouter;
+authRoute.post('/register', register);
+authRoute.post('/login', login);
+authRoute.post('/logout', logout);
+authRoute.get('/is-auth', userAuth, isAuthenticated);
+authRoute.post('/verify-otp', verifyOtp);
+authRoute.post('/forgot-password', forgotPassword);
+authRoute.post("/check-reset-otp", checkResetOtp); 
+authRoute.post("/reset-password", resetPassword);
+
+export default authRoute;
