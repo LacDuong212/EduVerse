@@ -5,6 +5,7 @@ import axios from 'axios'
 import { toast } from 'react-toastify'
 import { useDispatch, useSelector } from 'react-redux'
 import { setLogout } from '../redux/authSlice'
+import { ShoppingCart } from 'lucide-react'
 
 const Navbar = () => {
 
@@ -12,6 +13,7 @@ const Navbar = () => {
     const disPatch = useDispatch()
     const { userData } = useSelector((state) => state.auth)
     const backendUrl = import.meta.env.VITE_BACKEND_URL
+    const itemCount = useSelector((state) => state.cart.items || []).length;
 
     const logout = async () => {
         try {
@@ -67,46 +69,70 @@ const Navbar = () => {
             </div>
 
             {/* Right Section */}
-            <div className="flex-1 flex justify-end">
+            <div className="flex-1 flex justify-end items-center gap-4">
                 {userData ? (
-                    <div className="relative group cursor-pointer">
-                        <div className="w-10 h-10 rounded-full overflow-hidden bg-black flex items-center justify-center text-white text-lg">
-                            {userData?.pfpImg ? (
-                                <img
-                                    src={userData.pfpImg}
-                                    alt="User avatar"
-                                    className="w-full h-full object-cover"
-                                />
-                            ) : (
-                                (userData?.name?.[0] || "U").toUpperCase()
+                    <div className="flex items-center gap-6">
+                        {/* Cart Icon */}
+                        <div
+                            onClick={() => navigate('/my-cart')}
+                            className="relative cursor-pointer"
+                        >
+                            <ShoppingCart className="w-6 h-6 text-gray-700 hover:text-black transition" />
+
+                            {/* Item count badge */}
+                            {itemCount > 0 && (
+                                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1">
+                                    {itemCount}
+                                </span>
                             )}
                         </div>
 
-                        {/* Dropdown */}
-                        <div className="absolute hidden group-hover:block top-0 right-0 z-10 text-black rounded pt-12">
-                            <ul className="list-none m-0 p-2 bg-gray-100 text-sm shadow-md rounded">
-                                <li
-                                    onClick={() => navigate('/account')}
-                                    className="py-1 px-2 hover:bg-gray-200 cursor-pointer rounded"
-                                >
-                                    Profile
-                                </li>
-                                <li
-                                    onClick={logout}
-                                    className="py-1 px-2 hover:bg-gray-200 cursor-pointer rounded"
-                                >
-                                    Logout
-                                </li>
-                            </ul>
+                        {/* Profile */}
+                        <div className="relative group cursor-pointer">
+                            <div className="w-10 h-10 rounded-full overflow-hidden bg-black flex items-center justify-center text-white text-lg">
+                                {userData?.pfpImg ? (
+                                    <img
+                                        src={userData.pfpImg}
+                                        alt="User avatar"
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    (userData?.name?.[0] || "U").toUpperCase()
+                                )}
+                            </div>
+
+                            {/* Dropdown */}
+                            <div className="absolute hidden group-hover:block top-full right-0 z-10 text-black rounded pt-2">
+                                <ul className="list-none m-0 p-2 bg-gray-100 text-sm shadow-md rounded min-w-[105px]">
+                                    <li
+                                        onClick={() => navigate('/account')}
+                                        className="py-1 px-2 hover:bg-gray-200 cursor-pointer rounded"
+                                    >
+                                        Account
+                                    </li>
+                                    <li
+                                        onClick={() => navigate('/my-courses')}
+                                        className="py-1 px-2 hover:bg-gray-200 cursor-pointer rounded"
+                                    >
+                                        My Courses
+                                    </li>
+                                    <li
+                                        onClick={logout}
+                                        className="py-1 px-2 hover:bg-gray-200 cursor-pointer rounded"
+                                    >
+                                        Logout
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 ) : (
                     <button
                         onClick={() => navigate('/login')}
-                        className='flex items-center gap-2 border border-gray-500 rounded-full px-5 py-2 text-gray-800 hover:bg-gray-100 transition-all text-sm sm:text-base'
+                        className="flex items-center gap-2 border border-gray-500 rounded-full px-5 py-2 text-gray-800 hover:bg-gray-100 transition-all text-sm sm:text-base"
                     >
                         Login
-                        <img src={assets.arrow_icon} alt='arrow icon' className="w-4 h-4" />
+                        <img src={assets.arrow_icon} alt="arrow icon" className="w-4 h-4" />
                     </button>
                 )}
             </div>
