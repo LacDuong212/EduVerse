@@ -1,4 +1,5 @@
 import Course from "../models/courseModel.js";
+import Order from "../models/orderModel.js";
 
 export const getHomeCourses = async (req, res) => {
     try {
@@ -66,5 +67,49 @@ export const getCourseById = async (req, res) => {
     return res.json({ success: true, course });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// GET /my-courses
+export const getOwnedCourses = async (req, res) => {
+  try {
+    // get only completed orders
+    const orders = await Order.find({
+      user: req.userId,
+      status: "completed"
+    }).populate("courses.course");
+
+    // extract unique courses (optional, cus pretteh sure no duplicates, unless..)
+    const ownedCourses = [];
+    const courseSet = new Set();
+    for (const order of orders) {
+      for (const item of order.courses) {
+        const c = item.course;
+        if (c && !courseSet.has(c._id.toString())) {
+          courseSet.add(c._id.toString());
+
+          ownedCourses.push({
+            courseId: c._id,
+            title: c.title,
+            category: c.category,
+            subCategory: c.subCategory,
+            rating: c.rating,
+            instructor: c.instructor,
+            level: c.level,
+            thumbnail: c.thumbnail,
+            price: c.price,
+            discountPrice: c.discountPrice,
+            updatedAt: c.updatedAt,
+          });
+        }
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      courses: ownedCourses,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error fetching owned courses", error });
   }
 };

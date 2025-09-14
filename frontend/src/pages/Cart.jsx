@@ -77,6 +77,24 @@ export default function CartPage() {
   const displayedTotal = displayedCourses.reduce((sum, c) => sum + c.discountPrice, 0);
   const displayedCount = displayedCourses.length;
 
+  const handleCheckout = async () => {
+    try {
+      const { data } = await axios.post(
+        `${backendUrl}/api/orders/create`, 
+        { cart: { courses: displayedCourses } }, 
+        { withCredentials: true }
+      );
+
+      if (data.success) {
+        toast.success("Checkout successful!");
+      } else {
+        toast.error("Checkout failed. Please try again.");
+      }
+    } catch (error) {
+      toast.error("An error occurred during checkout.");
+    }
+  };
+
   return (
     <div className="container mx-auto px-3 py-23 grid grid-cols-1 lg:grid-cols-3 gap-8">
       {/* Left: Cart items */}
@@ -172,7 +190,7 @@ export default function CartPage() {
             </span>
           </div>
 
-          <Button className="w-full mb-3" disabled={displayedCount === 0} onClick={() => toast.info("Checkout coming soon!")}>
+          <Button className="w-full mb-3" disabled={displayedCount === 0} onClick={() => handleCheckout() }>
             Checkout {displayedCount > 0 && `(${displayedCount})`}
           </Button>
 

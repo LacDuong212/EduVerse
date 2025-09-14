@@ -67,25 +67,36 @@ export const getOrderById = async (req, res) => {
 export const createOrder = async (req, res) => {
   try {
     const userId = req.userId;
-    const cart = await Cart.findOne({ user: userId }).populate('courses.course');
-    if (!cart || cart.courses.length === 0) {
-      return res.status(400).json({ success: false, message: "Cart is empty" });
+
+    const { cart } = req.body;
+    if (!cart || !Array.isArray(cart.courses) || cart.courses.length === 0) {
+      return res.status(400).json({ success: false, message: "Cart is empty or invalid" });
     }
 
     // create order
     const order = new Order({
       user: userId,
       courses: cart.courses.map(c => ({
-        course: c.course._id,
-        pricePaid: c.course.price,
+        course: c.courseId,
+        pricePaid: c.price,
       })),
-      totalAmount: cart.courses.reduce((total, c) => total + c.course.price, 0),
+      totalAmount: cart.courses.reduce((total, c) => total + c.price, 0),
       status: "pending",
       expiresAt: new Date(Date.now() + 60 * 60 * 1000),
     });
 
     await order.save();
-    await Cart.findOneAndDelete({ user: userId });  // clear cart after
+
+    // update cart
+    await Cart.findOneAndUpdate(
+      { user: userId },
+      {
+        $pull: {
+          courses: { course: { $in: cart.courses.map(c => c.courseId) } }
+        }
+      },
+      { new: true }
+    );
 
     res.status(201).json({ success: true, message: "Order created", order });
   } catch (error) {

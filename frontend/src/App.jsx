@@ -13,11 +13,13 @@ import ForgotPassword from "./pages/ForgotPassword";
 import CheckResetOtp from "./pages/CheckResetOtp";
 import ResetPassword from "./pages/ResetPassword";
 import CourseDetail from "./pages/CourseDetail";
+import CartPage from "./pages/Cart";
+import MyCourses from "./pages/MyCourses";
 
 import { useDispatch } from "react-redux";
 import { setLogin, setLogout } from "./redux/authSlice";
 import { setCart } from "./redux/cartSlice";
-import CartPage from "./pages/Cart";
+
 
 axios.defaults.withCredentials = true; // ? set globally once
 
@@ -64,6 +66,7 @@ const App = () => {
         <Route path="/account" element={<Profile />} />
         <Route path="/courses/:id" element={<CourseDetail />} />
         <Route path="/my-cart" element={<CartPage />} />
+        <Route path="/my-courses" element={<MyCourses />} />
 
       </Routes>
     </div>

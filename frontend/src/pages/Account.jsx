@@ -45,8 +45,8 @@ export default function AccountPage() {
         return <AvatarTab />;
       // case "security":
       //   return <SecurityTab />;
-      // case "subscriptions":
-      //   return <SubscriptionTab />;
+      // case "bills":
+      //   return <BillsTab />;
       // case "payment":
       //   return <PaymentTab />;
       // case "privacy":
@@ -126,10 +126,10 @@ export default function AccountPage() {
 
           <Button
             variant="ghost"
-            className={`w-full justify-start ${activeTab === "subscriptions" ? "bg-gray-200 font-semibold" : ""}`}
-            onClick={() => setActiveTab("subscriptions")}
+            className={`w-full justify-start ${activeTab === "bills" ? "bg-gray-200 font-semibold" : ""}`}
+            onClick={() => setActiveTab("bills")}
           >
-            Subscriptions
+            Bills
           </Button>
 
           <Button
