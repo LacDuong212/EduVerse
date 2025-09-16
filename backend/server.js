@@ -34,6 +34,7 @@ app.use('/api/user', userRoute);
 app.use('/api/courses', courseRoute);
 app.use('/api/cart', cartRoute);
 app.use('/api/orders', orderRoute);
+app.use('/api/payment', PaymentRoutes);
 
 // Port
 const PORT = process.env.PORT || 5000;
