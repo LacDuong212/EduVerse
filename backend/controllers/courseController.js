@@ -36,23 +36,40 @@ export const getHomeCourses = async (req, res) => {
 
 export const getAllCourses = async (req, res) => {
   try {
-    const { page = 1, limit = 10 } = req.query;
-    const courses = await Course.find()
-      .skip((page - 1) * limit)
-      .limit(parseInt(limit));
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const { category, subCategory, search } = req.query;
 
-    const total = await Course.countDocuments();
+    const filter = {};
+    if (category) filter.category = category;
+    if (subCategory) filter.subCategory = subCategory;
+    if (search) {
+      filter.title = { $regex: search, $options: "i" };
+    }
+
+    const courses = await Course.find(filter)
+      .sort({ createdAt: -1, _id: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    const total = await Course.countDocuments(filter);
 
     res.json({
+      success: true,
       courses,
       total,
-      page: parseInt(page),
+      page,
       pages: Math.ceil(total / limit),
     });
   } catch (error) {
-    res.status(500).json({ message: "Error fetching courses", error });
+    res.status(500).json({ 
+      success: false, 
+      message: "Error fetching courses", 
+      error: error.message 
+    });
   }
 };
+
 
 export const getCourseById = async (req, res) => {
   try {

@@ -19,6 +19,7 @@ import MyCourses from "./pages/MyCourses";
 import { useDispatch } from "react-redux";
 import { setLogin, setLogout } from "./redux/authSlice";
 import { setCart } from "./redux/cartSlice";
+import CourseList from "./pages/CourseList";
 
 
 axios.defaults.withCredentials = true; // ? set globally once
@@ -53,7 +54,7 @@ const App = () => {
   }, [dispatch, backendUrl]);
 
   return (
-    <div>
+    <div className="text-default min-h-screen bg-white">
       <ToastContainer />
       <Navbar />
       <Routes>
@@ -64,6 +65,7 @@ const App = () => {
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/check-reset-otp" element={<CheckResetOtp />} />
         <Route path="/account" element={<Profile />} />
+        <Route path="/courses" element={<CourseList />} />
         <Route path="/courses/:id" element={<CourseDetail />} />
         <Route path="/my-cart" element={<CartPage />} />
         <Route path="/my-courses" element={<MyCourses />} />

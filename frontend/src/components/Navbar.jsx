@@ -30,7 +30,7 @@ const Navbar = () => {
     }
 
     return (
-        <div className="w-full flex items-center px-4 sm:px-6 md:px-12 lg:px-24 py-4 fixed top-0 left-0 bg-white shadow z-50">
+        <div className="w-full flex items-center px-4 sm:px-6 md:px-12 lg:px-24 py-4 top-0 left-0 bg-white shadow z-50">
             {/* Logo */}
             <div className='flex-1'>
                 <img src={assets.logo} alt='logo'
