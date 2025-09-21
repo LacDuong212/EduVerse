@@ -10,6 +10,7 @@ import userRoute from './routes/userRoutes.js';
 import courseRoute from './routes/courseRoutes.js';
 import cartRoute from './routes/cartRoutes.js';
 import orderRoute from './routes/orderRoutes.js';
+import reviewRoute from './routes/reviewRoutes.js';
 
 //Initialize Express
 const app = express();
@@ -34,6 +35,7 @@ app.use('/api/user', userRoute);
 app.use('/api/courses', courseRoute);
 app.use('/api/cart', cartRoute);
 app.use('/api/orders', orderRoute);
+app.use('/api/reviews', reviewRoute);
 
 // Port
 const PORT = process.env.PORT || 5000;
