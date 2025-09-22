@@ -1,29 +1,33 @@
-import { VNPay, ignoreLogger, ProductCode, VnpLocale, dateFormat } from 'vnpay';
+import { VNPay, ignoreLogger } from 'vnpay';
 
 class PaymentController {
-  // Tạo link thanh toán VNPay (dạng cash)
   static async createPayment(req, res) {
     try {
       const { amount, orderId, orderInfo } = req.body;
 
       // Cấu hình VNPay
-      const vnp = new VNPay({
-        tmnCode: process.env.VNP_TMN_CODE, // Mã website của bạn
-        secretKey: process.env.VNP_HASH_SECRET, // Key bí mật
-        returnUrl: process.env.VNP_RETURN_URL, // URL VNPay redirect sau thanh toán
-        locale: VnpLocale.VI,
-        currency: 'VND',
+      const vnpay = new VNPay({
+        tmnCode: 'KXLFWPCG',
+        secureSecret: 'GK1YZKCZHULE8UCVZDMJ2XJ2M6AKY6U9',
+        vnpayHost: 'https://sandbox.vnpayment.vn',
+
+        testMode: true,
+        hashAlgorithm: 'SHA512',
+        enableLog: true,
+        loggerFn: ignoreLogger,
       });
 
       // Tạo payment URL
-      const paymentUrl = vnp.createPaymentUrl({
-        amount: parseInt(amount) * 100, // VNPay nhận số tiền * 100
-        orderId,
-        orderInfo,
-        command: ProductCode.PAYMENT, // Mặc định PAYMENT
-        txnRef: orderId,
-        createDate: dateFormat(new Date(), 'yyyyMMddHHmmss'),
+      const paymentUrl = vnpay.buildPaymentUrl({
+        vnp_Amount: parseInt(amount),
+        vnp_IpAddr: '127.0.0.1',
+        vnp_ReturnUrl: process.env.VNP_RETURN_URL,
+        vnp_TxnRef: orderId,
+        vnp_OrderInfo: orderInfo,
       });
+
+      const bankList = await vnpay.getBankList();
+      console.log(bankList);
 
       res.json({ success: true, paymentUrl });
     } catch (error) {
@@ -37,13 +41,12 @@ class PaymentController {
     try {
       const vnp = new VNPay({
         tmnCode: process.env.VNP_TMN_CODE,
-        secretKey: process.env.VNP_HASH_SECRET,
+        secureSecret: process.env.VNP_HASH_SECRET,
       });
 
-      const isValid = vnp.validateReturn(req.query);
+      const isValid = vnp.verifyReturnUrl(req.query);
 
       if (isValid) {
-        // Thanh toán thành công
         return res.json({ success: true, message: 'Thanh toán thành công', data: req.query });
       } else {
         return res.json({ success: false, message: 'Thanh toán không hợp lệ' });
