@@ -178,7 +178,7 @@ export default function AvatarTab() {
 
           <div className="flex flex-col gap-3 w-full md:w-auto">
             <div className="flex flex-col sm:flex-row gap-3">
-              <Button variant="secondary" onClick={onPickFile}>
+              <Button variant="secondary" className="hover:bg-gray-200 transition-colors" onClick={onPickFile}>
                 Change Photo
               </Button>
               <input
@@ -213,9 +213,9 @@ export default function AvatarTab() {
                   type="button"
                   key={src}
                   onClick={() => onSelectPreset(src)}
-                  className={`w-16 h-16 rounded-full overflow-hidden flex items-center justify-center
-            outline-none transition
-            ${active ? "ring-2 ring-indigo-500" : "ring-1 ring-transparent"}`}
+                  className={`w-16 h-16 rounded-full overflow-hidden flex items-center 
+                    justify-center outline-none transition
+                    ${active ? "ring-2 ring-indigo-500" : "ring-1 ring-transparent"}`}
                   aria-label="Choose preset avatar"
                 >
                   <img
@@ -235,7 +235,7 @@ export default function AvatarTab() {
             {isSaving ? "Saving..." : "Save Avatar"}
           </Button>
           <Button
-            variant="ghost"
+            variant="outline"
             onClick={() => {
               setPreviewUrl(initialUrl);
               setSelectedPreset(null);
