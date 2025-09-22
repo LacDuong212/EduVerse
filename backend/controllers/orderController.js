@@ -31,7 +31,7 @@ const transformCourses = (courses) => {
   }));
 };
 
-// GET /
+// GET /orders/
 export const getOrders = async (req, res) => {
   try {
     const orders = await Order.find({ user: req.userId }).populate('courses.course');
@@ -44,7 +44,7 @@ export const getOrders = async (req, res) => {
   }
 };
 
-// GET /:id
+// GET /orders/:id
 export const getOrderById = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id).populate('courses.course');
@@ -63,7 +63,7 @@ export const getOrderById = async (req, res) => {
   }
 };
 
-// POST /create
+// POST /orders/create
 export const createOrder = async (req, res) => {
   try {
     const userId = req.userId;
@@ -104,7 +104,7 @@ export const createOrder = async (req, res) => {
   }
 };
 
-// PATCH /:id/update
+// PATCH /orders/:id/update
 export const updateOrder = async (req, res) => {
   try {
     const status = req.body.status;

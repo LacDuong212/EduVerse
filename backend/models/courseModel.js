@@ -28,8 +28,8 @@ const courseSchema = new mongoose.Schema({
   ],
   studentsEnrolled: { type: Number, default: 0 },
   rating: {
-    average: { type: Number, default: 0 },
-    count: { type: Number, default: 0 }
+    average: { type: Number, min: 0, max: 5, default: 0 },
+    count: { type: Number, min: 0, default: 0 }
   },
   thumbnail: String,
   previewVideo: String,

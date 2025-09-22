@@ -18,9 +18,7 @@ const transformCourses = (courses) => {
   }));
 };
 
-// TODO: get cart once instead of populating in every func?
-
-// GET /
+// GET /cart/
 export const getCart = async (req, res) => {
   try {
     const userId = req.userId;
@@ -41,7 +39,7 @@ export const getCart = async (req, res) => {
   }
 };
 
-// POST /add
+// POST /cart/add
 export const addToCart = async (req, res) => {
   try {
     const userId = req.userId;
@@ -100,7 +98,7 @@ export const addToCart = async (req, res) => {
   }
 };
 
-// DELETE /remove
+// DELETE /cart/remove
 export const removeFromCart = async (req, res) => {
   try {
     const userId = req.userId;
@@ -127,7 +125,7 @@ export const removeFromCart = async (req, res) => {
   }
 };
 
-// DELETE /clear
+// DELETE /cart/clear
 export const clearCart = async (req, res) => {
   try {
     const userId = req.userId;
