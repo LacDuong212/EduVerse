@@ -165,7 +165,7 @@ export default function AccountPage() {
           </Button>
         </nav>
 
-        <Button onClick={logout} variant="destructive" className="w-full flex gap-2 mt-6">
+        <Button onClick={logout} variant="destructive" className="w-full flex gap-2 mt-6 hover:bg-red-700 transition">
           <LogOut size={16} /> Logout
         </Button>
       </aside>
