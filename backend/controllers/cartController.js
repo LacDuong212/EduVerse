@@ -18,9 +18,7 @@ const transformCourses = (courses) => {
   }));
 };
 
-// TODO: get cart once instead of populating in every func?
-
-// GET /
+// GET /cart/
 export const getCart = async (req, res) => {
   try {
     const userId = req.userId;
@@ -41,7 +39,7 @@ export const getCart = async (req, res) => {
   }
 };
 
-// POST /add
+// POST /cart/add
 export const addToCart = async (req, res) => {
   try {
     const userId = req.userId;
@@ -62,7 +60,7 @@ export const addToCart = async (req, res) => {
     // check if course already in cart
     const courseExists = cart.courses.some(c => c.course.toString() === courseId);
     if (courseExists) {
-      return res.status(400).json({ success: false, message: "Course already in cart" });
+      return res.status(200).json({ success: false, message: "Course already in cart" });
     }
 
     // check if course already owned
@@ -72,7 +70,7 @@ export const addToCart = async (req, res) => {
       status: "completed",
     });
     if (completedOrder) {
-      return res.status(400).json({ success: false, message: "You already own this course" });
+      return res.status(200).json({ success: false, message: "You already own this course" });
     }
 
     // check if course in a pending order
@@ -83,7 +81,7 @@ export const addToCart = async (req, res) => {
       expiresAt: { $gt: new Date() },
     });
     if (pendingOrder) {
-      return res.status(400).json({ success: false, message: "This course is already in your active order" });
+      return res.status(200).json({ success: false, message: "This course is already in your active order" });
     }
 
     cart.courses.push({ course: courseId });
@@ -100,7 +98,7 @@ export const addToCart = async (req, res) => {
   }
 };
 
-// DELETE /remove
+// DELETE /cart/remove
 export const removeFromCart = async (req, res) => {
   try {
     const userId = req.userId;
@@ -127,7 +125,7 @@ export const removeFromCart = async (req, res) => {
   }
 };
 
-// DELETE /clear
+// DELETE /cart/clear
 export const clearCart = async (req, res) => {
   try {
     const userId = req.userId;

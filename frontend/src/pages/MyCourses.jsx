@@ -8,7 +8,7 @@ const SectionBlock = ({ title, courses }) => (
     <h2 className="text-2xl font-semibold text-gray-800">{title}</h2>
     <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4 mt-6">
       {courses.map((course) => (
-        <CourseCard key={course.courseId} course={course} />
+        <CourseCard key={course._id} course={course} />
       ))}
     </div>
   </div>
@@ -52,7 +52,7 @@ export default function MyCourses() {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh] text-red-500">
+      <div className="flex items-center justify-center min-h-[60vh] text-gray-500">
         Unable to load courses. Please try again later.
       </div>
     );

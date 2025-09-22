@@ -2,6 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { Link } from "react-scroll";
+import { useDispatch } from "react-redux";
+import { toast } from "react-toastify";
+import { setCart } from "../redux/cartSlice";
 
 const CourseDetail = () => {
   const { id } = useParams();
@@ -43,6 +46,28 @@ const CourseDetail = () => {
 
     return url;
   };
+
+  const dispatch = useDispatch();
+  const handleAddToCart = async () => {
+    try {
+      const res = await axios.post(
+        `${backendUrl}/api/cart/add`,
+        { courseId: id },
+        { withCredentials: true }
+      );
+
+      if (res.data.success) {
+        dispatch(setCart(res.data.cart)); // update Redux
+        toast.success("Added to cart!");
+      } else {
+        toast.error(res.data.message || "Failed to add");
+      }
+    } catch (err) {
+      toast.error("Error adding to cart");
+      console.error(err);
+    }
+  };
+
   return (
     <div>
       {/* Banner */}
@@ -69,8 +94,8 @@ const CourseDetail = () => {
               ⭐ {course.rating?.average || 0} ({course.rating?.count || 0} ratings)
             </span>
             <p className="text-sm ">
-            👩‍🎓 {course.studentsEnrolled} students enrolled
-          </p>
+              👩‍🎓 {course.studentsEnrolled} students enrolled
+            </p>
             <span>🌐 {course.language || "N/A"}</span>
             {course.tags?.length > 0 && (
               <div className="flex gap-2 flex-wrap">
@@ -209,7 +234,12 @@ const CourseDetail = () => {
             Buy Now
           </button>
 
-          
+          <button 
+            className="w-full border border-gray-300 bg-white text-black py-2.5 rounded-lg font-medium hover:bg-gray-200 transition"
+            onClick={handleAddToCart}
+          >
+            Add To Cart
+          </button>
 
           <div>
             <h3 className="text-lg font-semibold mb-2">This Course Includes</h3>
