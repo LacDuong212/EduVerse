@@ -15,7 +15,14 @@ const CourseDetail = () => {
     const fetchCourse = async () => {
       try {
         const { data } = await axios.get(`${backendUrl}/api/courses/${id}`);
-        if (data.success) setCourse(data.course);
+        if (data.success){
+          setCourse(data.course)
+          await axios.post(
+            `${backendUrl}/api/courses/${id}/viewed`,
+            {},
+            { withCredentials: true }
+          );
+        };
       } catch (error) {
         console.error(error);
       }
