@@ -89,7 +89,7 @@ export const getOwnedCourses = async (req, res) => {
           courseSet.add(c._id.toString());
 
           ownedCourses.push({
-            courseId: c._id,
+            _id: c._id,
             title: c.title,
             category: c.category,
             subCategory: c.subCategory,
