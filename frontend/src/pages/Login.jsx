@@ -47,6 +47,8 @@ const Login = () => {
                         disPatch(setLogout());
                     }
 
+                    // TODO: Get cart
+
                     navigate('/');
                 } else {
                     toast.error(data.message)

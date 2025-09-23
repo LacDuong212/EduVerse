@@ -5,11 +5,13 @@ import { Link } from "react-scroll";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { setCart } from "../redux/cartSlice";
+import ReviewsSection from "@/components/ReviewsSection";
 
 const CourseDetail = () => {
   const { id } = useParams();
   const [course, setCourse] = useState(null);
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -47,7 +49,6 @@ const CourseDetail = () => {
     return url;
   };
 
-  const dispatch = useDispatch();
   const handleAddToCart = async () => {
     try {
       const res = await axios.post(
@@ -181,14 +182,7 @@ const CourseDetail = () => {
           </section>
 
           {/* Reviews */}
-          <section id="reviews">
-            <h2 className="text-2xl font-semibold mb-4">Student Reviews</h2>
-            <p className="text-gray-500">
-              {course.rating?.average
-                ? `${course.rating.average} ★ (${course.rating.count} reviews)`
-                : "No reviews yet"}
-            </p>
-          </section>
+          <ReviewsSection courseId={id} />
         </div>
 
         {/* Right column */}
