@@ -15,6 +15,7 @@ import ResetPassword from "./pages/ResetPassword";
 import CourseDetail from "./pages/CourseDetail";
 import CartPage from "./pages/Cart";
 import MyCourses from "./pages/MyCourses";
+import ViewedCourses from "./pages/ViewedCourses";
 
 import { useDispatch } from "react-redux";
 import { setLogin, setLogout } from "./redux/authSlice";
@@ -69,6 +70,7 @@ const App = () => {
         <Route path="/courses/:id" element={<CourseDetail />} />
         <Route path="/my-cart" element={<CartPage />} />
         <Route path="/my-courses" element={<MyCourses />} />
+        <Route path="/viewed-courses" element={<ViewedCourses />} />
 
       </Routes>
     </div>

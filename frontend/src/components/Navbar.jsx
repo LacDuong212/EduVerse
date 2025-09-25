@@ -117,6 +117,12 @@ const Navbar = () => {
                                         My Courses
                                     </li>
                                     <li
+                                        onClick={() => navigate('/viewed-courses')}
+                                        className="py-1 px-2 hover:bg-gray-200 cursor-pointer rounded"
+                                    >
+                                        Viewed Courses
+                                    </li>
+                                    <li
                                         onClick={logout}
                                         className="py-1 px-2 hover:bg-gray-200 cursor-pointer rounded"
                                     >
