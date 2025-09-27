@@ -8,13 +8,13 @@ const CourseCard = ({ course }) => {
 
     const currency = useSelector((state) => state.courses.currency);
     const avgRating = course.rating?.average || 0;
-    const [isWishlisted, setIsWishlisted] = useState(false);
+    // const [isWishlisted, setIsWishlisted] = useState(false);
 
-    const toggleWishlist = (e) => {
-        e.preventDefault(); // chặn click vào Link khi bấm trái tim
-        setIsWishlisted(!isWishlisted);
-        // TODO: Gọi API add/remove wishlist ở đây
-    };
+    // const toggleWishlist = (e) => {
+    //     e.preventDefault(); // chặn click vào Link khi bấm trái tim
+    //     setIsWishlisted(!isWishlisted);
+    //     // TODO: Gọi API add/remove wishlist ở đây
+    // };
 
 
     return (
@@ -39,12 +39,12 @@ const CourseCard = ({ course }) => {
                         ? course.discountPrice.toFixed(2)
                         : course.price.toFixed(2)}
                 </p>
-                <button
+                {/* <button
                     onClick={toggleWishlist}
                     className="absolute top-2 right-2 bg-white/80 p-1 rounded-full shadow-md"
                 >
                     <FaHeart className={isWishlisted ? "text-red-500" : "text-gray-400"} />
-                </button>
+                </button> */}
             </div>
         </Link>
     )
