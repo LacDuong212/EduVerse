@@ -32,7 +32,7 @@ const InstructorDashboard = () => {
           </div>
         </header>
 
-        <Overview />
+        {/* <Overview /> */}
 
       </main>
     </div>

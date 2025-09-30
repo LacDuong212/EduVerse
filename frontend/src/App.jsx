@@ -21,6 +21,7 @@ import { useDispatch } from "react-redux";
 import { setLogin, setLogout } from "./redux/authSlice";
 import { setCart } from "./redux/cartSlice";
 import CourseList from "./pages/CourseList";
+import InstructorDashboard from "./pages/InstructorDashBoard";
 
 
 axios.defaults.withCredentials = true; // ? set globally once
@@ -66,6 +67,7 @@ const App = () => {
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/check-reset-otp" element={<CheckResetOtp />} />
         <Route path="/account" element={<Profile />} />
+        <Route path="/instructor" element={<InstructorDashboard />} />
         <Route path="/courses" element={<CourseList />} />
         <Route path="/courses/:id" element={<CourseDetail />} />
         <Route path="/my-cart" element={<CartPage />} />

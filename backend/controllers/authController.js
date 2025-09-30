@@ -83,7 +83,7 @@ export const login = async (req, res) => {
             return res.json({ success: false, message: "Invalid password" });
         }
 
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+        const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1d' });
 
         res.cookie('token', token, {
             httpOnly: true,
@@ -92,7 +92,7 @@ export const login = async (req, res) => {
             maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
         });
 
-        return res.json({ success: true, message: "Login successful", user: { id: user._id, name: user.name, email: user.email } });
+        return res.json({ success: true, message: "Login successful", user: { id: user._id, name: user.name, email: user.email, role: user.role} });
 
     } catch (error) {
         return res.json({ success: false, message: error.message });
