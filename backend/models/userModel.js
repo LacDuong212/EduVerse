@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema({
     socials: {
         facebook: { type: String, default: "" },
         instagram: { type: String, default: "" },
-        twitter: { type: String, default: "" },
+        linkedin: { type: String, default: "" },
     },
     pfpImg: { type: String, default: "" },
     password: { type: String, required: true },

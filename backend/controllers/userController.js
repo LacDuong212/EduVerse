@@ -62,6 +62,7 @@ export const updateProfile = async (req, res) => {
   }
 };
 
+// #TODO: pending deletion
 // DELETE /user/profile
 export const deleteAccount = async (req, res) => {
   try {
