@@ -13,7 +13,7 @@ export default function ProfileTab({ userData }) {
   const [socials, setSocials] = useState({
     facebook: userData?.socials?.facebook || "",
     instagram: userData?.socials?.instagram || "",
-    twitter: userData?.socials?.twitter || "",
+    linkedin: userData?.socials?.linkedin || "",
   });
 
   const handleSave = async () => {
@@ -87,11 +87,11 @@ export default function ProfileTab({ userData }) {
         </div>
 
         <div>
-          <Label className="block mb-1">Twitter</Label>
+          <Label className="block mb-1">Linkedin</Label>
           <Input
-            placeholder="twitter.com/username"
-            value={socials.twitter}
-            onChange={(e) => setSocials({ ...socials, twitter: e.target.value })}
+            placeholder="linkedin.com/in/username"
+            value={socials.linkedin}
+            onChange={(e) => setSocials({ ...socials, linkedin: e.target.value })}
           />
         </div>
 

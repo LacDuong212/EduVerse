@@ -10,6 +10,6 @@ const reviewSchema = new mongoose.Schema(
   },
   { timestamps: true }    // = adding createdAt & updatedAt
 );
-//reviewSchema.index({ course: 1, user: 1 }, { unique: true }); // if only 1 review/user/course
+//reviewSchema.index({ course: 1, user: 1 }, { unique: true }); // 1 review/user/course
 
 export default mongoose.model("Review", reviewSchema);

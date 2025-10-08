@@ -6,7 +6,8 @@ import { useDispatch } from 'react-redux'
 import axios from 'axios'
 import { setHomeCourses } from '@/redux/coursesSlice'
 import { toast } from 'react-toastify'
-import { data } from 'react-router-dom'
+import ChatbotWidget from '@/components/ChatbotWidget';
+
 
 const Home = () => {
   const dispatch = useDispatch();
@@ -26,6 +27,7 @@ const Home = () => {
 
   return (
     <div className='flex flex-col items-center space-y-7 text-center'>
+      <ChatbotWidget />
       <Hero />
       <CoursesSection />
       <Footer />

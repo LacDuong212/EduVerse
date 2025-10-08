@@ -69,9 +69,9 @@ export default function AccountPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex pt-20">
+    <div className="bg-gray-50 flex flex-1 h-[calc(100vh-64px)] overflow-hidden">
       {/* Sidebar */}
-      <aside className="w-50 bg-white shadow-md p-4 space-y-4 h-[calc(100vh-5rem)] sticky top-20">
+      <aside className="w-50 bg-white shadow-md p-4 space-y-4 h-full">
         {/* Back Button */}
         <Button
           variant="ghost"
@@ -171,7 +171,7 @@ export default function AccountPage() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-6">
+      <main className="flex-1 p-6 overflow-y-auto">
         <Card className="shadow-lg rounded-2xl">
           {renderContent()}
         </Card>

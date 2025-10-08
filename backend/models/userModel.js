@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema({
     socials: {
         facebook: { type: String, default: "" },
         instagram: { type: String, default: "" },
-        twitter: { type: String, default: "" },
+        linkedin: { type: String, default: "" },
     },
     pfpImg: { type: String, default: "" },
     password: { type: String, required: true },
@@ -18,6 +18,6 @@ const userSchema = new mongoose.Schema({
     isVerified: { type: Boolean, default: false },
 });
 
-const userModel = mongoose.models.user || mongoose.model('user', userSchema);
+const userModel = mongoose.models.user || mongoose.model('User', userSchema);
 
 export default userModel;
