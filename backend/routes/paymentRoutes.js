@@ -7,6 +7,6 @@ const router = express.Router();
 router.post('/create', PaymentController.createPayment);
 
 // VNPay callback
-router.get('/return', PaymentController.paymentReturn);
+// router.get('/return', PaymentController.paymentReturn);
 
 export default router;
