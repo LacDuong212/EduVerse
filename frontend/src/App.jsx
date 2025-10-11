@@ -19,6 +19,7 @@ import CartPage from "./pages/Cart";
 import MyCourses from "./pages/MyCourses";
 import ViewedCourses from "./pages/ViewedCourses";
 import SignInPage from "./app/auth/sign-in/SignInPage";
+import SignUpPage from "./app/auth/sign-up/SignUpPage";
 
 import { useDispatch } from "react-redux";
 import { setLogin, setLogout } from "./redux/authSlice";
@@ -58,7 +59,8 @@ const App = () => {
   }, [dispatch, backendUrl]);
 
   return (
-     <Routes>
+    <>
+    <Routes>
       {/* Nhóm có Navbar */}
       <Route element={<MainLayout />}>
         <Route path="/" element={<Home />} />
@@ -70,12 +72,25 @@ const App = () => {
         <Route path="/viewed-courses" element={<ViewedCourses />} />
       </Route>
 
-      <Route path="/login" element={<SignInPage />} />
+      <Route path="/auth/sign-in" element={<SignInPage />} />
+      <Route path="/auth/sign-up" element={<SignUpPage />} />
       <Route path="/email-verify" element={<EmailVerify />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/check-reset-otp" element={<CheckResetOtp />} />
     </Routes>
+    <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        pauseOnHover
+        draggable
+        theme="colored"
+      />
+    </>
+     
   );
 };
 

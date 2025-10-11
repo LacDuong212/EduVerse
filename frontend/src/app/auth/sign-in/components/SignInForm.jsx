@@ -4,7 +4,7 @@ import { BsEnvelopeFill } from "react-icons/bs";
 import { FaLock } from "react-icons/fa";
 import useSignIn from "../useSignIn";
 
-export default function SignIn() {
+export default function SignInForm() {
   const { loading, login, control } = useSignIn();
 
   return (
