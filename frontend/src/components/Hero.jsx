@@ -5,7 +5,7 @@ const Hero = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="w-full min-h-[700px] flex flex-col items-center justify-center text-center bg-gray-50 px-6">
+    <section className="w-full min-h-[700px] flex flex-col items-center justify-center text-center bg-gray-200 px-6">
       {/* Tiêu đề */}
       <h1 className="text-4xl md:text-6xl font-bold text-gray-900 leading-tight">
         Learn Anytime, Anywhere with{" "}

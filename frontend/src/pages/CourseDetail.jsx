@@ -17,7 +17,14 @@ const CourseDetail = () => {
     const fetchCourse = async () => {
       try {
         const { data } = await axios.get(`${backendUrl}/api/courses/${id}`);
-        if (data.success) setCourse(data.course);
+        if (data.success){
+          setCourse(data.course)
+          await axios.post(
+            `${backendUrl}/api/courses/${id}/viewed`,
+            {},
+            { withCredentials: true }
+          );
+        };
       } catch (error) {
         console.error(error);
       }
@@ -72,7 +79,7 @@ const CourseDetail = () => {
   return (
     <div>
       {/* Banner */}
-      <div className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white mt-18 py-10 px-4">
+      <div className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-10 px-4">
         <div className="max-w-7xl mx-auto space-y-4">
           <h1 className="text-3xl md:text-5xl font-bold">{course.title}</h1>
           {course.subtitle && (

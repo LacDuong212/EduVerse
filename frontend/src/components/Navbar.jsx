@@ -30,7 +30,7 @@ const Navbar = () => {
     }
 
     return (
-        <div className="w-full flex items-center px-4 sm:px-6 md:px-12 lg:px-24 py-4 fixed top-0 left-0 bg-white shadow z-50">
+        <div className="w-full flex items-center px-4 sm:px-6 md:px-12 lg:px-24 py-4 top-0 left-0 bg-white shadow z-50">
             {/* Logo */}
             <div className='flex-1'>
                 <img src={assets.logo} alt='logo'
@@ -103,7 +103,7 @@ const Navbar = () => {
 
                             {/* Dropdown */}
                             <div className="absolute hidden group-hover:block top-full right-0 z-10 text-black rounded pt-2">
-                                <ul className="list-none m-0 p-2 bg-gray-100 text-sm shadow-md rounded min-w-[105px]">
+                                <ul className="list-none m-0 p-2 bg-gray-100 text-sm shadow-md rounded min-w-[135px]">
                                     <li
                                         onClick={() => navigate('/account')}
                                         className="py-1 px-2 hover:bg-gray-200 cursor-pointer rounded"
@@ -117,8 +117,14 @@ const Navbar = () => {
                                         My Courses
                                     </li>
                                     <li
-                                        onClick={logout}
+                                        onClick={() => navigate('/viewed-courses')}
                                         className="py-1 px-2 hover:bg-gray-200 cursor-pointer rounded"
+                                    >
+                                        Viewed Courses
+                                    </li>
+                                    <li
+                                        onClick={logout}
+                                        className="py-1 px-2 text-red-500 hover:bg-gray-200 cursor-pointer rounded"
                                     >
                                         Logout
                                     </li>
@@ -128,7 +134,7 @@ const Navbar = () => {
                     </div>
                 ) : (
                     <button
-                        onClick={() => navigate('/login')}
+                        onClick={() => navigate('/auth/sign-in')}
                         className="flex items-center gap-2 border border-gray-500 rounded-full px-5 py-2 text-gray-800 hover:bg-gray-100 transition-all text-sm sm:text-base"
                     >
                         Login

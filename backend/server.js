@@ -10,6 +10,7 @@ import userRoute from './routes/userRoutes.js';
 import courseRoute from './routes/courseRoutes.js';
 import cartRoute from './routes/cartRoutes.js';
 import orderRoute from './routes/orderRoutes.js';
+import paymentRoute from './routes/paymentRoutes.js';
 import reviewRoute from './routes/reviewRoutes.js';
 import chatbotRoute from './routes/chatbotRoutes.js';
 
@@ -36,6 +37,7 @@ app.use('/api/user', userRoute);
 app.use('/api/courses', courseRoute);
 app.use('/api/cart', cartRoute);
 app.use('/api/orders', orderRoute);
+app.use('/api/payment', paymentRoute);
 app.use('/api/reviews', reviewRoute);
 app.use('/api/chatbot', chatbotRoute);
 
