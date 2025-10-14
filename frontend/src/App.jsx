@@ -5,6 +5,8 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import Navbar from "./components/Navbar";
+import MainLayout from "./layouts/MainLayout";
+import AuthLayout from "./app/auth/components/AuthLayout";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import EmailVerify from "./pages/EmailVerify";
@@ -16,6 +18,8 @@ import CourseDetail from "./pages/CourseDetail";
 import CartPage from "./pages/Cart";
 import MyCourses from "./pages/MyCourses";
 import ViewedCourses from "./pages/ViewedCourses";
+import SignInPage from "./app/auth/sign-in/SignInPage";
+import SignUpPage from "./app/auth/sign-up/SignUpPage";
 
 import { useDispatch } from "react-redux";
 import { setLogin, setLogout } from "./redux/authSlice";
@@ -56,16 +60,11 @@ const App = () => {
   }, [dispatch, backendUrl]);
 
   return (
-    <div className="text-default min-h-screen bg-white">
-      <ToastContainer />
-      <Navbar />
-      <Routes>
+    <>
+    <Routes>
+      {/* Nhóm có Navbar */}
+      <Route element={<MainLayout />}>
         <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/email-verify" element={<EmailVerify />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/check-reset-otp" element={<CheckResetOtp />} />
         <Route path="/account" element={<Profile />} />
         <Route path="/instructor" element={<InstructorDashboard />} />
         <Route path="/courses" element={<CourseList />} />
@@ -73,9 +72,27 @@ const App = () => {
         <Route path="/my-cart" element={<CartPage />} />
         <Route path="/my-courses" element={<MyCourses />} />
         <Route path="/viewed-courses" element={<ViewedCourses />} />
+      </Route>
 
-      </Routes>
-    </div>
+      <Route path="/auth/sign-in" element={<SignInPage />} />
+      <Route path="/auth/sign-up" element={<SignUpPage />} />
+      <Route path="/email-verify" element={<EmailVerify />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/check-reset-otp" element={<CheckResetOtp />} />
+    </Routes>
+    <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        pauseOnHover
+        draggable
+        theme="colored"
+      />
+    </>
+     
   );
 };
 

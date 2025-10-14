@@ -134,7 +134,7 @@ const Navbar = () => {
                     </div>
                 ) : (
                     <button
-                        onClick={() => navigate('/login')}
+                        onClick={() => navigate('/auth/sign-in')}
                         className="flex items-center gap-2 border border-gray-500 rounded-full px-5 py-2 text-gray-800 hover:bg-gray-100 transition-all text-sm sm:text-base"
                     >
                         Login
