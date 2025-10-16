@@ -5,8 +5,7 @@ import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { setLogin } from "@/redux/authSlice";
 
-export default function useSignUp() {
-  const navigate = useNavigate();
+export default function useSignUp(onSignUpSuccess) {
   const dispatch = useDispatch();
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -29,10 +28,10 @@ export default function useSignUp() {
       }
 
       dispatch(setLogin({ name, email }));
-      navigate("/email-verify", { state: { email } });
       toast.success("Registration successful! Please verify your email.");
+
+      if (onSignUpSuccess) onSignUpSuccess(email);
     } catch (error) {
-      console.error(error);
       toast.error(error.response?.data?.message || "Something went wrong");
     } finally {
       setLoading(false);

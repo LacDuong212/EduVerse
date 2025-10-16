@@ -1,0 +1,71 @@
+@import "tiny-slider/dist/tiny-slider.css";
+@import 'simplebar-react/dist/simplebar.min.css';
+@import 'https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap';
+// Bootstrap variables
+@import "bootstrap/scss/functions";
+@import "bootstrap/scss/variables";
+@import "bootstrap/scss/variables-dark";
+
+// Theme variables
+@import "variables";
+@import "variables-dark";
+
+// User variables
+@import "user-variables";
+
+// Bootstrap core
+@import "bootstrap/scss/bootstrap";
+
+// Extended bootstrap utilities
+@import "custom/utilities";
+@import "bootstrap/scss/utilities/api";
+
+// Extended bootstrap components
+@import "custom/accordion";
+@import "custom/breadcrumb";
+@import "custom/buttons";
+@import "custom/card";
+@import "custom/dropdowns";
+@import "custom/list-group";
+@import "custom/nav";
+@import "custom/navbar";
+@import "custom/pagination";
+@import "custom/progress";
+@import "custom/reboot";
+@import "custom/tables";
+@import "custom/type";
+@import "custom/forms/form-check";
+@import "custom/forms/form-control";
+@import "custom/forms/input-group";
+@import "custom/helper/text-truncation";
+@import "custom-react";
+
+// Theme components
+@import "components/general";
+@import "components/avatar";
+@import "components/utilities";
+@import "components/sidebar-admin";
+@import "components/vendor/choices";
+@import "components/vendor/tiny-slider";
+@import "components/vendor/apexchart";
+@import "components/vendor/stepper";
+@import "components/vendor/video-plyr";
+@import "components/vendor/quill";
+@import "components/vendor/custom-scrollbar";
+
+// Theme dark
+@import "dark-mode";
+
+// In this scss you can write your scss/css
+@import "user";
+
+// Hide default toastify container styles
+.Toastify {
+  position: fixed !important;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
