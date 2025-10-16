@@ -1,60 +1,90 @@
-import { VNPay, ignoreLogger } from 'vnpay';
+import crypto from 'crypto';
+import https from 'https';
 
 class PaymentController {
   static async createPayment(req, res) {
-    try {
-      const { amount, orderId, orderInfo } = req.body;
+    const accessKey = 'F8BBA842ECF85';
+    const secretKey = 'K951B6PE1waDMi640xX08PD3vg6EkVlz';
+    const orderInfo = 'pay with MoMo';
+    const partnerCode = 'MOMO';
+    const redirectUrl = 'https://webhook.site/b3088a6a-2d17-4f8d-a383-71389a6c600b';
+    const ipnUrl = 'https://webhook.site/b3088a6a-2d17-4f8d-a383-71389a6c600b';
+    const requestType = "payWithMethod";
+    const amount = '50000';
+    const orderId = partnerCode + new Date().getTime();
+    const requestId = orderId;
+    const extraData = '';
+    const orderGroupId = '';
+    const autoCapture = true;
+    const lang = 'vi';
 
-      // Cấu hình VNPay
-      const vnpay = new VNPay({
-        tmnCode: 'KXLFWPCG',
-        secureSecret: 'GK1YZKCZHULE8UCVZDMJ2XJ2M6AKY6U9',
-        vnpayHost: 'https://sandbox.vnpayment.vn',
+    // Raw signature
+    const rawSignature =
+      `accessKey=${accessKey}&amount=${amount}&extraData=${extraData}&ipnUrl=${ipnUrl}` +
+      `&orderId=${orderId}&orderInfo=${orderInfo}&partnerCode=${partnerCode}` +
+      `&redirectUrl=${redirectUrl}&requestId=${requestId}&requestType=${requestType}`;
 
-        testMode: true,
-        hashAlgorithm: 'SHA512',
-        enableLog: true,
-        loggerFn: ignoreLogger,
-      });
+    console.log("--------------------RAW SIGNATURE----------------");
+    console.log(rawSignature);
 
-      // Tạo payment URL
-      const paymentUrl = vnpay.buildPaymentUrl({
-        vnp_Amount: parseInt(amount),
-        vnp_IpAddr: '127.0.0.1',
-        vnp_ReturnUrl: process.env.VNP_RETURN_URL,
-        vnp_TxnRef: orderId,
-        vnp_OrderInfo: orderInfo,
-      });
+    // Signature
+    const signature = crypto.createHmac('sha256', secretKey)
+      .update(rawSignature)
+      .digest('hex');
 
-      const bankList = await vnpay.getBankList();
-      console.log(bankList);
+    console.log("--------------------SIGNATURE----------------");
+    console.log(signature);
 
-      res.json({ success: true, paymentUrl });
-    } catch (error) {
-      console.error('VNPay create payment error:', error);
-      res.status(500).json({ success: false, message: 'Tạo link thanh toán thất bại' });
-    }
-  }
+    // Request body
+    const requestBody = JSON.stringify({
+      partnerCode,
+      partnerName: "Test",
+      storeId: "MomoTestStore",
+      requestId,
+      amount,
+      orderId,
+      orderInfo,
+      redirectUrl,
+      ipnUrl,
+      lang,
+      requestType,
+      autoCapture,
+      extraData,
+      orderGroupId,
+      signature
+    });
 
-  // Callback VNPay sau khi thanh toán xong
-  static async paymentReturn(req, res) {
-    try {
-      const vnp = new VNPay({
-        tmnCode: process.env.VNP_TMN_CODE,
-        secureSecret: process.env.VNP_HASH_SECRET,
-      });
-
-      const isValid = vnp.verifyReturnUrl(req.query);
-
-      if (isValid) {
-        return res.json({ success: true, message: 'Thanh toán thành công', data: req.query });
-      } else {
-        return res.json({ success: false, message: 'Thanh toán không hợp lệ' });
+    // HTTPS request options
+    const options = {
+      hostname: 'test-payment.momo.vn',
+      port: 443,
+      path: '/v2/gateway/api/create',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(requestBody)
       }
-    } catch (error) {
-      console.error('VNPay return error:', error);
-      res.status(500).json({ success: false, message: 'Lỗi xử lý callback VNPay' });
-    }
+    };
+
+    const momoReq = https.request(options, momoRes => {
+      let data = '';
+      momoRes.on('data', chunk => {
+        data += chunk;
+      });
+      momoRes.on('end', () => {
+        console.log("MoMo response:", data);
+        res.json(JSON.parse(data));
+      });
+    });
+
+    momoReq.on('error', e => {
+      console.error(`problem with request: ${e.message}`);
+      res.status(500).json({ error: e.message });
+    });
+
+    console.log("Sending....");
+    momoReq.write(requestBody);
+    momoReq.end();
   }
 }
 
