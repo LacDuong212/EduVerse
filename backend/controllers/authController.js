@@ -162,8 +162,7 @@ export const isAuthenticated = (req, res) => {
     } catch (error) {
         return res.json({ success: false, message: "Invalid token" });
     }
-}
-    ;
+};
 // Send OTP to reset password
 export const forgotPassword = async (req, res) => {
     try {
@@ -229,7 +228,7 @@ export const resetPassword = async (req, res) => {
     }
 }
 
-// ✅ Chỉ check OTP hợp lệ (không đổi password)
+// Chỉ check OTP hợp lệ (không đổi password)
 export const checkResetOtp = async (req, res) => {
     try {
         const { email, otp } = req.body;

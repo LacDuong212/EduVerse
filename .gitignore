@@ -153,3 +153,7 @@ vite.config.ts.timestamp-*
 
 # Temp folder for multer
 tmp/
+
+*.json
+!package-lock.json
+!package.json

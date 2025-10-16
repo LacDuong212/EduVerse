@@ -4,28 +4,13 @@ import axios from "axios";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import Navbar from "./components/Navbar";
-import MainLayout from "./layouts/MainLayout";
-import AuthLayout from "./app/auth/components/AuthLayout";
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import EmailVerify from "./pages/EmailVerify";
-import Profile from "./pages/Account";
-import ForgotPassword from "./pages/ForgotPassword";
-import CheckResetOtp from "./pages/CheckResetOtp";
-import ResetPassword from "./pages/ResetPassword";
-import CourseDetail from "./pages/CourseDetail";
-import CartPage from "./pages/Cart";
-import MyCourses from "./pages/MyCourses";
-import ViewedCourses from "./pages/ViewedCourses";
 import SignInPage from "./app/auth/sign-in/SignInPage";
 import SignUpPage from "./app/auth/sign-up/SignUpPage";
 
 import { useDispatch } from "react-redux";
 import { setLogin, setLogout } from "./redux/authSlice";
 import { setCart } from "./redux/cartSlice";
-import CourseList from "./pages/CourseList";
-import InstructorDashboard from "./pages/InstructorDashBoard";
+import '@/assets/scss/style.scss';
 
 
 axios.defaults.withCredentials = true; // ? set globally once
@@ -76,10 +61,6 @@ const App = () => {
 
       <Route path="/auth/sign-in" element={<SignInPage />} />
       <Route path="/auth/sign-up" element={<SignUpPage />} />
-      <Route path="/email-verify" element={<EmailVerify />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
-      <Route path="/check-reset-otp" element={<CheckResetOtp />} />
     </Routes>
     <ToastContainer
         position="top-right"
