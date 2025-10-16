@@ -1,4 +1,5 @@
-import { Controller, useForm } from "react-hook-form";
+import IconTextFormInput from '@/components/form/IconTextFormInput';
+import { useForm } from "react-hook-form";
 import { BsEnvelopeFill } from "react-icons/bs";
 import { FaLock, FaUser } from "react-icons/fa";
 import * as yup from "yup";
@@ -18,7 +19,7 @@ const schema = yup.object({
     .required("Please confirm your password"),
 });
 
-export default function SignUpForm() {
+export default function SignUpForm({ onSignUpSuccess }) {
   const { control, handleSubmit } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
@@ -29,7 +30,7 @@ export default function SignUpForm() {
     },
   });
 
-  const { loading, signUp } = useSignUp();
+  const { loading, signUp } = useSignUp(onSignUpSuccess);
 
   const onSubmit = (data) => {
     const { confirmPassword, ...payload } = data;
@@ -37,95 +38,71 @@ export default function SignUpForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      {/* Full Name */}
-      <div>
-        <label className="block text-gray-700 mb-1">Full Name *</label>
-        <div className="relative">
-          <FaUser className="absolute left-3 top-3 text-gray-400" />
-          <Controller
-            name="name"
-            control={control}
-            render={({ field }) => (
-              <input
-                {...field}
-                type="text"
-                placeholder="Full Name"
-                className="w-full pl-10 pr-3 py-2 border rounded-sm focus:ring-2 focus:ring-blue-400 outline-none"
-              />
-            )}
-          />
-        </div>
+    <form onSubmit={handleSubmit(onSubmit)}>
+      {/* Name */}
+      <div className="mb-4">
+        <IconTextFormInput
+          control={control}
+          icon={FaUser}
+          placeholder="Full Name"
+          label="Full Name *"
+          name="name"
+        />
       </div>
 
       {/* Email */}
-      <div>
-        <label className="block text-gray-700 mb-1">Email address *</label>
-        <div className="relative">
-          <BsEnvelopeFill className="absolute left-3 top-3 text-gray-400" />
-          <Controller
-            name="email"
-            control={control}
-            render={({ field }) => (
-              <input
-                {...field}
-                type="email"
-                placeholder="E-mail"
-                className="w-full pl-10 pr-3 py-2 border rounded-sm focus:ring-2 focus:ring-blue-400 outline-none"
-              />
-            )}
-          />
-        </div>
+      <div className="mb-4">
+        <IconTextFormInput
+          control={control}
+          icon={BsEnvelopeFill}
+          placeholder="E-mail"
+          label="Email address *"
+          name="email"
+        />
       </div>
 
       {/* Password */}
-      <div>
-        <label className="block text-gray-700 mb-1">Password *</label>
-        <div className="relative">
-          <FaLock className="absolute left-3 top-3 text-gray-400" />
-          <Controller
-            name="password"
-            control={control}
-            render={({ field }) => (
-              <input
-                {...field}
-                type="password"
-                placeholder="Password"
-                className="w-full pl-10 pr-3 py-2 border rounded-sm focus:ring-2 focus:ring-blue-400 outline-none"
-              />
-            )}
-          />
-        </div>
+      <div className="mb-4">
+        <IconTextFormInput
+          control={control}
+          type="password"
+          icon={FaLock}
+          placeholder="*********"
+          label="Password *"
+          name="password"
+        />
       </div>
 
       {/* Confirm Password */}
-      <div>
-        <label className="block text-gray-700 mb-1">Confirm Password *</label>
-        <div className="relative">
-          <FaLock className="absolute left-3 top-3 text-gray-400" />
-          <Controller
-            name="confirmPassword"
-            control={control}
-            render={({ field }) => (
-              <input
-                {...field}
-                type="password"
-                placeholder="Confirm Password"
-                className="w-full pl-10 pr-3 py-2 border rounded-sm focus:ring-2 focus:ring-blue-400 outline-none"
-              />
-            )}
-          />
+      <div className="mb-4">
+        <IconTextFormInput
+          control={control}
+          type="password"
+          icon={FaLock}
+          placeholder="*********"
+          label="Confirm Password *"
+          name="confirmPassword"
+        />
+      </div>
+
+      {/* Terms checkbox */}
+      <div className="mb-4">
+        <div className="form-check">
+          <input type="checkbox" className="form-check-input" id="checkbox-1" />
+          <label className="form-check-label" htmlFor="checkbox-1">
+            By signing up, you agree to the <a href="#">terms of service</a>
+          </label>
         </div>
       </div>
 
-      {/* Submit Button */}
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full bg-blue-600 text-white py-2 rounded-sm hover:bg-blue-700 transition"
-      >
-        {loading ? "Signing up..." : "Sign Up"}
-      </button>
+      {/* Submit button */}
+      <div className="align-items-center mt-0">
+        <div className="d-grid">
+          <button className="btn btn-primary mb-0" type="submit" disabled={loading}>
+            {loading ? "Signing Up..." : "Sign Up"}
+          </button>
+        </div>
+      </div>
     </form>
   );
 }
