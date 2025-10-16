@@ -3,9 +3,8 @@ import App from './App.jsx'
 import { BrowserRouter } from 'react-router-dom'
 import { Provider } from 'react-redux'
 import { store } from './redux/store'
-import "swiper/css";
-import "swiper/css/navigation";
-import "swiper/css/pagination";
+// Use the bundle CSS to avoid subpath export resolution issues in this environment
+import "swiper/swiper-bundle.css";
 
 createRoot(document.getElementById('root')).render(
   <BrowserRouter>
