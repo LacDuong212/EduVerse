@@ -4,8 +4,7 @@ import axios from "axios";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import SignInPage from "./app/auth/sign-in/SignInPage";
-import SignUpPage from "./app/auth/sign-up/SignUpPage";
+import AppRouter from "./routes/router"; 
 
 import { useDispatch } from "react-redux";
 import { setLogin, setLogout } from "./redux/authSlice";
@@ -19,38 +18,36 @@ const App = () => {
   const dispatch = useDispatch();
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        // fetch user profile
-        const { data } = await axios.get(`${backendUrl}/api/user/profile`);
-        if (data.success) {
-          dispatch(setLogin(data.user));
-        } else {
-          dispatch(setLogout());
-        }
+  // useEffect(() => {
+  //   const fetchUser = async () => {
+  //     try {
+  //       // fetch user profile
+  //       const { data } = await axios.get(`${backendUrl}/api/user/profile`);
+  //       if (data.success) {
+  //         dispatch(setLogin(data.user));
+  //       } else {
+  //         dispatch(setLogout());
+  //       }
 
-        // fetch cart items
-        const cartRes = await axios.get(`${backendUrl}/api/cart`);
-        if (cartRes.data.success) {
-          dispatch(setCart(cartRes.data.cart));
-        }
+  //       // fetch cart items
+  //       const cartRes = await axios.get(`${backendUrl}/api/cart`);
+  //       if (cartRes.data.success) {
+  //         dispatch(setCart(cartRes.data.cart));
+  //       }
 
-      } catch (err) {
-        dispatch(setLogout());
-      }
-    };
+  //     } catch (err) {
+  //       dispatch(setLogout());
+  //     }
+  //   };
 
-    fetchUser();
-  }, [dispatch, backendUrl]);
+  //   fetchUser();
+  // }, [dispatch, backendUrl]);
 
   return (
     <>
-    <Routes>
-      <Route path="/auth/sign-in" element={<SignInPage />} />
-      <Route path="/auth/sign-up" element={<SignUpPage />} />
-    </Routes>
-    <ToastContainer
+      <AppRouter />
+      
+      <ToastContainer
         position="top-right"
         autoClose={3000}
         hideProgressBar={false}
@@ -61,7 +58,6 @@ const App = () => {
         theme="colored"
       />
     </>
-     
   );
 };
 
