@@ -197,49 +197,4 @@ export const getOwnedCourses = async (req, res) => {
   } catch (error) {
     res.status(500).json({ success: false, message: "Error fetching owned courses", error });
   }
-};export const getRelatedCourses = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    // Tìm course hiện tại
-    const currentCourse = await Course.findById(id);
-    if (!currentCourse) {
-      return res.status(404).json({
-        success: false,
-        message: "Course not found",
-      });
-    }
-
-    // Điều kiện tìm related
-    const conditions = [
-      { tags: { $in: currentCourse.tags || [] } },
-      { category: currentCourse.category },
-      { subCategory: currentCourse.subCategory }
-    ];
-
-    // Tìm tất cả course liên quan
-    let relatedCourses = await Course.find({
-      _id: { $ne: id },
-      $or: conditions
-    }).select("title thumbnail instructor rating price discountPrice");
-
-    // Loại bỏ trùng lặp (nếu có)
-    const seen = new Set();
-    relatedCourses = relatedCourses.filter(c => {
-      if (seen.has(c._id.toString())) return false;
-      seen.add(c._id.toString());
-      return true;
-    });
-
-    res.json({
-      success: true,
-      courses: relatedCourses,
-    });
-  } catch (error) {
-    console.error("Error in getRelatedCourses:", error);
-    res.status(500).json({
-      success: false,
-      message: "Server error",
-    });
-  }
 };

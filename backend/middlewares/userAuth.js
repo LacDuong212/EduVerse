@@ -12,8 +12,7 @@ const userAuth = (req, res, next) => {
         const tokenDecode = jwt.verify(token, process.env.JWT_SECRET);
         
         if (tokenDecode.id) {
-            req.userId = tokenDecode.id;
-            req.userRole = tokenDecode.role;
+            req.userId = tokenDecode.id
         } else {
             return res.json({ success: false, message: "Unauthorized: Invalid token" });
         }

@@ -47,18 +47,6 @@ const App = () => {
   return (
     <>
     <Routes>
-      {/* Nhóm có Navbar */}
-      <Route element={<MainLayout />}>
-        <Route path="/" element={<Home />} />
-        <Route path="/account" element={<Profile />} />
-        <Route path="/instructor" element={<InstructorDashboard />} />
-        <Route path="/courses" element={<CourseList />} />
-        <Route path="/courses/:id" element={<CourseDetail />} />
-        <Route path="/my-cart" element={<CartPage />} />
-        <Route path="/my-courses" element={<MyCourses />} />
-        <Route path="/viewed-courses" element={<ViewedCourses />} />
-      </Route>
-
       <Route path="/auth/sign-in" element={<SignInPage />} />
       <Route path="/auth/sign-up" element={<SignUpPage />} />
     </Routes>
