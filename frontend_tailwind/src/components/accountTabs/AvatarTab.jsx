@@ -179,7 +179,7 @@ export default function AvatarTab() {
           <div className="flex flex-col gap-3 w-full md:w-auto">
             <div className="flex flex-col sm:flex-row gap-3">
               <Button variant="secondary" className="hover:bg-gray-200 transition-colors" onClick={onPickFile}>
-                Change Photo
+                Upload File
               </Button>
               <input
                 ref={fileInputRef}

@@ -171,7 +171,7 @@ export default function AccountPage() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-6 overflow-y-auto">
+      <main className="flex-1 p-4 overflow-y-auto">
         <Card className="shadow-lg rounded-2xl">
           {renderContent()}
         </Card>

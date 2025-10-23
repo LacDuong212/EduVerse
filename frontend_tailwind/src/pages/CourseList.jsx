@@ -61,7 +61,7 @@ const CourseList = () => {
   }, [page]);
 
   return (
-    <div className="relative md:px-36 px-8 pt-20 text-left">
+    <div className="relative md:px-36 px-12 pt-10 text-left">
       {/* Header */}
       <div className="flex md:flex-row flex-col gap-6 items-start justify-between w-full">
         <div>
@@ -95,7 +95,7 @@ const CourseList = () => {
             <option value="Security">Security</option>
             <option value="Programming">Programming</option>
             <option value="Design">Design</option>
-            {/* 👆 có thể fetch danh mục từ API riêng nếu backend hỗ trợ */}
+            {/* #TODO: auto fetch categories from API */}
           </select>
         </div>
       </div>
@@ -105,10 +105,10 @@ const CourseList = () => {
         dataLength={allCourses.length}
         next={() => setPage((prev) => prev + 1)}
         hasMore={allCourses.length < total}
-        loader={<p className="text-center mt-6">Đang tải thêm...</p>}
+        loader={<p className="text-center mt-6">Loading more...</p>}
         endMessage={
-          <p className="text-center mt-6 text-gray-500">
-            🎉 Đã tải hết khóa học
+          <p className="text-center mt-12 mb-12 text-gray-500">
+            All courses loaded
           </p>
         }
       >

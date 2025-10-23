@@ -25,11 +25,11 @@ const userInteractionSchema = new mongoose.Schema({
 });
 
 // Index để tối ưu truy vấn
-userInteractionSchema.index({ userId: 1, productId: 1, interactionType: 1 });
 userInteractionSchema.index({ userId: 1, interactionType: 1, interactedAt: -1 });
 userInteractionSchema.index({ productId: 1, interactionType: 1 });
 
-// Compound index để tránh duplicate
+// Compound index để tránh duplicate (và cũng tối ưu truy vấn)
 userInteractionSchema.index({ userId: 1, productId: 1, interactionType: 1 }, { unique: true });
+
 
 export default mongoose.model('UserInteraction', userInteractionSchema);

@@ -26,7 +26,7 @@ const Home = () => {
   }, [dispatch]);
 
   return (
-    <div className='flex flex-col items-center space-y-7 text-center'>
+    <div className='flex flex-col items-center text-center'>
       <ChatbotWidget />
       <Hero />
       <CoursesSection />

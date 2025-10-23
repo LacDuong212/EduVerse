@@ -103,7 +103,7 @@ const Navbar = () => {
 
                             {/* Dropdown */}
                             <div className="absolute hidden group-hover:block top-full right-0 z-10 text-black rounded pt-2">
-                                <ul className="list-none m-0 p-2 bg-gray-100 text-sm shadow-md rounded min-w-[105px]">
+                                <ul className="list-none m-0 p-2 bg-gray-100 text-sm shadow-md rounded min-w-[135px]">
                                     <li
                                         onClick={() => navigate('/account')}
                                         className="py-1 px-2 hover:bg-gray-200 cursor-pointer rounded"
@@ -124,7 +124,7 @@ const Navbar = () => {
                                     </li>
                                     <li
                                         onClick={logout}
-                                        className="py-1 px-2 hover:bg-gray-200 cursor-pointer rounded"
+                                        className="py-1 px-2 text-red-500 hover:bg-gray-200 cursor-pointer rounded"
                                     >
                                         Logout
                                     </li>

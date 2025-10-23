@@ -59,7 +59,7 @@ const ViewedCourses = () => {
   }, [page]);
 
   return (
-    <div className="relative md:px-36 px-8 pt-20 text-left">
+    <div className="relative md:px-36 px-12 pt-10 text-left">
       {/* Header */}
       <div className="flex md:flex-row flex-col gap-6 items-start justify-between w-full">
         <div>
@@ -81,10 +81,10 @@ const ViewedCourses = () => {
         dataLength={allCourses.length}
         next={() => setPage((prev) => prev + 1)}
         hasMore={allCourses.length < total}
-        loader={<p className="text-center mt-6">Đang tải thêm...</p>}
+        loader={<p className="text-center mt-6">Loading more...</p>}
         endMessage={
-          <p className="text-center mt-6 text-gray-500">
-            🎉 Đã tải hết khóa học đã xem
+          <p className="text-center mt-12 mb-12 text-gray-500">
+            All viewed courses loaded
           </p>
         }
       >
@@ -94,7 +94,7 @@ const ViewedCourses = () => {
               <CourseCard key={course._id} course={course} />
             ))
           ) : !loading ? (
-            <p className="text-gray-500">Bạn chưa xem khóa học nào.</p>
+            <p className="text-gray-500">You haven't viewed any courses.</p>
           ) : null}
         </div>
       </InfiniteScroll>
