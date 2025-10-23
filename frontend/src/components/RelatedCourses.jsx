@@ -5,7 +5,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import axios from "axios";
 import CourseCard from "./CourseCard";
-import { Navigation } from "swiper/modules";   // thêm module Navigation
+import { Navigation }   from "swiper/modules";   // thêm module Navigation
 
 
 const RelatedCourses = ({ courseId }) => {
