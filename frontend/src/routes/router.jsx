@@ -2,8 +2,9 @@ import SignInPage from "../app/auth/sign-in/SignInPage";
 import SignUpPage from "../app/auth/sign-up/SignUpPage";
 import NotFoundPage from "../app/not-found";
 import InstructorLayout from '../layouts/InstructorLayout';
+import StudentLayout from "../layouts/StudentLayout";
 
-import { instructorRoutes } from '@/routes/index';
+import { instructorRoutes, studentRoutes } from '@/routes/index';
 // import { useAuthContext } from '@/context/useAuthContext';
 import { Navigate, Route, Routes } from 'react-router-dom';
 
@@ -27,6 +28,20 @@ const AppRouter = props => {
           path={route.path} 
           element={isAuthenticated 
             ? <InstructorLayout {...props}>{route.element}</InstructorLayout> 
+            : <Navigate to={{
+              pathname: '/auth/sign-in',
+              search: 'redirectTo=' + route.path
+            }} />} 
+        />
+      )}
+
+      {/* STUDENT ROUTES */}
+      {(studentRoutes || []).map((route, idx) => 
+        <Route 
+          key={idx + route.name} 
+          path={route.path} 
+          element={isAuthenticated 
+            ? <StudentLayout {...props}>{route.element}</StudentLayout> 
             : <Navigate to={{
               pathname: '/auth/sign-in',
               search: 'redirectTo=' + route.path

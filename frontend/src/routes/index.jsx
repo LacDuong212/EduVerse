@@ -1,4 +1,4 @@
-
+import HomePage from "../app/home/page";
 
 export const instructorRoutes = [{
   path: '/instructor/dashboard',
@@ -27,6 +27,33 @@ export const instructorRoutes = [{
   element: null
 }, {
   path: '/instructor/orders',
+  name: 'Orders',
+  isNested: true,
+  element: null
+}];
+
+export const studentRoutes = [{
+  path: '/home',
+  name: 'Home',
+  isNested: false,
+  element: <HomePage />
+}, {
+  path: '/courses',
+  name: 'Courses',
+  isNested: true,
+  element: null
+}, {
+  path: '/student/my-courses',
+  name: 'My Courses',
+  isNested: true,
+  element: null
+}, {
+  path: '/student/cart',
+  name: 'My Cart',
+  isNested: false,
+  element: null
+}, {
+  path: '/student/orders',
   name: 'Orders',
   isNested: true,
   element: null

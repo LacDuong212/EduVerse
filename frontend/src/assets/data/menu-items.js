@@ -1,5 +1,6 @@
-import { BsBasket, BsFolderCheck, BsGear, BsGraphUp, BsPencilSquare, BsPeople, BsQuestionDiamond, BsStar, BsTrash, BsUiChecksGrid, BsWallet2 } from 'react-icons/bs';
-
+import { BsBasket, BsBasketFill, BsCardChecklist, BsCartCheck, BsCartCheckFill, BsCreditCard2Front, BsCreditCard2FrontFill, BsFileCheckFill, BsFileEarmarkPlusFill, BsFolderCheck, BsGear, BsGraphUp, BsGridFill, BsHouse, BsLock, BsPencilSquare, BsPeople, BsQuestionDiamond, BsStar, BsStarFill, BsTrash, BsUiChecksGrid, BsUiRadiosGrid, BsWallet2 } from 'react-icons/bs';
+import { FaBasketballBall, FaChartBar, FaCog, FaEdit, FaFacebook, FaLinkedinIn, FaRegCommentDots, FaRegFileAlt, FaTrashAlt, FaUserCog } from 'react-icons/fa';
+import { FaChartLine, FaUserGraduate, FaUserTie, FaWallet } from 'react-icons/fa6';
 
 //---ADMIN
 
@@ -74,5 +75,74 @@ export const INSTRUCTOR_MENU_ITEMS = [{
 }];
 
 //---STUDENT
-
+export const STUDENT_APP_MENU_ITEMS = [{
+  key: 'home',
+  label: 'Home',
+  url: '/home'
+}, {
+  key: 'courses',
+  label: 'Courses',
+  url: '/courses'
+}];
+export const STUDENT_MENU_ITEMS = [{
+  key: 'dashboard',
+  label: 'Dashboard',
+  icon: BsUiChecksGrid,
+  url: '/student/dashboard',
+  parentKey: 'student'
+}, {
+  key: 'subscriptions',
+  label: 'My Subscriptions',
+  icon: BsCardChecklist,
+  url: '/student/subscription',
+  parentKey: 'student'
+}, {
+  key: 'courses',
+  label: 'My Courses',
+  icon: BsBasket,
+  url: '/student/course-list',
+  parentKey: 'student'
+}, {
+  key: 'resume',
+  label: 'Course Resume',
+  icon: FaRegFileAlt,
+  url: '/student/course-resume',
+  parentKey: 'student'
+}, {
+  key: 'quiz',
+  label: 'Quiz',
+  icon: BsQuestionDiamond,
+  url: '/student/quiz',
+  parentKey: 'student'
+}, {
+  key: 'paymentInfo',
+  label: 'Payment Info',
+  icon: BsCreditCard2Front,
+  url: '/student/payment-info',
+  parentKey: 'student'
+}, {
+  key: 'wishlist',
+  label: 'Wishlist',
+  icon: BsCartCheck,
+  url: '/student/bookmark',
+  parentKey: 'student'
+}, {
+  key: 'profile',
+  label: 'Edit Profile',
+  icon: BsPencilSquare,
+  url: '/student/edit-profile',
+  parentKey: 'student'
+}, {
+  key: 'setting',
+  label: 'Setting',
+  icon: BsGear,
+  url: '/student/setting',
+  parentKey: 'student'
+}, {
+  key: 'delete',
+  label: 'Delete Profile',
+  icon: BsTrash,
+  url: '/student/delete-account',
+  parentKey: 'student'
+}];
 //---OTHERS
