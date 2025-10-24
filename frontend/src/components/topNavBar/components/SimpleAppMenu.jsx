@@ -1,4 +1,3 @@
-import { INSTRUCTOR_APP_MENU_ITEMS } from '@/assets/data/menu-items.js';
 import clsx from 'clsx';
 import { useEffect, useState } from 'react';
 import { Collapse } from 'react-bootstrap';
@@ -6,13 +5,13 @@ import { FaSearch } from 'react-icons/fa';
 import { Link, useLocation } from 'react-router-dom';
 
 
-const SimpleAppMenu = ({ mobileMenuOpen, menuClassName }) => {
+const SimpleAppMenu = ({ mobileMenuOpen, menuClassName, topMenuItems }) => {
   const [activeKey, setActiveKey] = useState(null);
   const { pathname } = useLocation();
 
   // find current active item
   useEffect(() => {
-    const current = INSTRUCTOR_APP_MENU_ITEMS.find(
+    const current = topMenuItems.find(
       (item) => item.url === pathname
     );
     if (current) setActiveKey(current.key);
@@ -23,7 +22,7 @@ const SimpleAppMenu = ({ mobileMenuOpen, menuClassName }) => {
       <div className="d-flex align-items-center gap-3 flex-wrap justify-content-center">
         {/* Main nav */}
         <ul className={clsx('navbar-nav d-flex flex-row gap-3', menuClassName)}>
-          {INSTRUCTOR_APP_MENU_ITEMS.map((item) => (
+          {topMenuItems.map((item) => (
             <li key={item.key} className="nav-item">
               <Link
                 to={item.url}

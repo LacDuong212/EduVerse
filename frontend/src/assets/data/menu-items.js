@@ -1,4 +1,4 @@
-import { BsBasket, BsFolderCheck, BsGear, BsGraphUp, BsPencilSquare, BsPeople, BsQuestionDiamond, BsStar, BsTrash, BsUiChecksGrid, BsWallet2 } from 'react-icons/bs';
+import { BsBasket, BsFolderCheck, BsGear, BsPencilSquare, BsPeople, BsStar, BsTrash, BsUiChecksGrid, BsWallet2 } from 'react-icons/bs';
 
 
 //---ADMIN
@@ -27,31 +27,31 @@ export const INSTRUCTOR_MENU_ITEMS = [{
   key: 'courses',
   label: 'My Courses',
   icon: BsBasket,
-  url: '/instructor/manage-course',
+  url: '/instructor/courses',
   parentKey: 'instructor'
 }, {
   key: 'students',
   label: 'Students',
   icon: BsPeople,
-  url: '/instructor/student-list',
+  url: '/instructor/students',
   parentKey: 'instructor'
 }, {
   key: 'orders',
   label: 'Orders',
   icon: BsFolderCheck,
-  url: '/instructor/order',
+  url: '/instructor/orders',
   parentKey: 'instructor'
 }, {
   key: 'reviews',
   label: 'Reviews',
   icon: BsStar,
-  url: '/instructor/review',
+  url: '/instructor/reviews',
   parentKey: 'instructor'
 }, {
-  key: 'edit-profile',
-  label: 'Edit Profile',
+  key: 'profile',
+  label: 'My Profile',
   icon: BsPencilSquare,
-  url: '/instructor/edit-profile',
+  url: '/instructor/profile',
   parentKey: 'instructor'
 }, {
   key: 'balance',
@@ -60,10 +60,10 @@ export const INSTRUCTOR_MENU_ITEMS = [{
   url: '/instructor/balance',
   parentKey: 'instructor'
 }, {
-  key: 'setting',
-  label: 'Setting',
+  key: 'settings',
+  label: 'Settings',
   icon: BsGear,
-  url: '/instructor/setting',
+  url: '/instructor/settings',
   parentKey: 'instructor'
 }, {
   key: 'delete',

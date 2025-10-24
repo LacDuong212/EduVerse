@@ -26,7 +26,7 @@ const AppRouter = props => {
           key={idx + route.name} 
           path={route.path} 
           element={isAuthenticated 
-            ? <InstructorLayout {...props}>{route.element}</InstructorLayout> 
+            ? <InstructorLayout {...props} isNested={route.isNested} >{route.element}</InstructorLayout> 
             : <Navigate to={{
               pathname: '/auth/sign-in',
               search: 'redirectTo=' + route.path

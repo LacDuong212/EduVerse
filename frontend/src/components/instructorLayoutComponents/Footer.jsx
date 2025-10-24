@@ -1,11 +1,13 @@
 import logoLight from '@/assets/images/logo/logo_light.svg';
+import { OUR_GROUP_NAME } from '@/context/constants';
 import { Col, Container, Row } from 'react-bootstrap';
 import { FaFacebook, FaInstagram, FaLinkedinIn, FaTwitter } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
 
 const Footer = () => {
-  return <footer className="bg-dark p-3">
+  return (
+    <footer className="bg-dark p-3">
       <Container>
         <Row className="align-items-center">
           <Col md={4} className="text-center text-md-start mb-3 mb-md-0">
@@ -15,7 +17,7 @@ const Footer = () => {
           </Col>
           <Col md={4} className="mb-3 mb-md-0">
             <div className="text-center text-white text-primary-hover">
-              Copyrights ©2025 EduVerse. Modified by Vi021. {/*Originally Eduport, built by StackBros*/}
+              Copyrights ©2025 EduVerse. Modified by {OUR_GROUP_NAME}. {/*Originally Eduport, built by StackBros*/}
             </div>
           </Col>
           <Col md={4}>
@@ -44,7 +46,8 @@ const Footer = () => {
           </Col>
         </Row>
       </Container>
-    </footer>;
+    </footer>
+  );
 };
 
 export default Footer;

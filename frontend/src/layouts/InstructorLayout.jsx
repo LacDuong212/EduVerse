@@ -1,20 +1,17 @@
 import { INSTRUCTOR_MENU_ITEMS } from '@/assets/data/menu-items';
-// import Preloader from '@/components/Preloader';
+import Banner from '@/components/instructorLayoutComponents/Banner';
+import Footer from '@/components/instructorLayoutComponents/Footer';
+import TopNavigationBar from '@/components/instructorLayoutComponents/TopNavigationBar';
 // import { useAuthContext } from '@/context/useAuthContext';
 // import { useLayoutContext } from '@/context/useLayoutContext';
 import useToggle from '@/hooks/useToggle';
 import useViewPort from '@/hooks/useViewPort';
 
 import clsx from 'clsx';
-import { lazy, Suspense } from 'react';
 import { Col, Container, Offcanvas, OffcanvasBody, OffcanvasHeader, OffcanvasTitle, Row } from 'react-bootstrap';
 import { FaSignOutAlt } from 'react-icons/fa';
 import { Link, useLocation } from 'react-router-dom';
 
-
-const Banner = lazy(() => import('@/components/instructorLayoutComponents/Banner'));
-const Footer = lazy(() => import('@/components/instructorLayoutComponents/Footer'));
-const TopNavigationBar = lazy(() => import('@/components/instructorLayoutComponents/TopNavigationBar'));
 
 const VerticalMenu = () => {
   const { pathname } = useLocation();
@@ -59,9 +56,7 @@ const InstructorLayout = ({ children, isNested = false }) => {
 
   return (
     <>
-      <Suspense>
-        <TopNavigationBar />
-      </Suspense>
+      <TopNavigationBar />
 
       <main>
         {isNested ? (
@@ -80,9 +75,7 @@ const InstructorLayout = ({ children, isNested = false }) => {
                       </OffcanvasBody>
                     </Offcanvas>}
                   </Col>
-                  <Col xl={9}>
-                    {/* <Suspense fallback={<Preloader />}>{children}</Suspense> */}
-                  </Col>
+                  <Col xl={9}>{children}</Col>
                 </Row>
               </Container>
             </section>
@@ -94,9 +87,7 @@ const InstructorLayout = ({ children, isNested = false }) => {
         )}
       </main>
 
-      <Suspense>
-        <Footer />
-      </Suspense>
+      <Footer />
     </>
   );
 };

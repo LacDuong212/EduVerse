@@ -1,3 +1,4 @@
+import { INSTRUCTOR_APP_MENU_ITEMS } from '@/assets/data/menu-items.js';
 import LogoBox from '@/components/LogoBox';
 import TopNavbar from '@/components/TopNavbar';
 import SimpleAppMenu from '@/components/TopNavbar/components/SimpleAppMenu';
@@ -17,7 +18,7 @@ const TopNavigationBar = () => {
         <LogoBox height={36} width={143} />
         {/* <TopbarMenuToggler /> */}
         {/* <SimpleAppMenu mobileMenuOpen={appMenuControl.open} menuClassName="mx-auto" /> */}
-        <SimpleAppMenu mobileMenuOpen={false} menuClassName="mx-auto" />
+        <SimpleAppMenu mobileMenuOpen={false} menuClassName="mx-auto" topMenuItems={INSTRUCTOR_APP_MENU_ITEMS} />
         <ul className="nav flex-row align-items-center list-unstyled ms-xl-auto">
           <NotificationDropdown />
           <ProfileDropdown className="nav-item ms-3" />

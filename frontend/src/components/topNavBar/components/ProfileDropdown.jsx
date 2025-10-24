@@ -83,27 +83,27 @@ const ProfileDropdown = ({ className }) => {
           <DropdownDivider />
         </li>
         <li>
-          <DropdownItem href="/instructor/edit-profile">
-            <BsPerson className="fa-fw me-2" />
-            Edit Profile
+          <DropdownItem href="/instructor/profile">
+            <BsPerson className="fa-fw me-2 mb-1" />
+            My Profile
           </DropdownItem>
         </li>
         <li>
-          <DropdownItem href="/admin/admin-settings">
-            <BsGear className="fa-fw me-2" />
+          <DropdownItem href="/instructor/settings">
+            <BsGear className="fa-fw me-2 mb-1" />
             Account Settings
           </DropdownItem>
         </li>
         <li>
           <DropdownItem href="/help/center">
-            <BsInfoCircle className="fa-fw me-2" />
+            <BsInfoCircle className="fa-fw me-2 mb-1" />
             Help
           </DropdownItem>
         </li>
         <li>
           {/* <Link className="dropdown-item bg-danger-soft-hover" onClick={removeSession} to="/auth/sign-in"> */}
           <Link className="dropdown-item bg-danger-soft-hover" onClick={null} to="/auth/sign-in">
-            <BsPower className="fa-fw me-2" />
+            <BsPower className="fa-fw me-2 mb-1" />
             Sign Out
           </Link>
         </li>
