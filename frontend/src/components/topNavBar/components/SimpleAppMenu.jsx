@@ -27,7 +27,7 @@ const SimpleAppMenu = ({ mobileMenuOpen, menuClassName, topMenuItems }) => {
               <Link
                 to={item.url}
                 className={clsx(
-                  'nav-link px-2 py-1',
+                  'nav-link fw-medium px-2 pt-1',
                   activeKey === item.key && 'active'
                 )}
               >

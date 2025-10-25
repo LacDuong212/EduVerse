@@ -15,7 +15,7 @@ const TopNavigationBar = () => {
   return (
     <TopNavbar>
       <Container>
-        <LogoBox height={36} width={143} />
+        <LogoBox width={130} />
         <TopbarMenuToggler />
         <SimpleAppMenu mobileMenuOpen={appMenuControl.open} menuClassName="mx-auto" topMenuItems={INSTRUCTOR_APP_MENU_ITEMS} />
         <ul className="nav flex-row align-items-center list-unstyled ms-xl-auto">
