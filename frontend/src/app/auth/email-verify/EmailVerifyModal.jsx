@@ -2,8 +2,8 @@ import React from "react";
 import { Modal, Button, Form, Row, Col } from "react-bootstrap";
 import useEmailVerify from "./useEmailVerify";
 
-export default function EmailVerifyModal({ show, onHide, email }) {
-  const emailVerify = useEmailVerify(email);
+export default function EmailVerifyModal({ show, onHide, email, mode, onVerifySuccess }) {
+  const emailVerify = useEmailVerify(email, mode, onVerifySuccess);
 
   return (
     <Modal show={show} onHide={onHide} centered>
@@ -48,8 +48,8 @@ export default function EmailVerifyModal({ show, onHide, email }) {
             ))}
           </Row>
 
-          <Button type="submit" variant="primary" className="w-50 mx-auto d-block">
-            Verify Email
+          <Button type="submit" variant="primary" className="w-50 mx-auto d-block" disabled={emailVerify.loading}>
+            {emailVerify.loading ? "Verifying..." : "Verify Email"}
           </Button>
         </Modal.Body>
       </Form>

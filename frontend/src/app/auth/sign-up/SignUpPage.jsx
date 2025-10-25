@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Col, Row } from 'react-bootstrap';
 import { FaFacebookF, FaGoogle } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import AuthLayout from "../components/AuthLayout";
 import SignUpForm from "./components/SignUpForm";
 import EmailVerifyModal from "../email-verify/EmailVerifyModal";
@@ -9,6 +10,7 @@ import EmailVerifyModal from "../email-verify/EmailVerifyModal";
 export default function SignUpPage() {
   const [showVerifyModal, setShowVerifyModal] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState("");
+  const navigate = useNavigate();
 
   return (
     <AuthLayout>
@@ -54,6 +56,12 @@ export default function SignUpPage() {
           show={showVerifyModal}
           onHide={() => setShowVerifyModal(false)}
           email={registeredEmail}
+          mode="register"
+          onVerifySuccess={() => {
+            setShowVerifyModal(false);
+            toast.success("Account verified successfully!");
+            navigate("/auth/sign-in");
+          }}
         />
       </AuthLayout>
   );

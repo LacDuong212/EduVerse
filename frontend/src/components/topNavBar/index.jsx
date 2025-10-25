@@ -12,13 +12,14 @@ const TopNavbar = ({ children, className }) => {
       <header 
         ref={headerRef} 
         className={clsx(
-          'navbar-light navbar-sticky header-static', 
+          'navbar-light header-static', 
           className, 
+          'sticky-top', // always sticky on small screens, scroll-based on large screens
           { 'navbar-sticky-on': scrollY >= 400 }
         )}
       >
         <nav 
-          className="navbar navbar-expand-xl transition-all" 
+          className="navbar navbar-expand-xl py-2 transition-all" 
           style={{ height: scrollY >= 400 }}
         >
           {children}

@@ -2,8 +2,8 @@ import { INSTRUCTOR_MENU_ITEMS } from '../assets/data/menu-items';
 import Banner from '../components/instructorLayoutComponents/Banner';
 import Footer from '../components/instructorLayoutComponents/Footer';
 import TopNavigationBar from '../components/instructorLayoutComponents/TopNavigationBar';
-// import { useAuthContext } from '../context/useAuthContext';
-// import { useLayoutContext } from '../context/useLayoutContext';
+import { useAuthContext } from '../context/useAuthContext';
+import { useLayoutContext } from '../context/useLayoutContext';
 import useToggle from '../hooks/useToggle';
 import useViewPort from '../hooks/useViewPort';
 
@@ -15,10 +15,10 @@ import { Link, useLocation } from 'react-router-dom';
 
 const VerticalMenu = () => {
   const { pathname } = useLocation();
-  // const { removeSession } = useAuthContext();
+  const { removeSession } = useAuthContext();
 
   return (
-    <div className="bg-dark border rounded-3 pb-0 p-3 w-100">
+    <div className="bg-dark border rounded-3 p-3 mb-5">
       <div className="list-group list-group-dark list-group-borderless">
         {INSTRUCTOR_MENU_ITEMS.map(({
           label,
@@ -45,7 +45,7 @@ const VerticalMenu = () => {
 
 const InstructorLayout = ({ children, isNested = false }) => {
   const { width } = useViewPort();
-  // const { } = useLayoutContext();
+  const { } = useLayoutContext();
   const { isTrue: isOffCanvasMenuOpen, toggle: toggleOffCanvasMenu } = useToggle();
 
   const instructorData = {
@@ -66,14 +66,16 @@ const InstructorLayout = ({ children, isNested = false }) => {
               <Container>
                 <Row>
                   <Col xl={3}>
-                    {width >= 1200 ? <VerticalMenu /> : <Offcanvas show={isOffCanvasMenuOpen} placement="end" onHide={toggleOffCanvasMenu}>
-                      <OffcanvasHeader className="bg-light" closeButton>
-                        <OffcanvasTitle>My profile</OffcanvasTitle>
-                      </OffcanvasHeader>
-                      <OffcanvasBody className="p-3 p-xl-0">
-                        <VerticalMenu />
-                      </OffcanvasBody>
-                    </Offcanvas>}
+                    {width >= 1200 ? <VerticalMenu /> : (
+                      <Offcanvas show={isOffCanvasMenuOpen} placement="end" onHide={toggleOffCanvasMenu}>
+                        <OffcanvasHeader className="bg-light" closeButton>
+                          <OffcanvasTitle>Menu</OffcanvasTitle>
+                        </OffcanvasHeader>
+                        <OffcanvasBody className="p-2">
+                          <VerticalMenu />
+                        </OffcanvasBody>
+                      </Offcanvas>
+                    )}
                   </Col>
                   <Col xl={9}>{children}</Col>
                 </Row>

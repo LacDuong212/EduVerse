@@ -71,9 +71,7 @@ const Banner = ({
             </Card>
             <hr className="d-xl-none" />
             <Col xs={12} xl={3} className="d-flex justify-content-between align-items-center">
-              <a className="h6 mb-0 fw-bold d-xl-none" href="#">
-                Menu
-              </a>
+              <a className="h6 mb-0 fw-bold d-xl-none" href="#">Menu</a>
               <button onClick={toggleOffCanvas} className="btn btn-primary d-xl-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar" aria-controls="offcanvasSidebar">
                 <FaSlidersH />
               </button>

@@ -1,5 +1,5 @@
-// import { useAuthContext } from '@/context/useAuthContext';
-// import { useLayoutContext } from '@/context/useLayoutContext';
+import { useAuthContext } from '@/context/useAuthContext';
+import { useLayoutContext } from '@/context/useLayoutContext';
 import { toSentenceCase } from '@/utils/change-casing';
 
 import clsx from 'clsx';
@@ -9,8 +9,8 @@ import { Link } from 'react-router-dom';
 
 
 const ProfileDropdown = ({ className }) => {
-  // const { removeSession } = useAuthContext();
-  // const { changeTheme, theme } = useLayoutContext();
+  const { removeSession } = useAuthContext();
+  const { changeTheme, theme } = useLayoutContext();
   const instructorData = {
     name: 'Duckle Munchkin',
     email: 'duckle.munchkin@example.com',
@@ -115,12 +115,11 @@ const ProfileDropdown = ({ className }) => {
           <div className="bg-light dark-mode-switch theme-icon-active d-flex align-items-center p-1 rounded mt-2">
             {themeModes.map((mode, idx) =>
               <button
-                onClick={null /*() => changeTheme(mode.theme)*/}
+                onClick={() => changeTheme(mode.theme)}
                 data-bs-theme-value={mode.theme}
                 type="button"
                 className={clsx('btn btn-sm mb-0 flex-fill text-truncate', {
-                  /*active: theme === mode.theme*/
-                  active: false
+                  active: theme === mode.theme
                 })} key={mode.theme + idx}>
                 {mode.icon}
                 {toSentenceCase(mode.theme)}
