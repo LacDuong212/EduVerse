@@ -1,11 +1,11 @@
-import { INSTRUCTOR_MENU_ITEMS } from '@/assets/data/menu-items';
-import Banner from '@/components/instructorLayoutComponents/Banner';
-import Footer from '@/components/instructorLayoutComponents/Footer';
-import TopNavigationBar from '@/components/instructorLayoutComponents/TopNavigationBar';
-// import { useAuthContext } from '@/context/useAuthContext';
-// import { useLayoutContext } from '@/context/useLayoutContext';
-import useToggle from '@/hooks/useToggle';
-import useViewPort from '@/hooks/useViewPort';
+import { INSTRUCTOR_MENU_ITEMS } from '../assets/data/menu-items';
+import Banner from '../components/instructorLayoutComponents/Banner';
+import Footer from '../components/instructorLayoutComponents/Footer';
+import TopNavigationBar from '../components/instructorLayoutComponents/TopNavigationBar';
+// import { useAuthContext } from '../context/useAuthContext';
+// import { useLayoutContext } from '../context/useLayoutContext';
+import useToggle from '../hooks/useToggle';
+import useViewPort from '../hooks/useViewPort';
 
 import clsx from 'clsx';
 import { Col, Container, Offcanvas, OffcanvasBody, OffcanvasHeader, OffcanvasTitle, Row } from 'react-bootstrap';
@@ -62,7 +62,7 @@ const InstructorLayout = ({ children, isNested = false }) => {
         {isNested ? (
           <>
             <Banner toggleOffCanvas={toggleOffCanvasMenu} instructorData={instructorData} />
-            <section className="pt-0">
+            <section className="py-0">
               <Container>
                 <Row>
                   <Col xl={3}>
@@ -81,8 +81,8 @@ const InstructorLayout = ({ children, isNested = false }) => {
             </section>
           </>
         ) : (
-          <section className="pt-0">
-            <Container>{children}</Container>
+          <section className="py-0">
+            {children}
           </section>
         )}
       </main>

@@ -1,6 +1,8 @@
 
 // INSTRUCTOR
 import InstructorDashboard from "../app/instructor/dashboard";
+import InstructorMyCourses from "../app/instructor/my-courses";
+import InstructorMyStudents from "../app/instructor/my-students";
 
 
 export const instructorRoutes = [{
@@ -12,12 +14,12 @@ export const instructorRoutes = [{
   path: '/instructor/courses',
   name: 'My Courses',
   isNested: false,
-  element: null
+  element: <InstructorMyCourses />
 }, {
   path: '/instructor/students',
   name: 'Students',
   isNested: false,
-  element: null
+  element: <InstructorMyStudents />
 }, {
   path: '/instructor/profile',
   name: 'My Profile',

@@ -9,8 +9,18 @@ const TopNavbar = ({ children, className }) => {
 
   return (
     <>
-      <header ref={headerRef} className={clsx('navbar-light navbar-sticky header-static', className, { 'navbar-sticky-on': scrollY >= 400 })}>
-        <nav className="navbar navbar-expand-xl transition-all" style={{ height: scrollY >= 400 }}>
+      <header 
+        ref={headerRef} 
+        className={clsx(
+          'navbar-light navbar-sticky header-static', 
+          className, 
+          { 'navbar-sticky-on': scrollY >= 400 }
+        )}
+      >
+        <nav 
+          className="navbar navbar-expand-xl transition-all" 
+          style={{ height: scrollY >= 400 }}
+        >
           {children}
         </nav>
       </header>
