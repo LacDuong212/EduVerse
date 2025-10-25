@@ -14,7 +14,7 @@ export default function SignInForm() {
         <IconTextFormInput control={control} icon={BsEnvelopeFill} placeholder="E-mail" label="Email address *" name="email" />
       </div>
       <div className="mb-4">
-        <IconTextFormInput type='password' control={control} icon={FaLock} placeholder="password" label="Password *" name="password" />
+        <IconTextFormInput type='password' control={control} icon={FaLock} placeholder="Password" label="Password *" name="password" />
         <div id="passwordHelpBlock" className="form-text">
           Your password must be 8 characters at least
         </div>

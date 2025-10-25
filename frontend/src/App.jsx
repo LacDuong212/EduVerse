@@ -6,6 +6,8 @@ import "react-toastify/dist/ReactToastify.css";
 
 import SignInPage from "./app/auth/sign-in/SignInPage";
 import SignUpPage from "./app/auth/sign-up/SignUpPage";
+import ForgotPasswordPage from "./app/auth/forgot-password/ForgotPasswordPage";
+import ResetPasswordPage from "./app/auth/reset-password/ResetPasswordPage";
 
 import { useDispatch } from "react-redux";
 import { setLogin, setLogout } from "./redux/authSlice";
@@ -49,6 +51,8 @@ const App = () => {
     <Routes>
       <Route path="/auth/sign-in" element={<SignInPage />} />
       <Route path="/auth/sign-up" element={<SignUpPage />} />
+      <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
     </Routes>
     <ToastContainer
         position="top-right"

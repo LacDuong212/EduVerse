@@ -4,12 +4,13 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { setUserData } from "@/redux/authSlice";
 
-export default function useEmailVerify(initialEmail = "") {
-  axios.defaults.withCredentials = true;
+export default function useEmailVerify(initialEmail = "", mode = "register", onVerifySuccess) {
   const dispatch = useDispatch();
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   const [userEmail, setUserEmail] = useState(initialEmail);
   const [otp, setOtp] = useState(new Array(6).fill(""));
+  const [loading, setLoadinng] = useState(false);
   const inputRefs = useRef([]);
 
   useEffect(() => {
@@ -55,22 +56,39 @@ export default function useEmailVerify(initialEmail = "") {
     }
 
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL;
+      setLoadinng(true);
+      axios.defaults.withCredentials = true;
+      
       const { data } = await axios.post(`${backendUrl}/api/auth/verify-otp`, {
         email: userEmail,
         otp: otpCode,
       });
 
-      if (data.success) {
-        toast.success(data.message);
-        dispatch(setUserData(data.user));
-      } else {
-        toast.error(data.message);
+      if (!data.success) {
+        toast.error(data.message || "Invalid OTP");
         setOtp(new Array(6).fill(""));
         inputRefs.current[0].focus();
+        return;
       }
+
+      toast.success(data.message || "OTP verified successfully");
+
+      if (mode === "register") {
+        const res = await axios.post(`${backendUrl}/api/auth/verify-account`, { email: userEmail });
+        if (res.data.success) {
+          toast.success(res.data.message || "Account verified");
+          if (onVerifySuccess) onVerifySuccess(userEmail);
+        } else {
+          toast.error(res.data.message || "Failed to verify account");
+        }
+      } else if (mode === "forgot") {
+        if (onVerifySuccess) onVerifySuccess(userEmail);
+      }
+
     } catch (error) {
       toast.error(error.response?.data?.message || "Verification failed");
+    } finally {
+      setLoadinng(false);
     }
   };
 
@@ -79,6 +97,7 @@ export default function useEmailVerify(initialEmail = "") {
     inputRefs,
     userEmail,
     setUserEmail,
+    loading,
     handleChange,
     handleKeyDown,
     handlePaste,

@@ -1,18 +1,17 @@
 import { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { setLogin } from "@/redux/authSlice";
 
 export default function useSignUp(onSignUpSuccess) {
-  const dispatch = useDispatch();
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
-
   const [loading, setLoading] = useState(false);
 
   const signUp = async ({ name, email, password }) => {
+    if (loading) return;
     setLoading(true);
+
     try {
       axios.defaults.withCredentials = true;
 
@@ -27,10 +26,10 @@ export default function useSignUp(onSignUpSuccess) {
         return;
       }
 
-      dispatch(setLogin({ name, email }));
       toast.success("Registration successful! Please verify your email.");
 
       if (onSignUpSuccess) onSignUpSuccess(email);
+      
     } catch (error) {
       toast.error(error.response?.data?.message || "Something went wrong");
     } finally {

@@ -115,8 +115,7 @@ export const logout = async(req, res) => {
     }
 }
 
-// Verify OTP
-export const verifyOtp = async(req, res) => {
+export const verifyOtpCheck = async(req, res) => {
 
     const { email, otp } = req.body;
 
@@ -131,10 +130,6 @@ export const verifyOtp = async(req, res) => {
             return res.json({ success: false, message: "User not found" });
         }
 
-        if(user.isVerified) {
-            return res.json({ success: false, message: "User already verified" });
-        }
-
         if(user.verifyOtp ==='' || user.verifyOtp !== otp) {
             return res.json({ success: false, message: "Invalid OTP" });
         }
@@ -143,7 +138,6 @@ export const verifyOtp = async(req, res) => {
             return res.json({ success: false, message: "OTP has expired" });
         }
 
-        user.isVerified = true;
         user.verifyOtp = '';
         user.verifyOtpExpireAt = 0;
 
@@ -156,14 +150,34 @@ export const verifyOtp = async(req, res) => {
     }
 }
 
-export const isAuthenticated = (req, res) => {
-    try {
-        return res.json({ success: true, message: "User is authenticated", userId: req.userId });
-    } catch (error) {
-        return res.json({ success: false, message: "Invalid token" });
+export const verifyAccount = async (req, res) => {
+
+  const { email } = req.body;
+
+  if (!email) {
+    return res.json({ success: false, message: "Missing email" });
+  }
+
+  try {
+    const user = await userModel.findOne({ email });
+    if (!user) {
+      return res.json({ success: false, message: "User not found" });
     }
+
+    if (user.isVerified) {
+      return res.json({ success: false, message: "User already verified" });
+    }
+
+    user.isVerified = true;
+    await user.save();
+
+    return res.json({ success: true, message: "Account verified successfully" });
+
+  } catch (error) {
+    return res.json({ success: false, message: error.message });
+  }
 };
-// Send OTP to reset password
+
 export const forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
@@ -191,11 +205,11 @@ export const forgotPassword = async (req, res) => {
         return res.json({ success: false, message: error.message });
     }
 };
-// Verify ResetOTP
+
 export const resetPassword = async (req, res) => {
     try {
 
-        const { email, otp, newPassword } = req.body;
+        const { email, newPassword } = req.body;
         const user = await userModel.findOne({ email });
 
         if (!user) {
@@ -206,18 +220,8 @@ export const resetPassword = async (req, res) => {
             return res.json({ success: false, message: "Account not verified" });
         }
 
-        if (user.verifyOtp !== otp) {
-            return res.json({ success: false, message: "Invalid OTP" });
-        }
-        
-        if (user.verifyOtpExpireAt < Date.now()) {
-            return res.json({ success: false, message: "OTP has expired" });
-        }
-
         const hashedNewPassword = await bycrypt.hash(newPassword, 10);
         user.password = hashedNewPassword;
-        user.verifyOtp = '';
-        user.verifyOtpExpireAt = 0;
 
         await user.save();
 
@@ -228,31 +232,10 @@ export const resetPassword = async (req, res) => {
     }
 }
 
-// Chỉ check OTP hợp lệ (không đổi password)
-export const checkResetOtp = async (req, res) => {
+export const isAuthenticated = (req, res) => {
     try {
-        const { email, otp } = req.body;
-        const user = await userModel.findOne({ email });
-
-        if (!user) {
-            return res.json({ success: false, message: "User not found" });
-        }
-
-        if (!user.isVerified) {
-            return res.json({ success: false, message: "Account not verified" });
-        }
-
-        if (user.verifyOtp !== otp) {
-            return res.json({ success: false, message: "Invalid OTP" });
-        }
-
-        if (user.verifyOtpExpireAt < Date.now()) {
-            return res.json({ success: false, message: "OTP has expired" });
-        }
-
-        return res.json({ success: true, message: "OTP verified successfully" });
-
+        return res.json({ success: true, message: "User is authenticated", userId: req.userId });
     } catch (error) {
-        return res.json({ success: false, message: error.message });
+        return res.json({ success: false, message: "Invalid token" });
     }
 };
