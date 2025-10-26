@@ -1,4 +1,6 @@
 import HomePage from "../app/home/page";
+import CourseDetails from "../app/pages/course/detail/page";
+
 
 export const instructorRoutes = [{
   path: '/instructor/dashboard',
@@ -38,10 +40,10 @@ export const studentRoutes = [{
   isNested: false,
   element: <HomePage />
 }, {
-  path: '/courses',
-  name: 'Courses',
+  path: '/courses/:id',
+  name: 'CourseDetails',
   isNested: true,
-  element: null
+  element: <CourseDetails />
 }, {
   path: '/student/my-courses',
   name: 'My Courses',
