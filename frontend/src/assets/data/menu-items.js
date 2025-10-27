@@ -1,4 +1,6 @@
-import { BsBasket, BsFolderCheck, BsGear, BsPencilSquare, BsPeople, BsStar, BsTrash, BsUiChecksGrid, BsWallet2 } from 'react-icons/bs';
+import { BsGear, BsPeople, BsPerson, BsStar, BsUiChecksGrid, BsWallet2 } from 'react-icons/bs';
+import { RiBook2Line } from 'react-icons/ri';
+import { MdDoNotDisturb } from 'react-icons/md';
 
 
 //---ADMIN
@@ -18,6 +20,12 @@ export const INSTRUCTOR_APP_MENU_ITEMS = [{
   url: '/instructor/students'
 }];
 export const INSTRUCTOR_MENU_ITEMS = [{
+  key: 'account',
+  label: 'Account',
+  icon: BsPerson,
+  url: '/instructor/account',
+  parentKey: 'instructor'
+}, {
   key: 'dashboard',
   label: 'Dashboard',
   icon: BsUiChecksGrid,
@@ -26,7 +34,7 @@ export const INSTRUCTOR_MENU_ITEMS = [{
 }, {
   key: 'courses',
   label: 'My Courses',
-  icon: BsBasket,
+  icon: RiBook2Line,
   url: '/instructor/courses',
   parentKey: 'instructor'
 }, {
@@ -36,22 +44,10 @@ export const INSTRUCTOR_MENU_ITEMS = [{
   url: '/instructor/students',
   parentKey: 'instructor'
 }, {
-  key: 'orders',
-  label: 'Orders',
-  icon: BsFolderCheck,
-  url: '/instructor/orders',
-  parentKey: 'instructor'
-}, {
   key: 'reviews',
   label: 'Reviews',
   icon: BsStar,
   url: '/instructor/reviews',
-  parentKey: 'instructor'
-}, {
-  key: 'profile',
-  label: 'My Profile',
-  icon: BsPencilSquare,
-  url: '/instructor/profile',
   parentKey: 'instructor'
 }, {
   key: 'balance',
@@ -66,10 +62,10 @@ export const INSTRUCTOR_MENU_ITEMS = [{
   url: '/instructor/settings',
   parentKey: 'instructor'
 }, {
-  key: 'delete',
-  label: 'Delete Profile',
-  icon: BsTrash,
-  url: '/instructor/delete-account',
+  key: 'deactivate-account',
+  label: 'Deactivate Account',
+  icon: MdDoNotDisturb,
+  url: '/instructor/deactivate-account',
   parentKey: 'instructor'
 }];
 

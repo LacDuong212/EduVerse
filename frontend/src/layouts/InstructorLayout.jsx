@@ -20,23 +20,22 @@ const VerticalMenu = () => {
   return (
     <div className="bg-dark border rounded-3 p-3 mb-5">
       <div className="list-group list-group-dark list-group-borderless">
-        {INSTRUCTOR_MENU_ITEMS.map(({
-          label,
-          url,
-          icon
-        }, idx) => {
-          const Icon = icon;
-          return <Link className={clsx('list-group-item icons-center', {
-            active: pathname === url
-          })} to={url || ''} key={idx}>
-            {Icon && <Icon className="me-2" />}
-            {label}
-          </Link>;
-        })}
+        {INSTRUCTOR_MENU_ITEMS.map(
+          ({ label, url, icon }, idx) => {
+            const Icon = icon;
+            return (
+              <Link className={clsx('list-group-item icons-center', { active: pathname === url })} to={url || ''} key={idx}>
+                {Icon && <Icon size={18} className="flex-shrink-0 me-2" />}
+                <span style={{ position: 'relative', top: '2px' }}>{label}</span>
+              </Link>
+            );
+          }
+        )}
+
         {/* <Link className="list-group-item text-danger bg-danger-soft-hover" onClick={removeSession} to="/auth/sign-in"> */}
         <Link className="list-group-item text-danger bg-danger-soft-hover" onClick={null} to="/auth/sign-in">
-          <FaSignOutAlt className="fa-fw me-2" />
-          Sign Out
+          <FaSignOutAlt className="flex-shrink-0 ms-1 me-2" />
+          <span style={{ position: 'relative', top: '2px' }}>Sign Out</span>
         </Link>
       </div>
     </div>
@@ -51,7 +50,7 @@ const InstructorLayout = ({ children, isNested = false }) => {
   const instructorData = {
     name: 'Duckle Munchkin',
     email: 'duckle.munchkin@example.com',
-    pfpImg: 'https://res.cloudinary.com/dw1fjzfom/image/upload/v1757337425/av5_a572ef.jpg'
+    pfpImg: 'https://res.cloudinary.com/dw1fjzfom/image/upload/v1761585729/7bd60af2-97e7-4c08-a35f-5a614d92052d.png'
   };
 
   return (
@@ -61,7 +60,7 @@ const InstructorLayout = ({ children, isNested = false }) => {
       <main>
         {isNested ? (
           <>
-            <Banner toggleOffCanvas={toggleOffCanvasMenu} instructorData={instructorData} />
+            <Banner toggleOffCanvas={toggleOffCanvasMenu} accountData={instructorData} />
             <section className="py-0">
               <Container>
                 <Row>

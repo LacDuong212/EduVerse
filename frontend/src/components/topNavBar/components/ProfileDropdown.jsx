@@ -14,7 +14,7 @@ const ProfileDropdown = ({ className }) => {
   const instructorData = {
     name: 'Duckle Munchkin',
     email: 'duckle.munchkin@example.com',
-    pfpImg: 'https://res.cloudinary.com/dw1fjzfom/image/upload/v1757337425/av5_a572ef.jpg'
+    pfpImg: 'https://res.cloudinary.com/dw1fjzfom/image/upload/v1761585729/7bd60af2-97e7-4c08-a35f-5a614d92052d.png'
   };
 
   const themeModes = [{
@@ -48,7 +48,7 @@ const ProfileDropdown = ({ className }) => {
             src={instructorData.pfpImg}
             alt="Instructor Avatar" />
         ) : (
-          <div className="avatar-img rounded-circle shadow d-flex align-items-center justify-content-center bg-light text-secondary fw-bold">
+          <div className="avatar-img rounded-circle border border-white border-1 shadow d-flex align-items-center justify-content-center bg-light text-dark fw-bold fs-5">
             {(instructorData?.name?.[0] || "I").toUpperCase()}
           </div>
         )}
@@ -65,7 +65,7 @@ const ProfileDropdown = ({ className }) => {
                   src={instructorData.pfpImg}
                   alt="Instructor Avatar" />
               ) : (
-                <div className="avatar-img rounded-circle border border-white border-3 shadow d-flex align-items-center justify-content-center bg-light text-secondary fw-bold">
+                <div className="avatar-img rounded-circle border border-white border-1 shadow d-flex align-items-center justify-content-center bg-light text-dark fw-bold fs-4">
                   {(instructorData?.name?.[0] || "I").toUpperCase()}
                 </div>
               )}
@@ -83,15 +83,15 @@ const ProfileDropdown = ({ className }) => {
           <DropdownDivider />
         </li>
         <li>
-          <DropdownItem href="/instructor/profile">
+          <DropdownItem href="/instructor/account">
             <BsPerson className="fa-fw me-2 mb-1" />
-            My Profile
+            My Account
           </DropdownItem>
         </li>
         <li>
           <DropdownItem href="/instructor/settings">
             <BsGear className="fa-fw me-2 mb-1" />
-            Account Settings
+            Settings
           </DropdownItem>
         </li>
         <li>

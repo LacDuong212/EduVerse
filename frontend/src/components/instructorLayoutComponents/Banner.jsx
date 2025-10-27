@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom';
 
 const Banner = ({
   toggleOffCanvas,
-  instructorData
+  accountData
 }) => {
   return (
     <section className="pt-0">
@@ -29,14 +29,14 @@ const Banner = ({
               <Row className="d-flex justify-content-between">
                 <Col xs={'auto'} className="mt-4 mt-md-0">
                   <div className="avatar avatar-xxl mt-n3">
-                    {instructorData?.pfpImg ? (
+                    {accountData?.pfpImg ? (
                       <img
                         className="avatar-img rounded-circle border border-white border-3 shadow"
-                        src={instructorData.pfpImg}
+                        src={accountData.pfpImg}
                         alt="Instructor Avatar" />
                     ) : (
-                      <div className="avatar-img rounded-circle border border-white border-3 shadow d-flex align-items-center justify-content-center bg-light text-secondary fw-bold">
-                        {(instructorData?.name?.[0] || "I").toUpperCase()}
+                      <div className="avatar-img rounded-circle border border-white border-3 shadow d-flex align-items-center justify-content-center bg-light text-dark fw-bold fs-1">
+                        {(accountData?.name?.[0] || "I").toUpperCase()}
                       </div>
                     )}
                   </div>
@@ -44,20 +44,20 @@ const Banner = ({
                 <Col className="d-md-flex justify-content-between align-items-center mt-4">
                   <div>
                     <h1 className="my-1 fs-4">
-                      {instructorData?.name} <BsPatchCheckFill className="text-info small" />
+                      {accountData?.name} <BsPatchCheckFill className="text-info small" />
                     </h1>
                     <ul className="list-inline mb-0">
                       <li className="list-inline-item h6 fw-light me-3 mb-1 mb-sm-0">
                         <FaStar className="text-warning me-2" />
-                        {instructorData?.rating}
+                        {accountData?.rating}
                       </li>
                       <li className="list-inline-item h6 fw-light me-3 mb-1 mb-sm-0">
                         <FaUserGraduate className="text-orange me-2" />
-                        {instructorData?.studentEnrolledCount}
+                        {accountData?.studentEnrolledCount}
                       </li>
                       <li className="list-inline-item h6 fw-light me-3 mb-1 mb-sm-0">
                         <FaBook className="text-purple me-2" />
-                        {instructorData?.ownedCourseCount}
+                        {accountData?.ownedCourseCount}
                       </li>
                     </ul>
                   </div>

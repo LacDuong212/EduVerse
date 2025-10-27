@@ -1,5 +1,6 @@
 
 // INSTRUCTOR
+import Account from "../app/instructor/account";
 import InstructorDashboard from "../app/instructor/dashboard";
 import InstructorMyCourses from "../app/instructor/my-courses";
 import InstructorMyStudents from "../app/instructor/my-students";
@@ -21,10 +22,10 @@ export const instructorRoutes = [{
   isNested: false,
   element: <InstructorMyStudents />
 }, {
-  path: '/instructor/profile',
-  name: 'My Profile',
+  path: '/instructor/account',
+  name: 'Account',
   isNested: true,
-  element: null
+  element: <Account />
 }, {
   path: '/instructor/settings',
   name: 'Settings',
@@ -36,8 +37,23 @@ export const instructorRoutes = [{
   isNested: true,
   element: null
 }, {
-  path: '/instructor/orders',
-  name: 'Orders',
+  path: '/instructor/reviews',
+  name: 'Reviews',
+  isNested: true,
+  element: null
+}, {
+  path: '/instructor/deactivate-account',
+  name: 'Deactivate Account',
+  isNested: true,
+  element: null
+}, {
+  path: '/instructor/create-course',
+  name: 'Create Course',
+  isNested: false,
+  element: null
+}, {
+  path: '/instructor/update-course',
+  name: 'Update Course',
   isNested: true,
   element: null
 }];
