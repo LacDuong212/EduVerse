@@ -9,6 +9,8 @@ const SimpleAppMenu = ({ mobileMenuOpen, menuClassName, topMenuItems }) => {
   const [activeKey, setActiveKey] = useState(null);
   const { pathname } = useLocation();
 
+  topMenuItems = topMenuItems || [];
+
   // find current active item
   useEffect(() => {
     const current = topMenuItems.find(

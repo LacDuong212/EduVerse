@@ -1,0 +1,31 @@
+import { STUDENT_APP_MENU_ITEMS, STUDENT_ACCOUNT_DROPDOWN_ITEMS } from '@/assets/data/menu-items.js';
+import LogoBox from '@/components/LogoBox';
+import TopNavbar from '@/components/TopNavbar';
+import NotificationDropdown from '@/components/TopNavbar/components/NotificationDropdown'
+import ProfileDropdown from '@/components/TopNavbar/components/ProfileDropdown';
+import SimpleAppMenu from '@/components/TopNavbar/components/SimpleAppMenu';
+import TopbarMenuToggler from '@/components/TopNavbar/components/TopbarMenuToggler';
+import ShoppingCartDropdown from '@/components/TopNavbar/components/ShoppingCartDropdown';
+import { useLayoutContext } from '@/context/useLayoutContext';
+import { Container } from 'react-bootstrap';
+
+const TopNavigationBar = () => {
+  const { appMenuControl } = useLayoutContext();
+
+  return (
+    <TopNavbar>
+      <Container>
+        <LogoBox width={130} />
+        <TopbarMenuToggler />
+        <SimpleAppMenu mobileMenuOpen={appMenuControl.open} menuClassName="mx-auto" topMenuItems={STUDENT_APP_MENU_ITEMS} />
+        <ul className="nav flex-row align-items-center list-unstyled ms-xl-auto">
+          <NotificationDropdown />
+          <ShoppingCartDropdown className="nav-item ms-3" />
+          <ProfileDropdown className="nav-item ms-3" dropdownItems={STUDENT_ACCOUNT_DROPDOWN_ITEMS} />
+        </ul>
+      </Container>
+    </TopNavbar>
+  );
+};
+
+export default TopNavigationBar;
