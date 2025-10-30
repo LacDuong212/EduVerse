@@ -1,10 +1,14 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import { toast } from "react-toastify";
+import { useDispatch } from "react-redux";
+import { setCart } from "@/redux/cartSlice";
 
 export default function useCourseDetail() {
     const { id } = useParams();
     const [course, setCourse] = useState(null);
+    const dispatch = useDispatch();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -33,6 +37,26 @@ export default function useCourseDetail() {
         fetchCourse();
     }, [fetchCourse]);
 
+  const handleAddToCart = async () => {
+    try {
+      const res = await axios.post(
+        `${backendUrl}/api/cart/add`,
+        { courseId: id },
+        { withCredentials: true }
+      );
+
+      if (res.data.success) {
+        dispatch(setCart(res.data.cart)); // update Redux
+        toast.success("Added to cart!");
+      } else {
+        toast.error(res.data.message || "Failed to add");
+      }
+    } catch (err) {
+      toast.error("Error adding to cart");
+      console.error(err);
+    }
+  };
+
 
     // related courses (single effect, guarded)
     const [relatedCourses, setRelatedCourses] = useState([]);
@@ -58,5 +82,5 @@ export default function useCourseDetail() {
         return () => { cancelled = true; };
     }, [id, backendUrl]);
 
-    return { course, setCourse, loading, error, refetch: fetchCourse, relatedCourses };
+    return { course, setCourse, loading, error, refetch: fetchCourse, relatedCourses,handleAddToCart };
 }

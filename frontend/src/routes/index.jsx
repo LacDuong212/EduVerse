@@ -1,5 +1,6 @@
 import HomePage from "../app/home/page";
 import CourseDetails from "../app/pages/course/detail/page";
+import CartDetails from "../app/shop/cart/page";
 
 
 export const instructorRoutes = [{
@@ -50,10 +51,10 @@ export const studentRoutes = [{
   isNested: true,
   element: null
 }, {
-  path: '/student/cart',
+  path: '/cart',
   name: 'My Cart',
   isNested: false,
-  element: null
+  element: <CartDetails />
 }, {
   path: '/student/orders',
   name: 'Orders',

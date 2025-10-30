@@ -3,6 +3,7 @@ import CourseDetails from './components/CourseDetails';
 import ListedCourses from './components/ListedCourses';
 import PageIntro from './components/PageIntro';
 import useCourseDetail from './useCourseDetail';
+
 // import TopNavigationBar from './components/TopNavigationBar';
 const CourseDetail = () => {
   const { course, loading, error, refetch } = useCourseDetail();
@@ -26,7 +27,7 @@ const CourseDetail = () => {
       <main>
         <PageIntro course={course} />
         <CourseDetails course={course} />
-        <ListedCourses />
+        <ListedCourses  />
       </main>
       {/* <Footer className="bg-light" /> */}
     </>;

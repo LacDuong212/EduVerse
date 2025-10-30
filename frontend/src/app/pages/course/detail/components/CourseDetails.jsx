@@ -12,7 +12,12 @@ import courseImg1 from '@/assets/images/courses/4by3/01.jpg';
 import courseImg18 from '@/assets/images/courses/4by3/18.jpg';
 import courseImg21 from '@/assets/images/courses/4by3/21.jpg';
 import { Link } from 'react-router-dom';
+import useCourseDetail from '../useCourseDetail';
+
+
+
 const PricingCard = ({ course }) => {
+  const { handleAddToCart } = useCourseDetail();
    const getEmbedUrl = (url) => {
     if (!url) return null;
 
@@ -96,7 +101,7 @@ const PricingCard = ({ course }) => {
             Free trial
           </Button>
           &nbsp;
-          <Button variant="success" className="mb-0">
+          <Button variant="success" className="mb-0" onClick={handleAddToCart}>
             Buy course
           </Button>
         </div>
