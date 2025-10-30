@@ -1,4 +1,4 @@
-import { BsGear, BsPeople, BsPerson, BsStar, BsUiChecksGrid, BsWallet2 } from 'react-icons/bs';
+import { BsGear, BsInfoCircle, BsPeople, BsPerson, BsStar, BsUiChecksGrid, BsWallet2 } from 'react-icons/bs';
 import { RiBook2Line } from 'react-icons/ri';
 import { MdDoNotDisturb } from 'react-icons/md';
 
@@ -6,6 +6,23 @@ import { MdDoNotDisturb } from 'react-icons/md';
 //---ADMIN
 
 //---INSTRUCTOR
+export const INSTRUCTOR_ACCOUNT_DROPDOWN_ITEMS = [{
+  key: 'account',
+  label: 'My Account',
+  icon: BsPerson,
+  url: '/instructor/account'
+
+}, {
+  key: 'settings',
+  label: 'Settings',
+  icon: BsGear,
+  url: '/instructor/settings'
+}, {
+  key: 'help',
+  label: 'Help',
+  icon: BsInfoCircle,
+  url: '/help'
+}];
 export const INSTRUCTOR_APP_MENU_ITEMS = [{
   key: 'dashboard',
   label: 'Dashboard',

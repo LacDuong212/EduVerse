@@ -31,11 +31,11 @@ const Banner = ({
                   <div className="avatar avatar-xxl mt-n3">
                     {accountData?.pfpImg ? (
                       <img
-                        className="avatar-img rounded-circle border border-white border-3 shadow"
+                        className="avatar-img rounded-circle border border-light border-3 shadow"
                         src={accountData.pfpImg}
                         alt="Instructor Avatar" />
                     ) : (
-                      <div className="avatar-img rounded-circle border border-white border-3 shadow d-flex align-items-center justify-content-center bg-light text-dark fw-bold fs-1">
+                      <div className="avatar-img rounded-circle border border-light border-3 shadow d-flex align-items-center justify-content-center bg-light text-dark fw-bold fs-1">
                         {(accountData?.name?.[0] || "I").toUpperCase()}
                       </div>
                     )}
@@ -49,15 +49,15 @@ const Banner = ({
                     <ul className="list-inline mb-0">
                       <li className="list-inline-item h6 fw-light me-3 mb-1 mb-sm-0">
                         <FaStar className="text-warning me-2" />
-                        {accountData?.rating}
+                        {accountData?.averageRating}
                       </li>
                       <li className="list-inline-item h6 fw-light me-3 mb-1 mb-sm-0">
                         <FaUserGraduate className="text-orange me-2" />
-                        {accountData?.studentEnrolledCount}
+                        {accountData?.totalStudents}
                       </li>
                       <li className="list-inline-item h6 fw-light me-3 mb-1 mb-sm-0">
                         <FaBook className="text-purple me-2" />
-                        {accountData?.ownedCourseCount}
+                        {accountData?.totalCourses}
                       </li>
                     </ul>
                   </div>

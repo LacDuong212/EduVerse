@@ -33,7 +33,10 @@ export default function useSignIn() {
         }
 
         toast.success("Login successful!");
-        navigate("/");
+
+        const params = new URLSearchParams(location.search);
+        const redirectTo = params.get("redirectTo") || "/";
+        navigate(redirectTo, { replace: true });
       } else {
         toast.error(response.data.message || "Invalid credentials");
       }

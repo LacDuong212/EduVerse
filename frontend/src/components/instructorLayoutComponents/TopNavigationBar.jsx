@@ -1,4 +1,4 @@
-import { INSTRUCTOR_APP_MENU_ITEMS } from '@/assets/data/menu-items.js';
+import { INSTRUCTOR_APP_MENU_ITEMS, INSTRUCTOR_ACCOUNT_DROPDOWN_ITEMS } from '@/assets/data/menu-items.js';
 import LogoBox from '@/components/LogoBox';
 import TopNavbar from '@/components/TopNavbar';
 import SimpleAppMenu from '@/components/TopNavbar/components/SimpleAppMenu';
@@ -20,7 +20,7 @@ const TopNavigationBar = () => {
         <SimpleAppMenu mobileMenuOpen={appMenuControl.open} menuClassName="mx-auto" topMenuItems={INSTRUCTOR_APP_MENU_ITEMS} />
         <ul className="nav flex-row align-items-center list-unstyled ms-xl-auto">
           <NotificationDropdown />
-          <ProfileDropdown className="nav-item ms-3" />
+          <ProfileDropdown className="nav-item ms-3" dropdownItems={INSTRUCTOR_ACCOUNT_DROPDOWN_ITEMS} />
         </ul>
       </Container>
     </TopNavbar>

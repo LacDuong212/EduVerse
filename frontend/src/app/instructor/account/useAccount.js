@@ -21,3 +21,5 @@ export const linkedAccount = [{
   isActive: false,
   variant: 'text-facebook'
 }];
+
+
