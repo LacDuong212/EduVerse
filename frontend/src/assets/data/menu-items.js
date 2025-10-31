@@ -1,9 +1,92 @@
-import { BsGear, BsPeople, BsPerson, BsStar, BsUiChecksGrid, BsWallet2 } from 'react-icons/bs';
+import { BsBasket, BsGear, BsHouse, BsLock, BsPeople, BsPerson, BsStar, BsUiChecksGrid, BsWallet2 } from 'react-icons/bs';
+import { FaChartBar, FaRegCommentDots, FaUserCog } from 'react-icons/fa';
+import { FaUserGraduate, FaUserTie } from 'react-icons/fa6';
 import { RiBook2Line } from 'react-icons/ri';
 import { MdDoNotDisturb } from 'react-icons/md';
 
 
 //---ADMIN
+export const ADMIN_MENU_ITEMS = [{
+  key: 'admin',
+  label: 'Dashboard',
+  icon: BsHouse,
+  url: '/admin/dashboard'
+}, {
+  key: 'pages',
+  isTitle: true,
+  label: 'Pages'
+}, {
+  key: 'courses',
+  label: 'Courses',
+  icon: BsBasket,
+  children: [{
+    key: 'all-courses',
+    label: 'All Courses',
+    parentKey: 'courses',
+    url: '/admin/all-courses'
+  }, 
+  // {
+  //   key: 'course-category',
+  //   label: 'Course Category',
+  //   url: '/admin/course-category',
+  //   parentKey: 'courses'
+  // },
+   {
+    key: 'course-detail',
+    label: 'Course Detail',
+    url: '/admin/course-detail',
+    parentKey: 'courses'
+  }]
+}, {
+  key: 'students',
+  label: 'Students',
+  icon: FaUserGraduate,
+  url: '/admin/students'
+}, {
+  key: 'instructors',
+  label: 'Instructors',
+  icon: FaUserTie,
+  children: [{
+    key: 'instructors',
+    label: 'Instructors',
+    url: '/admin/instructors',
+    parentKey: 'instructors'
+  }, {
+    key: 'instructor-detail',
+    label: 'Instructor Detail',
+    url: '/admin/instructor-detail',
+    parentKey: 'instructors'
+  }]
+  //  {
+  //   key: 'instructor-requests',
+  //   label: 'Instructor Requests',
+  //   url: '/admin/instructor-requests',
+  //   parentKey: 'instructors',
+  //   badge: '2'
+  // }]
+},
+//  {
+//   key: 'administrators',
+//   label: 'Administrators',
+//   icon: FaUserCog,
+//   url: '/admin/administrators'
+// },
+ {
+  key: 'reviews',
+  label: 'Reviews',
+  icon: FaRegCommentDots,
+  url: '/admin/reviews'
+}, {
+  key: 'earnings',
+  label: 'Earnings',
+  icon: FaChartBar,
+  url: '/admin/earnings'
+}, {
+  key: 'admin-settings',
+  label: 'Admin Settings',
+  icon: FaUserCog,
+  url: '/admin/admin-settings'
+}];
 
 //---INSTRUCTOR
 export const INSTRUCTOR_APP_MENU_ITEMS = [{

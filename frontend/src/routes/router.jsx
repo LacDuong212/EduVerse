@@ -1,13 +1,11 @@
-import ForgotPasswordPage from "../app/auth/forgot-password/ForgotPasswordPage";
-import SignInPage from "../app/auth/sign-in/SignInPage";
-import SignUpPage from "../app/auth/sign-up/SignUpPage";
-import ResetPasswordPage from "../app/auth/reset-password/ResetPasswordPage";
+import AdminLayout from '@/layouts/AdminLayout';
 
+import AdminNotFoundPage from "../app/admin/not-found";
 import NotFoundPage from "../app/not-found";
 
 import InstructorLayout from '../layouts/InstructorLayout';
 
-import { instructorRoutes } from '@/routes/index';
+import { authRoutes, instructorRoutes, authAdminRoutes, adminRoutes } from '@/routes/index';
 // import { useAuthContext } from '@/context/useAuthContext';
 
 import { Navigate, Route, Routes } from 'react-router-dom';
@@ -22,24 +20,49 @@ const AppRouter = props => {
   return (
     <Routes>
       {/* AUTH ROUTES */}
-      <Route path="/auth/sign-in" element={<SignInPage />} />
-      <Route path="/auth/sign-up" element={<SignUpPage />} />
-      <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
-      <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
+      {(authRoutes || []).map((route, idx) =>
+        <Route
+          key={idx + route.name}
+          path={route.path}
+          element={route.element}
+        />)}
 
       {/* INSTRUCTOR ROUTES */}
-      {(instructorRoutes || []).map((route, idx) => 
-        <Route 
-          key={idx + route.name} 
-          path={route.path} 
-          element={isAuthenticated 
-            ? <InstructorLayout {...props} isNested={route.isNested} >{route.element}</InstructorLayout> 
+      {(instructorRoutes || []).map((route, idx) =>
+        <Route
+          key={idx + route.name}
+          path={route.path}
+          element={isAuthenticated
+            ? <InstructorLayout {...props} isNested={route.isNested} >{route.element}</InstructorLayout>
             : <Navigate to={{
               pathname: '/auth/sign-in',
               search: 'redirectTo=' + route.path
-            }} />} 
+            }} />}
         />
       )}
+
+      {/* AUTH ADMIN ROUTES */}
+      {(authAdminRoutes || []).map((route, idx) =>
+        <Route
+          key={idx + route.name}
+          path={route.path}
+          element={route.element}
+        />)}
+
+      {/* ADMIN ROUTES */}
+      {(adminRoutes || []).map((route, idx) =>
+        <Route
+          key={idx + route.name}
+          path={route.path}
+          element={isAuthenticated
+            ? <AdminLayout {...props}>{route.element}</AdminLayout>
+            : <Navigate to={{
+              pathname: '/auth/sign-in',
+              search: 'redirectTo=' + route.path
+            }} />} />)}
+
+      {/* 404 ADMIN FALLBACK */}
+      <Route path="/admin/*" element={<AdminLayout {...props}><AdminNotFoundPage /></AdminLayout>} />
 
       {/* 404 FALLBACK */}
       <Route path="*" element={<NotFoundPage />} />
