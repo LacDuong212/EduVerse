@@ -3,11 +3,11 @@ import { Alert, Button, Card, Col, Container, Row } from 'react-bootstrap';
 import { BsXLg } from 'react-icons/bs';
 import { FaRegEdit, FaTimes } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
-
+import EmptyCartPage from '@/app/shop/empty-cart/page';
 // ✅ Thêm hook (đúng file bạn yêu cầu)
 import useCartDetail from '../useCartDetails';
 
-const CartCard = ({ image, title, price, onRemove  }) => {
+const CartCard = ({ image, title, price, onRemove }) => {
   return (
     <tr>
       <td>
@@ -24,7 +24,7 @@ const CartCard = ({ image, title, price, onRemove  }) => {
         <h5 className="text-success mb-0">${price}</h5>
       </td>
       <td>
-       
+
         <button className="btn btn-sm btn-danger-soft px-2 mb-0" onClick={onRemove}>
           <FaTimes size={14} />
         </button>
@@ -44,11 +44,11 @@ const CartDetails = () => {
     displayedCourses,
     displayedTotal,
     removeFromCart,
-     reloadCart,
+    reloadCart,
     // Nếu bạn cần các biến khác, destructuring thêm tại đây:
     // displayedCount, items, selected, toggleSelect, toggleSelectAll, removeFromCart, handleCheckout
   } = useCartDetail();
-
+  const isEmpty = displayedCourses.length === 0;
   // Tính các con số tổng (thay cho hard code ở cột phải)
   const originalTotal = displayedCourses.reduce(
     (sum, c) => sum + (Number(c?.price ?? 0) || 0),
@@ -59,7 +59,9 @@ const CartDetails = () => {
     0
   ));
   const totalToPay = displayedTotal; // đã là tổng discountPrice
-
+  if (isEmpty) {
+    return <EmptyCartPage />;
+  }
   return (
     <section className="pt-5">
       <Container>
@@ -115,7 +117,7 @@ const CartDetails = () => {
                   </div>
                 </Col>
                 <Col md={6} className="text-md-end">
-                  <button className="btn btn-primary mb-0"   onClick={reloadCart}>
+                  <button className="btn btn-primary mb-0" onClick={reloadCart}>
                     Update cart
                   </button>
                 </Col>

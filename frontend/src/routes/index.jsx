@@ -1,7 +1,7 @@
 import HomePage from "../app/home/page";
 import CourseDetails from "../app/pages/course/detail/page";
 import CartDetails from "../app/shop/cart/page";
-
+import AllCourses from "../app/pages/course/grid/page";
 // INSTRUCTOR
 import Account from "../app/instructor/account";
 import InstructorDashboard from "../app/instructor/dashboard";
@@ -14,6 +14,11 @@ export const guestRoutes = [{
   name: 'Home',
   isNested: false,
   element: <HomePage />
+},{
+path: '/courses',
+  name: 'Courses',
+  isNested: false,
+  element: <AllCourses />
 }, {
   path: '/courses/:id',
   name: 'CourseDetails',
