@@ -1,112 +1,133 @@
-// shop/cart/useCartDetails.js
-import { useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
+// shop/cart/useCartDetail.js
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
+
+// Sửa path này cho đúng cartSlice của bạn
 import { setCart } from "@/redux/cartSlice";
 
-export default function useCartDetails() {
-  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+/** Lấy id thống nhất (phòng sau này shape đổi) */
+function getId(item) {
+  return item?.courseId ?? item?.id ?? item?._id ?? item?.course?._id ?? item?.course?.id;
+}
+
+/** Ép mọi kiểu payload về mảng */
+function toArray(raw) {
+  if (Array.isArray(raw)) return raw;
+  if (raw && Array.isArray(raw.items)) return raw.items;
+  if (raw && Array.isArray(raw.courses)) return raw.courses;
+  return [];
+}
+
+export default function useCartDetail() {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-  // Luôn đọc từ state.cart.items để thống nhất shape
-  const rawItems = useSelector((state) => state.cart.items ?? []);
-  console.log("Raw cart items from state:", rawItems);
-  // Chỉ giữ item hợp lệ có courseId
-  const items = rawItems.filter((i) => i?.courseId);
+  // Lấy đúng giỏ từ Redux: state.cart.items
+  const { items: storeItems = [] } = useSelector((state) => state.cart || {});
+  const items = toArray(storeItems); // luôn là mảng
 
-  const [selected, setSelected] = useState([]);
-
-  // Derived states (không memo nếu không cần tối ưu sớm)
-  const isEmpty = items.length === 0;
+  const [selected, setSelected] = useState([]); // nếu bạn có UI chọn nhiều
   const isSelecting = selected.length > 0;
-  const isAllSelected = items.length > 0 && selected.length === items.length;
 
-  const displayedCourses = isSelecting
-    ? items.filter((c) => selected.includes(c.courseId))
-    : items;
+  /** Load giỏ lần đầu nếu store đang rỗng */
+  useEffect(() => {
+    if (!items.length) {
+      reloadCart();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const displayedTotal = displayedCourses.reduce(
-    (sum, c) => sum + (c.discountPrice ?? c.price ?? 0),
-    0
-  );
-
-  // Actions
-  const refetchCart = async () => {
+  /** Refetch giỏ và đẩy vào Redux (QUAN TRỌNG: setCart nhận MẢNG) */
+  const reloadCart = async () => {
     try {
       const { data } = await axios.get(`${backendUrl}/api/cart`, {
         withCredentials: true,
       });
-      if (data?.success) {
-        const normalized = Array.isArray(data.cart)
-          ? data.cart
-          : data.cart?.items ?? [];
-        dispatch(setCart(normalized));
-        return { success: true, items: normalized };
-      } else {
-        toast.error(data?.message || "Không tải được giỏ hàng");
-        return { success: false };
-      }
-    } catch (error) {
-      toast.error(error.response?.data?.message || error.message);
-      return { success: false, error };
+      // Với response bạn cung cấp: data.cart là MẢNG
+      const next = toArray(data?.cart ?? data);
+      dispatch(setCart(next));
+      // reset selected để tránh lọc rỗng khi id đã xoá
+      setSelected([]);
+      return true;
+    } catch {
+      toast.error("Không tải được giỏ hàng.");
+      return false;
     }
   };
 
   const toggleSelect = (id) => {
     setSelected((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
     );
   };
 
   const toggleSelectAll = () => {
-    setSelected((prev) =>
-      prev.length === items.length ? [] : items.map((i) => i.courseId)
-    );
+    if (selected.length === items.length) setSelected([]);
+    else setSelected(items.map((i) => getId(i)));
   };
 
-  const removeFromCart = async (courseIds) => {
+  // Danh sách hiển thị (nếu có chọn thì lọc theo selected)
+  const displayedCourses = isSelecting
+    ? items.filter((c) => selected.includes(getId(c)))
+    : items;
+
+  const displayedTotal = displayedCourses.reduce(
+    (sum, c) => sum + (Number(c?.discountPrice ?? c?.price ?? 0) || 0),
+    0
+  );
+  const displayedCount = displayedCourses.length;
+
+  /** Xoá 1 hoặc nhiều courseId (mặc định theo selected) */
+  const removeFromCart = async (courseIds = selected) => {
+    if (!courseIds.length) return;
     try {
-      const ids = Array.isArray(courseIds) ? courseIds : [courseIds];
-      for (const courseId of ids) {
+      for (const courseId of courseIds) {
         await axios.delete(`${backendUrl}/api/cart/remove`, {
           data: { courseId },
           withCredentials: true,
         });
       }
-      await refetchCart();
-      setSelected((prev) => prev.filter((id) => !ids.includes(id)));
-      return { success: true };
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Error removing items");
-      return { success: false, error };
+      await reloadCart();
+    } catch {
+      toast.error("Error removing items");
     }
   };
 
-  const removeSelected = async () => {
-    if (selected.length === 0) return { success: true };
-    return await removeFromCart(selected);
+  /** Checkout theo danh sách đang hiển thị (giữ contract cũ) */
+  const handleCheckout = async () => {
+    try {
+      const { data } = await axios.post(
+        `${backendUrl}/api/orders/create`,
+        { cart: { courses: displayedCourses } },
+        { withCredentials: true }
+      );
+      if (data?.success) {
+        toast.success("Checkout successful!");
+        return true;
+      } else {
+        toast.error(data?.message || "Checkout failed. Please try again.");
+        return false;
+      }
+    } catch {
+      toast.error("An error occurred during checkout.");
+      return false;
+    }
   };
 
-  const gotoCourses = () => navigate("/courses");
-
   return {
-    // data
+    // GIỮ NGUYÊN tên biến/hàm theo style của bạn
     items,
     selected,
+    isSelecting,
     displayedCourses,
     displayedTotal,
-    isSelecting,
-    isAllSelected,
-    isEmpty,
-    // actions
-    refetchCart,
+    displayedCount,
     toggleSelect,
     toggleSelectAll,
     removeFromCart,
-    removeSelected,
-    gotoCourses,
+    handleCheckout,
+    reloadCart, // nếu muốn gọi thủ công
   };
 }
