@@ -41,7 +41,7 @@ app.use('/api', instructorRoute);
 app.use('/api/courses', courseRoute);
 app.use('/api/cart', cartRoute);
 app.use('/api/orders', orderRoute);
-app.use('/api/payment', paymentRoute);
+app.use('/api/payments', paymentRoute);
 app.use('/api/reviews', reviewRoute);
 app.use('/api/chatbot', chatbotRoute);
 

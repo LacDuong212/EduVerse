@@ -1,12 +1,21 @@
 import express from 'express';
-import PaymentController from '../controllers/paymentController.js';
+import {
+  createPayment,
+  handleMomoIpn,
+  handleMomoReturn,
+  handleVnpayIpn,
+  handleVnpayReturn,
+} from '../controllers/paymentController.js';
+import userAuth from '../middlewares/userAuth.js';
 
 const router = express.Router();
 
-// Tạo link thanh toán
-router.post('/create', PaymentController.createPayment);
+router.post('/create', userAuth, createPayment);
 
-// VNPay callback
-// router.get('/return', PaymentController.paymentReturn);
+// Thêm cả các route IPN và Return
+router.post('/momo_ipn', handleMomoIpn);
+router.get('/momo_return', handleMomoReturn);
+router.get('/vnpay_ipn', handleVnpayIpn);
+router.get('/vnpay_return', handleVnpayReturn);
 
 export default router;

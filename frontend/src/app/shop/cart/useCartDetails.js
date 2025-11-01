@@ -1,8 +1,7 @@
-// shop/cart/useCartDetail.js
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
-import { toast } from "react-hot-toast";
+import { toast } from "react-toastify";
 
 // Sửa path này cho đúng cartSlice của bạn
 import { setCart } from "@/redux/cartSlice";
@@ -96,28 +95,53 @@ export default function useCartDetail() {
   };
 
   /** Checkout theo danh sách đang hiển thị (giữ contract cũ) */
-  const handleCheckout = async () => {
+  const handleCheckout = async (paymentMethod) => {
+    if (!displayedCourses.length) {
+      toast.error('Giỏ hàng của bạn đang rỗng.');
+      return false;
+    }
+
     try {
-      const { data } = await axios.post(
+      const { data: orderData } = await axios.post(
         `${backendUrl}/api/orders/create`,
-        { cart: { courses: displayedCourses } },
+        { cart: { courses: displayedCourses }, paymentMethod, },
         { withCredentials: true }
       );
-      if (data?.success) {
-        toast.success("Checkout successful!");
-        return true;
-      } else {
-        toast.error(data?.message || "Checkout failed. Please try again.");
+
+      if (!orderData.success || !orderData.order?._id) {
+        toast.error(orderData.message || 'Không thể tạo đơn hàng.');
         return false;
       }
-    } catch {
-      toast.error("An error occurred during checkout.");
+      const orderId = orderData.order._id;
+
+      toast.info('Đang tạo yêu cầu thanh toán...');
+
+      const { data: paymentData } = await axios.post(
+        `${backendUrl}/api/payments/create`, // <-- API mới của bạn
+        {
+          orderId,
+          paymentMethod,
+        },
+        { withCredentials: true }
+      );
+
+      if (!paymentData.payUrl) {
+        toast.error(paymentData.message || 'Không thể tạo link thanh toán.');
+        return false;
+      }
+
+      // --- BƯỚC 3: Chuyển hướng người dùng đến cổng thanh toán ---
+      window.location.href = paymentData.payUrl;
+      return true; // (Chuyển hướng sẽ xảy ra trước khi hàm này trả về)
+    } catch (error) {
+      console.error("Error during checkout:", error);
+      const message = error.response?.data?.message || "An error occurred during checkout.";
+      toast.error(message);
       return false;
     }
   };
 
   return {
-    // GIỮ NGUYÊN tên biến/hàm theo style của bạn
     items,
     selected,
     isSelecting,
@@ -128,6 +152,6 @@ export default function useCartDetail() {
     toggleSelectAll,
     removeFromCart,
     handleCheckout,
-    reloadCart, // nếu muốn gọi thủ công
+    reloadCart,
   };
 }
