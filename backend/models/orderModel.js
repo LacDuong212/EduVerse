@@ -9,6 +9,11 @@ const orderSchema = new mongoose.Schema({
     },
   ],
   totalAmount: { type: Number, required: true },
+  paymentMethod: {
+    type: String,
+    enum: ['momo', 'vnpay'],
+    required: [true, 'Payment method is required'],
+  },
   status: {
     type: String,
     enum: ["pending", "completed", "refunded", "cancelled"],

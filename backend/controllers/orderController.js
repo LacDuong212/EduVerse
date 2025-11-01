@@ -68,19 +68,39 @@ export const createOrder = async (req, res) => {
   try {
     const userId = req.userId;
 
-    const { cart } = req.body;
+    const { cart, paymentMethod } = req.body;
+
     if (!cart || !Array.isArray(cart.courses) || cart.courses.length === 0) {
       return res.status(400).json({ success: false, message: "Cart is empty or invalid" });
     }
 
+    if (!paymentMethod) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'Payment method is required' });
+    }
+    if (!['momo', 'vnpay'].includes(paymentMethod)) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'Invalid payment method' });
+    }
+
+    const coursesToOrder = cart.courses.map((c) => ({
+      course: c.courseId,
+      pricePaid: c.discountPrice ?? c.price,
+    }));
+
+    const totalAmount = coursesToOrder.reduce(
+      (total, c) => total + c.pricePaid,
+      0
+    );
+
     // create order
     const order = new Order({
       user: userId,
-      courses: cart.courses.map(c => ({
-        course: c.courseId,
-        pricePaid: c.price,
-      })),
-      totalAmount: cart.courses.reduce((total, c) => total + c.price, 0),
+      courses: coursesToOrder,
+      totalAmount: totalAmount,
+      paymentMethod: paymentMethod,
       status: "pending",
       expiresAt: new Date(Date.now() + 60 * 60 * 1000),
     });

@@ -24,7 +24,7 @@ const AdminResetPassword = lazy(() => import('@/app/admin/auth/reset-password/pa
 
 // ADMIN
 const AdminDashboard = lazy(() => import('@/app/admin/dashboard/page'));
-const AllCourses = lazy(() => import('@/app/admin/all-courses/page'));
+const AdminAllCourses = lazy(() => import('@/app/admin/all-courses/page'));
 const CourseCategory = lazy(() => import('@/app/admin/course-category/page'));
 const ComingSoonPage = lazy(() => import('@/app/admin/coming-soon/page'));
 const AdminStudents = lazy(() => import('@/app/admin/students/page'));
@@ -34,6 +34,10 @@ const AdminInstructorRequests = lazy(() => import('@/app/admin/instructor-reques
 const AdminReviews = lazy(() => import('@/app/admin/reviews/page'));
 const AdminEarnings = lazy(() => import('@/app/admin/earnings/page'));
 const AdminSettings = lazy(() => import('@/app/admin/admin-settings/page'));
+
+const Checkout = lazy(() => import('@/app/shop/checkout/page'));
+const PaymentSuccess = lazy(() => import('@/app/shop/payment-result/success/page'));
+const PaymentFailed = lazy(() => import('@/app/shop/payment-result/failed/page'));
 
 // STUDENT
 import VideoPlayer from "../app/pages/course/video-player/page";
@@ -151,7 +155,7 @@ export const adminRoutes = [{
 }, {
   path: '/admin/all-courses',
   name: 'All Courses',
-  element: <AllCourses />
+  element: <AdminAllCourses />
 }, {
   path: '/admin/course-category',
   name: 'Course Category',
@@ -192,8 +196,7 @@ export const adminRoutes = [{
   path: '/admin/admin-settings',
   name: 'Admin Settings',
   element: <AdminSettings />
-}
-];
+}];
 
 export const studentRoutes = [{
   path: '/student/courses',
@@ -210,11 +213,26 @@ export const studentRoutes = [{
   name: 'My Cart',
   isNested: false,
   element: <CartDetails />
+},{
+  path: '/student/checkout',
+  name: 'Checkout',
+  isNested: false,
+  element: <Checkout />
 }, {
   path: '/student/account',
   name: 'Account',
   isNested: true,
   element: null
+}, {
+  path: '/student/payment-success',
+  name: 'Payment Success',
+  isNested: false,
+  element: <PaymentSuccess />
+}, {
+  path: '/student/payment-failed',
+  name: 'Failed',
+  isNested: false,
+  element: <PaymentFailed />
 }, {
   path: '/student/payment-info',
   name: 'Payment Info',
