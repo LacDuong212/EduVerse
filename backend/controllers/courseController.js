@@ -38,6 +38,7 @@ export const getHomeCourses = async (req, res) => {
     res.status(500).json({ message: "Error fetching home courses", error });
   }
 };
+
 export const getAllCourses = async (req, res) => {
   try {
     // query params
@@ -299,6 +300,7 @@ export const getOwnedCourses = async (req, res) => {
     res.status(500).json({ success: false, message: "Error fetching owned courses", error });
   }
 };
+
 export const getRelatedCourses = async (req, res) => {
   try {
     const { id } = req.params;

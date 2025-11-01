@@ -1,7 +1,6 @@
 import { lazy } from 'react';
 import HomePage from "../app/home/page";
 import CourseDetails from "../app/pages/course/detail/page";
-import AllCourses from "../app/pages/course/grid/page";
 import CoursesPage from "../app/pages/course/grid/page";
 
 //AUTH
