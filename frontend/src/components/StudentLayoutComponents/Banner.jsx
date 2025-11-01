@@ -1,8 +1,7 @@
 import patternImg from '@/assets/images/pattern/04.png';
 
 import { Card, Col, Container, Row } from 'react-bootstrap';
-import { BsPatchCheckFill } from 'react-icons/bs';
-import { FaBook, FaSlidersH, FaStar, FaUserGraduate } from 'react-icons/fa';
+import { FaSlidersH } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
 
@@ -47,15 +46,15 @@ const Banner = ({
                     <ul className="list-inline mb-0">
                       <li className="list-inline-item me-3 mb-1 mb-sm-0">
                         <span className="h6">{studentData.point ?? 0}</span>
-                        &nbsp;<span className="text-body fw-light">points</span>
+                        &nbsp;<span className="text-body fw-light">Points</span>
                       </li>
                       <li className="list-inline-item me-3 mb-1 mb-sm-0">
                         <span className="h6">{studentData.completedCourses ?? 0}</span>
-                        &nbsp;<span className="text-body fw-light">Completed courses</span>
+                        &nbsp;<span className="text-body fw-light">Completed Courses</span>
                       </li>
                       <li className="list-inline-item me-3 mb-1 mb-sm-0">
-                        <span className="h6">{studentData.completedLessons ?? 0}</span>
-                        &nbsp; <span className="text-body fw-light">Completed lessons</span>
+                        <span className="h6">{studentData.completedLectures ?? 0}</span>
+                        &nbsp; <span className="text-body fw-light">Completed Lectures</span>
                       </li>
                     </ul>
                   </div>

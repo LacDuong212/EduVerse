@@ -3,7 +3,7 @@ import HomePage from "../app/home/page";
 import CourseDetails from "../app/pages/course/detail/page";
 import CoursesPage from "../app/pages/course/grid/page";
 
-//AUTH
+// AUTH
 const SignIn = lazy(() => import('@/app/auth/sign-in/page'));
 const SignUp = lazy(() => import('@/app/auth/sign-up/page'));
 const ForgotPassword = lazy(() => import('@/app/auth/forgot-password/page'));
@@ -16,13 +16,13 @@ import InstructorMyCourses from "../app/instructor/my-courses";
 import InstructorMyStudents from "../app/instructor/my-students";
 import CreateCoursePage from "../app/instructor/create-course";
 
-//AUTH-ADMIN
+// AUTH-ADMIN
 const AdminSignUp = lazy(() => import('@/app/admin/auth/sign-up/page'));
 const AdminSignIn = lazy(() => import('@/app/admin/auth/sign-in/page'));
 const AdminForgotPassword = lazy(() => import('@/app/admin/auth/forgot-password/page'));
 const AdminResetPassword = lazy(() => import('@/app/admin/auth/reset-password/page'));
 
-//ADMIN
+// ADMIN
 const AdminDashboard = lazy(() => import('@/app/admin/dashboard/page'));
 const AllCourses = lazy(() => import('@/app/admin/all-courses/page'));
 const CourseCategory = lazy(() => import('@/app/admin/course-category/page'));
@@ -35,9 +35,11 @@ const AdminReviews = lazy(() => import('@/app/admin/reviews/page'));
 const AdminEarnings = lazy(() => import('@/app/admin/earnings/page'));
 const AdminSettings = lazy(() => import('@/app/admin/admin-settings/page'));
 
-//STUDENT
+// STUDENT
 import VideoPlayer from "../app/pages/course/video-player/page";
 import CartDetails from "../app/shop/cart/page";
+import StudentMyCourses from '../app/student/my-courses';
+
 
 export const guestRoutes = [{
   path: '/home',
@@ -197,7 +199,7 @@ export const studentRoutes = [{
   path: '/student/courses',
   name: 'My Courses',
   isNested: true,
-  element: null
+  element: <StudentMyCourses />
 }, {
   path: '/student/video-player',
   name: 'My Video Player',
@@ -216,11 +218,6 @@ export const studentRoutes = [{
 }, {
   path: '/student/payment-info',
   name: 'Payment Info',
-  isNested: true,
-  element: null
-}, {
-  path: '/student/courses',
-  name: 'My Courses',
   isNested: true,
   element: null
 }, {

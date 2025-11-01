@@ -31,7 +31,7 @@ const VerticalMenu = () => {
           }
         )}
 
-        <Link className="list-group-item text-danger bg-danger-soft-hover" onClick={logout} to="/auth/sign-in">
+        <Link className="list-group-item text-danger bg-danger-soft-hover" onClick={logout} to="/">
           <FaSignOutAlt className="flex-shrink-0 ms-1 me-2" />
           <span style={{ position: 'relative', top: '2px' }}>Sign Out</span>
         </Link>

@@ -257,18 +257,23 @@ export const getViewedCourses = async (req, res) => {
   }
 };
 
-// GET /my-courses
+// GET /api/courses/my-courses?page=1&limit=8
 export const getOwnedCourses = async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 8;
+    const skip = (page - 1) * limit;
+
     // get only completed orders
     const orders = await Order.find({
       user: req.userId,
-      status: "completed"
+      status: "completed",
     }).populate("courses.course");
 
-    // extract unique courses (optional, cus pretteh sure no duplicates, unless..)
+    // extract unique courses
     const ownedCourses = [];
     const courseSet = new Set();
+
     for (const order of orders) {
       for (const item of order.courses) {
         const c = item.course;
@@ -280,24 +285,38 @@ export const getOwnedCourses = async (req, res) => {
             title: c.title,
             category: c.category,
             subCategory: c.subCategory,
-            rating: c.rating,
+            rating: c.rating?.average || 0,
             instructor: c.instructor,
             level: c.level,
             thumbnail: c.thumbnail,
-            price: c.price,
-            discountPrice: c.discountPrice,
             updatedAt: c.updatedAt,
+            totalLectures:
+              c.lecturesCount || (c.curriculum?.lectures || []).length || 0,
           });
         }
       }
     }
 
+    // pagination
+    const totalCourses = ownedCourses.length;
+    const pagedCourses = ownedCourses.slice(skip, skip + limit);
+
     res.status(200).json({
       success: true,
-      courses: ownedCourses,
+      courses: pagedCourses,
+      pagination: {
+        total: totalCourses,
+        page,
+        limit,
+        totalPages: Math.ceil(totalCourses / limit),
+      },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Error fetching owned courses", error });
+    res.status(500).json({
+      success: false,
+      message: "Error fetching owned courses",
+      error,
+    });
   }
 };
 

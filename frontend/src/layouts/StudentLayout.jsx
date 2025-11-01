@@ -35,7 +35,7 @@ const VerticalMenu = () => {
             {label}
           </Link>;
         })}
-        <Link className="list-group-item text-danger bg-danger-soft-hover" onClick={logout} to="/auth/sign-in">
+        <Link className="list-group-item text-danger bg-danger-soft-hover" onClick={logout} to="/">
           <FaSignOutAlt className="fa-fw me-2" />
           Sign Out
         </Link>
@@ -48,11 +48,9 @@ const StudentLayout = ({ children, isNested = false }) => {
   const { user } = useProfile();
   const { width } = useViewPort();
   const { isTrue: isOffCanvasMenuOpen, toggle: toggleOffCanvasMenu } = useToggle();
-  const { pathname } = useLocation(); // 👈 kiểm tra URL
+  const { pathname } = useLocation();
 
-  // ✅ Nếu là trang video-player (hoặc có slug, vd /student/video-player/abc)
   if (pathname.startsWith('/student/video-player')) {
-    // 👇 không render layout gì hết, chỉ hiển thị page con
     return <>{children}</>;
   }
 
