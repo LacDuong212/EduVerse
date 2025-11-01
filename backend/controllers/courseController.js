@@ -38,6 +38,22 @@ export const getHomeCourses = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: "Error fetching home courses", error });
   }
+};export const getFullCourses = async (req, res) => {
+  try {
+    const courses = await Course.find();
+
+    res.status(200).json({
+      success: true,
+      count: courses.length,
+      data: courses,
+    });
+  } catch (error) {
+    console.error("Error fetching courses:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while fetching courses",
+    });
+  }
 };
 
 export const getCoursesOverview = async (req, res) => {

@@ -50,8 +50,18 @@ const StudentLayout = ({ children, isNested = false }) => {
   const { isTrue: isOffCanvasMenuOpen, toggle: toggleOffCanvasMenu } = useToggle();
   const { pathname } = useLocation();
 
-  if (pathname.startsWith('/student/video-player')) {
-    return <>{children}</>;
+  // Điều kiện full screen cho trang player
+  const isFullscreen =
+    pathname === '/student/video-player' ||
+    /^\/courses\/[^/]+\/watch(\/[^/]+)?$/.test(pathname);
+
+  // Nếu full screen: bỏ toàn bộ chrome, render thẳng nội dung
+  if (isFullscreen) {
+    return (
+      <main className="bg-dark min-vh-100">
+        <Suspense fallback={<Preloader />}>{children}</Suspense>
+      </main>
+    );
   }
 
   return (

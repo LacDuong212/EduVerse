@@ -8,6 +8,7 @@ const adaptToCard = (c) => {
   const star = typeof c?.rating?.average === 'number' ? c.rating.average : 0;
 
   return {
+    id: c?.courseId || c?._id || c?.id,
     title: c?.title || 'Untitled',
     description: c?.description || '',
     image: c?.thumbnail || '',
@@ -41,8 +42,8 @@ const NewestCourses = () => {
         </Row>
 
         <Row className="g-4">
-          {list.map((course, idx) => (
-            <Col sm={6} lg={4} xl={3} key={idx}>
+          {list.map((course) => (
+            <Col sm={6} lg={4} xl={3} key={course.id}>
               <CourseCard course={course} />
             </Col>
           ))}
