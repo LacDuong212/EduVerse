@@ -817,7 +817,7 @@ export const notificationData = [{
 }];
 export const administratorsData = [{
   id: '1001',
-  name: 'Võ Nguyễn Hòa Lạc Dương',
+  name: 'V� Nguy?n H�a L?c Duong',
   email: 'lacduongldg212@gmail.com',
   isVerified: true,
   isApproved: true,
@@ -825,7 +825,7 @@ export const administratorsData = [{
   updatedAt: "2025-11-01"
 }, {
   id: '1002',
-  name: 'Võ Nguyễn Hòa Lạc Dương',
+  name: 'V� Nguy?n H�a L?c Duong',
   email: 'lacduongldg@gmail.com',
   isVerified: true,
   isApproved: false,
@@ -833,7 +833,7 @@ export const administratorsData = [{
   updatedAt: "2025-10-31"
 },{
   id: '1003',
-  name: 'Võ Nguyễn Hòa Lạc Dương',
+  name: 'V� Nguy?n H�a L?c Duong',
   email: 'lacduong212@gmail.com',
   isVerified: false,
   isApproved: false,
@@ -841,7 +841,7 @@ export const administratorsData = [{
   updatedAt: "2025-11-01"
 },{
   id: '1004',
-  name: 'Hoàng Thị Thùy Dương',
+  name: 'Ho�ng Th? Th�y Duong',
   email: 'thuyduong1472004@gmail.com',
   isVerified: true,
   isApproved: true,
@@ -849,7 +849,7 @@ export const administratorsData = [{
   updatedAt: "2025-11-01"
 },{
   id: '1005',
-  name: 'Hoàng Thị Thùy Dương',
+  name: 'Ho�ng Th? Th�y Duong',
   email: 'tduongjob@gmail.com',
   isVerified: true,
   isApproved: false,
@@ -857,7 +857,7 @@ export const administratorsData = [{
   updatedAt: "2025-11-01"
 },{
   id: '1006',
-  name: 'Trần Triệu Vĩ',
+  name: 'Tr?n Tri?u Vi',
   email: 'vi021ttv@gmail.com',
   isVerified: false,
   isApproved: false,

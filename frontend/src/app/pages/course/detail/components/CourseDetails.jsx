@@ -12,14 +12,43 @@ import courseImg1 from '@/assets/images/courses/4by3/01.jpg';
 import courseImg18 from '@/assets/images/courses/4by3/18.jpg';
 import courseImg21 from '@/assets/images/courses/4by3/21.jpg';
 import { Link } from 'react-router-dom';
-const PricingCard = () => {
+import useCourseDetail from '../useCourseDetail';
+
+
+
+const PricingCard = ({ course }) => {
+  const { handleAddToCart } = useCourseDetail();
+   const getEmbedUrl = (url) => {
+    if (!url) return null;
+
+    // dạng youtu.be/xxxx
+    if (url.includes("youtu.be/")) {
+      const videoId = url.split("youtu.be/")[1];
+      return `https://www.youtube.com/embed/${videoId}`;
+    }
+
+    // dạng watch?v=xxxx
+    if (url.includes("watch?v=")) {
+      return url.replace("watch?v=", "embed/");
+    }
+
+    // dạng shorts/xxxx
+    if (url.includes("shorts/")) {
+      const videoId = url.split("shorts/")[1];
+      return `https://www.youtube.com/embed/${videoId}`;
+    }
+
+    return url;
+  };
+
+   
   return <Card className="shadow p-2 mb-4 z-index-9">
       <div className="overflow-hidden rounded-3">
-        <img src={courseImg1} className="card-img" alt="course image" />
-        <div className="bg-overlay bg-dark opacity-6" />
+        <img src={course?.thumbnail} className="card-img" alt="course image" />
+        <div className="bg-overlay bg-dark opacity-1" />
         <div className="card-img-overlay d-flex align-items-start flex-column p-3">
           <div className="m-auto">
-            <GlightBox href="https://www.youtube.com/embed/tXHviS-4ygo" className="btn btn-lg text-danger btn-round btn-white-shadow mb-0" data-glightbox data-gallery="course-video">
+            <GlightBox href={getEmbedUrl(course?.previewVideo)} className="btn btn-lg text-danger btn-round btn-white-shadow mb-0" data-glightbox data-gallery="course-video">
               <FaPlay />
             </GlightBox>
           </div>
@@ -29,13 +58,11 @@ const PricingCard = () => {
         <div className="d-flex justify-content-between align-items-center">
           <div>
             <div className="d-flex align-items-center">
-              <h3 className="fw-bold mb-0 me-2">{currency}150</h3>
-              <span className="text-decoration-line-through mb-0 me-2">{currency}350</span>
-              <span className="badge text-bg-orange mb-0">60% off</span>
+              <h3 className="fw-bold mb-0 me-2">{currency}{course?.discountPrice}</h3>
+              <span className="text-decoration-line-through mb-0 me-2">{currency}{course?.price}</span>
+              <span className="badge text-bg-orange mb-0">{course?.discountPercentage}% off</span>
             </div>
-            <p className="mb-0 text-danger">
-              <FaStopwatch className="me-2" />5 days left at this price
-            </p>
+            
           </div>
           <Dropdown>
             <DropdownToggle as="a" className="btn btn-sm btn-light rounded small arrow-none" role="button" id="dropdownShare" data-bs-toggle="dropdown" aria-expanded="false">
@@ -74,7 +101,7 @@ const PricingCard = () => {
             Free trial
           </Button>
           &nbsp;
-          <Button variant="success" className="mb-0">
+          <Button variant="success" className="mb-0" onClick={handleAddToCart}>
             Buy course
           </Button>
         </div>
@@ -138,7 +165,7 @@ const PopularTags = () => {
       </ul>
     </Card>;
 };
-const CourseDetails = () => {
+const CourseDetails = ({ course }) => {
   return <section className="pb-0 py-lg-5">
       <Container>
         <Row>
@@ -207,7 +234,7 @@ const CourseDetails = () => {
           <Col lg={4} className="pt-5 pt-lg-0">
             <Row className="mb-5 mb-lg-0">
               <Col md={6} lg={12}>
-                <PricingCard />
+                <PricingCard course={course} />
                 <Card className="card-body shadow p-4 mb-4">
                   <h4 className="mb-3">This course includes</h4>
                   <ul className="list-group list-group-borderless">
@@ -216,35 +243,28 @@ const CourseDetails = () => {
                         <FaBookOpen className="fa-fw text-primary me-1" />
                         Lectures
                       </span>
-                      <span>30</span>
+                      <span>{course?.lecturesCount}</span>
                     </li>
                     <li className="list-group-item d-flex justify-content-between align-items-center">
                       <span className="h6 fw-light mb-0">
                         <FaClock className="fa-fw text-primary me-1" />
                         Duration
                       </span>
-                      <span>4h 50m</span>
+                      <span>{course?.duration}h</span>
                     </li>
                     <li className="list-group-item d-flex justify-content-between align-items-center">
                       <span className="h6 fw-light mb-0">
                         <FaSignal className="fa-fw text-primary me-1" />
                         Skills
                       </span>
-                      <span>Beginner</span>
+                      <span>{course?.level}</span>
                     </li>
                     <li className="list-group-item d-flex justify-content-between align-items-center">
                       <span className="h6 fw-light mb-0">
                         <FaGlobe className="fa-fw text-primary me-1" />
                         Language
                       </span>
-                      <span>English</span>
-                    </li>
-                    <li className="list-group-item d-flex justify-content-between align-items-center">
-                      <span className="h6 fw-light mb-0">
-                        <FaUserClock className="fa-fw text-primary me-1" />
-                        Deadline
-                      </span>
-                      <span>Nov 30 2021</span>
+                      <span>{course?.language}</span>
                     </li>
                     <li className="list-group-item d-flex justify-content-between align-items-center">
                       <span className="h6 fw-light mb-0">

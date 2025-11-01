@@ -1,5 +1,5 @@
 import { Card, CardBody, CardHeader, Col } from 'react-bootstrap';
-import { BsTwitter, BsX } from 'react-icons/bs';
+import { BsTwitter } from 'react-icons/bs';
 import { FaFacebook, FaInstagram, FaYoutube } from 'react-icons/fa';
 
 

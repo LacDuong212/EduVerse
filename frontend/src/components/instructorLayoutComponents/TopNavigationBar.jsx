@@ -1,9 +1,9 @@
-import { INSTRUCTOR_APP_MENU_ITEMS } from '@/assets/data/menu-items.js';
+import { INSTRUCTOR_APP_MENU_ITEMS, INSTRUCTOR_ACCOUNT_DROPDOWN_ITEMS } from '@/assets/data/menu-items.js';
 import LogoBox from '@/components/LogoBox';
 import TopNavbar from '@/components/TopNavbar';
-import SimpleAppMenu from '@/components/TopNavbar/components/SimpleAppMenu';
-import ProfileDropdown from '@/components/TopNavbar/components/ProfileDropdown';
 import NotificationDropdown from '@/components/TopNavbar/components/NotificationDropdown'
+import ProfileDropdown from '@/components/TopNavbar/components/ProfileDropdown';
+import SimpleAppMenu from '@/components/TopNavbar/components/SimpleAppMenu';
 import TopbarMenuToggler from '@/components/TopNavbar/components/TopbarMenuToggler';
 import { useLayoutContext } from '@/context/useLayoutContext';
 import { Container } from 'react-bootstrap';
@@ -20,7 +20,7 @@ const TopNavigationBar = () => {
         <SimpleAppMenu mobileMenuOpen={appMenuControl.open} menuClassName="mx-auto" topMenuItems={INSTRUCTOR_APP_MENU_ITEMS} />
         <ul className="nav flex-row align-items-center list-unstyled ms-xl-auto">
           <NotificationDropdown />
-          <ProfileDropdown className="nav-item ms-3" />
+          <ProfileDropdown className="nav-item ms-3" dropdownItems={INSTRUCTOR_ACCOUNT_DROPDOWN_ITEMS} />
         </ul>
       </Container>
     </TopNavbar>

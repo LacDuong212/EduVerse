@@ -1,5 +1,5 @@
-import { useAuthContext } from '@/context/useAuthContext';
 import { useLayoutContext } from '@/context/useLayoutContext';
+import useProfile from '@/hooks/useProfile';
 import { toSentenceCase } from '@/utils/change-casing';
 
 import clsx from 'clsx';
@@ -8,14 +8,9 @@ import { BsGear, BsInfoCircle, BsPerson, BsPower } from 'react-icons/bs';
 import { Link } from 'react-router-dom';
 
 
-const ProfileDropdown = ({ className }) => {
-  const { removeSession } = useAuthContext();
+const ProfileDropdown = ({ className, dropdownItems }) => {
   const { changeTheme, theme } = useLayoutContext();
-  const instructorData = {
-    name: 'Duckle Munchkin',
-    email: 'duckle.munchkin@example.com',
-    pfpImg: 'https://res.cloudinary.com/dw1fjzfom/image/upload/v1761585729/7bd60af2-97e7-4c08-a35f-5a614d92052d.png'
-  };
+  const { user, logout } = useProfile();
 
   const themeModes = [{
     icon: <svg xmlns="http://www.w3.org/2000/svg" width={16} height={16} fill="currentColor" className="bi bi-sun fa-fw mode-switch" viewBox="0 0 16 16">
@@ -42,14 +37,14 @@ const ProfileDropdown = ({ className }) => {
     <Dropdown drop="start" className={className}>
       {/* Avatar */}
       <DropdownToggle as="a" className="avatar avatar-sm p-0 arrow-none" id="profileDropdown" role="button" data-bs-auto-close="outside" data-bs-display="static" data-bs-toggle="dropdown" aria-expanded="false">
-        {instructorData?.pfpImg ? (
+        {user?.pfpImg ? (
           <img
-            className="avatar-img rounded-circle shadow"
-            src={instructorData.pfpImg}
+            className="avatar-img rounded-circle shadow "
+            src={user.pfpImg}
             alt="Instructor Avatar" />
         ) : (
           <div className="avatar-img rounded-circle border border-white border-1 shadow d-flex align-items-center justify-content-center bg-light text-dark fw-bold fs-5">
-            {(instructorData?.name?.[0] || "I").toUpperCase()}
+            {(user?.name?.[0] || "I").toUpperCase()}
           </div>
         )}
       </DropdownToggle>
@@ -59,22 +54,22 @@ const ProfileDropdown = ({ className }) => {
         <li className="px-3 mb-3">
           <div className="d-flex align-items-center">
             <div className="avatar me-3">
-              {instructorData?.pfpImg ? (
+              {user?.pfpImg ? (
                 <img
-                  className="avatar-img rounded-circle shadow"
-                  src={instructorData.pfpImg}
+                  className="avatar-img rounded-circle border border-light border-2 shadow"
+                  src={user.pfpImg}
                   alt="Instructor Avatar" />
               ) : (
                 <div className="avatar-img rounded-circle border border-white border-1 shadow d-flex align-items-center justify-content-center bg-light text-dark fw-bold fs-4">
-                  {(instructorData?.name?.[0] || "I").toUpperCase()}
+                  {(user?.name?.[0] || "I").toUpperCase()}
                 </div>
               )}
             </div>
             <div>
               <a className="h6" href="#">
-                {instructorData?.name || "Instructor"}
+                {user?.name || "Instructor"}
               </a>
-              <p className="small m-0">{instructorData?.email || "instructor@example.com"}</p>
+              <p className="small m-0">{user?.email || "instructor@example.com"}</p>
             </div>
           </div>
         </li>
@@ -82,27 +77,16 @@ const ProfileDropdown = ({ className }) => {
 
           <DropdownDivider />
         </li>
+        {(dropdownItems || []).map(({ key, label, icon: Icon, url }) => (
+          <li key={key}>
+            <DropdownItem as={Link} to={url}>
+              <Icon className="fa-fw me-2 mb-1" />
+              {label}
+            </DropdownItem>
+          </li>
+        ))}
         <li>
-          <DropdownItem href="/instructor/account">
-            <BsPerson className="fa-fw me-2 mb-1" />
-            My Account
-          </DropdownItem>
-        </li>
-        <li>
-          <DropdownItem href="/instructor/settings">
-            <BsGear className="fa-fw me-2 mb-1" />
-            Settings
-          </DropdownItem>
-        </li>
-        <li>
-          <DropdownItem href="/help/center">
-            <BsInfoCircle className="fa-fw me-2 mb-1" />
-            Help
-          </DropdownItem>
-        </li>
-        <li>
-          {/* <Link className="dropdown-item bg-danger-soft-hover" onClick={removeSession} to="/auth/sign-in"> */}
-          <Link className="dropdown-item bg-danger-soft-hover" onClick={null} to="/auth/sign-in">
+          <Link className="dropdown-item bg-danger-soft-hover" onClick={logout} to="/">
             <BsPower className="fa-fw me-2 mb-1" />
             Sign Out
           </Link>
@@ -118,9 +102,9 @@ const ProfileDropdown = ({ className }) => {
                 onClick={() => changeTheme(mode.theme)}
                 data-bs-theme-value={mode.theme}
                 type="button"
-                className={clsx('btn btn-sm mb-0 flex-fill text-truncate', {
-                  active: theme === mode.theme
-                })} key={mode.theme + idx}>
+                className={clsx('btn btn-sm mb-0 flex-fill text-truncate', { active: theme === mode.theme })}
+                key={mode.theme + idx}
+              >
                 {mode.icon}
                 {toSentenceCase(mode.theme)}
               </button>

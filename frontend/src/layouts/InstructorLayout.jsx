@@ -2,8 +2,7 @@ import { INSTRUCTOR_MENU_ITEMS } from '../assets/data/menu-items';
 import Banner from '../components/instructorLayoutComponents/Banner';
 import Footer from '../components/instructorLayoutComponents/Footer';
 import TopNavigationBar from '../components/instructorLayoutComponents/TopNavigationBar';
-import { useAuthContext } from '../context/useAuthContext';
-import { useLayoutContext } from '../context/useLayoutContext';
+import useProfile from '../hooks/useProfile';
 import useToggle from '../hooks/useToggle';
 import useViewPort from '../hooks/useViewPort';
 
@@ -15,7 +14,7 @@ import { Link, useLocation } from 'react-router-dom';
 
 const VerticalMenu = () => {
   const { pathname } = useLocation();
-  const { removeSession } = useAuthContext();
+  const { logout } = useProfile();
 
   return (
     <div className="bg-dark border rounded-3 p-3 mb-5">
@@ -32,8 +31,7 @@ const VerticalMenu = () => {
           }
         )}
 
-        {/* <Link className="list-group-item text-danger bg-danger-soft-hover" onClick={removeSession} to="/auth/sign-in"> */}
-        <Link className="list-group-item text-danger bg-danger-soft-hover" onClick={null} to="/auth/sign-in">
+        <Link className="list-group-item text-danger bg-danger-soft-hover" onClick={logout} to="/auth/sign-in">
           <FaSignOutAlt className="flex-shrink-0 ms-1 me-2" />
           <span style={{ position: 'relative', top: '2px' }}>Sign Out</span>
         </Link>
@@ -43,15 +41,9 @@ const VerticalMenu = () => {
 };
 
 const InstructorLayout = ({ children, isNested = false }) => {
+  const { user } = useProfile();
   const { width } = useViewPort();
-  const { } = useLayoutContext();
   const { isTrue: isOffCanvasMenuOpen, toggle: toggleOffCanvasMenu } = useToggle();
-
-  const instructorData = {
-    name: 'Duckle Munchkin',
-    email: 'duckle.munchkin@example.com',
-    pfpImg: 'https://res.cloudinary.com/dw1fjzfom/image/upload/v1761585729/7bd60af2-97e7-4c08-a35f-5a614d92052d.png'
-  };
 
   return (
     <>
@@ -60,7 +52,7 @@ const InstructorLayout = ({ children, isNested = false }) => {
       <main>
         {isNested ? (
           <>
-            <Banner toggleOffCanvas={toggleOffCanvasMenu} accountData={instructorData} />
+            <Banner toggleOffCanvas={toggleOffCanvasMenu} accountData={user} />
             <section className="py-0">
               <Container>
                 <Row>

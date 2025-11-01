@@ -1,4 +1,4 @@
-import { linkedAccount } from '../data';
+import { linkedAccount } from '../useAccount';
 import { Card, CardBody, CardHeader, Col } from 'react-bootstrap';
 import { BsCheckCircleFill } from 'react-icons/bs';
 

@@ -1,4 +1,7 @@
 import { lazy } from 'react';
+import HomePage from "../app/home/page";
+import CourseDetails from "../app/pages/course/detail/page";
+import CartDetails from "../app/shop/cart/page";
 
 //AUTH
 const SignIn = lazy(() => import('@/app/auth/sign-in/page'));
@@ -30,6 +33,19 @@ const AdminInstructorRequests = lazy(() => import('@/app/admin/instructor-reques
 const AdminReviews = lazy(() => import('@/app/admin/reviews/page'));
 const AdminEarnings = lazy(() => import('@/app/admin/earnings/page'));
 const AdminSettings = lazy(() => import('@/app/admin/admin-settings/page'));
+
+
+export const guestRoutes = [{
+  path: '/home',
+  name: 'Home',
+  isNested: false,
+  element: <HomePage />
+}, {
+  path: '/courses/:id',
+  name: 'CourseDetails',
+  isNested: true,
+  element: <CourseDetails />
+}];
 
 export const authRoutes = [{
   path: '/auth/sign-in',
@@ -169,3 +185,20 @@ export const adminRoutes = [{
   element: <AdminSettings />
 }
 ];
+
+export const studentRoutes = [{
+  path: '/student/my-courses',
+  name: 'My Courses',
+  isNested: true,
+  element: null
+}, {
+  path: '/student/cart',
+  name: 'My Cart',
+  isNested: false,
+  element: <CartDetails />
+}, {
+  path: '/student/orders',
+  name: 'Orders',
+  isNested: true,
+  element: null
+}];

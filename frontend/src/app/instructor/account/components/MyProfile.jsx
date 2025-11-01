@@ -1,32 +1,50 @@
-import TextFormInput from '@/components/form/TextFormInput';
-
+import useProfile from '@/hooks/useProfile';
+import useInstructor from '../../useInstructor';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { useEffect, useState } from 'react';
 import { Card, CardBody, CardHeader, Col } from 'react-bootstrap';
 import { useForm } from 'react-hook-form';
 import { BsPlus, BsX } from 'react-icons/bs';
+import { toast } from 'react-toastify';
 import * as yup from 'yup';
 
 
 const MyProfile = () => {
-  const instructorSchema = yup.object({
-    fullname: yup.string().required('Please enter your full name'),
-    username: yup.string().required('Please enter your username'),
-    address: yup.string()
-  });
+  const { user } = useProfile();
+  const { fetchPublicFields } = useInstructor();
+  const [instructor, setInstructor] = useState(null);
 
-  const {
-    handleSubmit
-  } = useForm({
-    resolver: yupResolver(instructorSchema)
-  });
+  useEffect(() => {
+    const loadInstructor = async () => {
+      const data = await fetchPublicFields(['address', 'education']);
+      if (data) setInstructor(data);
+      else toast.error('Failed to load instructor data');
+    };
+    loadInstructor();
+  }, []);
 
-  const instructorData = {
-    name: 'Duckle Munchkin',
-    username: 'duckle0munchkin',
-    email: 'duckle.munchkin@example.com',
-    bio: 'I am NOT a duck!',
-    address: '18th Main St., Heather City, Heaven',
-    pfpImg: 'https://res.cloudinary.com/dw1fjzfom/image/upload/v1761585729/7bd60af2-97e7-4c08-a35f-5a614d92052d.png'
+  const [educationList, setEducationList] = useState([]);
+
+  useEffect(() => {
+    if (instructor) setEducationList(instructor.education || []);
+  }, []);
+
+  const handleAdd = () => {
+    setEducationList([...educationList, { degree: '', institution: '' }]);
+  };
+
+  const handleChange = (index, field, value) => {
+    const updated = [...educationList];
+    updated[index][field] = value;
+    setEducationList(updated);
+  };
+
+  const handleRemove = (index) => {
+    setEducationList(educationList.filter((_, i) => i !== index));
+  };
+
+  const handleSubmit = () => {
+
   };
 
   return (
@@ -41,14 +59,14 @@ const MyProfile = () => {
             <div className="d-flex align-items-center">
               <label className="position-relative me-4" htmlFor="uploadfile-1" title="Replace this pic">
                 <span className="avatar avatar-xl">
-                  {instructorData?.pfpImg ? (
+                  {user?.pfpImg ? (
                     <img
-                      className="avatar-img rounded-circle border border-white border-3 shadow"
-                      src={instructorData.pfpImg}
+                      className="avatar-img rounded-circle border border-light border-3 shadow"
+                      src={user.pfpImg}
                       alt="Instructor Avatar" />
                   ) : (
-                    <div className="avatar-img rounded-circle border border-white border-3 shadow d-flex align-items-center justify-content-center bg-light text-dark fw-bold fs-1">
-                      {(instructorData?.name?.[0] || "I").toUpperCase()}
+                    <div className="avatar-img rounded-circle border border-light border-3 shadow d-flex align-items-center justify-content-center bg-light text-dark fw-bold fs-1">
+                      {(user?.name?.[0] || "I").toUpperCase()}
                     </div>
                   )}
                 </span>
@@ -65,60 +83,71 @@ const MyProfile = () => {
           <Col xs={12}>
             <label className="form-label">Full Name</label>
             <div className="input-group">
-              <input type="text" className="form-control" placeholder="Eg. Edu Verse" defaultValue={instructorData?.name} />
+              <input type="text" className="form-control" placeholder="Eg. Edu Verse" defaultValue={user?.name} />
             </div>
           </Col>
           <Col md={5}>
             <label className="form-label">Username</label>
             <div className="input-group">
               <span className="input-group-text">eduverse.com/</span>
-              <input type="text" className="form-control" placeholder="eduVerse_01" defaultValue={instructorData?.username} />
+              <input type="text" className="form-control" placeholder="eduVerse_01" defaultValue={user?.username} />
             </div>
           </Col>
           <Col xs={7}>
             <label className="form-label">Email</label>
             <div className="input-group">
-              <input type="text" className="form-control" placeholder="instructor@example.com" defaultValue={instructorData?.email} disabled />
+              <input type="text" className="form-control" placeholder="instructor@example.com" defaultValue={user?.email} disabled />
             </div>
           </Col>
           <Col xs={5}>
             <label className="form-label">Phone Number</label>
             <div className="input-group">
-              <input type="text" className="form-control" placeholder="+84123456789 or 0123456789, etc." defaultValue={instructorData?.phone} disabled />
+              <input type="text" className="form-control" placeholder="+84123456789 or 0123456789, etc." defaultValue={user?.phone} disabled />
             </div>
           </Col>
           <Col xs={7}>
             <label className="form-label">Address</label>
             <div className="input-group">
-              <input type="text" className="form-control" placeholder="123 Main St, City, Country" defaultValue={instructorData?.address} />
+              <input type="text" className="form-control" placeholder="123 Main St, City, Country" defaultValue={instructor?.address || ''} />
             </div>
           </Col>
           <Col xs={12}>
             <label className="form-label">Bio</label>
-            <textarea className="form-control" rows={3} placeholder='I am not a robot...' defaultValue={instructorData?.bio} />
+            <textarea className="form-control" rows={3} placeholder='I am not a robot...' defaultValue={user?.bio} />
             <div className="form-text">Brief description for your profile.</div>
           </Col>
           <Col xs={12}>
-            <label className="form-label">Education</label>
-            <div className="input-group mb-2">
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Bachelor in..."
-                style={{ flexBasis: '30%' }}
-                defaultValue={instructorData?.degree}
-              />
-              <span className="input-group-text">at</span>
-              <input
-                type="text"
-                className="form-control"
-                placeholder="University of..."
-                defaultValue={instructorData?.school}
-              />
-            </div>
-            <button className="btn btn-sm btn-light mb-0 icon-center">
+            <label className="form-label me-2">Education</label>
+            {educationList.map((edu, index) => (
+              <div className="input-group mb-2" key={index}>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Bachelor in..."
+                  style={{ flexBasis: '30%' }}
+                  value={edu.degree}
+                  onChange={(e) => handleChange(index, 'degree', e.target.value)}
+                />
+                <span className="input-group-text">at</span>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="University of..."
+                  value={edu.institution}
+                  onChange={(e) => handleChange(index, 'institution', e.target.value)}
+                />
+                <button
+                  type="button"
+                  className="btn btn-outline-danger"
+                  onClick={() => handleRemove(index)}
+                >
+                  &times;
+                </button>
+              </div>
+            ))}
+            <button className="btn btn-sm btn-light mb-0 icon-center" onClick={handleAdd}>
               <BsPlus className="me-1" />
-              Add more
+              Add
             </button>
           </Col>
           <div className="d-sm-flex justify-content-end">
