@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import Course from "./courseModel.js";
 
 const userSchema = new mongoose.Schema({
     name: { type: String, required: true },
@@ -20,6 +21,16 @@ const userSchema = new mongoose.Schema({
     isActivated: { type: Boolean, default: false },
     role: { type: String, enum: ['student', 'instructor'], default: 'student' },
 }, { timestamps: true });
+
+userSchema.post("save", async function () {
+  await Course.updateMany(
+    { "instructor.ref": this._id },
+    { 
+      "instructor.name": this.name,
+      "instructor.avatar": this.avatar 
+    }
+  );
+});
 
 const userModel = mongoose.models.user || mongoose.model('User', userSchema);
 

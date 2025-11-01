@@ -1,11 +1,11 @@
 import PageMetaData from '@/components/PageMetaData';
-import Courses from './components/Courses';
+import CoursesList from './components/Courses';
 import CoursesStat from './components/CoursesStat';
 const Courses = () => {
   return <>
       <PageMetaData title="All Course" />
       <CoursesStat />
-      <Courses />
+      <CoursesList />
     </>;
 };
 export default Courses;

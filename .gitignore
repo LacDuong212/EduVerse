@@ -155,5 +155,4 @@ vite.config.ts.timestamp-*
 tmp/
 
 *.json
-!package-lock.json
 !package.json

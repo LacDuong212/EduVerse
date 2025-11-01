@@ -1,4 +1,5 @@
 import Instructor from '../models/instructorModel.js';
+import Course from "../models/courseModel.js";
 
 
 const fetchInstructorFields = async (filter, fields, allowedFields) => {
@@ -117,4 +118,50 @@ export const createInstructor = async (req, res) => {
 
 export const updateInstructor = async (req, res) => {
   
+};
+
+export const getInstructorCourses = async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    // Find instructor by user ref
+    const instructor = await Instructor.findOne({ user: userId });
+    if (!instructor) {
+      return res.status(404).json({ success: false, message: 'Instructor not found' });
+    }
+
+    // Get list of course IDs from instructor's myCourses
+    const courseIds = instructor.myCourses.map((c) => c.course);
+
+    const total = courseIds.length;
+
+    // Fetch courses with pagination
+    const courses = await Course.find({ _id: { $in: courseIds } })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    // Calculate active/inactive counts from ALL courses (not just paged)
+    const allCourses = await Course.find({ _id: { $in: courseIds } }).lean();
+
+    const totalActive = allCourses.filter(c => c.isActive && c.status === "Live").length;
+    const totalInactive = total - totalActive;
+
+    return res.status(200).json({
+      success: true,
+      data: courses,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+      totalActive,
+      totalInactive,
+    });
+  } catch (err) {
+    console.error('Error fetching instructor courses:', err);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
 };

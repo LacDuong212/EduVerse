@@ -61,7 +61,7 @@ const CourseCard = ({
         </td>}
     </tr>;
 };
-const Courses = () => {
+const CoursesList = () => {
   return <Card className="bg-transparent border">
       <CardHeader className="bg-light border-bottom">
         <Row className="g-3 align-items-center justify-content-between">
@@ -156,4 +156,4 @@ const Courses = () => {
       </CardFooter>
     </Card>;
 };
-export default Courses;
+export default CoursesList;

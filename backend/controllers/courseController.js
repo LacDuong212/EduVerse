@@ -1,40 +1,45 @@
 import Course from "../models/courseModel.js";
 import Order from "../models/orderModel.js";
+import Instructor from "../models/instructorModel.js";
 import userInteraction from "../models/userInteraction.js";
+
 import Fuse from "fuse.js";
 
+
 export const getHomeCourses = async (req, res) => {
-    try {
-        const newest = await Course.find()
-            .sort({ createdAt: -1 })
-            .limit(8);
-        
-        const bestSellers = await Course.find()
-            .sort({ studentsEnrolled: -1 })
-            .limit(6);
+  try {
+    const newest = await Course.find()
+      .sort({ createdAt: -1 })
+      .limit(8);
 
-        const topRated = await Course.find()
-        .sort({ "rating.average": -1, "rating.count": -1 })
-        .limit(8);
+    const bestSellers = await Course.find()
+      .sort({ studentsEnrolled: -1 })
+      .limit(6);
 
-        const biggestDiscounts = await Course.aggregate([
-          { $match: { discountPrice: { $ne: null } } },
-          { $addFields: { discountAmount: { $subtract: ["$price", "$discountPrice"] } } },
-          { $sort: { discountAmount: -1 } },
-          { $limit: 4 }
-        ]);
+    const topRated = await Course.find()
+      .sort({ "rating.average": -1, "rating.count": -1 })
+      .limit(8);
 
-        res.json({
-        newest,
-        bestSellers,
-        topRated,
-        biggestDiscounts,
-        });
+    const biggestDiscounts = await Course.aggregate([
+      { $match: { discountPrice: { $ne: null } } },
+      { $addFields: { discountAmount: { $subtract: ["$price", "$discountPrice"] } } },
+      { $sort: { discountAmount: -1 } },
+      { $limit: 4 }
+    ]);
 
-    } catch (error) {
-        res.status(500).json({ message: "Error fetching home courses", error });
-    }
-};export const getAllCourses = async (req, res) => {
+    res.json({
+      newest,
+      bestSellers,
+      topRated,
+      biggestDiscounts,
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching home courses", error });
+  }
+};
+
+export const getAllCourses = async (req, res) => {
   try {
     // query params
     const page = Math.max(parseInt(req.query.page) || 1, 1);
@@ -205,7 +210,7 @@ export const getHomeCourses = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Error fetching courses",
-      error: error.message,
+      error: error.message
     });
   }
 };
@@ -336,6 +341,7 @@ export const getOwnedCourses = async (req, res) => {
     res.status(500).json({ success: false, message: "Error fetching owned courses", error });
   }
 };
+
 export const getRelatedCourses = async (req, res) => {
   try {
     const { id } = req.params;
@@ -380,4 +386,255 @@ export const getRelatedCourses = async (req, res) => {
       success: false,
       message: "Server error",
     });
-  }};
+  }
+};
+
+export const saveCourseStep1 = async (req, res) => {
+  try {
+    const userId = req.userId; // from userAuth middleware
+    const {
+      courseId,
+      title,
+      subtitle,
+      description,
+      category,
+      subCategory,
+      language,
+      level,
+      duration,
+      lecturesCount,
+      price,
+      discountPrice,
+    } = req.body;
+
+    let course;
+
+    if (courseId) {
+      // update existing draft
+      course = await Course.findById(courseId);
+      if (!course) {
+        return res.status(404).json({ success: false, message: "Course not found" });
+      }
+
+      if (course.instructor?.ref?.toString() !== userId) {
+        return res.status(403).json({ success: false, message: "Not authorised" });
+      }
+
+      course.title = title;
+      course.subtitle = subtitle;
+      course.description = description;
+      course.category = category;
+      course.subCategory = subCategory;
+      course.language = language;
+      course.level = level;
+      course.duration = duration;
+      course.lecturesCount = lecturesCount;
+      course.price = price;
+      course.discountPrice = discountPrice;
+
+      await course.save();
+    } else {
+      // create new draft
+      course = await Course.create({
+        title,
+        subtitle,
+        description,
+        category,
+        subCategory,
+        language,
+        level,
+        duration,
+        lecturesCount,
+        price,
+        discountPrice,
+        instructor: { ref: userId },
+        status: "Pending",
+        isActive: false,
+      });
+
+      // Add course to instructor.myCourses only on creation
+      await Instructor.updateOne(
+        { user: userId, 'myCourses.course': { $ne: course._id } },
+        { $push: { myCourses: { course: course._id } } }
+      );
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Step 1 saved successfully",
+      data: course,
+    });
+  } catch (err) {
+    console.error("Error saving Step 1:", err);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const saveCourseStep2 = async (req, res) => {
+  try {
+    const { courseId, thumbnail, previewVideo } = req.body;
+    const userId = req.userId;
+
+    if (!courseId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Course ID is required',
+      });
+    }
+
+    const course = await Course.findById(courseId);
+
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: 'Course not found',
+      });
+    }
+
+    // Check ownership
+    if (String(course.instructor.ref) !== String(userId)) {
+      return res.status(403).json({
+        success: false,
+        message: 'You are not authorised to modify this course',
+      });
+    }
+
+    // Update fields
+    course.thumbnail = thumbnail;
+    course.previewVideo = previewVideo;
+
+    await course.save();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Step 2 saved successfully',
+      data: course,
+    });
+  } catch (error) {
+    console.error('Error saving Step 2:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Server error while saving step 2',
+    });
+  }
+};
+
+export const saveCourseStep3 = async (req, res) => {
+  try {
+    const { courseId, curriculum } = req.body;
+    const userId = req.userId;
+
+    if (!courseId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Course ID is required',
+      });
+    }
+
+    if (!Array.isArray(curriculum)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Curriculum must be an array',
+      });
+    }
+
+    const course = await Course.findById(courseId);
+
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: 'Course not found',
+      });
+    }
+
+    // Ownership check
+    if (String(course.instructor.ref) !== String(userId)) {
+      return res.status(403).json({
+        success: false,
+        message: 'You are not authorised to modify this course',
+      });
+    }
+
+    // Validate and sanitize curriculum if needed (optional, recommended)
+
+    // Update curriculum
+    course.curriculum = curriculum;
+
+    await course.save();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Step 3 saved successfully',
+      data: course,
+    });
+  } catch (error) {
+    console.error('Error saving Step 3:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Server error while saving step 3',
+    });
+  }
+};
+
+export const submitCourseForReview = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { courseId, tags, ...restData } = req.body;
+
+    if (!courseId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Course ID is required',
+      });
+    }
+
+    const course = await Course.findById(courseId);
+
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: 'Course not found',
+      });
+    }
+
+    // Check ownership
+    if (String(course.instructor.ref) !== String(userId)) {
+      return res.status(403).json({
+        success: false,
+        message: 'You are not authorised to modify this course',
+      });
+    }
+
+    // Update course with all submitted fields
+    // You may want to whitelist or validate fields here
+    if (tags && Array.isArray(tags)) {
+      course.tags = tags;
+    }
+
+    // Apply any other submitted fields (e.g., title, description, thumbnail, etc.)
+    // assuming restData contains these fields
+    Object.entries(restData).forEach(([key, value]) => {
+      course[key] = value;
+    });
+
+    // Mark course as pending review
+    course.status = 'Pending';
+
+    await course.save();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Course submitted for review successfully',
+      data: course,
+    });
+  } catch (error) {
+    console.error('Error submitting course for review:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Server error while submitting course',
+    });
+  }
+};

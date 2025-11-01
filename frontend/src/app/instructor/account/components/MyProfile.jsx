@@ -1,12 +1,8 @@
 import useProfile from '@/hooks/useProfile';
 import useInstructor from '../../useInstructor';
-import { yupResolver } from '@hookform/resolvers/yup';
 import { useEffect, useState } from 'react';
 import { Card, CardBody, CardHeader, Col } from 'react-bootstrap';
-import { useForm } from 'react-hook-form';
 import { BsPlus, BsX } from 'react-icons/bs';
-import { toast } from 'react-toastify';
-import * as yup from 'yup';
 
 
 const MyProfile = () => {
@@ -18,7 +14,6 @@ const MyProfile = () => {
     const loadInstructor = async () => {
       const data = await fetchPublicFields(['address', 'education']);
       if (data) setInstructor(data);
-      else toast.error('Failed to load instructor data');
     };
     loadInstructor();
   }, []);

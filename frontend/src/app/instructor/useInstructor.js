@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 
@@ -51,5 +52,21 @@ export default function useInstructor() {
     }
   };
 
-  return { fetchPublicFields, fetchPrivateFields };
+  const fetchCourses = useCallback(async (page, limit) => {
+    if (!userId) return null;
+
+    try {
+      const { data } = await axios.get(
+        `${backendUrl}/api/instructor/courses?page=${page}&limit=${limit}`,
+        { withCredentials: true }
+      );
+      if (data?.success) return data;
+      return null;
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  }, [userId]);
+
+  return { fetchPublicFields, fetchPrivateFields, fetchCourses };
 };

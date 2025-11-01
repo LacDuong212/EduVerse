@@ -4,7 +4,7 @@ import Courses from './components/Courses';
 import NewsLetter from './components/NewsLetter';
 import PageBanner from './components/PageBanner';
 // import TopNavigationBar from './components/TopNavigationBar';
-const AllCourses = () => {
+const CoursesPage = () => {
   return <>
       <PageMetaData title="All Courses" />
       {/* <TopNavigationBar /> */}
@@ -16,4 +16,4 @@ const AllCourses = () => {
       </main>
     </>;
 };
-export default AllCourses;
+export default CoursesPage;

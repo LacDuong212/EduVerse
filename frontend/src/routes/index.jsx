@@ -1,8 +1,8 @@
 import { lazy } from 'react';
 import HomePage from "../app/home/page";
 import CourseDetails from "../app/pages/course/detail/page";
+import CoursesPage from "../app/pages/course/grid/page";
 
-import Courses from "../app/pages/course/grid/page";
 //AUTH
 const SignIn = lazy(() => import('@/app/auth/sign-in/page'));
 const SignUp = lazy(() => import('@/app/auth/sign-up/page'));
@@ -14,6 +14,7 @@ import Account from "../app/instructor/account";
 import InstructorDashboard from "../app/instructor/dashboard";
 import InstructorMyCourses from "../app/instructor/my-courses";
 import InstructorMyStudents from "../app/instructor/my-students";
+import CreateCoursePage from "../app/instructor/create-course";
 
 //AUTH-ADMIN
 const AdminSignUp = lazy(() => import('@/app/admin/auth/sign-up/page'));
@@ -41,17 +42,15 @@ import CartDetails from "../app/shop/cart/page";
 export const guestRoutes = [{
   path: '/home',
   name: 'Home',
-  isNested: false,
   element: <HomePage />
 },{
 path: '/courses',
   name: 'Courses',
   isNested: false,
-  element: <Courses />
+  element: <CoursesPage />
 }, {
   path: '/courses/:id',
   name: 'CourseDetails',
-  isNested: true,
   element: <CourseDetails />
 }];
 
@@ -117,7 +116,7 @@ export const instructorRoutes = [{
   path: '/instructor/create-course',
   name: 'Create Course',
   isNested: false,
-  element: null
+  element: <CreateCoursePage />
 }, {
   path: '/instructor/update-course',
   name: 'Update Course',
