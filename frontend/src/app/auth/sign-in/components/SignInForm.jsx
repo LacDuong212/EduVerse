@@ -1,9 +1,9 @@
 import { Controller } from "react-hook-form";
-import IconTextFormInput from '../../../../components/form/IconTextFormInput';
+import IconTextFormInput from '@/components/form/IconTextFormInput';
 import { Link } from "react-router-dom";
 import { BsEnvelopeFill } from "react-icons/bs";
 import { FaLock } from "react-icons/fa";
-import useSignIn from "../useSignIn";
+import useSignIn from "@/app/auth/sign-in/useSignIn";
 
 export default function SignInForm() {
   const { loading, login, control } = useSignIn();

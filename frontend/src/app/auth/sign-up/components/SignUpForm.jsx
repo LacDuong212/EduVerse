@@ -4,7 +4,7 @@ import { BsEnvelopeFill } from "react-icons/bs";
 import { FaLock, FaUser } from "react-icons/fa";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import useSignUp from "../useSignUp";
+import useSignUp from "@/app/auth/sign-up/useSignUp";
 
 const schema = yup.object({
   name: yup.string().required("Please enter your full name"),

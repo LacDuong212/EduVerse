@@ -1,16 +1,14 @@
-import ForgotPasswordPage from "../app/auth/forgot-password/ForgotPasswordPage";
-import SignInPage from "../app/auth/sign-in/SignInPage";
-import SignUpPage from "../app/auth/sign-up/SignUpPage";
-import ResetPasswordPage from "../app/auth/reset-password/ResetPasswordPage";
+import AdminNotFoundPage from "../app/admin/not-found";
 import NotFoundPage from "../app/not-found";
 import CourseDetail from "../app/pages/course/detail/page";
 
 import ProtectedRoute from "../components/ProtectedRoute";
 
+import AdminLayout from '../layouts/AdminLayout';
 import InstructorLayout from '../layouts/InstructorLayout';
 import StudentLayout from "../layouts/StudentLayout";
 
-import { guestRoutes, instructorRoutes, studentRoutes } from './index';
+import { guestRoutes, authRoutes, studentRoutes, instructorRoutes, authAdminRoutes, adminRoutes } from '@/routes/index';
 
 import { Navigate, Route, Routes } from 'react-router-dom';
 
@@ -22,10 +20,12 @@ const AppRouter = props => {
       <Route path="/" element={<Navigate to="/home" replace />} />
 
       {/* AUTH ROUTES */}
-      <Route path="/auth/sign-in" element={<SignInPage />} />
-      <Route path="/auth/sign-up" element={<SignUpPage />} />
-      <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
-      <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
+      {(authRoutes || []).map((route, idx) =>
+        <Route
+          key={idx + route.name}
+          path={route.path}
+          element={route.element}
+        />)}
       <Route path="/courses/:id" element={<CourseDetail />} />
 
       {/* GUEST ROUTES */}
@@ -70,6 +70,31 @@ const AppRouter = props => {
           />
         ))}
       </Route>
+
+      {/* AUTH ADMIN ROUTES */}
+      {(authAdminRoutes || []).map((route, idx) =>
+        <Route
+          key={idx + route.name}
+          path={route.path}
+          element={route.element}
+        />)}
+
+      {/* ADMIN ROUTES */}
+      <Route element={<ProtectedRoute />}>
+        {(adminRoutes || []).map((route, idx) =>
+          <Route
+            key={idx + route.name}
+            path={route.path}
+            element={
+              <AdminLayout {...props}>{route.element}</AdminLayout>
+            }
+          />
+        )}
+      </Route>
+
+
+      {/* 404 ADMIN FALLBACK */}
+      <Route path="/admin/*" element={<AdminLayout {...props}><AdminNotFoundPage /></AdminLayout>} />
 
       {/* 404 FALLBACK */}
       <Route path="*" element={<NotFoundPage />} />

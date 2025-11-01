@@ -3,7 +3,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from 'react-hook-form';
 import { BsEnvelopeFill } from 'react-icons/bs';
 import * as yup from 'yup';
-import useForgotPassword from '../useForgotPassword';
+import useForgotPassword from '@/app/auth/forgot-password/useForgotPassword';
 
 const ForgotPasswordForm = ({ onForgotSuccess }) => {
   const editEmailFormSchema = yup.object({

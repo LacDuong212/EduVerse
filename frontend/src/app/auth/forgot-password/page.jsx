@@ -1,9 +1,10 @@
 import { useState } from "react";
+import PageMetaData from '@/components/PageMetaData';
 import { Col, Row } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
-import AuthLayout from "../components/AuthLayout";
-import ForgotPasswordForm from "./components/ForgotPasswordForm";
-import EmailVerifyModal from "../email-verify/EmailVerifyModal";
+import AuthLayout from "@/app/auth/components/AuthLayout";
+import ForgotPasswordForm from "@/app/auth/forgot-password/components/ForgotPasswordForm";
+import EmailVerifyModal from "@/app/auth/email-verify/EmailVerifyModal";
 
 const ForgotPasswordPage = () => {
   const [showVerifyModal, setShowVerifyModal] = useState(false);
@@ -11,6 +12,7 @@ const ForgotPasswordPage = () => {
   const navigate = useNavigate();
 
   return <>
+      <PageMetaData title="Forgot-Password" />
       <AuthLayout>
         <Col xs={12} lg={6} className="d-flex justify-content-center">
           <Row className="my-5">

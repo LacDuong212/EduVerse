@@ -1,13 +1,15 @@
 import { useLocation, Link } from "react-router-dom";
+import PageMetaData from '@/components/PageMetaData';
 import { Col, Row } from "react-bootstrap";
-import AuthLayout from "../components/AuthLayout";
-import ResetPasswordForm from "./components/ResetPasswordForm";
+import AuthLayout from "@/app/auth/components/AuthLayout";
+import ResetPasswordForm from "@/app/auth/reset-password/components/ResetPasswordForm";
 
 const ResetPasswordPage = () => {
   const location = useLocation();
   const email = location.state?.email || "";
 
   return <>
+      <PageMetaData title="Reset-Password" />
       <AuthLayout>
         <Col xs={12} lg={6} className="d-flex justify-content-center">
           <Row className="my-5">
