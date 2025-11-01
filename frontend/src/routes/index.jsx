@@ -2,7 +2,7 @@ import { lazy } from 'react';
 import HomePage from "../app/home/page";
 import CourseDetails from "../app/pages/course/detail/page";
 import CartDetails from "../app/shop/cart/page";
-
+import AllCourses from "../app/pages/course/grid/page";
 //AUTH
 const SignIn = lazy(() => import('@/app/auth/sign-in/page'));
 const SignUp = lazy(() => import('@/app/auth/sign-up/page'));
@@ -40,6 +40,11 @@ export const guestRoutes = [{
   name: 'Home',
   isNested: false,
   element: <HomePage />
+},{
+path: '/courses',
+  name: 'Courses',
+  isNested: false,
+  element: <AllCourses />
 }, {
   path: '/courses/:id',
   name: 'CourseDetails',
