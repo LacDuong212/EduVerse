@@ -20,10 +20,10 @@ const courseSchema = new mongoose.Schema({
   lecturesCount: Number,
 
   curriculum: [{ 
-    section: String,
+    section: { type: String, required: true },
     lectures: [{
-      title: String,
-      videoUrl: String,
+      title: { type: String, required: true },
+      videoUrl: String,       // #TODO: file, img, doc
       duration: Number,
       isFree: { type: Boolean, default: false }
     }]
@@ -46,10 +46,20 @@ const courseSchema = new mongoose.Schema({
 
   isActive: { type: Boolean, default: true },
   status: { type: String, enum: ["Rejected", "Pending", "Live"], default: "Pending" },
+  isDeleted: { type: Boolean, default: false }
 }, {
   timestamps: true
 });
 
 courseSchema.index({ title: "text", category: 1, subCategory: 1, tags: 1 });
+
+courseSchema.pre('save', function (next) {
+  if (this.isModified('curriculum') && this.curriculum?.length) {
+    const allLectures = this.curriculum.flatMap(s => s.lectures || []);
+    this.lecturesCount = allLectures.length;
+    this.duration = allLectures.reduce((sum, lec) => sum + (lec.duration || 0), 0);
+  }
+  next();
+});
 
 export default mongoose.model("Course", courseSchema);

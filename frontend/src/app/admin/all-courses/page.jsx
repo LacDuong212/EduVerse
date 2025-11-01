@@ -3,7 +3,7 @@ import CoursesList from './components/Courses';
 import CoursesStat from './components/CoursesStat';
 const Courses = () => {
   return <>
-      <PageMetaData title="All Course" />
+      <PageMetaData title="All Courses" />
       <CoursesStat />
       <CoursesList />
     </>;

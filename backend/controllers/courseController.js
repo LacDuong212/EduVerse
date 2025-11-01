@@ -1,3 +1,4 @@
+import Admin from "../models/adminModel.js";
 import Course from "../models/courseModel.js";
 import Order from "../models/orderModel.js";
 import Instructor from "../models/instructorModel.js";
@@ -36,6 +37,52 @@ export const getHomeCourses = async (req, res) => {
 
   } catch (error) {
     res.status(500).json({ message: "Error fetching home courses", error });
+  }
+};
+
+export const getCoursesOverview = async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    const admin = await Admin.findById(userId);
+    if (!admin || !admin.isVerified || !admin.isApproved) {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied",
+      });
+    }
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const courses = await Course.find(/*{ isDeleted: false }*/) // #TODO
+      .select("image thumbnail title instructor level createdAt price status")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean(); // lean = faster, returns plain JS objects
+
+    const [totalCourses, activatedCourses, pendingCourses] = await Promise.all([
+      Course.countDocuments(/*{ isDeleted: false }*/),
+      Course.countDocuments({ status: "Live", isActive: true, /*{ isDeleted: false }*/ }),
+      Course.countDocuments({ status: "Pending", /*{ isDeleted: false }*/ }),
+    ]);
+
+    res.status(200).json({
+      success: true,
+      data: courses,
+      meta: {
+        totalCourses,
+        activatedCourses,
+        pendingCourses,
+        currentPage: page,
+        totalPages: Math.ceil(totalCourses / limit),
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
