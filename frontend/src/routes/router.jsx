@@ -7,7 +7,7 @@ import ProtectedRoute from "../components/ProtectedRoute";
 import AdminLayout from '../layouts/AdminLayout';
 import InstructorLayout from '../layouts/InstructorLayout';
 import StudentLayout from "../layouts/StudentLayout";
-
+import GuestLayout from "../layouts/GuestLayout";
 import { guestRoutes, authRoutes, studentRoutes, instructorRoutes, authAdminRoutes, adminRoutes } from '@/routes/index';
 
 import { Navigate, Route, Routes } from 'react-router-dom';
@@ -34,9 +34,11 @@ const AppRouter = props => {
           key={idx + route.name}
           path={route.path}
           element={
-            // <InstructorLayout {...props} isNested={route.isNested}>{
-              route.element
-            // }</InstructorLayout>
+          <GuestLayout {...props}>
+              {route.element}
+            </GuestLayout>
+           
+         
           }
         />
       ))}

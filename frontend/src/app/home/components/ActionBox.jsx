@@ -1,5 +1,13 @@
+
+import { useNavigate } from 'react-router-dom';
 import { Button, Col, Container, Row } from 'react-bootstrap';
 const ActionBox = () => {
+  const navigate = useNavigate();
+
+  const handleButtonClick = () => {
+    navigate('/student/become-instructor');
+  };
+
   return <section className="pt-0 pt-lg-5">
       <Container className="position-relative">
         <figure className="position-absolute top-50 start-50 translate-middle ms-2">
@@ -29,7 +37,7 @@ const ActionBox = () => {
                       </p>
                     </Col>
                     <Col lg={5} className="text-lg-end">
-                      <Button variant="outline-warning" className="mb-0">
+                      <Button variant="outline-warning" className="mb-0" onClick={handleButtonClick}>
                         Start Teaching Today
                       </Button>
                     </Col>
