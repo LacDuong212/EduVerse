@@ -16,7 +16,7 @@ export default function useCourseList() {
 
   // local state (giữ nguyên style của bạn)
   const [page, setPage] = useState(1);
-  const [limit] = useState(8);
+  const [limit] = useState(9);
   const [total, setTotal] = useState(0);
   const [category, setCategory] = useState("");
   const [search, setSearch] = useState("");
@@ -81,12 +81,11 @@ export default function useCourseList() {
   }, [category, search]);
 
   // load thêm khi page tăng
-  useEffect(() => {
-    if (page > 1) {
-      fetchCourses(page, false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page]);
+ useEffect(() => {
+  // MỖI lần page đổi (1,2,3,...) => replace kết quả trang đó
+  fetchCourses(page, /* reset = */ true);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [page]);
 
   // API nạp thêm (cho nút "Load more" hoặc infinite scroll)
   const loadMore = () => {

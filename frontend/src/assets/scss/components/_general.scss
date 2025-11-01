@@ -104,26 +104,88 @@
   }
 */
 
-// Ribbon css
-.ribbon{
+// Ribbon css/* ===== Compact, clean ribbon at top-left ===== */
+.ribbon {
   position: absolute;
-  top: 15px;
+  top: 0;
   left: 0;
-  background: var(--#{$prefix}white);
-  padding: 0 10px;
-  color:$dark;
-  box-shadow: 0 0 40px rgba(0, 0, 0, .15);
+  z-index: 10;
+  overflow: hidden;
+  width: 90px;      /* ↓ nhỏ hơn trước */
+  height: 90px;     /* ↓ nhỏ hơn trước */
+  pointer-events: none;
 }
-.ribbon::before{
-  content: "";
+
+.ribbon span {
   position: absolute;
+  display: block;
+  width: 125px;     /* ↓ ngắn hơn, không che nhiều */
+  padding: 6px 0;   /* ↓ mảnh hơn */
+  background: linear-gradient(45deg, #ff4757, #ff6b81);
+  color: #fff;
+  font-weight: 800;
+  text-align: center;
+  font-size: 1.25rem;
+  transform: rotate(-45deg);
   top: 0px;
-  right: -20px;
-  border-top: 0.75em $border-style  var(--#{$prefix}white);
-  border-bottom: 0.75em $border-style  var(--#{$prefix}white);
-  border-right: 20px $border-style transparent;
-  border-left: 0px $border-style transparent;
+  left: -35px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  border-radius: 2px;
+    animation: 
+    ribbonGlow 2.5s ease-in-out infinite alternate,
+    gradientMove 5s linear infinite;
 }
+
+.ribbon span::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 2px;
+}
+
+/* Ribbon lớn, nổi bật */
+.ribbon-lg {
+  width: 150px;
+  height: 150px;
+}
+.ribbon-lg span {
+  animation: salePulse 3s infinite ease-in-out;
+}
+@keyframes ribbonGlow {
+  0% { box-shadow: 0 0 5px rgba(255, 80, 100, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(255, 80, 100, 0.7); }
+  100% { box-shadow: 0 0 8px rgba(255, 80, 100, 0.4); }
+}
+
+/* Gradient di chuyển */
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+
+}
+.ribbon-lg span {
+  width: 220px;
+  padding: 12px 0;
+  font-size: 1.1rem;
+  top: 28px;
+  left: -50px;
+  background: linear-gradient(45deg, #ff4757, #ff6b81);
+  text-transform: uppercase;
+}
+// .ribbon::before{
+//   content: "";
+//   position: absolute;
+//   top: 0px;
+//   right: -20px;
+//   border-top: 0.75em $border-style  var(--#{$prefix}white);
+//   border-bottom: 0.75em $border-style  var(--#{$prefix}white);
+//   border-right: 20px $border-style transparent;
+//   border-left: 0px $border-style transparent;
+// }
 
 //Upload remove button
 .uploadremove {

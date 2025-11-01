@@ -1,41 +1,40 @@
+// pages/course/detail/grid/components/Courses.jsx
 import ChoicesFormInput from '@/components/form/ChoicesFormInput';
-import { Button, Col, Container, Offcanvas, OffcanvasBody, OffcanvasHeader, Row } from 'react-bootstrap';
+import {  Button,  Col,  Container,  Offcanvas,  OffcanvasBody,  OffcanvasHeader,  Row } from 'react-bootstrap';
 import { FaSearch, FaSlidersH } from 'react-icons/fa';
 import Pagination from './Pagination';
 import CourseFilter from './CourseFilter';
 import useToggle from '@/hooks/useToggle';
 import useViewPort from '@/hooks/useViewPort';
-// ❌ BỎ mock data:
-// import { useFetchData } from '@/hooks/useFetchData';
-// import { getAllCourses } from '@/helpers/data';
-import CourseCard from './CourseCard';
+import CourseCard from "@/components/CourseCard";
 
-// ✅ Dùng hook mới (đặt đúng path bạn đã nói):
+// ✅ Dùng hook data thật
 import useCourseList from '../useCourseList';
 
 const Courses = () => {
   const { isTrue, toggle } = useToggle();
   const { width } = useViewPort();
 
-  // ✅ Lấy data thật từ hook (đã kết nối backend fuzzy)
   const {
     allCourses,
     total,
-    search, setSearch,
-    // page, setPage, limit, loading, loadMore, category, setCategory, fetchCourses
+    page,
+    setPage,
+    limit,
+    search,
+    setSearch,
+    // loading, category, setCategory, fetchCourses, loadMore
   } = useCourseList();
 
-  // Số liệu hiển thị ngắn gọn (giữ nguyên vị trí text cũ)
-  const showingFrom = allCourses.length ? 1 : 0;
-  const showingTo = allCourses.length;
-  const totalResult = total;
-
-  // Submit ô search (không cần preventDefault nếu chỉ là button thường)
   const onSearchClick = (e) => {
     e.preventDefault();
-    // Hook đã tự fetch khi search thay đổi (useEffect trong hook)
-    // Nên ở đây chỉ cần setSearch; nút này chỉ để UX hợp lý
+    // Hook đã tự fetch khi search thay đổi
   };
+
+  // ✅ Tính số liệu hiển thị cho dòng "Showing X-Y of Z result"
+  const showingFrom = total ? (page - 1) * limit + (allCourses.length ? 1 : 0) : 0;
+  const showingTo = (page - 1) * limit + allCourses.length;
+  const totalResult = total;
 
   return (
     <section className="py-5">
@@ -78,7 +77,11 @@ const Courses = () => {
                 </form>
               </Col>
 
-              <Col xs={12} xl={3} className="d-flex justify-content-between align-items-center mt-3 mt-xl-0">
+              <Col
+                xs={12}
+                xl={3}
+                className="d-flex justify-content-between align-items-center mt-3 mt-xl-0"
+              >
                 <Button
                   variant="primary"
                   onClick={toggle}
@@ -91,14 +94,15 @@ const Courses = () => {
                   <FaSlidersH className="me-1" /> Show filter
                 </Button>
                 <p className="mb-0 text-end">
-                  {/* ✅ Hiển thị động, giữ nguyên format */}
+                  {/* ✅ Hiển thị động theo page/limit */}
                   Showing {showingFrom}-{showingTo} of {totalResult} result
                 </p>
               </Col>
             </Row>
 
             <Row className="g-4">
-              {allCourses?.slice(0, 9)?.map((course, idx) => (
+              {/* ✅ KHÔNG slice — allCourses đã theo đúng trang */}
+              {allCourses?.map((course, idx) => (
                 <Col sm={6} xl={4} key={course.courseId || course._id || idx}>
                   <CourseCard course={course} />
                 </Col>
@@ -106,7 +110,13 @@ const Courses = () => {
             </Row>
 
             <Col xs={12}>
-              <Pagination />
+              {/* ✅ Truyền props để phân trang điều khiển cùng một state */}
+              <Pagination
+                page={page}
+                limit={limit}
+                total={total}
+                onChangePage={setPage}
+              />
             </Col>
           </Col>
 

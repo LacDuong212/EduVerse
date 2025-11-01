@@ -1,13 +1,10 @@
 import { FaAngleDoubleLeft, FaAngleDoubleRight } from 'react-icons/fa';
-import useCourseList from '../useCourseList';
 
-const Pagination = () => {
-  const { page, setPage, total, limit } = useCourseList();
-
-  const totalPages = Math.ceil(total / limit) || 1;
+const Pagination = ({ page, limit, total, onChangePage }) => {
+  const totalPages = Math.max(1, Math.ceil(total / limit));
 
   const goToPage = (p) => {
-    if (p >= 1 && p <= totalPages) setPage(p);
+    if (p >= 1 && p <= totalPages) onChangePage(p);
   };
 
   return (

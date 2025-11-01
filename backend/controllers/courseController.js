@@ -43,14 +43,13 @@ export const getAllCourses = async (req, res) => {
     const search = (req.query.search || "").trim();
     const { category, subCategory } = req.query;
 
-    // bộ lọc DB (lọc trước để giảm dữ liệu đưa vào fuzzy)
+    // bộ lọc DB
     const mongoFilter = {};
     if (category) mongoFilter.category = category;
     if (subCategory) mongoFilter.subCategory = subCategory;
 
-    // lấy về mảng "thô" (lean) cho nhẹ và nhanh
+    // chỉ lấy field cần thiết cho FE + tính toán
     const courseDocs = await Course.find(mongoFilter, {
-      // chọn các field cần thiết cho FE
       title: 1,
       subtitle: 1,
       category: 1,
@@ -61,29 +60,34 @@ export const getAllCourses = async (req, res) => {
       discountPrice: 1,
       createdAt: 1,
       updatedAt: 1,
-      // nếu có courseId khác _id
       courseId: 1,
+
+      // 3 field mới cần tính/trả về
+      duration: 1,
+      lecturesCount: 1,
+      rating: 1,
+
+      // để fallback tính duration/lectures từ curriculum
+      "curriculum.section": 1,                // tên section (nhẹ)
+      "curriculum.lectures.duration": 1,      // chỉ lấy duration (không cần videoUrl)
+      // không lấy videoUrl/title để nhẹ hơn
     })
       .sort({ createdAt: -1, _id: -1 })
       .lean();
 
-    // mặc định kết quả = toàn bộ sau khi lọc DB
     let results = courseDocs;
 
-    // fuzzy search khi có search
+    // fuzzy search (nếu có)
     if (search) {
       const fuse = new Fuse(courseDocs, {
         keys: ["title", "subtitle", "category", "subCategory", "tags"],
-        // tinh chỉnh fuzzy cho nội dung khóa học
-        threshold: 0,          // 0 = khắt khe, 1 = rất thoáng
-        distance: 120,            // chấp nhận độ lệch ký tự
-        ignoreLocation: true,     // không phụ thuộc vị trí match
+        threshold: 0,
+        distance: 120,
+        ignoreLocation: true,
         includeScore: true,
         minMatchCharLength: 2,
       });
-
-      const fuzzyResults = fuse.search(search);
-      results = fuzzyResults.map((r) => r.item);
+      results = fuse.search(search).map((r) => r.item);
     }
 
     // phân trang sau fuzzy
@@ -92,20 +96,61 @@ export const getAllCourses = async (req, res) => {
     const end = start + limit;
     const paginated = results.slice(start, end);
 
-    // Chuẩn hóa courseId cho FE nếu bạn đang dùng courseId riêng
-    const data = paginated.map((c) => ({
-      courseId: c.courseId || String(c._id), // FE của bạn đang dùng courseId
-      title: c.title,
-      subtitle: c.subtitle,
-      category: c.category,
-      subCategory: c.subCategory,
-      level: c.level,
-      thumbnail: c.thumbnail,
-      price: c.price,
-      discountPrice: c.discountPrice,
-      createdAt: c.createdAt,
-      updatedAt: c.updatedAt,
-    }));
+    // helper: tính fallback
+    const sumLectureDurations = (cur = []) =>
+      Array.isArray(cur)
+        ? cur.reduce((acc, sec) => {
+            const list = Array.isArray(sec?.lectures) ? sec.lectures : [];
+            const s = list.reduce((a, lec) => a + (Number(lec?.duration) || 0), 0);
+            return acc + s;
+          }, 0)
+        : 0;
+
+    const countLecturesFromCurriculum = (cur = []) =>
+      Array.isArray(cur)
+        ? cur.reduce((acc, sec) => acc + (Array.isArray(sec?.lectures) ? sec.lectures.length : 0), 0)
+        : 0;
+
+    // Chuẩn hóa dữ liệu trả về
+    const data = paginated.map((c) => {
+      // duration (phút)
+      const duration =
+        typeof c.duration === "number" && !Number.isNaN(c.duration)
+          ? c.duration
+          : sumLectureDurations(c.curriculum);
+
+      // lectures (số bài)
+      const lectures =
+        typeof c.lecturesCount === "number" && !Number.isNaN(c.lecturesCount)
+          ? c.lecturesCount
+          : countLecturesFromCurriculum(c.curriculum);
+
+      // rating object
+      const rating = {
+        average: Number(c?.rating?.average ?? 0),
+        count: Number(c?.rating?.count ?? 0),
+        total: Number(c?.rating?.total ?? 0),
+      };
+
+      return {
+        courseId: c.courseId || String(c._id),
+        title: c.title,
+        subtitle: c.subtitle,
+        category: c.category,
+        subCategory: c.subCategory,
+        level: c.level,
+        thumbnail: c.thumbnail,
+        price: c.price,
+        discountPrice: c.discountPrice,
+        createdAt: c.createdAt,
+        updatedAt: c.updatedAt,
+
+        // ➕ 3 field mới
+        rating,
+        duration,
+        lectures,
+      };
+    });
 
     res.json({
       success: true,
