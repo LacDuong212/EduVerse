@@ -22,14 +22,24 @@ const coursesSlice = createSlice({
     setAllCourses: (state, action) => {
       state.allCourses = action.payload;
     },
-    appendCourses: (state, action) => {
-      console.log("append", action.payload.length, "before:", state.allCourses.length);
-      const newCourses = action.payload.filter(
-        (c) => !state.allCourses.some((old) => old._id === c._id)
-      );
-      console.log("after filter:", newCourses.length);
-      state.allCourses = [...state.allCourses, ...newCourses];
-      console.log("new total:", state.allCourses.length);
+   appendCourses: (state, action) => {
+      const incoming = Array.isArray(action.payload) ? action.payload : [];
+
+      // Lấy id chuẩn, hỗ trợ nhiều schema
+      const getId = (x) => x?.courseId ?? x?._id ?? x?.id;
+
+      const existingIds = new Set(state.allCourses.map(getId));
+
+      // ✅ Chỉ lấy những item CHƯA có trong state
+      const toAdd = incoming.filter((x) => !existingIds.has(getId(x)));
+
+      // (tuỳ chọn) log cho bạn check:
+      // console.log('append', incoming.length, 'before:', state.allCourses.length);
+      // console.log('after filter:', toAdd.length);
+
+      state.allCourses.push(...toAdd);
+
+      // console.log('new total:', state.allCourses.length);
     },
   },
 });

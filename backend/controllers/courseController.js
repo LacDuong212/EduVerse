@@ -1,6 +1,7 @@
 import Course from "../models/courseModel.js";
 import Order from "../models/orderModel.js";
 import userInteraction from "../models/userInteraction.js";
+import Fuse from "fuse.js";
 
 export const getHomeCourses = async (req, res) => {
     try {
@@ -34,43 +35,95 @@ export const getHomeCourses = async (req, res) => {
         res.status(500).json({ message: "Error fetching home courses", error });
     }
 };
-
 export const getAllCourses = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const { category, subCategory, search } = req.query;
+    // query params
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const limit = Math.max(parseInt(req.query.limit) || 10, 1);
+    const search = (req.query.search || "").trim();
+    const { category, subCategory } = req.query;
 
-    const filter = {};
-    if (category) filter.category = category;
-    if (subCategory) filter.subCategory = subCategory;
+    // bộ lọc DB (lọc trước để giảm dữ liệu đưa vào fuzzy)
+    const mongoFilter = {};
+    if (category) mongoFilter.category = category;
+    if (subCategory) mongoFilter.subCategory = subCategory;
+
+    // lấy về mảng "thô" (lean) cho nhẹ và nhanh
+    const courseDocs = await Course.find(mongoFilter, {
+      // chọn các field cần thiết cho FE
+      title: 1,
+      subtitle: 1,
+      category: 1,
+      subCategory: 1,
+      level: 1,
+      thumbnail: 1,
+      price: 1,
+      discountPrice: 1,
+      createdAt: 1,
+      updatedAt: 1,
+      // nếu có courseId khác _id
+      courseId: 1,
+    })
+      .sort({ createdAt: -1, _id: -1 })
+      .lean();
+
+    // mặc định kết quả = toàn bộ sau khi lọc DB
+    let results = courseDocs;
+
+    // fuzzy search khi có search
     if (search) {
-      filter.title = { $regex: search, $options: "i" };
+      const fuse = new Fuse(courseDocs, {
+        keys: ["title", "subtitle", "category", "subCategory", "tags"],
+        // tinh chỉnh fuzzy cho nội dung khóa học
+        threshold: 0,          // 0 = khắt khe, 1 = rất thoáng
+        distance: 120,            // chấp nhận độ lệch ký tự
+        ignoreLocation: true,     // không phụ thuộc vị trí match
+        includeScore: true,
+        minMatchCharLength: 2,
+      });
+
+      const fuzzyResults = fuse.search(search);
+      results = fuzzyResults.map((r) => r.item);
     }
 
-    const courses = await Course.find(filter)
-      .sort({ createdAt: -1, _id: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit);
+    // phân trang sau fuzzy
+    const total = results.length;
+    const start = (page - 1) * limit;
+    const end = start + limit;
+    const paginated = results.slice(start, end);
 
-    const total = await Course.countDocuments(filter);
+    // Chuẩn hóa courseId cho FE nếu bạn đang dùng courseId riêng
+    const data = paginated.map((c) => ({
+      courseId: c.courseId || String(c._id), // FE của bạn đang dùng courseId
+      title: c.title,
+      subtitle: c.subtitle,
+      category: c.category,
+      subCategory: c.subCategory,
+      level: c.level,
+      thumbnail: c.thumbnail,
+      price: c.price,
+      discountPrice: c.discountPrice,
+      createdAt: c.createdAt,
+      updatedAt: c.updatedAt,
+    }));
 
     res.json({
       success: true,
-      courses,
-      total,
-      page,
-      pages: Math.ceil(total / limit),
+      data,
+      pagination: {
+        total,
+        page,
+        totalPages: Math.ceil(total / limit),
+      },
     });
   } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      message: "Error fetching courses", 
-      error: error.message 
+    res.status(500).json({
+      success: false,
+      message: "Error fetching courses",
+      error: error.message,
     });
   }
 };
-
 
 export const getCourseById = async (req, res) => {
   try {

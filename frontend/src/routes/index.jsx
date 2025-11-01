@@ -1,6 +1,6 @@
 import HomePage from "../app/home/page";
 import CourseDetails from "../app/pages/course/detail/page";
-import CartDetails from "../app/shop/cart/page";
+
 import AllCourses from "../app/pages/course/grid/page";
 // INSTRUCTOR
 import Account from "../app/instructor/account";
@@ -8,6 +8,9 @@ import InstructorDashboard from "../app/instructor/dashboard";
 import InstructorMyCourses from "../app/instructor/my-courses";
 import InstructorMyStudents from "../app/instructor/my-students";
 
+//STUDENT
+import VideoPlayer from "../app/pages/course/video-player/page";
+import CartDetails from "../app/shop/cart/page";
 
 export const guestRoutes = [{
   path: '/home',
@@ -84,6 +87,11 @@ export const studentRoutes = [{
   isNested: true,
   element: null
 }, {
+  path: '/student/video-player',
+  name: 'My Video Player',
+  isNested: false,
+  element: <VideoPlayer />
+},{
   path: '/student/cart',
   name: 'My Cart',
   isNested: false,
