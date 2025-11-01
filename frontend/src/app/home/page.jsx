@@ -4,9 +4,11 @@ import ActionBox from './components/ActionBox';
 import Counter from './components/Counter';
 import Hero from './components/Hero';
 import NewestCourses from './components/NewestCourses';
-import Reviews from './components/Reviews';
+// import Reviews from './components/Reviews';
 import useHomeCourses from './useHomeCourses';
 import TrendingCourses from './components/TrendingCourses';
+import BestSellersSection from './components/BestSellers';
+import TopRatedSection from './components/TopRated';
 const HomePage = () => {
   useHomeCourses();
 
@@ -19,7 +21,9 @@ const HomePage = () => {
         <NewestCourses />
         <ActionBox />
         <TrendingCourses />
-        <Reviews />
+        <BestSellersSection />
+        <TopRatedSection />
+        {/* <Reviews /> */}
       </main>
      
     </>;

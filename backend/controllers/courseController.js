@@ -34,8 +34,7 @@ export const getHomeCourses = async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: "Error fetching home courses", error });
     }
-};
-export const getAllCourses = async (req, res) => {
+};export const getAllCourses = async (req, res) => {
   try {
     // query params
     const page = Math.max(parseInt(req.query.page) || 1, 1);
@@ -52,36 +51,54 @@ export const getAllCourses = async (req, res) => {
     const courseDocs = await Course.find(mongoFilter, {
       title: 1,
       subtitle: 1,
+      description: 1, // nếu cần cho FE
+      image: 1,       // nếu cần cho FE
       category: 1,
       subCategory: 1,
+      language: 1,
+
+      // instructor (đúng theo schema bạn cung cấp)
+      "instructor.ref": 1,
+      "instructor.name": 1,
+      "instructor.avatar": 1,
+
       level: 1,
+      duration: 1,
+      lecturesCount: 1,
+
+      curriculum: 1, // lấy để fallback (nếu muốn nhẹ hơn thì chỉ chọn trường cần như dưới)
+      // "curriculum.section": 1,
+      // "curriculum.lectures.duration": 1,
+
+      studentsEnrolled: 1,
+
+      rating: 1,
+
       thumbnail: 1,
+      previewVideo: 1,
+      tags: 1,
+
       price: 1,
       discountPrice: 1,
+
+      isActive: 1,
+      status: 1,
+
       createdAt: 1,
       updatedAt: 1,
       courseId: 1,
-
-      // 3 field mới cần tính/trả về
-      duration: 1,
-      lecturesCount: 1,
-      rating: 1,
-
-      // để fallback tính duration/lectures từ curriculum
-      "curriculum.section": 1,                // tên section (nhẹ)
-      "curriculum.lectures.duration": 1,      // chỉ lấy duration (không cần videoUrl)
-      // không lấy videoUrl/title để nhẹ hơn
     })
       .sort({ createdAt: -1, _id: -1 })
       .lean();
 
     let results = courseDocs;
 
-    // fuzzy search (nếu có)
+    // fuzzy search (nếu có từ khoá)
     if (search) {
+      // đảm bảo đã cài và import Fuse
       const fuse = new Fuse(courseDocs, {
         keys: ["title", "subtitle", "category", "subCategory", "tags"],
-        threshold: 0,
+        threshold: 0,           // strict match (giống logic bạn đang dùng)
         distance: 120,
         ignoreLocation: true,
         includeScore: true,
@@ -90,13 +107,13 @@ export const getAllCourses = async (req, res) => {
       results = fuse.search(search).map((r) => r.item);
     }
 
-    // phân trang sau fuzzy
+    // phân trang SAU fuzzy (giữ nguyên logic quan trọng)
     const total = results.length;
     const start = (page - 1) * limit;
     const end = start + limit;
     const paginated = results.slice(start, end);
 
-    // helper: tính fallback
+    // helper fallback
     const sumLectureDurations = (cur = []) =>
       Array.isArray(cur)
         ? cur.reduce((acc, sec) => {
@@ -108,12 +125,15 @@ export const getAllCourses = async (req, res) => {
 
     const countLecturesFromCurriculum = (cur = []) =>
       Array.isArray(cur)
-        ? cur.reduce((acc, sec) => acc + (Array.isArray(sec?.lectures) ? sec.lectures.length : 0), 0)
+        ? cur.reduce(
+            (acc, sec) => acc + (Array.isArray(sec?.lectures) ? sec.lectures.length : 0),
+            0
+          )
         : 0;
 
-    // Chuẩn hóa dữ liệu trả về
+    // Chuẩn hoá dữ liệu phản hồi
     const data = paginated.map((c) => {
-      // duration (phút)
+      // duration (giờ)
       const duration =
         typeof c.duration === "number" && !Number.isNaN(c.duration)
           ? c.duration
@@ -125,15 +145,31 @@ export const getAllCourses = async (req, res) => {
           ? c.lecturesCount
           : countLecturesFromCurriculum(c.curriculum);
 
-      // rating object
+      // rating object (giữ nguyên)
       const rating = {
         average: Number(c?.rating?.average ?? 0),
         count: Number(c?.rating?.count ?? 0),
         total: Number(c?.rating?.total ?? 0),
       };
 
+      // studentsEnrolled: ưu tiên field trong DB, fallback từ rating.count
+      const studentsEnrolled = Number.isFinite(Number(c?.studentsEnrolled))
+        ? Number(c.studentsEnrolled)
+        : (Number.isFinite(Number(c?.rating?.count)) ? Number(c.rating.count) : 0);
+
+      // instructor: map đúng theo schema (không dùng populate để không đổi logic quan trọng)
+      const instructor = c?.instructor
+        ? {
+            ref: c.instructor.ref,     // ObjectId
+            name: c.instructor.name,   // có thể null nếu chưa set
+            avatar: c.instructor.avatar,
+          }
+        : undefined;
+
       return {
         courseId: c.courseId || String(c._id),
+
+        // các field FE cần
         title: c.title,
         subtitle: c.subtitle,
         category: c.category,
@@ -145,10 +181,14 @@ export const getAllCourses = async (req, res) => {
         createdAt: c.createdAt,
         updatedAt: c.updatedAt,
 
-        // ➕ 3 field mới
+        // số liệu chuẩn hoá
         rating,
         duration,
         lectures,
+
+        // ➕ field mới thêm theo yêu cầu
+        studentsEnrolled,
+        instructor,
       };
     });
 
