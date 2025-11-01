@@ -194,7 +194,7 @@ export const adminRoutes = [{
 ];
 
 export const studentRoutes = [{
-  path: '/student/my-courses',
+  path: '/student/courses',
   name: 'My Courses',
   isNested: true,
   element: null
@@ -209,8 +209,43 @@ export const studentRoutes = [{
   isNested: false,
   element: <CartDetails />
 }, {
-  path: '/student/orders',
-  name: 'Orders',
+  path: '/student/account',
+  name: 'Account',
   isNested: true,
+  element: null
+}, {
+  path: '/student/payment-info',
+  name: 'Payment Info',
+  isNested: true,
+  element: null
+}, {
+  path: '/student/courses',
+  name: 'My Courses',
+  isNested: true,
+  element: null
+}, {
+  path: '/student/dashboard',
+  name: 'dashboard',
+  isNested: true,
+  element: null
+}, {
+  path: '/student/settings',
+  name: 'Settings',
+  isNested: true,
+  element: null
+}, {
+  path: '/student/wish-list',
+  name: 'Wish List',
+  isNested: true,
+  element: null
+}, {
+  path: '/student/deactivate-account',
+  name: 'Deactivate Account',
+  isNested: true,
+  element: null
+}, {
+  path: '/student/become-instructor',
+  name: 'Become an Instructor',
+  isNested: false,
   element: null
 }];

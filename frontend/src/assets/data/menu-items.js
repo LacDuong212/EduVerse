@@ -1,4 +1,4 @@
-import { BsBasket, BsCardChecklist, BsCreditCard2Front, BsGear, BsHouse, BsInfoCircle, BsPencilSquare, BsPeople, BsPerson, BsQuestionDiamond, BsTrash, BsStar, BsUiChecksGrid, BsWallet2 } from 'react-icons/bs';
+import { BsBasket, BsBook, BsCardChecklist, BsCreditCard2Front, BsGear, BsHouse, BsInfoCircle, BsPencilSquare, BsPeople, BsPerson, BsQuestionDiamond, BsTrash, BsStar, BsUiChecksGrid, BsWallet2 } from 'react-icons/bs';
 import { FaChartBar, FaRegCommentDots, FaRegFileAlt, FaUserCog } from 'react-icons/fa';
 import { FaUserGraduate, FaUserTie } from 'react-icons/fa6';
 import { MdDoNotDisturb } from 'react-icons/md';
@@ -94,7 +94,6 @@ export const INSTRUCTOR_ACCOUNT_DROPDOWN_ITEMS = [{
   label: 'My Account',
   icon: BsPerson,
   url: '/instructor/account'
-
 }, {
   key: 'settings',
   label: 'Settings',
@@ -175,7 +174,11 @@ export const STUDENT_ACCOUNT_DROPDOWN_ITEMS = [{
   label: 'My Account',
   icon: BsPerson,
   url: '/student/account'
-
+}, {
+  key: 'courses',
+  label: 'My Courses',
+  icon: BsBook,
+  url: '/student/courses'
 }, {
   key: 'settings',
   label: 'Settings',
@@ -197,64 +200,45 @@ export const STUDENT_APP_MENU_ITEMS = [{
   url: '/courses'
 }];
 export const STUDENT_MENU_ITEMS = [{
+  key: 'account',
+  label: 'Account',
+  icon: BsPerson,
+  url: '/student/account',
+  parentKey: 'student'
+}, {
   key: 'dashboard',
   label: 'Dashboard',
   icon: BsUiChecksGrid,
   url: '/student/dashboard',
   parentKey: 'student'
 }, {
-  key: 'subscriptions',
-  label: 'My Subscriptions',
-  icon: BsCardChecklist,
-  url: '/student/subscription',
-  parentKey: 'student'
-}, {
   key: 'courses',
   label: 'My Courses',
   icon: BsBasket,
-  url: '/student/course-list',
+  url: '/student/courses',
   parentKey: 'student'
 }, {
-  key: 'resume',
-  label: 'Course Resume',
-  icon: FaRegFileAlt,
-  url: '/student/course-resume',
-  parentKey: 'student'
-}, {
-  key: 'quiz',
-  label: 'Quiz',
-  icon: BsQuestionDiamond,
-  url: '/student/quiz',
-  parentKey: 'student'
-}, {
-  key: 'paymentInfo',
+  key: 'payment-info',
   label: 'Payment Info',
   icon: BsCreditCard2Front,
   url: '/student/payment-info',
   parentKey: 'student'
 }, {
-  key: 'wishlist',
-  label: 'Wishlist',
+  key: 'wish-list',
+  label: 'Wish List',
   icon: BsCardChecklist,
-  url: '/student/bookmark',
+  url: '/student/wish-list',
   parentKey: 'student'
 }, {
-  key: 'profile',
-  label: 'Edit Profile',
-  icon: BsPencilSquare,
-  url: '/student/edit-profile',
-  parentKey: 'student'
-}, {
-  key: 'setting',
-  label: 'Setting',
+  key: 'settings',
+  label: 'Settings',
   icon: BsGear,
-  url: '/student/setting',
+  url: '/student/settings',
   parentKey: 'student'
 }, {
-  key: 'delete',
-  label: 'Delete Profile',
-  icon: BsTrash,
-  url: '/student/delete-account',
+  key: 'deactivate-account',
+  label: 'Deactivate Account',
+  icon: MdDoNotDisturb,
+  url: '/student/deactivate-account',
   parentKey: 'student'
 }];
-
