@@ -1,6 +1,7 @@
 import Course from "../models/courseModel.js";
 import Order from "../models/orderModel.js";
 import userInteraction from "../models/userInteraction.js";
+import Instructor from "../models/instructorModel.js";
 
 export const getHomeCourses = async (req, res) => {
   try {
@@ -307,6 +308,12 @@ export const saveCourseStep1 = async (req, res) => {
         status: "Pending",
         isActive: false,
       });
+
+      // Add course to instructor.myCourses only on creation
+      await Instructor.updateOne(
+        { user: userId, 'myCourses.course': { $ne: course._id } },
+        { $push: { myCourses: { course: course._id } } }
+      );
     }
 
     res.status(200).json({
