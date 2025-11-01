@@ -199,11 +199,11 @@ export const studentRoutes = [{
   isNested: true,
   element: null
 }, {
-  path: '/student/video-player',
+  path: '/courses/:courseId/watch/:lectureId?',
   name: 'My Video Player',
   isNested: false,
   element: <VideoPlayer />
-},{
+}, {
   path: '/student/cart',
   name: 'My Cart',
   isNested: false,

@@ -46,16 +46,23 @@ const VerticalMenu = () => {
 
 const StudentLayout = ({ children, isNested = false }) => {
   const { user } = useProfile();
-  const { width } = useViewPort();
+    const { width } = useViewPort();
   const { isTrue: isOffCanvasMenuOpen, toggle: toggleOffCanvasMenu } = useToggle();
-  const { pathname } = useLocation(); // 👈 kiểm tra URL
+  const { pathname } = useLocation();
 
-  // ✅ Nếu là trang video-player (hoặc có slug, vd /student/video-player/abc)
-  if (pathname.startsWith('/student/video-player')) {
-    // 👇 không render layout gì hết, chỉ hiển thị page con
-    return <>{children}</>;
+  // ✅ Điều kiện full screen cho trang player
+  const isFullscreen =
+    pathname === '/student/video-player' ||
+    /^\/courses\/[^/]+\/watch(\/[^/]+)?$/.test(pathname);
+
+  // ✅ Nếu full screen: bỏ toàn bộ chrome, render thẳng nội dung
+  if (isFullscreen) {
+    return (
+      <main className="bg-dark min-vh-100">
+        <Suspense fallback={<Preloader />}>{children}</Suspense>
+      </main>
+    );
   }
-
   return (
     <>
       <Suspense>

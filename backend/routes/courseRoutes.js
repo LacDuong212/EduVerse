@@ -1,8 +1,9 @@
 import express from "express";
-import { getAllCourses, getCourseById, courseViewed, getViewedCourses, getHomeCourses, getOwnedCourses, getRelatedCourses, saveCourseStep1, saveCourseStep2, saveCourseStep3, submitCourseForReview } from "../controllers/courseController.js";import userAuth from "../middlewares/userAuth.js";
+import { getFullCourses, getAllCourses, getCourseById, courseViewed, getViewedCourses, getHomeCourses, getOwnedCourses, getRelatedCourses, saveCourseStep1, saveCourseStep2, saveCourseStep3, submitCourseForReview } from "../controllers/courseController.js";import userAuth from "../middlewares/userAuth.js";
 const courseRoute = express.Router();
 
 courseRoute.get("/home", getHomeCourses);
+courseRoute.get("/full", getFullCourses);
 courseRoute.get("/", getAllCourses);
 courseRoute.get("/my-courses", userAuth, getOwnedCourses);
 courseRoute.get("/viewed", userAuth, getViewedCourses);

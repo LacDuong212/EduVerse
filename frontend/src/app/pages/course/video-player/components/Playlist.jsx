@@ -1,31 +1,87 @@
+// components/Playlist.jsx
 import TextFormInput from '@/components/form/TextFormInput';
-import { getAllPlaylist } from '@/helpers/data';
-import { useFetchData } from '@/hooks/useFetchData';
 import useToggle from '@/hooks/useToggle';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { Link } from 'react-router-dom';
-import { Fragment } from 'react';
-import { Accordion, AccordionBody, AccordionHeader, AccordionItem, Button, Card, CardBody, CardFooter, CardHeader, Col, Collapse, Modal, ModalBody, ModalFooter, ModalHeader, Row } from 'react-bootstrap';
+import { Link, useNavigate } from 'react-router-dom';
+import { Fragment, useMemo } from 'react';
+import {
+  Accordion,
+  AccordionBody,
+  AccordionHeader,
+  AccordionItem,
+  Button,
+  Card,
+  CardBody,
+  CardFooter,
+  CardHeader,
+  Col,
+  Collapse,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
+  Row,
+} from 'react-bootstrap';
 import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
 import { BsLockFill, BsPencilSquare, BsPlayFill, BsTrashFill } from 'react-icons/bs';
 import { FaPlay } from 'react-icons/fa';
 import * as yup from 'yup';
-const PlayNote = () => {
-  const {
-    isTrue: isOpen,
-    toggle
-  } = useToggle();
-  return <>
-      <Button onClick={toggle} variant="warning" className="btn btn-xs" role="button" aria-expanded="false" aria-controls="addnote-1">
+
+/**
+ * Props:
+ * - course: object từ API getCourseById (bắt buộc)
+ * - onSelect?: (lecture) => void  // callback khi chọn bài (nếu không truyền sẽ navigate theo route)
+ * - currentId?: string            // _id lecture đang phát để active UI
+ */
+const Playlist = ({ course, onSelect, currentId }) => {
+  const navigate = useNavigate();
+
+  const { isTrue: isOpenAddNote, toggle: toggleAddNote } = useToggle();
+  const { isTrue: isOpenInlineNote, toggle: toggleInlineNote } = useToggle();
+
+  // Chuẩn hóa dữ liệu từ course.curriculum
+  const sections = useMemo(
+    () => (Array.isArray(course?.curriculum) ? course.curriculum : []),
+    [course]
+  );
+
+  // Schema note (giữ logic form cũ của bạn)
+  const noteSchema = yup.object({
+    note: yup.string().required('please enter your note'),
+  });
+  const { control, handleSubmit } = useForm({ resolver: yupResolver(noteSchema) });
+
+  // Format duration (giờ -> "Hh Mm"), fallback "--"
+  const formatDuration = (hours) => {
+    if (typeof hours !== 'number' || isNaN(hours)) return '--';
+    const h = Math.floor(hours);
+    const m = Math.round((hours - h) * 60);
+    if (h <= 0 && m <= 0) return '--';
+    return m ? `${h}h ${m}m` : `${h}h`;
+  };
+
+  // Component hiển thị note inline (demo giữ như cũ)
+  const PlayNote = () => (
+    <>
+      <Button
+        onClick={toggleInlineNote}
+        variant="warning"
+        className="btn btn-xs"
+        role="button"
+        aria-expanded={isOpenInlineNote}
+        aria-controls="addnote-1"
+      >
         View note
       </Button>
-      <Collapse in={isOpen}>
+      <Collapse in={isOpenInlineNote}>
         <div>
           <Card className="card-body p-0">
             <div className="d-flex justify-content-between bg-light rounded-2 p-2 mb-2">
               <div className="d-flex align-items-center">
                 <span className="badge bg-dark me-2">5:20</span>
-                <h6 className="d-inline-block text-truncate w-40px w-sm-150px mb-0 fw-light">Describe SEO Engine</h6>
+                <h6 className="d-inline-block text-truncate w-40px w-sm-150px mb-0 fw-light">
+                  Describe SEO Engine
+                </h6>
               </div>
               <div className="d-flex">
                 <Button variant="light" size="sm" className="btn-round me-2 mb-0">
@@ -39,7 +95,9 @@ const PlayNote = () => {
             <div className="d-flex justify-content-between bg-light rounded-2 p-2 mb-2">
               <div className="d-flex align-items-center">
                 <span className="badge bg-dark me-2">10:20</span>
-                <h6 className="d-inline-block text-truncate w-40px w-sm-150px mb-0 fw-light">Know about all marketing</h6>
+                <h6 className="d-inline-block text-truncate w-40px w-sm-150px mb-0 fw-light">
+                  Know about all marketing
+                </h6>
               </div>
               <div className="d-flex">
                 <Button variant="light" size="sm" className="btn-round me-2 mb-0">
@@ -53,90 +111,139 @@ const PlayNote = () => {
           </Card>
         </div>
       </Collapse>
-    </>;
+    </>
+  );
+
+  // Handler chọn bài: ưu tiên gọi onSelect; nếu không có thì navigate theo route bạn đang dùng
+  const handlePlay = (lecture) => {
+  if (!lecture) return;
+  if (typeof onSelect === 'function') onSelect(lecture);
+  else navigate(`/courses/${course._id}/watch/${lecture._id}`); // 👈 SPA điều hướng
 };
-const Playlist = () => {
-  const {
-    isTrue: isOpen,
-    toggle
-  } = useToggle();
-  const allPlaylists = useFetchData(getAllPlaylist);
-  const noteSchema = yup.object({
-    note: yup.string().required('please enter your note')
-  });
-  const {
-    control,
-    handleSubmit
-  } = useForm({
-    resolver: yupResolver(noteSchema)
-  });
-  return <>
+
+  return (
+    <>
       <Card className="vh-100 overflow-auto rounded-0 w-280px w-sm-400px">
         <CardHeader className="bg-light rounded-0">
-          <h1 className="mt-2 fs-5">The Complete Digital Marketing Course - 12 Courses in 1</h1>
-          <h6 className="mb-0 fw-normal">
-            <a href="#">By Jacqueline Miller</a>
-          </h6>
+          <h1 className="mt-2 fs-5">{course?.title || 'Course'}</h1>
+          {course?.instructor?.ref && (
+            <h6 className="mb-0 fw-normal">
+              {/* Nếu có tên instructor, thay anchor này */}
+              <a href="#">By Instructor</a>
+            </h6>
+          )}
         </CardHeader>
+
         <CardBody>
           <div className="d-sm-flex justify-content-sm-between">
             <h5>Course content</h5>
-            <Button variant="warning" size="sm" type="button" onClick={toggle}>
+            <Button variant="warning" size="sm" type="button" onClick={toggleAddNote}>
               <BsPencilSquare className="fa-fw me-2" />
               Add note
             </Button>
           </div>
           <hr />
+
           <Row>
             <Col xs={12}>
               <Accordion defaultActiveKey="0" flush className="accordion-flush-light" id="accordionExample">
-                {allPlaylists?.map((list, idx) => <AccordionItem eventKey={`${idx}`} key={idx}>
-                    <AccordionHeader id="headingOne">
-                      <span className="mb-0 fw-bold">{list.title}</span>
+                {sections.map((sec, sIdx) => (
+                  <AccordionItem eventKey={`${sIdx}`} key={sec?._id || sIdx}>
+                    <AccordionHeader id={`heading-${sIdx}`}>
+                      <span className="mb-0 fw-bold">{sec?.section || `Section ${sIdx + 1}`}</span>
                     </AccordionHeader>
+
                     <AccordionBody className="px-3">
                       <div className="vstack gap-3">
-                        {list.lectures.map((lecture, idx) => <Fragment key={idx}>
-                            {lecture.isNote ? <div>
-                                <div className="d-flex justify-content-between align-items-center mb-2">
-                                  <div className="position-relative d-flex align-items-center">
-                                    <a href="#" className="btn btn-danger-soft btn-round btn-sm mb-0 stretched-link position-static">
-                                      <FaPlay className="me-0" size={11} />
-                                    </a>
-                                    <span className="d-inline-block text-truncate ms-2 mb-0 h6 fw-light w-100px w-sm-200px">{lecture.title}</span>
+                        {(sec?.lectures || []).map((lecture, lIdx) => {
+                          const isLockedUI = !lecture?.isFree; // chỉ hiển thị icon khóa; không chặn click
+                          const isActive = currentId === lecture?._id;
+                          const timeLabel =
+                            typeof lecture?.duration === 'number'
+                              ? formatDuration(lecture.duration)
+                              : (lecture?.time || '--');
+
+                          const isNote = Boolean(lecture?.isNote); // nếu dữ liệu cũ có cờ này thì vẫn render block note
+
+                          return (
+                            <Fragment key={lecture?._id || `${sIdx}-${lIdx}`}>
+                              {isNote ? (
+                                <div>
+                                  <div className="d-flex justify-content-between align-items-center mb-2">
+                                    <div className="position-relative d-flex align-items-center">
+                                      <a
+                                        href="#"
+                                        className="btn btn-danger-soft btn-round btn-sm mb-0 stretched-link position-static"
+                                        onClick={(e) => e.preventDefault()}
+                                      >
+                                        <FaPlay className="me-0" size={11} />
+                                      </a>
+                                      <span className="d-inline-block text-truncate ms-2 mb-0 h6 fw-light w-100px w-sm-200px">
+                                        {lecture?.title || 'Untitled'}
+                                      </span>
+                                    </div>
+                                    <p className="mb-0 text-truncate">{timeLabel}</p>
                                   </div>
-                                  <p className="mb-0 text-truncate">{lecture.time}</p>
+                                  <PlayNote />
                                 </div>
-                                <PlayNote />
-                              </div> : <div className="d-flex justify-content-between align-items-center">
-                                <div className="position-relative d-flex align-items-center">
-                                  {lecture.isPremium ? <Button variant="light" size="sm" className="btn-round mb-0 stretched-link position-static">
-                                      <BsLockFill size={11} />
-                                    </Button> : <Button variant="danger-soft" size="sm" className="btn-round mb-0 stretched-link position-static">
-                                      <FaPlay className="me-0" size={11} />
-                                    </Button>}
-                                  <span className="d-inline-block text-truncate ms-2 mb-0 h6 fw-light w-100px w-sm-200px">{lecture.title}</span>
+                              ) : (
+                                <div className="d-flex justify-content-between align-items-center">
+                                  <div className="position-relative d-flex align-items-center">
+                                    {/* Icon trạng thái: free/play hoặc locked (không disable) */}
+                                    <Button
+                                      variant={isActive ? 'danger' : isLockedUI ? 'light' : 'danger-soft'}
+                                      size="sm"
+                                      className="btn-round mb-0 stretched-link position-static"
+                                      onClick={() => handlePlay(lecture)}
+                                      title={lecture?.title}
+                                    >
+                                      {isLockedUI ? <BsLockFill size={11} /> : <FaPlay className="me-0" size={11} />}
+                                    </Button>
+
+                                    <span
+                                      className={`d-inline-block text-truncate ms-2 mb-0 h6 fw-light w-100px w-sm-200px ${
+                                        isActive ? 'text-danger' : ''
+                                      }`}
+                                      title={lecture?.title}
+                                    >
+                                      {lecture?.title || 'Untitled'}
+                                    </span>
+                                  </div>
+
+                                  <p className="mb-0 text-truncate">{timeLabel}</p>
                                 </div>
-                                <p className="mb-0 text-truncate">{lecture.time}</p>
-                              </div>}
-                          </Fragment>)}
+                              )}
+                            </Fragment>
+                          );
+                        })}
                       </div>
                     </AccordionBody>
-                  </AccordionItem>)}
+                  </AccordionItem>
+                ))}
               </Accordion>
             </Col>
           </Row>
         </CardBody>
+
         <CardFooter>
           <div className="d-grid">
-            <Link to="/pages/course/detail" className="btn btn-primary-soft mb-0">
+            <Link to={`/courses/${course?._id || ''}`} className="btn btn-primary-soft mb-0">
               Back to course
             </Link>
           </div>
         </CardFooter>
       </Card>
 
-      <Modal show={isOpen} onHide={toggle} className="fade" id="Notemodal" tabIndex={-1} aria-labelledby="NotemodalLabel" aria-hidden="true">
+      {/* Modal Add Note */}
+      <Modal
+        show={isOpenAddNote}
+        onHide={toggleAddNote}
+        className="fade"
+        id="Notemodal"
+        tabIndex={-1}
+        aria-labelledby="NotemodalLabel"
+        aria-hidden="true"
+      >
         <form onSubmit={handleSubmit(() => {})}>
           <ModalHeader closeButton>
             <h5 className="modal-title" id="NotemodalLabel">
@@ -144,10 +251,16 @@ const Playlist = () => {
             </h5>
           </ModalHeader>
           <ModalBody>
-            <TextFormInput name="note" label="Type your note *" placeholder="Type your note" control={control} containerClassName="col-12" />
+            <TextFormInput
+              name="note"
+              label="Type your note *"
+              placeholder="Type your note"
+              control={control}
+              containerClassName="col-12"
+            />
           </ModalBody>
           <ModalFooter>
-            <Button variant="secondary" onClick={toggle}>
+            <Button variant="secondary" onClick={toggleAddNote}>
               Close
             </Button>
             <Button variant="primary" type="submit">
@@ -156,6 +269,8 @@ const Playlist = () => {
           </ModalFooter>
         </form>
       </Modal>
-    </>;
+    </>
+  );
 };
+
 export default Playlist;
