@@ -36,32 +36,32 @@ const Banner = ({
                         alt="Student Avatar" />
                     ) : (
                       <div className="avatar-img rounded-circle border border-white border-3 shadow d-flex align-items-center justify-content-center bg-light text-secondary fw-bold">
-                        {(studentData?.name?.[0] || "I").toUpperCase()}
+                        {(studentData?.name?.[0] || "S").toUpperCase()}
                       </div>
                     )}
                   </div>
                 </Col>
                 <Col className="d-md-flex justify-content-between align-items-center mt-4">
                   <div>
-                    <h1 className="my-1 fs-4">Lori Stevens</h1>
+                    <h1 className="my-1 fs-4">{studentData.name ?? 'Student'}</h1>
                     <ul className="list-inline mb-0">
                       <li className="list-inline-item me-3 mb-1 mb-sm-0">
-                        <span className="h6">255</span>
+                        <span className="h6">{studentData.point ?? 0}</span>
                         &nbsp;<span className="text-body fw-light">points</span>
                       </li>
                       <li className="list-inline-item me-3 mb-1 mb-sm-0">
-                        <span className="h6">7</span>
+                        <span className="h6">{studentData.completedCourses ?? 0}</span>
                         &nbsp;<span className="text-body fw-light">Completed courses</span>
                       </li>
                       <li className="list-inline-item me-3 mb-1 mb-sm-0">
-                        <span className="h6">52</span>
+                        <span className="h6">{studentData.completedLessons ?? 0}</span>
                         &nbsp; <span className="text-body fw-light">Completed lessons</span>
                       </li>
                     </ul>
                   </div>
                   <div className="mt-2 mt-sm-0">
-                    <Link to="/student/course-list" className="btn btn-outline-primary mb-0">
-                      View my courses
+                    <Link to="/student/become-instructor" className="btn btn-outline-primary mb-0">
+                      Become an Instructor
                     </Link>
                   </div>
                 </Col>

@@ -1,5 +1,7 @@
 export const currency = '$';
 
+export const currentYear = new Date().getFullYear();
+
 export const OUR_GROUP_NAME = '@d2v-team';
 
 export const DEFAULT_PAGE_TITLE = 'EduVerse';
@@ -7,7 +9,7 @@ export const DEFAULT_PAGE_TITLE = 'EduVerse';
 export const colorVariants = ['primary', 'secondary', 'success', 'danger', 'warning', 'info', 'dark', 'light'];
 
 export const INSTRUCTOR_WELCOME_SENTENCES = [
-  "How’s your day going so far?",
+  "Howï¿½s your day going so far?",
   "Did you know? Great teachers inspire greatness in others!",
   "Keep shaping brilliant minds today ?",
   "Small progress each day adds up to big results ??",

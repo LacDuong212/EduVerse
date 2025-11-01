@@ -1,9 +1,7 @@
-import { STUDENT_MENU_ITEMS } from '@/assets/data/menu-items';
-// import Preloader from '@/components/Preloader';
-// import { useAuthContext } from '@/context/useAuthContext';
-// import { useLayoutContext } from '@/context/useLayoutContext';
-import useToggle from '@/hooks/useToggle';
-import useViewPort from '@/hooks/useViewPort';
+import { STUDENT_MENU_ITEMS } from '../assets/data/menu-items';
+import useProfile from '../hooks/useProfile';
+import useToggle from '../hooks/useToggle';
+import useViewPort from '../hooks/useViewPort';
 
 import clsx from 'clsx';
 import { lazy, Suspense } from 'react';
@@ -11,14 +9,15 @@ import { Col, Container, Offcanvas, OffcanvasBody, OffcanvasHeader, OffcanvasTit
 import { FaSignOutAlt } from 'react-icons/fa';
 import { Link, useLocation } from 'react-router-dom';
 
-const Banner = lazy(() => import('@/components/StudentLayoutComponents/Banner'));
-const Footer = lazy(() => import('@/components/StudentLayoutComponents/Footer'));
-const TopNavigationBar = lazy(() => import('@/components/StudentLayoutComponents/TopNavigationBar'));
+const Banner = lazy(() => import('../components/StudentLayoutComponents/Banner'));
+const Footer = lazy(() => import('../components/Footer'));
+const Preloader = lazy(() => import('../components/Preloader'));
+const TopNavigationBar = lazy(() => import('../components/StudentLayoutComponents/TopNavigationBar'));
 
 
 const VerticalMenu = () => {
   const { pathname } = useLocation();
-  // const { removeSession } = useAuthContext();
+  const { logout } = useProfile();
 
   return (
     <div className="bg-dark border rounded-3 pb-0 p-3 w-100">
@@ -36,8 +35,7 @@ const VerticalMenu = () => {
             {label}
           </Link>;
         })}
-        {/* <Link className="list-group-item text-danger bg-danger-soft-hover" onClick={removeSession} to="/auth/sign-in"> */}
-        <Link className="list-group-item text-danger bg-danger-soft-hover" onClick={null} to="/auth/sign-in">
+        <Link className="list-group-item text-danger bg-danger-soft-hover" onClick={logout} to="/auth/sign-in">
           <FaSignOutAlt className="fa-fw me-2" />
           Sign Out
         </Link>
@@ -47,8 +45,8 @@ const VerticalMenu = () => {
 };
 
 const StudentLayout = ({ children, isNested = false }) => {
+  const { user } = useProfile();
   const { width } = useViewPort();
-  // const { } = useLayoutContext();
   const { isTrue: isOffCanvasMenuOpen, toggle: toggleOffCanvasMenu } = useToggle();
   const { pathname } = useLocation(); // 👈 kiểm tra URL
 
@@ -57,11 +55,6 @@ const StudentLayout = ({ children, isNested = false }) => {
     // 👇 không render layout gì hết, chỉ hiển thị page con
     return <>{children}</>;
   }
-  const studentData = {
-    name: 'Duckle Munchkin',
-    email: 'duckle.munchkin@example.com',
-    pfpImg: 'https://res.cloudinary.com/dw1fjzfom/image/upload/v1757337425/av5_a572ef.jpg'
-  };
 
   return (
     <>
@@ -72,7 +65,7 @@ const StudentLayout = ({ children, isNested = false }) => {
       <main>
         {isNested ? (
           <>
-            <Banner toggleOffCanvas={toggleOffCanvasMenu} studentData={studentData} />
+            <Banner toggleOffCanvas={toggleOffCanvasMenu} studentData={user} />
             <section className="pt-0">
               <Container>
                 <Row>
@@ -87,7 +80,7 @@ const StudentLayout = ({ children, isNested = false }) => {
                     </Offcanvas>}
                   </Col>
                   <Col xl={9}>
-                    {/* <Suspense fallback={<Preloader />}>{children}</Suspense> */}
+                    <Suspense fallback={<Preloader />}>{children}</Suspense>
                   </Col>
                 </Row>
               </Container>
@@ -101,7 +94,7 @@ const StudentLayout = ({ children, isNested = false }) => {
       </main>
 
       <Suspense>
-        <Footer />
+        <Footer className={"bg-light pt-5"} />
       </Suspense>
     </>
   );
