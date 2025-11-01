@@ -2,7 +2,6 @@ import ChoicesFormInput from "@/components/form/ChoicesFormInput";
 import { Button, Card, CardBody, CardFooter, CardHeader, Col, Row } from "react-bootstrap";
 import { FaAngleLeft, FaAngleRight, FaSearch } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import useAdminCourses from "../useAdminCourses";
 
 
 const CourseCard = ({
@@ -104,8 +103,7 @@ const CourseCard = ({
   );
 };
 
-const CoursesList = () => {
-  const { courses, meta, loading, fetchCourses } = useAdminCourses();
+const CoursesList = ({ courses, meta, loading, fetchCourses }) => {
 
   return (
     <Card className="bg-transparent border">

@@ -13,7 +13,7 @@ export default function SignInPage() {
         <Row className="my-5">
           <Col sm={10} xl={8} className="m-auto">
             <span className="mb-0 fs-1">👋</span>
-            <h1 className="fs-2">Login into Eduport!</h1>
+            <h1 className="fs-2">Login into EduVerse!</h1>
             <p className="lead mb-4">Nice to see you! Please log in with your account.</p>
             <SignInForm />
             <Row>

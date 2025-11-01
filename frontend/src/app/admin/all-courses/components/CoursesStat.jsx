@@ -1,6 +1,5 @@
 import { Col, Row } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import useAdminCourses from '../useAdminCourses';
 
 
 const CourseStatCard = ({ count, title, variant }) => {
@@ -16,8 +15,7 @@ const CourseStatCard = ({ count, title, variant }) => {
   );
 };
 
-const CoursesStat = () => {
-  const { meta, loading } = useAdminCourses();
+const CoursesStat = ({ meta, loading }) => {
 
   const courseStatData = [
     {
