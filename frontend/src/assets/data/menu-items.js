@@ -4,6 +4,16 @@ import { FaUserGraduate, FaUserTie } from 'react-icons/fa6';
 import { MdDoNotDisturb } from 'react-icons/md';
 import { RiBook2Line } from 'react-icons/ri';
 
+//--GUEST
+export const GUEST_APP_MENU_ITEMS = [{
+  key: 'home',
+  label: 'Home',
+  url: '/home'
+}, {
+  key: 'courses',
+  label: 'Courses',
+  url: '/courses'
+}];
 
 //---ADMIN
 export const ADMIN_MENU_ITEMS = [{
