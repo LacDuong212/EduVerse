@@ -1,6 +1,6 @@
-import IconTextFormInput from '../../../../components/form/IconTextFormInput';
+import IconTextFormInput from '@/components/form/IconTextFormInput';
 import { FaLock } from "react-icons/fa";
-import useResetPassword from "../useResetPassword";
+import useResetPassword from "@/app/auth/reset-password/useResetPassword";
 
 export default function ResetPasswordForm({ email }) {
   const { loading, handleSubmit, resetPassword, control } = useResetPassword(email);

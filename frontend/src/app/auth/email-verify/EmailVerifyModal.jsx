@@ -1,6 +1,6 @@
 import React from "react";
 import { Modal, Button, Form, Row, Col } from "react-bootstrap";
-import useEmailVerify from "./useEmailVerify";
+import useEmailVerify from "@/app/auth/email-verify/useEmailVerify";
 
 export default function EmailVerifyModal({ show, onHide, email, mode, onVerifySuccess }) {
   const emailVerify = useEmailVerify(email, mode, onVerifySuccess);

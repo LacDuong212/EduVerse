@@ -6,6 +6,7 @@ import { startAllTasks } from './utils/scheduler.js';
 
 import connectDB from './configs/mongodb.js';
 import authRoute from './routes/authRoutes.js';
+import adminRoute from './routes/adminRoutes.js';
 import userRoute from './routes/userRoutes.js';
 import courseRoute from './routes/courseRoutes.js';
 import cartRoute from './routes/cartRoutes.js';
@@ -34,6 +35,7 @@ app.use(cors({origin: allowedOrigins, credentials: true}));
 // API Endpoints
 app.get('/', (req, res) => res.send("API is running"));
 app.use('/api/auth', authRoute);
+app.use('/api/admin', adminRoute);
 app.use('/api/user', userRoute);
 app.use('/api', instructorRoute);
 app.use('/api/courses', courseRoute);

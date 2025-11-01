@@ -815,3 +815,52 @@ export const notificationData = [{
   description: "What's new! Find out about new features",
   isTime: true
 }];
+export const administratorsData = [{
+  id: '1001',
+  name: 'Võ Nguy?n Hòa L?c Duong',
+  email: 'lacduongldg212@gmail.com',
+  isVerified: true,
+  isApproved: true,
+  createdAt: "2025-10-28",
+  updatedAt: "2025-11-01"
+}, {
+  id: '1002',
+  name: 'Võ Nguy?n Hòa L?c Duong',
+  email: 'lacduongldg@gmail.com',
+  isVerified: true,
+  isApproved: false,
+  createdAt: "2025-10-30",
+  updatedAt: "2025-10-31"
+},{
+  id: '1003',
+  name: 'Võ Nguy?n Hòa L?c Duong',
+  email: 'lacduong212@gmail.com',
+  isVerified: false,
+  isApproved: false,
+  createdAt: "2025-10-28",
+  updatedAt: "2025-11-01"
+},{
+  id: '1004',
+  name: 'Hoàng Th? Thùy Duong',
+  email: 'thuyduong1472004@gmail.com',
+  isVerified: true,
+  isApproved: true,
+  createdAt: "2025-10-28",
+  updatedAt: "2025-11-01"
+},{
+  id: '1005',
+  name: 'Hoàng Th? Thùy Duong',
+  email: 'tduongjob@gmail.com',
+  isVerified: true,
+  isApproved: false,
+  createdAt: "2025-10-28",
+  updatedAt: "2025-11-01"
+},{
+  id: '1006',
+  name: 'Tr?n Tri?u Vi',
+  email: 'vi021ttv@gmail.com',
+  isVerified: false,
+  isApproved: false,
+  createdAt: "2025-10-28",
+  updatedAt: "2025-11-01"
+}];

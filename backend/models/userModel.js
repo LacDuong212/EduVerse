@@ -17,8 +17,9 @@ const userSchema = new mongoose.Schema({
     verifyOtp: { type: String, default: '' },
     verifyOtpExpireAt: { type: Number, default: 0 },
     isVerified: { type: Boolean, default: false },
+    isActivated: { type: Boolean, default: false },
     role: { type: String, enum: ['student', 'instructor'], default: 'student' },
-});
+}, { timestamps: true });
 
 const userModel = mongoose.models.user || mongoose.model('User', userSchema);
 

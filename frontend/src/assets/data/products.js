@@ -60,6 +60,8 @@ import marketingImg from '@/assets/images/element/marketing.svg';
 import accountImg from '@/assets/images/element/account.svg';
 import { addOrSubtractDaysFromDate, addOrSubtractHoursFromDate } from '@/utils/date';
 import mastercardImg from '@/assets/images/client/mastercard.svg';
+import momoImg from '@/assets/images/client/momo.svg';
+import vnpayImg from '@/assets/images/client/vnpay.svg';
 import paypalImg from '@/assets/images/client/paypal.svg';
 import { FaTv, FaUserGraduate, FaUserTie } from 'react-icons/fa';
 import { BsBook, BsFileEarmarkPdf, BsSoundwave, BsStopwatchFill } from 'react-icons/bs';
@@ -958,9 +960,8 @@ export const billingHistoryData = [{
   date: addOrSubtractDaysFromDate(1),
   status: 'paid',
   paymentMethod: {
-    image: mastercardImg,
-    type: 'master',
-    number: '****4568'
+    image: momoImg,
+    type: 'momo',
   },
   price: 350,
   amount: 3999
@@ -970,9 +971,8 @@ export const billingHistoryData = [{
   date: addOrSubtractDaysFromDate(50),
   status: 'paid',
   paymentMethod: {
-    image: mastercardImg,
-    type: 'master',
-    number: '****2588'
+    image: momoImg,
+    type: 'momo'
   },
   price: 242,
   amount: 4201
@@ -982,8 +982,8 @@ export const billingHistoryData = [{
   date: addOrSubtractDaysFromDate(10),
   status: 'pending',
   paymentMethod: {
-    image: paypalImg,
-    type: 'paypal'
+    image: vnpayImg,
+    type: 'vnpay'
   },
   price: 576,
   amount: 1032
@@ -993,9 +993,8 @@ export const billingHistoryData = [{
   date: addOrSubtractDaysFromDate(19),
   status: 'cancel',
   paymentMethod: {
-    image: mastercardImg,
-    type: 'master',
-    number: '****2588'
+    image: momoImg,
+    type: 'momo',
   },
   price: 425,
   amount: 6548
@@ -1005,9 +1004,8 @@ export const billingHistoryData = [{
   date: addOrSubtractDaysFromDate(25),
   status: 'cancel',
   paymentMethod: {
-    image: paypalImg,
-    type: 'paypal',
-    number: '****2588'
+    image: vnpayImg,
+    type: 'vnpay',
   },
   price: 425,
   amount: 2546
@@ -1017,8 +1015,8 @@ export const billingHistoryData = [{
   date: addOrSubtractDaysFromDate(36),
   status: 'pending',
   paymentMethod: {
-    image: paypalImg,
-    type: 'paypal'
+    image: vnpayImg,
+    type: 'vnpay'
   },
   price: 576,
   amount: 4258
@@ -1028,9 +1026,8 @@ export const billingHistoryData = [{
   date: addOrSubtractDaysFromDate(21),
   status: 'paid',
   paymentMethod: {
-    image: mastercardImg,
-    type: 'master',
-    number: '****4568'
+    image: momoImg,
+    type: 'momo'
   },
   price: 350,
   amount: 854
@@ -1040,9 +1037,8 @@ export const billingHistoryData = [{
   date: addOrSubtractDaysFromDate(15),
   status: 'paid',
   paymentMethod: {
-    image: mastercardImg,
-    type: 'master',
-    number: '****2588'
+    image: momoImg,
+    type: 'momo'
   },
   price: 242,
   amount: 965
