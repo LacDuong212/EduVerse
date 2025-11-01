@@ -12,10 +12,6 @@ export const getAllEvents = async () => {
   await sleep();
   return eventsData;
 };
-export const getAllInstructors = async () => {
-  await sleep();
-  return instructorsData;
-};
 export const getInstructorById = async id => {
   const data = instructorsData.find(instructor => instructor.id == id);
   await sleep();
@@ -107,6 +103,24 @@ export const getAllStudents = async (page = 1, search = "") => {
     return { data: [], pagination: { total: 0, page: 1, totalPages: 1 } };
   }
 };
+export const getAllInstructors = async (page = 1, search = "") => {
+  try {
+    const token = localStorage.getItem("adminToken");
+    const response = await axios.get(`${backendUrl}/api/admin/instructors?page=${page}&limit=5&search=${encodeURIComponent(search)}`, {
+      withCredentials: true,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (response.data.success) {
+      return response.data;
+    }
+    return { data: [], pagination: { total: 0, page: 1, totalPages: 1 } };
+  } catch (error) {
+    console.error("Error fetching instructor:", error);
+    return { data: [], pagination: { total: 0, page: 1, totalPages: 1 } };
+  }
+};
 export const getAllAdminitrators = async (page = 1, search = "") => {
   try {
     const token = localStorage.getItem("adminToken");
@@ -173,6 +187,34 @@ export const deleteStudent = async (id) => {
     return response.data;
   } catch (error) {
     console.error("Error deleting student:", error);
+    return { success: false, message: error.message };
+  }
+};
+
+export const blockInstructor = async (id) => {
+  try {
+    const response = await axios.patch(
+      `${backendUrl}/api/admin/instructors/${id}/block`,
+      {},
+      getAuthHeaders()
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error blocking instructor:", error);
+    return { success: false, message: error.message };
+  }
+};
+
+export const unblockInstructor = async (id) => {
+  try {
+    const response = await axios.patch(
+      `${backendUrl}/api/admin/instructors/${id}/unblock`,
+      {},
+      getAuthHeaders()
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error unblocking instructor:", error);
     return { success: false, message: error.message };
   }
 };
