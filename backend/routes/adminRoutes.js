@@ -4,6 +4,8 @@ import { register, login, logout,
     verifyAccount, verifyOtpCheck,
     getAdminProfile, getAllAdministrators } from '../controllers/adminController.js';
 import { getAllStudents, blockStudent, unblockStudent, deleteStudent } from '../controllers/userController.js';
+import { getAllInstructors, blockInstructor, unblockInstructor } from '../controllers/instructorController.js';
+import { getEarningsHistory, getEarningsStats } from '../controllers/courseController.js';
 import { verifyAdminToken } from "../middlewares/adminAuth.js";
 
 const adminRoute = express.Router();
@@ -23,5 +25,14 @@ adminRoute.get("/students", verifyAdminToken, getAllStudents);
 adminRoute.patch("/students/:id/block", verifyAdminToken, blockStudent);
 adminRoute.patch("/students/:id/unblock", verifyAdminToken, unblockStudent);
 adminRoute.delete("/students/:id", verifyAdminToken, deleteStudent);
+
+//Admin manage instructors
+adminRoute.get("/instructors", verifyAdminToken, getAllInstructors);
+adminRoute.patch("/instructors/:id/block", verifyAdminToken, blockInstructor);
+adminRoute.patch("/instructors/:id/unblock", verifyAdminToken, unblockInstructor);
+
+//Admin manage earning
+adminRoute.get("/earnings-history", verifyAdminToken, getEarningsHistory);
+adminRoute.get("/earnings-stats", verifyAdminToken, getEarningsStats);
 
 export default adminRoute;
