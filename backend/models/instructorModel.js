@@ -15,7 +15,7 @@ const myStudentsSubSchema = new mongoose.Schema({
 const enrollmentSubSchema = new mongoose.Schema({
   course: { type: mongoose.Schema.Types.ObjectId, ref: "Course" },
   student: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-  isActive: { type: Boolean, default: true },
+  isActive: { type: Boolean, default: false },
   enrolledAt: { type: Date, default: Date.now },
 });
 const ratingSubSchema = new mongoose.Schema({
@@ -58,6 +58,8 @@ const instructorSchema = new mongoose.Schema({
   occupation: { type: String, default: "" },
   skills: [skillSubSchema],
   education: [educationSubSchema],
+
+  isApproved: { type: Boolean, default: false }
 }, {
   timestamps: true    // = adding createdAt & updatedAt (automatically handled by mongoose)
 });

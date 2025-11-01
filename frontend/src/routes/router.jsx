@@ -12,13 +12,15 @@ import StudentLayout from "../layouts/StudentLayout";
 
 import { guestRoutes, instructorRoutes, studentRoutes } from './index';
 
-import { Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 
 
 const AppRouter = props => {
 
   return (
     <Routes>
+      <Route path="/" element={<Navigate to="/home" replace />} />
+
       {/* AUTH ROUTES */}
       <Route path="/auth/sign-in" element={<SignInPage />} />
       <Route path="/auth/sign-up" element={<SignUpPage />} />
@@ -26,9 +28,22 @@ const AppRouter = props => {
       <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
       <Route path="/courses/:id" element={<CourseDetail />} />
 
+      {/* GUEST ROUTES */}
+      {(guestRoutes || []).map((route, idx) => (
+        <Route
+          key={idx + route.name}
+          path={route.path}
+          element={
+            // <InstructorLayout {...props} isNested={route.isNested}>{
+              route.element
+            // }</InstructorLayout>
+          }
+        />
+      ))}
+
       {/* INSTRUCTOR ROUTES */}
       <Route element={<ProtectedRoute />}>
-        {([/*...guestRoutes*/, ...instructorRoutes] || []).map((route, idx) => (
+        {(instructorRoutes || []).map((route, idx) => (
           <Route
             key={idx + route.name}
             path={route.path}
@@ -43,7 +58,7 @@ const AppRouter = props => {
 
       {/* STUDENT ROUTES */}
       <Route element={<ProtectedRoute />}>
-        {([...guestRoutes, ...studentRoutes] || []).map((route, idx) => (
+        {(studentRoutes || []).map((route, idx) => (
           <Route
             key={idx + route.name}
             path={route.path}

@@ -7,17 +7,16 @@ import Account from "../app/instructor/account";
 import InstructorDashboard from "../app/instructor/dashboard";
 import InstructorMyCourses from "../app/instructor/my-courses";
 import InstructorMyStudents from "../app/instructor/my-students";
+import CreateCoursePage from "../app/instructor/create-course";
 
 
 export const guestRoutes = [{
   path: '/home',
   name: 'Home',
-  isNested: false,
   element: <HomePage />
 }, {
   path: '/courses/:id',
   name: 'CourseDetails',
-  isNested: true,
   element: <CourseDetails />
 }];
 
@@ -65,7 +64,7 @@ export const instructorRoutes = [{
   path: '/instructor/create-course',
   name: 'Create Course',
   isNested: false,
-  element: null
+  element: <CreateCoursePage />
 }, {
   path: '/instructor/update-course',
   name: 'Update Course',

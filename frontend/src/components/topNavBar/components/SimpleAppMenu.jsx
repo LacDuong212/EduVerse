@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Collapse } from 'react-bootstrap';
 import { FaSearch } from 'react-icons/fa';
 import { Link, useLocation } from 'react-router-dom';
@@ -11,13 +11,17 @@ const SimpleAppMenu = ({ mobileMenuOpen, menuClassName, topMenuItems }) => {
 
   topMenuItems = topMenuItems || [];
 
-  // find current active item
-  useEffect(() => {
-    const current = topMenuItems.find(
-      (item) => item.url === pathname
+  const current = useMemo(() => {
+    return (
+      topMenuItems.find(item => item.url === pathname) ||
+      topMenuItems.find(item => pathname.startsWith(item.url))
     );
+  }, [pathname, topMenuItems]);
+
+  useEffect(() => {
     if (current) setActiveKey(current.key);
-  }, [pathname]);
+    else setActiveKey(null);
+  }, [current]);
 
   return (
     <Collapse in={mobileMenuOpen} className="navbar-collapse collapse mx-3 rounded-3">
@@ -29,8 +33,8 @@ const SimpleAppMenu = ({ mobileMenuOpen, menuClassName, topMenuItems }) => {
               <Link
                 to={item.url}
                 className={clsx(
-                  'nav-link fw-medium px-2 pt-1',
-                  activeKey === item.key && 'active'
+                  'nav-link fw-medium px-2 py-1',
+                  activeKey === item.key && 'active text-primary'
                 )}
               >
                 {item.label}

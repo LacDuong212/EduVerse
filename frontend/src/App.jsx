@@ -1,5 +1,4 @@
 import axios from "axios";
-import "react-toastify/dist/ReactToastify.css";
 
 import AppProvidersWrapper from "./components/wrappers/AppProvidersWrapper";
 import AppRouter from "./routes/router";
