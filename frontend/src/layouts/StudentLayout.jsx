@@ -50,7 +50,13 @@ const StudentLayout = ({ children, isNested = false }) => {
   const { width } = useViewPort();
   // const { } = useLayoutContext();
   const { isTrue: isOffCanvasMenuOpen, toggle: toggleOffCanvasMenu } = useToggle();
+  const { pathname } = useLocation(); // 👈 kiểm tra URL
 
+  // ✅ Nếu là trang video-player (hoặc có slug, vd /student/video-player/abc)
+  if (pathname.startsWith('/student/video-player')) {
+    // 👇 không render layout gì hết, chỉ hiển thị page con
+    return <>{children}</>;
+  }
   const studentData = {
     name: 'Duckle Munchkin',
     email: 'duckle.munchkin@example.com',

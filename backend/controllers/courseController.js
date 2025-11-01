@@ -1,7 +1,10 @@
 import Course from "../models/courseModel.js";
 import Order from "../models/orderModel.js";
-import userInteraction from "../models/userInteraction.js";
 import Instructor from "../models/instructorModel.js";
+import userInteraction from "../models/userInteraction.js";
+
+import Fuse from "fuse.js";
+
 
 export const getHomeCourses = async (req, res) => {
   try {
@@ -35,33 +38,131 @@ export const getHomeCourses = async (req, res) => {
     res.status(500).json({ message: "Error fetching home courses", error });
   }
 };
-
 export const getAllCourses = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const { category, subCategory, search } = req.query;
+    // query params
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const limit = Math.max(parseInt(req.query.limit) || 10, 1);
+    const search = (req.query.search || "").trim();
+    const { category, subCategory } = req.query;
 
-    const filter = {};
-    if (category) filter.category = category;
-    if (subCategory) filter.subCategory = subCategory;
+    // bộ lọc DB
+    const mongoFilter = {};
+    if (category) mongoFilter.category = category;
+    if (subCategory) mongoFilter.subCategory = subCategory;
+
+    // chỉ lấy field cần thiết cho FE + tính toán
+    const courseDocs = await Course.find(mongoFilter, {
+      title: 1,
+      subtitle: 1,
+      category: 1,
+      subCategory: 1,
+      level: 1,
+      thumbnail: 1,
+      price: 1,
+      discountPrice: 1,
+      createdAt: 1,
+      updatedAt: 1,
+      courseId: 1,
+
+      // 3 field mới cần tính/trả về
+      duration: 1,
+      lecturesCount: 1,
+      rating: 1,
+
+      // để fallback tính duration/lectures từ curriculum
+      "curriculum.section": 1,                // tên section (nhẹ)
+      "curriculum.lectures.duration": 1,      // chỉ lấy duration (không cần videoUrl)
+      // không lấy videoUrl/title để nhẹ hơn
+    })
+      .sort({ createdAt: -1, _id: -1 })
+      .lean();
+
+    let results = courseDocs;
+
+    // fuzzy search (nếu có)
     if (search) {
-      filter.title = { $regex: search, $options: "i" };
+      const fuse = new Fuse(courseDocs, {
+        keys: ["title", "subtitle", "category", "subCategory", "tags"],
+        threshold: 0,
+        distance: 120,
+        ignoreLocation: true,
+        includeScore: true,
+        minMatchCharLength: 2,
+      });
+      results = fuse.search(search).map((r) => r.item);
     }
 
-    const courses = await Course.find(filter)
-      .sort({ createdAt: -1, _id: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit);
+    // phân trang sau fuzzy
+    const total = results.length;
+    const start = (page - 1) * limit;
+    const end = start + limit;
+    const paginated = results.slice(start, end);
 
-    const total = await Course.countDocuments(filter);
+    // helper: tính fallback
+    const sumLectureDurations = (cur = []) =>
+      Array.isArray(cur)
+        ? cur.reduce((acc, sec) => {
+            const list = Array.isArray(sec?.lectures) ? sec.lectures : [];
+            const s = list.reduce((a, lec) => a + (Number(lec?.duration) || 0), 0);
+            return acc + s;
+          }, 0)
+        : 0;
+
+    const countLecturesFromCurriculum = (cur = []) =>
+      Array.isArray(cur)
+        ? cur.reduce((acc, sec) => acc + (Array.isArray(sec?.lectures) ? sec.lectures.length : 0), 0)
+        : 0;
+
+    // Chuẩn hóa dữ liệu trả về
+    const data = paginated.map((c) => {
+      // duration (phút)
+      const duration =
+        typeof c.duration === "number" && !Number.isNaN(c.duration)
+          ? c.duration
+          : sumLectureDurations(c.curriculum);
+
+      // lectures (số bài)
+      const lectures =
+        typeof c.lecturesCount === "number" && !Number.isNaN(c.lecturesCount)
+          ? c.lecturesCount
+          : countLecturesFromCurriculum(c.curriculum);
+
+      // rating object
+      const rating = {
+        average: Number(c?.rating?.average ?? 0),
+        count: Number(c?.rating?.count ?? 0),
+        total: Number(c?.rating?.total ?? 0),
+      };
+
+      return {
+        courseId: c.courseId || String(c._id),
+        title: c.title,
+        subtitle: c.subtitle,
+        category: c.category,
+        subCategory: c.subCategory,
+        level: c.level,
+        thumbnail: c.thumbnail,
+        price: c.price,
+        discountPrice: c.discountPrice,
+        createdAt: c.createdAt,
+        updatedAt: c.updatedAt,
+
+        // ➕ 3 field mới
+        rating,
+        duration,
+        lectures,
+      };
+    });
 
     res.json({
       success: true,
-      courses,
-      total,
-      page,
-      pages: Math.ceil(total / limit),
+      data,
+      pagination: {
+        total,
+        page,
+        totalPages: Math.ceil(total / limit),
+      },
     });
   } catch (error) {
     res.status(500).json({
@@ -71,7 +172,6 @@ export const getAllCourses = async (req, res) => {
     });
   }
 };
-
 
 export const getCourseById = async (req, res) => {
   try {

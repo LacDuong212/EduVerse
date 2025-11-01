@@ -1,7 +1,7 @@
 import { lazy } from 'react';
 import HomePage from "../app/home/page";
 import CourseDetails from "../app/pages/course/detail/page";
-import CartDetails from "../app/shop/cart/page";
+import AllCourses from "../app/pages/course/grid/page";
 import CoursesPage from "../app/pages/course/grid/page";
 
 //AUTH
@@ -36,6 +36,9 @@ const AdminReviews = lazy(() => import('@/app/admin/reviews/page'));
 const AdminEarnings = lazy(() => import('@/app/admin/earnings/page'));
 const AdminSettings = lazy(() => import('@/app/admin/admin-settings/page'));
 
+//STUDENT
+import VideoPlayer from "../app/pages/course/video-player/page";
+import CartDetails from "../app/shop/cart/page";
 
 export const guestRoutes = [{
   path: '/home',
@@ -197,6 +200,11 @@ export const studentRoutes = [{
   isNested: true,
   element: null
 }, {
+  path: '/student/video-player',
+  name: 'My Video Player',
+  isNested: false,
+  element: <VideoPlayer />
+},{
   path: '/student/cart',
   name: 'My Cart',
   isNested: false,

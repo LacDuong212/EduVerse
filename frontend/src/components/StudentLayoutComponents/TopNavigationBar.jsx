@@ -14,6 +14,11 @@ const TopNavigationBar = () => {
   const { appMenuControl } = useLayoutContext();
   const cartCount = useSelector((state) => (state.cart?.items || []).length);
   const navigate = useNavigate();
+  
+   const onLogoClick = (e) => {
+    e.preventDefault();
+    navigate('/home');
+  };
   const onCartClick = (e) => {
     // Chặn Bootstrap dropdown toggle, điều hướng luôn
     e.preventDefault();
@@ -23,7 +28,9 @@ const TopNavigationBar = () => {
   return (
     <TopNavbar>
       <Container>
-        <LogoBox width={130} />
+         <div onClick={onLogoClick} style={{ cursor: 'pointer' }}>
+          <LogoBox width={130} />
+        </div>
         <TopbarMenuToggler />
         <SimpleAppMenu mobileMenuOpen={appMenuControl.open} menuClassName="mx-auto" topMenuItems={STUDENT_APP_MENU_ITEMS} />
         <ul className="nav flex-row align-items-center list-unstyled ms-xl-auto">

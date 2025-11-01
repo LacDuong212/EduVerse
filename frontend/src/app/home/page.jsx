@@ -3,18 +3,20 @@ import PageMetaData from '@/components/PageMetaData';
 import ActionBox from './components/ActionBox';
 import Counter from './components/Counter';
 import Hero from './components/Hero';
-import PopularCourse from './components/PopularCourse';
+import NewestCourses from './components/NewestCourses';
 import Reviews from './components/Reviews';
-
+import useHomeCourses from './useHomeCourses';
 import TrendingCourses from './components/TrendingCourses';
 const HomePage = () => {
+  useHomeCourses();
+
   return <>
       <PageMetaData title="Home" />
   
       <main>
         <Hero />
         <Counter />
-        <PopularCourse />
+        <NewestCourses />
         <ActionBox />
         <TrendingCourses />
         <Reviews />
