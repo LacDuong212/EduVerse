@@ -3,6 +3,7 @@ import PageMetaData from '@/components/PageMetaData';
 import { Card, CardBody, CardHeader, Col, Row, Table } from 'react-bootstrap';
 import { BsInfoCircleFill } from 'react-icons/bs';
 import { FaAngleLeft, FaAngleRight } from 'react-icons/fa';
+import CountUp from 'react-countup';
 import axios from 'axios';
 
 
@@ -20,7 +21,12 @@ const EarningsFastCard = ({
           <BsInfoCircleFill className="small" />
         </a>}
       </h6>
-      <h2 className={`mb-0 fs-1 text-${variant}`}>{amount}</h2>
+      <h2 className={`mb-0 fs-1 text-${variant}`}>
+        <CountUp
+          end={amount}
+          duration={1.5}
+        />
+      </h2>
     </div>
   </Col>;
 };
@@ -47,7 +53,7 @@ const InvoiceHistoryCard = ({
       <img src={paymentMethod.image} className={` ${paymentMethod.type === 'vnpay' ? 'h-30px' : 'h-40px'}`} height={paymentMethod.type === 'momo' ? 30 : 40} alt="paymentMethodImg" />
     </td>
     <td>
-      ${amount}&nbsp;
+      ₫{amount}&nbsp;
     </td>
     <td>
       <div className={`badge bg-${status === 'completed' ? 'success' : status === 'pending' ? 'orange' : 'danger'} bg-opacity-10 text-${status === 'completed' ? 'success' : status === 'pending' ? 'orange' : 'danger'}`}>
