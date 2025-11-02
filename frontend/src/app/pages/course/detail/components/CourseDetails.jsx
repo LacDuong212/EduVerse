@@ -11,13 +11,16 @@ import { FaBookOpen, FaClock, FaCopy, FaFacebookSquare, FaGlobe, FaLinkedin, FaM
 import courseImg1 from '@/assets/images/courses/4by3/01.jpg';
 import courseImg18 from '@/assets/images/courses/4by3/18.jpg';
 import courseImg21 from '@/assets/images/courses/4by3/21.jpg';
+import { useState } from 'react'; // ✅ thêm import
+
 import { Link } from 'react-router-dom';
 import useCourseDetail from '../useCourseDetail';
 
 
 
-const PricingCard = ({ course }) => {
+const PricingCard = ({ course, onShowCurriculum }) => {
   const { handleAddToCart } = useCourseDetail();
+
   const getEmbedUrl = (url) => {
     if (!url) return null;
 
@@ -68,10 +71,10 @@ const PricingCard = ({ course }) => {
 
               return (
                 <div className="d-flex align-items-center">
-                  <h3 className="fw-bold mb-0 me-2">{formatCurrency(sale)}</h3>
+                  <h3 className="fw-bold mb-0 me-2 fs-5">{formatCurrency(sale)}</h3> {/* 👈 thêm fs-5 */}
                   {percent > 0 && (
                     <>
-                      <span className="text-decoration-line-through mb-0 me-2">
+                      <span className="text-decoration-line-through mb-0 me-2 fs-6">
                         {formatCurrency(original)}
                       </span>
                       <span className="badge text-bg-orange mb-0">{percent}% off</span>
@@ -116,7 +119,11 @@ const PricingCard = ({ course }) => {
         </Dropdown>
       </div>
       <div className="mt-3 d-sm-flex justify-content-sm-between">
-        <Button variant="outline-primary" className="mb-0">
+        <Button
+          variant="outline-primary"
+          className="mb-0"
+          onClick={onShowCurriculum} // ✅ chuyển sang tab "curriculum"
+        >
           Free trial
         </Button>
         &nbsp;
@@ -185,12 +192,15 @@ const PopularTags = () => {
   </Card>;
 };
 const CourseDetails = ({ course }) => {
+  const [activeKey, setActiveKey] = useState('overview'); // tab mặc định
+
   return <section className="pb-0 py-lg-5">
     <Container>
       <Row>
         <Col lg={8}>
           <Card className="shadow rounded-2 p-0">
-            <TabContainer defaultActiveKey="overview">
+            {/* ✅ dùng activeKey + onSelect thay vì defaultActiveKey */}
+            <TabContainer activeKey={activeKey} onSelect={(k) => setActiveKey(k)}>
               <CardHeader className="border-bottom px-4 py-3">
                 <Nav className="nav-pills nav-tabs-line py-0" id="course-pills-tab" role="tablist">
                   <NavItem className="me-2 me-sm-4" role="presentation">
@@ -234,7 +244,7 @@ const CourseDetails = ({ course }) => {
                     <Curriculum />
                   </TabPane>
                   <TabPane eventKey="instructor" className="fade" role="tabpanel">
-                    <Instructor />
+                    <Instructor course={course} /> {/* (khuyến nghị) truyền course nếu cần */}
                   </TabPane>
                   <TabPane eventKey="reviews" className="fade" role="tabpanel">
                     <Reviews />
@@ -253,7 +263,11 @@ const CourseDetails = ({ course }) => {
         <Col lg={4} className="pt-5 pt-lg-0">
           <Row className="mb-5 mb-lg-0">
             <Col md={6} lg={12}>
-              <PricingCard course={course} />
+              {/* ✅ truyền callback để nút Free trial đổi tab */}
+              <PricingCard
+                course={course}
+                onShowCurriculum={() => setActiveKey('curriculum')}
+              />
               <Card className="card-body shadow p-4 mb-4">
                 <h4 className="mb-3">This course includes</h4>
                 <ul className="list-group list-group-borderless">
