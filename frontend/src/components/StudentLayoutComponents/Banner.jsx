@@ -30,11 +30,11 @@ const Banner = ({
                   <div className="avatar avatar-xxl mt-n3">
                     {studentData?.pfpImg ? (
                       <img
-                        className="avatar-img rounded-circle border border-white border-3 shadow"
+                        className="avatar-img rounded-circle border border-light border-3 shadow"
                         src={studentData.pfpImg}
                         alt="Student Avatar" />
                     ) : (
-                      <div className="avatar-img rounded-circle border border-white border-3 shadow d-flex align-items-center justify-content-center bg-light text-secondary fw-bold">
+                      <div className="avatar-img rounded-circle border border-light border-3 shadow d-flex align-items-center justify-content-center bg-light text-dark fw-bold fs-1">
                         {(studentData?.name?.[0] || "S").toUpperCase()}
                       </div>
                     )}

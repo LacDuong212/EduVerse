@@ -1,9 +1,7 @@
-// src/layouts/GuestLayout.jsx
 import { lazy, Suspense } from 'react';
 import { Container } from 'react-bootstrap';
 
 const TopNavigationBar = lazy(() => import('../components/GuestLayoutComponents/TopNavigationBar'));
-// const Banner = lazy(() => import('../components/GuestLayoutComponents/Banner'));
 const Footer = lazy(() => import('../components/Footer'));
 const Preloader = lazy(() => import('../components/Preloader'));
 
@@ -15,10 +13,6 @@ const GuestLayout = ({ children }) => {
       </Suspense>
 
       <main>
-        {/* <Suspense fallback={<Preloader />}>
-          <Banner />
-        </Suspense> */}
-
         <section className="pt-0">
           <Container>{children}</Container>
         </section>

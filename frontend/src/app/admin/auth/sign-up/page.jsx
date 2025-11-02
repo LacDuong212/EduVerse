@@ -1,7 +1,7 @@
 import { useState } from "react";
 import PageMetaData from '@/components/PageMetaData';
 import { Col, Row } from 'react-bootstrap';
-import { FaFacebookF, FaGoogle } from "react-icons/fa";
+import { FaChevronLeft, FaFacebookF, FaGoogle } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import AuthLayout from "@/app/admin/auth/components/AuthLayout";
@@ -18,7 +18,16 @@ export default function SignUpPage() {
     <AuthLayout>
       <Col xs={12} lg={6} className="m-auto">
         <Row className="my-5">
-          <Col sm={10} xl={8} className="m-auto">
+          <Col sm={10} xl={8} className="m-auto position-relative">
+            <div className='mb-3'>
+              <FaChevronLeft className='mb-1 text-primary' />
+              <Link
+                to="/"
+                className="ms-1 fw-semibold text-decoration-none"
+              >
+                Back to Home
+              </Link>
+            </div>
             <h2>Sign up for your account!</h2>
             <p className="lead mb-4">Nice to see you! Please Sign up with your account.</p>
             <SignUpForm

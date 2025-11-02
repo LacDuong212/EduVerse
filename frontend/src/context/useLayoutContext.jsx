@@ -11,7 +11,7 @@ const useLayoutContext = () => {
   }
   return context;
 };
-const storageThemeKey = 'EDUPORT_THEME_KEY';
+const storageThemeKey = 'EDUVERSE_THEME_KEY';
 const themeKey = 'data-bs-theme';
 
 const LayoutProvider = ({ children }) => {

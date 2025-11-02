@@ -1,6 +1,6 @@
 import CreateCourseForm from './components/CreateCourseForm';
 
-const CreateCoursePage = () => {
+const InstructorCreateCoursePage = () => {
   return (
     <>
       <CreateCourseForm />
@@ -8,4 +8,4 @@ const CreateCoursePage = () => {
   );
 };
 
-export default CreateCoursePage;
+export default InstructorCreateCoursePage;

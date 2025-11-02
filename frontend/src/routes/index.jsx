@@ -1,7 +1,4 @@
 import { lazy } from 'react';
-import HomePage from "../app/home/page";
-import CourseDetails from "../app/pages/course/detail/page";
-import CoursesPage from "../app/pages/course/grid/page";
 
 // AUTH
 const SignIn = lazy(() => import('@/app/auth/sign-in/page'));
@@ -10,11 +7,11 @@ const ForgotPassword = lazy(() => import('@/app/auth/forgot-password/page'));
 const ResetPassword = lazy(() => import('@/app/auth/reset-password/page'));
 
 // INSTRUCTOR
-import Account from "../app/instructor/account";
+import InstructorAccount from "../app/instructor/account";
+import InstructorCreateCoursePage from "../app/instructor/create-course";
 import InstructorDashboard from "../app/instructor/dashboard";
 import InstructorMyCourses from "../app/instructor/my-courses";
 import InstructorMyStudents from "../app/instructor/my-students";
-import CreateCoursePage from "../app/instructor/create-course";
 
 // AUTH-ADMIN
 const AdminSignUp = lazy(() => import('@/app/admin/auth/sign-up/page'));
@@ -23,6 +20,7 @@ const AdminForgotPassword = lazy(() => import('@/app/admin/auth/forgot-password/
 const AdminResetPassword = lazy(() => import('@/app/admin/auth/reset-password/page'));
 
 // ADMIN
+const AdminNotFoundPage = lazy(() => import("@/app/admin/not-found"));
 const AdminDashboard = lazy(() => import('@/app/admin/dashboard/page'));
 const AdminAllCourses = lazy(() => import('@/app/admin/all-courses/page'));
 const CourseCategory = lazy(() => import('@/app/admin/course-category/page'));
@@ -35,24 +33,28 @@ const AdminReviews = lazy(() => import('@/app/admin/reviews/page'));
 const AdminEarnings = lazy(() => import('@/app/admin/earnings/page'));
 const AdminSettings = lazy(() => import('@/app/admin/admin-settings/page'));
 
+// STUDENT
 const Checkout = lazy(() => import('@/app/shop/checkout/page'));
 const PaymentSuccess = lazy(() => import('@/app/shop/payment-result/success/page'));
 const PaymentFailed = lazy(() => import('@/app/shop/payment-result/failed/page'));
-
-// STUDENT
-import VideoPlayer from "../app/pages/course/video-player/page";
 import CartDetails from "../app/shop/cart/page";
 import StudentMyCourses from '../app/student/my-courses';
 
+// PUBLIC
+import HomePage from "../app/home/page";
+import CoursesPage from "../app/pages/course/grid/page";
+import CourseDetails from "../app/pages/course/detail/page";
+import VideoPlayer from "../app/pages/course/video-player/page";
+import NotFoundPage from '../app/not-found';
 
-export const guestRoutes = [{
+
+export const publicRoutes = [{
   path: '/home',
   name: 'Home',
   element: <HomePage />
 },{
-path: '/courses',
+  path: '/courses',
   name: 'Courses',
-  isNested: false,
   element: <CoursesPage />
 }, {
   path: '/courses/:id',
@@ -97,7 +99,7 @@ export const instructorRoutes = [{
   path: '/instructor/account',
   name: 'Account',
   isNested: true,
-  element: <Account />
+  element: <InstructorAccount />
 }, {
   path: '/instructor/settings',
   name: 'Settings',
@@ -122,12 +124,17 @@ export const instructorRoutes = [{
   path: '/instructor/create-course',
   name: 'Create Course',
   isNested: false,
-  element: <CreateCoursePage />
+  element: <InstructorCreateCoursePage />
 }, {
   path: '/instructor/update-course',
   name: 'Update Course',
   isNested: true,
   element: null
+}, {
+  path: '/instructor/*',
+  name: 'Resource Not Found',
+  isNested: false,
+  element: <NotFoundPage />
 }];
 
 export const authAdminRoutes = [{
@@ -196,18 +203,22 @@ export const adminRoutes = [{
   path: '/admin/admin-settings',
   name: 'Admin Settings',
   element: <AdminSettings />
+}, {
+  path: '/admin/*',
+  name: 'Resource Not Found',
+  element: <AdminNotFoundPage />
 }];
 
 export const studentRoutes = [{
-  path: '/student/courses',
-  name: 'My Courses',
-  isNested: true,
-  element: <StudentMyCourses />
-}, {
   path: '/courses/:courseId/watch/:lectureId?',
   name: 'My Video Player',
   isNested: false,
   element: <VideoPlayer />
+}, {
+  path: '/student/courses',
+  name: 'My Courses',
+  isNested: true,
+  element: <StudentMyCourses />
 }, {
   path: '/student/cart',
   name: 'My Cart',
@@ -263,4 +274,9 @@ export const studentRoutes = [{
   name: 'Become an Instructor',
   isNested: false,
   element: null
+}, {
+  path: '/student/*',
+  name: 'Resource Not Found',
+  isNested: false,
+  element: <NotFoundPage />
 }];

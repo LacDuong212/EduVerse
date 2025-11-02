@@ -1076,7 +1076,7 @@ export const supportRequestsData = [{
   time: addOrSubtractHoursFromDate(8)
 }, {
   name: 'Dennis Barrett',
-  description: 'Stackbros assign you a new ticket for Eduport theme',
+  description: 'Stackbros assign you a new ticket for EduVerse theme',
   time: addOrSubtractHoursFromDate(5)
 }, {
   name: 'Dennis Barrett',

@@ -6,7 +6,7 @@ import SocialMedia from './components/SocialMedia';
 import { Row } from 'react-bootstrap';
 
 
-const Account = () => {
+const InstructorAccount = () => {
   return (
     <div className='pb-5'>
       <PageMetaData title="Account" />
@@ -19,4 +19,4 @@ const Account = () => {
   );
 };
 
-export default Account;
+export default InstructorAccount;

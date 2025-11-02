@@ -41,10 +41,10 @@ const ProfileDropdown = ({ className, dropdownItems }) => {
           <img
             className="avatar-img rounded-circle shadow "
             src={user.pfpImg}
-            alt="Instructor Avatar" />
+            alt="User Avatar" />
         ) : (
           <div className="avatar-img rounded-circle border border-white border-1 shadow d-flex align-items-center justify-content-center bg-light text-dark fw-bold fs-5">
-            {(user?.name?.[0] || "I").toUpperCase()}
+            {(user?.name?.[0] || "U").toUpperCase()}
           </div>
         )}
       </DropdownToggle>
@@ -58,18 +58,18 @@ const ProfileDropdown = ({ className, dropdownItems }) => {
                 <img
                   className="avatar-img rounded-circle border border-light border-2 shadow"
                   src={user.pfpImg}
-                  alt="Instructor Avatar" />
+                  alt="User Avatar" />
               ) : (
                 <div className="avatar-img rounded-circle border border-white border-1 shadow d-flex align-items-center justify-content-center bg-light text-dark fw-bold fs-4">
-                  {(user?.name?.[0] || "I").toUpperCase()}
+                  {(user?.name?.[0] || "U").toUpperCase()}
                 </div>
               )}
             </div>
             <div>
               <a className="h6" href="#">
-                {user?.name || "Instructor"}
+                {user?.name || "User"}
               </a>
-              <p className="small m-0">{user?.email || "instructor@example.com"}</p>
+              <p className="small m-0">{user?.email || "user@example.com"}</p>
             </div>
           </div>
         </li>

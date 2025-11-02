@@ -20,7 +20,7 @@ const ComingSoonPage = () => {
             <Row className="g-5 align-items-center justify-content-center">
               <Col lg={5}>
                 <h1 className="mt-4 mt-lg-0">We are building something awesome!</h1>
-                <p>Hey you! Eduport is coming. We are doing our best to launch our website and we will be back soon.</p>
+                <p>Hey you! EduVerse is coming. We are doing our best to launch our website and we will be back soon.</p>
                 <div className="overflow-hidden mt-4">
                   <p className="mb-1 h6 fw-light text-start">Launch progress</p>
                   <div className="progress progress-md progress-percent-bg bg-light">
