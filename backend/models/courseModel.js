@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import User from "./userModel.js";
 
 const courseSchema = new mongoose.Schema({
   title: { type: String, required: true },
@@ -58,6 +59,17 @@ courseSchema.pre('save', function (next) {
     const allLectures = this.curriculum.flatMap(s => s.lectures || []);
     this.lecturesCount = allLectures.length;
     this.duration = allLectures.reduce((sum, lec) => sum + (lec.duration || 0), 0);
+  }
+  next();
+});
+
+courseSchema.pre("save", async function (next) {
+  if (!this.isModified("instructor.ref")) return next();
+
+  const user = await User.findById(this.instructor.ref).select("name pfpImg");
+  if (user) {
+    this.instructor.name = user.name;
+    this.instructor.avatar = user.pfpImg;
   }
   next();
 });

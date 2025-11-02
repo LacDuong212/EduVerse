@@ -32,6 +32,22 @@ userSchema.post("save", async function () {
   );
 });
 
+userSchema.post("save", async function () {
+  if (!this.isModified("name") && !this.isModified("avatar")) return;
+
+  try {
+    await Course.updateMany(
+      { "instructor.ref": this._id },
+      {
+        "instructor.name": this.name,
+        "instructor.avatar": this.avatar
+      }
+    );
+  } catch (err) {
+    console.error("Failed to update instructor info in courses: ", err);
+  }
+});
+
 const userModel = mongoose.models.user || mongoose.model('User', userSchema);
 
 export default userModel;
