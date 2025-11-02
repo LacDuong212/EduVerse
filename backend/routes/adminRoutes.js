@@ -2,7 +2,8 @@ import express from 'express';
 import { register, login, logout,
     forgotPassword, resetPassword, 
     verifyAccount, verifyOtpCheck,
-    getAdminProfile, getAllAdministrators } from '../controllers/adminController.js';
+    getAdminProfile, getAllAdministrators,
+    getDashboardStats, getEarningsChart, changePassword } from '../controllers/adminController.js';
 import { getAllStudents, blockStudent, unblockStudent, deleteStudent } from '../controllers/userController.js';
 import { getAllInstructors, blockInstructor, unblockInstructor } from '../controllers/instructorController.js';
 import { getEarningsHistory, getEarningsStats } from '../controllers/courseController.js';
@@ -19,6 +20,11 @@ adminRoute.post('/forgot-password', forgotPassword);
 adminRoute.post('/reset-password', resetPassword);
 adminRoute.get("/profile", verifyAdminToken, getAdminProfile);
 adminRoute.get("/admins", verifyAdminToken, getAllAdministrators);
+adminRoute.patch("/profile/change-password", verifyAdminToken, changePassword);
+
+// Admin dashboard
+adminRoute.get("/dashboard-stats", verifyAdminToken, getDashboardStats);
+adminRoute.get("/earnings-chart", verifyAdminToken, getEarningsChart);
 
 //Admin manage students
 adminRoute.get("/students", verifyAdminToken, getAllStudents);

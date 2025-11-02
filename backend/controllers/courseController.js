@@ -593,13 +593,13 @@ export const getEarningsStats = async (req, res) => {
     const earningsCardsData = [
       {
         title: "Total Sales",
-        amount: completedData.totalRevenue.toFixed(2),
+        amount: completedData.totalRevenue,
         variant: "success",
         isInfo: false,
       },
       {
         title: "Pending Revenue",
-        amount: pendingData.pendingRevenue.toFixed(2),
+        amount: pendingData.pendingRevenue,
         variant: "orange",
         isInfo: false,
       },

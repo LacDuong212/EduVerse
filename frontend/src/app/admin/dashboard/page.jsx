@@ -12,10 +12,6 @@ const AdminDashboardPage = () => {
         </Col>
       </Row>
       <Counter />
-      {/* <Row className="g-4 mb-4">
-        <Earnings />
-        <TopInstructors />
-      </Row> */}
       <Earnings />
     </>;
 };
