@@ -1,5 +1,15 @@
-export const currency = '$';
+export const currency = '₫';
 
+/**
+ * Định dạng tiền tệ dạng: 1,299,000 ₫
+ */
+export const formatCurrency = (value) => {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return '—';
+  return `${new Intl.NumberFormat('en-US', {
+    maximumFractionDigits: 0,
+  }).format(n)} ${currency}`;
+};
 export const currentYear = new Date().getFullYear();
 
 export const OUR_GROUP_NAME = '@d2v-team';

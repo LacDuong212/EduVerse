@@ -6,7 +6,7 @@ import Instructor from './Instructor';
 import Overview from './Overview';
 import Reviews from './Reviews';
 import GlightBox from '@/components/GlightBox';
-import { currency } from '@/context/constants';
+import { formatCurrency } from '@/context/constants';
 import { FaBookOpen, FaClock, FaCopy, FaFacebookSquare, FaGlobe, FaLinkedin, FaMedal, FaPlay, FaShareAlt, FaSignal, FaStar, FaStopwatch, FaTwitterSquare, FaUserClock } from 'react-icons/fa';
 import courseImg1 from '@/assets/images/courses/4by3/01.jpg';
 import courseImg18 from '@/assets/images/courses/4by3/18.jpg';
@@ -68,11 +68,11 @@ const PricingCard = ({ course }) => {
 
               return (
                 <div className="d-flex align-items-center">
-                  <h3 className="fw-bold mb-0 me-2">{currency}{sale}</h3>
+                  <h3 className="fw-bold mb-0 me-2">{formatCurrency(sale)}</h3>
                   {percent > 0 && (
                     <>
                       <span className="text-decoration-line-through mb-0 me-2">
-                        {currency}{original}
+                        {formatCurrency(original)}
                       </span>
                       <span className="badge text-bg-orange mb-0">{percent}% off</span>
                     </>
@@ -140,7 +140,7 @@ const RecentlyViewed = () => {
         </h6>
         <ul className="list-group list-group-borderless mt-1 d-flex justify-content-between">
           <li className="list-group-item px-0 d-flex justify-content-between">
-            <span className="text-success">{currency}130</span>
+            <span className="text-success">{formatCurrency(130)}</span>
             <span className="h6 fw-light">
               4.5
               <FaStar className="text-warning ms-1" />
@@ -159,7 +159,7 @@ const RecentlyViewed = () => {
         </h6>
         <ul className="list-group list-group-borderless mt-1 d-flex justify-content-between">
           <li className="list-group-item px-0 d-flex justify-content-between">
-            <span className="text-success">{currency}150</span>
+            <span className="text-success">{formatCurrency(150)}</span>
             <span className="h6 fw-light">
               4.0
               <FaStar className="text-warning ms-1" />

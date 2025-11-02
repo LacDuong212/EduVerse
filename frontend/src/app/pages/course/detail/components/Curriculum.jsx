@@ -26,7 +26,7 @@ import {
 } from "react-icons/fa";
 import { BsPatchCheckFill } from "react-icons/bs";
 import element1 from "@/assets/images/element/01.svg";
-import { currency } from "@/context/constants";
+import { formatCurrency } from "@/context/constants";
 import useToggle from "@/hooks/useToggle";
 import useCourseDetail from "../useCourseDetail"; // 🔗 hook bạn cung cấp
 import { useNavigate } from "react-router-dom";
@@ -163,7 +163,7 @@ const Curriculum = () => {
           </figure>
           <h2>
             Get Premium Course in{" "}
-            <span className="text-success">{currency}800</span>
+            <span className="text-success">{formatCurrency(800)}</span>
           </h2>
           <p>
             Unlock full access to all lectures, materials and exclusive

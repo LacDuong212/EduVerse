@@ -9,7 +9,7 @@ const PageIntro = ({ course }) => {
       <Container>
         <Row className="py-5">
           <Col lg={8}>
-            <h6 className="mb-3 font-base bg-primary text-white py-2 px-4 rounded-2 d-inline-block">Digital Marketing</h6>
+            <h6 className="mb-3 font-base bg-primary text-white py-2 px-4 rounded-2 d-inline-block">{course?.category ?? 'General'}</h6>
             <h1>{course?.title}</h1>
             <p>{course?.subtitle}</p>
             <ul className="list-inline mb-0">

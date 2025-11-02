@@ -1,5 +1,5 @@
 import TinySlider from '@/components/TinySlider';
-import { currency } from '@/context/constants';
+import { formatCurrency } from '@/context/constants';
 import useCourseDetail from '../useCourseDetail';
 import { toAlphaNumber } from '@/utils/change-casing';
 import { Card, CardBody, CardTitle, Container, Row } from 'react-bootstrap';
@@ -60,8 +60,7 @@ const CourseCard = ({
             {label}
           </a> */}
           <h3 className="text-success mb-0">
-            {currency}
-            {discountPrice}
+            {formatCurrency(discountPrice)}
           </h3>
         </div>
       </CardBody>
