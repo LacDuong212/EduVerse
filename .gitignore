@@ -156,3 +156,4 @@ tmp/
 
 *.json
 !package.json
+/frontend_tailwind
