@@ -69,7 +69,7 @@ const CourseCard = ({
         <span className={`badge text-bg-${levelBadge}`}>{level || "All"}</span>
       </td>
 
-      <td>${price}</td>
+      <td>{price}đ</td>
 
       <td>
         <span

@@ -4,7 +4,6 @@ import { BsXLg } from 'react-icons/bs';
 import { FaRegEdit, FaTimes } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import EmptyCartPage from '@/app/shop/empty-cart/page';
-// ✅ Thêm hook (đúng file bạn yêu cầu)
 import useCartDetail from '../useCartDetails';
 
 const CartCard = ({ image, title, price, onRemove }) => {
@@ -36,20 +35,15 @@ const CartCard = ({ image, title, price, onRemove }) => {
 const CartDetails = () => {
   const { isTrue, toggle } = useToggle(true);
 
-  // ❌ BỎ hard data:
-  // const cartData = useFetchData(getAllCourses);
-
-  // ✅ Dùng dữ liệu thật từ hook (GIỮ tên biến/hàm theo style của bạn)
   const {
     displayedCourses,
     displayedTotal,
     removeFromCart,
     reloadCart,
-    // Nếu bạn cần các biến khác, destructuring thêm tại đây:
-    // displayedCount, items, selected, toggleSelect, toggleSelectAll, removeFromCart, handleCheckout
+
   } = useCartDetail();
   const isEmpty = displayedCourses.length === 0;
-  // Tính các con số tổng (thay cho hard code ở cột phải)
+
   const originalTotal = displayedCourses.reduce(
     (sum, c) => sum + (Number(c?.price ?? 0) || 0),
     0
@@ -58,7 +52,7 @@ const CartDetails = () => {
     (sum, c) => sum + (Number(c?.discountPrice ?? c?.price ?? 0) || 0),
     0
   ));
-  const totalToPay = displayedTotal; // đã là tổng discountPrice
+  const totalToPay = displayedTotal;
   if (isEmpty) {
     return <EmptyCartPage />;
   }
@@ -93,7 +87,6 @@ const CartDetails = () => {
               <div className="table-responsive border-0 rounded-3">
                 <table className="table align-middle p-4 mb-0">
                   <tbody className="border-top-0">
-                    {/* 🔁 GIỮ nguyên CartCard, chỉ thay nguồn data */}
                     {displayedCourses.map((item) => (
                       <CartCard
                         key={item.courseId}
@@ -147,8 +140,7 @@ const CartDetails = () => {
                 </li>
               </ul>
               <div className="d-grid">
-                {/* Giữ nguyên giao diện/Link như code gốc */}
-                <Link to="/shop/checkout" className="btn btn-lg btn-success">
+                <Link to="/student/checkout" className="btn btn-lg btn-success">
                   Proceed to Checkout
                 </Link>
               </div>
