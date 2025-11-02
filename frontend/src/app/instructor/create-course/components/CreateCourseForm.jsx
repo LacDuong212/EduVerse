@@ -1,3 +1,4 @@
+import PageMetaData from '@/components/PageMetaData';
 import useBSStepper from '@/hooks/useBSStepper';
 import { useEffect, useRef } from 'react';
 import { Card, CardBody, CardHeader, Col, Container, Row } from 'react-bootstrap';
@@ -5,13 +6,17 @@ import Step1 from './Step1';
 import Step2 from './Step2';
 import Step3 from './Step3';
 import Step4 from './Step4';
+
+
 const CreateCourseForm = () => {
   const stepperRef = useRef(null);
   const stepperInstance = useBSStepper(stepperRef);
   useEffect(() => {
     stepperInstance?.to(1);
   }, [stepperInstance]);
-  return <section>
+  return (
+  <section>
+      <PageMetaData title="Create a Course" />
       <Container>
         <Row>
           <Col md={8} className="mx-auto text-center">
@@ -73,6 +78,7 @@ const CreateCourseForm = () => {
           </div>
         </Card>
       </Container>
-    </section>;
+    </section>
+    );
 };
 export default CreateCourseForm;
