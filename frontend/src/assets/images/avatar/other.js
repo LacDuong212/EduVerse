@@ -211,7 +211,7 @@ export const blogsData = [{
   image: event8
 }, {
   id: '1003',
-  title: 'Never underestimate the influence of Eduport',
+  title: 'Never underestimate the influence of EduVerse',
   description: 'Prospective students should start broadly and then narrow their list',
   name: 'Joan Wallace',
   createdAt: '5D Ago',
@@ -697,7 +697,7 @@ export const eventScheduleData = [{
   events: [{
     avatar: avatar1,
     title: 'Grad Opening',
-    description: 'by Lori Stevens Chairman of Eduport',
+    description: 'by Lori Stevens Chairman of EduVerse',
     time: addOrSubtractHoursFromDate(1)
   }, {
     avatar: avatar2,
@@ -708,7 +708,7 @@ export const eventScheduleData = [{
   }, {
     avatar: avatar4,
     title: 'Evolution of User Experience',
-    description: 'by Larry Lawson Co-founder and Carolyn Ortiz Eduport Director',
+    description: 'by Larry Lawson Co-founder and Carolyn Ortiz EduVerse Director',
     time: addOrSubtractHoursFromDate(7)
   }, {
     avatar: avatar6,
@@ -774,7 +774,7 @@ export const eventScheduleData = [{
   events: [{
     avatar: avatar1,
     title: 'Grad Opening',
-    description: 'by Lori Stevens Chairman of Eduport',
+    description: 'by Lori Stevens Chairman of EduVerse',
     time: addOrSubtractHoursFromDate(5)
   }, {
     avatar: avatar2,
@@ -785,7 +785,7 @@ export const eventScheduleData = [{
   }, {
     avatar: avatar4,
     title: 'Evolution of User Experience',
-    description: 'by Larry Lawson Co-founder and Carolyn Ortiz Eduport Director',
+    description: 'by Larry Lawson Co-founder and Carolyn Ortiz EduVerse Director',
     time: addOrSubtractHoursFromDate(11)
   }, {
     avatar: avatar6,

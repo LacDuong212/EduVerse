@@ -1,6 +1,6 @@
 import PageMetaData from '@/components/PageMetaData';
 import { Col, Row } from 'react-bootstrap';
-import { FaFacebookF, FaGoogle } from "react-icons/fa";
+import { FaChevronLeft, FaFacebookF, FaGoogle } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import AuthLayout from "@/app/auth/components/AuthLayout";
 import SignInForm from "@/app/auth/sign-in/components/SignInForm";
@@ -11,8 +11,16 @@ export default function SignInPage() {
     <AuthLayout>
       <Col xs={12} lg={6} className="m-auto">
         <Row className="my-5">
-          <Col sm={10} xl={8} className="m-auto">
-            <span className="mb-0 fs-1">👋</span>
+          <Col sm={10} xl={8} className="m-auto position-relative">
+            <div className='mb-3'>
+              <FaChevronLeft className='mb-1 text-primary' />
+              <Link
+                to="/"
+                className="ms-1 fw-semibold text-decoration-none"
+              >
+                Back to Home
+              </Link>
+            </div>
             <h1 className="fs-2">Login into EduVerse!</h1>
             <p className="lead mb-4">Nice to see you! Please log in with your account.</p>
             <SignInForm />

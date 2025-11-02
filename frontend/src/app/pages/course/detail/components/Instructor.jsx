@@ -99,7 +99,7 @@ const Instructor = () => {
           <li className="list-group-item pb-0">
             Web:
             <a href="#" className="ms-2">
-              https://eduport.com
+              https://eduverse.com
             </a>
           </li>
         </ul>
