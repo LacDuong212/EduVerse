@@ -1,10 +1,11 @@
 import useToggle from '@/hooks/useToggle';
 import { Alert, Button, Card, Col, Container, Row } from 'react-bootstrap';
 import { BsXLg } from 'react-icons/bs';
-import { FaRegEdit, FaTimes } from 'react-icons/fa';
+import { FaTimes } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import EmptyCartPage from '@/app/shop/empty-cart/page';
 import useCartDetail from '../useCartDetails';
+import { formatCurrency } from '@/context/constants'; // ✅ thêm
 
 const CartCard = ({ image, title, price, onRemove }) => {
   return (
@@ -20,10 +21,10 @@ const CartCard = ({ image, title, price, onRemove }) => {
         </div>
       </td>
       <td className="text-center">
-        <h5 className="text-success mb-0">${price}</h5>
+        {/* ✅ dùng formatCurrency */}
+        <h5 className="text-success mb-0">{formatCurrency(price)}</h5>
       </td>
       <td>
-
         <button className="btn btn-sm btn-danger-soft px-2 mb-0" onClick={onRemove}>
           <FaTimes size={14} />
         </button>
@@ -40,22 +41,29 @@ const CartDetails = () => {
     displayedTotal,
     removeFromCart,
     reloadCart,
-
   } = useCartDetail();
+
   const isEmpty = displayedCourses.length === 0;
 
+  // ✅ giữ số để tính toán, chỉ format khi render
   const originalTotal = displayedCourses.reduce(
     (sum, c) => sum + (Number(c?.price ?? 0) || 0),
     0
   );
-  const couponDiscount = Math.max(0, originalTotal - displayedCourses.reduce(
-    (sum, c) => sum + (Number(c?.discountPrice ?? c?.price ?? 0) || 0),
-    0
-  ));
-  const totalToPay = displayedTotal;
+  const couponDiscount = Math.max(
+    0,
+    originalTotal -
+      displayedCourses.reduce(
+        (sum, c) => sum + (Number(c?.discountPrice ?? c?.price ?? 0) || 0),
+        0
+      )
+  );
+  const totalToPay = Number(displayedTotal || 0);
+
   if (isEmpty) {
     return <EmptyCartPage />;
   }
+
   return (
     <section className="pt-5">
       <Container>
@@ -80,7 +88,7 @@ const CartDetails = () => {
                   data-bs-dismiss="alert"
                   aria-label="Close"
                 >
-                  <BsXLg></BsXLg>
+                  <BsXLg />
                 </button>
               </Alert>
 
@@ -90,9 +98,10 @@ const CartDetails = () => {
                     {displayedCourses.map((item) => (
                       <CartCard
                         key={item.courseId}
-                        image={item.thumbnail || "/placeholder-course.png"}
-                        title={item.title || "Untitled"}
-                        price={(item.discountPrice ?? item.price ?? 0).toFixed(2)}
+                        image={item.thumbnail || '/placeholder-course.png'}
+                        title={item.title || 'Untitled'}
+                        // ✅ truyền số, không toFixed
+                        price={Number(item.discountPrice ?? item.price ?? 0)}
                         onRemove={() => removeFromCart([item.courseId])}
                       />
                     ))}
@@ -103,7 +112,7 @@ const CartDetails = () => {
               <Row className="g-3 mt-2">
                 <Col md={6}>
                   <div className="input-group">
-                    <input className="form-control form-control " placeholder="COUPON CODE" />
+                    <input className="form-control form-control" placeholder="COUPON CODE" />
                     <button type="button" className="btn btn-primary">
                       Apply coupon
                     </button>
@@ -125,17 +134,22 @@ const CartDetails = () => {
                 <li className="list-group-item px-0 d-flex justify-content-between">
                   <span className="h6 fw-light mb-0">Original Price</span>
                   <span className="h6 fw-light mb-0 fw-bold">
-                    ${originalTotal.toFixed(2)}
+                    {/* ✅ format */}
+                    {formatCurrency(originalTotal)}
                   </span>
                 </li>
                 <li className="list-group-item px-0 d-flex justify-content-between">
                   <span className="h6 fw-light mb-0">Coupon Discount</span>
-                  <span className="text-danger">-${couponDiscount.toFixed(2)}</span>
+                  <span className="text-danger">
+                    {/* ✅ format và thêm dấu trừ (chỉ hiển thị) */}
+                    -{formatCurrency(couponDiscount)}
+                  </span>
                 </li>
                 <li className="list-group-item px-0 d-flex justify-content-between">
                   <span className="h5 mb-0">Total</span>
                   <span className="h5 mb-0">
-                    ${totalToPay.toFixed(2)}
+                    {/* ✅ format */}
+                    {formatCurrency(totalToPay)}
                   </span>
                 </li>
               </ul>
@@ -145,7 +159,7 @@ const CartDetails = () => {
                 </Link>
               </div>
               <p className="small mb-0 mt-2 text-center">
-                By completing your purchase, you agree to these
+                By completing your purchase, you agree to these{' '}
                 <a href="#"><strong>Terms of Service</strong></a>
               </p>
             </Card>
