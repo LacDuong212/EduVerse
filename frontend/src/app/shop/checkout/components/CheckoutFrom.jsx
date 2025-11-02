@@ -8,6 +8,7 @@ import * as yup from 'yup';
 import useCartDetail from '../../cart/useCartDetails';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { formatCurrency } from '@/context/constants';
 
 const CheckoutProductCard = ({
   image,
@@ -25,7 +26,7 @@ const CheckoutProductCard = ({
           <a href="#">{title}</a>
         </h6>
         <div className="d-flex justify-content-between align-items-center mt-3">
-          <span className="text-success">${price}</span>
+          <span className="text-success">{formatCurrency(price)}</span>
           <div className="text-primary-hover">
             <button
               className="btn btn-link text-body p-0 me-2"
@@ -168,19 +169,19 @@ const CheckoutFrom = () => {
                   <li className="list-group-item px-0 d-flex justify-content-between">
                     <span className="h6 fw-light mb-0">Original Price</span>
                     <span className="h6 fw-light mb-0 fw-bold">
-                      ${originalTotal.toFixed(2)}
+                      {formatCurrency(originalTotal)}
                     </span>
                   </li>
                   <li className="list-group-item px-0 d-flex justify-content-between">
                     <span className="h6 fw-light mb-0">Coupon Discount</span>
                     <span className="text-danger">
-                      -${couponDiscount.toFixed(2)}
+                      -{formatCurrency(couponDiscount)}
                     </span>
                   </li>
                   <li className="list-group-item px-0 d-flex justify-content-between">
                     <span className="h5 mb-0">Total</span>
                     <span className="h5 mb-0">
-                      ${totalToPay.toFixed(2)}
+                      {formatCurrency(totalToPay)}
                     </span>
                   </li>
                 </ul>
