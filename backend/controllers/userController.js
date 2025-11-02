@@ -140,7 +140,7 @@ export const getAllStudents  = async (req, res) => {
     const search = req.query.search?.trim() || "";
 
     const studentsDocs = await userModel
-      .find({}, 'name email isVerified isActivated createdAt updatedAt pfpImg')
+      .find({role : 'student'}, 'name email isVerified isActivated createdAt updatedAt pfpImg')
       .sort({ createdAt: -1 });
 
     const students = studentsDocs.map((doc) => doc.toObject());
