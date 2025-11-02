@@ -1,10 +1,9 @@
 import TinySlider from '@/components/TinySlider';
-import { currency } from '@/context/constants';
 import { useSelector } from 'react-redux';
 import { Card, CardBody, CardFooter, CardTitle } from 'react-bootstrap';
 import { renderToString } from 'react-dom/server';
 import { FaChevronLeft, FaChevronRight, FaRegBookmark, FaRegClock, FaShoppingCart, FaStar, FaTable } from 'react-icons/fa';
-
+import { formatCurrency } from '@/context/constants';
 // --- Card: thêm hiển thị discount ---
 const BestSellersCard = ({ course }) => {
   const {
@@ -98,15 +97,15 @@ const BestSellersCard = ({ course }) => {
             ) : hasDiscount ? (
               <>
                 <div className="small text-muted text-decoration-line-through">
-                  {currency}{price.toFixed(2)}
+                  {formatCurrency(price)}
                 </div>
                 <h4 className="text-success mb-0 item-show">
-                  {currency}{discountPrice.toFixed(2)}
+                  {formatCurrency(discountPrice)}
                 </h4>
               </>
             ) : (
               <h4 className="text-success mb-0 item-show">
-                {currency}{price.toFixed(2)}
+                {formatCurrency(price)}
               </h4>
             )}
 
