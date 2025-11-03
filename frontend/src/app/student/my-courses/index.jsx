@@ -4,64 +4,93 @@ import { Button, Card, CardBody, CardHeader, Col, ProgressBar, Row } from 'react
 import { BsArrowRepeat, BsCheck, BsPlayCircle } from 'react-icons/bs';
 import { FaAngleLeft, FaAngleRight, FaSearch } from 'react-icons/fa';
 import { useMyCourses } from './useMyCourses';
-
+import { useNavigate } from "react-router-dom";
 
 const CourseRow = ({
+  _id,
   completedLectures,
   image,
   name,
-  totalLectures
+  totalLectures,
+  firstLectureId,
+  hasPreview,
 }) => {
-  const percentage = Math.trunc(completedLectures * 100 / totalLectures);
-  return <tr>
-    <td>
-      <div className="d-flex align-items-center">
-        <div className="w-100px">
-          <img src={image} className="rounded" alt="courses" />
-        </div>
-        <div className="flex-grow-1 ms-2">
-          <h6 className="mb-1 text-truncate">
-            <a href="#" className="text-decoration-none">{name}</a>
-          </h6>
+  const navigate = useNavigate();
 
-          <div>
-            <div className="d-flex justify-content-between align-items-center mb-1">
-              <span className="text-muted small">Progress</span>
-              <h6 className="mb-0 text-end">{percentage}%</h6>
+  const percentage =
+    totalLectures > 0 ? Math.trunc((completedLectures * 100) / totalLectures) : 0;
+
+  const goToWatch = () => {
+    const targetLecture = firstLectureId || (hasPreview ? "preview" : null);
+    if (targetLecture) navigate(`/courses/${_id}/watch/${targetLecture}`);
+    else navigate(`/courses/${_id}`);
+  };
+
+  return (
+    <tr>
+      <td>
+        <div className="d-flex align-items-center">
+          <div className="w-100px">
+            <img src={image} className="rounded" alt="courses" />
+          </div>
+
+          <div className="flex-grow-1 ms-2">
+            <h6 className="mb-1 text-truncate">
+              <span
+                className="text-decoration-none text-primary"
+                style={{ cursor: "pointer" }}
+                onClick={goToWatch}
+              >
+                {name}
+              </span>
+            </h6>
+
+            <div>
+              <div className="d-flex justify-content-between align-items-center mb-1">
+                <span className="text-muted small">Progress</span>
+                <h6 className="mb-0 text-end">{percentage}%</h6>
+              </div>
+
+              <ProgressBar
+                now={percentage}
+                className="progress progress-sm bg-opacity-10 aos"
+                data-aos="slide-right"
+                data-aos-delay={200}
+                data-aos-duration={1000}
+                data-aos-easing="ease-in-out"
+                aria-valuenow={percentage}
+                aria-valuemin={0}
+                aria-valuemax={100}
+              />
             </div>
-
-            <ProgressBar
-              now={percentage}
-              className="progress progress-sm bg-opacity-10 aos"
-              data-aos="slide-right"
-              data-aos-delay={200}
-              data-aos-duration={1000}
-              data-aos-easing="ease-in-out"
-              aria-valuenow={percentage}
-              aria-valuemin={0}
-              aria-valuemax={100}
-            />
           </div>
         </div>
-      </div>
-    </td>
-    <td className="text-center">{totalLectures}</td>
-    <td className="text-center">{completedLectures}</td>
-    <td>
-      {percentage === 100 ? (
-        <Button variant="light" size="sm" className="me-1">
-          <BsArrowRepeat className="me-1 icons-center" />
-          Restart
-        </Button>
-      ) : (
-        <Button variant="primary-soft" size="sm" className="icons-center">
-          <BsPlayCircle className="me-1 " />
-          Continue
-        </Button>
-      )}
-    </td>
-  </tr>;
+      </td>
+
+      <td className="text-center">{totalLectures}</td>
+      <td className="text-center">{completedLectures}</td>
+      <td>
+        {percentage === 100 ? (
+          <Button variant="light" size="sm" className="me-1">
+            <BsArrowRepeat className="me-1 icons-center" />
+            Restart
+          </Button>
+        ) : (
+          <Button
+            variant="primary-soft"
+            size="sm"
+            className="icons-center"
+            onClick={goToWatch}
+          >
+            <BsPlayCircle className="me-1" />
+            Continue
+          </Button>
+        )}
+      </td>
+    </tr>
+  );
 };
+
 
 const StudentMyCourses = () => {
   const { courseData, pagination, loading, fetchMyCourses } = useMyCourses();
