@@ -97,15 +97,15 @@ const StudentList = ({ studentsData, isLoading, onBlock, onUnblock, onDelete }) 
                       </Button>
                     </td>
                     : <td>
-                      <Button variant="success-soft" size="sm" className="me-1 mb-1 mb-md-0" onClick={() => onUnblock(item._id)}>
-                        UnBlock
+                      <Button variant="primary-soft" size="sm" className="me-1 mb-1 mb-md-0" onClick={() => onUnblock(item._id)}>
+                        Unblock
                       </Button>
                     </td>
                 )
                 : (
                   <td>
                     <Button variant="danger-soft" size="sm" className="me-1 mb-1 mb-md-0" onClick={() => onDelete(item._id)}>
-                      Delete
+                      Remove
                     </Button>
                   </td>
                 )
