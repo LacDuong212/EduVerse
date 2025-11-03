@@ -5,19 +5,20 @@ import VideoPlayerDetail from './components/VideoPlayerDetail';
 import useCourseById from './useCourseById';
 
 export default function VideoPlayer() {
-  const { courseId, lectureId } = useParams();           // 👈 ĐỌC PARAMS Ở ĐÂY
+  const { courseId, lectureId } = useParams();
   const { course, loading, error } = useCourseById(courseId);
-console.log('params in parent', { courseId, lectureId });
+
   return (
     <>
       <PageMetaData title="Course Video" />
       <main>
         <VideoPlayerDetail
+          key={`${courseId}:${lectureId}`}   // 👈 ép remount subtree
           course={course}
           loading={loading}
           error={error}
           courseId={courseId}
-          lectureId={lectureId}                           // 👈 TRUYỀN XUỐNG
+          lectureId={lectureId}
         />
       </main>
     </>

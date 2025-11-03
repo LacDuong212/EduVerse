@@ -1,5 +1,5 @@
 // app/pages/course/video-player/components/VideoPlayerDetail.jsx
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import useToggle from "@/hooks/useToggle";
 import { Collapse, Row, Spinner } from "react-bootstrap";
@@ -13,7 +13,7 @@ export default function VideoPlayerDetail({ course, loading, error, courseId, le
   const { isTrue: isOpen, toggle } = useToggle(true);
   const navigate = useNavigate();
 
-  // Chuẩn hóa dữ liệu (không return sớm trước hooks)
+  // Chuẩn hóa dữ liệu lectures
   const lectures = useMemo(
     () => (course?.curriculum ? course.curriculum.flatMap((s) => s.lectures || []) : []),
     [course]
@@ -31,31 +31,40 @@ export default function VideoPlayerDetail({ course, loading, error, courseId, le
     );
   }, [course, lectures, lectureId]);
 
+  // Xác định provider để fingerprint chắc chắn
+  const provider = useMemo(() => {
+    const yt = current?.videoUrl ? parseYouTubeId(current.videoUrl) : null;
+    return yt ? "yt" : "html5";
+  }, [current?.videoUrl]);
+
   // Nguồn phát Plyr (YouTube/mp4)
   const source = useMemo(() => {
     if (!current || !course) return null;
     return toPlyrSource(current.videoUrl, current.title || course.title, course.thumbnail);
   }, [current, course]);
 
-  // Remount Plyr khi đổi lecture để tránh lỗi removeChild
-  const [playerKey, setPlayerKey] = useState(0);
-  useEffect(() => {
-    setPlayerKey((k) => k + 1);
-  }, [lectureId]);
+  // Fingerprint cho key => ép Plyr remount “đủ sâu” mỗi khi đổi bài/nguồn
+  const playerKey = useMemo(() => {
+    const ytId = current?.videoUrl ? parseYouTubeId(current.videoUrl) : null;
+    return [courseId || "no-course", current?._id || "no-lecture", provider, ytId || current?.videoUrl || "no-src"].join("|");
+  }, [courseId, current?._id, current?.videoUrl, provider]);
 
   // Log hỗ trợ debug (tắt nếu muốn)
   useEffect(() => {
     if (current) {
+      // eslint-disable-next-line no-console
       console.log({
         from: "VideoPlayerDetail",
         params: { courseId, lectureId },
         lecturesLen: lectures.length,
         current,
+        provider,
         ytId: current?.videoUrl ? parseYouTubeId(current.videoUrl) : null,
         source,
+        playerKey,
       });
     }
-  }, [courseId, lectureId, lectures.length, current, source]);
+  }, [courseId, lectureId, lectures.length, current, provider, source, playerKey]);
 
   // UI trạng thái (giữ đúng layout full-screen)
   const overlayStatus =
@@ -81,16 +90,24 @@ export default function VideoPlayerDetail({ course, loading, error, courseId, le
     <section className="py-0 bg-dark position-relative min-vh-100">
       <Row className="g-0">
         <div className="d-flex w-100">
-          {/* LEFT: Player – y hệt template, chỉ thay source động */}
+          {/* LEFT: Player */}
           <div className="overflow-hidden fullscreen-video w-100 position-relative">
             <div className="video-player rounded-3">
-              {/* Tracks (caption) nếu có, bạn có thể thêm vào toPlyrSource hoặc nối ở đây */}
-              {source && <Plyr key={playerKey} playsInline crossOrigin="anonymous" controls source={source} />}
+              {/* Tracks (caption) nếu có, có thể nối thêm vào source */}
+              {source && (
+                <Plyr
+                  key={playerKey}                 // 👈 Key đổi theo fingerprint (lecture + provider + url/id)
+                  playsInline
+                  crossOrigin="anonymous"
+                  controls
+                  source={source}
+                />
+              )}
             </div>
             {overlayStatus}
           </div>
 
-          {/* RIGHT: Sidebar toggle + collapse (animation) */}
+          {/* RIGHT: Sidebar toggle + collapse */}
           <div className="justify-content-end position-relative">
             <button
               onClick={toggle}
