@@ -5,6 +5,7 @@ import Instructor from "../models/instructorModel.js";
 import userInteraction from "../models/userInteraction.js";
 
 import Fuse from "fuse.js";
+import userModel from "../models/userModel.js";
 
 
 export const getHomeCourses = async (req, res) => {
@@ -62,7 +63,7 @@ export const getCoursesOverview = async (req, res) => {
 
     const admin = await Admin.findById(userId);
     if (!admin || !admin.isVerified || !admin.isApproved) {
-      return res.status(403).json({
+      return res.status(401).json({
         success: false,
         message: "Access denied",
       });
@@ -73,7 +74,7 @@ export const getCoursesOverview = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const courses = await Course.find(/*{ isDeleted: false }*/) // #TODO
-      .select("image thumbnail title instructor level createdAt price status")
+      .select("image thumbnail title instructor level createdAt price status isActive")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -384,19 +385,7 @@ export const getOwnedCourses = async (req, res) => {
         if (c && !courseSet.has(c._id.toString())) {
           courseSet.add(c._id.toString());
 
-          ownedCourses.push({
-            _id: c._id,
-            title: c.title,
-            category: c.category,
-            subCategory: c.subCategory,
-            rating: c.rating?.average || 0,
-            instructor: c.instructor,
-            level: c.level,
-            thumbnail: c.thumbnail,
-            updatedAt: c.updatedAt,
-            totalLectures:
-              c.lecturesCount || (c.curriculum?.lectures || []).length || 0,
-          });
+          ownedCourses.push(c);
         }
       }
     }
@@ -671,6 +660,8 @@ export const saveCourseStep1 = async (req, res) => {
 
       await course.save();
     } else {
+      const user = await userModel.findById(userId);
+
       // create new draft
       course = await Course.create({
         title,
@@ -684,7 +675,7 @@ export const saveCourseStep1 = async (req, res) => {
         lecturesCount,
         price,
         discountPrice,
-        instructor: { ref: userId },
+        instructor: { ref: userId, name: user?.name, avatar: user?.pfpImg },
         status: "Pending",
         isActive: false,
       });
@@ -872,6 +863,55 @@ export const submitCourseForReview = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Server error while submitting course',
+    });
+  }
+};
+
+// PATCH /api/courses/:id?newStatus=
+export const updateCourseStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { newStatus } = req.query;
+    const adminId = req.adminId;
+
+    const admin = await Admin.findById(adminId);
+    if (!admin || !admin.isVerified || !admin.isApproved) {
+      return res.status(401).json({
+        success: false,
+        message: 'Access denied'
+      });
+    }
+
+    const allowedStatus = ['Rejected', 'Pending', 'Live', 'Blocked'];
+
+    if (!allowedStatus.includes(newStatus)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid status'
+      });
+    }
+
+    const course = await Course.findById(id);
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: 'Course not found'
+      });
+    }
+
+    course.status = newStatus;
+    await course.save();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Status updated successfully',
+      course
+    });
+  } catch (error) {
+    console.error('Error updating course status:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error'
     });
   }
 };
