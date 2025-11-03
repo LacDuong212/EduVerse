@@ -39,6 +39,7 @@ const PaymentSuccess = lazy(() => import('@/app/shop/payment-result/success/page
 const PaymentFailed = lazy(() => import('@/app/shop/payment-result/failed/page'));
 import CartDetails from "../app/shop/cart/page";
 import StudentMyCourses from '../app/student/my-courses';
+import StudentAccount from '../app/student/account';
 
 // PUBLIC
 import HomePage from "../app/home/page";
@@ -233,7 +234,7 @@ export const studentRoutes = [{
   path: '/student/account',
   name: 'Account',
   isNested: true,
-  element: null
+  element: <StudentAccount />
 }, {
   path: '/student/payment-success',
   name: 'Payment Success',
