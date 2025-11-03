@@ -25,7 +25,7 @@ await connectDB();
 // Start scheduled tasks
 startAllTasks();
 
-const allowedOrigins = ['http://localhost:5173'];
+const allowedOrigins = ['http://localhost:5173','http://localhost:3000'];
 
 //Middleware
 app.use(express.json());

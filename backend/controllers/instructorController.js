@@ -7,9 +7,9 @@ import Fuse from 'fuse.js';
 const fetchInstructorFields = async (filter, fields, allowedFields) => {
   const selectFields = fields
     ? fields
-        .split(',')
-        .filter((f) => allowedFields.includes(f))
-        .join(' ')
+      .split(',')
+      .filter((f) => allowedFields.includes(f))
+      .join(' ')
     : '';
 
   return Instructor.findOne(filter).select(selectFields);
@@ -52,8 +52,8 @@ export const getPrivateFields = async (req, res) => {
     const userId = req.userId;
 
     const allowedFields = [
-      'linkedAccounts', 
-      'myStudents', 
+      'linkedAccounts',
+      'myStudents',
       'enrollments'
     ];
 
@@ -73,26 +73,10 @@ export const getPrivateFields = async (req, res) => {
 // POST /api/instructors
 export const createInstructor = async (req, res) => {
   try {
-    const { user } = req.body;
     const userId = req.userId;
 
-    if (user !== userId) {
-      return res.status(403).json({
-        success: false,
-        message: 'You can only create an instructor profile for your own user.'
-      });
-    }
-
-    // validate required field
-    if (!user) {
-      return res.status(400).json({
-        success: false,
-        message: 'User reference is required.'
-      });
-    }
-
     // prevent duplicate instructors for same user
-    const existing = await Instructor.findOne({ user });
+    const existing = await Instructor.findOne({ userId });
     if (existing) {
       return res.status(400).json({
         success: false,
@@ -101,8 +85,15 @@ export const createInstructor = async (req, res) => {
     }
 
     // create instructor
-    const instructor = new Instructor(req.body);
+    const instructor = new Instructor({ user: userId });
     await instructor.save();
+
+    // change role in userModel
+    const user = await userModel.findById(userId);
+    if (user) {
+      user.role = 'instructor';
+      await user.save();
+    }
 
     res.status(201).json({
       success: true,
@@ -119,7 +110,7 @@ export const createInstructor = async (req, res) => {
 };
 
 export const updateInstructor = async (req, res) => {
-  
+
 };
 
 export const getInstructorCourses = async (req, res) => {
@@ -187,8 +178,8 @@ export const getAllInstructors = async (req, res) => {
     if (search) {
       const fuse = new Fuse(instructors, {
         keys: ["name", "email"],
-        threshold: 0.4, 
-        distance: 100, 
+        threshold: 0.4,
+        distance: 100,
         includeScore: true,
       });
 
