@@ -2,7 +2,7 @@
 import TextFormInput from '@/components/form/TextFormInput';
 import useToggle from '@/hooks/useToggle';
 import { Link, useNavigate } from 'react-router-dom';
-import { Fragment, useMemo } from 'react';
+import { Fragment, useMemo, useState, useEffect } from 'react';
 import {
   Accordion,
   AccordionBody,
@@ -44,6 +44,34 @@ const Playlist = ({ course, onSelect, currentId }) => {
     () => (Array.isArray(course?.curriculum) ? course.curriculum : []),
     [course]
   );
+
+  // -------- NEW: quản lý active section theo currentId (controlled Accordion) ----------
+  // Tạo eventKey ổn định cho mỗi section (ưu tiên _id nếu có)
+  const sectionKeys = useMemo(
+    () => sections.map((sec, idx) => String(sec?._id ?? idx)),
+    [sections]
+  );
+
+  // Tìm eventKey (section) chứa lecture hiện tại
+  const findSectionKeyByLectureId = (lecId) => {
+    if (!lecId) return sectionKeys[0] ?? '0';
+    for (let i = 0; i < sections.length; i++) {
+      const lecs = Array.isArray(sections[i]?.lectures) ? sections[i].lectures : [];
+      if (lecs.some((l) => l?._id === lecId)) {
+        return String(sections[i]?._id ?? i);
+      }
+    }
+    return sectionKeys[0] ?? '0';
+  };
+
+  const [activeKey, setActiveKey] = useState(() => findSectionKeyByLectureId(currentId));
+
+  useEffect(() => {
+    setActiveKey(findSectionKeyByLectureId(currentId));
+    // chỉ cần phụ thuộc currentId + kích thước sections để tránh re-run không cần thiết
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentId, sections.length]);
+  // ------------------------------------------------------------------------------------
 
   // Schema note (giữ logic form cũ của bạn)
   const noteSchema = yup.object({
@@ -116,10 +144,10 @@ const Playlist = ({ course, onSelect, currentId }) => {
 
   // Handler chọn bài: ưu tiên gọi onSelect; nếu không có thì navigate theo route bạn đang dùng
   const handlePlay = (lecture) => {
-  if (!lecture) return;
-  if (typeof onSelect === 'function') onSelect(lecture);
-  else navigate(`/courses/${course._id}/watch/${lecture._id}`); // 👈 SPA điều hướng
-};
+    if (!lecture) return;
+    if (typeof onSelect === 'function') onSelect(lecture);
+    else navigate(`/courses/${course._id}/watch/${lecture._id}`); // 👈 SPA điều hướng
+  };
 
   return (
     <>
@@ -146,80 +174,90 @@ const Playlist = ({ course, onSelect, currentId }) => {
 
           <Row>
             <Col xs={12}>
-              <Accordion defaultActiveKey="0" flush className="accordion-flush-light" id="accordionExample">
-                {sections.map((sec, sIdx) => (
-                  <AccordionItem eventKey={`${sIdx}`} key={sec?._id || sIdx}>
-                    <AccordionHeader id={`heading-${sIdx}`}>
-                      <span className="mb-0 fw-bold">{sec?.section || `Section ${sIdx + 1}`}</span>
-                    </AccordionHeader>
+              {/* Controlled Accordion để không tự reset về section 1 */}
+              <Accordion
+                activeKey={activeKey}
+                onSelect={(ek) => setActiveKey(ek)}
+                flush
+                className="accordion-flush-light"
+                id="accordionExample"
+              >
+                {sections.map((sec, sIdx) => {
+                  const ek = String(sec?._id ?? sIdx);
+                  return (
+                    <AccordionItem eventKey={ek} key={ek}>
+                      <AccordionHeader id={`heading-${ek}`}>
+                        <span className="mb-0 fw-bold">{sec?.section || `Section ${sIdx + 1}`}</span>
+                      </AccordionHeader>
 
-                    <AccordionBody className="px-3">
-                      <div className="vstack gap-3">
-                        {(sec?.lectures || []).map((lecture, lIdx) => {
-                          const isLockedUI = !lecture?.isFree; // chỉ hiển thị icon khóa; không chặn click
-                          const isActive = currentId === lecture?._id;
-                          const timeLabel =
-                            typeof lecture?.duration === 'number'
-                              ? formatDuration(lecture.duration)
-                              : (lecture?.time || '--');
+                      <AccordionBody className="px-3">
+                        <div className="vstack gap-3">
+                          {(sec?.lectures || []).map((lecture, lIdx) => {
+                            const isLockedUI = !lecture?.isFree; // chỉ hiển thị icon khóa; không chặn click
+                            const isActive = currentId === lecture?._id;
+                            const timeLabel =
+                              typeof lecture?.duration === 'number'
+                                ? formatDuration(lecture.duration)
+                                : (lecture?.time || '--');
 
-                          const isNote = Boolean(lecture?.isNote); // nếu dữ liệu cũ có cờ này thì vẫn render block note
+                            const isNote = Boolean(lecture?.isNote); // nếu dữ liệu cũ có cờ này thì vẫn render block note
 
-                          return (
-                            <Fragment key={lecture?._id || `${sIdx}-${lIdx}`}>
-                              {isNote ? (
-                                <div>
-                                  <div className="d-flex justify-content-between align-items-center mb-2">
+                            return (
+                              <Fragment key={lecture?._id || `${sIdx}-${lIdx}`}>
+                                {isNote ? (
+                                  <div>
+                                    <div className="d-flex justify-content-between align-items-center mb-2">
+                                      <div className="position-relative d-flex align-items-center">
+                                        <a
+                                          href="#"
+                                          className="btn btn-danger-soft btn-round btn-sm mb-0 stretched-link position-static"
+                                          onClick={(e) => e.preventDefault()}
+                                        >
+                                          <FaPlay className="me-0" size={11} />
+                                        </a>
+                                        <span className="d-inline-block text-truncate ms-2 mb-0 h6 fw-light w-100px w-sm-200px">
+                                          {lecture?.title || 'Untitled'}
+                                        </span>
+                                      </div>
+                                      <p className="mb-0 text-truncate">{timeLabel}</p>
+                                    </div>
+                                    <PlayNote />
+                                  </div>
+                                ) : (
+                                  <div className="d-flex justify-content-between align-items-center">
                                     <div className="position-relative d-flex align-items-center">
-                                      <a
-                                        href="#"
-                                        className="btn btn-danger-soft btn-round btn-sm mb-0 stretched-link position-static"
-                                        onClick={(e) => e.preventDefault()}
+                                      {/* Icon trạng thái: free/play hoặc locked (không disable) */}
+                                      <Button
+                                        variant={isActive ? 'danger' : isLockedUI ? 'light' : 'danger-soft'}
+                                        size="sm"
+                                        className="btn-round mb-0 stretched-link position-static"
+                                        onClick={() => handlePlay(lecture)}
+                                        title={lecture?.title}
                                       >
-                                        <FaPlay className="me-0" size={11} />
-                                      </a>
-                                      <span className="d-inline-block text-truncate ms-2 mb-0 h6 fw-light w-100px w-sm-200px">
+                                        {isLockedUI ? <BsLockFill size={11} /> : <FaPlay className="me-0" size={11} />}
+                                      </Button>
+
+                                      <span
+                                        className={`d-inline-block text-truncate ms-2 mb-0 h6 fw-light w-100px w-sm-200px ${
+                                          isActive ? 'text-danger' : ''
+                                        }`}
+                                        title={lecture?.title}
+                                      >
                                         {lecture?.title || 'Untitled'}
                                       </span>
                                     </div>
+
                                     <p className="mb-0 text-truncate">{timeLabel}</p>
                                   </div>
-                                  <PlayNote />
-                                </div>
-                              ) : (
-                                <div className="d-flex justify-content-between align-items-center">
-                                  <div className="position-relative d-flex align-items-center">
-                                    {/* Icon trạng thái: free/play hoặc locked (không disable) */}
-                                    <Button
-                                      variant={isActive ? 'danger' : isLockedUI ? 'light' : 'danger-soft'}
-                                      size="sm"
-                                      className="btn-round mb-0 stretched-link position-static"
-                                      onClick={() => handlePlay(lecture)}
-                                      title={lecture?.title}
-                                    >
-                                      {isLockedUI ? <BsLockFill size={11} /> : <FaPlay className="me-0" size={11} />}
-                                    </Button>
-
-                                    <span
-                                      className={`d-inline-block text-truncate ms-2 mb-0 h6 fw-light w-100px w-sm-200px ${
-                                        isActive ? 'text-danger' : ''
-                                      }`}
-                                      title={lecture?.title}
-                                    >
-                                      {lecture?.title || 'Untitled'}
-                                    </span>
-                                  </div>
-
-                                  <p className="mb-0 text-truncate">{timeLabel}</p>
-                                </div>
-                              )}
-                            </Fragment>
-                          );
-                        })}
-                      </div>
-                    </AccordionBody>
-                  </AccordionItem>
-                ))}
+                                )}
+                              </Fragment>
+                            );
+                          })}
+                        </div>
+                      </AccordionBody>
+                    </AccordionItem>
+                  );
+                })}
               </Accordion>
             </Col>
           </Row>
