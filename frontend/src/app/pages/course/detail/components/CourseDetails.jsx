@@ -241,10 +241,10 @@ const CourseDetails = ({ course }) => {
                     <Overview />
                   </TabPane>
                   <TabPane eventKey="curriculum" className="fade" role="tabpanel">
-                    <Curriculum />
+                    <Curriculum coursePrice={course?.discountPrice || course?.price || 0} />
                   </TabPane>
                   <TabPane eventKey="instructor" className="fade" role="tabpanel">
-                    <Instructor course={course} /> {/* (khuyến nghị) truyền course nếu cần */}
+                    <Instructor instructor={course?.instructor} /> {/* (khuyến nghị) truyền course nếu cần */}
                   </TabPane>
                   <TabPane eventKey="reviews" className="fade" role="tabpanel">
                     <Reviews />

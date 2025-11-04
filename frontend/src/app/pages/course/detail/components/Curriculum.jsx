@@ -31,7 +31,7 @@ import useToggle from "@/hooks/useToggle";
 import useCourseDetail from "../useCourseDetail"; // 🔗 hook bạn cung cấp
 import { useNavigate } from "react-router-dom";
 
-const Curriculum = () => {
+const Curriculum = ({ coursePrice }) => {
   const { course, loading, error } = useCourseDetail(); // ✅ lấy dữ liệu thật
   const { isTrue: isOpen, toggle } = useToggle();
   const navigate = useNavigate();
@@ -163,7 +163,7 @@ const Curriculum = () => {
           </figure>
           <h2>
             Get Premium Course in{" "}
-            <span className="text-success">{formatCurrency(800)}</span>
+            <span className="text-success">{formatCurrency(coursePrice)}</span>
           </h2>
           <p>
             Unlock full access to all lectures, materials and exclusive

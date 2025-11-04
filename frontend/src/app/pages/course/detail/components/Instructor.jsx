@@ -1,16 +1,24 @@
 import { Card, CardBody, Col, Row } from 'react-bootstrap';
-import instructor1 from '@/assets/images/instructor/01.jpg';
 import { FaCommentDots, FaFacebookSquare, FaInstagramSquare, FaLinkedin, FaPlay, FaStar, FaTwitterSquare, FaUserGraduate, FaYoutubeSquare } from 'react-icons/fa';
-const Instructor = () => {
+const Instructor = ({instructor}) => {
   return <>
       <Card className="mb-0 mb-md-4">
         <Row className="g-0 align-items-center">
           <Col md={5}>
-            <img src={instructor1} className="img-fluid rounded-3" alt="instructor-image" />
+            {instructor?.avatar ? (
+              <img
+                className="img-fluid rounded-3" alt="instructor-image"
+                src={instructor.avatar} 
+              />
+            ) : (
+              <div className="rounded-3 shadow d-flex align-items-center justify-content-center bg-light text-dark fw-bold fs-1">
+                {(instructor?.name?.[0] || "I").toUpperCase()}
+              </div>
+            )}
           </Col>
           <Col md={7}>
             <CardBody>
-              <h3 className="card-title mb-0">Louis Ferguson</h3>
+              <h3 className="card-title mb-0">{instructor?.name}</h3>
               <p className="mb-2">Instructor of Marketing</p>
               <ul className="list-inline mb-3">
                 <li className="list-inline-item me-3">

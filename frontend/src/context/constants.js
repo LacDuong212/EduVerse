@@ -8,7 +8,7 @@ export const formatCurrency = (value) => {
   if (!Number.isFinite(n)) return '—';
   return `${new Intl.NumberFormat('en-US', {
     maximumFractionDigits: 0,
-  }).format(n)} ${currency}`;
+  }).format(n)}${currency}`;
 };
 export const currentYear = new Date().getFullYear();
 
