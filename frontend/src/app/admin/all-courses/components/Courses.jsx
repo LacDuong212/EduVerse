@@ -1,7 +1,9 @@
 import ChoicesFormInput from "@/components/form/ChoicesFormInput";
+import { updateCourseStatus } from "@/helpers/data";
 import { Button, Card, CardBody, CardFooter, CardHeader, Col, Row } from "react-bootstrap";
 import { FaAngleLeft, FaAngleRight, FaSearch } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
 
 
 const CourseCard = ({
@@ -14,6 +16,7 @@ const CourseCard = ({
   price,
   status,
   thumbnail,
+  fetchCourses,
 }) => {
   const levelBadge =
     level === "Beginner"
@@ -33,6 +36,15 @@ const CourseCard = ({
       ? "danger"
       : "success";
 
+  const handleStatusUpdate = async (newStatus) => {
+    const res = await updateCourseStatus({ id: _id, status: newStatus });
+    if (res.success) {
+      fetchCourses?.();
+    } else {
+      toast.error("Update status failed");
+    }
+  };
+
   return (
     <tr>
       <td>
@@ -41,7 +53,7 @@ const CourseCard = ({
             <img src={image || thumbnail} className="rounded" alt={title} />
           </div>
           <h6 className="table-responsive-title mb-0 ms-2">
-            <Link to={`/course/${_id}`} className="stretched-link">
+            <Link to={`/courses/${_id}`} className="stretched-link">
               {title}
             </Link>
           </h6>
@@ -51,11 +63,17 @@ const CourseCard = ({
       <td>
         <div className="d-flex align-items-center mb-3">
           <div className="avatar avatar-xs flex-shrink-0">
-            <img
-              className="avatar-img rounded-circle"
-              src={instructor?.avatar || "/images/avatar-placeholder.png"}
-              alt={instructor?.name || "Instructor"}
-            />
+            {instructor?.avatar ? (
+              <img
+                src={instructor.avatar}
+                className="rounded-circle"
+                alt={instructor?.name || "I"}
+              />
+            ) : (
+              <div className="avatar-img rounded-circle border-white border-3 shadow d-flex align-items-center justify-content-center bg-light text-dark fw-bold fs-5">
+                {(instructor?.name?.[0] || "I").toUpperCase()}
+              </div>
+            )}
           </div>
           <div className="ms-2">
             <h6 className="mb-0 fw-light">{instructor?.name || "Unknown"}</h6>
@@ -86,16 +104,49 @@ const CourseCard = ({
               variant="success-soft"
               size="sm"
               className="me-1 mb-1 mb-md-0"
+              onClick={() => handleStatusUpdate("Live")}
             >
               Approve
             </Button>
-            <button className="btn btn-sm btn-secondary-soft mb-0">
+            <Button
+              variant="secondary-soft"
+              size="sm"
+              className="me-1 mb-1 mb-md-0"
+              onClick={() => handleStatusUpdate("Rejected")}
+            >
               Reject
-            </button>
+            </Button>
           </>
+        ) : status === "Live" ? (
+          <Button
+            variant="warning-soft"
+            size="sm"
+            className="me-1 mb-1 mb-md-0"
+            onClick={() => handleStatusUpdate("Blocked")}
+          >
+            Block
+          </Button>
+        ) : status === "Rejected" ? (
+          <Button
+            variant="success-soft"
+            size="sm"
+            className="me-1 mb-1 mb-md-0"
+            onClick={() => handleStatusUpdate("Pending")}
+          >
+            Approve
+          </Button>
+        ) : status === "Blocked" ? (
+          <Button
+            variant="info-soft"
+            size="sm"
+            className="me-1 mb-1 mb-md-0"
+            onClick={() => handleStatusUpdate("Pending")}
+          >
+            Unblock
+          </Button>
         ) : (
-          <Button variant="dark" size="sm" className="me-1 mb-1 mb-md-0">
-            Edit
+          <Button variant="danger-soft" size="sm" className="me-1 mb-1 mb-md-0">
+            Remove
           </Button>
         )}
       </td>
@@ -104,6 +155,8 @@ const CourseCard = ({
 };
 
 const CoursesList = ({ courses, meta, loading, fetchCourses }) => {
+  const start = (meta?.currentPage - 1) * 10 + 1;
+  const end = meta?.currentPage !== meta?.totalPages ? start + 9 : meta?.totalCourses;
 
   return (
     <Card className="bg-transparent border">
@@ -163,7 +216,7 @@ const CoursesList = ({ courses, meta, loading, fetchCourses }) => {
               <tbody>
                 {courses.length > 0 ? (
                   courses.map((item) => (
-                    <CourseCard key={item._id} {...item} />
+                    <CourseCard key={item._id} {...item} fetchCourses={fetchCourses} />
                   ))
                 ) : (
                   <tr>
@@ -181,39 +234,38 @@ const CoursesList = ({ courses, meta, loading, fetchCourses }) => {
       <CardFooter className="bg-transparent pt-0">
         <div className="d-sm-flex justify-content-sm-between align-items-sm-center">
           <p className="mb-0 text-center text-sm-start">
-            Showing {meta?.currentPage} of {meta?.totalPages} pages (
-            {meta?.totalCourses} courses)
+            Showing {start} to {end} of {meta?.totalCourses} courses
           </p>
 
           <nav className="d-flex justify-content-center mb-0" aria-label="navigation">
             <ul className="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
               <li className={`page-item mb-0 ${meta.currentPage === 1 ? "disabled" : ""}`}>
-                <button
-                  className="page-link"
+                  <button
+                    className="page-link"
                   onClick={() => fetchCourses(meta.currentPage - 1)}
                   disabled={meta.currentPage === 1}
-                >
-                  <FaAngleLeft />
-                </button>
-              </li>
+                  >
+                    <FaAngleLeft />
+                  </button>
+                </li>
 
               <li className="page-item mb-0 active">
                 <span className="page-link">{meta.currentPage}</span>
-              </li>
+                  </li>
 
               <li
                 className={`page-item mb-0 ${
                   meta.currentPage >= meta.totalPages ? "disabled" : ""
                 }`}
               >
-                <button
-                  className="page-link"
+                  <button
+                    className="page-link"
                   onClick={() => fetchCourses(meta.currentPage + 1)}
                   disabled={meta.currentPage >= meta.totalPages}
-                >
-                  <FaAngleRight />
-                </button>
-              </li>
+                  >
+                    <FaAngleRight />
+                  </button>
+                </li>
             </ul>
           </nav>
         </div>

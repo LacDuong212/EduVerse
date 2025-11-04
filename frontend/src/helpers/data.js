@@ -2,6 +2,7 @@ import axios from "axios";
 import { blogsData, courseResumeData, eventScheduleData, playListData, pricingPlans, studentData, studentReviewData, testimonialData, userReviewData, administratorsData } from '@/assets/data/other';
 import { booksData, collegesData, courseCategories, coursesData, eventsData, instructorsData } from '@/assets/data/products';
 import { sleep } from '@/utils/promise';
+import { toast } from "react-toastify";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 export const getAllCourses = async () => {
@@ -215,6 +216,23 @@ export const unblockInstructor = async (id) => {
     return response.data;
   } catch (error) {
     console.error("Error unblocking instructor:", error);
+    return { success: false, message: error.message };
+  }
+};
+
+export const updateCourseStatus = async ({ id, status }) => {
+  try {
+    const res = await axios.patch(
+      `${backendUrl}/api/courses/${id}?newStatus=${status}`,
+      {},
+      getAuthHeaders()
+    );
+
+    if (res.data.success) {
+      return res.data;
+    }
+  } catch (error) {
+    console.error("Update status failed: ", error);
     return { success: false, message: error.message };
   }
 };
