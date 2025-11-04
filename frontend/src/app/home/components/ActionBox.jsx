@@ -37,7 +37,7 @@ const ActionBox = () => {
                       </p>
                     </Col>
                     <Col lg={5} className="text-lg-end">
-                      <Button variant="outline-warning" className="mb-0" onClick={handleButtonClick}>
+                      <Button variant="outline-warning" className="mb-0" onClick={() => navigate("/become-instructor")}>
                         Start Teaching Today
                       </Button>
                     </Col>

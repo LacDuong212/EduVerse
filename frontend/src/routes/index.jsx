@@ -44,6 +44,7 @@ import StudentAccount from '../app/student/account';
 // PUBLIC
 import HomePage from "../app/home/page";
 import CoursesPage from "../app/pages/course/grid/page";
+import BecomeInstructorPage from '../app/student/become-instructor';
 import CourseDetails from "../app/pages/course/detail/page";
 import VideoPlayer from "../app/pages/course/video-player/page";
 import NotFoundPage from '../app/not-found';
@@ -61,6 +62,10 @@ export const publicRoutes = [{
   path: '/courses/:id',
   name: 'CourseDetails',
   element: <CourseDetails />
+}, {
+  path: '/become-instructor',
+  name: 'Become Instructor',
+  element: <BecomeInstructorPage />
 }];
 
 export const authRoutes = [{
@@ -269,11 +274,6 @@ export const studentRoutes = [{
   path: '/student/deactivate-account',
   name: 'Deactivate Account',
   isNested: true,
-  element: null
-}, {
-  path: '/student/become-instructor',
-  name: 'Become an Instructor',
-  isNested: false,
   element: null
 }, {
   path: '/student/*',

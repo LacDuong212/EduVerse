@@ -14,7 +14,7 @@ const GuestLayout = ({ children }) => {
 
       <main>
         <section className="pt-0">
-          <Container>{children}</Container>
+          {children}
         </section>
       </main>
 

@@ -59,7 +59,7 @@ const Banner = ({
                     </ul>
                   </div>
                   <div className="mt-2 mt-sm-0">
-                    <Link to="/student/become-instructor" className="btn btn-outline-primary mb-0">
+                    <Link to="/become-instructor" className="btn btn-outline-primary mb-0">
                       Become an Instructor
                     </Link>
                   </div>

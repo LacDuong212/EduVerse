@@ -31,7 +31,8 @@ export const footerLinks = [{
 }, {
   title: 'Teaching',
   items: [{
-    name: 'Become a teacher'
+    name: 'Become a teacher',
+    link: '/become-instructor'
   }, {
     name: 'How to guide',
     link: '/help/faq'

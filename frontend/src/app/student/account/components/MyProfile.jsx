@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Card, CardBody, CardHeader, Col } from 'react-bootstrap';
-import { BsX } from 'react-icons/bs';
+import { BsTwitter, BsX } from 'react-icons/bs';
+import { FaFacebook, FaInstagram, FaYoutube } from 'react-icons/fa';
 
 
 const MyProfile = ({ user }) => {
@@ -8,7 +9,7 @@ const MyProfile = ({ user }) => {
 
   useEffect(() => {
     const loadStudent = async () => {
-      
+
     };
     loadStudent();
   }, []);
@@ -85,6 +86,37 @@ const MyProfile = ({ user }) => {
             <label className="form-label">Bio</label>
             <textarea className="form-control" rows={3} placeholder='I am not a robot...' defaultValue={user?.bio} />
             <div className="form-text">Brief description for your profile.</div>
+          </Col>
+          <Col lg={12}>
+            <h5 className="card-header-title mt-4 mb-3">Social Media</h5>
+            <div className="mb-3">
+              <label className="form-label d-flex align-items-center">
+                <FaFacebook className="fab fa-facebook text-facebook me-2 fs-5" />
+                Facebook profile URL
+              </label>
+              <input className="form-control" type="text" placeholder="facebook.com/your_username" value={user?.socials?.facebook || ''} />
+            </div>
+            <div className="mb-3">
+              <label className="form-label d-flex align-items-center">
+                <BsTwitter className="bi bi-twitter text-twitter me-2 fs-5" />
+                Twitter profile URL
+              </label>
+              <input className="form-control" type="text" placeholder="x.com/your_username" value={user?.socials?.twitter || ''} />
+            </div>
+            <div className="mb-3">
+              <label className="form-label d-flex align-items-center">
+                <FaInstagram className="fab fa-instagram text-danger me-2 fs-5" />
+                Instagram profile URL
+              </label>
+              <input className="form-control" type="text" placeholder="instagram.com/your_username" value={user?.socials?.instagram || ''} />
+            </div>
+            <div className="mb-3">
+              <label className="form-label d-flex align-items-center">
+                <FaYoutube className="fab fa-youtube text-youtube me-2 fs-5" />
+                YouTube channel URL
+              </label>
+              <input className="form-control" type="text" placeholder="youtube.com/@your_channel" value={user?.socials?.youtube || ''} />
+            </div>
           </Col>
           <div className="d-sm-flex justify-content-end">
             <button type="submit" className="btn btn-primary">
