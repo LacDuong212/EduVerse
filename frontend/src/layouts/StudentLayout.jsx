@@ -65,12 +65,12 @@ const StudentLayout = ({ children, isNested = false }) => {
   }
 
   return (
-    <>
+    <div className="d-flex flex-column min-vh-100">
       <Suspense>
         <TopNavigationBar />
       </Suspense>
 
-      <main>
+      <main className="flex-grow-1">
         {isNested ? (
           <>
             <Banner toggleOffCanvas={toggleOffCanvasMenu} studentData={user} />
@@ -104,7 +104,7 @@ const StudentLayout = ({ children, isNested = false }) => {
       <Suspense>
         <Footer className={"bg-light pt-5"} />
       </Suspense>
-    </>
+    </div>
   );
 };
 

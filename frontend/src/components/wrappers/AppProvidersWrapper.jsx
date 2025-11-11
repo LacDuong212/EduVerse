@@ -40,6 +40,7 @@ const AppProvidersWrapper = ({ children }) => {
         pauseOnHover
         draggable
         theme="colored"
+        style={{ pointerEvents: 'auto' }}
       />
     </LayoutProvider>
   );

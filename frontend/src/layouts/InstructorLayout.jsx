@@ -46,10 +46,10 @@ const InstructorLayout = ({ children, isNested = false }) => {
   const { isTrue: isOffCanvasMenuOpen, toggle: toggleOffCanvasMenu } = useToggle();
 
   return (
-    <>
+    <div className="d-flex flex-column min-vh-100">
       <TopNavigationBar />
 
-      <main>
+      <main className="flex-grow-1">
         {isNested ? (
           <>
             <Banner toggleOffCanvas={toggleOffCanvasMenu} accountData={user} />
@@ -81,7 +81,7 @@ const InstructorLayout = ({ children, isNested = false }) => {
       </main>
 
       <Footer />
-    </>
+    </div>
   );
 };
 

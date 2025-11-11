@@ -113,6 +113,7 @@ export const updateInstructor = async (req, res) => {
 
 };
 
+// GET /api/instructor/courses?page=&limit=&skip=
 export const getInstructorCourses = async (req, res) => {
   try {
     const userId = req.userId;
@@ -127,20 +128,15 @@ export const getInstructorCourses = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Instructor not found' });
     }
 
-    // Get list of course IDs from instructor's myCourses
-    const courseIds = instructor.myCourses.map((c) => c.course);
-
-    const total = courseIds.length;
-
     // Fetch courses with pagination
-    const courses = await Course.find({ _id: { $in: courseIds } })
+    const courses = await Course.find({ "instructor.ref": userId })
       .skip(skip)
       .limit(limit)
       .lean();
 
     // Calculate active/inactive counts from ALL courses (not just paged)
-    const allCourses = await Course.find({ _id: { $in: courseIds } }).lean();
-
+    const allCourses = await Course.find({ "instructor.ref": userId }).lean();
+    const total = allCourses.length;
     const totalActive = allCourses.filter(c => c.isActive && c.status === "Live").length;
     const totalInactive = total - totalActive;
 

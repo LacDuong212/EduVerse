@@ -55,7 +55,7 @@ export default function SignUpPage() {
             </Row>
             <div className="mt-4 text-center">
               <span>
-                Already have an account?<Link to="/auth/sign-in"> Sign in here</Link>
+                Already have an account?<Link to="/auth/sign-in"> Sign in here!</Link>
               </span>
             </div>
           </Col>

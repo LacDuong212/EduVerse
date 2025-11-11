@@ -7,12 +7,12 @@ const Preloader = lazy(() => import('../components/Preloader'));
 
 const GuestLayout = ({ children }) => {
   return (
-    <>
+    <div className="d-flex flex-column min-vh-100">
       <Suspense fallback={<Preloader />}>
         <TopNavigationBar />
       </Suspense>
 
-      <main>
+      <main className="flex-grow-1">
         <section className="pt-0">
           {children}
         </section>
@@ -21,7 +21,7 @@ const GuestLayout = ({ children }) => {
       <Suspense fallback={<Preloader />}>
         <Footer className="bg-light pt-5" />
       </Suspense>
-    </>
+    </div>
   );
 };
 

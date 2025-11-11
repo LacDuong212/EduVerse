@@ -44,7 +44,7 @@ export default function SignInPage() {
             </Row>
             <div className="mt-4 text-center">
               <span>
-                Don&apos;t have an account? <Link to="/auth/sign-up">Signup here</Link>
+                Don&apos;t have an account? <Link to="/auth/sign-up">Sign up now!</Link>
               </span>
             </div>
           </Col>

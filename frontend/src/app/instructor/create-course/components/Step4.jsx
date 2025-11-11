@@ -1,39 +1,41 @@
 import { useState, useEffect } from 'react';
 import { Col, Row } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
-import { toast } from 'react-toastify';
-import useCourseFormData from '../useCourseFormData';
 
-const Step4 = ({ stepperInstance }) => {
-  const { formData, setFormData, clearDraft, courseId } = useCourseFormData();
-  const [submitting, setSubmitting] = useState(false);
-  const [tagsInput, setTagsInput] = useState(formData.tags?.join(', ') || '');
 
-  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+const Step4 = ({
+  stepperInstance,
+  draftData,
+  onSave,
+  onSubmit,
+  isSubmitting,
+}) => {
+  const [tagsInput, setTagsInput] = useState(draftData.tags?.join(', ') || '');
 
+  // update draft data
   useEffect(() => {
-    // Keep formData updated with tags in real time if needed
+    // parse the tags string into an array
     const tags = tagsInput
       .split(',')
-      .map((t) => t.trim().toLowerCase())
-      .filter((t) => t.length > 0)
-      .slice(0, 14);
+      .map((t) => t.trim().toLowerCase()) // clean and lowercase
+      .filter((t) => t.length > 0) // remove empty tags
+      .slice(0, 14); // limit to 14 tags
 
-    setFormData((prev) => ({ ...prev, tags }));
-  }, [tagsInput, setFormData]);
+    onSave({ tags });
+  }, [tagsInput, onSave]);
 
+  // nav
   const goToPreviousStep = (e) => {
     e.preventDefault();
     stepperInstance?.previous();
   };
 
-  const handleSubmit = async (e) => {
+  // final submission
+  const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (submitting) return;
+    if (isSubmitting) return; // prevent multiple submissions
 
-    // Warning confirmation before submit
     const confirmSubmit = window.confirm(
       'Once you submit, the draft data on this page will be cleared and cannot be recovered. Do you want to continue?'
     );
@@ -42,40 +44,8 @@ const Step4 = ({ stepperInstance }) => {
       return;
     }
 
-    setSubmitting(true);
-
-    try {
-      const tags = tagsInput
-        .split(',')
-        .map((t) => t.trim().toLowerCase())
-        .filter((t) => t.length > 0)
-        .slice(0, 14);
-
-      const finalData = {
-        ...formData,
-        tags,
-        courseId,
-      };
-
-      const { data: res } = await axios.post(
-        `${backendUrl}/api/courses/submit`,
-        finalData,
-        { withCredentials: true }
-      );
-
-      if (!res.success) throw new Error(res.message || 'Submission failed');
-
-      toast.success('Course submitted for review!');
-
-      clearDraft();
-      setTagsInput('');
-
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to submit course');
-    } finally {
-      setSubmitting(false);
-    }
+    // call the parent's submission function
+    onSubmit();
   };
 
   return (
@@ -87,7 +57,7 @@ const Step4 = ({ stepperInstance }) => {
       onSubmit={handleSubmit}
       onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
     >
-      <h4>Additional information</h4>
+      <h4>Additional Information (Optional)</h4>
       <hr />
 
       <Row className="g-4">
@@ -101,10 +71,12 @@ const Step4 = ({ stepperInstance }) => {
                 placeholder="Enter tags separated by commas"
                 value={tagsInput}
                 onChange={(e) => setTagsInput(e.target.value)}
-                maxLength={100} // optional max length for input string
+                maxLength={200}
               />
-              <span className="small">
-                Maximum of 14 keywords. Keywords should all be in lowercase. e.g. javascript, react, marketing
+              <span className="small mx-1">
+                Maximum of 14 keywords, should all be in lowercase, separated by
+                commas(,). For example:{' '}
+                <span className="fw-bold">eduverse, course, online</span>
               </span>
             </div>
           </div>
@@ -112,23 +84,43 @@ const Step4 = ({ stepperInstance }) => {
       </Row>
 
       <div className="d-flex flex-column flex-sm-row justify-content-between align-items-start mt-4">
+        {/* Previous Button */}
         <div className="d-flex mb-1 mb-sm-0">
-          <button type="button" className="btn btn-secondary" onClick={goToPreviousStep}>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={goToPreviousStep}
+          >
             Previous
           </button>
         </div>
 
+        {/* Action Buttons */}
         <div className="d-flex flex-column align-items-end">
           <div className="d-flex gap-2">
-            <Link to="/instructor/course-preview" className="btn btn-light">
+            {/* Preview Button */}
+            <Link
+              to="/instructor/course-preview"
+              state={{ courseData: draftData }} // pass draft data to preview route
+              className="btn btn-light"
+              target="_blank" // open in new tab
+              rel="noopener noreferrer"
+            >
               Preview Course
             </Link>
-            <button type="submit" className="btn btn-success" disabled={submitting}>
-              {submitting ? 'Submitting…' : 'Create Course'}
+            
+            {/* Submit Button */}
+            <button
+              type="submit"
+              className="btn btn-success"
+              disabled={isSubmitting} // controlled by parent
+            >
+              {isSubmitting ? 'Submitting…' : 'Create Course'}
             </button>
           </div>
           <p className="small mb-0 text-end mt-1">
-            Once you click "Create Course", your course will be uploaded and marked as pending for review.
+            Once you click "Create Course", your course will be uploaded and
+            marked as pending for review.
           </p>
         </div>
       </div>

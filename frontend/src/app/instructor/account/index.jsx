@@ -11,7 +11,7 @@ const InstructorAccount = () => {
     <div className='pb-5'>
       <PageMetaData title="Account" />
       <MyProfile />
-      <Row className="g-4 mt-3">
+      <Row className="g-3 mt-1">
         <LinkedAccount col={5} />
         <SocialMedia col={7} />
       </Row>

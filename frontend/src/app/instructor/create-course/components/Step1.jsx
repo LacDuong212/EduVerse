@@ -1,42 +1,55 @@
+import ChoicesFormInput from '@/components/form/ChoicesFormInput';
+import { currency } from '@/context/constants';
 import { useEffect, useState } from 'react';
-import { Col, Row } from 'react-bootstrap';
+import { Button, Col, Row, Form, InputGroup } from 'react-bootstrap';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
-import ChoicesFormInput from '@/components/form/ChoicesFormInput';
 import { toast } from 'react-toastify';
-import useCourseFormData from '../useCourseFormData';
 
-const Step1 = ({ stepperInstance }) => {
-  const { formData: savedData, updateStepData } = useCourseFormData();
 
+const Step1 = ({ stepperInstance, draftData, onSave }) => {
   const [saving, setSaving] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  // initialize from props or set defaults
   const [formData, setFormData] = useState({
     title: '',
     subTitle: '',
     category: '',
+    subcategory: '',
     level: '',
     language: '',
     featured: false,
     duration: '',
-    lecturesCount: '',
+    durationUnit: 'hours',
     price: '',
     discount: '',
     enableDiscount: false,
     description: '',
+    isActive: false,
   });
 
+  const draftDataString = JSON.stringify(draftData);
+
+  // hydrate local form state when draftData prop changes
   useEffect(() => {
-    // only hydrate once — when component mounts and local formData is still empty
-    if (
-      savedData &&
-      Object.keys(savedData).length > 0 &&
-      !formData.title && // or another key check to avoid overwriting
-      !formData.subTitle
-    ) {
-      setFormData((prev) => ({ ...prev, ...savedData }));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // run only once on mount
+    setFormData({
+      title: draftData.title || '',
+      subTitle: draftData.subTitle || '',
+      category: draftData.category || '',
+      subcategory: draftData.subcategory || '',
+      level: draftData.level || '',
+      language: draftData.language || '',
+      featured: draftData.featured || false,
+      duration: draftData.duration || '',
+      durationUnit: draftData.durationUnit || 'hours',
+      price: draftData.price || '',
+      discount: draftData.discount || '',
+      enableDiscount: draftData.enableDiscount || false,
+      description: draftData.description || '',
+      isActive: draftData.isActive !== undefined ? draftData.isActive : false, // = isPublish
+    });
+  }, [draftDataString]);
 
   // handle input changes
   const handleChange = (e) => {
@@ -45,52 +58,119 @@ const Step1 = ({ stepperInstance }) => {
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
     }));
-  };
 
-  // handle submit
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSaving(true);
-
-    try {
-      await updateStepData('step1', formData);
-      stepperInstance?.next();
-    } catch {
-      toast.error('Failed to save course details');
-    } finally {
-      setSaving(false);
+    // clear the specific error when the user starts typing
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: null }));
     }
   };
 
+  // special handler for custom fields
+  const handleCustomChange = (name, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: null }));
+    }
+  };
+
+  // validation
+  const validateForm = () => {
+    const newErrors = {};
+    const price = Number(formData.price);
+
+    if (!formData.title || formData.title.trim() === '') {
+      newErrors.title = 'Course title is required.';
+    }
+
+    if (!formData.category) {
+      newErrors.category = 'Please select a category.';
+    }
+
+    if (!formData.level) {
+      newErrors.level = 'Please select a course level.';
+    }
+
+    if (!formData.language) {
+      newErrors.language = 'Please select a language.';
+    }
+
+    if (!formData.price) {
+      newErrors.price = 'Price is required.';
+    } else if (isNaN(Number(formData.price)) || Number(formData.price) < 0) {
+      newErrors.price = 'Price must be a valid, positive number.';
+    }
+
+    if (formData.enableDiscount) {
+      const discount = Number(formData.discount);
+
+      if (!formData.discount) {
+        newErrors.discount = 'Discount price is required when enabled.';
+      } else if (isNaN(discount) || discount <= 0) {
+        newErrors.discount = 'Discount must be a valid, positive number.';
+      } else if (!newErrors.price && discount >= price) {
+        newErrors.discount = 'Discount price must be less than the regular price.';
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0; // return true if there are no errors
+  };
+
+  // handle submit
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setSaving(true);
+
+    // run validation
+    if (validateForm()) {
+      onSave(formData);
+      stepperInstance?.next();
+
+      // inform progress saved
+      toast.success('Step 1 saved!');
+    } else {
+      toast.error('Please fix the errors on the page');
+    }
+
+    setSaving(false);
+  };
+
   return (
-    <form
+    <Form
       id="step-1"
       role="tabpanel"
-      className="content fade"
+      className="bs-stepper-pane fade"
       aria-labelledby="steppertrigger1"
       onSubmit={handleSubmit}
+      noValidate  // disable native browser validation
     >
-      <h4>Course details</h4>
+      <h4>Course Details</h4>
       <hr />
 
       <Row className="g-4">
         <Col xs={12}>
-          <label className="form-label">Course title</label>
-          <input
-            className="form-control"
+          <Form.Label>Course Title <span className="text-danger">*</span></Form.Label>
+          <Form.Control
             type="text"
             name="title"
             placeholder="Enter course title"
             value={formData.title}
             onChange={handleChange}
-            required
+            isInvalid={!!errors.title}
           />
+          <Form.Control.Feedback type="invalid">
+            {errors.title}
+          </Form.Control.Feedback>
         </Col>
 
         <Col xs={12}>
-          <label className="form-label">Short description</label>
-          <textarea
-            className="form-control"
+          <Form.Label>Short Description (Subtitle)</Form.Label>
+          <Form.Control
+            as="textarea"
             rows={2}
             name="subTitle"
             placeholder="Enter short description"
@@ -100,162 +180,197 @@ const Step1 = ({ stepperInstance }) => {
         </Col>
 
         <Col md={6}>
-          <label className="form-label">Course category</label>
+          <Form.Group controlId="categorySelect">
+            <Form.Label>Category <span className="text-danger">*</span></Form.Label>
+            <ChoicesFormInput
+              className={!!errors.category ? 'is-invalid' : ''}
+              value={formData.category}
+              onChange={(val) =>
+                handleCustomChange('category', val?.target?.value || val)
+              }
+            >
+              <option value="">Select category</option>
+              <option value="Engineer">Engineer</option>
+              <option value="Medical">Medical</option>
+              <option value="Information technology">Information technology</option>
+              <option value="Finance">Finance</option>
+              <option value="Marketing">Marketing</option>
+            </ChoicesFormInput>
+            <Form.Control.Feedback type="invalid" className="d-block">
+              {errors.category}
+            </Form.Control.Feedback>
+          </Form.Group>
+        </Col>
+
+        <Col md={6}>
+          <Form.Label>Subcategory</Form.Label>
           <ChoicesFormInput
-            className="form-select js-choice border-0 z-index-9 bg-transparent"
-            value={formData.category}
+            value={formData.subcategory}
             onChange={(val) =>
-              setFormData((p) => ({ ...p, category: val?.target?.value || val }))
+              handleCustomChange('subcategory', val?.target?.value || val)
             }
           >
-            <option value="">Select category</option>
-            <option value="Engineer">Engineer</option>
-            <option value="Medical">Medical</option>
-            <option value="Information technology">Information technology</option>
-            <option value="Finance">Finance</option>
-            <option value="Marketing">Marketing</option>
+            <option value="">Select course subcategory</option>
           </ChoicesFormInput>
         </Col>
 
         <Col md={6}>
-          <label className="form-label">Course level</label>
-          <ChoicesFormInput
-            className="form-select js-choice border-0 z-index-9 bg-transparent"
-            value={formData.level}
-            onChange={(val) =>
-              setFormData((p) => ({ ...p, level: val?.target?.value || val }))
-            }
-          >
-            <option value="">Select course level</option>
-            <option value="All">All</option>
-            <option value="Beginner">Beginner</option>
-            <option value="Intermediate">Intermediate</option>
-            <option value="Advanced">Advanced</option>
-          </ChoicesFormInput>
+          <Form.Group controlId="levelSelect">
+            <Form.Label>Course Level <span className="text-danger">*</span></Form.Label>
+            <ChoicesFormInput
+              className={!!errors.level ? 'is-invalid' : ''}
+              value={formData.level}
+              onChange={(val) =>
+                handleCustomChange('level', val?.target?.value || val)
+              }
+            >
+              <option value="">Select course level</option>
+              <option value="All">All</option>
+              <option value="Beginner">Beginner</option>
+              <option value="Intermediate">Intermediate</option>
+              <option value="Advanced">Advanced</option>
+            </ChoicesFormInput>
+            <Form.Control.Feedback type="invalid" className="d-block">
+              {errors.level}
+            </Form.Control.Feedback>
+          </Form.Group>
         </Col>
 
         <Col md={6}>
-          <label className="form-label">Language</label>
-          <ChoicesFormInput
-            className="form-select js-choice border-0 z-index-9 bg-transparent"
-            value={formData.language}
-            onChange={(val) =>
-              setFormData((p) => ({ ...p, language: val?.target?.value || val }))
-            }
-          >
-            <option value="">Select language</option>
-            <option>English</option>
-            <option>Vietnamese</option>
-          </ChoicesFormInput>
+          <Form.Group controlId="languageSelect">
+            <Form.Label>Language <span className="text-danger">*</span></Form.Label>
+            <ChoicesFormInput
+              className={!!errors.language ? 'is-invalid' : ''}
+              value={formData.language}
+              onChange={(val) =>
+                handleCustomChange('language', val?.target?.value || val)
+              }
+            >
+              <option value="">Select language</option>
+              <option>English</option>
+              <option>Vietnamese</option>
+              <option>Others</option>
+            </ChoicesFormInput>
+            <Form.Control.Feedback type="invalid" className="d-block">
+              {errors.language}
+            </Form.Control.Feedback>
+          </Form.Group>
         </Col>
 
-        <Col
-          md={6}
-          className="d-flex align-items-center justify-content-start mt-5"
-        >
-          <div className="form-check form-switch form-check-md">
-            <input
-              className="form-check-input"
-              type="checkbox"
-              id="checkPrivacy1"
-              name="featured"
-              checked={formData.featured}
+        <Col md={6}>
+          <Form.Label>Course Duration</Form.Label>
+          <InputGroup>
+            <Form.Control
+              type="number"
+              name="duration"
+              placeholder="Enter duration"
+              min="1"
+              value={formData.duration}
               onChange={handleChange}
+              style={{ width: '60%' }} // wider input
             />
-            <label className="form-check-label" htmlFor="checkPrivacy1">
-              Check this for featured course
-            </label>
+            <Form.Select
+              name="durationUnit"
+              value={formData.durationUnit}
+              onChange={handleChange}
+              style={{ width: '40%' }} // narrower select
+            >
+              <option value="hour">Hours</option>
+              <option value="minute">Minutes</option>
+              <option value="second">Seconds</option>
+              <option value="day">Days</option>
+            </Form.Select>
+          </InputGroup>
+        </Col>
+
+        {/* force new row */}
+        <Col md={4} ></Col>
+
+        <Col md={6}>
+          <Form.Label>
+            Price <span className="text-danger">*</span>
+          </Form.Label>
+          <div className="input-group">
+            <Form.Control
+              type="text"
+              name="price"
+              placeholder="Enter price"
+              value={formData.price}
+              onChange={handleChange}
+              isInvalid={!!errors.price}
+            />
+            <span className="input-group-text rounded-end">{currency}</span>
+            <Form.Control.Feedback type="invalid">
+              {errors.price}
+            </Form.Control.Feedback>
           </div>
         </Col>
 
         <Col md={6}>
-          <label className="form-label">Course duration (hours)</label>
-          <input
-            className="form-control"
-            type="text"
-            name="duration"
-            placeholder="Enter duration"
-            value={formData.duration}
+          <Form.Label>Discount Price</Form.Label>
+          <div className="input-group">
+            <Form.Control
+              type="text"
+              name="discount"
+              placeholder="Enter discount"
+              value={formData.discount}
+              onChange={handleChange}
+              disabled={!formData.enableDiscount}
+              isInvalid={!!errors.discount}
+            />
+            <span className="input-group-text rounded-end">{currency}</span>
+            <Form.Control.Feedback type="invalid">
+              {errors.discount}
+            </Form.Control.Feedback>
+          </div>
+          <Form.Check
+            type="checkbox"
+            id="checkBox1"
+            label="Enable discount"
+            className="small mt-2"
+            name="enableDiscount"
+            checked={formData.enableDiscount}
             onChange={handleChange}
           />
-        </Col>
-
-        <Col md={6}>
-          <label className="form-label">Total lectures</label>
-          <input
-            className="form-control"
-            type="text"
-            name="lecturesCount"
-            placeholder="Enter number of lectures"
-            value={formData.lecturesCount}
-            onChange={handleChange}
-          />
-        </Col>
-
-        <Col md={6}>
-          <label className="form-label">Course price</label>
-          <input
-            type="text"
-            className="form-control"
-            name="price"
-            placeholder="Enter price"
-            value={formData.price}
-            onChange={handleChange}
-          />
-        </Col>
-
-        <Col md={6}>
-          <label className="form-label">Discount price</label>
-          <input
-            className="form-control"
-            type="text"
-            name="discount"
-            placeholder="Enter discount"
-            value={formData.discount}
-            onChange={handleChange}
-          />
-          <Col xs={12} className="mt-1 mb-0">
-            <div className="form-check small mb-0">
-              <input
-                className="form-check-input"
-                type="checkbox"
-                id="checkBox1"
-                name="enableDiscount"
-                checked={formData.enableDiscount}
-                onChange={handleChange}
-              />
-              <label className="form-check-label" htmlFor="checkBox1">
-                Enable this discount
-              </label>
-            </div>
-          </Col>
         </Col>
 
         <Col xs={12}>
-          <label className="form-label">Add description</label>
-          <ReactQuill
-            className="pb-2 pb-sm-0 mb-4"
-            theme="snow"
-            style={{ height: 400 }}
-            value={formData.description}
-            onChange={(val) =>
-              setFormData((p) => ({ ...p, description: val }))
-            }
-            id="quilltoolbar"
+          <Form.Label>Add Description</Form.Label>
+          <div className='pb-3'>
+            <ReactQuill
+              theme="snow"
+              style={{ height: 400 }}
+              value={formData.description}
+              onChange={(val) =>
+                handleCustomChange('description', val)
+              }
+            />
+          </div>
+        </Col>
+
+        <Col md={6} className="mt-5">
+          <Form.Check
+            type="switch"
+            id="checkPrivacy1"
+            label="Publish this course once approved"
+            name="isActive"
+            checked={formData.isActive}
+            onChange={handleChange}
           />
         </Col>
 
-        <div className="d-flex justify-content-end mt-5">
-          <button
+        <div className="d-flex justify-content-end mt-3">
+          <Button
             type="submit"
-            className="btn btn-primary next-btn mb-0"
+            variant="primary"
+            className="next-btn mb-0"
             disabled={saving}
           >
-            {saving ? 'Saving...' : 'Next'}
-          </button>
+            {saving ? 'Validating...' : 'Next'}
+          </Button>
         </div>
       </Row>
-    </form>
+    </Form>
   );
 };
 

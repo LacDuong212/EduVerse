@@ -105,7 +105,7 @@ const MyCourses = ({ courses, page, limit, totalPages, totalCourses, loading, on
                             }}
                           >
                             <img
-                              src={course.thumbnail || ""}
+                              src={course.image || course.thumbnail || ""}
                               alt={course.title || "Course image"}
                               style={{
                                 width: "100%",

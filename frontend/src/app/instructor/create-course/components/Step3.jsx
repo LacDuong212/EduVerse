@@ -1,49 +1,68 @@
+import AddSection from './AddSection';
+import AddLecture from './AddLecture';
 import { useState, useEffect } from 'react';
 import { Accordion, AccordionBody, AccordionHeader, AccordionItem, Button, Row } from 'react-bootstrap';
 import { FaEdit, FaPlay, FaTimes, FaPlus } from 'react-icons/fa';
 import { toast } from 'react-toastify';
-import AddSection from './AddSection';
-import AddLecture from './AddLecture';
-import useCourseFormData from '../useCourseFormData';
 
-const Step3 = ({ stepperInstance }) => {
-  const { formData, updateStepData, setFormData } = useCourseFormData();
 
-  const [curriculum, setCurriculum] = useState(
-    (formData.curriculum || []).map(section => ({
-      ...section,
-      lectures: section.lectures || [],
-    }))
-  );
+const Step3 = ({ stepperInstance, draftData, onSave }) => {
+  // local state
+  const [curriculum, setCurriculum] = useState([]);
+  const [errors, setErrors] = useState({});
 
+  // modal state
   const [showLectureModal, setShowLectureModal] = useState(false);
   const [editingLecture, setEditingLecture] = useState(null);
   const [editingSectionIndex, setEditingSectionIndex] = useState(null);
   const [editingLectureIndex, setEditingLectureIndex] = useState(null);
 
-  // Sync local curriculum if formData.curriculum changes externally and is different
+  const curriculumJson = JSON.stringify(draftData?.curriculum || []);
+  // init
   useEffect(() => {
-    const currJson = JSON.stringify(curriculum);
-    const formJson = JSON.stringify(formData.curriculum || []);
-    if (currJson !== formJson) {
-      setCurriculum(
-        (formData.curriculum || []).map(section => ({
-          ...section,
-          lectures: section.lectures || [],
-        }))
-      );
+    const data = draftData || {};
+    setCurriculum(
+      (data.curriculum || []).map(section => ({
+        ...section,
+        lectures: section.lectures || [],
+      }))
+    );
+  }, [curriculumJson]);
+
+  // these are calculated on every render
+  const totalSections = curriculum.length;
+  const totalLectures = curriculum.reduce(
+    (acc, section) => acc + (section.lectures ? section.lectures.length : 0),
+    0
+  );
+
+  // debounced auto-save 
+  useEffect(() => {
+    const localCurriculumJson = JSON.stringify(curriculum);
+
+    // prevent auto-save if local state is identical to prop state
+    if (localCurriculumJson === curriculumJson) {
+      return;
     }
-  }, [formData.curriculum]);
 
-  // Helper function to update curriculum locally and sync with global formData
-  const updateCurriculum = (updater) => {
-    setCurriculum(prev => {
-      const updated = updater(prev);
-      setFormData(prevForm => ({ ...prevForm, curriculum: updated }));
-      return updated;
-    });
-  };
+    // timer
+    const handler = setTimeout(() => {
+      console.log("Auto-saving curriculum...");
+      
+      onSave({ 
+        curriculum: curriculum,
+        lecturesCount: totalLectures
+      });
+    }, 2000); // 2-second delay
 
+    // clear timer if curriculum changes early
+    return () => {
+      clearTimeout(handler);
+    };
+
+  }, [curriculum, totalLectures, onSave, curriculumJson]);
+
+  // modal ---
   const openAddLectureModal = (sectionIdx) => {
     setEditingLecture(null);
     setEditingSectionIndex(sectionIdx);
@@ -65,59 +84,91 @@ const Step3 = ({ stepperInstance }) => {
     setEditingLectureIndex(null);
   };
 
+  // curriculum ---
   const saveLecture = (lectureData) => {
-    updateCurriculum(prev => {
+    let lectureToSave = { ...lectureData };
+
+    if (lectureData.videoFile) {
+      toast.info('Handling video file...');
+      const tempUrl = URL.createObjectURL(lectureData.videoFile);
+      lectureToSave.videoUrl = tempUrl;
+      lectureToSave.videoFile = null;
+    }
+
+    setCurriculum(prev => {
       const updated = [...prev];
-
       if (editingLectureIndex !== null && editingSectionIndex !== null) {
-        // Edit existing lecture
-        updated[editingSectionIndex].lectures[editingLectureIndex] = lectureData;
+        updated[editingSectionIndex].lectures[editingLectureIndex] = lectureToSave;
       } else if (editingSectionIndex !== null) {
-        // Add new lecture
-        updated[editingSectionIndex].lectures = updated[editingSectionIndex].lectures || [];
-        updated[editingSectionIndex].lectures.push(lectureData);
+        const lectures = updated[editingSectionIndex].lectures || [];
+        updated[editingSectionIndex].lectures = [...lectures, lectureToSave];
       }
-
       return updated;
     });
+
     closeLectureModal();
   };
 
   const handleRemoveLecture = (sectionIdx, lectureIdx) => {
     if (!window.confirm('Are you sure you want to remove this lecture?')) return;
-
-    updateCurriculum(prev => {
-      if (sectionIdx < 0 || sectionIdx >= prev.length) return prev;
+    setCurriculum(prev => {
       const updated = [...prev];
+      if (sectionIdx < 0 || sectionIdx >= updated.length) return prev;
       updated[sectionIdx].lectures.splice(lectureIdx, 1);
       return updated;
     });
   };
 
   const handleRemoveSection = (sectionIdx) => {
-    if (!window.confirm('Are you sure you want to remove this section? All its lectures will be deleted.')) return;
-
-    updateCurriculum(prev => {
-      if (sectionIdx < 0 || sectionIdx >= prev.length) return prev;
+    if (!window.confirm('Are you sure you want to remove this section? All its lectures will be deleted!')) return;
+    setCurriculum(prev => {
       const updated = [...prev];
+      if (sectionIdx < 0 || sectionIdx >= updated.length) return prev;
       updated.splice(sectionIdx, 1);
       return updated;
     });
   };
 
   const addSection = (newSection) => {
-    updateCurriculum(prev => [...prev, { ...newSection, lectures: [] }]);
+    setCurriculum(prev => [...prev, { ...newSection, lectures: [] }]);
+    if (errors.curriculum) setErrors(prev => ({ ...prev, curriculum: null }));
   };
 
+  // nav
   const goToPreviousStep = (e) => {
     e.preventDefault();
     stepperInstance?.previous();
   };
 
-  const handleSubmit = async (e) => {
+  // validation
+  const validate = () => {
+    const newErrors = {};
+
+    if (curriculum.length === 0) {
+      newErrors.curriculum = 'Please add at least one section.';
+    } else if (curriculum.every(sec => sec.lectures.length === 0)) {
+      newErrors.curriculum = 'Please add at least one lecture to a section.';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // submission
+  const handleSubmit = (e) => {
     e.preventDefault();
+    if (!validate()) {
+      toast.error("Please fix the errors on the page");
+      return;
+    }
+
+    // saving draft
     try {
-      await updateStepData('step3', { curriculum });
+      onSave({
+        curriculum,
+        lecturesCount: totalLectures,
+      });
+
       stepperInstance?.next();
     } catch (error) {
       toast.error('Failed to save curriculum');
@@ -133,22 +184,28 @@ const Step3 = ({ stepperInstance }) => {
         aria-labelledby="steppertrigger3"
         onSubmit={handleSubmit}
       >
-        <h4>Curriculum</h4>
+        <h4>
+          Curriculum{" "} 
+          <span className="text-danger">* </span> 
+          <span className="fw-normal fs-5">(Sections: {totalSections}, Lectures: {totalLectures})</span>
+        </h4>
         <hr />
 
         <Row>
           <div className="d-sm-flex justify-content-sm-between align-items-center mb-3">
-            <h5 className="mb-2 mb-sm-0">Upload Lecture</h5>
+            <h5 className="mb-2 mb-sm-0">Sections <span className="text-danger">*</span></h5>
             <AddSection onAddSection={addSection} />
           </div>
+
+          {errors.curriculum && <div className="text-danger mb-2 text-center">{errors.curriculum}</div>}
 
           <Accordion className="accordion-icon accordion-bg-light" id="accordionExample2">
             {curriculum.length === 0 && (
               <div
-                className="text-center text-muted my-4 d-flex align-items-center justify-content-center"
+                className="text-center text-secondary my-4 d-flex align-items-center justify-content-center"
                 style={{ minHeight: '150px' }}
               >
-                No sections added yet. Use the button above to add a section.
+                No sections added yet. Click "Add Section" to add a new section.
               </div>
             )}
 

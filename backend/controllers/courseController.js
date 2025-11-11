@@ -39,7 +39,9 @@ export const getHomeCourses = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: "Error fetching home courses", error });
   }
-};export const getFullCourses = async (req, res) => {
+};
+
+export const getFullCourses = async (req, res) => {
   try {
     const courses = await Course.find();
 
@@ -615,254 +617,135 @@ export const getEarningsStats = async (req, res) => {
   }
 };
 
-export const saveCourseStep1 = async (req, res) => {
+// POST /api/courses
+export const createCourse = async (req, res) => {
   try {
-    const userId = req.userId; // from userAuth middleware
-    const {
-      courseId,
+    const userId = req.userId;
+    
+    // required
+    const { 
       title,
-      subtitle,
-      description,
       category,
-      subCategory,
-      language,
       level,
-      duration,
-      lecturesCount,
+      language,
       price,
-      discountPrice,
+      enableDiscount,
+      image,
+      curriculum
     } = req.body;
 
-    let course;
+    const others = req.body;
 
-    if (courseId) {
-      // update existing draft
-      course = await Course.findById(courseId);
-      if (!course) {
-        return res.status(404).json({ success: false, message: "Course not found" });
-      }
-
-      if (course.instructor?.ref?.toString() !== userId) {
-        return res.status(403).json({ success: false, message: "Not authorised" });
-      }
-
-      course.title = title;
-      course.subtitle = subtitle;
-      course.description = description;
-      course.category = category;
-      course.subCategory = subCategory;
-      course.language = language;
-      course.level = level;
-      course.duration = duration;
-      course.lecturesCount = lecturesCount;
-      course.price = price;
-      course.discountPrice = discountPrice;
-
-      await course.save();
-    } else {
-      const user = await userModel.findById(userId);
-
-      // create new draft
-      course = await Course.create({
-        title,
-        subtitle,
-        description,
-        category,
-        subCategory,
-        language,
-        level,
-        duration,
-        lecturesCount,
-        price,
-        discountPrice,
-        instructor: { ref: userId, name: user?.name, avatar: user?.pfpImg },
-        status: "Pending",
-        isActive: false,
+    // validation ---
+    if (!title || !title.trim()) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Title is required.' 
       });
-
-      // Add course to instructor.myCourses only on creation
-      await Instructor.updateOne(
-        { user: userId, 'myCourses.course': { $ne: course._id } },
-        { $push: { myCourses: { course: course._id } } }
-      );
+    }
+    if (!category || !category.trim()) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Category is required.' 
+      });
+    }
+    if (!level || !level.trim()) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Level is required.' 
+      });
+    }
+    if (!language || !language.trim()) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Language is required.' 
+      });
+    }
+    if (price == null || price < 0) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'A valid price is required.' 
+      });
+    }
+    if (enableDiscount && (others?.discountPrice == null || others?.discountPrice < 0)) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Discount price is required when discount is enabled.' 
+      });
+    }
+    if (enableDiscount && others?.discountPrice >= price) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Discount price must be less than the original price.' 
+      });
+    }
+    if (!image || !image.trim()) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Course image is required.' 
+      });
+    }
+    if (!curriculum || curriculum.length === 0) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Curriculum cannot be empty.' 
+      });
     }
 
-    res.status(200).json({
+    const instructor = await Instructor.findOne({ user: userId }).populate('user');
+    if (!instructor) {
+      return res.status(404).json({ 
+        success: false,
+        message: 'Instructor not found' 
+      });
+    }
+
+    const newCourse = new Course({
+      ...req.body, // passes all fields (title, curriculum, price, etc.)
+      
+      instructor: {
+        ref: userId,
+        name: instructor?.user?.name,
+        avatar: instructor?.user?.pfpImg
+      },
+      studentsEnrolled: 0,
+      rating: {
+        average: 0,
+        count: 0,
+        total: 0
+      },
+      isActive: req.body.isActive || false, // = isPublished
+      status: 'Pending',
+      isDeleted: false,
+    });
+
+    await newCourse.save();
+
+    // update instructor
+    instructor.myCourses.push({ course: newCourse._id });
+    await instructor.save();
+
+    return res.status(201).json({
       success: true,
-      message: "Step 1 saved successfully",
-      data: course,
+      message: 'Course submitted for review successfully!',
+      data: newCourse
     });
-  } catch (err) {
-    console.error("Error saving Step 1:", err);
-    res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
-  }
-};
 
-export const saveCourseStep2 = async (req, res) => {
-  try {
-    const { courseId, thumbnail, previewVideo } = req.body;
-    const userId = req.userId;
-
-    if (!courseId) {
-      return res.status(400).json({
-        success: false,
-        message: 'Course ID is required',
-      });
-    }
-
-    const course = await Course.findById(courseId);
-
-    if (!course) {
-      return res.status(404).json({
-        success: false,
-        message: 'Course not found',
-      });
-    }
-
-    // Check ownership
-    if (String(course.instructor.ref) !== String(userId)) {
-      return res.status(403).json({
-        success: false,
-        message: 'You are not authorised to modify this course',
-      });
-    }
-
-    // Update fields
-    course.thumbnail = thumbnail;
-    course.previewVideo = previewVideo;
-
-    await course.save();
-
-    return res.status(200).json({
-      success: true,
-      message: 'Step 2 saved successfully',
-      data: course,
-    });
   } catch (error) {
-    console.error('Error saving Step 2:', error);
-    return res.status(500).json({
+    console.error('Error creating course:', error);
+
+    // handle Mongoose validation errors
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ 
+        success: false,
+        message: error.message, 
+        errors: error.errors 
+      });
+    }
+
+    return res.status(500).json({ 
       success: false,
-      message: 'Server error while saving step 2',
-    });
-  }
-};
-
-export const saveCourseStep3 = async (req, res) => {
-  try {
-    const { courseId, curriculum } = req.body;
-    const userId = req.userId;
-
-    if (!courseId) {
-      return res.status(400).json({
-        success: false,
-        message: 'Course ID is required',
-      });
-    }
-
-    if (!Array.isArray(curriculum)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Curriculum must be an array',
-      });
-    }
-
-    const course = await Course.findById(courseId);
-
-    if (!course) {
-      return res.status(404).json({
-        success: false,
-        message: 'Course not found',
-      });
-    }
-
-    // Ownership check
-    if (String(course.instructor.ref) !== String(userId)) {
-      return res.status(403).json({
-        success: false,
-        message: 'You are not authorised to modify this course',
-      });
-    }
-
-    // Validate and sanitize curriculum if needed (optional, recommended)
-
-    // Update curriculum
-    course.curriculum = curriculum;
-
-    await course.save();
-
-    return res.status(200).json({
-      success: true,
-      message: 'Step 3 saved successfully',
-      data: course,
-    });
-  } catch (error) {
-    console.error('Error saving Step 3:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Server error while saving step 3',
-    });
-  }
-};
-
-export const submitCourseForReview = async (req, res) => {
-  try {
-    const userId = req.userId;
-    const { courseId, tags, ...restData } = req.body;
-
-    if (!courseId) {
-      return res.status(400).json({
-        success: false,
-        message: 'Course ID is required',
-      });
-    }
-
-    const course = await Course.findById(courseId);
-
-    if (!course) {
-      return res.status(404).json({
-        success: false,
-        message: 'Course not found',
-      });
-    }
-
-    // Check ownership
-    if (String(course.instructor.ref) !== String(userId)) {
-      return res.status(403).json({
-        success: false,
-        message: 'You are not authorised to modify this course',
-      });
-    }
-
-    // Update course with all submitted fields
-    // You may want to whitelist or validate fields here
-    if (tags && Array.isArray(tags)) {
-      course.tags = tags;
-    }
-
-    // Apply any other submitted fields (e.g., title, description, thumbnail, etc.)
-    // assuming restData contains these fields
-    Object.entries(restData).forEach(([key, value]) => {
-      course[key] = value;
-    });
-
-    // Mark course as pending review
-    course.status = 'Pending';
-
-    await course.save();
-
-    return res.status(200).json({
-      success: true,
-      message: 'Course submitted for review successfully',
-      data: course,
-    });
-  } catch (error) {
-    console.error('Error submitting course for review:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Server error while submitting course',
+      message: 'Server error while creating course' 
     });
   }
 };

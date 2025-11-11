@@ -16,6 +16,7 @@ const userSlice = createSlice({
     setLogout: (state) => {
       state.isLoggedIn = false;
       state.userData = null;
+      // #TODO: clear all user data
     },
     setUserData: (state, action) => {
       state.userData = action.payload

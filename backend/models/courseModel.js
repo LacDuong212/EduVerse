@@ -44,8 +44,9 @@ const courseSchema = new mongoose.Schema({
 
   price: { type: Number, required: true, min: 0 },
   discountPrice: { type: Number, min: 0, default: null },
+  enableDiscount: { type: Boolean, default: false },
 
-  isActive: { type: Boolean, default: true },
+  isActive: { type: Boolean, default: false },
   status: { type: String, enum: ["Rejected", "Pending", "Live", "Blocked"], default: "Pending" },
   isDeleted: { type: Boolean, default: false }
 }, {
@@ -53,15 +54,6 @@ const courseSchema = new mongoose.Schema({
 });
 
 courseSchema.index({ title: "text", category: 1, subCategory: 1, tags: 1 });
-
-courseSchema.pre('save', function (next) {
-  if (this.isModified('curriculum') && this.curriculum?.length) {
-    const allLectures = this.curriculum.flatMap(s => s.lectures || []);
-    this.lecturesCount = allLectures.length;
-    this.duration = allLectures.reduce((sum, lec) => sum + (lec.duration || 0), 0);
-  }
-  next();
-});
 
 courseSchema.pre("save", async function (next) {
   if (!this.isModified("instructor.ref")) return next();
