@@ -3,6 +3,7 @@ import { uploadAvatar } from "../configs/cloudinary.js";
 import fs from "fs";
 import Fuse from "fuse.js";
 
+
 // GET /user/profile
 export const getProfile = async (req, res) => {
   try {

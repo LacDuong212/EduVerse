@@ -1,22 +1,19 @@
+// useMyCourses.js
 import axios from "axios";
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 
 const getFirstLectureId = (course) => {
   const sections = Array.isArray(course?.curriculum) ? course.curriculum : [];
-
-  // 1) Ưu tiên lecture free
   for (const sec of sections) {
     const lecs = Array.isArray(sec?.lectures) ? sec.lectures : [];
     const free = lecs.find((l) => l?.isFree);
     if (free?._id) return free._id;
   }
-  // 2) Không có free → lấy bài đầu tiên
   for (const sec of sections) {
     const lecs = Array.isArray(sec?.lectures) ? sec.lectures : [];
     if (lecs.length && lecs[0]?._id) return lecs[0]._id;
   }
-  // 3) Không có curriculum → nếu có previewVideo thì dùng 'preview'
   if (course?.previewVideo) return "preview";
   return null;
 };
@@ -32,11 +29,20 @@ export const useMyCourses = () => {
     limit: 8,
   });
 
-  const fetchMyCourses = async (page = 1) => {
+  // 👉 stats cho Counter
+  const [stats, setStats] = useState({
+    total: 0,
+    completed: 0,
+    inProgress: 0,
+  });
+
+  const fetchMyCourses = async (_page = 1) => {
     try {
       setLoading(true);
+
+      // ✅ ĐÚNG: /api/students/my-courses (có "s")
       const { data } = await axios.get(
-        `${backendUrl}/api/courses/my-courses?page=${page}&limit=${pagination.limit}`,
+        `${backendUrl}/api/student/my-courses`,
         { withCredentials: true }
       );
 
@@ -47,17 +53,32 @@ export const useMyCourses = () => {
           image: c.thumbnail || "/images/placeholder.jpg",
           totalLectures: c.lecturesCount ?? c.totalLectures ?? 0,
           completedLectures: 0,
-          firstLectureId: getFirstLectureId(c), // 👈 thêm
+          firstLectureId: getFirstLectureId(c),
           hasPreview: !!c.previewVideo,
         }));
 
         setCourseData(normalized);
-        setPagination((prev) => ({
-          ...prev,
-          page: data.pagination.page,
-          total: data.pagination.total,
-          totalPages: data.pagination.totalPages,
-        }));
+
+        // 👉 dùng stats từ backend
+        const totalCourses = data.stats?.totalCourses ?? normalized.length;
+        const completedCourses = data.stats?.completedCourses ?? 0;
+        const inProgressCourses =
+          data.stats?.inProgressCourses ??
+          Math.max(0, totalCourses - completedCourses);
+
+        setStats({
+          total: totalCourses,
+          completed: completedCourses,
+          inProgress: inProgressCourses,
+        });
+
+        // giữ pagination cho UI cũ nhưng 1 trang
+        setPagination({
+          page: 1,
+          total: totalCourses,
+          limit: normalized.length || 8,
+          totalPages: 1,
+        });
       } else {
         toast.error(data.message || "Failed to fetch courses");
       }
@@ -67,11 +88,10 @@ export const useMyCourses = () => {
       setLoading(false);
     }
   };
-
   useEffect(() => {
     fetchMyCourses(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return { courseData, pagination, loading, fetchMyCourses };
+  return { courseData, pagination, loading, fetchMyCourses, stats };
 };
