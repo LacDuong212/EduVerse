@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Col, Row } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 
@@ -11,9 +11,15 @@ const Step4 = ({
   isSubmitting,
 }) => {
   const [tagsInput, setTagsInput] = useState(draftData.tags?.join(', ') || '');
-
+  const isFirstRender = useRef(true);
+  
   // update draft data
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    
     // parse the tags string into an array
     const tags = tagsInput
       .split(',')
@@ -35,14 +41,6 @@ const Step4 = ({
     e.preventDefault();
 
     if (isSubmitting) return; // prevent multiple submissions
-
-    const confirmSubmit = window.confirm(
-      'Once you submit, the draft data on this page will be cleared and cannot be recovered. Do you want to continue?'
-    );
-    if (!confirmSubmit) {
-      toast.info('Submission cancelled');
-      return;
-    }
 
     // call the parent's submission function
     onSubmit();
@@ -108,19 +106,18 @@ const Step4 = ({
             >
               Preview Course
             </Link>
-            
+
             {/* Submit Button */}
             <button
               type="submit"
               className="btn btn-success"
               disabled={isSubmitting} // controlled by parent
             >
-              {isSubmitting ? 'Submitting…' : 'Create Course'}
+              {isSubmitting ? 'Submitting…' : 'Submit Course'}
             </button>
           </div>
           <p className="small mb-0 text-end mt-1">
-            Once you click "Create Course", your course will be uploaded and
-            marked as pending for review.
+            Your course will be reviewed by the admin before it goes live.
           </p>
         </div>
       </div>

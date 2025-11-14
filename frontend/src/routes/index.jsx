@@ -8,7 +8,7 @@ const ResetPassword = lazy(() => import('@/app/auth/reset-password/page'));
 
 // INSTRUCTOR
 import InstructorAccount from "../app/instructor/account";
-import InstructorCreateCoursePage from "../app/instructor/create-course";
+import InstructorManageCoursePage from "../app/instructor/manage-course";
 import InstructorDashboard from "../app/instructor/dashboard";
 import InstructorMyCourses from "../app/instructor/my-courses";
 import InstructorMyStudents from "../app/instructor/my-students";
@@ -58,6 +58,11 @@ export const publicRoutes = [{
   path: '/courses',
   name: 'Courses',
   element: <CoursesPage />
+}, {
+  path: '/courses/:courseId/watch/:lectureId?',
+  name: 'My Video Player',
+  isNested: false,
+  element: <VideoPlayer />
 }, {
   path: '/courses/:id',
   name: 'CourseDetails',
@@ -127,15 +132,15 @@ export const instructorRoutes = [{
   isNested: true,
   element: null
 }, {
-  path: '/instructor/create-course',
+  path: '/instructor/courses/create',
   name: 'Create Course',
   isNested: false,
-  element: <InstructorCreateCoursePage />
+  element: <InstructorManageCoursePage isEdit={false} />
 }, {
-  path: '/instructor/update-course',
+  path: '/instructor/courses/edit/:id',
   name: 'Update Course',
-  isNested: true,
-  element: null
+  isNested: false,
+  element: <InstructorManageCoursePage isEdit={true} />
 }, {
   path: '/instructor/*',
   name: 'Resource Not Found',
@@ -216,11 +221,6 @@ export const adminRoutes = [{
 }];
 
 export const studentRoutes = [{
-  path: '/courses/:courseId/watch/:lectureId?',
-  name: 'My Video Player',
-  isNested: false,
-  element: <VideoPlayer />
-}, {
   path: '/student/courses',
   name: 'My Courses',
   isNested: true,

@@ -146,8 +146,8 @@ const Step3 = ({ stepperInstance, draftData, onSave }) => {
 
     if (curriculum.length === 0) {
       newErrors.curriculum = 'Please add at least one section.';
-    } else if (curriculum.every(sec => sec.lectures.length === 0)) {
-      newErrors.curriculum = 'Please add at least one lecture to a section.';
+    } else if (curriculum.some(sec => sec.lectures.length === 0)) {
+      newErrors.curriculum = 'Please ensure all sections have at least one lecture.';
     }
 
     setErrors(newErrors);
@@ -169,6 +169,7 @@ const Step3 = ({ stepperInstance, draftData, onSave }) => {
         lecturesCount: totalLectures,
       });
 
+      toast.success('Step 3 saved!');
       stepperInstance?.next();
     } catch (error) {
       toast.error('Failed to save curriculum');

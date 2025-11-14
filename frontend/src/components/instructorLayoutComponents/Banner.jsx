@@ -62,7 +62,7 @@ const Banner = ({
                     </ul>
                   </div>
                   <div className="d-flex align-items-center mt-2 mt-md-0">
-                    <Link to="/instructor/create-course" className="btn btn-success mb-0">
+                    <Link to="/instructor/courses/create" className="btn btn-success mb-0">
                       Create a course
                     </Link>
                   </div>

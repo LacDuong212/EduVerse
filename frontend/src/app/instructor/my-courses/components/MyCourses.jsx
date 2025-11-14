@@ -2,6 +2,7 @@ import ChoicesFormInput from '@/components/form/ChoicesFormInput';
 import { useState } from "react";
 import { Button, Card, CardBody, CardHeader, Col, Row } from 'react-bootstrap';
 import { FaAngleLeft, FaAngleRight, FaCheckCircle, FaRegEdit, FaSearch, FaTable, FaTimes } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 
 const MyCourses = ({ courses, page, limit, totalPages, totalCourses, loading, onPageChange }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -105,7 +106,7 @@ const MyCourses = ({ courses, page, limit, totalPages, totalCourses, loading, on
                             }}
                           >
                             <img
-                              src={course.image || course.thumbnail || ""}
+                              src={course.image || course.thumbnail || "https://res.cloudinary.com/dw1fjzfom/image/upload/v1757337425/av4_khpvlh.png"}
                               alt={course.title || "Course image"}
                               style={{
                                 width: "100%",
@@ -117,7 +118,7 @@ const MyCourses = ({ courses, page, limit, totalPages, totalCourses, loading, on
                           </div>
                           <div className="mb-0 ms-2">
                             <h6>
-                              <a href={`/course/${course._id}`}>
+                              <a href={`/courses/${course._id}`}>
                                 {course.title}
                               </a>
                             </h6>
@@ -157,6 +158,8 @@ const MyCourses = ({ courses, page, limit, totalPages, totalCourses, loading, on
                           variant="success-soft"
                           size="sm"
                           className="btn-round me-1 mb-0"
+                          as={Link}
+                          to={`/instructor/courses/edit/${course._id}`}
                         >
                           <FaRegEdit className="fa-fw" />
                         </Button>

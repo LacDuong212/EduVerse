@@ -188,18 +188,18 @@ export const getAllCourses = async (req, res) => {
     const sumLectureDurations = (cur = []) =>
       Array.isArray(cur)
         ? cur.reduce((acc, sec) => {
-            const list = Array.isArray(sec?.lectures) ? sec.lectures : [];
-            const s = list.reduce((a, lec) => a + (Number(lec?.duration) || 0), 0);
-            return acc + s;
-          }, 0)
+          const list = Array.isArray(sec?.lectures) ? sec.lectures : [];
+          const s = list.reduce((a, lec) => a + (Number(lec?.duration) || 0), 0);
+          return acc + s;
+        }, 0)
         : 0;
 
     const countLecturesFromCurriculum = (cur = []) =>
       Array.isArray(cur)
         ? cur.reduce(
-            (acc, sec) => acc + (Array.isArray(sec?.lectures) ? sec.lectures.length : 0),
-            0
-          )
+          (acc, sec) => acc + (Array.isArray(sec?.lectures) ? sec.lectures.length : 0),
+          0
+        )
         : 0;
 
     // Chuẩn hoá dữ liệu phản hồi
@@ -231,10 +231,10 @@ export const getAllCourses = async (req, res) => {
       // instructor: map đúng theo schema (không dùng populate để không đổi logic quan trọng)
       const instructor = c?.instructor
         ? {
-            ref: c.instructor.ref,     // ObjectId
-            name: c.instructor.name,   // có thể null nếu chưa set
-            avatar: c.instructor.avatar,
-          }
+          ref: c.instructor.ref,     // ObjectId
+          name: c.instructor.name,   // có thể null nếu chưa set
+          avatar: c.instructor.avatar,
+        }
         : undefined;
 
       return {
@@ -459,9 +459,10 @@ export const getRelatedCourses = async (req, res) => {
       success: false,
       message: "Server error",
     });
-  }};
+  }
+};
 
-  export const getEarningsHistory = async (req, res) => {
+export const getEarningsHistory = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 4;
@@ -472,7 +473,7 @@ export const getRelatedCourses = async (req, res) => {
 
     const results = await Order.aggregate([
       { $unwind: "$courses" },
-      
+
       {
         $lookup: {
           from: "courses",
@@ -481,7 +482,7 @@ export const getRelatedCourses = async (req, res) => {
           as: "courseDetails",
         },
       },
-      
+
       { $unwind: "$courseDetails" },
 
       { $match: matchStage },
@@ -495,7 +496,7 @@ export const getRelatedCourses = async (req, res) => {
             { $limit: limit },
             {
               $project: {
-                _id: "$_id", 
+                _id: "$_id",
                 name: "$courseDetails.title",
                 date: "$createdAt",
                 amount: "$courses.pricePaid",
@@ -503,13 +504,13 @@ export const getRelatedCourses = async (req, res) => {
                 paymentMethod: {
                   $switch: {
                     branches: [
-                      { 
-                        case: { $eq: ["$paymentMethod", "momo"] }, 
-                        then: { type: "momo", image: "/assets/images/payment/momo.svg" } 
+                      {
+                        case: { $eq: ["$paymentMethod", "momo"] },
+                        then: { type: "momo", image: "/assets/images/payment/momo.svg" }
                       },
-                      { 
-                        case: { $eq: ["$paymentMethod", "vnpay"] }, 
-                        then: { type: "vnpay", image: "/assets/images/payment/vnpay.svg" } 
+                      {
+                        case: { $eq: ["$paymentMethod", "vnpay"] },
+                        then: { type: "vnpay", image: "/assets/images/payment/vnpay.svg" }
                       }
                     ],
                     default: { type: "unknown", image: "" }
@@ -621,88 +622,34 @@ export const getEarningsStats = async (req, res) => {
 export const createCourse = async (req, res) => {
   try {
     const userId = req.userId;
-    
-    // required
-    const { 
-      title,
-      category,
-      level,
-      language,
-      price,
-      enableDiscount,
-      image,
-      curriculum
-    } = req.body;
 
-    const others = req.body;
-
-    // validation ---
-    if (!title || !title.trim()) {
-      return res.status(400).json({ 
-        success: false,
-        message: 'Title is required.' 
-      });
-    }
-    if (!category || !category.trim()) {
-      return res.status(400).json({ 
-        success: false,
-        message: 'Category is required.' 
-      });
-    }
-    if (!level || !level.trim()) {
-      return res.status(400).json({ 
-        success: false,
-        message: 'Level is required.' 
-      });
-    }
-    if (!language || !language.trim()) {
-      return res.status(400).json({ 
-        success: false,
-        message: 'Language is required.' 
-      });
-    }
-    if (price == null || price < 0) {
-      return res.status(400).json({ 
-        success: false,
-        message: 'A valid price is required.' 
-      });
-    }
-    if (enableDiscount && (others?.discountPrice == null || others?.discountPrice < 0)) {
-      return res.status(400).json({ 
-        success: false,
-        message: 'Discount price is required when discount is enabled.' 
-      });
-    }
-    if (enableDiscount && others?.discountPrice >= price) {
-      return res.status(400).json({ 
-        success: false,
-        message: 'Discount price must be less than the original price.' 
-      });
-    }
-    if (!image || !image.trim()) {
-      return res.status(400).json({ 
-        success: false,
-        message: 'Course image is required.' 
-      });
-    }
-    if (!curriculum || curriculum.length === 0) {
-      return res.status(400).json({ 
-        success: false,
-        message: 'Curriculum cannot be empty.' 
-      });
+    const validation = validateCourse(req.body);
+    if (!validation.success) {
+      return res.status(400).json(validation);
     }
 
     const instructor = await Instructor.findOne({ user: userId }).populate('user');
     if (!instructor) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         success: false,
-        message: 'Instructor not found' 
+        message: 'Instructor not found'
       });
+    }
+
+    // #TODO: parse in FE not here
+    if (req.body.duration !== null) {
+      const duration = parseDurationToHours(req.body.duration, req.body.durationUnit);
+      if (duration.error) {
+        return res.status(400).json({ success: false, message: duration.error });
+      }
+
+      req.body.duration = duration.hours;
+      req.body.durationUnit = 'hour';
     }
 
     const newCourse = new Course({
       ...req.body, // passes all fields (title, curriculum, price, etc.)
-      
+
       instructor: {
         ref: userId,
         name: instructor?.user?.name,
@@ -736,19 +683,181 @@ export const createCourse = async (req, res) => {
 
     // handle Mongoose validation errors
     if (error.name === 'ValidationError') {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        message: error.message, 
-        errors: error.errors 
+        message: error.message,
+        errors: error.errors
       });
     }
 
-    return res.status(500).json({ 
+    return res.status(500).json({
       success: false,
-      message: 'Server error while creating course' 
+      message: 'Server error while creating course'
     });
   }
 };
+
+// PUT /api/courses/:id
+export const updateCourse = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.userId;
+
+    const course = await Course.findOne({ _id: id, isDeleted: false });
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: 'Course not found'
+      });
+    }
+
+    if (!course.instructor?.ref?.equals(userId)) {
+      return res.status(403).json({
+        success: false,
+        message: 'You cannot modify this course'
+      });
+    }
+
+    const validation = validateCourse(req.body);
+    if (!validation.success) {
+      return res.status(400).json(validation);
+    }
+
+    // #TODO: parse in FE not here
+    if (req.body.duration !== null) {
+      const duration = parseDurationToHours(req.body.duration, req.body.durationUnit);
+      if (duration.error) {
+        return res.status(400).json({ success: false, message: duration.error });
+      }
+
+      req.body.duration = duration.hours;
+      req.body.durationUnit = 'hour';
+    }
+
+    Object.assign(course, req.body);  // apply update
+
+    course.status = 'Pending';  // update status
+
+    await course.save();
+
+    return res.json({
+      success: true,
+      message: 'Course updated successfully! Awaiting review.',
+      data: course
+    });
+
+  } catch (error) {
+    console.error('Error updating course:', error);
+
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        success: false,
+        message: error.message,
+        errors: error.errors
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: 'Server error while updating course'
+    });
+  }
+};
+
+// course validation helper
+export const validateCourse = (course) => {
+  // required fields
+  const {
+    title,
+    category,
+    level,
+    language,
+    price,
+    enableDiscount,
+    discountPrice,  // optional when enableDiscount = false
+    image,
+    curriculum
+  } = course;
+
+  if (!title || !title.trim()) {
+    return { success: false, message: 'Title is required.' };
+  }
+
+  if (!category || !category.trim()) {
+    return { success: false, message: 'Category is required.' };
+  }
+
+  if (!level || !level.trim()) {
+    return { success: false, message: 'Level is required.' };
+  }
+
+  if (!language || !language.trim()) {
+    return { success: false, message: 'Language is required.' };
+  }
+
+  if (price == null || price < 0) {
+    return { success: false, message: 'A valid price is required.' };
+  }
+
+  if (enableDiscount) {
+    if (discountPrice == null || discountPrice < 0) {
+      return { success: false, message: 'Discount price is required when discount is enabled.' };
+    }
+
+    if (discountPrice >= price) {
+      return { success: false, message: 'Discount price must be less than the original price.' };
+    }
+  }
+
+  if (!image || !image.trim()) {
+    return { success: false, message: 'Course image is required.' };
+  }
+
+  if (!Array.isArray(curriculum) || curriculum.length === 0) {
+    return { success: false, message: 'Curriculum cannot be empty.' };
+  }
+
+  // #TODO: validation (string, number, etc.) for other fields as needed
+
+  return { success: true };
+};
+
+const parseDurationToHours = (duration, durationUnit) => {
+  if (isNaN(duration)) {
+    return { error: 'Duration must be a number.' };
+  }
+
+  if (!durationUnit || !['hour', 'minute', 'second', 'day'].includes(durationUnit)) {
+    return { error: 'Duration unit must be one of: hour, minute, second, day.' };
+  }
+
+  const durationNum = Number(duration);
+
+  if (durationNum <= 0) {
+    return { error: 'Duration must be a positive number.' };
+  }
+
+  let hours;
+  switch (durationUnit) {
+    case 'hour':
+      hours = durationNum;
+      break;
+    case 'minute':
+      hours = durationNum / 60;
+      break;
+    case 'second':
+      hours = durationNum / 3600;
+      break;
+    case 'day':
+      hours = durationNum * 24;
+      break;
+    default:
+      return { error: 'Invalid duration unit.' };
+  }
+
+  // round to 2 decimals
+  return { hours: Math.round(hours * 100) / 100 };
+}
 
 // PATCH /api/courses/:id?newStatus=
 export const updateCourseStatus = async (req, res) => {

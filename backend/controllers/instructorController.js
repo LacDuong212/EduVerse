@@ -129,7 +129,7 @@ export const getInstructorCourses = async (req, res) => {
     }
 
     // Fetch courses with pagination
-    const courses = await Course.find({ "instructor.ref": userId })
+    const courses = await Course.find({ "instructor.ref": userId, isDeleted: false })
       .skip(skip)
       .limit(limit)
       .lean();
@@ -152,6 +152,28 @@ export const getInstructorCourses = async (req, res) => {
   } catch (err) {
     console.error('Error fetching instructor courses:', err);
     res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
+// GET /api/instructor/courses/:id
+export const getMyCourseById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.userId;
+
+    const course = await Course.findOne({ _id: id, isDeleted: false }).lean();
+    if (!course) {
+      return res.status(404).json({ success: false, message: "Course not found" });
+    }
+
+    if (!course.instructor?.ref?.equals(userId)) {
+      return res.status(403).json({ success: false, message: "Cannot access this course" });
+    }
+
+    return res.json({ success: true, course });
+  } catch (error) {
+    console.error(`Error fetching instructor course with id(${req.params.id}):`, error);
+    return res.status(500).json({ success: false, message: "Cannot get instructor's course" });
   }
 };
 

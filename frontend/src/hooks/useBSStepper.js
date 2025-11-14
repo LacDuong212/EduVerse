@@ -3,11 +3,11 @@ import { useEffect, useState } from 'react';
 import 'bs-stepper/dist/css/bs-stepper.min.css';
 
 
-const useBSStepper = (stepperRef) => {
+const useBSStepper = (stepperRef, isReady = true) => {
   const [stepperInstance, setStepperInstance] = useState(null);
 
   useEffect(() => {
-    if (!stepperRef.current) return;
+    if (!stepperRef.current || !isReady) return;
 
     // create instance only once
     const instance = new Stepper(stepperRef.current, {
@@ -22,7 +22,7 @@ const useBSStepper = (stepperRef) => {
     return () => {
       instance.destroy();
     };
-  }, [stepperRef]);
+  }, [stepperRef, isReady]);
 
   return stepperInstance;
 };

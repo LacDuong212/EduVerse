@@ -1,24 +1,25 @@
 import galleryImg from '@/assets/images/element/gallery.svg';
 import GlightBox from '@/components/GlightBox';
-import { useRef, useState, useMemo } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { Col, Row, Nav, Tab, Alert } from 'react-bootstrap';
 import { FaPlay } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 
+
 // helper functions ---
-const getInitialPreview = (thumbnail) => {
-  if (thumbnail) {
-    if (thumbnail instanceof File) return URL.createObjectURL(thumbnail);
-    if (typeof thumbnail === 'string' && thumbnail.startsWith('http')) return thumbnail;
-  }
-  return null;
-};
-const getInitialTab = (thumbnail) => {
-  if (thumbnail) {
-    if (thumbnail instanceof File) return 'upload';
-    if (typeof thumbnail === 'string' && thumbnail.startsWith('http')) return 'url';
+const getInitialTab = (image) => {
+  if (image) {
+    if (image instanceof File) return 'upload';
+    if (typeof image === 'string' && image.startsWith('http')) return 'url';
   }
   return 'url';
+};
+const getImagePreview = (image) => {
+  if (image) {
+    if (image instanceof File) return URL.createObjectURL(image);
+    if (typeof image === 'string' && image.startsWith('http')) return image;
+  }
+  return null;
 };
 
 const Step2 = ({ stepperInstance, draftData, onSave }) => {
@@ -31,7 +32,7 @@ const Step2 = ({ stepperInstance, draftData, onSave }) => {
     draftData.image instanceof File ? draftData.image : null
   );
   const [previewCourseImage, setPreviewCourseImage] = useState(
-    getInitialPreview(draftData.image)
+    getImagePreview(draftData.image)
   );
   const courseImageInputRef = useRef(null);
 
@@ -46,6 +47,50 @@ const Step2 = ({ stepperInstance, draftData, onSave }) => {
 
   // other states ---
   const [error, setError] = useState('');
+
+
+  // syncs the component's state with the draftData.image prop
+  useEffect(() => {
+    const image = draftData.image;
+    if (image) {
+      if (typeof image === 'string') {
+        setCourseImageTab('url');
+        setCourseImageURL(image);
+        setPreviewCourseImage(image);
+        setCourseImageFile(null); // Ensure file is cleared
+      } else if (image instanceof File) {
+        setCourseImageTab('upload');
+        setCourseImageFile(image);
+        setPreviewCourseImage(getImagePreview(image));
+        setCourseImageURL(''); // Ensure URL is cleared
+      }
+    } else {
+      // handles when the data is loading or image is truly null
+      setCourseImageTab('url');
+      setCourseImageURL('');
+      setCourseImageFile(null);
+      setPreviewCourseImage(null);
+    }
+  }, [draftData.image]);  // runs whenever draftData.image changes
+
+  // This effect syncs the component's state with the draftData.previewVideo prop
+  useEffect(() => {
+    const video = draftData.previewVideo;
+    if (video) {
+      if (typeof video === 'string') {
+        setVideoURL(video);
+        setVideoFile(null);
+      } else if (video instanceof File) {
+        setVideoFile(video);
+        setVideoURL('');
+      }
+    } else {
+      setVideoURL('');
+      setVideoFile(null);
+    }
+    // This hook runs whenever draftData.previewVideo changes
+  }, [draftData.previewVideo]);
+  // --- END: THE FIX ---
 
   // YouTube URL parsing ---
   const youtubeId = useMemo(() => {
@@ -63,29 +108,29 @@ const Step2 = ({ stepperInstance, draftData, onSave }) => {
   const videoHref = youtubeId ? `https://youtu.be/${youtubeId}` : videoURL || '#';
 
   // image handlers ---
-  const handleCourseImageFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setCourseImageFile(file);
-      setPreviewCourseImage(URL.createObjectURL(file));
-      setCourseImageURL('');
-      setError('');
-    }
-  };
-  const handleCourseImageURLChange = (e) => {
-    const url = e.target.value;
-    setCourseImageURL(url);
-    setPreviewCourseImage(url);
-    setCourseImageFile(null);
-    if (courseImageInputRef.current) courseImageInputRef.current.value = '';
-    setError('');
-  };
   const handleCourseImageTabChange = (tabKey) => {
     setCourseImageTab(tabKey);
     handleRemoveCourseImage();
   };
+  const handleCourseImageURLChange = (e) => {
+    const url = e.target.value;
+    setCourseImageURL(url);
+    setPreviewCourseImage(url); // Update preview
+    setCourseImageFile(null);
+    if (courseImageInputRef.current) courseImageInputRef.current.value = '';
+    setError('');
+  };
+  const handleCourseImageFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setCourseImageFile(file);
+      setPreviewCourseImage(URL.createObjectURL(file)); // Update preview
+      setCourseImageURL('');
+      setError('');
+    }
+  };
   const handleRemoveCourseImage = () => {
-    setPreviewCourseImage(null);
+    setPreviewCourseImage(null); // Update preview
     setCourseImageURL('');
     setCourseImageFile(null);
     setError('');
@@ -99,7 +144,6 @@ const Step2 = ({ stepperInstance, draftData, onSave }) => {
     if (videoInputRef.current) videoInputRef.current.value = '';
     setError('');
   };
-
   const handleVideoFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -146,8 +190,14 @@ const Step2 = ({ stepperInstance, draftData, onSave }) => {
       thumbnail: thumbnailData,
     };
 
-    await onSave(payload);
-    stepperInstance?.next();
+    try {
+      onSave(payload);
+
+      toast.success('Step 2 saved!');
+      stepperInstance?.next();
+    } catch (error) {
+      toast.error('Failed to save course media');
+    }
   };
 
   return (
@@ -168,7 +218,10 @@ const Step2 = ({ stepperInstance, draftData, onSave }) => {
         {/* --- IMAGE SECTION --- */}
         <Col xs={12} className="mb-5">
           <h5>Upload Course Image <span className="text-danger">*</span></h5>
-          <Tab.Container activeKey={courseImageTab} onSelect={handleCourseImageTabChange}>
+          <Tab.Container
+            activeKey={courseImageTab}
+            onSelect={handleCourseImageTabChange}
+          >
             {/* Image Tabs  */}
             <Nav variant="tabs" className="nav-tabs-line mt-3">
               <Nav.Item>
@@ -194,7 +247,11 @@ const Step2 = ({ stepperInstance, draftData, onSave }) => {
                   <div>
                     <h6 className="my-2">
                       Drop an image file here, or{' '}
-                      <label htmlFor="image" className="text-primary" style={{ cursor: 'pointer' }}>
+                      <label
+                        htmlFor="image"
+                        className="text-primary"
+                        style={{ cursor: 'pointer' }}
+                      >
                         Browse
                       </label>
                     </h6>
@@ -208,7 +265,8 @@ const Step2 = ({ stepperInstance, draftData, onSave }) => {
                       onChange={handleCourseImageFileChange}
                     />
                     <p className="small mb-0 mt-2">
-                      <b>Note:</b> Only JPG, JPEG and PNG. Suggested size 600×450px.
+                      <b>Note:</b> Only JPG, JPEG and PNG. Suggested size
+                      600×450px.
                     </p>
                   </div>
                 </div>
@@ -219,7 +277,7 @@ const Step2 = ({ stepperInstance, draftData, onSave }) => {
             </Tab.Content>
           </Tab.Container>
 
-          {/* Course Image Preview */}
+          {/* Course Image Preview (Corrected) */}
           {previewCourseImage && (
             <div className="mt-4 text-center">
               <h6 className="mb-2">Image Preview</h6>
@@ -231,7 +289,7 @@ const Step2 = ({ stepperInstance, draftData, onSave }) => {
                   maxHeight: '200px',
                   maxWidth: '100%',
                   objectFit: 'cover',
-                  border: '1px solid #eee'
+                  border: '1px solid #eee',
                 }}
               />
               <div className="d-sm-flex justify-content-end mt-2">

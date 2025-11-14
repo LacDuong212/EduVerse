@@ -16,7 +16,8 @@ export const currentYear = new Date().getFullYear();
 export const OUR_GROUP_NAME = '@d2v-team';
 
 export const DEFAULT_PAGE_TITLE = 'EduVerse';
-export const DRAFT_COURSE_STORAGE_KEY = 'EDV_courseDraft';
+export const CREATE_COURSE_DRAFT_STORAGE_KEY = 'EDV_draft_createCourse';
+export const EDIT_COURSE_DRAFT_STORAGE_KEY = 'EDV_draft_editCourse';
 
 export const colorVariants = ['primary', 'secondary', 'success', 'danger', 'warning', 'info', 'dark', 'light'];
 

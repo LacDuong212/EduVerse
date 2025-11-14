@@ -1,5 +1,5 @@
 import PageMetaData from '@/components/PageMetaData';
-import { DRAFT_COURSE_STORAGE_KEY } from '@/context/constants';
+import { CREATE_COURSE_DRAFT_STORAGE_KEY } from '@/context/constants';
 import useBSStepper from '@/hooks/useBSStepper';
 
 import Step1 from './Step1';
@@ -7,11 +7,12 @@ import Step2 from './Step2';
 import Step3 from './Step3';
 import Step4 from './Step4';
 
-import axios from 'axios'; 
+import axios from 'axios';
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { Card, CardBody, CardHeader, Col, Container, Row } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+
 
 const CreateCourseForm = () => {
   const navigate = useNavigate();
@@ -22,7 +23,7 @@ const CreateCourseForm = () => {
   // init
   const [courseDraft, setCourseDraft] = useState(() => {
     try {
-      const storedDraft = sessionStorage.getItem(DRAFT_COURSE_STORAGE_KEY);
+      const storedDraft = sessionStorage.getItem(CREATE_COURSE_DRAFT_STORAGE_KEY);
       return storedDraft ? JSON.parse(storedDraft) : {};
     } catch (error) {
       console.error('Error parsing draft from sessionStorage', error);
@@ -33,13 +34,31 @@ const CreateCourseForm = () => {
 
   // saving changes to draft
   useEffect(() => {
-    sessionStorage.setItem(DRAFT_COURSE_STORAGE_KEY, JSON.stringify(courseDraft));
+    sessionStorage.setItem(CREATE_COURSE_DRAFT_STORAGE_KEY, JSON.stringify(courseDraft));
   }, [courseDraft]);
 
   // init stepper
   useEffect(() => {
     stepperInstance?.to(1);
   }, [stepperInstance]);
+
+  // warning when leaving site without submitting changes
+  useEffect(() => {
+    const handleBeforeUnload = (event) => {
+      if (hasMeaningfulDraftData(courseDraft)) {
+        // these are required to trigger the browser's native prompt
+        event.preventDefault();
+        event.returnValue = ''; // necessary
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    // cleanup function
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [courseDraft]);
 
   // data handler
   const handleSaveDraft = useCallback((stepData) => {
@@ -48,6 +67,30 @@ const CreateCourseForm = () => {
       ...stepData,
     }));
   }, []);
+
+  // helper
+  const hasMeaningfulDraftData = (draft) => {
+    // get all keys from draft
+    const keys = Object.keys(draft);
+
+    // nokeys = empty
+    if (keys.length === 0) {
+      return false;
+    }
+
+    // check if there is any key other than 'tags'
+    const hasOtherData = keys.some(key => key !== 'tags');
+    if (hasOtherData) {
+      return true;
+    }
+
+    // only has 'tags' key, check if tags is empty
+    if (draft.tags && draft.tags.length > 0) {
+      return true;
+    }
+
+    return false;
+  };
 
   // final validation
   const validateDraft = (draft) => {
@@ -72,10 +115,12 @@ const CreateCourseForm = () => {
     // step 3
     if (!draft.curriculum || draft.curriculum.length === 0) {
       return 'Curriculum must have at least one section.';
+    } else if (draft.curriculum.some(sec => sec.lectures.length === 0)) {
+      return 'Each section must contain at least one lecture.';
     }
 
     // step 4?
-    
+
     return null; // all good
   };
 
@@ -92,8 +137,15 @@ const CreateCourseForm = () => {
       return;
     }
 
-    setIsSubmitting(true);
+    const confirmSubmit = window.confirm(
+      'Once you submit, the draft data on this page will be cleared and cannot be recovered. Do you want to continue?'
+    );
+    if (!confirmSubmit) {
+      toast.info('Submission cancelled');
+      return;
+    }
 
+    setIsSubmitting(true);
     try {
       const backendUrl = import.meta.env.VITE_BACKEND_URL;
       const { data: res } = await axios.post(
@@ -105,10 +157,9 @@ const CreateCourseForm = () => {
       // handle response
       if (res.success) {
         toast.success(res.message || 'Course submitted for review!');
-        
+
         // clear the draft from storage and state
-        sessionStorage.removeItem(DRAFT_COURSE_STORAGE_KEY);
-        setCourseDraft({});
+        sessionStorage.removeItem(CREATE_COURSE_DRAFT_STORAGE_KEY);
 
         // redirect
         navigate('/instructor/courses');
@@ -132,9 +183,10 @@ const CreateCourseForm = () => {
         <Row>
           <Col md={8} className="mx-auto text-center">
             <p className="text-center">
-              Use this interface to add a new Course to the portal. Once you are done adding the item it will be reviewed for quality. If approved,
-              your course will appear for sale and you will be informed by email that your course has been approved.
-            </p>
+              Add your new course here. After you submit it, our team will review it for quality.
+              <br />
+              Once it’s approved, your course will go live on the portal, and we’ll notify you by email.
+            </p>  {/* #TODO: send email */}
           </Col>
         </Row>
         <Card className="bg-transparent border rounded-3 mb-5">
@@ -200,8 +252,8 @@ const CreateCourseForm = () => {
                   stepperInstance={stepperInstance}
                   draftData={courseDraft}
                   onSave={handleSaveDraft}
-                  onSubmit={handleSubmitCourse} // Passes the submit handler
-                  isSubmitting={isSubmitting} // Passes the loading state
+                  onSubmit={handleSubmitCourse}
+                  isSubmitting={isSubmitting}
                 />
               </div>
             </CardBody>
