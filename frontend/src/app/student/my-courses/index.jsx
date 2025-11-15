@@ -5,6 +5,7 @@ import { BsArrowRepeat, BsCheck, BsPlayCircle } from 'react-icons/bs';
 import { FaAngleLeft, FaAngleRight, FaSearch } from 'react-icons/fa';
 import { useMyCourses } from './useMyCourses';
 import { useNavigate } from "react-router-dom";
+import Counter from './Counter';
 
 const CourseRow = ({
   _id,
@@ -93,7 +94,10 @@ const CourseRow = ({
 
 
 const StudentMyCourses = () => {
-  const { courseData, pagination, loading, fetchMyCourses } = useMyCourses();
+
+  const { courseData, pagination, loading, fetchMyCourses, stats } = useMyCourses();
+
+
   const handlePageChange = (page) => {
     if (page >= 1 && page <= pagination.totalPages) {
       fetchMyCourses(page);
@@ -128,6 +132,7 @@ const StudentMyCourses = () => {
         </CardHeader>
 
         <CardBody>
+          <Counter stats={stats} loading={loading} />
           {loading ? (
             <div className="text-center py-5">
               <div className="spinner-border text-primary" role="status" />

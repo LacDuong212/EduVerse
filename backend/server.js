@@ -15,6 +15,8 @@ import paymentRoute from './routes/paymentRoutes.js';
 import reviewRoute from './routes/reviewRoutes.js';
 import chatbotRoute from './routes/chatbotRoutes.js';
 import instructorRoute from './routes/instructorRoutes.js';
+import studentRoute from "./routes/studentRoute.js";
+
 
 //Initialize Express
 const app = express();
@@ -36,6 +38,7 @@ app.use(cors({origin: allowedOrigins, credentials: true}));
 app.get('/', (req, res) => res.send("API is running"));
 app.use('/api/auth', authRoute);
 app.use('/api/admin', adminRoute);
+app.use("/api/student", studentRoute);
 app.use('/api/user', userRoute);
 app.use('/api', instructorRoute);
 app.use('/api/courses', courseRoute);
