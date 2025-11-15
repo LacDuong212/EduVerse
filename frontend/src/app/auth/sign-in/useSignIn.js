@@ -6,8 +6,17 @@ import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
 import { setLogin, setLogout } from "@/redux/authSlice";
 
+import { yupResolver } from '@hookform/resolvers/yup';
+import { loginSchema } from './signInSchema';
+
 export default function useSignIn() {
-  const { control, handleSubmit, reset } = useForm();
+  const { control, handleSubmit, reset } = useForm({
+    resolver: yupResolver(loginSchema),
+    defaultValues: {
+      email: '',
+      password: ''
+    }
+  });
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -44,7 +53,6 @@ export default function useSignIn() {
       toast.error("Login failed. Please try again.");
     } finally {
       setLoading(false);
-      reset();
     }
   });
 

@@ -1,5 +1,5 @@
 import IconTextFormInput from '@/components/form/IconTextFormInput';
-import { FaLock } from "react-icons/fa";
+import { FaLock, FaKey } from "react-icons/fa";
 import useResetPassword from "@/app/auth/reset-password/useResetPassword";
 
 export default function ResetPasswordForm({ email }) {
@@ -7,6 +7,18 @@ export default function ResetPasswordForm({ email }) {
 
   return (
     <form onSubmit={handleSubmit(resetPassword)}>
+      <div className="mb-4">
+        <IconTextFormInput 
+            control={control} 
+            icon={FaKey} 
+            placeholder="Enter 6-digit OTP" 
+            label="OTP Code *" 
+            name="otp" 
+        />
+        <div className="form-text">
+           Check your email: <strong>{email}</strong> for the code.
+        </div>
+      </div>
       <div className="mb-4">
         <IconTextFormInput type='password' control={control} icon={FaLock} placeholder="New Password" label="New Password *" name="password" />
       </div>
