@@ -265,8 +265,8 @@ const Playlist = ({ course, onSelect, currentId }) => {
 
         <CardFooter>
           <div className="d-grid">
-            <Link to={`/courses/${course?._id || ''}`} className="btn btn-primary-soft mb-0">
-              Back to course
+            <Link to={`/student/courses/${course?._id || ''}`} className="btn btn-primary-soft mb-0">
+              Back to Learning Course
             </Link>
           </div>
         </CardFooter>

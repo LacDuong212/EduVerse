@@ -131,3 +131,126 @@ export const getMyCourses = async (req, res) => {
     });
   }
 };
+export const getMyCourseById = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { courseId } = req.params;
+
+    if (!userId) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Unauthorized: no userId" });
+    }
+
+    await ensureStudentProfile(userId);
+
+    // Tìm student có course này trong myCourses
+    const student = await Student.findOne({
+      user: userId,
+      "myCourses.course": courseId,
+    })
+      .select("myCourses stats")
+      .populate({
+        path: "myCourses.course",
+        select: `
+          _id title subtitle description
+          thumbnail category subCategory language
+          level duration lecturesCount
+          studentsEnrolled rating
+          previewVideo price discountPrice
+          tags instructor
+          curriculum
+          createdAt updatedAt
+        `,
+      })
+      .lean();
+
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: "You are not enrolled in this course",
+      });
+    }
+
+    const raw =
+      (student.myCourses || [])
+        .map((mc) => mc.course)
+        .find((c) => c && String(c._id) === String(courseId)) || null;
+
+    if (!raw) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found in your learning list",
+      });
+    }
+
+    // helper fallback
+    const calcLecturesCount = (cur = []) =>
+      Array.isArray(cur)
+        ? cur.reduce(
+            (acc, sec) =>
+              acc +
+              (Array.isArray(sec?.lectures) ? sec.lectures.length : 0),
+            0
+          )
+        : 0;
+
+    const calcDuration = (cur = []) =>
+      Array.isArray(cur)
+        ? cur.reduce((acc, sec) => {
+            const list = Array.isArray(sec?.lectures) ? sec.lectures : [];
+            const s = list.reduce(
+              (sum, lec) => sum + (Number(lec?.duration) || 0),
+              0
+            );
+            return acc + s;
+          }, 0)
+        : 0;
+
+    const lecturesCount =
+      typeof raw.lecturesCount === "number"
+        ? raw.lecturesCount
+        : calcLecturesCount(raw.curriculum);
+
+    const duration =
+      typeof raw.duration === "number"
+        ? raw.duration
+        : calcDuration(raw.curriculum);
+
+    const course = {
+      _id: raw._id,
+      title: raw.title,
+      subtitle: raw.subtitle,
+      description: raw.description,
+      thumbnail: raw.thumbnail,
+      category: raw.category,
+      subCategory: raw.subCategory,
+      language: raw.language,
+      level: raw.level,
+      duration,
+      lecturesCount,
+      studentsEnrolled: raw.studentsEnrolled ?? 0,
+      rating: raw.rating ?? { average: 0, count: 0, total: 0 },
+      price: raw.price ?? 0,
+      discountPrice: raw.discountPrice ?? null,
+      previewVideo: raw.previewVideo ?? null,
+      tags: raw.tags ?? [],
+      instructor: raw.instructor ?? null, // { ref, name, avatar }
+      curriculum: raw.curriculum ?? [],   // [{ section, lectures: [{ title, videoUrl, duration, isFree }]}]
+      createdAt: raw.createdAt,
+      updatedAt: raw.updatedAt,
+    };
+
+    return res.status(200).json({
+      success: true,
+      course,
+    });
+  } catch (error) {
+    console.error("getMyCourseById error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error fetching course detail",
+      error: error?.message || error,
+    });
+  }
+};
