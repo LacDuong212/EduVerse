@@ -20,12 +20,12 @@ export default function SignInForm() {
         </div>
       </div>
       <div className="mb-4 d-flex justify-content-between">
-        <div className="form-check">
+        {/* <div className="form-check">
           <input type="checkbox" className="form-check-input" id="exampleCheck1" />
           <label className="form-check-label" htmlFor="exampleCheck1">
             Remember me
           </label>
-        </div>
+        </div> */}
         <div className="text-primary-hover">
           <Link to="/auth/forgot-password" className="text-secondary">
             <u>Forgot password?</u>

@@ -1,19 +1,32 @@
 import express from 'express';
-import { isAuthenticated, register, login, logout,
-    forgotPassword, resetPassword, 
-    verifyAccount,
-    verifyOtpCheck} from '../controllers/authController.js';
+import { 
+    isAuthenticated, 
+    register, 
+    login, 
+    logout,
+    forgotPassword, 
+    resetPassword,
+    verifyEmail } from '../controllers/authController.js';
+
+import { 
+    loginSchema, 
+    registerSchema, 
+    forgotPasswordSchema, 
+    resetPasswordSchema,
+    verifyEmailSchema
+} from '../validations/auth.validation.js';
+
+import validate from '../middlewares/validate.js';
 import userAuth from '../middlewares/userAuth.js';
 
 const authRoute = express.Router();
 
-authRoute.post('/register', register);
-authRoute.post('/login', login);
+authRoute.post('/register', validate(registerSchema), register);
+authRoute.post('/login', validate(loginSchema), login);
 authRoute.post('/logout', logout);
 authRoute.get('/is-auth', userAuth, isAuthenticated);
-authRoute.post('/verify-otp', verifyOtpCheck);
-authRoute.post('/verify-account', verifyAccount); 
-authRoute.post('/forgot-password', forgotPassword);
-authRoute.post('/reset-password', resetPassword);
+authRoute.post('/forgot-password', validate(forgotPasswordSchema), forgotPassword);
+authRoute.post('/reset-password', validate(resetPasswordSchema), resetPassword);
+authRoute.post('/verify-email', validate(verifyEmailSchema), verifyEmail);
 
 export default authRoute;

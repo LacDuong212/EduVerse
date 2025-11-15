@@ -1,16 +1,13 @@
 import { useState, useRef, useEffect } from "react";
-import { useDispatch } from "react-redux";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { setUserData } from "@/redux/authSlice";
 
-export default function useEmailVerify(initialEmail = "", mode = "register", onVerifySuccess) {
-  const dispatch = useDispatch();
+export default function useEmailVerify(initialEmail = "", onVerifySuccess) {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   const [userEmail, setUserEmail] = useState(initialEmail);
   const [otp, setOtp] = useState(new Array(6).fill(""));
-  const [loading, setLoadinng] = useState(false);
+  const [loading, setLoading] = useState(false);
   const inputRefs = useRef([]);
 
   useEffect(() => {
@@ -56,13 +53,13 @@ export default function useEmailVerify(initialEmail = "", mode = "register", onV
     }
 
     try {
-      setLoadinng(true);
+      setLoading(true);
       axios.defaults.withCredentials = true;
       
-      const { data } = await axios.post(`${backendUrl}/api/auth/verify-otp`, {
-        email: userEmail,
-        otp: otpCode,
-      });
+      const endpoint = `${backendUrl}/api/auth/verify-email`;
+      const payload = { email: userEmail, otp: otpCode };
+
+      const { data } = await axios.post(endpoint, payload);
 
       if (!data.success) {
         toast.error(data.message || "Invalid OTP");
@@ -71,24 +68,14 @@ export default function useEmailVerify(initialEmail = "", mode = "register", onV
         return;
       }
 
-      toast.success(data.message || "OTP verified successfully");
+      toast.success(data.message || "Email verified successfully!");
 
-      if (mode === "register") {
-        const res = await axios.post(`${backendUrl}/api/auth/verify-account`, { email: userEmail });
-        if (res.data.success) {
-          toast.success(res.data.message || "Account verified");
-          if (onVerifySuccess) onVerifySuccess(userEmail);
-        } else {
-          toast.error(res.data.message || "Failed to verify account");
-        }
-      } else if (mode === "forgot") {
-        if (onVerifySuccess) onVerifySuccess(userEmail);
-      }
+      if (onVerifySuccess) onVerifySuccess(userEmail);
 
     } catch (error) {
       toast.error(error.response?.data?.message || "Verification failed");
     } finally {
-      setLoadinng(false);
+      setLoading(false);
     }
   };
 

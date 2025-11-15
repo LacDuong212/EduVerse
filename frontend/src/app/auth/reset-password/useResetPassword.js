@@ -7,7 +7,13 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const schema = yup.object({
+  otp: yup
+    .string()
+    .required("Please enter the OTP code")
+    .length(6, "OTP must be exactly 6 digits"),
+
   password: yup.string().required("Please enter a new password").min(6, "At least 6 characters"),
+
   confirmPassword: yup
     .string()
     .oneOf([yup.ref("password"), null], "Passwords do not match")
@@ -21,6 +27,11 @@ export default function useResetPassword(email) {
 
   const { handleSubmit, control, reset } = useForm({
     resolver: yupResolver(schema),
+    defaultValues: {
+      otp: "",
+      password: "",
+      confirmPassword: ""
+    }
   });
 
   const resetPassword = async (data) => {
@@ -33,6 +44,7 @@ export default function useResetPassword(email) {
     try {
       const response = await axios.post(`${backendUrl}/api/auth/reset-password`, {
         email,
+        otp: data.otp,
         newPassword: data.password,
       });
 

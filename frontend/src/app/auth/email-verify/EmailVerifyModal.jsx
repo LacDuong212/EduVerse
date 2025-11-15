@@ -1,9 +1,8 @@
-import React from "react";
 import { Modal, Button, Form, Row, Col } from "react-bootstrap";
 import useEmailVerify from "@/app/auth/email-verify/useEmailVerify";
 
-export default function EmailVerifyModal({ show, onHide, email, mode, onVerifySuccess }) {
-  const emailVerify = useEmailVerify(email, mode, onVerifySuccess);
+export default function EmailVerifyModal({ show, onHide, email, onVerifySuccess }) {
+  const emailVerify = useEmailVerify(email, onVerifySuccess);
 
   return (
     <Modal show={show} onHide={onHide} centered>
@@ -19,8 +18,7 @@ export default function EmailVerifyModal({ show, onHide, email, mode, onVerifySu
       />
     </Modal.Header>
     <hr className="my-0 mx-0 w-100" style={{ borderTop: "2px solid #777" }} />
-
-
+    
         <Modal.Body>
           <p className="text-center">
             Enter the 6-digit code sent to<br />
