@@ -14,7 +14,7 @@ const Step1 = ({ stepperInstance, draftData, onSave }) => {
   // initialize from props or set defaults
   const [formData, setFormData] = useState({
     title: '',
-    subTitle: '',
+    subtitle: '',
     category: '',
     subcategory: '',
     level: '',
@@ -23,7 +23,7 @@ const Step1 = ({ stepperInstance, draftData, onSave }) => {
     duration: '',
     durationUnit: 'hour',
     price: '',
-    discount: '',
+    discountPrice: '',
     enableDiscount: false,
     description: '',
     isActive: false,
@@ -35,7 +35,7 @@ const Step1 = ({ stepperInstance, draftData, onSave }) => {
   useEffect(() => {
     setFormData({
       title: draftData.title || '',
-      subTitle: draftData.subTitle || '',
+      subtitle: draftData.subtitle || '',
       category: draftData.category || '',
       subcategory: draftData.subcategory || '',
       level: draftData.level || '',
@@ -44,7 +44,7 @@ const Step1 = ({ stepperInstance, draftData, onSave }) => {
       duration: draftData.duration || '',
       durationUnit: draftData.durationUnit || 'hour',
       price: draftData.price || '',
-      discount: draftData.discount || '',
+      discountPrice: draftData.discountPrice || '',
       enableDiscount: draftData.enableDiscount || false,
       description: draftData.description || '',
       isActive: draftData.isActive !== undefined ? draftData.isActive : false, // = isPublish
@@ -105,14 +105,14 @@ const Step1 = ({ stepperInstance, draftData, onSave }) => {
     }
 
     if (formData.enableDiscount) {
-      const discount = Number(formData.discount);
+      const discountPrice = Number(formData.discountPrice);
 
-      if (!formData.discount) {
-        newErrors.discount = 'Discount price is required when enabled.';
-      } else if (isNaN(discount) || discount <= 0) {
-        newErrors.discount = 'Discount must be a valid, positive number.';
-      } else if (!newErrors.price && discount >= price) {
-        newErrors.discount = 'Discount price must be less than the regular price.';
+      if (!formData.discountPrice) {
+        newErrors.discountPrice = 'Discount price is required when enabled.';
+      } else if (isNaN(discountPrice) || discountPrice <= 0) {
+        newErrors.discountPrice = 'Discount must be a valid, positive number.';
+      } else if (!newErrors.price && discountPrice >= price) {
+        newErrors.discountPrice = 'Discount price must be less than the regular price.';
       }
     }
 
@@ -172,9 +172,9 @@ const Step1 = ({ stepperInstance, draftData, onSave }) => {
           <Form.Control
             as="textarea"
             rows={2}
-            name="subTitle"
+            name="subtitle"
             placeholder="Enter short description"
-            value={formData.subTitle}
+            value={formData.subtitle}
             onChange={handleChange}
           />
         </Col>
@@ -311,16 +311,16 @@ const Step1 = ({ stepperInstance, draftData, onSave }) => {
           <div className="input-group">
             <Form.Control
               type="text"
-              name="discount"
+              name="discountPrice"
               placeholder="Enter discount"
-              value={formData.discount}
+              value={formData.discountPrice}
               onChange={handleChange}
               disabled={!formData.enableDiscount}
-              isInvalid={!!errors.discount}
+              isInvalid={!!errors.discountPrice}
             />
             <span className="input-group-text rounded-end">{currency}</span>
             <Form.Control.Feedback type="invalid">
-              {errors.discount}
+              {errors.discountPrice}
             </Form.Control.Feedback>
           </div>
           <Form.Check
