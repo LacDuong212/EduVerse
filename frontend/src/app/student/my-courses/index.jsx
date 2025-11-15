@@ -21,11 +21,9 @@ const CourseRow = ({
   const percentage =
     totalLectures > 0 ? Math.trunc((completedLectures * 100) / totalLectures) : 0;
 
-  const goToWatch = () => {
-    const targetLecture = firstLectureId || (hasPreview ? "preview" : null);
-    if (targetLecture) navigate(`/courses/${_id}/watch/${targetLecture}`);
-    else navigate(`/courses/${_id}`);
-  };
+ const gotoLearning = () => {
+  navigate(`/student/courses/${_id}`);
+};
 
   return (
     <tr>
@@ -40,7 +38,7 @@ const CourseRow = ({
               <span
                 className="text-decoration-none text-primary"
                 style={{ cursor: "pointer" }}
-                onClick={goToWatch}
+                onClick={gotoLearning}
               >
                 {name}
               </span>
@@ -81,7 +79,7 @@ const CourseRow = ({
             variant="primary-soft"
             size="sm"
             className="icons-center"
-            onClick={goToWatch}
+            onClick={gotoLearning}
           >
             <BsPlayCircle className="me-1" />
             Continue
