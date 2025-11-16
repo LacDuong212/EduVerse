@@ -14,12 +14,13 @@ const userSchema = new mongoose.Schema({
         youtube: { type: String, default: "" },
     },
     pfpImg: { type: String, default: "" },
-    password: { type: String, required: true },
+    password: { type: String, required: false },
     verifyOtp: { type: String, default: '' },
     verifyOtpExpireAt: { type: Number, default: 0 },
     isVerified: { type: Boolean, default: false },
     isActivated: { type: Boolean, default: true },
     role: { type: String, enum: ['student', 'instructor'], default: 'student' },
+    googleId: { type: String, unique: true, sparse: true }
 }, { timestamps: true });
 
 userSchema.post("save", async function () {
