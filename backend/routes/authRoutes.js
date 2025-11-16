@@ -16,6 +16,9 @@ import {
     verifyEmailSchema
 } from '../validations/auth.validation.js';
 
+import passport from 'passport';
+import jwt from 'jsonwebtoken';
+
 import validate from '../middlewares/validate.js';
 import userAuth from '../middlewares/userAuth.js';
 
@@ -28,5 +31,34 @@ authRoute.get('/is-auth', userAuth, isAuthenticated);
 authRoute.post('/forgot-password', validate(forgotPasswordSchema), forgotPassword);
 authRoute.post('/reset-password', validate(resetPasswordSchema), resetPassword);
 authRoute.post('/verify-email', validate(verifyEmailSchema), verifyEmail);
+
+authRoute.get(
+  '/google',
+  passport.authenticate('google', {
+    scope: ['profile', 'email'],
+  })
+);
+
+authRoute.get(
+  '/google/callback',
+  passport.authenticate('google', {
+    failureRedirect: 'http://localhost:5173/auth/sign-in',
+    session: false,
+  }),
+  (req, res) => {
+    const token = jwt.sign({ id: req.user._id }, process.env.JWT_SECRET, { 
+        expiresIn: '7d' 
+    });
+
+    res.cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000
+    });
+
+    res.redirect('http://localhost:5173/'); 
+  }
+);
 
 export default authRoute;

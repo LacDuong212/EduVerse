@@ -6,6 +6,8 @@ import AuthLayout from "@/app/auth/components/AuthLayout";
 import SignInForm from "@/app/auth/sign-in/components/SignInForm";
 
 export default function SignInPage() {
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  
   return <>
     <PageMetaData title="Sign-In" />
     <AuthLayout>
@@ -29,16 +31,10 @@ export default function SignInPage() {
                 <hr />
                 <p className="small position-absolute top-50 start-50 translate-middle bg-body px-5">Or</p>
               </div>
-              <Col xxl={6} className="d-grid">
-                <a href="#" className="btn bg-google mb-2 mb-xxl-0">
+              <Col xxl={12} className="d-grid">
+                <a href={`${backendUrl}/api/auth/google`} className="btn bg-google mb-2 mb-xxl-0">
                   <FaGoogle className="text-white me-2" />
                   Login with Google
-                </a>
-              </Col>
-              <Col xxl={6} className="d-grid">
-                <a href="#" className="btn bg-facebook mb-0">
-                  <FaFacebookF className="me-2" />
-                  Login with Facebook
                 </a>
               </Col>
             </Row>
