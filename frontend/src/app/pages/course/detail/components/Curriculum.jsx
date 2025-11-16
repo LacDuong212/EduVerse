@@ -30,6 +30,8 @@ import { formatCurrency } from '@/utils/currency';
 import useToggle from "@/hooks/useToggle";
 import useCourseDetail from "../useCourseDetail"; // 🔗 hook bạn cung cấp
 import { useNavigate } from "react-router-dom";
+// 🔥 thêm GlightBox
+import GlightBox from "@/components/GlightBox";
 
 const Curriculum = ({ coursePrice }) => {
   const { course, loading, error } = useCourseDetail(); // ✅ lấy dữ liệu thật
@@ -56,9 +58,12 @@ const Curriculum = ({ coursePrice }) => {
       </div>
     );
 
+  // 🔥 handlePlay giờ chỉ xử lý lecture PREMIUM (không free)
   const handlePlay = (lecture) => {
-    if (!lecture?.isFree) return toggle(); // Premium → mở modal
-    navigate(`/courses/${course._id}/watch/${lecture._id}`);
+    if (!lecture?.isFree) {
+      return toggle(); // Premium → mở modal
+    }
+    // lecture free sẽ dùng GlightBox, KHÔNG navigate nữa
   };
 
   return (
@@ -80,7 +85,7 @@ const Curriculum = ({ coursePrice }) => {
               <div className="fw-bold rounded d-sm-flex d-inline-block collapsed">
                 {section.section || `Section ${idx + 1}`}
                 <span className="small ms-0 ms-sm-2">
-                  ({(section.lectures || []).length} Lectures)
+                  {(section.lectures || []).length} Lectures
                 </span>
               </div>
             </AccordionHeader>
@@ -90,16 +95,26 @@ const Curriculum = ({ coursePrice }) => {
                 <Fragment key={lecture._id || i}>
                   <div className="d-flex justify-content-between align-items-center">
                     <div className="position-relative d-flex align-items-center">
-                      <Button
-                        variant={
-                          lecture.isFree ? "danger-soft" : "light"
-                        }
-                        size="sm"
-                        className="btn-round mb-0 stretched-link position-static flex-centered"
-                        onClick={() => handlePlay(lecture)}
-                      >
-                        <FaPlay className="me-0" size={11} />
-                      </Button>
+                      {/* 🔥 FREE: dùng GlightBox; PREMIUM: dùng Button + handlePlay */}
+                      {lecture.isFree && lecture.videoUrl ? (
+                        <GlightBox
+                          data-glightbox
+                          data-gallery={`section-${section._id || idx}`}
+                          href={lecture.videoUrl}
+                          className="btn-round mb-0 stretched-link position-static flex-centered btn btn-sm btn-danger-soft"
+                        >
+                          <FaPlay className="me-0" size={11} />
+                        </GlightBox>
+                      ) : (
+                        <Button
+                          variant={lecture.isFree ? "danger-soft" : "light"}
+                          size="sm"
+                          className="btn-round mb-0 stretched-link position-static flex-centered"
+                          onClick={() => handlePlay(lecture)}
+                        >
+                          <FaPlay className="me-0" size={11} />
+                        </Button>
+                      )}
 
                       <Row className="g-sm-0 align-items-center">
                         <Col sm="auto">
