@@ -19,14 +19,13 @@ const Step1 = ({ stepperInstance, draftData, onSave }) => {
     subcategory: '',
     level: '',
     language: '',
-    featured: false,
     duration: '',
     durationUnit: 'hour',
     price: '',
     discountPrice: '',
     enableDiscount: false,
     description: '',
-    isActive: false,
+    isPrivate: true,
   });
 
   const draftDataString = JSON.stringify(draftData);
@@ -40,14 +39,13 @@ const Step1 = ({ stepperInstance, draftData, onSave }) => {
       subcategory: draftData.subcategory || '',
       level: draftData.level || '',
       language: draftData.language || '',
-      featured: draftData.featured || false,
       duration: draftData.duration || '',
       durationUnit: draftData.durationUnit || 'hour',
       price: draftData.price || '',
       discountPrice: draftData.discountPrice || '',
       enableDiscount: draftData.enableDiscount || false,
       description: draftData.description || '',
-      isActive: draftData.isActive !== undefined ? draftData.isActive : false, // = isPublish
+      isPrivate: draftData.isPrivate !== undefined ? draftData.isPrivate : true, // = isPublish
     });
   }, [draftDataString]);
 
@@ -352,9 +350,9 @@ const Step1 = ({ stepperInstance, draftData, onSave }) => {
           <Form.Check
             type="switch"
             id="checkPrivacy1"
-            label="Publish this course once approved"
-            name="isActive"
-            checked={formData.isActive}
+            label="Make this course public"
+            name="isPrivate"
+            checked={!formData.isPrivate}
             onChange={handleChange}
           />
         </Col>

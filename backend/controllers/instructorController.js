@@ -113,7 +113,7 @@ export const updateInstructor = async (req, res) => {
 
 };
 
-// GET /api/instructor/courses?page=&limit=&skip=
+// GET /api/instructor/courses?page=&limit=&search=&sort=
 export const getInstructorCourses = async (req, res) => {
   try {
     const userId = req.userId;
@@ -121,28 +121,68 @@ export const getInstructorCourses = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
+    const searchTerm = req.query.search || '';
+    const sortParam = req.query.sort || '';
 
-    // Find instructor by user ref
+    // find instructor by user ref
     const instructor = await Instructor.findOne({ user: userId });
     if (!instructor) {
       return res.status(404).json({ success: false, message: 'Instructor not found' });
     }
 
-    // Fetch courses with pagination
-    const courses = await Course.find({ "instructor.ref": userId, isDeleted: false })
-      .skip(skip)
-      .limit(limit)
-      .lean();
+    // fetch all courses for the instructor
+    const allCourses = await Course.find({ "instructor.ref": userId, isDeleted: false }).lean();
 
-    // Calculate active/inactive counts from ALL courses (not just paged)
-    const allCourses = await Course.find({ "instructor.ref": userId }).lean();
-    const total = allCourses.length;
-    const totalActive = allCourses.filter(c => c.isActive && c.status === "Live").length;
+    // sorting function helper
+    const sortFunctions = {
+      '': (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt),        // default: updatedAt desc
+      'newest': (a, b) => new Date(b.createdAt) - new Date(a.createdAt),  // createdAt desc
+      'oldest': (a, b) => new Date(a.createdAt) - new Date(b.createdAt),  // createdAt asc
+      'mostPopular': (a, b) => (b.studentsEnrolled || 0) - (a.studentsEnrolled || 0), // desc
+      'leastPopular': (a, b) => (a.studentsEnrolled || 0) - (b.studentsEnrolled || 0), // asc
+      'highestRating': (a, b) => (b.rating?.average || 0) - (a.rating?.average || 0), // desc
+      'lowestRating': (a, b) => (a.rating?.average || 0) - (b.rating?.average || 0),  // asc
+    };
+    // fallback to default sort if invalid
+    const sortFn = sortFunctions[sortParam] || sortFunctions[''];
+
+    let filteredCourses = allCourses;
+
+    // filter by searchTerm first
+    if (searchTerm.trim() !== '') {
+      const fuse = new Fuse(allCourses, {
+        keys: ['title', 'subtitle', 'description', 'category', 'subCategory', 'tags'],
+        threshold: 0.3,
+      });
+      filteredCourses = fuse.search(searchTerm).map(result => result.item);
+    }
+
+    // then sort the filtered list
+    filteredCourses.sort(sortFn);
+
+    // total count after search filter
+    const total = filteredCourses.length;
+
+    // sort the filtered results
+    filteredCourses.sort((a, b) => {
+      if (sortParam === 'updatedAt') {
+        return new Date(b.updatedAt) - new Date(a.updatedAt);
+      }
+      if (sortParam === 'createdAt') {
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      }
+      return 0;
+    });
+
+    // paginate
+    const pagedCourses = filteredCourses.slice(skip, skip + limit);
+
+    const totalActive = filteredCourses.filter(c => !c.isPrivate && c.status === "Live").length;
     const totalInactive = total - totalActive;
 
     return res.status(200).json({
       success: true,
-      data: courses,
+      data: pagedCourses,
       total,
       page,
       totalPages: Math.ceil(total / limit),

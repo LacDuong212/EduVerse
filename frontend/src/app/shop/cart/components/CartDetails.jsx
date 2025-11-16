@@ -5,7 +5,7 @@ import { FaTimes } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import EmptyCartPage from '@/app/shop/empty-cart/page';
 import useCartDetail from '../useCartDetails';
-import { formatCurrency } from '@/context/constants'; // ✅ thêm
+import { formatCurrency } from '@/utils/currency';
 
 const CartCard = ({ image, title, price, onRemove }) => {
   return (

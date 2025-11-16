@@ -8,7 +8,7 @@ import * as yup from 'yup';
 import useCartDetail from '../../cart/useCartDetails';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { formatCurrency } from '@/context/constants';
+import { formatCurrency } from '@/utils/currency';
 
 const CheckoutProductCard = ({
   image,

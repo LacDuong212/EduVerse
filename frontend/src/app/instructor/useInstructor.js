@@ -52,12 +52,12 @@ export default function useInstructor() {
     }
   };
 
-  const fetchCourses = useCallback(async (page, limit) => {
+  const fetchCourses = useCallback(async (page, limit, search = '', sort = '') => {
     if (!userId) return null;
 
     try {
       const { data } = await axios.get(
-        `${backendUrl}/api/instructor/courses?page=${page}&limit=${limit}`,
+        `${backendUrl}/api/instructor/courses?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}&sort=${sort}`,
         { withCredentials: true }
       );
       if (data?.success) return data;
@@ -68,5 +68,27 @@ export default function useInstructor() {
     }
   }, [userId]);
 
-  return { fetchPublicFields, fetchPrivateFields, fetchCourses };
+  const setCoursePrivacy = async (courseId, makePrivate) => {
+    try {
+      const { data } = await axios.patch(
+        `${backendUrl}/api/courses/${courseId}?setPrivacy=${makePrivate}`,
+        {},
+        { withCredentials: true }
+      );
+
+      if (data?.success) {
+        toast.success(data.message || 'Course updated!');
+        return true;
+      } else {
+        toast.error(data.message || 'Failed to update course');
+        return false;
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('Error updating course privacy');
+      return false;
+    }
+  };
+
+  return { fetchPublicFields, fetchPrivateFields, fetchCourses, setCoursePrivacy };
 };

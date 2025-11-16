@@ -2,7 +2,7 @@ import { Card, CardBody, CardFooter, CardTitle } from 'react-bootstrap';
 import { FaRegClock, FaRegHeart, FaRegStar, FaHeart, FaStar, FaStarHalfAlt, FaTable } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import useToggle from '@/hooks/useToggle';
-import { formatCurrency } from '@/context/constants';
+import { formatCurrency } from '@/utils/currency';
 
 const clamp = (n, min, max) => Math.max(min, Math.min(max, n ?? 0));
 
