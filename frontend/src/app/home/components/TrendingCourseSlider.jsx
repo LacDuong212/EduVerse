@@ -1,5 +1,5 @@
 import TinySlider from '@/components/TinySlider';
-import { formatCurrency } from '@/context/constants';
+import { formatCurrency } from '@/utils/currency';
 import { useSelector } from 'react-redux';
 import { Card, CardBody, CardFooter, CardTitle } from 'react-bootstrap';
 import { renderToString } from 'react-dom/server';

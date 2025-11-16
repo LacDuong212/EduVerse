@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { Card, CardBody, CardFooter, CardTitle } from 'react-bootstrap';
 import { renderToString } from 'react-dom/server';
 import { FaChevronLeft, FaChevronRight, FaRegBookmark, FaRegClock, FaShoppingCart, FaStar, FaTable } from 'react-icons/fa';
-import { formatCurrency } from '@/context/constants';
+import { formatCurrency } from '@/utils/currency';
 // --- Card: thêm hiển thị discount ---
 const BestSellersCard = ({ course }) => {
   const {

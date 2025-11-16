@@ -1,7 +1,7 @@
 import express from "express";
 import { getFullCourses, getAllCourses, getCourseById, 
     courseViewed, getViewedCourses, getHomeCourses, getOwnedCourses, getRelatedCourses, getCoursesOverview, 
-    createCourse, updateCourse, updateCourseStatus } from "../controllers/courseController.js";
+    createCourse, updateCourse, updateCourseStatus, setCoursePrivacy } from "../controllers/courseController.js";
 import userAuth from "../middlewares/userAuth.js";
 import { verifyAdminToken } from "../middlewares/adminAuth.js";
 
@@ -20,6 +20,7 @@ courseRoute.post("/:id/viewed", userAuth, courseViewed);
 courseRoute.post("/", userAuth, createCourse);
 
 courseRoute.put("/:id", userAuth, updateCourse);
+courseRoute.patch("/:id", userAuth, setCoursePrivacy);
 courseRoute.patch("/:id", verifyAdminToken, updateCourseStatus);
 
 export default courseRoute;

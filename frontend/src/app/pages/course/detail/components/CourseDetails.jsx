@@ -6,9 +6,8 @@ import Instructor from './Instructor';
 import Overview from './Overview';
 import Reviews from './Reviews';
 import GlightBox from '@/components/GlightBox';
-import { formatCurrency } from '@/context/constants';
+import { formatCurrency } from '@/utils/currency';
 import { FaBookOpen, FaClock, FaCopy, FaFacebookSquare, FaGlobe, FaLinkedin, FaMedal, FaPlay, FaShareAlt, FaSignal, FaStar, FaStopwatch, FaTwitterSquare, FaUserClock } from 'react-icons/fa';
-import courseImg1 from '@/assets/images/courses/4by3/01.jpg';
 import courseImg18 from '@/assets/images/courses/4by3/18.jpg';
 import courseImg21 from '@/assets/images/courses/4by3/21.jpg';
 import { useState } from 'react'; // ✅ thêm import

@@ -1,20 +1,33 @@
 import ChoicesFormInput from '@/components/form/ChoicesFormInput';
+import { formatCurrency } from '@/utils/currency';
 import { useState } from "react";
-import { Button, Card, CardBody, CardHeader, Col, Row } from 'react-bootstrap';
-import { FaAngleLeft, FaAngleRight, FaCheckCircle, FaRegEdit, FaSearch, FaTable, FaTimes } from 'react-icons/fa';
+import { Button, Card, CardBody, CardHeader, Col, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
+import { BsPersonFill } from 'react-icons/bs';
+import { FaAngleLeft, FaAngleRight, FaFile, FaFolder, FaGlobe, FaLock, FaRegEdit, FaSearch, FaStar } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
-const MyCourses = ({ courses, page, limit, totalPages, totalCourses, loading, onPageChange }) => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [sort, setSort] = useState("");
 
+const MyCourses = ({ 
+  courses,
+  totalCourses,
+  page,
+  limit,
+  totalPages,
+  loading,
+  onPageChange,
+  onTogglePrivacy,
+  searchTerm,
+  setSearchTerm,
+  sort,
+  setSort 
+}) => {
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     onPageChange(1);
   };
 
-  const handleSortChange = (e) => {
-    setSort(e.target.value);
+  const handleSortChange = (value) => {
+    setSort(value);   // cus ChoicesFormInput accepts value directly, not an event (e.target.value)
     onPageChange(1);
   };
 
@@ -55,10 +68,12 @@ const MyCourses = ({ courses, page, limit, totalPages, totalCourses, loading, on
                 onChange={handleSortChange}
               >
                 <option value="">Sort by</option>
-                <option value="free">Free</option>
                 <option value="newest">Newest</option>
-                <option value="popular">Most Popular</option>
-                <option value="rating">Highest Rating</option>
+                <option value="oldest">Oldest</option>
+                <option value="mostPopular">Most Popular</option>
+                <option value="leastPopular">Least Popular</option>
+                <option value="highestRating">Highest Rating</option>
+                <option value="lowestRating">Lowest Rating</option>
               </ChoicesFormInput>
             </form>
           </Col>
@@ -76,10 +91,10 @@ const MyCourses = ({ courses, page, limit, totalPages, totalCourses, loading, on
                 <thead>
                   <tr>
                     <th scope="col" className="border-0 rounded-start">
-                      Course Title
+                      Course
                     </th>
                     <th scope="col" className="border-0">
-                      Enrolled
+                      Updated At
                     </th>
                     <th scope="col" className="border-0">
                       Status
@@ -97,75 +112,127 @@ const MyCourses = ({ courses, page, limit, totalPages, totalCourses, loading, on
                     <tr key={course._id}>
                       <td>
                         <div className="d-flex align-items-center">
-                          <div
-                            style={{
-                              width: "60px",
-                              height: "60px",
-                              overflow: "hidden",
-                              borderRadius: "0.375rem",
-                            }}
-                          >
+                          <div className="flex-shrink-0 rounded overflow-hidden" style={{ width: "80px", height: "80px" }}>
                             <img
                               src={course.image || course.thumbnail || "https://res.cloudinary.com/dw1fjzfom/image/upload/v1757337425/av4_khpvlh.png"}
-                              alt={course.title || "Course image"}
-                              style={{
-                                width: "100%",
-                                height: "100%",
-                                objectFit: "cover",
-                                display: "block",
-                              }}
+                              alt={course.title}
+                              className="img-fluid h-100 w-100 object-fit-cover"
                             />
                           </div>
-                          <div className="mb-0 ms-2">
-                            <h6>
-                              <a href={`/courses/${course._id}`}>
-                                {course.title}
-                              </a>
-                            </h6>
-                            <div className="d-sm-flex">
-                              <p className="h6 fw-light mb-0 small me-3">
-                                <FaTable className="text-orange me-2" />
-                                {course.lecturesCount || 0} lectures
-                              </p>
-                              <p className="h6 fw-light mb-0 small">
-                                <FaCheckCircle className="text-success me-2" />
-                                {course.completedLectures || 0} Completed
-                              </p>
+                          <div className="ms-2 flex-grow-1">
+                            <div className="mb-1">
+                              <h6 className="mb-0 text-truncate">
+                                <a
+                                  href={`/courses/${course._id}`}
+                                  className="text-decoration-none d-inline-block"
+                                >
+                                  {course.title}
+                                </a>
+                              </h6>
+
+                              <div className="small">
+                                {course.subtitle}
+                              </div>
+                            </div>
+                            <div className="small">
+                              <div className="row gx-2">
+                                <div className="col-md-6 col-lg-4 col-xl-5 d-flex align-items-center">
+                                  <FaStar className="text-warning mb-1 me-1" />
+                                  {course.rating?.average || 0} Rating
+                                </div>
+
+                                <div className="col-md-6 col-lg-4 col-xl-5 d-flex align-items-center">
+                                  <BsPersonFill className="text-info mb-1 me-1" />
+                                  {course.enrolledCount || 0} Enrolled
+                                </div>
+                              </div>
+                              <div className="row gx-2">
+                                <div className="col-md-6 col-lg-4 col-xl-5 d-flex align-items-center">
+                                  <FaFolder className="me-1" />
+                                  {course.curriculum?.length || 0} Sections
+                                </div>
+                                <div className="col-md-6 col-lg-4 col-xl-5 d-flex align-items-center">
+                                  <FaFile className="me-1" />
+                                  {course.lecturesCount || 0} Lectures
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>
                       </td>
                       <td className="text-center text-sm-start">
-                        {course.enrolledCount || 0}
+                        {course.createdAt
+                          ? new Date(course.createdAt).toLocaleString("en-GB", {
+                            year: "numeric",
+                            month: "2-digit",
+                            day: "2-digit",
+                            hour: "2-digit",
+                            minute: "2-digit"
+                          })
+                          : "N/A"}
                       </td>
                       <td>
                         <div
                           className={`badge ${course.status === "Live"
-                              ? "bg-success bg-opacity-10 text-success"
-                              : "bg-secondary bg-opacity-10 text-secondary"
+                            ? "bg-success bg-opacity-10 text-success"
+                            : "bg-secondary bg-opacity-10 text-secondary"
                             }`}
                         >
-                          {course.status || "Draft"}
+                          {course.status || "N/A"}
                         </div>
                       </td>
                       <td>
-                        {course.price === 0
-                          ? "Free"
-                          : `$${course.price?.toFixed(2) || "0.00"}`}
+                        {course.price === 0 ? "Free" : course.enableDiscount ? (
+                          <>
+                            {formatCurrency(course.discountPrice)}{" "}
+                            <span className="text-decoration-line-through">
+                              {formatCurrency(course.price)}
+                            </span>
+                          </>
+                        ) : (
+                          formatCurrency(course.price)
+                        )}
                       </td>
                       <td>
-                        <Button
-                          variant="success-soft"
-                          size="sm"
-                          className="btn-round me-1 mb-0"
-                          as={Link}
-                          to={`/instructor/courses/edit/${course._id}`}
+                        <OverlayTrigger
+                          placement="top"
+                          overlay={<Tooltip id={`tooltip-edit-${course._id}`}>Edit Course</Tooltip>}
                         >
-                          <FaRegEdit className="fa-fw" />
-                        </Button>
-                        <button className="btn btn-sm btn-danger-soft btn-round mb-0">
-                          <FaTimes className="fa-fw" />
-                        </button>
+                          <Button
+                            variant="primary-soft"
+                            size="sm"
+                            className="btn-round me-1"
+                            as={Link}
+                            to={`/instructor/courses/edit/${course._id}`}
+                          >
+                            <FaRegEdit className="fa-fw" />
+                          </Button>
+                        </OverlayTrigger>
+                        {course.isPrivate ? (
+                          <OverlayTrigger
+                            placement="top"
+                            overlay={<Tooltip id={`tooltip-public-${course._id}`}>Make course public</Tooltip>}
+                          >
+                            <button 
+                              className="btn btn-sm btn-success-soft btn-round"
+                              onClick={() => onTogglePrivacy(course._id, course.isPrivate)}
+                            >
+                              <FaGlobe className="fa-fw" />
+                            </button>
+                          </OverlayTrigger>
+                        ) : (
+                          <OverlayTrigger
+                            placement="top"
+                            overlay={<Tooltip id={`tooltip-private-${course._id}`}>Make course private</Tooltip>}
+                          >
+                            <button 
+                              className="btn btn-sm btn-danger-soft btn-round"
+                              onClick={() => onTogglePrivacy(course._id, course.isPrivate)}
+                            >
+                              <FaLock className="fa-fw" />
+                            </button>
+                          </OverlayTrigger>
+                        )}
                       </td>
                     </tr>
                   ))}

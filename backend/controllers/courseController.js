@@ -76,16 +76,16 @@ export const getCoursesOverview = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const courses = await Course.find(/*{ isDeleted: false }*/) // #TODO
-      .select("image thumbnail title instructor level createdAt price status isActive")
+      .select("image thumbnail title instructor level createdAt price status isPrivate")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .lean(); // lean = faster, returns plain JS objects
 
     const [totalCourses, activatedCourses, pendingCourses] = await Promise.all([
-      Course.countDocuments(/*{ isDeleted: false }*/),
-      Course.countDocuments({ status: "Live", isActive: true, /*{ isDeleted: false }*/ }),
-      Course.countDocuments({ status: "Pending", /*{ isDeleted: false }*/ }),
+      Course.countDocuments({ isDeleted: false }),
+      Course.countDocuments({ status: "Live", isDeleted: false }),
+      Course.countDocuments({ status: "Pending", isDeleted: false }),
     ]);
 
     res.status(200).json({
@@ -152,7 +152,7 @@ export const getAllCourses = async (req, res) => {
       price: 1,
       discountPrice: 1,
 
-      isActive: 1,
+      isPrivate: 1,
       status: 1,
 
       createdAt: 1,
@@ -661,8 +661,8 @@ export const createCourse = async (req, res) => {
         count: 0,
         total: 0
       },
-      isActive: req.body.isActive || false, // = isPublished
       status: 'Pending',
+      isPrivate: req.body.isPrivate || true,  // = !isPublished
       isDeleted: false,
     });
 
@@ -901,6 +901,56 @@ export const updateCourseStatus = async (req, res) => {
     });
   } catch (error) {
     console.error('Error updating course status:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+};
+
+// PATCH /api/courses/:id?setPrivacy=
+export const setCoursePrivacy = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { setPrivacy } = req.query;
+    const userId = req.userId;
+
+    const course = await Course.findOne({ _id: id, isDeleted: false });
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: 'Course not found'
+      });
+    }
+
+    if (!course.instructor?.ref?.equals(userId)) {
+      return res.status(403).json({
+        success: false,
+        message: 'You cannot modify this course'
+      });
+    }
+
+    const value =
+      setPrivacy === 'true' ? true :
+      setPrivacy === 'false' ? false :
+      null;
+    if (value === null) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid privacy value'
+      });
+    }
+
+    course.isPrivate = value;
+    await course.save();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Course state updated',
+      isPrivate: value
+    });
+  } catch (error) {
+    console.error('Error updating course privacy:', error);
     return res.status(500).json({
       success: false,
       message: 'Internal server error'
