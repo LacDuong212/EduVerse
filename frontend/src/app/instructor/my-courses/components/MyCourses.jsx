@@ -172,8 +172,8 @@ const MyCourses = ({
                         </div>
                       </td>
                       <td className="text-center text-sm-start">
-                        {course.createdAt
-                          ? new Date(course.createdAt).toLocaleString("en-GB", {
+                        {course.updatedAt
+                          ? new Date(course.updatedAt).toLocaleString("en-GB", {
                             year: "numeric",
                             month: "2-digit",
                             day: "2-digit",

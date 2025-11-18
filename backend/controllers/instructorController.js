@@ -435,6 +435,7 @@ export const getStudentsEnrolled = async (req, res) => {
 const getDateConfig = (period) => {
   const now = new Date();
   const start = new Date();
+  console.log(now);
   
   let mongoFormat = ""; // How Mongo formats the date string (grouping ID)
   let unit = "";        // How we step through the loop (day, week, month, year)
@@ -483,67 +484,98 @@ const getDateConfig = (period) => {
 // helper: fill in missing dates with 0
 const fillChartData = (mongoData, start, unit) => {
   const results = [];
-  const current = new Date(start);
+  // Clone ngày start để không làm thay đổi biến gốc bên ngoài
+  const current = new Date(start); 
   const now = new Date();
 
-  // Convert Mongo array to Object Map for fast lookup
-  // Ex: { "2023-11-18": 500, "2023-11-19": 200 }
+  // 1. Tạo Map để tra cứu nhanh O(1)
+  // Ex: { "2025-11-19": 500, "2025-11": 2000 }
   const dataMap = {};
-  mongoData.forEach(item => {
-    dataMap[item._id] = item.total;
-  });
+  if (Array.isArray(mongoData)) {
+    mongoData.forEach(item => {
+      dataMap[item._id] = item.total; // hoặc item.totalAmount tuỳ response của bạn
+    });
+  }
 
-  // Loop until we pass today
-  // Note: We use a "buffer" in the while loop to ensure we catch the current bucket
-  while (current <= now || (unit === 'week' && current.getTime() < now.getTime() + 604800000)) {
-    let label = "";
+  // Helper: Thêm số 0 đằng trước (1 -> "01")
+  const pad = (num) => num.toString().padStart(2, '0');
+
+  // 2. Vòng lặp fill data
+  // Điều kiện: Chạy miễn là current chưa vượt quá now. 
+  // Với 'week', thêm buffer nhỏ để đảm bảo tuần hiện tại được tính dù chưa hết tuần.
+  while (current <= now || (unit === 'week' && current.getTime() < now.getTime() + 7 * 24 * 60 * 60 * 1000)) {
     
+    let label = "";
+    let shouldBreak = false; // Cờ để thoát vòng lặp an toàn cho case Week
+
     if (unit === 'day') {
-      label = current.toISOString().slice(0, 10); // "2023-11-18"
+      // Format: YYYY-MM-DD (Local Time)
+      const year = current.getFullYear();
+      const month = pad(current.getMonth() + 1);
+      const day = pad(current.getDate());
+      label = `${year}-${month}-${day}`; 
+
       results.push({ name: label, value: dataMap[label] || 0 });
-      // Increment 1 Day
+      
+      // Tăng 1 ngày
       current.setDate(current.getDate() + 1);
     } 
-    else if (unit === 'week') {
-      // Get ISO Week number manually for JS to match Mongo's %V
-      // This is a bit tricky in pure JS, so we use a simplified key generator
-      // Trick: We let Mongo drive the keys, but for the "Empty" loop, 
-      // we might just approximate or rely on the library.
-      
-      // Simple Approach: Use a helper to format JS date to "%Y-%V"
-      const year = current.getFullYear();
-      const oneJan = new Date(current.getFullYear(), 0, 1);
-      const numberOfDays = Math.floor((current - oneJan) / (24 * 60 * 60 * 1000));
-      const weekNum = Math.ceil((current.getDay() + 1 + numberOfDays) / 7);
-      const weekString = weekNum.toString().padStart(2, '0');
-      
-      label = `${year}-${weekString}`; // "2023-46"
-      
-      // If Mongo returned "2023-46", we match it. 
-      // Note: ISO week calculation is complex. If this drifts, 
-      // use a library like date-fns or moment in production.
-      
-      // Fallback check: Does dataMap have a key that looks like this week?
-      const foundValue = dataMap[label] || 0;
 
-      results.push({ name: `Week ${weekString}`, value: foundValue });
-      
-      // Increment 7 Days
-      current.setDate(current.getDate() + 7);
-      if (results.length >= 4) break; // Hard limit to 4 weeks as requested
-    } 
     else if (unit === 'month') {
-      label = current.toISOString().slice(0, 7); // "2023-11"
+      // Format: YYYY-MM (Local Time)
+      const year = current.getFullYear();
+      const month = pad(current.getMonth() + 1);
+      label = `${year}-${month}`;
+
       results.push({ name: label, value: dataMap[label] || 0 });
-      // Increment 1 Month
+      
+      // Tăng 1 tháng
       current.setMonth(current.getMonth() + 1);
     } 
+
     else if (unit === 'year') {
-      label = current.getFullYear().toString(); // "2023"
+      // Format: YYYY
+      label = current.getFullYear().toString();
       results.push({ name: label, value: dataMap[label] || 0 });
-      // Increment 1 Year
+      
+      // Tăng 1 năm
       current.setFullYear(current.getFullYear() + 1);
+    } 
+
+    else if (unit === 'week') {
+      // Logic tính tuần thủ công để khớp với Mongo %V
+      const year = current.getFullYear();
+      const oneJan = new Date(year, 0, 1);
+      const numberOfDays = Math.floor((current - oneJan) / (24 * 60 * 60 * 1000));
+      const weekNum = Math.ceil((current.getDay() + 1 + numberOfDays) / 7);
+      const weekString = pad(weekNum);
+      
+      // Label khớp với Mongo: "2025-47"
+      label = `${year}-${weekString}`; 
+      
+      // Tìm trong map, nếu không có thử check label dạng "Week X" (tuỳ nhu cầu hiển thị)
+      // Ở đây ta ưu tiên key khớp với Mongo ID
+      const foundValue = dataMap[label] || 0;
+
+      // Hiển thị ra UI là "Week 47" cho đẹp
+      results.push({ name: `Week ${weekString}`, value: foundValue });
+
+      // Tăng 7 ngày
+      current.setDate(current.getDate() + 7);
+
+      // Logic break an toàn: Nếu ngày current mới đã vượt quá xa tương lai
+      if (current > new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)) {
+         shouldBreak = true;
+      }
+      // Limit cứng 4-5 tuần nếu cần thiết (như code cũ của bạn)
+      // if (results.length >= 5) shouldBreak = true;
     }
+
+    // Check thoát vòng lặp thủ công nếu cần
+    if (shouldBreak) break;
+    
+    // Safety check: Tránh vòng lặp vô tận nếu logic tăng ngày bị lỗi
+    if (results.length > 3660) break; // Max 10 năm days
   }
 
   return results;

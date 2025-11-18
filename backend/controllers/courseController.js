@@ -133,7 +133,7 @@ export const getAllCourses = async (req, res) => {
         keys: ["title", "subtitle", "category", "subCategory", "tags"],
         threshold: 0.5,
         ignoreLocation: true,
-        minMatchCharLength: 2,
+        minMatchCharLength: 1,
       });
 
       courseDocs = fuse.search(search).map((r) => r.item);
