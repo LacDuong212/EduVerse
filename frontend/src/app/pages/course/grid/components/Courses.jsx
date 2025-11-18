@@ -1,6 +1,5 @@
-// pages/course/detail/grid/components/Courses.jsx
 import ChoicesFormInput from '@/components/form/ChoicesFormInput';
-import {  Button,  Col,  Container,  Offcanvas,  OffcanvasBody,  OffcanvasHeader,  Row } from 'react-bootstrap';
+import { Button, Col, Container, Offcanvas, OffcanvasBody, OffcanvasHeader, Row } from 'react-bootstrap';
 import { FaSearch, FaSlidersH } from 'react-icons/fa';
 import Pagination from './Pagination';
 import CourseFilter from './CourseFilter';
@@ -8,7 +7,6 @@ import useToggle from '@/hooks/useToggle';
 import useViewPort from '@/hooks/useViewPort';
 import CourseCard from "@/components/CourseCard";
 
-// ✅ Dùng hook data thật
 import useCourseList from '../useCourseList';
 
 const Courses = () => {
@@ -23,18 +21,28 @@ const Courses = () => {
     limit,
     search,
     setSearch,
-    // loading, category, setCategory, fetchCourses, loadMore
+    category,
+    setCategory,
+    sort,
+    setSort,
+    loading,
+    price,
+    setPrice,
+    level,
+    setLevel,
+    language,
+    setLanguage,
+    clearFilters,
   } = useCourseList();
 
   const onSearchClick = (e) => {
     e.preventDefault();
-    // Hook đã tự fetch khi search thay đổi
   };
 
-  // ✅ Tính số liệu hiển thị cho dòng "Showing X-Y of Z result"
   const showingFrom = total ? (page - 1) * limit + (allCourses.length ? 1 : 0) : 0;
   const showingTo = (page - 1) * limit + allCourses.length;
   const totalResult = total;
+  const hasFilter = category || search || price || level || language || sort !== "newest";
 
   return (
     <section className="py-5">
@@ -68,11 +76,18 @@ const Courses = () => {
                   <ChoicesFormInput
                     className="form-select form-select-sm js-choice border-0"
                     aria-label=".form-select-sm"
+                    value={sort}
+                    onChange={(value) => {
+                      setSort(value);
+                      setPage(1);
+                    }}
                   >
-                    <option>Most Viewed</option>
-                    <option>Recently search</option>
-                    <option>Most popular</option>
-                    <option>Top rated</option>
+                    <option value="newest">Newest</option>
+                    <option value="oldest">Oldest</option>
+                    <option value="mostPopular">Most Popular</option>
+                    <option value="ratingHighToLow">Rating: High to Low</option>
+                    <option value="priceHighToLow">Price: High to Low</option>
+                    <option value="priceLowToHigh">Price: Low to High</option>
                   </ChoicesFormInput>
                 </form>
               </Col>
@@ -94,15 +109,19 @@ const Courses = () => {
                   <FaSlidersH className="me-1" /> Show filter
                 </Button>
                 <p className="mb-0 text-end">
-                  {/* ✅ Hiển thị động theo page/limit */}
                   Showing {showingFrom}-{showingTo} of {totalResult} result
                 </p>
               </Col>
             </Row>
 
             <Row className="g-4">
-              {/* ✅ KHÔNG slice — allCourses đã theo đúng trang */}
-              {allCourses?.map((course, idx) => (
+              {loading && <Col xs={12}><p>Loading courses...</p></Col>}
+              {!loading && allCourses.length === 0 && (
+                <Col xs={12}>
+                  <p>No courses found matching your criteria.</p>
+                </Col>
+              )}
+              {!loading && allCourses?.map((course, idx) => (
                 <Col sm={6} xl={4} key={course.courseId || course._id || idx}>
                   <CourseCard course={course} />
                 </Col>
@@ -110,7 +129,6 @@ const Courses = () => {
             </Row>
 
             <Col xs={12}>
-              {/* ✅ Truyền props để phân trang điều khiển cùng một state */}
               <Pagination
                 page={page}
                 limit={limit}
@@ -123,11 +141,22 @@ const Courses = () => {
           <Col lg={4} xl={3}>
             {width >= 992 ? (
               <>
-                <CourseFilter />
+                <CourseFilter
+                  category={category}
+                  setCategory={setCategory}
+                  price={price}
+                  setPrice={setPrice}
+                  level={level}
+                  setLevel={setLevel}
+                  language={language}
+                  setLanguage={setLanguage}
+                />
                 <div className="d-grid p-2 p-lg-0 text-center">
-                  <Button variant="primary" className="mb-0">
-                    Filter Results
-                  </Button>
+                  {hasFilter && (
+                    <Button variant="primary" className="mb-0" onClick={clearFilters}>
+                      Clear Filter
+                    </Button>
+                  )}
                 </div>
               </>
             ) : (
@@ -145,12 +174,23 @@ const Courses = () => {
                   </h5>
                 </OffcanvasHeader>
                 <OffcanvasBody className="p-3 p-lg-0">
-                  <CourseFilter />
+                  <CourseFilter
+                    category={category}
+                    setCategory={setCategory}
+                    price={price}
+                    setPrice={setPrice}
+                    level={level}
+                    setLevel={setLevel}
+                    language={language}
+                    setLanguage={setLanguage}
+                  />
                 </OffcanvasBody>
                 <div className="d-grid p-2 p-lg-0 text-center">
-                  <Button variant="primary" className="mb-0">
-                    Filter Results
-                  </Button>
+                  {hasFilter && (
+                    <Button variant="primary" className="mb-0" onClick={clearFilters}>
+                      Clear Filter
+                    </Button>
+                  )}
                 </div>
               </Offcanvas>
             )}

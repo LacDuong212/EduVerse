@@ -1,61 +1,54 @@
-// pages/course/detail/grid/components/CourseFilter.jsx
 import useToggle from '@/hooks/useToggle';
-import useCourseList from '../useCourseList';
 import { Card, Col, Collapse } from 'react-bootstrap';
 import { FaAngleDown, FaAngleUp } from 'react-icons/fa';
-import { useMemo, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 
-const CourseFilter = () => {
+const CourseFilter = ({
+  category,
+  setCategory,
+  price,
+  setPrice,
+  level,
+  setLevel,
+  language,
+  setLanguage,
+}) => {
   const { isTrue, toggle } = useToggle();
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-  // Lấy data & setter từ hook
-  const { allCourses = [], category, setCategory, search } = useCourseList();
+  const [allCategories, setAllCategories] = useState([]);
+  const [allLanguages, setAllLanguages] = useState([]);
+  const [allLevels, setAllLevels] = useState(["All", "Beginner", "Intermediate", "Advanced"]);
 
-  // --- 1) TÍNH categories TỪ DATA HIỆN TẠI ---
-  const categoriesNow = useMemo(() => {
-    const map = new Map();
-    for (const c of allCourses) {
-      const key = c.category || 'Other';
-      map.set(key, (map.get(key) || 0) + 1);
-    }
-    const list = Array.from(map.entries()).map(([name, count]) => ({ name, count }));
-    list.sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
-    return list;
-  }, [allCourses]);
 
-  // --- 2) CACHE danh sách đầy đủ khi đang ở trạng thái "All" (chưa filter/search) ---
-  const [categoriesCache, setCategoriesCache] = useState([]);
   useEffect(() => {
-    // Chỉ cache khi không có filter/search (coi như trạng thái "All")
-    if (!category && !search && categoriesNow.length) {
-      setCategoriesCache(categoriesNow);
-    }
-  }, [category, search, categoriesNow]);
+    const fetchFilterData = async () => {
+      try {
+        const res = await axios.get(`${backendUrl}/api/courses/filters`);
+        if (res.data.categories) {
+          const categoryList = res.data.categories.map(name => ({ name }));
+          setAllCategories(categoryList);
+        }
+        if (res.data.languages) {
+          setAllLanguages(res.data.languages);
+        }
+        if (res.data.levels) {
+          setAllLevels(res.data.levels);
+        }
+      } catch (error) {
+        console.error("Failed to fetch filters", error);
+        setAllCategories([{ name: 'Information technology' }, { name: 'Data' }]);
+        setAllLanguages(['English', 'Tiếng Việt']);
+      }
+    };
+    fetchFilterData();
+  }, [backendUrl]);
 
-  // Dùng cache nếu có, để khi chọn 1 option, các option khác KHÔNG biến mất
-  const categories = categoriesCache.length ? categoriesCache : categoriesNow;
+  const primaryCats = allCategories.slice(0, 6);
+  const moreCats = allCategories.slice(6);
+  const languages = allLanguages;
 
-  // Chia primary/more như cũ
-  const primaryCats = categories.slice(0, 6);
-  const moreCats = categories.slice(6);
-
-  // --- Language: cũng cache tương tự cho ổn định (tuỳ chọn) ---
-  const languagesNow = useMemo(() => {
-    const s = new Set();
-    for (const c of allCourses) if (c.language) s.add(c.language);
-    const arr = Array.from(s);
-    return arr.length ? arr : ['English', 'Francas', 'Hindi', 'Russian', 'Spanish', 'Bengali', 'Portuguese'];
-  }, [allCourses]);
-
-  const [languagesCache, setLanguagesCache] = useState([]);
-  useEffect(() => {
-    if (!category && !search && languagesNow.length) {
-      setLanguagesCache(languagesNow);
-    }
-  }, [category, search, languagesNow]);
-  const languages = languagesCache.length ? languagesCache : languagesNow;
-
-  // --- Handlers ---
   const isAll = !category;
   const handleSelectAll = () => setCategory('');
   const handleSelectCat = (name) => {
@@ -83,7 +76,6 @@ const CourseFilter = () => {
                 All
               </label>
             </div>
-            {/* <span className="small">({allCourses.length})</span> */}
           </div>
 
           {/* Primary categories */}
@@ -101,7 +93,6 @@ const CourseFilter = () => {
                   {c.name}
                 </label>
               </div>
-              {/* <span className="small">({c.count})</span> */}
             </div>
           ))}
 
@@ -125,7 +116,6 @@ const CourseFilter = () => {
                             {c.name}
                           </label>
                         </div>
-                        <span className="small">({c.count})</span>
                       </div>
                     ))}
                   </Card>
@@ -156,24 +146,45 @@ const CourseFilter = () => {
         </Col>
       </Card>
 
-      {/* PRICE LEVEL (UI giữ nguyên) */}
+      {/* PRICE LEVEL */}
       <Card className="card-body shadow p-4 mb-4">
         <h4 className="mb-3">Price Level</h4>
         <ul className="list-inline mb-0">
           <li className="list-inline-item">
-            <input type="radio" className="btn-check" name="price-options" id="price-all" defaultChecked />
+            <input
+              type="radio"
+              className="btn-check"
+              name="price-options"
+              id="price-all"
+              checked={price === "" || price === null}
+              onChange={() => setPrice("")}
+            />
             <label className="btn btn-light btn-primary-soft-check" htmlFor="price-all">
               All
             </label>
           </li>
           <li className="list-inline-item">
-            <input type="radio" className="btn-check" name="price-options" id="price-free" />
+            <input
+              type="radio"
+              className="btn-check"
+              name="price-options"
+              id="price-free"
+              checked={price === "free"}
+              onChange={() => setPrice("free")}
+            />
             <label className="btn btn-light btn-primary-soft-check" htmlFor="price-free">
               Free
             </label>
           </li>
           <li className="list-inline-item">
-            <input type="radio" className="btn-check" name="price-options" id="price-paid" />
+            <input
+              type="radio"
+              className="btn-check"
+              name="price-options"
+              id="price-paid"
+              checked={price === "paid"}
+              onChange={() => setPrice("paid")}
+            />
             <label className="btn btn-light btn-primary-soft-check" htmlFor="price-paid">
               Paid
             </label>
@@ -181,41 +192,51 @@ const CourseFilter = () => {
         </ul>
       </Card>
 
-      {/* SKILL LEVEL (UI giữ nguyên) */}
+      {/* SKILL LEVEL */}
       <Card className="card-body shadow p-4 mb-4">
         <h4 className="mb-3">Skill level</h4>
         <ul className="list-inline mb-0">
-          {[
-            { id: 'all-levels', label: 'All levels' },
-            { id: 'beginner', label: 'Beginner' },
-            { id: 'intermediate', label: 'Intermediate' },
-            { id: 'advanced', label: 'Advanced' },
-          ].map((lv) => (
-            <li className="list-inline-item mb-2" key={lv.id}>
-              <input type="checkbox" className="btn-check" id={`btn-${lv.id}`} />
-              <label className="btn btn-light btn-primary-soft-check" htmlFor={`btn-${lv.id}`}>
-                {lv.label}
+          {allLevels.map((lv) => (
+            <li className="list-inline-item mb-2" key={lv}>
+              <input
+                type="checkbox"
+                className="btn-check"
+                id={`btn-level-${lv}`}
+                checked={level === lv || (lv === "All" && (level === "" || level === "All"))}
+                onChange={() => {
+                  if (lv === "All") setLevel("");
+                  else setLevel(level === lv ? "" : lv);
+                }}
+              />
+              <label className="btn btn-light btn-primary-soft-check" htmlFor={`btn-level-${lv}`}>
+                {lv}
               </label>
             </li>
           ))}
         </ul>
       </Card>
 
-      {/* LANGUAGE (map theo data thật + cache) */}
+      {/* LANGUAGE */}
       <Card className="card-body shadow p-4 mb-4">
         <h4 className="mb-3">Language</h4>
         <ul className="list-inline mb-0 g-3">
-          {languages.map((language, idx) => (
-            <li className="list-inline-item mb-2" key={language + idx}>
-              <input type="checkbox" className="btn-check" id={`btn-check-lan-${idx}`} />
+          {languages.map((lan, idx) => (
+            <li className="list-inline-item mb-2" key={lan + idx}>
+              <input
+                type="checkbox"
+                className="btn-check"
+                id={`btn-check-lan-${idx}`}
+                checked={language === lan}
+                onChange={() => setLanguage(language === lan ? "" : lan)}
+              />
               <label className="btn btn-light btn-primary-soft-check" htmlFor={`btn-check-lan-${idx}`}>
-                {language}
+                {lan}
               </label>
             </li>
           ))}
         </ul>
       </Card>
-    </form>
+    </form >
   );
 };
 

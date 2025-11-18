@@ -17,6 +17,9 @@ import chatbotRoute from './routes/chatbotRoutes.js';
 import instructorRoute from './routes/instructorRoutes.js';
 import studentRoute from "./routes/studentRoute.js";
 
+import session from 'express-session';
+import passport from 'passport';
+import configurePassport from './configs/passport.js';
 
 //Initialize Express
 const app = express();
@@ -33,6 +36,17 @@ const allowedOrigins = ['http://localhost:5173','http://localhost:3000'];
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({origin: allowedOrigins, credentials: true}));
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+
+configurePassport(passport);
+app.use(passport.initialize());
+app.use(passport.session());
 
 // API Endpoints
 app.get('/', (req, res) => res.send("API is running"));
