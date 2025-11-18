@@ -5,7 +5,6 @@ import Instructor from "../models/instructorModel.js";
 import userInteraction from "../models/userInteraction.js";
 
 import Fuse from "fuse.js";
-import userModel from "../models/userModel.js";
 
 
 export const getHomeCourses = async (req, res) => {
@@ -111,80 +110,61 @@ export const getAllCourses = async (req, res) => {
     const page = Math.max(parseInt(req.query.page) || 1, 1);
     const limit = Math.max(parseInt(req.query.limit) || 10, 1);
     const search = (req.query.search || "").trim();
-    const { category, subCategory } = req.query;
+    const { category, subCategory, sort, price, level, language } = req.query;
 
-    // bộ lọc DB
-    const mongoFilter = {};
+    const mongoFilter = {
+      isPrivate: false,
+      isDeleted: false,
+      status: "Live"
+    };
+
     if (category) mongoFilter.category = category;
     if (subCategory) mongoFilter.subCategory = subCategory;
+    if (language) mongoFilter.language = language;
+    if (level && level !== "All") mongoFilter.level = level;
 
-    // chỉ lấy field cần thiết cho FE + tính toán
-    const courseDocs = await Course.find(mongoFilter, {
-      title: 1,
-      subtitle: 1,
-      description: 1, // nếu cần cho FE
-      image: 1,       // nếu cần cho FE
-      category: 1,
-      subCategory: 1,
-      language: 1,
+    if (price === "free") mongoFilter.price = 0;
+    if (price === "paid") mongoFilter.price = { $gt: 0 };
 
-      // instructor (đúng theo schema bạn cung cấp)
-      "instructor.ref": 1,
-      "instructor.name": 1,
-      "instructor.avatar": 1,
+    let courseDocs = await Course.find(mongoFilter).lean();
 
-      level: 1,
-      duration: 1,
-      lecturesCount: 1,
-
-      curriculum: 1, // lấy để fallback (nếu muốn nhẹ hơn thì chỉ chọn trường cần như dưới)
-      // "curriculum.section": 1,
-      // "curriculum.lectures.duration": 1,
-
-      studentsEnrolled: 1,
-
-      rating: 1,
-
-      thumbnail: 1,
-      previewVideo: 1,
-      tags: 1,
-
-      price: 1,
-      discountPrice: 1,
-
-      isActive: 1,
-      status: 1,
-
-      createdAt: 1,
-      updatedAt: 1,
-      courseId: 1,
-    })
-      .sort({ createdAt: -1, _id: -1 })
-      .lean();
-
-    let results = courseDocs;
-
-    // fuzzy search (nếu có từ khoá)
     if (search) {
-      // đảm bảo đã cài và import Fuse
       const fuse = new Fuse(courseDocs, {
         keys: ["title", "subtitle", "category", "subCategory", "tags"],
-        threshold: 0,           // strict match (giống logic bạn đang dùng)
-        distance: 120,
+        threshold: 0.5,
         ignoreLocation: true,
-        includeScore: true,
         minMatchCharLength: 2,
       });
-      results = fuse.search(search).map((r) => r.item);
+
+      courseDocs = fuse.search(search).map((r) => r.item);
     }
 
-    // phân trang SAU fuzzy (giữ nguyên logic quan trọng)
-    const total = results.length;
-    const start = (page - 1) * limit;
-    const end = start + limit;
-    const paginated = results.slice(start, end);
+    switch (sort) {
+      case "newest":
+        courseDocs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        break;
+      case "oldest":
+        courseDocs.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        break;
+      case "priceHighToLow":
+        courseDocs.sort((a, b) => (b.price || 0) - (a.price || 0));
+        break;
+      case "priceLowToHigh":
+        courseDocs.sort((a, b) => (a.price || 0) - (b.price || 0));
+        break;
+      case "mostPopular":
+        courseDocs.sort((a, b) => (b.studentsEnrolled || 0) - (a.studentsEnrolled || 0));
+        break;
+      case "ratingHighToLow":
+        courseDocs.sort((a, b) => (b.rating?.average || 0) - (a.rating?.average || 0));
+        break;
+      default:
+        courseDocs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    }
 
-    // helper fallback
+    const total = courseDocs.length;
+    const paginated = courseDocs.slice((page - 1) * limit, page * limit);
+
     const sumLectureDurations = (cur = []) =>
       Array.isArray(cur)
         ? cur.reduce((acc, sec) => {
@@ -202,45 +182,19 @@ export const getAllCourses = async (req, res) => {
         )
         : 0;
 
-    // Chuẩn hoá dữ liệu phản hồi
     const data = paginated.map((c) => {
-      // duration (giờ)
       const duration =
         typeof c.duration === "number" && !Number.isNaN(c.duration)
           ? c.duration
           : sumLectureDurations(c.curriculum);
 
-      // lectures (số bài)
       const lectures =
         typeof c.lecturesCount === "number" && !Number.isNaN(c.lecturesCount)
           ? c.lecturesCount
           : countLecturesFromCurriculum(c.curriculum);
 
-      // rating object (giữ nguyên)
-      const rating = {
-        average: Number(c?.rating?.average ?? 0),
-        count: Number(c?.rating?.count ?? 0),
-        total: Number(c?.rating?.total ?? 0),
-      };
-
-      // studentsEnrolled: ưu tiên field trong DB, fallback từ rating.count
-      const studentsEnrolled = Number.isFinite(Number(c?.studentsEnrolled))
-        ? Number(c.studentsEnrolled)
-        : (Number.isFinite(Number(c?.rating?.count)) ? Number(c.rating.count) : 0);
-
-      // instructor: map đúng theo schema (không dùng populate để không đổi logic quan trọng)
-      const instructor = c?.instructor
-        ? {
-          ref: c.instructor.ref,     // ObjectId
-          name: c.instructor.name,   // có thể null nếu chưa set
-          avatar: c.instructor.avatar,
-        }
-        : undefined;
-
       return {
         courseId: c.courseId || String(c._id),
-
-        // các field FE cần
         title: c.title,
         subtitle: c.subtitle,
         category: c.category,
@@ -251,15 +205,21 @@ export const getAllCourses = async (req, res) => {
         discountPrice: c.discountPrice,
         createdAt: c.createdAt,
         updatedAt: c.updatedAt,
-
-        // số liệu chuẩn hoá
-        rating,
+        rating: {
+          average: Number(c?.rating?.average ?? 0),
+          count: Number(c?.rating?.count ?? 0),
+          total: Number(c?.rating?.total ?? 0),
+        },
         duration,
         lectures,
-
-        // ➕ field mới thêm theo yêu cầu
-        studentsEnrolled,
-        instructor,
+        studentsEnrolled: Number(c.studentsEnrolled || 0),
+        instructor: c?.instructor
+          ? {
+            ref: c.instructor.ref,
+            name: c.instructor.name,
+            avatar: c.instructor.avatar,
+          }
+          : undefined,
       };
     });
 
@@ -276,6 +236,40 @@ export const getAllCourses = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Error fetching courses",
+      error: error.message
+    });
+  }
+};
+
+export const getCourseFilters = async (req, res) => {
+  try {
+    const liveFilter = {
+      isPrivate: false,
+      isDeleted: false,
+      status: "Live"
+    };
+
+    const categoriesPromise = Course.distinct("category", liveFilter);
+    const languagesPromise = Course.distinct("language", liveFilter);
+
+    const levels = ["All", "Beginner", "Intermediate", "Advanced"];
+
+    const [categories, languages] = await Promise.all([
+      categoriesPromise,
+      languagesPromise
+    ]);
+
+    res.json({
+      success: true,
+      categories: categories.filter(Boolean),
+      languages: languages.filter(Boolean),
+      levels
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error fetching filters",
       error: error.message
     });
   }
@@ -901,6 +895,56 @@ export const updateCourseStatus = async (req, res) => {
     });
   } catch (error) {
     console.error('Error updating course status:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+};
+
+// PATCH /api/courses/:id?setPrivacy=
+export const setCoursePrivacy = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { setPrivacy } = req.query;
+    const userId = req.userId;
+
+    const course = await Course.findOne({ _id: id, isDeleted: false });
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: 'Course not found'
+      });
+    }
+
+    if (!course.instructor?.ref?.equals(userId)) {
+      return res.status(403).json({
+        success: false,
+        message: 'You cannot modify this course'
+      });
+    }
+
+    const value =
+      setPrivacy === 'true' ? true :
+        setPrivacy === 'false' ? false :
+          null;
+    if (value === null) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid privacy value'
+      });
+    }
+
+    course.isPrivate = value;
+    await course.save();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Course state updated',
+      isPrivate: value
+    });
+  } catch (error) {
+    console.error('Error updating course privacy:', error);
     return res.status(500).json({
       success: false,
       message: 'Internal server error'
