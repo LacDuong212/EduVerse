@@ -1,4 +1,4 @@
-import { FaAngleLeft, FaAngleRight } from "react-icons/fa";
+import { FaCaretLeft, FaCaretRight, FaFastBackward, FaFastForward, FaFastForward } from "react-icons/fa";
 
 const Pagination = ({ page, limit, total, onChangePage }) => {
   const totalPages = Math.max(1, Math.ceil(total / limit));
@@ -33,13 +33,13 @@ const Pagination = ({ page, limit, total, onChangePage }) => {
 
         <li className={`page-item mb-0 ${page === 1 ? "disabled" : ""}`}>
           <button className="page-link" onClick={() => goToPage(1)}>
-            ⏮
+            <FaFastBackward />
           </button>
         </li>
 
         <li className={`page-item mb-0 ${page === 1 ? "disabled" : ""}`}>
           <button className="page-link" onClick={() => goToPage(page - 1)}>
-            <FaAngleLeft />
+            <FaCaretLeft />
           </button>
         </li>
 
@@ -62,13 +62,13 @@ const Pagination = ({ page, limit, total, onChangePage }) => {
 
         <li className={`page-item mb-0 ${page === totalPages ? "disabled" : ""}`}>
           <button className="page-link" onClick={() => goToPage(page + 1)}>
-            <FaAngleRight />
+            <FaCaretRight />
           </button>
         </li>
 
         <li className={`page-item mb-0 ${page === totalPages ? "disabled" : ""}`}>
           <button className="page-link" onClick={() => goToPage(totalPages)}>
-            ⏭
+            <FaFastForward />
           </button>
         </li>
 
