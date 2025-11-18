@@ -9,7 +9,8 @@ import Step4 from './Step4';
 
 import axios from 'axios';
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { Card, CardBody, CardHeader, Col, Container, Row } from 'react-bootstrap';
+import { Button, Card, CardBody, CardHeader, Col, Container, Row } from 'react-bootstrap';
+import { FaArrowLeft } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
@@ -19,6 +20,10 @@ const CreateCourseForm = () => {
   const stepperRef = useRef(null);
   const stepperInstance = useBSStepper(stepperRef);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleGoBack = () => {
+    navigate(-1);
+  };
 
   // init
   const [courseDraft, setCourseDraft] = useState(() => {
@@ -181,7 +186,12 @@ const CreateCourseForm = () => {
       <PageMetaData title="Create a Course" />
       <Container className="mt-3 mb-5">
         <Row>
-          <Col md={8} className="mx-auto text-center">
+          <Col className="mx-auto text-center">
+            <div className="text-start mb-3">
+              <Button variant="link" onClick={handleGoBack} className="p-0">
+                <FaArrowLeft className="mb-1 me-2" />Return
+              </Button>
+            </div>
             <p className="text-center">
               Add your new course here. After you submit it, our team will review it for quality.
               <br />

@@ -9,7 +9,8 @@ import Step4 from './Step4';
 
 import axios from 'axios';
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { Card, CardBody, CardHeader, Col, Container, Row } from 'react-bootstrap';
+import { Button, Card, CardBody, CardHeader, Col, Container, Row } from 'react-bootstrap';
+import { FaArrowLeft } from 'react-icons/fa';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
@@ -25,6 +26,10 @@ const EditCourseForm = () => {
   const [courseDraft, setCourseDraft] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const stepperInstance = useBSStepper(stepperRef, !isLoading && !!courseDraft);
+
+  const handleGoBack = () => {
+    navigate(-1);
+  };
 
   // get course data
   useEffect(() => {
@@ -227,7 +232,12 @@ const EditCourseForm = () => {
         <PageMetaData title="Edit Course" />
         <Container className="mt-3 mb-5">
           <Row>
-            <Col md={8} className="mx-auto text-center">
+            <Col className="mx-auto text-center">
+              <div className="text-start mb-3">
+                <Button variant="link" onClick={handleGoBack} className="p-0">
+                  <FaArrowLeft className="mb-1 me-2" />Return
+                </Button>
+              </div>
               <p className="text-center">
                 Use this interface to update your course. After submission, your changes will be reviewed for quality.
                 <br />

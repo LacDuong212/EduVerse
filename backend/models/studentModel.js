@@ -32,7 +32,4 @@ const studentSchema = new mongoose.Schema(
   }
 );
 
-// Optional: index cho truy vấn nhanh theo user
-studentSchema.index({ user: 1 });
-
 export default mongoose.model("Student", studentSchema);

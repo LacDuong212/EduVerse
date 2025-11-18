@@ -8,8 +8,9 @@ const ResetPassword = lazy(() => import('@/app/auth/reset-password/page'));
 
 // INSTRUCTOR
 import InstructorAccount from "../app/instructor/account";
-import InstructorManageCoursePage from "../app/instructor/manage-course";
+import InstructorCourseDetail from '../app/instructor/course-detail';
 import InstructorDashboard from "../app/instructor/dashboard";
+import InstructorManageCoursePage from "../app/instructor/manage-course";
 import InstructorMyCourses from "../app/instructor/my-courses";
 import InstructorMyStudents from "../app/instructor/my-students";
 
@@ -142,6 +143,11 @@ export const instructorRoutes = [{
   name: 'Update Course',
   isNested: false,
   element: <InstructorManageCoursePage isEdit={true} />
+}, {
+  path: '/instructor/courses/:id',
+  name: 'Update Course',
+  isNested: false,
+  element: <InstructorCourseDetail />
 }, {
   path: '/instructor/*',
   name: 'Resource Not Found',

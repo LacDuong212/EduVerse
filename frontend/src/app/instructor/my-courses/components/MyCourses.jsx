@@ -1,6 +1,5 @@
 import ChoicesFormInput from '@/components/form/ChoicesFormInput';
 import { formatCurrency } from '@/utils/currency';
-import { useState } from "react";
 import { Button, Card, CardBody, CardHeader, Col, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { BsPersonFill } from 'react-icons/bs';
 import { FaAngleLeft, FaAngleRight, FaFile, FaFolder, FaGlobe, FaLock, FaRegEdit, FaSearch, FaStar } from 'react-icons/fa';
@@ -21,6 +20,18 @@ const MyCourses = ({
   sort,
   setSort 
 }) => {
+  const statusBadge = (status) => {
+    return status === "Live"
+      ? "success"
+      : status === "Pending"
+      ? "warning"
+      : status === "Rejected"
+      ? "orange"
+      : status === "Blocked"
+      ? "danger"
+      : "secondary";
+  }
+    
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     onPageChange(1);
@@ -115,15 +126,15 @@ const MyCourses = ({
                           <div className="flex-shrink-0 rounded overflow-hidden" style={{ width: "80px", height: "80px" }}>
                             <img
                               src={course.image || course.thumbnail || "https://res.cloudinary.com/dw1fjzfom/image/upload/v1757337425/av4_khpvlh.png"}
-                              alt={course.title}
+                              alt={course.title || 'Course Image'}
                               className="img-fluid h-100 w-100 object-fit-cover"
                             />
                           </div>
                           <div className="ms-2 flex-grow-1">
                             <div className="mb-1">
-                              <h6 className="mb-0 text-truncate">
+                              <h6 className="mb-0">
                                 <a
-                                  href={`/courses/${course._id}`}
+                                  href={`courses/${course._id}`}
                                   className="text-decoration-none d-inline-block"
                                 >
                                   {course.title}
@@ -173,10 +184,7 @@ const MyCourses = ({
                       </td>
                       <td>
                         <div
-                          className={`badge ${course.status === "Live"
-                            ? "bg-success bg-opacity-10 text-success"
-                            : "bg-secondary bg-opacity-10 text-secondary"
-                            }`}
+                          className={`badge bg-${statusBadge(course?.status)} bg-opacity-10 text-${statusBadge(course?.status)} fs-6`}
                         >
                           {course.status || "N/A"}
                         </div>
@@ -185,7 +193,7 @@ const MyCourses = ({
                         {course.price === 0 ? "Free" : course.enableDiscount ? (
                           <>
                             {formatCurrency(course.discountPrice)}{" "}
-                            <span className="text-decoration-line-through">
+                            <span className="text-decoration-line-through small">
                               {formatCurrency(course.price)}
                             </span>
                           </>
