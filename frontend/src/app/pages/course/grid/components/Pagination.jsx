@@ -1,4 +1,4 @@
-import { FaCaretLeft, FaCaretRight, FaFastBackward, FaFastForward, FaFastForward } from "react-icons/fa";
+import { FaCaretLeft, FaCaretRight, FaFastBackward, FaFastForward } from "react-icons/fa";
 
 const Pagination = ({ page, limit, total, onChangePage }) => {
   const totalPages = Math.max(1, Math.ceil(total / limit));
