@@ -50,7 +50,7 @@ const CourseDetail = () => {
 
   return (
     <section className="pt-0">
-      <Container>
+      <Container >
         <Row>
           <Col xs={12}>
             <Card className="shadow rounded-2 p-0 mt-n5">

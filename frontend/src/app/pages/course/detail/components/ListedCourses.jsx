@@ -1,5 +1,5 @@
 import TinySlider from '@/components/TinySlider';
-import { formatCurrency } from '@/context/constants';
+import { formatCurrency } from '@/utils/currency';
 import useCourseDetail from '../useCourseDetail';
 import { toAlphaNumber } from '@/utils/change-casing';
 import { Card, CardBody, CardTitle, Container, Row } from 'react-bootstrap';

@@ -75,16 +75,16 @@ export const getCoursesOverview = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const courses = await Course.find(/*{ isDeleted: false }*/) // #TODO
-      .select("image thumbnail title instructor level createdAt price status isActive")
+      .select("image thumbnail title instructor level createdAt price status isPrivate")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .lean(); // lean = faster, returns plain JS objects
 
     const [totalCourses, activatedCourses, pendingCourses] = await Promise.all([
-      Course.countDocuments(/*{ isDeleted: false }*/),
-      Course.countDocuments({ status: "Live", isActive: true, /*{ isDeleted: false }*/ }),
-      Course.countDocuments({ status: "Pending", /*{ isDeleted: false }*/ }),
+      Course.countDocuments({ isDeleted: false }),
+      Course.countDocuments({ status: "Live", isDeleted: false }),
+      Course.countDocuments({ status: "Pending", isDeleted: false }),
     ]);
 
     res.status(200).json({
@@ -655,8 +655,8 @@ export const createCourse = async (req, res) => {
         count: 0,
         total: 0
       },
-      isActive: req.body.isActive || false, // = isPublished
       status: 'Pending',
+      isPrivate: req.body.isPrivate || true,  // = !isPublished
       isDeleted: false,
     });
 

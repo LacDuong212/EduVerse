@@ -47,8 +47,9 @@ const courseSchema = new mongoose.Schema({
   discountPrice: { type: Number, min: 0, default: null },
   enableDiscount: { type: Boolean, default: false },
 
-  isActive: { type: Boolean, default: false },
   status: { type: String, enum: ["Rejected", "Pending", "Live", "Blocked"], default: "Pending" },
+
+  isPrivate: { type: Boolean, default: true },
   isDeleted: { type: Boolean, default: false }
 }, {
   timestamps: true

@@ -96,7 +96,7 @@ const StudentLayout = ({ children, isNested = false }) => {
           </>
         ) : (
           <section className="pt-0">
-            {children}
+            <>{children}</>
           </section>
         )}
       </main>

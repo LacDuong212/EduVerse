@@ -1,4 +1,22 @@
-import { Button, Card, CardBody, CardHeader, Col, Container, Dropdown, DropdownItem, DropdownMenu, DropdownToggle, Nav, NavItem, NavLink, Row, TabContainer, TabContent, TabPane } from 'react-bootstrap';
+import {
+  Button,
+  Card,
+  CardBody,
+  CardHeader,
+  Col,
+  Container,
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownToggle,
+  Nav,
+  NavItem,
+  NavLink,
+  Row,
+  TabContainer,
+  TabContent,
+  TabPane
+} from 'react-bootstrap';
 import Comment from './Comment';
 import Curriculum from './Curriculum';
 import Faqs from './Faqs';
@@ -6,17 +24,29 @@ import Instructor from './Instructor';
 import Overview from './Overview';
 import Reviews from './Reviews';
 import GlightBox from '@/components/GlightBox';
-import { formatCurrency } from '@/context/constants';
-import { FaBookOpen, FaClock, FaCopy, FaFacebookSquare, FaGlobe, FaLinkedin, FaMedal, FaPlay, FaShareAlt, FaSignal, FaStar, FaStopwatch, FaTwitterSquare, FaUserClock } from 'react-icons/fa';
-import courseImg1 from '@/assets/images/courses/4by3/01.jpg';
+import { formatCurrency } from '@/utils/currency';
+import {
+  FaBookOpen,
+  FaClock,
+  FaCopy,
+  FaFacebookSquare,
+  FaGlobe,
+  FaLinkedin,
+  FaMedal,
+  FaPlay,
+  FaShareAlt,
+  FaSignal,
+  FaStar,
+  FaStopwatch,
+  FaTwitterSquare,
+  FaUserClock
+} from 'react-icons/fa';
 import courseImg18 from '@/assets/images/courses/4by3/18.jpg';
 import courseImg21 from '@/assets/images/courses/4by3/21.jpg';
-import { useState } from 'react'; // ✅ thêm import
-
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react'; // 🔹 thêm useEffect
+import { Link, useNavigate, useParams } from 'react-router-dom'; // 🔹 thêm useNavigate, useParams
 import useCourseDetail from '../useCourseDetail';
-
-
+import axios from 'axios'; // 🔹 thêm axios
 
 const PricingCard = ({ course, onShowCurriculum }) => {
   const { handleAddToCart } = useCourseDetail();
@@ -25,298 +55,442 @@ const PricingCard = ({ course, onShowCurriculum }) => {
     if (!url) return null;
 
     // dạng youtu.be/xxxx
-    if (url.includes("youtu.be/")) {
-      const videoId = url.split("youtu.be/")[1];
+    if (url.includes('youtu.be/')) {
+      const videoId = url.split('youtu.be/')[1];
       return `https://www.youtube.com/embed/${videoId}`;
     }
 
     // dạng watch?v=xxxx
-    if (url.includes("watch?v=")) {
-      return url.replace("watch?v=", "embed/");
+    if (url.includes('watch?v=')) {
+      return url.replace('watch?v=', 'embed/');
     }
 
     // dạng shorts/xxxx
-    if (url.includes("shorts/")) {
-      const videoId = url.split("shorts/")[1];
+    if (url.includes('shorts/')) {
+      const videoId = url.split('shorts/')[1];
       return `https://www.youtube.com/embed/${videoId}`;
     }
 
     return url;
   };
 
-
-  return <Card className="shadow p-2 mb-4 z-index-9">
-    <div className="overflow-hidden rounded-3">
-      <img src={course?.thumbnail} className="card-img" alt="course image" />
-      <div className="bg-overlay bg-dark opacity-1" />
-      <div className="card-img-overlay d-flex align-items-start flex-column p-3">
-        <div className="m-auto">
-          <GlightBox href={getEmbedUrl(course?.previewVideo)} className="btn btn-lg text-danger btn-round btn-white-shadow mb-0" data-glightbox data-gallery="course-video">
-            <FaPlay />
-          </GlightBox>
-        </div>
-      </div>
-    </div>
-    <CardBody className="px-3">
-      <div className="d-flex justify-content-between align-items-center">
-        <div>
-          <div className="d-flex align-items-center">
-            {(() => {
-              const original = Number(course?.price ?? 0);
-              const sale = Number(course?.discountPrice ?? original);
-              const percent =
-                original > 0 && sale < original
-                  ? Math.round(((original - sale) / original) * 100)
-                  : 0;
-
-              return (
-                <div className="d-flex align-items-center">
-                  <h3 className="fw-bold mb-0 me-2 fs-5">{formatCurrency(sale)}</h3> {/* 👈 thêm fs-5 */}
-                  {percent > 0 && (
-                    <>
-                      <span className="text-decoration-line-through mb-0 me-2 fs-6">
-                        {formatCurrency(original)}
-                      </span>
-                      <span className="badge text-bg-orange mb-0">{percent}% off</span>
-                    </>
-                  )}
-                </div>
-              );
-            })()}
+  return (
+    <Card className="shadow p-2 mb-4 z-index-9">
+      <div className="overflow-hidden rounded-3">
+        <img src={course?.thumbnail} className="card-img" alt="course image" />
+        <div className="bg-overlay bg-dark opacity-1" />
+        <div className="card-img-overlay d-flex align-items-start flex-column p-3">
+          <div className="m-auto">
+            <GlightBox
+              href={getEmbedUrl(course?.previewVideo)}
+              className="btn btn-lg text-danger btn-round btn-white-shadow mb-0"
+              data-glightbox
+              data-gallery="course-video"
+            >
+              <FaPlay />
+            </GlightBox>
           </div>
-
         </div>
-        <Dropdown>
-          <DropdownToggle as="a" className="btn btn-sm btn-light rounded small arrow-none" role="button" id="dropdownShare" data-bs-toggle="dropdown" aria-expanded="false">
-            <FaShareAlt className="fa-fw" />
-          </DropdownToggle>
-          <DropdownMenu className="dropdown-w-sm dropdown-menu-end min-w-auto shadow rounded" aria-labelledby="dropdownShare">
-            <li>
-              <DropdownItem href="#">
-                <FaTwitterSquare className="me-2" />
-                Twitter
-              </DropdownItem>
-            </li>
-            <li>
-              <DropdownItem href="#">
-                <FaFacebookSquare className="me-2" />
-                Facebook
-              </DropdownItem>
-            </li>
-            <li>
-              <DropdownItem href="#">
-                <FaLinkedin className="me-2" />
-                LinkedIn
-              </DropdownItem>
-            </li>
-            <li>
-              <DropdownItem href="#">
-                <FaCopy className="me-2" />
-                Copy link
-              </DropdownItem>
-            </li>
-          </DropdownMenu>
-        </Dropdown>
       </div>
-      <div className="mt-3 d-sm-flex justify-content-sm-between">
-        <Button
-          variant="outline-primary"
-          className="mb-0"
-          onClick={onShowCurriculum} // ✅ chuyển sang tab "curriculum"
-        >
-          Free trial
-        </Button>
-        &nbsp;
-        <Button variant="success" className="mb-0" onClick={handleAddToCart}>
-          Buy course
-        </Button>
-      </div>
-    </CardBody>
-  </Card>;
-};
-const RecentlyViewed = () => {
-  return <Card className="card-body shadow p-4 mb-4">
-    <h4 className="mb-3">Recently Viewed</h4>
-    <Row className="gx-3 mb-3">
-      <Col xs={4}>
-        <img className="rounded" src={courseImg21} alt="course" />
-      </Col>
-      <Col xs={8}>
-        <h6 className="mb-0">
-          <Link to="">Fundamentals of Business Analysis</Link>
-        </h6>
-        <ul className="list-group list-group-borderless mt-1 d-flex justify-content-between">
-          <li className="list-group-item px-0 d-flex justify-content-between">
-            <span className="text-success">{formatCurrency(130)}</span>
-            <span className="h6 fw-light">
-              4.5
-              <FaStar className="text-warning ms-1" />
-            </span>
-          </li>
-        </ul>
-      </Col>
-    </Row>
-    <Row className="gx-3">
-      <Col xs={4}>
-        <img className="rounded" src={courseImg18} alt="course" />
-      </Col>
-      <Col xs={8}>
-        <h6 className="mb-0">
-          <Link to="">The Complete Video Production Bootcamp</Link>
-        </h6>
-        <ul className="list-group list-group-borderless mt-1 d-flex justify-content-between">
-          <li className="list-group-item px-0 d-flex justify-content-between">
-            <span className="text-success">{formatCurrency(150)}</span>
-            <span className="h6 fw-light">
-              4.0
-              <FaStar className="text-warning ms-1" />
-            </span>
-          </li>
-        </ul>
-      </Col>
-    </Row>
-  </Card>;
-};
-const PopularTags = () => {
-  const tags = ['blog', 'business', 'theme', 'bootstrap', 'data science', 'web development', 'tips', 'machine learning'];
-  return <Card className="card-body shadow p-4">
-    <h4 className="mb-3">Popular Tags</h4>
-    <ul className="list-inline mb-0">
-      {tags.map((tag, idx) => <li className="list-inline-item" key={idx}>
+      <CardBody className="px-3">
+        <div className="d-flex justify-content-between align-items-center">
+          <div>
+            <div className="d-flex align-items-center">
+              {(() => {
+                const original = Number(course?.price ?? 0);
+                const sale = Number(course?.discountPrice ?? original);
+                const percent =
+                  original > 0 && sale < original
+                    ? Math.round(((original - sale) / original) * 100)
+                    : 0;
 
-        <Button variant="outline-light" size="sm">
-          {tag}
-        </Button>
-      </li>)}
-    </ul>
-  </Card>;
+                return (
+                  <div className="d-flex align-items-center">
+                    <h3 className="fw-bold mb-0 me-2 fs-5">
+                      {formatCurrency(sale)}
+                    </h3>
+                    {percent > 0 && (
+                      <>
+                        <span className="text-decoration-line-through mb-0 me-2 fs-6">
+                          {formatCurrency(original)}
+                        </span>
+                        <span className="badge text-bg-orange mb-0">
+                          {percent}% off
+                        </span>
+                      </>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
+          <Dropdown>
+            <DropdownToggle
+              as="a"
+              className="btn btn-sm btn-light rounded small arrow-none"
+              role="button"
+              id="dropdownShare"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              <FaShareAlt className="fa-fw" />
+            </DropdownToggle>
+            <DropdownMenu
+              className="dropdown-w-sm dropdown-menu-end min-w-auto shadow rounded"
+              aria-labelledby="dropdownShare"
+            >
+              <li>
+                <DropdownItem href="#">
+                  <FaTwitterSquare className="me-2" />
+                  Twitter
+                </DropdownItem>
+              </li>
+              <li>
+                <DropdownItem href="#">
+                  <FaFacebookSquare className="me-2" />
+                  Facebook
+                </DropdownItem>
+              </li>
+              <li>
+                <DropdownItem href="#">
+                  <FaLinkedin className="me-2" />
+                  LinkedIn
+                </DropdownItem>
+              </li>
+              <li>
+                <DropdownItem href="#">
+                  <FaCopy className="me-2" />
+                  Copy link
+                </DropdownItem>
+              </li>
+            </DropdownMenu>
+          </Dropdown>
+        </div>
+        <div className="mt-3 d-sm-flex justify-content-sm-between">
+          <Button
+            variant="outline-primary"
+            className="mb-0"
+            onClick={onShowCurriculum} // ✅ giữ nguyên, logic xử lý ở parent
+          >
+            Free trial
+          </Button>
+          &nbsp;
+          <Button variant="success" className="mb-0" onClick={handleAddToCart}>
+            Buy course
+          </Button>
+        </div>
+      </CardBody>
+    </Card>
+  );
 };
+
+const RecentlyViewed = () => {
+  return (
+    <Card className="card-body shadow p-4 mb-4">
+      <h4 className="mb-3">Recently Viewed</h4>
+      <Row className="gx-3 mb-3">
+        <Col xs={4}>
+          <img className="rounded" src={courseImg21} alt="course" />
+        </Col>
+        <Col xs={8}>
+          <h6 className="mb-0">
+            <Link to="">Fundamentals of Business Analysis</Link>
+          </h6>
+          <ul className="list-group list-group-borderless mt-1 d-flex justify-content-between">
+            <li className="list-group-item px-0 d-flex justify-content-between">
+              <span className="text-success">{formatCurrency(130)}</span>
+              <span className="h6 fw-light">
+                4.5
+                <FaStar className="text-warning ms-1" />
+              </span>
+            </li>
+          </ul>
+        </Col>
+      </Row>
+      <Row className="gx-3">
+        <Col xs={4}>
+          <img className="rounded" src={courseImg18} alt="course" />
+        </Col>
+        <Col xs={8}>
+          <h6 className="mb-0">
+            <Link to="">The Complete Video Production Bootcamp</Link>
+          </h6>
+          <ul className="list-group list-group-borderless mt-1 d-flex justify-content-between">
+            <li className="list-group-item px-0 d-flex justify-content-between">
+              <span className="text-success">{formatCurrency(150)}</span>
+              <span className="h6 fw-light">
+                4.0
+                <FaStar className="text-warning ms-1" />
+              </span>
+            </li>
+          </ul>
+        </Col>
+      </Row>
+    </Card>
+  );
+};
+
+const PopularTags = () => {
+  const tags = [
+    'blog',
+    'business',
+    'theme',
+    'bootstrap',
+    'data science',
+    'web development',
+    'tips',
+    'machine learning'
+  ];
+  return (
+    <Card className="card-body shadow p-4">
+      <h4 className="mb-3">Popular Tags</h4>
+      <ul className="list-inline mb-0">
+        {tags.map((tag, idx) => (
+          <li className="list-inline-item" key={idx}>
+            <Button variant="outline-light" size="sm">
+              {tag}
+            </Button>
+          </li>
+        ))}
+      </ul>
+    </Card>
+  );
+};
+
 const CourseDetails = ({ course }) => {
   const [activeKey, setActiveKey] = useState('overview'); // tab mặc định
 
-  return <section className="pb-0 py-lg-5">
-    <Container>
-      <Row>
-        <Col lg={8}>
-          <Card className="shadow rounded-2 p-0">
-            {/* ✅ dùng activeKey + onSelect thay vì defaultActiveKey */}
-            <TabContainer activeKey={activeKey} onSelect={(k) => setActiveKey(k)}>
-              <CardHeader className="border-bottom px-4 py-3">
-                <Nav className="nav-pills nav-tabs-line py-0" id="course-pills-tab" role="tablist">
-                  <NavItem className="me-2 me-sm-4" role="presentation">
-                    <NavLink as="button" eventKey="overview" className="mb-2 mb-md-0" type="button" role="tab">
-                      Overview
-                    </NavLink>
-                  </NavItem>
-                  <NavItem className="me-2 me-sm-4" role="presentation">
-                    <NavLink as="button" eventKey="curriculum" className="mb-2 mb-md-0" type="button" role="tab">
-                      Curriculum
-                    </NavLink>
-                  </NavItem>
-                  <NavItem className="me-2 me-sm-4" role="presentation">
-                    <NavLink as="button" eventKey="instructor" className="mb-2 mb-md-0" type="button" role="tab">
-                      Instructor
-                    </NavLink>
-                  </NavItem>
-                  <NavItem className="me-2 me-sm-4" role="presentation">
-                    <NavLink as="button" eventKey="reviews" className="mb-2 mb-md-0" type="button" role="tab">
-                      Reviews
-                    </NavLink>
-                  </NavItem>
-                  <NavItem className="me-2 me-sm-4" role="presentation">
-                    <NavLink as="button" eventKey="faqs" className="mb-2 mb-md-0" type="button" role="tab">
-                      FAQs
-                    </NavLink>
-                  </NavItem>
-                  <NavItem className="me-2 me-sm-4" role="presentation">
-                    <NavLink as="button" eventKey="comment" className="mb-2 mb-md-0" type="button" role="tab">
-                      Comment
-                    </NavLink>
-                  </NavItem>
-                </Nav>
-              </CardHeader>
-              <CardBody className="p-4">
-                <TabContent className="pt-2" id="course-pills-tabContent">
-                  <TabPane eventKey="overview" className="fade" role="tabpanel">
-                    <Overview />
-                  </TabPane>
-                  <TabPane eventKey="curriculum" className="fade" role="tabpanel">
-                    <Curriculum coursePrice={course?.discountPrice || course?.price || 0} />
-                  </TabPane>
-                  <TabPane eventKey="instructor" className="fade" role="tabpanel">
-                    <Instructor instructor={course?.instructor} /> {/* (khuyến nghị) truyền course nếu cần */}
-                  </TabPane>
-                  <TabPane eventKey="reviews" className="fade" role="tabpanel">
-                    <Reviews />
-                  </TabPane>
-                  <TabPane eventKey="faqs" className="fade" role="tabpanel">
-                    <Faqs />
-                  </TabPane>
-                  <TabPane eventKey="comment" className="fade" role="tabpanel">
-                    <Comment />
-                  </TabPane>
-                </TabContent>
-              </CardBody>
-            </TabContainer>
-          </Card>
-        </Col>
-        <Col lg={4} className="pt-5 pt-lg-0">
-          <Row className="mb-5 mb-lg-0">
-            <Col md={6} lg={12}>
-              {/* ✅ truyền callback để nút Free trial đổi tab */}
-              <PricingCard
-                course={course}
-                onShowCurriculum={() => setActiveKey('curriculum')}
-              />
-              <Card className="card-body shadow p-4 mb-4">
-                <h4 className="mb-3">This course includes</h4>
-                <ul className="list-group list-group-borderless">
-                  <li className="list-group-item d-flex justify-content-between align-items-center">
-                    <span className="h6 fw-light mb-0">
-                      <FaBookOpen className="fa-fw text-primary me-1" />
-                      Lectures
-                    </span>
-                    <span>{course?.lecturesCount}</span>
-                  </li>
-                  <li className="list-group-item d-flex justify-content-between align-items-center">
-                    <span className="h6 fw-light mb-0">
-                      <FaClock className="fa-fw text-primary me-1" />
-                      Duration
-                    </span>
-                    <span>{course?.duration}h</span>
-                  </li>
-                  <li className="list-group-item d-flex justify-content-between align-items-center">
-                    <span className="h6 fw-light mb-0">
-                      <FaSignal className="fa-fw text-primary me-1" />
-                      Skills
-                    </span>
-                    <span>{course?.level}</span>
-                  </li>
-                  <li className="list-group-item d-flex justify-content-between align-items-center">
-                    <span className="h6 fw-light mb-0">
-                      <FaGlobe className="fa-fw text-primary me-1" />
-                      Language
-                    </span>
-                    <span>{course?.language}</span>
-                  </li>
-                  <li className="list-group-item d-flex justify-content-between align-items-center">
-                    <span className="h6 fw-light mb-0">
-                      <FaMedal className="fa-fw text-primary me-1" />
-                      Certificate
-                    </span>
-                    <span>Yes</span>
-                  </li>
-                </ul>
-              </Card>
-            </Col>
-            <Col md={6} lg={12}>
-              <RecentlyViewed />
-              <PopularTags />
-            </Col>
-          </Row>
-        </Col>
-      </Row>
-    </Container>
-  </section>;
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
+  // 🔹 state check sở hữu
+  const [owned, setOwned] = useState(false);
+
+  useEffect(() => {
+    const checkOwned = async () => {
+      if (!backendUrl || !id) return;
+
+      try {
+        // API student my-course-by-id: bạn đã có trong studentController
+        const { data } = await axios.get(
+          `${backendUrl}/api/student/my-courses/${id}`,
+          { withCredentials: true }
+        );
+
+        if (data?.success && data.course) {
+          setOwned(true);
+        } else {
+          setOwned(false);
+        }
+      } catch (err) {
+        // 401 / 403 / 404 => coi như chưa sở hữu
+        setOwned(false);
+      }
+    };
+
+    checkOwned();
+  }, [backendUrl, id]);
+
+  // 🔹 handle đổi tab
+  const handleSelectTab = (k) => {
+    if (!k) return;
+
+    // nếu user đã mua course và bấm Curriculum -> chuyển sang trang học
+    if (k === 'curriculum' && owned) {
+      const courseId = course?._id || id;
+      if (courseId) {
+        navigate(`/student/courses/${courseId}`);
+        return;
+      }
+    }
+
+    setActiveKey(k);
+  };
+
+  return (
+    <section className="pb-0 py-lg-5">
+      <Container>
+        <Row>
+          <Col lg={8}>
+            <Card className="shadow rounded-2 p-0">
+              {/* ✅ dùng activeKey + handleSelectTab */}
+              <TabContainer activeKey={activeKey} onSelect={handleSelectTab}>
+                <CardHeader className="border-bottom px-4 py-3">
+                  <Nav
+                    className="nav-pills nav-tabs-line py-0"
+                    id="course-pills-tab"
+                    role="tablist"
+                  >
+                    <NavItem className="me-2 me-sm-4" role="presentation">
+                      <NavLink
+                        as="button"
+                        eventKey="overview"
+                        className="mb-2 mb-md-0"
+                        type="button"
+                        role="tab"
+                      >
+                        Overview
+                      </NavLink>
+                    </NavItem>
+                    <NavItem className="me-2 me-sm-4" role="presentation">
+                      <NavLink
+                        as="button"
+                        eventKey="curriculum"
+                        className="mb-2 mb-md-0"
+                        type="button"
+                        role="tab"
+                      >
+                        Curriculum
+                      </NavLink>
+                    </NavItem>
+                    <NavItem className="me-2 me-sm-4" role="presentation">
+                      <NavLink
+                        as="button"
+                        eventKey="instructor"
+                        className="mb-2 mb-md-0"
+                        type="button"
+                        role="tab"
+                      >
+                        Instructor
+                      </NavLink>
+                    </NavItem>
+                    <NavItem className="me-2 me-sm-4" role="presentation">
+                      <NavLink
+                        as="button"
+                        eventKey="reviews"
+                        className="mb-2 mb-md-0"
+                        type="button"
+                        role="tab"
+                      >
+                        Reviews
+                      </NavLink>
+                    </NavItem>
+                    <NavItem className="me-2 me-sm-4" role="presentation">
+                      <NavLink
+                        as="button"
+                        eventKey="faqs"
+                        className="mb-2 mb-md-0"
+                        type="button"
+                        role="tab"
+                      >
+                        FAQs
+                      </NavLink>
+                    </NavItem>
+                    <NavItem className="me-2 me-sm-4" role="presentation">
+                      <NavLink
+                        as="button"
+                        eventKey="comment"
+                        className="mb-2 mb-md-0"
+                        type="button"
+                        role="tab"
+                      >
+                        Comment
+                      </NavLink>
+                    </NavItem>
+                  </Nav>
+                </CardHeader>
+                <CardBody className="p-4">
+                  <TabContent className="pt-2" id="course-pills-tabContent">
+                    <TabPane eventKey="overview" className="fade" role="tabpanel">
+                      <Overview />
+                    </TabPane>
+
+                    {/* ⚠ Tab Curriculum vẫn render bình thường  */}
+                    <TabPane eventKey="curriculum" className="fade" role="tabpanel">
+                      <Curriculum
+                        coursePrice={
+                          course?.discountPrice || course?.price || 0
+                        }
+                      />
+                    </TabPane>
+
+                    <TabPane eventKey="instructor" className="fade" role="tabpanel">
+                      <Instructor instructor={course?.instructor} />
+                    </TabPane>
+                    <TabPane eventKey="reviews" className="fade" role="tabpanel">
+                      <Reviews />
+                    </TabPane>
+                    <TabPane eventKey="faqs" className="fade" role="tabpanel">
+                      <Faqs />
+                    </TabPane>
+                    <TabPane eventKey="comment" className="fade" role="tabpanel">
+                      <Comment />
+                    </TabPane>
+                  </TabContent>
+                </CardBody>
+              </TabContainer>
+            </Card>
+          </Col>
+          <Col lg={4} className="pt-5 pt-lg-0">
+            <Row className="mb-5 mb-lg-0">
+              <Col md={6} lg={12}>
+                {/* ✅ Free trial: nếu đã mua thì chuyển sang trang học, chưa mua thì chỉ bật tab curriculum */}
+                <PricingCard
+                  course={course}
+                  onShowCurriculum={() => {
+                    if (owned) {
+                      const courseId = course?._id || id;
+                      if (courseId) {
+                        navigate(`/student/courses/${courseId}`);
+                      }
+                    } else {
+                      setActiveKey('curriculum');
+                    }
+                  }}
+                />
+
+                <Card className="card-body shadow p-4 mb-4">
+                  <h4 className="mb-3">This course includes</h4>
+                  <ul className="list-group list-group-borderless">
+                    <li className="list-group-item d-flex justify-content-between align-items-center">
+                      <span className="h6 fw-light mb-0">
+                        <FaBookOpen className="fa-fw text-primary me-1" />
+                        Lectures
+                      </span>
+                      <span>{course?.lecturesCount}</span>
+                    </li>
+                    <li className="list-group-item d-flex justify-content-between align-items-center">
+                      <span className="h6 fw-light mb-0">
+                        <FaClock className="fa-fw text-primary me-1" />
+                        Duration
+                      </span>
+                      <span>{course?.duration}h</span>
+                    </li>
+                    <li className="list-group-item d-flex justify-content-between align-items-center">
+                      <span className="h6 fw-light mb-0">
+                        <FaSignal className="fa-fw text-primary me-1" />
+                        Skills
+                      </span>
+                      <span>{course?.level}</span>
+                    </li>
+                    <li className="list-group-item d-flex justify-content-between align-items-center">
+                      <span className="h6 fw-light mb-0">
+                        <FaGlobe className="fa-fw text-primary me-1" />
+                        Language
+                      </span>
+                      <span>{course?.language}</span>
+                    </li>
+                    <li className="list-group-item d-flex justify-content-between align-items-center">
+                      <span className="h6 fw-light mb-0">
+                        <FaMedal className="fa-fw text-primary me-1" />
+                        Certificate
+                      </span>
+                      <span>Yes</span>
+                    </li>
+                  </ul>
+                </Card>
+              </Col>
+              <Col md={6} lg={12}>
+                <RecentlyViewed />
+                <PopularTags />
+              </Col>
+            </Row>
+          </Col>
+        </Row>
+      </Container>
+    </section>
+  );
 };
+
 export default CourseDetails;
