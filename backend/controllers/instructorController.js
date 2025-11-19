@@ -328,7 +328,7 @@ export const getCourseEarnings = async (req, res) => {
     // validate ownership
     const course = await Course.findOne({ _id: id, isDeleted: false }).select('instructor');
     if (!course) return res.status(404).json({ success: false, message: "Course not found" });
-    if (!course.instructor?.ref?.equals(userId)) { 
+    if (!course.instructor?.ref?.equals(userId)) {
       return res.status(403).json({ success: false, message: "Unauthorized" });
     }
 
@@ -362,10 +362,10 @@ export const getCourseEarnings = async (req, res) => {
     // fill gaps (empty days/hours)
     const chartData = fillChartData(earnings, start, unit);
 
-    return res.json({ 
-      success: true, 
-      data: chartData, 
-      totalEarnings: earnings.reduce((acc, curr) => acc + curr.total, 0) 
+    return res.json({
+      success: true,
+      data: chartData,
+      totalEarnings: earnings.reduce((acc, curr) => acc + curr.total, 0)
     });
   } catch (error) {
     console.error(`Error fetching earnings for course (${req.params.id}):`, error);
@@ -400,7 +400,7 @@ export const getStudentsEnrolled = async (req, res) => {
         }
       },
       // Unwind is strictly safer to ensure we count the specific course instance
-      { $unwind: "$courses" }, 
+      { $unwind: "$courses" },
       {
         $match: {
           "courses.course": new mongoose.Types.ObjectId(id)
@@ -420,10 +420,10 @@ export const getStudentsEnrolled = async (req, res) => {
 
     const totalCount = enrollments.reduce((acc, curr) => acc + curr.total, 0);
 
-    return res.json({ 
-      success: true, 
-      data: chartData, 
-      totalEnrolled: totalCount 
+    return res.json({
+      success: true,
+      data: chartData,
+      totalEnrolled: totalCount
     });
   } catch (error) {
     console.error(`Error fetching enrollments for course (${req.params.id}):`, error);
@@ -436,7 +436,7 @@ const getDateConfig = (period) => {
   const now = new Date();
   const start = new Date();
   console.log(now);
-  
+
   let mongoFormat = ""; // How Mongo formats the date string (grouping ID)
   let unit = "";        // How we step through the loop (day, week, month, year)
 
@@ -452,7 +452,7 @@ const getDateConfig = (period) => {
       start.setDate(now.getDate() - 28); // Approx 4 weeks ago
       start.setHours(0, 0, 0, 0);
       // Group by Year and ISO Week number (e.g., "2023-46")
-      mongoFormat = "%Y-%V"; 
+      mongoFormat = "%Y-%V";
       unit = 'week';
       break;
 
@@ -477,7 +477,7 @@ const getDateConfig = (period) => {
       mongoFormat = "%Y-%m-%d";
       unit = 'day';
   }
-  
+
   return { start, mongoFormat, unit };
 };
 
@@ -485,7 +485,7 @@ const getDateConfig = (period) => {
 const fillChartData = (mongoData, start, unit) => {
   const results = [];
   // Clone ngày start để không làm thay đổi biến gốc bên ngoài
-  const current = new Date(start); 
+  const current = new Date(start);
   const now = new Date();
 
   // 1. Tạo Map để tra cứu nhanh O(1)
@@ -504,7 +504,7 @@ const fillChartData = (mongoData, start, unit) => {
   // Điều kiện: Chạy miễn là current chưa vượt quá now. 
   // Với 'week', thêm buffer nhỏ để đảm bảo tuần hiện tại được tính dù chưa hết tuần.
   while (current <= now || (unit === 'week' && current.getTime() < now.getTime() + 7 * 24 * 60 * 60 * 1000)) {
-    
+
     let label = "";
     let shouldBreak = false; // Cờ để thoát vòng lặp an toàn cho case Week
 
@@ -513,13 +513,13 @@ const fillChartData = (mongoData, start, unit) => {
       const year = current.getFullYear();
       const month = pad(current.getMonth() + 1);
       const day = pad(current.getDate());
-      label = `${year}-${month}-${day}`; 
+      label = `${year}-${month}-${day}`;
 
       results.push({ name: label, value: dataMap[label] || 0 });
-      
+
       // Tăng 1 ngày
       current.setDate(current.getDate() + 1);
-    } 
+    }
 
     else if (unit === 'month') {
       // Format: YYYY-MM (Local Time)
@@ -528,19 +528,19 @@ const fillChartData = (mongoData, start, unit) => {
       label = `${year}-${month}`;
 
       results.push({ name: label, value: dataMap[label] || 0 });
-      
+
       // Tăng 1 tháng
       current.setMonth(current.getMonth() + 1);
-    } 
+    }
 
     else if (unit === 'year') {
       // Format: YYYY
       label = current.getFullYear().toString();
       results.push({ name: label, value: dataMap[label] || 0 });
-      
+
       // Tăng 1 năm
       current.setFullYear(current.getFullYear() + 1);
-    } 
+    }
 
     else if (unit === 'week') {
       // Logic tính tuần thủ công để khớp với Mongo %V
@@ -549,10 +549,10 @@ const fillChartData = (mongoData, start, unit) => {
       const numberOfDays = Math.floor((current - oneJan) / (24 * 60 * 60 * 1000));
       const weekNum = Math.ceil((current.getDay() + 1 + numberOfDays) / 7);
       const weekString = pad(weekNum);
-      
+
       // Label khớp với Mongo: "2025-47"
-      label = `${year}-${weekString}`; 
-      
+      label = `${year}-${weekString}`;
+
       // Tìm trong map, nếu không có thử check label dạng "Week X" (tuỳ nhu cầu hiển thị)
       // Ở đây ta ưu tiên key khớp với Mongo ID
       const foundValue = dataMap[label] || 0;
@@ -565,7 +565,7 @@ const fillChartData = (mongoData, start, unit) => {
 
       // Logic break an toàn: Nếu ngày current mới đã vượt quá xa tương lai
       if (current > new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)) {
-         shouldBreak = true;
+        shouldBreak = true;
       }
       // Limit cứng 4-5 tuần nếu cần thiết (như code cũ của bạn)
       // if (results.length >= 5) shouldBreak = true;
@@ -573,10 +573,133 @@ const fillChartData = (mongoData, start, unit) => {
 
     // Check thoát vòng lặp thủ công nếu cần
     if (shouldBreak) break;
-    
+
     // Safety check: Tránh vòng lặp vô tận nếu logic tăng ngày bị lỗi
     if (results.length > 3660) break; // Max 10 năm days
   }
 
   return results;
+};
+
+// GET /api/instructor/courses/:id/students?page=&limit=&search=
+export const getCourseStudentsAndReviews = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    const keyword = req.query.search || '';
+    const userId = req.userId;
+
+    // verify instructor
+    const instructor = await Instructor.findOne({ user: userId });
+    if (!instructor) {
+      return res.status(403).json({ success: false, message: "Unauthorized" });
+    }
+
+    const course = await Course.findById(id);
+
+    // check if course exist
+    if (!course) {
+      return res.status(404).json({ success: false, message: "Course not found" });
+    }
+
+    // check ownership
+    if (!course.instructor.ref.equals(userId)) {
+      return res.status(403).json({ success: false, message: "Cannot access this course" });
+    }
+
+    // get students (from order)
+    const students = await Order.aggregate([
+      { $match: { status: "completed" } },  // filter out unrelated orders
+      { $unwind: "$courses" },  // from { abc, courses: [course: A, course: B] } to {abc, course: {course: A}}, {abc, couses: {course: B}}
+      { $match: { "courses.course": new mongoose.Types.ObjectId(id) } },  // filter out unrelated courses
+      { // get student info
+        $lookup: {
+          from: "users",
+          localField: "user",
+          foreignField: "_id",
+          as: "student"
+        }
+      },
+      { $unwind: "$student" },
+      { // get student review
+        $lookup: {
+          from: "reviews",
+          let: { userId: "$user", courseId: "$courses.course" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$user", "$$userId"] },
+                    { $eq: ["$course", "$$courseId"] },
+                    { $eq: ["isDeleted", false] }
+                  ]
+                }
+              }
+            },
+            {
+              $project: {
+                _id: 0,
+                rating: 1,
+                description: 1,
+                updatedAt: 1,
+              }
+            }
+          ],
+          as: "review"
+        }
+      },
+      { // shaping what to return
+        $project: {
+          _id: 0,
+          student: {
+            _id: "$student._id",
+            name: "$student.name",
+            email: "$student.email",
+            pfpImg: "$student.pfpImg",
+            enrolledAt: "$updatedAt"
+          },
+          review: { $ifNull: [{ $arrayElemAt: ["$review", 0] }, null] }  // get first review or null (only 1 review/user/course)
+        }
+      }
+    ]);
+
+    // get student progress and percentage #TODO
+    for (let i = 0; i < students.length; i++) students[i].student.progress = 0;
+
+    let filtered = students;
+
+    // search
+    if (keyword) {
+      const fuse = new Fuse(students, {
+        keys: ["student.name"],
+        threshold: 0.3
+      });
+
+      filtered = fuse.search(keyword).map(i => i.item);
+    }
+
+    // paging
+    const total = filtered.length;
+    const paged = filtered.slice(skip, skip + limit);
+
+    return res.json({
+      success: true,
+      students: paged,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    console.error("Get course student review: ", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while fetching students and reviews"
+    });
+  }
 };

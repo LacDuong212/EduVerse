@@ -72,3 +72,40 @@ export default function useMyCourseDetail() {
 
   return { course, loading, error, refetch: fetchCourse, id };
 }
+
+export const useCourseStudentList = (courseId, page = 1, limit = 10, search = '') => {
+  const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+
+  const fetchStudents = useCallback(async () => {
+    if (!courseId) return;
+    setLoading(true);
+    try {
+      const { data } = await axios.get(`${backendUrl}/api/instructor/courses/${courseId}/students`, {
+        params: { page, limit, search },
+        withCredentials: true,
+      });
+
+      if (data.success) {
+        setStudents(data.students);
+        setTotal(data.pagination.total);
+        setTotalPages(data.pagination.totalPages);
+      } else {
+        setError('Failed to fetch students');
+      }
+    } catch (err) {
+      setError(err.message || 'An unexpected error occurred.');
+    } finally {
+      setLoading(false);
+    }
+  }, [courseId, page, limit, search]);
+
+  useEffect(() => {
+    fetchStudents();
+  }, [fetchStudents]);
+
+  return { students, total, totalPages, loading, error, refetch: fetchStudents };
+};

@@ -1,10 +1,9 @@
 import { useCourseEarnings, useCourseEnrollments } from '../useMyCourseDetail';
-import { currency } from '@/context/constants';
+import { formatCurrency } from '@/utils/currency';
 import { useMemo } from 'react';
 import ReactApexChart from 'react-apexcharts';
-import { Card, CardBody, CardHeader, Col, Row, Spinner } from 'react-bootstrap';
-import { BsArrowUp } from 'react-icons/bs';
-import { courseEarningChart, courseEarningChart2 } from '../data';
+import { Card, CardBody, CardHeader, Col, Row } from 'react-bootstrap';
+import { BsArrowUp, BsArrowDown, BsDash } from 'react-icons/bs';
 
 
 // helper: get color variables safely
@@ -50,18 +49,46 @@ const getChartOptions = (seriesData, categories, colorVar) => {
   };
 };
 
+const getChangeDisplay = (dataArray, isCurrency = false) => {
+  if (!dataArray || dataArray.length < 2) return '+0 vs. last month';
+
+  const current = dataArray[dataArray.length - 1].value;
+  const previous = dataArray[dataArray.length - 2].value;
+  const diff = current - previous;
+
+  if (diff > 0) {
+    return (
+      <>
+        <span className="text-success me-1">+{isCurrency ? formatCurrency(diff) : diff} <BsArrowUp /></span> vs. last month
+      </>
+    );
+  } else if (diff < 0) {
+    return (
+      <>
+        <span className="text-danger me-1">{isCurrency ? formatCurrency(diff) : diff} <BsArrowDown /></span> vs. last month
+      </>
+    );
+  } else {
+    return (
+      <>
+        <span className="text-secondary me-1">0 <BsDash /></span> vs. last month
+      </>
+    );
+  }
+};
+
 const CourseStats = ({ col = 6, courseId = '' }) => {
   // 1. Fetch Data
-  const { 
-    data: earningsData, 
-    total: totalRevenue, 
-    loading: earningsLoading 
+  const {
+    data: earningsData,
+    total: totalRevenue,
+    loading: earningsLoading
   } = useCourseEarnings(courseId, 'month');
 
-  const { 
-    data: enrollmentsData, 
-    total: totalEnrollments, 
-    loading: enrollmentsLoading 
+  const {
+    data: enrollmentsData,
+    total: totalEnrollments,
+    loading: enrollmentsLoading
   } = useCourseEnrollments(courseId, 'month');
 
   // 2. Process Earnings Data
@@ -69,12 +96,12 @@ const CourseStats = ({ col = 6, courseId = '' }) => {
     if (!earningsData || earningsData.length === 0) return null;
 
     // Map 'value' for Y-axis
-    const values = earningsData.map(item => item.value); 
-    
+    const values = earningsData.map(item => item.value);
+
     // Map 'name' (2024-11) to 'MM/yy' (11/24) for X-axis
     const categories = earningsData.map(item => {
-        const [year, month] = item.name.split('-'); 
-        return `${month}/${year}`; 
+      const [year, month] = item.name.split('-');
+      return `${month}/${year}`;
     });
 
     return getChartOptions(values, categories, '--bs-success');
@@ -85,10 +112,10 @@ const CourseStats = ({ col = 6, courseId = '' }) => {
     if (!enrollmentsData || enrollmentsData.length === 0) return null;
 
     const values = enrollmentsData.map(item => item.value);
-    
+
     const categories = enrollmentsData.map(item => {
-        const [year, month] = item.name.split('-');
-        return `${month}/${year}`;
+      const [year, month] = item.name.split('-');
+      return `${month}/${year}`;
     });
 
     return getChartOptions(values, categories, '--bs-purple');
@@ -104,10 +131,11 @@ const CourseStats = ({ col = 6, courseId = '' }) => {
               <h5 className="card-header-title mb-0">Total Course Earning</h5>
             </CardHeader>
             <CardBody className="p-0">
-              <div className="d-sm-flex justify-content-between p-4">
-                <h4 className="text-blue mb-0">
-                  {earningsLoading ? 'Loading...' : `${totalRevenue}${currency}`}
+              <div className="d-sm-flex justify-content-between p-3">
+                <h4 className="mb-0 me-3">
+                  {earningsLoading ? 'Loading...' : formatCurrency(totalRevenue)}
                 </h4>
+                <p className="mb-0">{getChangeDisplay(earningsData, true)}</p>
               </div>
               {!earningsLoading && earningsChartConfig ? (
                 <ReactApexChart
@@ -128,10 +156,11 @@ const CourseStats = ({ col = 6, courseId = '' }) => {
               <h5 className="card-header-title mb-0">New Enrollment This Month</h5>
             </CardHeader>
             <CardBody className="p-0">
-              <div className="d-sm-flex justify-content-between p-4">
-                <h4 className="text-blue mb-0">
-                   {enrollmentsLoading ? 'Loading...' : totalEnrollments}
+              <div className="d-sm-flex justify-content-between p-3">
+                <h4 className="mb-0">
+                  {enrollmentsLoading ? 'Loading...' : totalEnrollments}
                 </h4>
+                <p className="mb-0">{getChangeDisplay(enrollmentsData)}</p>
               </div>
               {!enrollmentsLoading && enrollmentsChartConfig ? (
                 <ReactApexChart

@@ -250,7 +250,7 @@ const MyCourses = ({
 
             <div className="d-sm-flex justify-content-sm-between align-items-sm-center mt-4 mt-sm-3">
               <p className="mb-0 text-center text-sm-start">
-                Showing {(page - 1) * limit + 1} to{" "}
+                Showing {totalCourses === 0 ? 0 : (page - 1) * limit + 1} to{" "}
                 {Math.min(page * limit, totalCourses)} of {totalCourses} entries
               </p>
               <nav
