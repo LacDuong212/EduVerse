@@ -2,6 +2,7 @@ import authReducer from './authSlice';
 import adminReducer from './adminSlice';
 import coursesReducer from './coursesSlice';
 import cartReducer from './cartSlice';
+import wishlistReducer from './wishlistSlice';
 import { combineReducers } from "redux";
 import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";      // defaults to localStorage for web
@@ -13,6 +14,7 @@ const rootReducer = combineReducers({
   admin: adminReducer,
   courses: coursesReducer,
   cart: cartReducer,
+  wishlist: wishlistReducer
 });
 
 // choose what to persist

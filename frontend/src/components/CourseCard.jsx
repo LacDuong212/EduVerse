@@ -1,25 +1,67 @@
 import { Card, CardBody, CardFooter, CardTitle } from 'react-bootstrap';
 import { FaRegClock, FaRegHeart, FaRegStar, FaHeart, FaStar, FaStarHalfAlt, FaTable } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import useToggle from '@/hooks/useToggle';
 import { formatCurrency } from '@/utils/currency';
+
+import { useDispatch, useSelector } from 'react-redux';
+import { addToWishlist, removeFromWishlist } from '@/redux/wishlistSlice';
 
 const clamp = (n, min, max) => Math.max(min, Math.min(max, n ?? 0));
 
 const CourseCard = ({ course }) => {
-  const { isTrue: isOpen, toggle } = useToggle();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  // --------- Safe mapping & fallbacks ----------
+  const { userData } = useSelector((state) => state.auth);
+
+  const wishlistItems = useSelector((state) => state.wishlist.items || []);
+
+  const currentCardId = course._id
+    ? course._id.toString()
+    : (course.courseId && typeof course.courseId === 'object' ? course.courseId._id?.toString() : course.courseId?.toString());
+
+  const isWishlisted = wishlistItems.some((item) => {
+    if (!item || !item.courseId) return false;
+
+    let idInWishlist;
+
+    if (typeof item.courseId === 'string') {
+      idInWishlist = item.courseId;
+    } else {
+      idInWishlist = item.courseId._id || item.courseId.courseId || item.courseId;
+    }
+
+    return idInWishlist?.toString() === currentCardId?.toString();
+  });
+
+  const handleWishlistToggle = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!userData?._id) {
+      alert("Please login to use this feature!");
+      return;
+    }
+
+    if (!currentCardId) {
+      console.error("Cannot toggle wishlist: Missing Course ID");
+      return;
+    }
+
+    if (isWishlisted) {
+      dispatch(removeFromWishlist({ userId: userData._id, courseId: currentCardId }));
+    } else {
+      dispatch(addToWishlist({ userId: userData._id, course: { ...course, _id: currentCardId } }));
+    }
+  };
+
   const image =
     course.image ||
     course.thumbnail ||
     'https://via.placeholder.com/640x360?text=Course';
 
   const title = course.title || course.name || 'Untitled';
-  const description = course.description || course.subtitle || '';
 
-  // rating: chấp nhận {average} hoặc {star} hoặc số thô
   const rawStar =
     typeof course?.rating === 'object'
       ? (course?.rating?.average ?? course?.rating?.star)
@@ -31,6 +73,7 @@ const CourseCard = ({ course }) => {
   const fullStars = Math.floor(star);
   const hasHalf = Number.isFinite(star) && !Number.isInteger(star);
   const emptyStars = Math.max(0, 5 - Math.ceil(star));
+
   const subtitle = course.subtitle || course._raw?.subtitle || '';
   const price = Number(course.price ?? course._raw?.price ?? 0);
   const discountPrice = course.discountPrice != null
@@ -42,7 +85,6 @@ const CourseCard = ({ course }) => {
   const discountPercent = hasDiscount
     ? Math.round(((price - discountPrice) / price) * 100)
     : 0;
-  // duration: ưu tiên số -> render " hours"; nếu là chuỗi thì in nguyên
   const rawDuration =
     course.duration ?? course.totalDuration ?? course.totalHours ?? null;
   const durationText =
@@ -50,22 +92,19 @@ const CourseCard = ({ course }) => {
       ? `${rawDuration} hours`
       : (typeof rawDuration === 'string' ? rawDuration : '—');
 
-  // lectures: hỗ trợ nhiều tên trường
   const lectures =
     course.lectures ?? course.lecturesCount ?? course.lectureCount ?? 0;
 
-  // badge fallback
   const badge =
     course.badge || {
       class: 'bg-primary',
       text: course.level || course.category || 'Course',
     };
 
-  // điều hướng
-  const id = course.id || course._id || course.courseId;
   const handleClick = () => {
-    if (id) navigate(`/courses/${id}`);
+    if (currentCardId) navigate(`/courses/${currentCardId}`);
   };
+
   const priceNode = (() => {
     if (isFree) {
       return <h5 className="text-success mb-0">Free</h5>;
@@ -73,19 +112,19 @@ const CourseCard = ({ course }) => {
 
     if (hasDiscount) {
       return (
-       <div className="d-flex flex-column align-items-end text-end ms-auto">
-  <div className="small text-muted text-decoration-line-through">
-    {formatCurrency(price)}
-  </div>
-  <div className="d-flex align-items-center justify-content-end gap-2">
-    <small className="badge bg-danger-subtle text-danger me-1">
-      -{discountPercent}%
-    </small>
-    <h5 className="text-success mb-0">
-      {formatCurrency(discountPrice)}
-    </h5>
-  </div>
-</div>
+        <div className="d-flex flex-column align-items-end text-end ms-auto">
+          <div className="small text-muted text-decoration-line-through">
+            {formatCurrency(price)}
+          </div>
+          <div className="d-flex align-items-center justify-content-end gap-2">
+            <small className="badge bg-danger-subtle text-danger me-1">
+              -{discountPercent}%
+            </small>
+            <h5 className="text-success mb-0">
+              {formatCurrency(discountPrice)}
+            </h5>
+          </div>
+        </div>
       );
     }
 
@@ -95,7 +134,6 @@ const CourseCard = ({ course }) => {
       </h5>
     );
   })();
-  console.log('course data:', course);
 
   // --------------------------------------------
   return (
@@ -114,12 +152,12 @@ const CourseCard = ({ course }) => {
         <div className="flex-grow-1">
           <div className="d-flex justify-content-between mb-2">
             <span className={`badge ${badge.class} bg-opacity-60`}>{badge.text}</span>
-            <span role="button" className="h6 mb-0" onClick={toggle}>
-              {isOpen ? <FaHeart fill="red" /> : <FaRegHeart />}
+            <span role="button" className="h6 mb-0" onClick={handleWishlistToggle}>
+              {isWishlisted ? <FaHeart fill="red" /> : <FaRegHeart />}
             </span>
           </div>
 
-          <CardTitle onClick={handleClick} style={{ cursor: id ? 'pointer' : 'default' }}>
+          <CardTitle onClick={handleClick} style={{ cursor: currentCardId ? 'pointer' : 'default' }}>
             {title}
           </CardTitle>
 
