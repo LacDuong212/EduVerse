@@ -39,6 +39,7 @@ const Checkout = lazy(() => import('@/app/shop/checkout/page'));
 const PaymentSuccess = lazy(() => import('@/app/shop/payment-result/success/page'));
 const PaymentFailed = lazy(() => import('@/app/shop/payment-result/failed/page'));
 import CartDetails from "../app/shop/cart/page";
+import WishList from "../app/shop/wishlist/page";
 import StudentMyCourses from '../app/student/my-courses';
 import StudentAccount from '../app/student/account';
 import LearningCourse from '../app/student/learning/page';
@@ -237,6 +238,11 @@ export const studentRoutes = [{
   name: 'My Cart',
   isNested: false,
   element: <CartDetails />
+}, {
+  path: '/student/wishlist',
+  name: 'Wishlist',
+  isNested: false,
+  element: <WishList />
 },{
    path: '/student/courses/:courseId',
   name: 'Learning Course',
