@@ -121,8 +121,8 @@ const MarketingCourse = ({ col = 6, courseData }) => {
                   <li className="list-group-item">
                     <span>Updated At:</span>
                     <span className="h6 mb-0">
-                      {courseData?.createdAt
-                        ? new Date(courseData?.createdAt).toLocaleString("en-GB", {
+                      {courseData?.updatedAt
+                        ? new Date(courseData?.updatedAt).toLocaleString("en-GB", {
                           year: "numeric",
                           month: "2-digit",
                           day: "2-digit",

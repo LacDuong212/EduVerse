@@ -5,9 +5,10 @@ const CartPage = () => {
   return <>
       <PageMetaData title="Shop Cart" />
       <main>
-        {/* <Banner /> */}
+        <Banner />
         <CartDetails />
       </main>
     </>;
 };
+
 export default CartPage;

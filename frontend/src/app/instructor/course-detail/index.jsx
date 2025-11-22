@@ -1,7 +1,7 @@
 import useMyCourseDetail from './useMyCourseDetail';
 import CourseStats from './components/CourseStats';
 import MarketingCourse from './components/MarketingCourse';
-import StudentReview from './components/StudentReview';
+import CourseStudentList from './components/CourseStudentList';
 import { Col, Container, Row } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 
@@ -34,7 +34,7 @@ const InstructorCourseDetail = () => {
       <Row className="g-4">
         <MarketingCourse col={7} courseData={course} />
         <CourseStats col={5} courseId={course?._id} />
-        <StudentReview col={12} courseId={course?._id} />
+        <CourseStudentList col={12} courseId={course?._id} />
       </Row>
     </Container>
   );

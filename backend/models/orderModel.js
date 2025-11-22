@@ -19,8 +19,7 @@ const orderSchema = new mongoose.Schema({
     enum: ["pending", "completed", "refunded", "cancelled"],
     default: "pending",
   },
-  createdAt: { type: Date, default: Date.now },
   expiresAt: { type: Date },  // for pending orders, 1h expiry
-});
+}, { timestamps: true });
 
 export default mongoose.model("Order", orderSchema);
