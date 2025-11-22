@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setCart } from "@/redux/cartSlice";
 
 export default function useCourseDetail() {
@@ -13,41 +13,66 @@ export default function useCourseDetail() {
   const [error, setError] = useState(null);
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-  // 👉 NEW: state kiểm tra sở hữu
+  // 🔹 lấy user để biết đã login hay chưa
+  const user = useSelector((state) => state.auth.userData);
+
+  // 👉 state kiểm tra sở hữu
   const [owned, setOwned] = useState(false);
   const [ownedChecking, setOwnedChecking] = useState(false);
 
   const fetchCourse = useCallback(async () => {
     if (!id || !backendUrl) return;
+
     setLoading(true);
     setError(null);
+
     try {
+      // 🔹 API public: luôn gọi được cho guest
       const { data } = await axios.get(`${backendUrl}/api/courses/${id}`);
       if (data && data.success) setCourse(data.course);
-
-      await axios.post(
-        `${backendUrl}/api/courses/${id}/viewed`,
-        {},
-        { withCredentials: true }
-      );
     } catch (err) {
+      // ❗ chỉ coi lỗi GET course là lỗi thật
       setError(err);
       console.error(err);
     } finally {
       setLoading(false);
     }
-  }, [id, backendUrl]);
+
+    // 🔹 ghi nhận lượt xem: chỉ gọi nếu user đã login
+    if (user) {
+      try {
+        await axios.post(
+          `${backendUrl}/api/courses/${id}/viewed`,
+          {},
+          { withCredentials: true }
+        );
+      } catch (err) {
+        // 401/403 thì bỏ qua, không ảnh hưởng UI
+        const status = err?.response?.status;
+        if (status !== 401 && status !== 403) {
+          console.warn("Failed to mark course as viewed:", err);
+        }
+      }
+    }
+  }, [id, backendUrl, user]);
 
   useEffect(() => {
     fetchCourse();
   }, [fetchCourse]);
 
-  // 👉 NEW: check xem user đã mua course này chưa
+  // 👉 check xem user đã mua course này chưa (chỉ khi login)
   const checkOwned = useCallback(async () => {
     if (!id || !backendUrl) return;
+
+    // chưa login -> chắc chắn chưa sở hữu, KHÔNG gọi API
+    if (!user) {
+      setOwned(false);
+      setOwnedChecking(false);
+      return;
+    }
+
     setOwnedChecking(true);
     try {
-      // bạn đã làm API /api/student/my-courses/:courseId (theo studentController trước đó)
       const { data } = await axios.get(
         `${backendUrl}/api/student/my-courses/${id}`,
         { withCredentials: true }
@@ -64,7 +89,7 @@ export default function useCourseDetail() {
     } finally {
       setOwnedChecking(false);
     }
-  }, [id, backendUrl]);
+  }, [id, backendUrl, user]);
 
   useEffect(() => {
     checkOwned();
@@ -124,7 +149,7 @@ export default function useCourseDetail() {
     refetch: fetchCourse,
     relatedCourses,
     handleAddToCart,
-    owned,          // 👉 đã mua hay chưa
-    ownedChecking,  // 👉 đang check hay không (nếu bạn muốn hiển thị spinner)
+    owned,
+    ownedChecking,
   };
 }
