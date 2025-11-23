@@ -173,7 +173,7 @@ const CourseStudentList = ({ col = 12, courseId = '' }) => {
         <CardFooter className="bg-transparent">
           <div className="d-sm-flex justify-content-sm-between align-items-sm-center">
             <p className="mb-0 text-center text-sm-start">
-              Showing {total === 0 ? 0 : start} to {end} of {total} entries
+              Showing {total === 0 ? 0 : start} to {end} of {total} students
             </p>
             <nav aria-label="navigation">
               <ul className="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">

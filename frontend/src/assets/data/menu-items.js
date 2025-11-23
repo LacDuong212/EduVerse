@@ -153,12 +153,6 @@ export const INSTRUCTOR_MENU_ITEMS = [{
   url: '/instructor/students',
   parentKey: 'instructor'
 }, {
-  key: 'reviews',
-  label: 'Reviews',
-  icon: BsStar,
-  url: '/instructor/reviews',
-  parentKey: 'instructor'
-}, {
   key: 'balance',
   label: 'Balance',
   icon: BsWallet2,

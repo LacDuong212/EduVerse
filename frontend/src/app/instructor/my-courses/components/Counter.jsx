@@ -1,7 +1,7 @@
 import { Col, Row } from 'react-bootstrap';
 import CountUp from 'react-countup';
 import { BsLightningCharge, BsPauseCircle } from "react-icons/bs";
-import { FaLayerGroup } from "react-icons/fa";
+import { FaBook } from "react-icons/fa";
 
 
 const Counter = ({ totalCourses, activeCourses, inactiveCourses }) => {
@@ -11,7 +11,7 @@ const Counter = ({ totalCourses, activeCourses, inactiveCourses }) => {
         <div className="d-flex justify-content-center gap-5 flex-wrap">
           <div className="d-flex align-items-center">
             <div className="icon-lg fs-4 text-info bg-info bg-opacity-25 rounded flex-centered">
-              <FaLayerGroup />
+              <FaBook />
             </div>
             <div className="ms-3 text-start">
               <h4 className="purecounter fw-bold mb-0">

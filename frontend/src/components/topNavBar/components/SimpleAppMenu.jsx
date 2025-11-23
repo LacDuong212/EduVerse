@@ -26,7 +26,7 @@ const SimpleAppMenu = ({ mobileMenuOpen, menuClassName, topMenuItems }) => {
     <Collapse in={mobileMenuOpen} className="navbar-collapse collapse mx-3 rounded-3">
       <div>
         {/* Main nav */}
-        <ul className={clsx('navbar-nav d-flex flex-row gap-3 justify-content-center', menuClassName)}>
+        <ul className={clsx('nav d-flex flex-row gap-3 py-2 justify-content-center', menuClassName)}>
           {topMenuItems.map((item) => (
             <li key={item.key} className="nav-item">
               <Link
