@@ -43,14 +43,10 @@ import {
 } from 'react-icons/fa';
 import courseImg18 from '@/assets/images/courses/4by3/18.jpg';
 import courseImg21 from '@/assets/images/courses/4by3/21.jpg';
-import { useState, useEffect } from 'react'; // 🔹 thêm useEffect
-import { Link, useNavigate, useParams } from 'react-router-dom'; // 🔹 thêm useNavigate, useParams
-import useCourseDetail from '../useCourseDetail';
-import axios from 'axios'; // 🔹 thêm axios
+import { useState } from 'react'; // 🔹 chỉ còn useState
+import { Link, useNavigate, useParams } from 'react-router-dom';
 
-const PricingCard = ({ course, onShowCurriculum }) => {
-  const { handleAddToCart } = useCourseDetail();
-
+const PricingCard = ({ course, onShowCurriculum, onAddToCart }) => {
   const getEmbedUrl = (url) => {
     if (!url) return null;
 
@@ -175,7 +171,11 @@ const PricingCard = ({ course, onShowCurriculum }) => {
             Free trial
           </Button>
           &nbsp;
-          <Button variant="success" className="mb-0" onClick={handleAddToCart}>
+          <Button
+            variant="success"
+            className="mb-0"
+            onClick={onAddToCart} // ✅ dùng handler truyền từ parent
+          >
             Buy course
           </Button>
         </div>
@@ -257,42 +257,14 @@ const PopularTags = () => {
   );
 };
 
-const CourseDetails = ({ course }) => {
+// 🔹 nhận thêm owned + onAddToCart từ page
+const CourseDetails = ({ course, owned, onAddToCart }) => {
   const [activeKey, setActiveKey] = useState('overview'); // tab mặc định
 
   const navigate = useNavigate();
   const { id } = useParams();
-  const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-  // 🔹 state check sở hữu
-  const [owned, setOwned] = useState(false);
-
-  useEffect(() => {
-    const checkOwned = async () => {
-      if (!backendUrl || !id) return;
-
-      try {
-        // API student my-course-by-id: bạn đã có trong studentController
-        const { data } = await axios.get(
-          `${backendUrl}/api/student/my-courses/${id}`,
-          { withCredentials: true }
-        );
-
-        if (data?.success && data.course) {
-          setOwned(true);
-        } else {
-          setOwned(false);
-        }
-      } catch (err) {
-        // 401 / 403 / 404 => coi như chưa sở hữu
-        setOwned(false);
-      }
-    };
-
-    checkOwned();
-  }, [backendUrl, id]);
-
-  // 🔹 handle đổi tab
+  // 🔹 handle đổi tab (giữ nguyên logic)
   const handleSelectTab = (k) => {
     if (!k) return;
 
@@ -397,7 +369,11 @@ const CourseDetails = ({ course }) => {
                     </TabPane>
 
                     {/* ⚠ Tab Curriculum vẫn render bình thường  */}
-                    <TabPane eventKey="curriculum" className="fade" role="tabpanel">
+                    <TabPane
+                      eventKey="curriculum"
+                      className="fade"
+                      role="tabpanel"
+                    >
                       <Curriculum
                         coursePrice={
                           course?.discountPrice || course?.price || 0
@@ -405,10 +381,18 @@ const CourseDetails = ({ course }) => {
                       />
                     </TabPane>
 
-                    <TabPane eventKey="instructor" className="fade" role="tabpanel">
+                    <TabPane
+                      eventKey="instructor"
+                      className="fade"
+                      role="tabpanel"
+                    >
                       <Instructor instructor={course?.instructor} />
                     </TabPane>
-                    <TabPane eventKey="reviews" className="fade" role="tabpanel">
+                    <TabPane
+                      eventKey="reviews"
+                      className="fade"
+                      role="tabpanel"
+                    >
                       <Reviews />
                     </TabPane>
                     <TabPane eventKey="faqs" className="fade" role="tabpanel">
@@ -438,6 +422,7 @@ const CourseDetails = ({ course }) => {
                       setActiveKey('curriculum');
                     }
                   }}
+                  onAddToCart={onAddToCart}
                 />
 
                 <Card className="card-body shadow p-4 mb-4">

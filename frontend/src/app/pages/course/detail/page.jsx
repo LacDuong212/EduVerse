@@ -3,8 +3,16 @@ import CourseDetails from './components/CourseDetails';
 import ListedCourses from './components/ListedCourses';
 import PageIntro from './components/PageIntro';
 import useCourseDetail from './useCourseDetail';
+
 const CourseDetail = () => {
-  const { course, loading, error, refetch } = useCourseDetail();
+  const {
+    course,
+    loading,
+    error,
+    refetch,
+    owned,            // 🔹 lấy thêm từ hook
+    handleAddToCart,  // 🔹 lấy thêm từ hook
+  } = useCourseDetail();
 
   if (loading) {
     return <div>Loading...</div>;
@@ -19,13 +27,21 @@ const CourseDetail = () => {
     );
   }
 
-  return <>
+  return (
+    <>
       <PageMetaData title="Course Detail" />
       <main>
         <PageIntro course={course} />
-        <CourseDetails course={course} />
-        <ListedCourses  />
+        {/* 🔹 truyền thêm owned + onAddToCart cho CourseDetails */}
+        <CourseDetails
+          course={course}
+          owned={owned}
+          onAddToCart={handleAddToCart}
+        />
+        <ListedCourses />
       </main>
-    </>;
+    </>
+  );
 };
+
 export default CourseDetail;

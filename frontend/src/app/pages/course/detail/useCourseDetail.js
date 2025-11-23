@@ -17,24 +17,20 @@ export default function useCourseDetail() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  const user = useSelector((state) => state.auth.userData);
+
   const [owned, setOwned] = useState(false);
   const [ownedChecking, setOwnedChecking] = useState(false);
 
   const fetchCourse = useCallback(async () => {
     if (!id || !backendUrl) return;
+
     setLoading(true);
     setError(null);
+
     try {
       const { data } = await axios.get(`${backendUrl}/api/courses/${id}`);
       if (data && data.success) setCourse(data.course);
-
-      if (userData?._id) {
-        await axios.post(
-          `${backendUrl}/api/courses/${id}/viewed`,
-          {},
-          { withCredentials: true }
-        );
-      }
     } catch (err) {
       setError(err);
       console.error(err);
@@ -50,6 +46,14 @@ export default function useCourseDetail() {
   const checkOwned = useCallback(async () => {
     if (!id || !backendUrl || !userData?._id) {
       setOwned(false);
+      return;
+    }
+
+
+    // chưa login -> chắc chắn chưa sở hữu, KHÔNG gọi API
+    if (!user) {
+      setOwned(false);
+      setOwnedChecking(false);
       return;
     }
 
