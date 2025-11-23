@@ -111,7 +111,8 @@ export const login = async (req, res) => {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-            maxAge: 7 * 24 * 60 * 60 * 1000
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+            path: '/'
         });
 
         return res.status(200).json({
@@ -196,14 +197,22 @@ export const resetPassword = async (req, res) => {
 
 export const isAuthenticated = (req, res) => {
     try {
-        return res.status(200).json({
-            success: true,
-            message: "User is authenticated",
-            userId: req.userId,
-            user: req.user
-        });
+        if (req.user) {
+            return res.status(200).json({
+                success: true,
+                message: "User is authenticated",
+                userId: req.userId,
+                user: req.user
+            });
+        } else {
+            return res.status(200).json({
+                success: false,
+                message: "Guest user",
+                user: null
+            });
+        }
     } catch (error) {
-        return res.status(401).json({ success: false, message: "Invalid token" });
+        return res.status(500).json({ success: false, message: "Server Error" });
     }
 };
 
@@ -214,6 +223,7 @@ export const logout = async (req, res) => {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+            path: '/'
         });
 
         return res.status(200).json({ success: true, message: "Logout successful" });

@@ -19,7 +19,10 @@ const AppProvidersWrapper = ({ children }) => {
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        const response = await axios.get(`${backendUrl}/api/auth/is-auth`);
+        const response = await axios.get(
+          `${backendUrl}/api/auth/is-auth`,
+          { withCredentials: true }
+        );
 
         if (response.data.success) {
           dispatch(setLogin(response.data.user));
