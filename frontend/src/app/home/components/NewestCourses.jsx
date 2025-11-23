@@ -1,33 +1,9 @@
-import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { Container, Row, Col } from 'react-bootstrap';
 import CourseCard from '@/components/CourseCard';
 
-/** Adapter: đổi dữ liệu API -> props cho CourseCard của bạn */
-const adaptToCard = (c) => {
-  const star = typeof c?.rating?.average === 'number' ? c.rating.average : 0;
-
-  return {
-    id: c?.courseId || c?._id || c?.id,
-    title: c?.title || 'Untitled',
-    description: c?.description || '',
-    image: c?.thumbnail || '',
-    lectures: c?.lecturesCount ?? 0,
-    duration: c?.duration != null ? `${c.duration}h` : '',
-    rating: { star },
-    badge: {
-      text: c?.level || 'Course',
-      class: 'bg-primary bg-opacity-60',
-    },
-    _raw: c,
-  };
-};
-
 const NewestCourses = () => {
   const newestCourses = useSelector((s) => s.courses?.newest || []);
-
-  // Chuẩn bị list course
-  const list = useMemo(() => (newestCourses || []).map(adaptToCard), [newestCourses]);
 
   return (
     <section>
@@ -42,8 +18,8 @@ const NewestCourses = () => {
         </Row>
 
         <Row className="g-4">
-          {list.map((course) => (
-            <Col sm={6} lg={4} xl={3} key={course.id}>
+          {newestCourses.map((course) => (
+            <Col sm={6} lg={4} xl={3} key={course._id}>
               <CourseCard course={course} />
             </Col>
           ))}

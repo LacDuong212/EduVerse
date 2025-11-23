@@ -7,6 +7,7 @@ import { setAllCourses } from "@/redux/coursesSlice";
 
 export default function useCourseList() {
   const dispatch = useDispatch();
+
   const { allCourses } = useSelector(
     (state) => state.courses || { allCourses: [] }
   );
