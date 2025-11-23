@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { Col, Row } from 'react-bootstrap';
 
 
-const WelcomeBack = ({ instructorName = "Instructor" }) => {
+const WelcomeBack = ({ instructorName = "" }) => {
   const [randomSaying, setRandomSaying] = useState("");
 
   useEffect(() => {
@@ -30,7 +30,7 @@ const WelcomeBack = ({ instructorName = "Instructor" }) => {
         
         {/* LEFT SIDE */}
         <Col md={7} className="position-relative z-index-9">
-          <h2 className="mb-2 fw-bold">Welcome back, {instructorName}!</h2>
+          <h2 className="mb-2 fw-bold">Welcome back{instructorName ? `, ${instructorName}` : ""}!</h2>
           <div className="mt-2">
             <p className="mb-1 text-secondary fs-5">{randomSaying}</p>
           </div>

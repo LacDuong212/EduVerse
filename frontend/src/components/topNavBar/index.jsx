@@ -16,7 +16,7 @@ const TopNavbar = ({ children, className }) => {
         zIndex: 99, // ensure it stays above content
       }}
     >
-      <nav className="navbar navbar-expand-xl py-3 transition-all">
+      <nav className="navbar navbar-expand-md py-2 transition-all">
         {children}
       </nav>
     </header>

@@ -2,6 +2,7 @@ import Course from "../models/courseModel.js";
 import Instructor from "../models/instructorModel.js";
 import Order from "../models/orderModel.js";
 import userModel from "../models/userModel.js";
+import Review from "../models/reviewModel.js";
 import Fuse from "fuse.js";
 import mongoose from "mongoose";
 
@@ -703,3 +704,107 @@ export const getCourseStudentsAndReviews = async (req, res) => {
     });
   }
 };
+
+// GET /api/instructor/dashboard
+export const poppulateDashboardData = async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    const instructor = await Instructor.findOne({ user: userId });
+    if (!instructor) {
+      return res.status(403).json({ success: false, message: "You don't have access to this resource" });
+    }
+
+    const courseIds = await getInstructorCourseIds(userId);
+    const studentIds = await getInstructorStudentIds(userId);
+
+    const totalCourses = courseIds.length
+    const totalStudents = studentIds.length;
+
+    const totalOrders = await Order.countDocuments({
+      status: 'completed',
+      "courses.course": { $in: courseIds }
+    });
+
+    if (courseIds.length === 0) {
+      return res.json({
+        success: true,
+        averageRating: 0,
+        totalCourses,
+        totalStudents,
+        totalOrders
+      });
+    }
+
+    const avgRating = await Review.aggregate([
+      {
+        $match: {
+          course: { $in: courseIds },
+          isDeleted: false,
+        }
+      },
+      { $sort: { createdAt: -1 } },
+      { // remove duplicates: keep only the *latest* review for each (course, user)
+        $group: {
+          _id: { course: "$course", user: "$user" },
+          latestReview: { $first: "$$ROOT" }
+        }
+      },
+      { // extract rating
+        $project: {
+          rating: "$latestReview.rating"
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          avgRating: { $avg: "$rating" },
+          totalReviews: { $sum: 1 }
+        }
+      }
+    ]);
+
+    const averageRating =
+      avgRating.length > 0 && avgRating[0].avgRating != null
+        ? parseFloat(avgRating[0].avgRating.toFixed(1))
+        : 0;
+
+    return res.json({
+      success: true,
+      averageRating,
+      totalCourses,
+      totalStudents,
+      totalOrders
+    });
+  } catch (error) {
+    console.error("Populate instructor dashboard data error: ", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
+  }
+};
+
+// helper: get course ids for an instructor
+const getInstructorCourseIds = async (userId) => {
+  const courses = await Course.find(
+    { "instructor.ref": userId, isDeleted: false },
+    '_id'
+  ).lean();
+
+  return courses.map(course => course._id);
+};
+
+// helper: get student ids for an instructor
+const getInstructorStudentIds = async (userId) => {
+  const courseIds = await getInstructorCourseIds(userId);
+  const orders = await Order.find(
+    {
+      status: 'completed',
+      "courses.course": { $in: courseIds }
+    },
+    'user'
+  ).lean();
+  const studentIdSet = new Set(orders.map(order => order.user.toString()));
+  return Array.from(studentIdSet).map(id => new mongoose.Types.ObjectId(id));
+}

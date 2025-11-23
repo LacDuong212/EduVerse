@@ -125,11 +125,6 @@ export const instructorRoutes = [{
   isNested: true,
   element: null
 }, {
-  path: '/instructor/reviews',
-  name: 'Reviews',
-  isNested: true,
-  element: null
-}, {
   path: '/instructor/deactivate-account',
   name: 'Deactivate Account',
   isNested: true,

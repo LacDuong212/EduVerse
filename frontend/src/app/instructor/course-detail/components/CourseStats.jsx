@@ -1,4 +1,5 @@
 import { useCourseEarnings, useCourseEnrollments } from '../useMyCourseDetail';
+import { currency } from '@/context/constants';
 import { formatCurrency } from '@/utils/currency';
 import { useMemo } from 'react';
 import ReactApexChart from 'react-apexcharts';
@@ -12,7 +13,7 @@ const getCSSVar = (variable) => {
 };
 
 // helper: base chart options generator
-const getChartOptions = (seriesData, categories, colorVar) => {
+const getChartOptions = (seriesData, categories, colorVar, isCurrency = false) => {
   return {
     series: [{
       name: 'Value',
@@ -42,6 +43,7 @@ const getChartOptions = (seriesData, categories, colorVar) => {
       fixed: { enabled: false },
       x: { show: true }, // Shows the date in tooltip
       y: {
+        formatter: (val) => isCurrency ? `${val}${currency}` : val,
         title: { formatter: () => '' } // Hides the series name in tooltip
       },
       marker: { show: false }
@@ -104,7 +106,7 @@ const CourseStats = ({ col = 6, courseId = '' }) => {
       return `${month}/${year}`;
     });
 
-    return getChartOptions(values, categories, '--bs-success');
+    return getChartOptions(values, categories, '--bs-success', true);
   }, [earningsData]);
 
   // 3. Process Enrollments Data
