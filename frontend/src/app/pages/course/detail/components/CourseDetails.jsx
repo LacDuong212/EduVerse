@@ -46,22 +46,19 @@ import courseImg21 from '@/assets/images/courses/4by3/21.jpg';
 import { useState } from 'react'; // 🔹 chỉ còn useState
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
-const PricingCard = ({ course, onShowCurriculum, onAddToCart }) => {
+const PricingCard = ({ course, owned, onShowCurriculum, onAddToCart }) => {
   const getEmbedUrl = (url) => {
     if (!url) return null;
 
-    // dạng youtu.be/xxxx
     if (url.includes('youtu.be/')) {
       const videoId = url.split('youtu.be/')[1];
       return `https://www.youtube.com/embed/${videoId}`;
     }
 
-    // dạng watch?v=xxxx
     if (url.includes('watch?v=')) {
       return url.replace('watch?v=', 'embed/');
     }
 
-    // dạng shorts/xxxx
     if (url.includes('shorts/')) {
       const videoId = url.split('shorts/')[1];
       return `https://www.youtube.com/embed/${videoId}`;
@@ -88,6 +85,7 @@ const PricingCard = ({ course, onShowCurriculum, onAddToCart }) => {
           </div>
         </div>
       </div>
+
       <CardBody className="px-3">
         <div className="d-flex justify-content-between align-items-center">
           <div>
@@ -120,65 +118,39 @@ const PricingCard = ({ course, onShowCurriculum, onAddToCart }) => {
               })()}
             </div>
           </div>
-          <Dropdown>
-            <DropdownToggle
-              as="a"
-              className="btn btn-sm btn-light rounded small arrow-none"
-              role="button"
-              id="dropdownShare"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-            >
-              <FaShareAlt className="fa-fw" />
-            </DropdownToggle>
-            <DropdownMenu
-              className="dropdown-w-sm dropdown-menu-end min-w-auto shadow rounded"
-              aria-labelledby="dropdownShare"
-            >
-              <li>
-                <DropdownItem href="#">
-                  <FaTwitterSquare className="me-2" />
-                  Twitter
-                </DropdownItem>
-              </li>
-              <li>
-                <DropdownItem href="#">
-                  <FaFacebookSquare className="me-2" />
-                  Facebook
-                </DropdownItem>
-              </li>
-              <li>
-                <DropdownItem href="#">
-                  <FaLinkedin className="me-2" />
-                  LinkedIn
-                </DropdownItem>
-              </li>
-              <li>
-                <DropdownItem href="#">
-                  <FaCopy className="me-2" />
-                  Copy link
-                </DropdownItem>
-              </li>
-            </DropdownMenu>
-          </Dropdown>
         </div>
-        <div className="mt-3 d-sm-flex justify-content-sm-between">
-          <Button
-            variant="outline-primary"
-            className="mb-0"
-            onClick={onShowCurriculum} // ✅ giữ nguyên, logic xử lý ở parent
-          >
-            Free trial
-          </Button>
-          &nbsp;
-          <Button
-            variant="success"
-            className="mb-0"
-            onClick={onAddToCart} // ✅ dùng handler truyền từ parent
-          >
-            Buy course
-          </Button>
-        </div>
+
+        {/* 🔥 Nếu owned → chỉ hiện Continue Learning */}
+        {owned ? (
+          <div className="mt-3">
+            <Button
+              variant="success"
+              className="w-100"
+              onClick={onShowCurriculum}
+            >
+              Continue Learning
+            </Button>
+          </div>
+        ) : (
+          /* ❌ chưa owned → hiện Free trial + Buy course */
+          <div className="mt-3 d-sm-flex justify-content-sm-between">
+            <Button
+              variant="outline-primary"
+              className="mb-0"
+              onClick={onShowCurriculum}
+            >
+              Free trial
+            </Button>
+            &nbsp;
+            <Button
+              variant="success"
+              className="mb-0"
+              onClick={onAddToCart}
+            >
+              Buy course
+            </Button>
+          </div>
+        )}
       </CardBody>
     </Card>
   );
@@ -412,12 +384,11 @@ const CourseDetails = ({ course, owned, onAddToCart }) => {
                 {/* ✅ Free trial: nếu đã mua thì chuyển sang trang học, chưa mua thì chỉ bật tab curriculum */}
                 <PricingCard
                   course={course}
+                  owned={owned}        // << 🔥 THÊM DÒNG NÀY
                   onShowCurriculum={() => {
                     if (owned) {
                       const courseId = course?._id || id;
-                      if (courseId) {
-                        navigate(`/student/courses/${courseId}`);
-                      }
+                      navigate(`/student/courses/${courseId}`);
                     } else {
                       setActiveKey('curriculum');
                     }
