@@ -5,41 +5,25 @@ import NotificationDropdown from '@/components/TopNavbar/components/Notification
 import ProfileDropdown from '@/components/TopNavbar/components/ProfileDropdown';
 import SimpleAppMenu from '@/components/TopNavbar/components/SimpleAppMenu';
 import TopbarMenuToggler from '@/components/TopNavbar/components/TopbarMenuToggler';
-import ShoppingCartDropdown from '@/components/TopNavbar/components/ShoppingCartDropdown';
 import { useLayoutContext } from '@/context/useLayoutContext';
-import { fetchWishlist } from '@/redux/wishlistSlice';
 
 import { Container } from 'react-bootstrap';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { Link } from "react-router";
 import { CiHeart } from "react-icons/ci";
-import { useEffect } from 'react';
+import { BsCart3 } from 'react-icons/bs';
 
 const TopNavigationBar = () => {
   const { appMenuControl } = useLayoutContext();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
-  const { userData } = useSelector((state) => state.auth);
-
-  useEffect(() => {
-    if (userData?._id) {
-      dispatch(fetchWishlist(userData._id));
-    }
-  }, [dispatch, userData]);
-
-  const cartCount = useSelector((state) => (state.cart?.items || []).length);
+  const cartCount = useSelector((state) => state.cart?.totalItem || 0);
   const wishlistCount = useSelector((state) => (state.wishlist?.items || []).length);
 
   const onLogoClick = (e) => {
     e.preventDefault();
     navigate('/home');
-  };
-  const onCartClick = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    navigate('/student/cart');
   };
 
   return (
@@ -65,12 +49,10 @@ const TopNavigationBar = () => {
               </span>
             )}
           </li>
-          <li
-            className="nav-item ms-3 position-relative"
-            onClickCapture={onCartClick}
-            style={{ cursor: 'pointer' }}
-          >
-            <ShoppingCartDropdown />
+          <li className="nav-item ms-3 position-relative" style={{ cursor: 'pointer' }}>
+            <Link to="/student/cart" className="btn btn-light btn-round mb-0 arrow-none">
+              <BsCart3 className="bi bi-cart3 fa-fw" />
+            </Link>
             {cartCount > 0 && (
               <span
                 className="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-dark mt-xl-2 ms-n1"

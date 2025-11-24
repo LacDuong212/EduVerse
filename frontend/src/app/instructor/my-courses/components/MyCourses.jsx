@@ -51,7 +51,7 @@ const MyCourses = ({
   return (
     <Card className="border bg-transparent rounded-3">
       <CardHeader className="bg-transparent border-bottom">
-        <Row className="align-items-center justify-content-between">
+        <Row className="align-items-center justify-content-between g-2">
           <Col md={8}>
             <form className="rounded position-relative" onSubmit={handleSearchSubmit}>
               <input
@@ -104,16 +104,16 @@ const MyCourses = ({
                     <th scope="col" className="border-0 rounded-start">
                       Course
                     </th>
-                    <th scope="col" className="border-0">
+                    <th scope="col" className="border-0 text-center d-none d-md-table-cell">
                       Updated At
                     </th>
-                    <th scope="col" className="border-0">
+                    <th scope="col" className="border-0 text-center">
                       Status
                     </th>
-                    <th scope="col" className="border-0">
+                    <th scope="col" className="border-0 text-center d-none d-md-table-cell">
                       Price
                     </th>
-                    <th scope="col" className="border-0 rounded-end">
+                    <th scope="col" className="border-0 rounded-end text-center">
                       Action
                     </th>
                   </tr>
@@ -130,7 +130,7 @@ const MyCourses = ({
                               className="img-fluid h-100 w-100 object-fit-cover"
                             />
                           </div>
-                          <div className="ms-2 flex-grow-1">
+                          <div className="ms-2 flex-grow-1 text-wrap">
                             <div className="mb-1">
                               <h6 className="mb-0">
                                 <a
@@ -140,8 +140,7 @@ const MyCourses = ({
                                   {course.title}
                                 </a>
                               </h6>
-
-                              <div className="small">
+                              <div className="small text-wrap">
                                 {course.subtitle}
                               </div>
                             </div>
@@ -171,7 +170,7 @@ const MyCourses = ({
                           </div>
                         </div>
                       </td>
-                      <td className="text-center text-sm-start">
+                      <td className="text-center d-none d-md-table-cell">
                         {course.updatedAt
                           ? new Date(course.updatedAt).toLocaleString("en-GB", {
                             year: "numeric",
@@ -182,26 +181,26 @@ const MyCourses = ({
                           })
                           : "N/A"}
                       </td>
-                      <td>
+                      <td className="text-center">
                         <div
                           className={`badge bg-${statusBadge(course?.status)} bg-opacity-10 text-${statusBadge(course?.status)} fs-6`}
                         >
                           {course.status || "N/A"}
                         </div>
                       </td>
-                      <td>
+                      <td className="text-end d-none d-md-table-cell">
                         {course.price === 0 ? "Free" : course.enableDiscount ? (
                           <>
-                            {formatCurrency(course.discountPrice)}{" "}
-                            <span className="text-decoration-line-through small">
+                            {formatCurrency(course.discountPrice)}
+                            <div className="text-decoration-line-through small">
                               {formatCurrency(course.price)}
-                            </span>
+                            </div>
                           </>
                         ) : (
                           formatCurrency(course.price)
                         )}
                       </td>
-                      <td>
+                      <td className="text-center">
                         <OverlayTrigger
                           placement="top"
                           overlay={<Tooltip id={`tooltip-edit-${course._id}`}>Edit Course</Tooltip>}
@@ -251,7 +250,7 @@ const MyCourses = ({
             <div className="d-sm-flex justify-content-sm-between align-items-sm-center mt-4 mt-sm-3">
               <p className="mb-0 text-center text-sm-start">
                 Showing {totalCourses === 0 ? 0 : (page - 1) * limit + 1} to{" "}
-                {Math.min(page * limit, totalCourses)} of {totalCourses} entries
+                {Math.min(page * limit, totalCourses)} of {totalCourses} courses
               </p>
               <nav
                 className="d-flex justify-content-center mb-0"
