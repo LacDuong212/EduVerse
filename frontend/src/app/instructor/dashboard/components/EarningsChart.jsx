@@ -92,29 +92,31 @@ const EarningsChart = ({ col = 6, earningsData = [] }) => {
     }
   };
 
+  const thisMonthValue = earningsData.length > 0 ? earningsData[earningsData.length - 1].value : 0;
+  const lastMonthValue = earningsData.length > 1 ? earningsData[earningsData.length - 2].value : 0;
+
   return (
     <Col md={12} lg={col}>
       <Card className="bg-transparent border rounded-3 h-100">
         <CardHeader className="bg-transparent border-bottom">
-          <h3 className="mb-0">Earnings Overview</h3>
+          <h5 className="mb-0">Revenue Overview</h5>
         </CardHeader>
         <CardBody>
           <Row className="g-4">
             <Col sm={6} md={4}>
               <span className="badge text-bg-dark">This Month</span>
-              <h4 className="text-primary my-2">{`0${currency}`}</h4>
-              <p className="mb-0">{earningsData?.length > 2
-                ? getChangeDisplay(earningsData[earningsData.length - 1].value, earningsData[earningsData.length - 2].value)
-                : getChangeDisplay(earningsData?.length === 1 ? earningsData[0].value : 0)
-              }vs. last month</p>
+              <h4 className="text-primary my-2">{formatCurrency(thisMonthValue)}</h4>
+              <p className="mb-0">
+                {getChangeDisplay(thisMonthValue, lastMonthValue)} vs. last month
+              </p>
             </Col>
             <Col sm={6} md={4}>
               <span className="badge text-bg-dark">On Average</span>
-              <h4 className="my-2">{`0${currency}`}</h4>
-              <p className="mb-0">{getChangeDisplay(avgEarnings, earningsData.length > 0 ? earningsData[earningsData.length - 1].value : 0)} vs. this month</p>
+              <h4 className="my-2">{formatCurrency(avgEarnings)}</h4>
+              <p className="mb-0">{getChangeDisplay(avgEarnings, thisMonthValue)} vs. this month</p>
             </Col>
           </Row>
-          <ReactApexChart height={300} series={chartOptions.series} type="area" options={chartOptions} />
+          <ReactApexChart options={chartOptions} series={chartOptions.series} type="area" height={300} />
         </CardBody>
       </Card>
     </Col>

@@ -3,7 +3,7 @@ import express from 'express';
 import { getPublicFields, getPrivateFields, createInstructor, 
     updateInstructor, getInstructorCourses, getMyCourseById, 
     getCourseEarnings, getStudentsEnrolled, getCourseStudentsAndReviews, 
-    poppulateDashboardData
+    getDashboardData
 } from '../controllers/instructorController.js';
 import userAuth from '../middlewares/userAuth.js';
 
@@ -16,7 +16,7 @@ instructorRoute.get('/instructor/courses/:id/earnings', userAuth, getCourseEarni
 instructorRoute.get('/instructor/courses/:id/enrollments', userAuth, getStudentsEnrolled);
 instructorRoute.get('/instructor/courses/:id', userAuth, getMyCourseById);
 instructorRoute.get('/instructor/courses', userAuth, getInstructorCourses);
-instructorRoute.get('/instructor/dashboard', userAuth, poppulateDashboardData);
+instructorRoute.get('/instructor/dashboard', userAuth, getDashboardData);
 instructorRoute.get('/instructor', userAuth, getPrivateFields);
 instructorRoute.post('/instructors', userAuth, createInstructor);
 instructorRoute.patch('/instructor/:id', userAuth, updateInstructor);
