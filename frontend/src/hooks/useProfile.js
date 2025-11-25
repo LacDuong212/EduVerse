@@ -2,14 +2,12 @@ import { setLogout, setUserData } from '@/redux/authSlice';
 
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 export default function useProfile() {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const dispatch = useDispatch();
-  const navigate = useNavigate();
-  
+
   const user = useSelector((state) => state.auth.userData);
 
   const updateProfile = async (updates) => {
@@ -35,9 +33,20 @@ export default function useProfile() {
     }
   };
 
-  const logout = () => {
-    dispatch(setLogout());
-    navigate('/');
+  const logout = async () => {
+    try {
+      await axios.post(
+        `${backendUrl}/api/auth/logout`,
+        {},
+        { withCredentials: true }
+      );
+    } catch (error) {
+      console.error("Error when calling logout API:", error);
+    } finally {
+      dispatch(setLogout());
+      window.location.href = '/';
+      toast.success('Log out successfully');
+    }
   };
 
   return {

@@ -122,7 +122,7 @@ const Courses = () => {
                 </Col>
               )}
               {!loading && allCourses?.map((course, idx) => (
-                <Col sm={6} xl={4} key={course.courseId || course._id || idx}>
+                <Col sm={6} xl={4} key={course._id || idx}>
                   <CourseCard course={course} />
                 </Col>
               ))}

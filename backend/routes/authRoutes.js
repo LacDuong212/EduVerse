@@ -20,14 +20,14 @@ import passport from 'passport';
 import jwt from 'jsonwebtoken';
 
 import validate from '../middlewares/validate.js';
-import userAuth from '../middlewares/userAuth.js';
+import { checkAuth } from '../middlewares/userAuth.js';
 
 const authRoute = express.Router();
 
 authRoute.post('/register', validate(registerSchema), register);
 authRoute.post('/login', validate(loginSchema), login);
 authRoute.post('/logout', logout);
-authRoute.get('/is-auth', userAuth, isAuthenticated);
+authRoute.get('/is-auth', checkAuth, isAuthenticated);
 authRoute.post('/forgot-password', validate(forgotPasswordSchema), forgotPassword);
 authRoute.post('/reset-password', validate(resetPasswordSchema), resetPassword);
 authRoute.post('/verify-email', validate(verifyEmailSchema), verifyEmail);

@@ -3,6 +3,8 @@ import { FaRegClock, FaRegHeart, FaRegStar, FaHeart, FaStar, FaStarHalfAlt, FaTa
 import { useNavigate } from 'react-router-dom';
 import { formatCurrency } from '@/utils/currency';
 
+import { toast } from 'react-toastify';
+
 import { useDispatch, useSelector } from 'react-redux';
 import { addToWishlist, removeFromWishlist } from '@/redux/wishlistSlice';
 
@@ -16,42 +18,51 @@ const CourseCard = ({ course }) => {
 
   const wishlistItems = useSelector((state) => state.wishlist.items || []);
 
-  const currentCardId = course._id
-    ? course._id.toString()
-    : (course.courseId && typeof course.courseId === 'object' ? course.courseId._id?.toString() : course.courseId?.toString());
+  if (!course) return null;
 
-  const isWishlisted = wishlistItems.some((item) => {
-    if (!item || !item.courseId) return false;
+  const currentCourseId = course._id || course.courseId;
 
-    let idInWishlist;
+const isWishlisted = wishlistItems.some((item) => {
+    const itemCourseId = item.courseId?._id || item.courseId;
+    
+    return itemCourseId?.toString() === currentCourseId?.toString();
+});
 
-    if (typeof item.courseId === 'string') {
-      idInWishlist = item.courseId;
-    } else {
-      idInWishlist = item.courseId._id || item.courseId.courseId || item.courseId;
-    }
-
-    return idInWishlist?.toString() === currentCardId?.toString();
-  });
-
-  const handleWishlistToggle = (e) => {
+  const handleWishlistToggle = async (e) => {
     e.preventDefault();
     e.stopPropagation();
 
     if (!userData?._id) {
-      alert("Please login to use this feature!");
+      toast.info("Please login to add to wishlist!");
       return;
     }
 
-    if (!currentCardId) {
-      console.error("Cannot toggle wishlist: Missing Course ID");
-      return;
+    if (!currentCourseId) {
+       toast.error("Error: Course ID missing");
+       return;
     }
 
-    if (isWishlisted) {
-      dispatch(removeFromWishlist({ userId: userData._id, courseId: currentCardId }));
-    } else {
-      dispatch(addToWishlist({ userId: userData._id, course: { ...course, _id: currentCardId } }));
+    try {
+      if (isWishlisted) {
+        await dispatch(removeFromWishlist({ 
+            userId: userData._id, 
+            courseId: currentCourseId 
+        })).unwrap();
+        
+        toast.success("Removed from wishlist");
+      } else {
+        const coursePayload = { ...course, _id: currentCourseId };
+        
+        await dispatch(addToWishlist({ 
+            userId: userData._id, 
+            course: coursePayload 
+        })).unwrap();
+
+        toast.success("Added to wishlist");
+      }
+    } catch (error) {
+      console.error("Wishlist action failed:", error);
+      toast.error(typeof error === 'string' ? error : "Something went wrong!");
     }
   };
 
@@ -101,41 +112,6 @@ const CourseCard = ({ course }) => {
       text: course.level || course.category || 'Course',
     };
 
-  const handleClick = () => {
-    if (currentCardId) navigate(`/courses/${currentCardId}`);
-  };
-
-  const priceNode = (() => {
-    if (isFree) {
-      return <h5 className="text-success mb-0">Free</h5>;
-    }
-
-    if (hasDiscount) {
-      return (
-        <div className="d-flex flex-column align-items-end text-end ms-auto">
-          <div className="small text-muted text-decoration-line-through">
-            {formatCurrency(price)}
-          </div>
-          <div className="d-flex align-items-center justify-content-end gap-2">
-            <small className="badge bg-danger-subtle text-danger me-1">
-              -{discountPercent}%
-            </small>
-            <h5 className="text-success mb-0">
-              {formatCurrency(discountPrice)}
-            </h5>
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <h5 className="text-success mb-0">
-        {formatCurrency(price)}
-      </h5>
-    );
-  })();
-
-  // --------------------------------------------
   return (
     <Card className="shadow h-100 position-relative">
       {isFree ? (
@@ -144,11 +120,9 @@ const CourseCard = ({ course }) => {
         <div className="ribbon"><span>-{discountPercent}%</span></div>
       ) : null}
 
-      <img src={image} className="card-img-top" alt="course image" />
+      <img src={image} className="card-img-top" alt={title} style={{objectFit: 'cover', height: '200px'}} />
 
-      {/* ✅ đổi CardBody thành flex column để đẩy giá xuống đáy */}
       <CardBody className="d-flex flex-column pb-0">
-        {/* phần nội dung phía trên chiếm chỗ */}
         <div className="flex-grow-1">
           <div className="d-flex justify-content-between mb-2">
             <span className={`badge ${badge.class} bg-opacity-60`}>{badge.text}</span>
@@ -157,7 +131,7 @@ const CourseCard = ({ course }) => {
             </span>
           </div>
 
-          <CardTitle onClick={handleClick} style={{ cursor: currentCardId ? 'pointer' : 'default' }}>
+          <CardTitle onClick={() => navigate(`/courses/${currentCourseId}`)} style={{ cursor: 'pointer' }}>
             {title}
           </CardTitle>
 
@@ -185,9 +159,15 @@ const CourseCard = ({ course }) => {
           </ul>
         </div>
 
-        {/* ✅ khối giá luôn sát đáy CardBody, ngay trên hr */}
         <div className="mt-auto d-flex justify-content-end align-items-end">
-          {priceNode}
+          {isFree ? <h5 className="text-success mb-0">Free</h5> : 
+               hasDiscount ? (
+                 <div>
+                    <small className="text-muted text-decoration-line-through me-2">{formatCurrency(price)}</small>
+                    <h5 className="text-success mb-0">{formatCurrency(discountPrice)}</h5>
+                 </div>
+               ) : <h5 className="text-success mb-0">{formatCurrency(price)}</h5>
+             }
         </div>
       </CardBody>
 

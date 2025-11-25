@@ -20,11 +20,7 @@ export const addToWishlist = createAsyncThunk(
   async ({ userId, course }, { rejectWithValue }) => {
     try {
 
-      const courseIdToSend = course._id || (course.courseId && course.courseId._id) || course.courseId;
-
-      if (!courseIdToSend) {
-        return rejectWithValue("Course ID not found");
-      }
+      const courseIdToSend = course._id;
 
       const response = await axios.post(`${API_URL}/add`, {
         userId,
@@ -33,7 +29,10 @@ export const addToWishlist = createAsyncThunk(
 
       const newItem = response.data.data;
 
-      return { ...newItem, courseId: course };
+      return {
+        ...newItem,
+        courseId: newItem.courseId._id ? newItem.courseId : course
+      };
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
@@ -79,15 +78,10 @@ const wishlistSlice = createSlice({
         state.items.push(action.payload);
         state.status = "succeeded";
       })
-      .addCase(addToWishlist.rejected, (state, action) => {
-        state.error = action.payload;
-      })
-
       .addCase(removeFromWishlist.fulfilled, (state, action) => {
-        state.items = state.items.filter((item) => {
-          const currentId = item.courseId._id || item.courseId;
-          return currentId?.toString() !== action.payload?.toString();
-        });
+        state.items = state.items.filter(
+          (item) => item.courseId._id !== action.payload
+        );
       });
   },
 });

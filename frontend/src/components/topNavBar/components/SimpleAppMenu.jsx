@@ -1,7 +1,6 @@
 import clsx from 'clsx';
 import { useEffect, useMemo, useState } from 'react';
 import { Collapse } from 'react-bootstrap';
-import { FaSearch } from 'react-icons/fa';
 import { Link, useLocation } from 'react-router-dom';
 
 

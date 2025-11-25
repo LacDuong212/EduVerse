@@ -1,9 +1,9 @@
 import Cart from "../models/cartModel.js";
 import Course from "../models/courseModel.js";
 import Order from "../models/orderModel.js";
+import mongoose from "mongoose";
 
 // #TODO: limit cart items
-// service
 const transformCourses = (courses) => {
   return courses.map(({ course, addedAt }) => ({
     courseId: course._id,
@@ -23,13 +23,11 @@ export const getCart = async (req, res) => {
   try {
     const userId = req.userId;
 
-    // get or create cart
     let cart = await Cart.findOne({ user: userId }).populate('courses.course');
     if (!cart) {
       cart = await Cart.create({ user: userId, courses: [] });
     }
 
-    // transform/flatten
     const items = transformCourses(cart.courses);
 
     res.status(200).json({ success: true, cart: items });
@@ -60,7 +58,7 @@ export const addToCart = async (req, res) => {
     // check if course already in cart
     const courseExists = cart.courses.some(c => c.course.toString() === courseId);
     if (courseExists) {
-      return res.status(200).json({ success: false, message: "Course already in cart" });
+      return res.status(409).json({ success: false, message: "Course already in cart" });
     }
 
     // check if course already owned
@@ -81,7 +79,7 @@ export const addToCart = async (req, res) => {
       expiresAt: { $gt: new Date() },
     });
     if (pendingOrder) {
-      return res.status(200).json({ success: false, message: "This course is already in your active order" });
+      return res.status(409).json({ success: false, message: "This course is already in your active order" });
     }
 
     cart.courses.push({ course: courseId });
@@ -144,5 +142,19 @@ export const clearCart = async (req, res) => {
   }
   catch (error) {
     res.status(500).json({ success: false, message: "Error clearing cart", error });
+  }
+};
+
+export const getCartCount = async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    const cart = await Cart.findOne({ user: userId }).select('courses');
+
+    const count = cart?.courses?.length || 0;
+
+    res.status(200).json({ success: true, count });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error fetching cart count", error });
   }
 };
