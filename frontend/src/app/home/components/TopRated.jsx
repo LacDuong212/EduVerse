@@ -1,5 +1,5 @@
 import { Col, Container, Row } from 'react-bootstrap';
-import BestSellersCourseSlider from './BestSellersSlider';
+import TopRatedCourseSlider from './TopRatedSlider.jsx';
 const TopRatedSection = () => {
   return <section className="pb-5 pt-0 pt-lg-5">
     <Container>
@@ -14,7 +14,7 @@ const TopRatedSection = () => {
       <Row>
         <Col lg={12}>
           <div className="tiny-slider arrow-round arrow-blur arrow-hover">
-            <BestSellersCourseSlider />
+            <TopRatedCourseSlider />
           </div>
         </Col>
       </Row>

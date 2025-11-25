@@ -3,11 +3,20 @@ import { formatCurrency } from '@/utils/currency';
 import { useSelector } from 'react-redux';
 import { Card, CardBody, CardFooter, CardTitle } from 'react-bootstrap';
 import { renderToString } from 'react-dom/server';
-import { FaChevronLeft, FaChevronRight, FaRegBookmark, FaRegClock, FaShoppingCart, FaStar, FaTable } from 'react-icons/fa';
+import {
+  FaChevronLeft,
+  FaChevronRight,
+  FaRegBookmark,
+  FaRegClock,
+  FaStar,
+  FaTable,
+} from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 
 // --- Card: thêm hiển thị discount ---
 const TopRatedCard = ({ course }) => {
   const {
+    id,
     name,
     duration,
     avatar,
@@ -20,28 +29,43 @@ const TopRatedCard = ({ course }) => {
     discountPercent,      // NEW
     students,
     lectures,
-    category
+    category,
   } = course;
 
   const isFree = (discountPrice ?? price) === 0;
   const hasDiscount = Number.isFinite(discountPrice) && discountPrice < price;
 
+  const detailPath = id ? `/courses/${id}` : '#';
+
   return (
     <Card className="action-trigger-hover border bg-transparent position-relative">
-
       {/* Ribbon Free / -% */}
       {isFree ? (
-        <div className="ribbon"><span>Free</span></div>
+        <div className="ribbon">
+          <span>Free</span>
+        </div>
       ) : hasDiscount ? (
-        <div className="ribbon"><span>{`-${discountPercent}%`}</span></div>
+        <div className="ribbon">
+          <span>{`-${discountPercent}%`}</span>
+        </div>
       ) : null}
 
-      <img src={studentImage} className="card-img-top" alt="course image" />
+      {/* Thumbnail: click => detail */}
+      <Link to={detailPath}>
+        <img
+          src={studentImage}
+          className="card-img-top"
+          alt="course image"
+          style={{ cursor: id ? 'pointer' : 'default' }}
+        />
+      </Link>
 
       <CardBody className="pb-0">
         <div className="d-flex justify-content-between mb-3">
           <span className="hstack gap-2">
-            <span className="badge bg-primary bg-opacity-10 text-primary">{category}</span>
+            <span className="badge bg-primary bg-opacity-10 text-primary">
+              {category}
+            </span>
             <span className="badge text-bg-dark">{badge.text}</span>
           </span>
           <span className="h6 fw-light mb-0" role="button" aria-label="bookmark">
@@ -50,7 +74,14 @@ const TopRatedCard = ({ course }) => {
         </div>
 
         <CardTitle className="mb-2">
-          <a href="#">{title}</a>
+          {/* Title: click => detail */}
+          <Link
+            to={detailPath}
+            className="text-decoration-none"
+            style={{ cursor: id ? 'pointer' : 'default' }}
+          >
+            {title}
+          </Link>
         </CardTitle>
 
         <div className="d-flex justify-content-between align-items-center mb-2">
@@ -87,33 +118,29 @@ const TopRatedCard = ({ course }) => {
               <img className="avatar-img rounded-1" src={avatar} alt="avatar" />
             </div>
             <p className="mb-0 ms-2">
-              <a href="#" className="h6 fw-light mb-0">{name}</a>
+              <span className="h6 fw-light mb-0">{name}</span>
             </p>
           </div>
 
-          {/* Giá: Free / Discount / Normal */}
+          {/* Giá: Free / Discount / Normal (bỏ hover ẩn) */}
           <div className="text-end">
             {isFree ? (
-              <h4 className="text-success mb-0 item-show">Free</h4>
+              <h4 className="text-success mb-0">Free</h4>
             ) : hasDiscount ? (
               <>
                 <div className="small text-muted text-decoration-line-through">
                   {formatCurrency(price)}
                 </div>
-                <h4 className="text-success mb-0 item-show">
+                <h4 className="text-success mb-0">
                   {formatCurrency(discountPrice)}
                 </h4>
               </>
             ) : (
-              <h4 className="text-success mb-0 item-show">
+              <h4 className="text-success mb-0">
                 {formatCurrency(price)}
               </h4>
             )}
-
-            <a href="#" className="btn btn-sm btn-success-soft item-show-hover mt-1">
-              <FaShoppingCart className="me-2" />
-              Add to cart
-            </a>
+            {/* Đã remove Add to cart button */}
           </div>
         </div>
       </CardFooter>
@@ -123,22 +150,33 @@ const TopRatedCard = ({ course }) => {
 
 // --- Adapter: map dữ liệu API -> shape mà Card dùng ---
 const adaptTrending = (c) => {
-  const ratingAvg = Number.isFinite(c?.rating?.average) ? Number(c.rating.average) : 0;
-  const ratingCount = Number.isFinite(c?.rating?.count) ? Number(c.rating.count) : 0;
+  const ratingAvg = Number.isFinite(c?.rating?.average)
+    ? Number(c.rating.average)
+    : 0;
+  const ratingCount = Number.isFinite(c?.rating?.count)
+    ? Number(c.rating.count)
+    : 0;
 
   const instructorName = c?.instructor?.name ?? 'Unknown Instructor';
-  const instructorAvatar = c?.instructor?.avatar ?? 'https://via.placeholder.com/40x40?text=U';
+  const instructorAvatar =
+    c?.instructor?.avatar ?? 'https://via.placeholder.com/40x40?text=U';
 
   const price = Number(c?.price ?? 0);
-  const discountPrice = c?.discountPrice != null ? Number(c.discountPrice) : null;
-  const hasDiscount = Number.isFinite(discountPrice) && discountPrice < price;
+  const discountPrice =
+    c?.discountPrice != null ? Number(c.discountPrice) : null;
+  const hasDiscount =
+    Number.isFinite(discountPrice) && discountPrice < price;
   const discountPercent = hasDiscount
     ? Math.round(((price - discountPrice) / price) * 100)
     : 0;
 
-  const duration = Number.isFinite(c?.duration) ? `${c.duration}h` : (c?.duration || '—');
+  const duration = Number.isFinite(c?.duration)
+    ? `${c.duration}h`
+    : c?.duration || '—';
 
   return {
+    id: c?._id || c?.id, // để Link dùng
+
     name: instructorName,
     avatar: instructorAvatar,
     studentImage: c?.thumbnail || 'https://via.placeholder.com/640x360?text=Course',
@@ -162,7 +200,9 @@ const adaptTrending = (c) => {
 // --- Slider ---
 const TopRatedCourseSlider = ({ source = 'topRated' }) => {
   const coursesState = useSelector((s) => s.courses || {});
-  const rawList = Array.isArray(coursesState[source]) ? coursesState[source] : [];
+  const rawList = Array.isArray(coursesState[source])
+    ? coursesState[source]
+    : [];
   const list = rawList.map(adaptTrending);
 
   const courseSliderSettings = {
@@ -172,7 +212,7 @@ const TopRatedCourseSlider = ({ source = 'topRated' }) => {
     autoplayButtonOutput: false,
     controlsText: [
       renderToString(<FaChevronLeft size={16} />),
-      renderToString(<FaChevronRight size={16} />)
+      renderToString(<FaChevronRight size={16} />),
     ],
     autoplay: true,
     controls: true,
@@ -184,8 +224,8 @@ const TopRatedCourseSlider = ({ source = 'topRated' }) => {
       576: { items: 1 },
       768: { items: 2 },
       992: { items: 2 },
-      1200: { items: 3 }
-    }
+      1200: { items: 3 },
+    },
   };
 
   if (!list.length) return null;
@@ -193,7 +233,7 @@ const TopRatedCourseSlider = ({ source = 'topRated' }) => {
   return (
     <TinySlider settings={courseSliderSettings} className="pb-1">
       {list.slice(0, 8).map((course, idx) => (
-        <div key={course._raw?._id || idx}>
+        <div key={course.id || course._raw?._id || idx}>
           <TopRatedCard course={course} />
         </div>
       ))}
