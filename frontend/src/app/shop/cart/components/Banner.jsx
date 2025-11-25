@@ -9,7 +9,7 @@ const Banner = () => {
     <Container>
       <Row>
         <Col xs={12} className="text-center">
-          <h1 className="m-0">My Cart</h1>
+          <h1 className="m-0 text-light">My Cart</h1>
         </Col>
       </Row>
     </Container>
