@@ -8,11 +8,12 @@ const ResetPassword = lazy(() => import('@/app/auth/reset-password/page'));
 
 // INSTRUCTOR
 import InstructorAccount from "../app/instructor/account";
-import InstructorCourseDetail from '../app/instructor/course-detail';
+import InstructorCourseDetail from "../app/instructor/course-detail";
 import InstructorDashboard from "../app/instructor/dashboard";
 import InstructorManageCoursePage from "../app/instructor/manage-course";
 import InstructorMyCourses from "../app/instructor/my-courses";
 import InstructorMyStudents from "../app/instructor/my-students";
+import VideoUploadTest from "../app/instructor/temp/VideoUploadTest";
 
 // AUTH-ADMIN
 const AdminSignUp = lazy(() => import('@/app/admin/auth/sign-up/page'));
@@ -144,6 +145,11 @@ export const instructorRoutes = [{
   name: 'Update Course',
   isNested: false,
   element: <InstructorCourseDetail />
+}, {
+  path: '/instructor/videos/upload-test',
+  name: 'Upload Video',
+  isNested: false,
+  element: <VideoUploadTest />
 }, {
   path: '/instructor/*',
   name: 'Resource Not Found',

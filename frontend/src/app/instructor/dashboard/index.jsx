@@ -14,10 +14,32 @@ const InstructorDashboard = () => {
   const { fetchDashboardData } = useInstructorDashboard();
 
   const [counterData, setCounterData] = useState(null);
+  const [earningsData, setEarningsData] = useState([]);
+  const [topCoursesData, setTopCoursesData] = useState([]);
+
   useEffect(() => {
     const load = async () => {
       const data = await fetchDashboardData();
-      setCounterData(data);
+
+      if (data?.success) {
+        const {
+          totalCourses,
+          totalStudents,
+          totalOrders,
+          averageRating,
+          earningsData,
+          topCoursesData,
+        } = data;
+
+        setCounterData({ totalCourses, totalStudents, totalOrders, averageRating });
+        setEarningsData(earningsData || []);
+        setTopCoursesData(topCoursesData || []);
+      } else {
+        // handle error or set defaults
+        setCounterData(null);
+        setEarningsData([]);
+        setTopCoursesData([]);
+      }
     };
     load();
   }, []);
@@ -28,8 +50,8 @@ const InstructorDashboard = () => {
       <WelcomeBack instructorName={instructorName} />
       <DashboardCounter counterData={counterData} />
       <Row className="mt-3 g-4">
-        <EarningsChart col={6} />
-        <TopCoursesChart col={6} />
+        <EarningsChart col={7} earningsData={earningsData} />
+        <TopCoursesChart col={5} topCoursesData={topCoursesData} />
       </Row>
     </Container>
   );

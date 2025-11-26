@@ -19,7 +19,7 @@ const orderSchema = new mongoose.Schema({
     enum: ["pending", "completed", "refunded", "cancelled"],
     default: "pending",
   },
-  expiresAt: { type: Date },  // for pending orders, 1h expiry
+  expiresAt: { type: Date, default: () => Date.now() + 1*60*60*1000 },  // for pending orders, 1h expiry
 }, { timestamps: true });
 
 export default mongoose.model("Order", orderSchema);

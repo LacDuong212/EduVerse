@@ -315,6 +315,7 @@ const Step3 = ({ stepperInstance, draftData, onSave }) => {
         onClose={closeLectureModal}
         onSave={saveLecture}
         initialLecture={editingLecture}
+        courseId={draftData?._id}
       />
     </>
   );

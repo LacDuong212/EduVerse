@@ -6,7 +6,7 @@ import { FaAngleLeft, FaAngleRight, FaFile, FaFolder, FaGlobe, FaLock, FaRegEdit
 import { Link } from 'react-router-dom';
 
 
-const MyCourses = ({ 
+const MyCourses = ({
   courses,
   totalCourses,
   page,
@@ -18,20 +18,20 @@ const MyCourses = ({
   searchTerm,
   setSearchTerm,
   sort,
-  setSort 
+  setSort
 }) => {
   const statusBadge = (status) => {
     return status === "Live"
       ? "success"
       : status === "Pending"
-      ? "warning"
-      : status === "Rejected"
-      ? "orange"
-      : status === "Blocked"
-      ? "danger"
-      : "secondary";
+        ? "warning"
+        : status === "Rejected"
+          ? "orange"
+          : status === "Blocked"
+            ? "danger"
+            : "secondary";
   }
-    
+
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     onPageChange(1);
@@ -188,16 +188,24 @@ const MyCourses = ({
                           {course.status || "N/A"}
                         </div>
                       </td>
-                      <td className="text-end d-none d-md-table-cell">
-                        {course.price === 0 ? "Free" : course.enableDiscount ? (
-                          <>
+                      <td className="d-none d-md-table-cell">
+                        {course.price === 0 ? (
+                          <div className="d-flex justify-content-center">
+                            <div className="badge bg-success bg-opacity-10 text-success">
+                              Free
+                            </div>
+                          </div>
+                        ) : course.enableDiscount ? (
+                          <div className="text-end">
                             {formatCurrency(course.discountPrice)}
                             <div className="text-decoration-line-through small">
                               {formatCurrency(course.price)}
                             </div>
-                          </>
+                          </div>
                         ) : (
-                          formatCurrency(course.price)
+                          <div className="text-end">
+                            {formatCurrency(course.price)}
+                          </div>
                         )}
                       </td>
                       <td className="text-center">
@@ -220,7 +228,7 @@ const MyCourses = ({
                             placement="top"
                             overlay={<Tooltip id={`tooltip-public-${course._id}`}>Make course public</Tooltip>}
                           >
-                            <button 
+                            <button
                               className="btn btn-sm btn-success-soft btn-round"
                               onClick={() => onTogglePrivacy(course._id, course.isPrivate)}
                             >
@@ -232,7 +240,7 @@ const MyCourses = ({
                             placement="top"
                             overlay={<Tooltip id={`tooltip-private-${course._id}`}>Make course private</Tooltip>}
                           >
-                            <button 
+                            <button
                               className="btn btn-sm btn-danger-soft btn-round"
                               onClick={() => onTogglePrivacy(course._id, course.isPrivate)}
                             >

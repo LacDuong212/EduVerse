@@ -55,7 +55,7 @@ const TopNavigationBar = () => {
             </Link>
             {cartCount > 0 && (
               <span
-                className="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-dark mt-xl-2 ms-n1"
+                className="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-primary mt-xl-2 ms-n1"
                 style={{ zIndex: 10, pointerEvents: 'none' }}
               >
                 {cartCount}
