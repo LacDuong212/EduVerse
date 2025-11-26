@@ -41,7 +41,7 @@ const Step1 = ({ stepperInstance, draftData, onSave }) => {
       language: draftData.language || '',
       duration: draftData.duration || '',
       durationUnit: draftData.durationUnit || 'hour',
-      price: draftData.price || '',
+      price: draftData.price === 0 ? 0 : draftData.price,
       discountPrice: draftData.discountPrice || '',
       enableDiscount: draftData.enableDiscount || false,
       description: draftData.description || '',

@@ -1,10 +1,14 @@
 import galleryImg from '@/assets/images/element/gallery.svg';
 import GlightBox from '@/components/GlightBox';
-import { useEffect, useRef, useState, useMemo } from 'react';
-import { Col, Row, Nav, Tab, Alert } from 'react-bootstrap';
+import { useVideoStream } from "@/hooks/useStreamUrl";
+import { useVideoUpload } from "../useVideoUpload";
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Alert, Col, Nav, ProgressBar, Row, Tab } from 'react-bootstrap';
 import { FaPlay } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 
+// simple URL regex
+const URL_REGEX = /^(https|http):\/\/[^\s$.?#].[^\s]*$/;
 
 // helper functions ---
 const getInitialTab = (image) => {
@@ -14,6 +18,7 @@ const getInitialTab = (image) => {
   }
   return 'url';
 };
+
 const getImagePreview = (image) => {
   if (image) {
     if (image instanceof File) return URL.createObjectURL(image);
@@ -23,6 +28,12 @@ const getImagePreview = (image) => {
 };
 
 const Step2 = ({ stepperInstance, draftData, onSave }) => {
+  // hook
+  const { uploadVideo, progress, isUploading } = useVideoUpload();
+
+  // tracks if we just successfully uploaded
+  const uploadSuccessRef = useRef(false);
+
   // image states ---
   const [courseImageTab, setCourseImageTab] = useState(getInitialTab(draftData.image));
   const [courseImageURL, setCourseImageURL] = useState(
@@ -48,6 +59,31 @@ const Step2 = ({ stepperInstance, draftData, onSave }) => {
   // other states ---
   const [error, setError] = useState('');
 
+  // determine if videoURL is an S3 key or an URL
+  const isS3Key = useMemo(() => {
+    return videoURL && typeof videoURL === 'string' && videoURL.startsWith('videos/');
+  }, [videoURL]);
+
+  // this ensures the URL string stays the same even when 'progress' triggers re-renders
+  const videoObjectUrl = useMemo(() => {
+    if (videoFile) {
+      return URL.createObjectURL(videoFile);
+    }
+    return null;
+  }, [videoFile]);
+
+  // Cleanup object URL to avoid memory leaks
+  useEffect(() => {
+    return () => {
+      if (videoObjectUrl) {
+        URL.revokeObjectURL(videoObjectUrl);
+      }
+    };
+  }, [videoObjectUrl]);
+
+  // fetch stream URL if S3 key
+  const courseId = draftData._id;
+  const { streamUrl: s3StreamUrl, loading: streamLoading } = useVideoStream(courseId, isS3Key ? videoURL : null);
 
   // syncs the component's state with the draftData.image prop
   useEffect(() => {
@@ -57,12 +93,12 @@ const Step2 = ({ stepperInstance, draftData, onSave }) => {
         setCourseImageTab('url');
         setCourseImageURL(image);
         setPreviewCourseImage(image);
-        setCourseImageFile(null); // Ensure file is cleared
+        setCourseImageFile(null); // ensure file is cleared
       } else if (image instanceof File) {
         setCourseImageTab('upload');
         setCourseImageFile(image);
         setPreviewCourseImage(getImagePreview(image));
-        setCourseImageURL(''); // Ensure URL is cleared
+        setCourseImageURL(''); // ensure URL is cleared
       }
     } else {
       // handles when the data is loading or image is truly null
@@ -73,13 +109,18 @@ const Step2 = ({ stepperInstance, draftData, onSave }) => {
     }
   }, [draftData.image]);  // runs whenever draftData.image changes
 
-  // This effect syncs the component's state with the draftData.previewVideo prop
+  // syncs the component's state with the draftData.previewVideo prop
   useEffect(() => {
     const video = draftData.previewVideo;
     if (video) {
       if (typeof video === 'string') {
         setVideoURL(video);
-        setVideoFile(null);
+        
+        // if we just uploaded the file, keep the local file in state
+        // so the UI doesn't switch to the "Loading S3 Stream" view, causing a flicker.
+        if (!uploadSuccessRef.current) {
+          setVideoFile(null);
+        }
       } else if (video instanceof File) {
         setVideoFile(video);
         setVideoURL('');
@@ -88,9 +129,7 @@ const Step2 = ({ stepperInstance, draftData, onSave }) => {
       setVideoURL('');
       setVideoFile(null);
     }
-    // This hook runs whenever draftData.previewVideo changes
-  }, [draftData.previewVideo]);
-  // --- END: THE FIX ---
+  }, [draftData.previewVideo]); // runs whenever draftData.previewVideo changes
 
   // YouTube URL parsing ---
   const youtubeId = useMemo(() => {
@@ -103,7 +142,7 @@ const Step2 = ({ stepperInstance, draftData, onSave }) => {
 
   const videoThumbnail = youtubeId
     ? `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`
-    : 'https://via.placeholder.com/600x300?text=No+Video+Preview';
+    : 'https://placehold.co/600x300?text=No+Video+Preview';
 
   const videoHref = youtubeId ? `https://youtu.be/${youtubeId}` : videoURL || '#';
 
@@ -115,7 +154,7 @@ const Step2 = ({ stepperInstance, draftData, onSave }) => {
   const handleCourseImageURLChange = (e) => {
     const url = e.target.value;
     setCourseImageURL(url);
-    setPreviewCourseImage(url); // Update preview
+    setPreviewCourseImage(url); // update preview
     setCourseImageFile(null);
     if (courseImageInputRef.current) courseImageInputRef.current.value = '';
     setError('');
@@ -124,13 +163,13 @@ const Step2 = ({ stepperInstance, draftData, onSave }) => {
     const file = e.target.files[0];
     if (file) {
       setCourseImageFile(file);
-      setPreviewCourseImage(URL.createObjectURL(file)); // Update preview
+      setPreviewCourseImage(URL.createObjectURL(file)); // update preview
       setCourseImageURL('');
       setError('');
     }
   };
   const handleRemoveCourseImage = () => {
-    setPreviewCourseImage(null); // Update preview
+    setPreviewCourseImage(null); // update preview
     setCourseImageURL('');
     setCourseImageFile(null);
     setError('');
@@ -140,7 +179,7 @@ const Step2 = ({ stepperInstance, draftData, onSave }) => {
   // new video handlers ---
   const handleVideoURLChange = (e) => {
     setVideoURL(e.target.value);
-    setVideoFile(null); // Clear file
+    setVideoFile(null); // clear file
     if (videoInputRef.current) videoInputRef.current.value = '';
     setError('');
   };
@@ -148,7 +187,7 @@ const Step2 = ({ stepperInstance, draftData, onSave }) => {
     const file = e.target.files[0];
     if (file) {
       setVideoFile(file);
-      setVideoURL(''); // Clear URL
+      setVideoURL(''); // clear URL
       setError('');
     }
   };
@@ -162,6 +201,7 @@ const Step2 = ({ stepperInstance, draftData, onSave }) => {
   // validation & submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isUploading) return; // prevent double submit
     setError('');
 
     // get image
@@ -172,31 +212,51 @@ const Step2 = ({ stepperInstance, draftData, onSave }) => {
       return;
     }
 
-    // get video
-    let previewVideoData = videoURL || videoFile || null; // will be string, File, or null
-    let thumbnailData = (videoURL && youtubeId) ? videoThumbnail : null;
-
-    // validate YouTube URL
-    if (videoURL && !youtubeId) {
-      setError('The preview video URL must be a valid YouTube URL.');
-      toast.error("Please fix the errors on the page");
-      return;
+    // check video source
+    if (videoURL && !videoFile) {
+      // if a valid S3 Key
+      const validS3 = videoURL.startsWith('videos/');
+      // if a valid URL
+      const validUrl = URL_REGEX.test(videoURL);
+      
+      if (!validS3 && !validUrl) {
+        setError('Invalid Video Source. Must be a valid URL (http/https) or an uploaded file (starting with "videos/..").');
+        toast.error("Please fix the errors on the page");
+        return;
+      }
     }
 
-    // submit, #TODO: video upload
-    const payload = {
-      image: courseImageData,
-      previewVideo: previewVideoData,
-      thumbnail: thumbnailData,
+    // prepare save function
+    const processSave = (finalVideoValue) => {
+      // fallback: if YouTube, use YT thumb. else, default to the Course Image.
+      const thumbnailData = (finalVideoValue && youtubeId) 
+          ? videoThumbnail 
+          : courseImageData; 
+
+      const payload = {
+        image: courseImageData,
+        previewVideo: finalVideoValue,
+        thumbnail: thumbnailData,
+      };
+
+      try {
+        onSave(payload);
+        toast.success('Step 2 saved!');
+        stepperInstance?.next();
+      } catch (error) {
+        toast.error('Failed to save course media');
+      }
     };
 
-    try {
-      onSave(payload);
-
-      toast.success('Step 2 saved!');
-      stepperInstance?.next();
-    } catch (error) {
-      toast.error('Failed to save course media');
+    // handle video upload if chosen a file
+    if (videoFile) {
+      // use the hook to upload
+      await uploadVideo(videoFile, (uploadedKey) => {
+        processSave(uploadedKey);  // if success save the returned key
+      });
+    } else {
+      // no new file, just save existing URL/Key or null
+      processSave(videoURL);
     }
   };
 
@@ -222,7 +282,7 @@ const Step2 = ({ stepperInstance, draftData, onSave }) => {
             activeKey={courseImageTab}
             onSelect={handleCourseImageTabChange}
           >
-            {/* Image Tabs  */}
+            {/* Image Tabs */}
             <Nav variant="tabs" className="nav-tabs-line mt-3">
               <Nav.Item>
                 <Nav.Link eventKey="url">Image URL</Nav.Link>
@@ -245,7 +305,7 @@ const Step2 = ({ stepperInstance, draftData, onSave }) => {
               <Tab.Pane eventKey="upload">
                 <div className="text-center justify-content-center align-items-center p-4 p-sm-5 border border-2 border-dashed position-relative rounded-3">
                   <div>
-                    <h6 className="my-2">
+                    <h6 className="my-2"> {/* #TODO */}
                       Drop an image file here, or{' '}
                       <label
                         htmlFor="image"
@@ -277,7 +337,7 @@ const Step2 = ({ stepperInstance, draftData, onSave }) => {
             </Tab.Content>
           </Tab.Container>
 
-          {/* Course Image Preview (Corrected) */}
+          {/* Course Image Preview */}
           {previewCourseImage && (
             <div className="mt-4 text-center">
               <h6 className="mb-2">Image Preview</h6>
@@ -320,14 +380,16 @@ const Step2 = ({ stepperInstance, draftData, onSave }) => {
           <h5>Upload Course Preview Video (Optional)</h5>
 
           <Col xs={12} className="mt-4">
-            <label className="form-label">YouTube Video URL</label>
+            <label className="form-label">Video Source</label>
+            {/* FIX: Changed type="url" to type="text" to accept S3 keys (videos/...) without browser error */}
             <input
               className="form-control"
-              type="url"
-              placeholder="Enter YouTube video URL"
+              type="text" 
+              placeholder="Enter YouTube URL or see uploaded file key"
               value={videoURL}
               onChange={handleVideoURLChange}
             />
+            <div className="form-text">Enter a YouTube URL or upload a file below.</div>
           </Col>
 
           <div className="position-relative my-4">
@@ -347,19 +409,25 @@ const Step2 = ({ stepperInstance, draftData, onSave }) => {
                 id="videoUpload"
                 accept="video/mp4,video/quicktime"
                 onChange={handleVideoFileChange}
+                disabled={isUploading}
               />
-              <label className="input-group-text">.mp4</label>
+              <label className="input-group-text">.mp4, .mov</label>
             </div>
-            <p className="small mb-0 mt-1">
-              <b>Note:</b> File upload comming soon!
-            </p>
+
+            {/* progress bar */}
+            {isUploading && (
+              <div className="mt-3">
+                <p className="mb-1 text-primary">Uploading Video... {progress}%</p>
+                <ProgressBar now={progress} animated striped variant="success" />
+              </div>
+            )}
           </Col>
 
           {/* Video Preview */}
-          {/* show YouTube preview if URL is set */}
-          {videoURL && (
+          {/* YouTube Preview */}
+          {youtubeId && !videoFile && (
             <>
-              <h6 className="mt-4">Video Preview</h6>
+              <h6 className="mt-4">Video Preview (YouTube)</h6>
               <div className="position-relative text-center px-sm-0 px-lg-5">
                 <img
                   src={videoThumbnail}
@@ -367,33 +435,69 @@ const Step2 = ({ stepperInstance, draftData, onSave }) => {
                   alt="video-thumbnail"
                   style={{ height: '300px', width: '100%', objectFit: 'cover' }}
                 />
-                {youtubeId && (
-                  <div className="position-absolute top-50 start-50 translate-middle">
-                    <GlightBox
-                      key={videoHref}
-                      href={videoHref}
-                      className="btn btn-lg text-danger btn-round btn-light-shadow"
-                      data-glightbox
-                      data-gallery="video-tour"
-                    >
-                      <FaPlay />
-                    </GlightBox>
-                  </div>
-                )}
+                <div className="position-absolute top-50 start-50 translate-middle">
+                  <GlightBox
+                    key={videoHref}
+                    href={videoHref}
+                    className="btn btn-lg text-danger btn-round btn-light-shadow"
+                    data-glightbox
+                    data-gallery="video-tour"
+                  >
+                    <FaPlay />
+                  </GlightBox>
+                </div>
               </div>
             </>
           )}
 
-          {/* show file info if a file is selected */}
-          {videoFile && (
-            <Alert variant="info" className="mt-4">
-              File selected: <strong>{videoFile.name}</strong>
-              <p className="small mb-0">
-                This file is ready for the next step.
-              </p>
-            </Alert>
+          {/* cloud video preview if existing saved video */}
+          {isS3Key && !videoFile && (
+            <div className="mt-4">
+              <h6 className="mb-2">Video Preview (Uploaded)</h6>
+              {streamLoading ? (
+                <div className="spinner-border text-primary" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </div>
+              ) : s3StreamUrl ? (
+                <video
+                  controls
+                  width="100%"
+                  className="rounded-3 border"
+                  style={{ maxHeight: '400px', backgroundColor: '#000' }}
+                >
+                  <source src={s3StreamUrl} type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+              ) : (
+                <Alert variant="warning">Unable to load video preview.</Alert>
+              )}
+            </div>
           )}
 
+          {/* local file preview (before upload) */}
+          {videoFile && videoObjectUrl && (
+            <div className="mt-4">
+              <h6 className="mb-2">File Ready for Upload</h6>
+              <Alert variant="info" className="d-flex align-items-center justify-content-between">
+                <div>
+                  File selected: <strong>{videoFile.name}</strong>
+                  <div className="small">
+                    {uploadSuccessRef.current ? "Upload Complete! Saving..." : 'Click "Next" to upload and save.'}
+                  </div>
+                </div>
+              </Alert>
+              {!isUploading && (
+                <video
+                  controls
+                  width="100%"
+                  className="rounded-3 border"
+                  style={{ maxHeight: '400px', backgroundColor: '#000' }}
+                  src={videoObjectUrl} 
+                >
+                </video>
+              )}
+            </div>
+          )}
         </Col>
 
         {/* --- NAVIGATION BUTTONS --- */}
@@ -402,11 +506,12 @@ const Step2 = ({ stepperInstance, draftData, onSave }) => {
             type="button"
             className="btn btn-secondary prev-btn mb-0"
             onClick={goToPreviousStep}
+            disabled={isUploading}
           >
             Previous
           </button>
-          <button type="submit" className="btn btn-primary next-btn mb-0">
-            Next
+          <button type="submit" className="btn btn-primary next-btn mb-0" disabled={isUploading}>
+            {isUploading ? 'Uploading...' : 'Next'}
           </button>
         </div>
       </Row>

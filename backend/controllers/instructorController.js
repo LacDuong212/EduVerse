@@ -1,11 +1,12 @@
 import Course from "../models/courseModel.js";
+import DraftVideo from "../models/draftVideoModel.js";
 import Instructor from "../models/instructorModel.js";
 import Order from "../models/orderModel.js";
 import userModel from "../models/userModel.js";
 import Review from "../models/reviewModel.js";
 import Fuse from "fuse.js";
 import mongoose from "mongoose";
-
+import { generateUploadUrl } from "../utils/aws/putObject.js";
 
 const fetchInstructorFields = async (filter, fields, allowedFields) => {
   const selectFields = fields
@@ -436,7 +437,6 @@ export const getStudentsEnrolled = async (req, res) => {
 const getDateConfig = (period) => {
   const now = new Date();
   const start = new Date();
-  console.log(now);
 
   let mongoFormat = ""; // How Mongo formats the date string (grouping ID)
   let unit = "";        // How we step through the loop (day, week, month, year)
@@ -787,7 +787,6 @@ export const getDashboardData = async (req, res) => {
       },
       { $sort: { "_id.month": 1 } }
     ]);
-    console.log("Earnings raw data: ", earnings);
     const earningsData = fillChartData(earnings, start, unit);
 
     const topCourses = await Order.aggregate([
@@ -875,3 +874,65 @@ const getInstructorStudentIds = async (userId) => {
   const studentIdSet = new Set(orders.map(order => order.user.toString()));
   return Array.from(studentIdSet).map(id => new mongoose.Types.ObjectId(id));
 }
+
+// POST /api/instructor/videos/upload
+export const generateVideoUploadUrl = async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    // check instructor
+    const isInstructor = await Instructor.exists({ user: userId });
+    if (!isInstructor) {
+      return res.status(403).json({ success: false, message: "You don't have permission" });
+    }
+
+    const { fileName, contentType } = req.body;
+
+    // basic validation
+    if (!fileName || !contentType) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing file name or content type"
+      });
+    }
+
+    // extension validation
+    const allowedExt = ["mp4", "mov", "mkv", "avi"];
+    const ext = fileName.split(".").pop().toLowerCase();
+
+    if (!allowedExt.includes(ext)) {
+      return res.status(400).json({
+        success: false,
+        message: "Unsupported file type"
+      });
+    }
+
+    // sanitize: replaces spaces and special chars with dashes to avoid S3 URL encoding issues
+    const safeFileName = fileName.replace(/[^a-zA-Z0-9._]/g, "_");
+
+    // prefix key: videos/{instructorId}/{timestamp}-{safeName}
+    const fileKey = `videos/${userId}/${Date.now()}-${safeFileName}`;
+
+    // generate signed URL
+    const { uploadUrl, key } = await generateUploadUrl(fileKey, contentType);
+
+    // tracking draft
+    await DraftVideo.create({
+      key: key,
+      contentType: contentType,
+    });
+
+    res.json({
+      success: true,
+      uploadUrl,
+      key
+    });
+
+  } catch (error) {
+    console.error("Generate upload URL error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
+  }
+};

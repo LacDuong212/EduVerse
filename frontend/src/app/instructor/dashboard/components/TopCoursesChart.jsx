@@ -1,3 +1,4 @@
+import { currency } from '@/context/constants';
 import ReactApexChart from 'react-apexcharts';
 import { Button, Card, CardBody, CardHeader, Col, Row } from 'react-bootstrap';
 import { FaCircle } from 'react-icons/fa';
@@ -23,7 +24,12 @@ const TopCoursesChart = ({ col = 6, topCoursesData = [] }) => {
     colors: variants.map(variant =>
       getComputedStyle(document.documentElement).getPropertyValue(`--bs-${variant}`).trim()
     ),
-    tooltip: { theme: 'dark' },
+    tooltip: {
+      theme: 'dark',
+      y: {
+        formatter: (val) => `${val}${currency}`
+      }
+    },
     responsive: [{
       breakpoint: 480,
       options: {
@@ -68,7 +74,7 @@ const TopCoursesChart = ({ col = 6, topCoursesData = [] }) => {
                       <FaCircle
                         className={`text-${variants[index % variants.length]} me-2 flex-shrink-0`}
                       />
-                      <span>{course.title}</span>
+                      <span>{course.title} - {course.totalEarnings || 0}{currency}</span>
                     </li>
                   ))}
                 </ul>
