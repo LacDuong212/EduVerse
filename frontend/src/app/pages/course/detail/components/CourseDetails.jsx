@@ -24,6 +24,7 @@ import Instructor from './Instructor';
 import Overview from './Overview';
 import Reviews from './Reviews';
 import GlightBox from '@/components/GlightBox';
+import { useVideoStream } from '@/hooks/useStreamUrl';
 import { formatCurrency } from '@/utils/currency';
 import {
   FaBookOpen,
@@ -46,7 +47,13 @@ import courseImg21 from '@/assets/images/courses/4by3/21.jpg';
 import { useState } from 'react'; // 🔹 chỉ còn useState
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
-const PricingCard = ({ course, owned, onShowCurriculum, onAddToCart }) => {
+const PricingCard = ({ course, owned, onShowCurriculum, onAddToCart, courseId }) => {
+  // 🔹 gọi hook của bạn
+  const { streamUrl, loading: videoLoading, error: videoError } = useVideoStream(
+    courseId,
+    course?.previewVideo
+  );
+
   const getEmbedUrl = (url) => {
     if (!url) return null;
 
@@ -67,6 +74,9 @@ const PricingCard = ({ course, owned, onShowCurriculum, onAddToCart }) => {
     return url;
   };
 
+  // 🔹 ưu tiên dùng streamUrl từ hook, fallback về previewVideo cũ (giữ nguyên behavior trước đây)
+  const previewHref = getEmbedUrl(streamUrl || course?.previewVideo);
+
   return (
     <Card className="shadow p-2 mb-4 z-index-9">
       <div className="overflow-hidden rounded-3">
@@ -75,10 +85,11 @@ const PricingCard = ({ course, owned, onShowCurriculum, onAddToCart }) => {
         <div className="card-img-overlay d-flex align-items-start flex-column p-3">
           <div className="m-auto">
             <GlightBox
-              href={getEmbedUrl(course?.previewVideo)}
+              href={previewHref}
               className="btn btn-lg text-danger btn-round btn-white-shadow mb-0"
-              data-glightbox
+              data-glightbox="type: video"   // 👈 EP TYPE Ở ĐÂY
               data-gallery="course-video"
+              data-type="video"              // 👈 NẾU WRAPPER CỦA BẠN FORWARD ATTR NÀY
             >
               <FaPlay />
             </GlightBox>
@@ -87,6 +98,7 @@ const PricingCard = ({ course, owned, onShowCurriculum, onAddToCart }) => {
       </div>
 
       <CardBody className="px-3">
+        {/* phần dưới giữ nguyên y chang code của bạn */}
         <div className="d-flex justify-content-between align-items-center">
           <div>
             <div className="d-flex align-items-center">
@@ -120,7 +132,6 @@ const PricingCard = ({ course, owned, onShowCurriculum, onAddToCart }) => {
           </div>
         </div>
 
-        {/* 🔥 Nếu owned → chỉ hiện Continue Learning */}
         {owned ? (
           <div className="mt-3">
             <Button
@@ -132,7 +143,6 @@ const PricingCard = ({ course, owned, onShowCurriculum, onAddToCart }) => {
             </Button>
           </div>
         ) : (
-          /* ❌ chưa owned → hiện Free trial + Buy course */
           <div className="mt-3 d-sm-flex justify-content-sm-between">
             <Button
               variant="outline-primary"
@@ -155,6 +165,7 @@ const PricingCard = ({ course, owned, onShowCurriculum, onAddToCart }) => {
     </Card>
   );
 };
+
 
 const RecentlyViewed = () => {
   return (
@@ -384,7 +395,8 @@ const CourseDetails = ({ course, owned, onAddToCart }) => {
                 {/* ✅ Free trial: nếu đã mua thì chuyển sang trang học, chưa mua thì chỉ bật tab curriculum */}
                 <PricingCard
                   course={course}
-                  owned={owned}        // << 🔥 THÊM DÒNG NÀY
+                  owned={owned}
+                  courseId={course?._id || id}   // 🔹 thêm dòng này
                   onShowCurriculum={() => {
                     if (owned) {
                       const courseId = course?._id || id;
