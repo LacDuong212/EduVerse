@@ -1,43 +1,11 @@
 import Order from "../models/orderModel.js";
 import Cart from "../models/cartModel.js";
-import { registerTask } from "../utils/scheduler.js";
 
-
-// service
-// run every minute
-registerTask("Expire Orders", "* * * * *", async () => {
-  const now = new Date();
-
-  const result = await Order.updateMany(
-    { status: "pending", expiresAt: { $lte: now } },
-    { $set: { status: "cancelled" } }
-  );
-
-  if (result.modifiedCount > 0) {
-    console.log(`> Cancelled ${result.modifiedCount} orders`);
-  }
-});
-
-// transform
-const transformCourses = (courses) => {
-  return courses.map(({ course, pricePaid }) => ({
-    courseId: course._id,
-    title: course.title,
-    subtitle: course.subtitle,
-    category: course.category,
-    level: course.level,
-    thumbnail: course.thumbnail,
-    pricePaid,
-  }));
-};
 
 // GET /orders/
 export const getOrders = async (req, res) => {
   try {
     const orders = await Order.find({ user: req.userId }).populate('courses.course');
-
-    // TODO: transform orders (differ for admin)
-
     res.status(200).json({ success: true, orders });
   } catch (error) {
     res.status(500).json({ success: false, message: "Error fetching orders", error });
@@ -52,7 +20,7 @@ export const getOrderById = async (req, res) => {
       return res.status(404).json({ success: false, message: "Order not found" });
     }
 
-    // check ownership, #TODO: admin (& transforming order)
+    // check ownership
     if (order.user.toString() !== req.userId) {
       return res.status(403).json({ success: false, message: "Unauthorized access" });
     }
@@ -101,8 +69,7 @@ export const createOrder = async (req, res) => {
       courses: coursesToOrder,
       totalAmount: totalAmount,
       paymentMethod: paymentMethod,
-      status: "pending",
-      expiresAt: new Date(Date.now() + 60 * 60 * 1000),
+      status: "pending"
     });
 
     await order.save();
@@ -138,7 +105,7 @@ export const updateOrder = async (req, res) => {
       return res.status(404).json({ success: false, message: "Order not found" });
     }
 
-    if (order.user.toString() !== req.userId) {   // TODO: admin
+    if (order.user.toString() !== req.userId) {
       return res.status(403).json({ success: false, message: "Unauthorized access" });
     }
 
