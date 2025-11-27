@@ -22,7 +22,7 @@ const GlightBox = ({
 
     // cleanup: destroy instance when href changes or component unmounts
     return () => instance?.destroy();
-  }, [ref]);
+  }, [href]);
 
   return (
     <a ref={ref} href={href} {...other} className={`glightbox ${other['className']}`}>

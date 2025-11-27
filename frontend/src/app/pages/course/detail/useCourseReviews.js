@@ -1,4 +1,3 @@
-// src/hooks/useCourseReviews.js
 import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -66,6 +65,47 @@ export default function useCourseReviews(courseId, options = {}) {
   const [loading, setLoading] = useState(false);        // load list
   const [actionLoading, setActionLoading] = useState(false); // create/update/delete
   const [error, setError] = useState(null);
+
+  // ✅ NEW: trạng thái enroll (đã mua / đã học) course này chưa
+  const [isEnrolled, setIsEnrolled] = useState(false);
+  const [isEnrolledChecking, setIsEnrolledChecking] = useState(false);
+
+  // ✅ NEW: check xem user có sở hữu course không
+  useEffect(() => {
+    if (!courseId || !backendUrl) return;
+
+    let cancelled = false;
+
+    const checkEnroll = async () => {
+      setIsEnrolledChecking(true);
+      try {
+        const { data } = await axios.get(
+          `${backendUrl}/api/student/my-courses/${courseId}`,
+          { withCredentials: true }
+        );
+
+        if (cancelled) return;
+
+        if (data?.success && data.course) {
+          setIsEnrolled(true);
+        } else {
+          setIsEnrolled(false);
+        }
+      } catch (err) {
+        if (cancelled) return;
+        // 401/403 hoặc lỗi khác -> coi như chưa enroll / guest
+        setIsEnrolled(false);
+      } finally {
+        if (!cancelled) setIsEnrolledChecking(false);
+      }
+    };
+
+    checkEnroll();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [backendUrl, courseId]);
 
   const fetchReviews = useCallback(async () => {
     if (!courseId || !backendUrl) return;
@@ -155,6 +195,12 @@ export default function useCourseReviews(courseId, options = {}) {
   const createReview = async ({ rating, description }) => {
     if (!courseId) return { success: false };
 
+    // ✅ NEW: chặn luôn từ frontend nếu chưa enroll
+    if (!isEnrolled) {
+      toast.error("You must enroll in this course before leaving a review.");
+      return { success: false };
+    }
+
     try {
       setActionLoading(true);
       const { data } = await axios.post(
@@ -236,6 +282,8 @@ export default function useCourseReviews(courseId, options = {}) {
     stats,          // { averageRating, totalReviews, distribution }
     pagination,
     page,
+    isEnrolled,          // ✅ NEW: export cho component dùng
+    isEnrolledChecking,  // ✅ NEW: export nếu UI muốn show loading
 
     // loading & error
     loading,

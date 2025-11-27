@@ -1,7 +1,6 @@
 import Review from "../models/reviewModel.js";
 import Course from "../models/courseModel.js";
-
-
+import { recalculateCourseRating } from "../helpers/recalculateCourseRating.js";
 // GET /reviews/:courseId?page=&limit=  (for guest)
 export const getCourseReviewsForGuests = async (req, res) => {
   try {
@@ -109,6 +108,9 @@ export const createReview = async (req, res) => {
     });
     await review.save();
 
+    // ⭐ SAU KHI TẠO REVIEW: update lại rating course
+    await recalculateCourseRating(courseId);
+
     res.status(200).json({ success: true, message: "Review created", review });
   }
   catch (error) {
@@ -126,17 +128,20 @@ export const updateReview = async (req, res) => {
     // check if review exists
     const review = await Review.findById(reviewId);
     if (!review) {
-      res.status(200).json({ success: false, message: "Review not found" });
+      return res.status(200).json({ success: false, message: "Review not found" });
     }
 
     // check if owner
     if (review.user.toString() !== userId.toString()) {
-      res.status(200).json({ success: false, message: "Not your review" });
+      return res.status(200).json({ success: false, message: "Not your review" });
     }
 
     review.rating = rating ?? review.rating;
     review.description = description ?? review.description;
     await review.save();
+
+    // ⭐ SAU KHI UPDATE: tính lại rating course
+    await recalculateCourseRating(review.course);
 
     res.status(200).json({ success: true, message: "Review updated", review });
   }
@@ -164,6 +169,9 @@ export const removeReview = async (req, res) => {
 
     review.isDeleted = true;
     await review.save();
+
+    // ⭐ SAU KHI XÓA: tính lại rating course
+    await recalculateCourseRating(review.course);
 
     res.status(200).json({ success: true, message: "Review deleted" });
   }

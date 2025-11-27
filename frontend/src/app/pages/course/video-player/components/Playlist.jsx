@@ -79,14 +79,14 @@ const Playlist = ({ course, onSelect, currentId }) => {
   });
   const { control, handleSubmit } = useForm({ resolver: yupResolver(noteSchema) });
 
-  // Format duration (giờ -> "Hh Mm"), fallback "--"
-  const formatDuration = (hours) => {
-    if (typeof hours !== 'number' || isNaN(hours)) return '--';
-    const h = Math.floor(hours);
-    const m = Math.round((hours - h) * 60);
-    if (h <= 0 && m <= 0) return '--';
-    return m ? `${h}h ${m}m` : `${h}h`;
-  };
+ const formatDuration = (sec) => {
+  if (!sec || isNaN(sec)) return "--";
+
+  const minutes = Math.floor(sec / 60);
+  const seconds = sec % 60;
+
+  return `${minutes}m ${seconds}s`;
+};
 
   // Component hiển thị note inline (demo giữ như cũ)
   const PlayNote = () => (

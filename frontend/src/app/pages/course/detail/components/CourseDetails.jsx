@@ -24,6 +24,7 @@ import Instructor from './Instructor';
 import Overview from './Overview';
 import Reviews from './Reviews';
 import GlightBox from '@/components/GlightBox';
+import { useVideoStream } from '@/hooks/useStreamUrl';
 import { formatCurrency } from '@/utils/currency';
 import {
   FaBookOpen,
@@ -46,22 +47,25 @@ import courseImg21 from '@/assets/images/courses/4by3/21.jpg';
 import { useState } from 'react'; // 🔹 chỉ còn useState
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
-const PricingCard = ({ course, onShowCurriculum, onAddToCart }) => {
+const PricingCard = ({ course, owned, onShowCurriculum, onAddToCart, courseId }) => {
+  // 🔹 gọi hook của bạn
+  const { streamUrl, loading: videoLoading, error: videoError } = useVideoStream(
+    courseId,
+    course?.previewVideo
+  );
+
   const getEmbedUrl = (url) => {
     if (!url) return null;
 
-    // dạng youtu.be/xxxx
     if (url.includes('youtu.be/')) {
       const videoId = url.split('youtu.be/')[1];
       return `https://www.youtube.com/embed/${videoId}`;
     }
 
-    // dạng watch?v=xxxx
     if (url.includes('watch?v=')) {
       return url.replace('watch?v=', 'embed/');
     }
 
-    // dạng shorts/xxxx
     if (url.includes('shorts/')) {
       const videoId = url.split('shorts/')[1];
       return `https://www.youtube.com/embed/${videoId}`;
@@ -69,6 +73,9 @@ const PricingCard = ({ course, onShowCurriculum, onAddToCart }) => {
 
     return url;
   };
+
+  // 🔹 ưu tiên dùng streamUrl từ hook, fallback về previewVideo cũ (giữ nguyên behavior trước đây)
+  const previewHref = getEmbedUrl(streamUrl || course?.previewVideo);
 
   return (
     <Card className="shadow p-2 mb-4 z-index-9">
@@ -78,17 +85,20 @@ const PricingCard = ({ course, onShowCurriculum, onAddToCart }) => {
         <div className="card-img-overlay d-flex align-items-start flex-column p-3">
           <div className="m-auto">
             <GlightBox
-              href={getEmbedUrl(course?.previewVideo)}
+              href={previewHref}
               className="btn btn-lg text-danger btn-round btn-white-shadow mb-0"
-              data-glightbox
+              data-glightbox="type: video"   // 👈 EP TYPE Ở ĐÂY
               data-gallery="course-video"
+              data-type="video"              // 👈 NẾU WRAPPER CỦA BẠN FORWARD ATTR NÀY
             >
               <FaPlay />
             </GlightBox>
           </div>
         </div>
       </div>
+
       <CardBody className="px-3">
+        {/* phần dưới giữ nguyên y chang code của bạn */}
         <div className="d-flex justify-content-between align-items-center">
           <div>
             <div className="d-flex align-items-center">
@@ -120,69 +130,42 @@ const PricingCard = ({ course, onShowCurriculum, onAddToCart }) => {
               })()}
             </div>
           </div>
-          <Dropdown>
-            <DropdownToggle
-              as="a"
-              className="btn btn-sm btn-light rounded small arrow-none"
-              role="button"
-              id="dropdownShare"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-            >
-              <FaShareAlt className="fa-fw" />
-            </DropdownToggle>
-            <DropdownMenu
-              className="dropdown-w-sm dropdown-menu-end min-w-auto shadow rounded"
-              aria-labelledby="dropdownShare"
-            >
-              <li>
-                <DropdownItem href="#">
-                  <FaTwitterSquare className="me-2" />
-                  Twitter
-                </DropdownItem>
-              </li>
-              <li>
-                <DropdownItem href="#">
-                  <FaFacebookSquare className="me-2" />
-                  Facebook
-                </DropdownItem>
-              </li>
-              <li>
-                <DropdownItem href="#">
-                  <FaLinkedin className="me-2" />
-                  LinkedIn
-                </DropdownItem>
-              </li>
-              <li>
-                <DropdownItem href="#">
-                  <FaCopy className="me-2" />
-                  Copy link
-                </DropdownItem>
-              </li>
-            </DropdownMenu>
-          </Dropdown>
         </div>
-        <div className="mt-3 d-sm-flex justify-content-sm-between">
-          <Button
-            variant="outline-primary"
-            className="mb-0"
-            onClick={onShowCurriculum} // ✅ giữ nguyên, logic xử lý ở parent
-          >
-            Free trial
-          </Button>
-          &nbsp;
-          <Button
-            variant="success"
-            className="mb-0"
-            onClick={onAddToCart} // ✅ dùng handler truyền từ parent
-          >
-            Buy course
-          </Button>
-        </div>
+
+        {owned ? (
+          <div className="mt-3">
+            <Button
+              variant="success"
+              className="w-100"
+              onClick={onShowCurriculum}
+            >
+              Continue Learning
+            </Button>
+          </div>
+        ) : (
+          <div className="mt-3 d-sm-flex justify-content-sm-between">
+            <Button
+              variant="outline-primary"
+              className="mb-0"
+              onClick={onShowCurriculum}
+            >
+              Free trial
+            </Button>
+            &nbsp;
+            <Button
+              variant="success"
+              className="mb-0"
+              onClick={onAddToCart}
+            >
+              Buy course
+            </Button>
+          </div>
+        )}
       </CardBody>
     </Card>
   );
 };
+
 
 const RecentlyViewed = () => {
   return (
@@ -412,12 +395,12 @@ const CourseDetails = ({ course, owned, onAddToCart }) => {
                 {/* ✅ Free trial: nếu đã mua thì chuyển sang trang học, chưa mua thì chỉ bật tab curriculum */}
                 <PricingCard
                   course={course}
+                  owned={owned}
+                  courseId={course?._id || id}   // 🔹 thêm dòng này
                   onShowCurriculum={() => {
                     if (owned) {
                       const courseId = course?._id || id;
-                      if (courseId) {
-                        navigate(`/student/courses/${courseId}`);
-                      }
+                      navigate(`/student/courses/${courseId}`);
                     } else {
                       setActiveKey('curriculum');
                     }

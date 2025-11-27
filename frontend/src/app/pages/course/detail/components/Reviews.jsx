@@ -18,6 +18,7 @@ const Reviews = () => {
   const {
     allReviews,
     userReviews,
+    isEnrolled,          // lấy flag từ hook
     stats,
     createReview,
     updateReview,
@@ -46,6 +47,9 @@ const Reviews = () => {
 
   // user đã từng review hay chưa
   const hasUserReview = (userReviews && userReviews.length > 0) || false;
+
+  // chỉ cho phép tạo review nếu đã enroll & chưa từng review
+  const canCreateReview = isEnrolled && !hasUserReview;
 
   // danh sách review hiển thị: luôn ghim review của user lên đầu
   const orderedReviews = [
@@ -177,8 +181,8 @@ const Reviews = () => {
         </Col>
       </Row>
 
-      {/* FORM TẠO REVIEW MỚI - chỉ hiện khi user CHƯA review */}
-      {!hasUserReview && (
+      {/* FORM TẠO REVIEW MỚI - chỉ hiện khi user đã enroll & chưa review */}
+      {canCreateReview && (
         <div className="mt-2">
           <h5 className="mb-4">Leave a Review</h5>
           <form className="row g-3" onSubmit={handleSubmitNew}>
@@ -221,6 +225,13 @@ const Reviews = () => {
             </Col>
           </form>
         </div>
+      )}
+
+      {/* Optional: thông báo cho guest / chưa enroll */}
+      {!isEnrolled && (
+        <p className="text-muted mt-3">
+          Only students who enrolled in this course can leave a review.
+        </p>
       )}
 
       <Row>
@@ -354,9 +365,10 @@ const Reviews = () => {
                         </Button>
                       </div>
                     </div>
-                  ) : (
+                  ) : 
+                  (
                     <>
-                      <p className="mb-2">{review.description}</p>
+                      {/* <p className="mb-2">{review.description}</p>
                       <div
                         className="btn-group"
                         role="group"
@@ -387,8 +399,8 @@ const Reviews = () => {
                         >
                           <FaRegThumbsDown className="me-1" />
                           2
-                        </label>
-                      </div>
+                        </label> */}
+                      {/* </div> */}
                     </>
                   )}
                 </div>
