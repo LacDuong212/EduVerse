@@ -386,29 +386,21 @@ const getDateConfig = (period) => {
 // helper: fill in missing dates with 0
 const fillChartData = (mongoData, start, unit) => {
   const results = [];
-  // Clone ngày start để không làm thay đổi biến gốc bên ngoài
   const current = new Date(start);
   const now = new Date();
 
-  // 1. Tạo Map để tra cứu nhanh O(1)
-  // Ex: { "2025-11-19": 500, "2025-11": 2000 }
   const dataMap = {};
   if (Array.isArray(mongoData)) {
     mongoData.forEach(item => {
-      dataMap[item._id] = item.total; // hoặc item.totalAmount tuỳ response của bạn
+      dataMap[item._id.month] = item.totalEarnings || item.total || 0;
     });
   }
 
-  // Helper: Thêm số 0 đằng trước (1 -> "01")
   const pad = (num) => num.toString().padStart(2, '0');
 
-  // 2. Vòng lặp fill data
-  // Điều kiện: Chạy miễn là current chưa vượt quá now. 
-  // Với 'week', thêm buffer nhỏ để đảm bảo tuần hiện tại được tính dù chưa hết tuần.
   while (current <= now || (unit === 'week' && current.getTime() < now.getTime() + 7 * 24 * 60 * 60 * 1000)) {
-
     let label = "";
-    let shouldBreak = false; // Cờ để thoát vòng lặp an toàn cho case Week
+    let shouldBreak = false;
 
     if (unit === 'day') {
       // Format: YYYY-MM-DD (Local Time)
@@ -607,7 +599,7 @@ export const getCourseStudentsAndReviews = async (req, res) => {
 };
 
 // GET /api/instructor/dashboard
-export const poppulateDashboardData = async (req, res) => {
+export const getDashboardData = async (req, res) => {
   try {
     const userId = req.userId;
 
@@ -631,6 +623,8 @@ export const poppulateDashboardData = async (req, res) => {
       return res.json({
         success: true,
         averageRating: 0,
+        earningsData: [],
+        topCoursesData: [],
         totalCourses,
         totalStudents,
         totalOrders
@@ -664,15 +658,88 @@ export const poppulateDashboardData = async (req, res) => {
         }
       }
     ]);
-
     const averageRating =
       avgRating.length > 0 && avgRating[0].avgRating != null
         ? parseFloat(avgRating[0].avgRating.toFixed(1))
         : 0;
 
+    const { start, mongoFormat, unit } = getDateConfig('month');
+    const earnings = await Order.aggregate([
+      {
+        $match: {
+          status: 'completed',
+          createdAt: { $gte: start }, // e.g. 12 months ago, first day of month
+          "courses.course": { $in: courseIds },  // courseIds is array of instructor's course _ids
+        }
+      },
+      { $unwind: "$courses" },
+      {
+        $match: {
+          "courses.course": { $in: courseIds }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            month: { $dateToString: { format: mongoFormat, date: "$createdAt" } }
+          },
+          totalEarnings: { $sum: "$courses.pricePaid" }
+        }
+      },
+      { $sort: { "_id.month": 1 } }
+    ]);
+    console.log("Earnings raw data: ", earnings);
+    const earningsData = fillChartData(earnings, start, unit);
+
+    const topCourses = await Order.aggregate([
+      {
+        $match: {
+          status: "completed",
+          createdAt: { $gte: start },
+          "courses.course": { $in: courseIds }
+        }
+      },
+      { $unwind: "$courses" },
+
+      {
+        $match: {
+          "courses.course": { $in: courseIds }
+        }
+      },
+      {
+        $group: {
+          _id: "$courses.course",
+          totalEarnings: { $sum: "$courses.pricePaid" },
+          totalSales: { $sum: 1 }
+        }
+      },
+      { $sort: { totalEarnings: -1 } },
+      { $limit: 5 },
+      {
+        $lookup: {
+          from: "courses",
+          localField: "_id",
+          foreignField: "_id",
+          as: "course"
+        }
+      },
+      { $unwind: "$course" },
+      {
+        $project: {
+          _id: 0,
+          courseId: "$_id",
+          title: "$course.title",
+          totalEarnings: 1,
+          totalSales: 1
+        }
+      }
+    ]);
+
     return res.json({
       success: true,
       averageRating,
+      earningsData,
+      topCoursesData: topCourses,
       totalCourses,
       totalStudents,
       totalOrders

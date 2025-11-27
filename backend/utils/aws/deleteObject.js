@@ -1,5 +1,5 @@
-const { DeleteObjectCommand } = require("@aws-sdk/client-s3");
-const { getS3Client } = require("./s3-credentials");
+import { DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { getS3Client } from "./s3-credentials";
 
 
 export const deleteObject = async (key) => {

@@ -3,7 +3,7 @@ import Course from "../models/courseModel.js";
 
 
 // GET /reviews/:courseId?page=&limit=  (for guest)
-export const getCourseReviewsForGuests = async(req, res) => {
+export const getCourseReviewsForGuests = async (req, res) => {
   try {
     const { courseId } = req.params;
     const page = parseInt(req.query.page) || 1;
@@ -21,11 +21,11 @@ export const getCourseReviewsForGuests = async(req, res) => {
 
     res.status(200).json({
       success: true,
-      othersReviews, 
-      pagination: { 
-        reviewCount, 
+      othersReviews,
+      pagination: {
+        reviewCount,
         page,
-        pages: Math.ceil(reviewCount / limit) 
+        pages: Math.ceil(reviewCount / limit)
       }
     });
   }
@@ -50,8 +50,8 @@ export const getCourseReviews = async (req, res) => {
       user: userId,
       isDeleted: false
     })
-    .populate("user", "name pfpImg")
-    .sort({ updatedAt: -1 });
+      .populate("user", "name pfpImg")
+      .sort({ updatedAt: -1 });
 
     // find others' reviews
     const query = { course: courseId, isDeleted: false };
@@ -65,12 +65,12 @@ export const getCourseReviews = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      userReviews, 
-      othersReviews, 
-      pagination: { 
-        reviewCount, 
-        page, 
-        pages: Math.ceil(reviewCount / limit) 
+      userReviews,
+      othersReviews,
+      pagination: {
+        reviewCount,
+        page,
+        pages: Math.ceil(reviewCount / limit)
       }
     });
   }
@@ -130,7 +130,7 @@ export const updateReview = async (req, res) => {
     }
 
     // check if owner
-    if (review.user.toString() !== userId) {
+    if (review.user.toString() !== userId.toString()) {
       res.status(200).json({ success: false, message: "Not your review" });
     }
 
@@ -158,7 +158,7 @@ export const removeReview = async (req, res) => {
     }
 
     // check if owner, #TODO?: admins remove reviews
-    if (review.user.toString() !== userId) {
+    if (review.user.toString() !== userId.toString()) {
       return res.status(403).json({ success: false, message: "Not your review" });
     }
 
