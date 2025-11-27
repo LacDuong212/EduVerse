@@ -97,7 +97,7 @@ const Step4 = ({
         <div className="d-flex flex-column align-items-end">
           <div className="d-flex gap-2">
             {/* Preview Button */}
-            <Link
+            {/* <Link
               to="/instructor/course-preview"
               state={{ courseData: draftData }} // pass draft data to preview route
               className="btn btn-light"
@@ -105,7 +105,7 @@ const Step4 = ({
               rel="noopener noreferrer"
             >
               Preview Course
-            </Link>
+            </Link> */}
 
             {/* Submit Button */}
             <button
@@ -116,7 +116,7 @@ const Step4 = ({
               {isSubmitting ? 'Submitting…' : 'Submit Course'}
             </button>
           </div>
-          <p className="small mb-0 text-end mt-1">
+          <p className="small mb-0 text-end text-info mt-1">
             Your course will be reviewed by the admin before it goes live.
           </p>
         </div>

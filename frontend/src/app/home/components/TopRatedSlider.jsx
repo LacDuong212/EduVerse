@@ -127,7 +127,7 @@ const adaptTrending = (c) => {
   const ratingCount = Number.isFinite(c?.rating?.count) ? Number(c.rating.count) : 0;
 
   const instructorName = c?.instructor?.name ?? 'Unknown Instructor';
-  const instructorAvatar = c?.instructor?.avatar ?? 'https://via.placeholder.com/40x40?text=U';
+  const instructorAvatar = c?.instructor?.avatar ?? 'https://placehold.co/80x80?text=Instructor';
 
   const price = Number(c?.price ?? 0);
   const discountPrice = c?.discountPrice != null ? Number(c.discountPrice) : null;
@@ -141,7 +141,7 @@ const adaptTrending = (c) => {
   return {
     name: instructorName,
     avatar: instructorAvatar,
-    studentImage: c?.thumbnail || 'https://via.placeholder.com/640x360?text=Course',
+    studentImage: c?.thumbnail || 'https://res.cloudinary.com/dw1fjzfom/image/upload/v1757337425/av4_khpvlh.png',
     badge: { text: c?.level || 'Course' },
 
     rating: { star: Number(ratingAvg.toFixed(1)), review: ratingCount },

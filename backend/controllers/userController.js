@@ -1,5 +1,5 @@
 import userModel from "../models/userModel.js";
-import { uploadAvatar } from "../configs/cloudinary.js";
+import {} from "../configs/cloudinary.js";
 import fs from "fs";
 import Fuse from "fuse.js";
 
@@ -89,7 +89,7 @@ export const uploadUserAvatar = async (req, res) => {
     }
 
     const userId = req.userId; // comes from auth middleware
-    const result = await uploadAvatar(req.file.path, userId); // upload to cloudinary
+    //const result = await uploadAvatar(req.file.path, userId); // upload to cloudinary
 
     // update DB with new avatar URL
     await userModel.findByIdAndUpdate(userId, { pfpImg: result.secure_url });

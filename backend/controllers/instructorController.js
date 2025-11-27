@@ -598,7 +598,7 @@ export const getCourseStudentsAndReviews = async (req, res) => {
     }
 
     // check ownership
-    if (!course.instructor.ref.equals(userId)) {
+    if (!course?.instructor?.ref?.equals(userId)) {
       return res.status(403).json({ success: false, message: "Cannot access this course" });
     }
 
