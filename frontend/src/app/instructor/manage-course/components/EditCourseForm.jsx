@@ -9,7 +9,7 @@ import Step4 from './Step4';
 
 import axios from 'axios';
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { Button, Card, CardBody, CardHeader, Col, Container, Row } from 'react-bootstrap';
+import { Alert, Button, Card, CardBody, CardHeader, Col, Container, Row } from 'react-bootstrap';
 import { FaArrowLeft } from 'react-icons/fa';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -232,7 +232,7 @@ const EditCourseForm = () => {
         <PageMetaData title="Edit Course" />
         <Container className="mt-3 mb-5">
           <Row>
-            <Col className="mx-auto text-center">
+            <Col md={12} className="mx-auto text-center">
               <div className="text-start mb-3">
                 <Button variant="link" onClick={handleGoBack} className="p-0">
                   <FaArrowLeft className="mb-1 me-2" />Return
@@ -243,6 +243,11 @@ const EditCourseForm = () => {
                 <br />
                 Once approved, your course will be republished and you’ll be notified by email.
               </p>  {/* #TODO: send email */}
+            </Col>
+            <Col className="mx-auto text-center">
+              <Alert className="mb-2 text-center" variant="primary">
+                You will lose all progress if you close this site or not submitting course within 24h.
+              </Alert>
             </Col>
           </Row>
           <Card className="bg-transparent border rounded-3 mb-5">

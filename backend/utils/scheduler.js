@@ -1,5 +1,8 @@
 import cron from "node-cron";
 
+// this is a "one cron per server", 
+// do keep in mind when running a cluster of server
+
 const tasks = [];
 
 // register a task

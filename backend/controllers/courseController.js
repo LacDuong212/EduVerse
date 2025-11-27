@@ -1,9 +1,36 @@
 import Course from "../models/courseModel.js";
-import Order from "../models/orderModel.js";
+import DraftVideo from "../models/draftVideoModel.js";
 import Instructor from "../models/instructorModel.js";
+import Order from "../models/orderModel.js";
 import userInteraction from "../models/userInteraction.js";
+import { generateStreamUrl } from "../utils/aws/getObject.js"; 
 
 import Fuse from "fuse.js";
+
+// HELPERS ---
+// helper: extract videoUrl from lectures and previewVideo in course
+const getAllVideoKeys = (data) => {
+  const keys = new Set();
+  
+  // check previewVideo
+  if (data.previewVideo) {
+    keys.add(data.previewVideo);
+  }
+
+  // check curriculum
+  if (data.curriculum && Array.isArray(data.curriculum)) {
+    data.curriculum.forEach(section => {
+      if (section.lectures && Array.isArray(section.lectures)) {
+        section.lectures.forEach(lecture => {
+          if (lecture.videoUrl) {
+            keys.add(lecture.videoUrl);
+          }
+        });
+      }
+    });
+  }
+  return keys;
+};
 
 
 export const getHomeCourses = async (req, res) => {
@@ -414,20 +441,20 @@ export const createCourse = async (req, res) => {
   try {
     const userId = req.userId;
 
+    const instructor = await Instructor.findOne({ user: userId }).populate('user');
+    if (!instructor) {
+      return res.status(403).json({
+        success: false,
+        message: "You don't have permission to create a course"
+      });
+    }
+
     const validation = validateCourse(req.body);
     if (!validation.success) {
       return res.status(400).json(validation);
     }
 
-    const instructor = await Instructor.findOne({ user: userId }).populate('user');
-    if (!instructor) {
-      return res.status(404).json({
-        success: false,
-        message: 'Instructor not found'
-      });
-    }
-
-    // #TODO: parse in FE not here
+    // #TODO: parse in FE not here, calculate duration base off lectures
     if (req.body.duration !== null) {
       const duration = parseDurationToHours(req.body.duration, req.body.durationUnit);
       if (duration.error) {
@@ -458,6 +485,17 @@ export const createCourse = async (req, res) => {
     });
 
     await newCourse.save();
+
+    // update drafts (remove expire date)
+    const newKeys = getAllVideoKeys(newCourse);
+    const keysArray = Array.from(newKeys);
+    if (keysArray.length > 0) {
+      // make them permanent by removing expireAt
+      await DraftVideo.updateMany(
+        { key: { $in: keysArray } },
+        { $unset: { expireAt: 1 } }
+      );
+    }
 
     // update instructor
     instructor.myCourses.push({ course: newCourse._id });
@@ -525,9 +563,31 @@ export const updateCourse = async (req, res) => {
       req.body.durationUnit = 'hour';
     }
 
-    Object.assign(course, req.body);  // apply update
+    const oldKeys = getAllVideoKeys(course);  // snapshot old videos
 
+    Object.assign(course, req.body);  // apply update
     course.status = 'Pending';  // update status
+
+    const newKeys = getAllVideoKeys(course);  // get new videos
+
+    // identify video to keep
+    const keysToKeep = Array.from(newKeys);
+    if (keysToKeep.length > 0) {
+      await DraftVideo.updateMany(
+        { key: { $in: keysToKeep } },
+        { $unset: { expireAt: 1 } }
+      );
+    }
+
+    // identify videos to remove
+    const keysToRemove = Array.from(oldKeys).filter(key => !newKeys.has(key));
+    if (keysToRemove.length > 0) {
+      const expireDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      await DraftVideo.updateMany(
+        { key: { $in: keysToRemove } },
+        { $set: { expireAt: expireDate } }
+      );
+    }
 
     await course.save();
 
@@ -698,4 +758,36 @@ export const setCoursePrivacy = async (req, res) => {
       message: 'Internal server error'
     });
   }
+};
+
+// GET /api/courses/:id/videos/:key
+export const streamVideo = async (req, res) => {
+  try {
+    const { id, key } = req.params;
+    const userId = req.userId;
+
+    // check access #TODO
+
+    // check if valid key
+    if (!key || !key.trim().startsWith('videos/')) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid S3 key format"
+      });
+    }
+
+    // generate url
+    const streamUrl = await generateStreamUrl(key);
+    
+    return res.json({
+      success: true,
+      streamUrl
+    });
+  } catch (error) {
+    console.error("Generate stream URL error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
+  } 
 };

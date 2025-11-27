@@ -2,7 +2,9 @@ import express from 'express';
 import cors from 'cors';
 import 'dotenv/config';
 import cookieParser from 'cookie-parser';
+
 import { startAllTasks } from './utils/scheduler.js';
+import "./services/CronTasks.js";
 
 import connectDB from './configs/mongodb.js';
 import authRoute from './routes/authRoutes.js';
