@@ -1,4 +1,5 @@
 import PageMetaData from "@/components/PageMetaData";
+import useInstructor from "../useInstructor";
 import useInstructorDashboard from "./useInstructorDashboard";
 import DashboardCounter from "./components/DashboardCounter";
 import EarningsChart from "./components/EarningsChart";
@@ -11,6 +12,7 @@ import { useSelector } from "react-redux";
 
 const InstructorDashboard = () => {
   const instructorName = useSelector(state => state.auth.userData.name);
+  const { fetchInstructorCounters } = useInstructor();
   const { fetchDashboardData } = useInstructorDashboard();
 
   const [counterData, setCounterData] = useState(null);
@@ -19,27 +21,11 @@ const InstructorDashboard = () => {
 
   useEffect(() => {
     const load = async () => {
-      const data = await fetchDashboardData();
+      setCounterData(await fetchInstructorCounters());
 
-      if (data?.success) {
-        const {
-          totalCourses,
-          totalStudents,
-          totalOrders,
-          averageRating,
-          earningsData,
-          topCoursesData,
-        } = data;
-
-        setCounterData({ totalCourses, totalStudents, totalOrders, averageRating });
-        setEarningsData(earningsData || []);
-        setTopCoursesData(topCoursesData || []);
-      } else {
-        // handle error or set defaults
-        setCounterData(null);
-        setEarningsData([]);
-        setTopCoursesData([]);
-      }
+      const { earningsData, topCoursesData } = await fetchDashboardData();
+      setEarningsData(earningsData);
+      setTopCoursesData(topCoursesData);
     };
     load();
   }, []);

@@ -90,5 +90,46 @@ export default function useInstructor() {
     }
   };
 
-  return { fetchPublicFields, fetchPrivateFields, fetchCourses, setCoursePrivacy };
+  const fetchInstructorCounters = async () => {
+    try {
+      const { data } = await axios.get(
+        `${backendUrl}/api/instructor/counters`,
+        { withCredentials: true }
+      );
+
+      if (data?.success) return {
+        averageRating: data?.averageRating || 0.0,
+        totalCourses: data?.totalCourses || 0,
+        totalOrders: data?.totalOrders || 0,
+        totalStudents: data?.totalStudents || 0,
+      };
+
+      toast.error('Failed to fetch instructor stats');
+
+      return {
+        averageRating: 0.0,
+        totalCourses: 0,
+        totalOrders: 0,
+        totalStudents: 0,
+      };
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to fetch instructor stats');
+
+      return {
+        averageRating: 0.0,
+        totalCourses: 0,
+        totalOrders: 0,
+        totalStudents: 0,
+      };
+    }
+  };
+
+  return {
+    fetchPublicFields,
+    fetchPrivateFields,
+    fetchCourses,
+    setCoursePrivacy,
+    fetchInstructorCounters
+  };
 };
