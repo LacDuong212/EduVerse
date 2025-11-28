@@ -1,7 +1,8 @@
 import express from "express";
 import { getAllCourses, getCourseFilters, getCourseById, 
-    courseViewed, getViewedCourses, getHomeCourses, getOwnedCourses, getRelatedCourses, 
-    createCourse, updateCourse, setCoursePrivacy, streamVideo
+    courseViewed, getViewedCourses, getHomeCourses, getOwnedCourses, getRelatedCourses,
+    createCourse, updateCourse, setCoursePrivacy,
+    streamVideo, generateImageUploadSignature
 } from "../controllers/courseController.js";
 import userAuth from "../middlewares/userAuth.js";
 
@@ -12,6 +13,7 @@ courseRoute.get("/", getAllCourses);
 courseRoute.get("/filters", getCourseFilters);
 courseRoute.get("/my-courses", userAuth, getOwnedCourses);
 courseRoute.get("/viewed", userAuth, getViewedCourses);
+courseRoute.get("/:id/images/upload", userAuth, generateImageUploadSignature);
 courseRoute.get("/:id/related", getRelatedCourses);
 courseRoute.get("/:id/videos/:key", userAuth, streamVideo);
 courseRoute.get("/:id", getCourseById);

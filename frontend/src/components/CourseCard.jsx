@@ -69,7 +69,7 @@ const isWishlisted = wishlistItems.some((item) => {
   const image =
     course.image ||
     course.thumbnail ||
-    'https://via.placeholder.com/640x360?text=Course';
+    'https://res.cloudinary.com/dw1fjzfom/image/upload/v1757337425/av4_khpvlh.png';
 
   const title = course.title || course.name || 'Untitled';
 

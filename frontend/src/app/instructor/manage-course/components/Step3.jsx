@@ -2,7 +2,8 @@ import AddSection from './AddSection';
 import AddLecture from './AddLecture';
 import { useState, useEffect } from 'react';
 import { Accordion, AccordionBody, AccordionHeader, AccordionItem, Button, Row } from 'react-bootstrap';
-import { FaEdit, FaPlay, FaTimes, FaPlus } from 'react-icons/fa';
+import { FaEdit, FaTimes, FaPlus } from 'react-icons/fa';
+import { FaSection } from 'react-icons/fa6';
 import { toast } from 'react-toastify';
 
 
@@ -48,8 +49,8 @@ const Step3 = ({ stepperInstance, draftData, onSave }) => {
     // timer
     const handler = setTimeout(() => {
       console.log("Auto-saving curriculum...");
-      
-      onSave({ 
+
+      onSave({
         curriculum: curriculum,
         lecturesCount: totalLectures
       });
@@ -186,8 +187,8 @@ const Step3 = ({ stepperInstance, draftData, onSave }) => {
         onSubmit={handleSubmit}
       >
         <h4>
-          Curriculum{" "} 
-          <span className="text-danger">* </span> 
+          Curriculum{" "}
+          <span className="text-danger">* </span>
           <span className="fw-normal fs-5">(Sections: {totalSections}, Lectures: {totalLectures})</span>
         </h4>
         <hr />
@@ -239,21 +240,15 @@ const Step3 = ({ stepperInstance, draftData, onSave }) => {
                   {(section.lectures || []).map((lecture, idx) => (
                     <div
                       key={idx}
-                      className="d-flex justify-content-between align-items-center px-2 pt-2"
+                      className="d-flex align-items-center justify-content-between px-2 pt-2"
                       role="group"
                       aria-label={`Lecture: ${lecture.title}`}
                     >
-                      <div className="d-flex align-items-center flex-grow-1 overflow-hidden">
-                        <Button
-                          variant="danger-soft"
-                          size="sm"
-                          className="btn-round p-0 d-flex justify-content-center align-items-center"
-                          aria-label={`Play lecture ${lecture.title}`}
-                        >
-                          <FaPlay />
-                        </Button>
+                      <div className="d-flex align-items-center flex-grow-1 min-w-0">
+                        <FaSection className="text-orange fs-5 me-2 flex-shrink-0" />
+
                         <span
-                          className="ms-3 h6 fw-light text-truncate"
+                          className="h6 m-0 fw-light text-wrap"
                           title={lecture.title}
                         >
                           {lecture.title}
@@ -262,7 +257,7 @@ const Step3 = ({ stepperInstance, draftData, onSave }) => {
 
                       <div className="d-flex align-items-center ms-3 flex-shrink-0">
                         <Button
-                          variant="success-soft"
+                          variant="primary-soft"
                           size="sm"
                           className="btn-round me-2"
                           onClick={() => openEditLectureModal(i, idx)}
@@ -287,7 +282,7 @@ const Step3 = ({ stepperInstance, draftData, onSave }) => {
                   ))}
                   <hr />
                   <Button
-                    variant="dark"
+                    variant="orange-soft"
                     size="sm"
                     onClick={() => openAddLectureModal(i)}
                     className="mb-0"

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Col, Modal, ModalBody, ModalFooter, ModalHeader } from "react-bootstrap";
+import { Button, Col, Modal, ModalBody, ModalFooter, ModalHeader } from "react-bootstrap";
 import { BsXLg, BsPlayCircleFill } from "react-icons/bs";
 import { useVideoUpload } from "../useVideoUpload";
 import GlightBox from "@/components/GlightBox";
@@ -70,6 +70,10 @@ const AddLecture = ({ show, onClose, onSave, initialLecture = null, courseId }) 
     }
   }
 
+  function isValidVideoUrl(url) {
+    return url && (url.startsWith("videos/") || URL_REGEX.test(url));
+  };
+
   // reset all state when modal opens/props change
   useEffect(() => {
     if (show) {
@@ -106,14 +110,14 @@ const AddLecture = ({ show, onClose, onSave, initialLecture = null, courseId }) 
     setVideoSource(source);
     setErrors({});
 
-    if (source === 'url') {
-      setVideoFile(null);
-      setFileName('');
-      setDuration(0); // reset duration so user can type it
-    } else {
-      setVideoUrl('');
-      setDuration(0); // reset until file is picked
-    }
+    // if (source === 'url') {
+    //   setVideoFile(null);
+    //   setFileName('');
+    //   setDuration(0); // reset duration so user can type it
+    // } else {
+    //   setVideoUrl('');
+    //   setDuration(0); // reset until file is picked
+    // }
   };
 
   // validate file immediately on selection
@@ -224,8 +228,8 @@ const AddLecture = ({ show, onClose, onSave, initialLecture = null, courseId }) 
 
   return (
     <Modal show={show} onHide={!isUploading ? onClose : undefined} backdrop={isUploading ? 'static' : true} size="lg">
-      <ModalHeader className="bg-dark">
-        <h5 className="modal-title text-white">{initialLecture ? 'Edit Lecture' : 'Add Lecture'}</h5>
+      <ModalHeader className="bg-orange">
+        <h5 className="modal-title">{initialLecture ? 'Edit Lecture' : 'Add Lecture'}</h5>
         {!isUploading && <button type="button" className="btn btn-sm btn-light mb-0 ms-auto" onClick={onClose}><BsXLg /></button>}
       </ModalHeader>
 
@@ -265,17 +269,17 @@ const AddLecture = ({ show, onClose, onSave, initialLecture = null, courseId }) 
                   />
 
                   {/* PREVIEW BUTTON (Dynamic GlightBox or Disabled Button) */}
-                  {previewHref ? (
+                  {isValidVideoUrl(previewHref) ? (
                     <GlightBox
                       href={previewHref}
-                      className="btn btn-secondary d-inline-flex align-items-center"
+                      className="btn btn-info d-inline-flex align-items-center"
                     >
                       <BsPlayCircleFill className="me-2" /> Preview
                     </GlightBox>
                   ) : (
-                    <button className="btn btn-secondary" type="button" disabled>
+                    <Button className="btn btn-info" type="button" disabled>
                       <BsPlayCircleFill className="me-2" /> Preview
-                    </button>
+                    </Button>
                   )}
                 </div>
                 {errors.video && <small className="text-danger">{errors.video}</small>}
@@ -317,12 +321,12 @@ const AddLecture = ({ show, onClose, onSave, initialLecture = null, courseId }) 
                   {previewHref ? (
                     <GlightBox
                       href={previewHref}
-                      className="btn btn-secondary d-inline-flex align-items-center"
+                      className="btn btn-info d-inline-flex align-items-center"
                     >
                       <BsPlayCircleFill className="me-2" /> Preview
                     </GlightBox>
                   ) : (
-                    <button className="btn btn-secondary" type="button" disabled>
+                    <button className="btn btn-info" type="button" disabled>
                       <BsPlayCircleFill className="me-2" /> Preview
                     </button>
                   )}

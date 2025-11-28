@@ -45,7 +45,7 @@ const Step1 = ({ stepperInstance, draftData, onSave }) => {
       discountPrice: draftData.discountPrice || '',
       enableDiscount: draftData.enableDiscount || false,
       description: draftData.description || '',
-      isPrivate: draftData.isPrivate !== undefined ? draftData.isPrivate : true, // = isPublish
+      isPrivate: draftData.isPrivate !== undefined ? draftData.isPrivate : true,
     });
   }, [draftDataString]);
 
@@ -200,7 +200,7 @@ const Step1 = ({ stepperInstance, draftData, onSave }) => {
           </Form.Group>
         </Col>
 
-        <Col md={6}>
+        {/* <Col md={6}>
           <Form.Label>Subcategory</Form.Label>
           <ChoicesFormInput
             value={formData.subcategory}
@@ -210,7 +210,10 @@ const Step1 = ({ stepperInstance, draftData, onSave }) => {
           >
             <option value="">Select course subcategory</option>
           </ChoicesFormInput>
-        </Col>
+        </Col> */}
+
+        {/* force new row */}
+        <Col md={6} ></Col>
 
         <Col md={6}>
           <Form.Group controlId="levelSelect">
@@ -282,7 +285,7 @@ const Step1 = ({ stepperInstance, draftData, onSave }) => {
         </Col>
 
         {/* force new row */}
-        <Col md={4} ></Col>
+        <Col md={6} ></Col>
 
         <Col md={6}>
           <Form.Label>
@@ -350,9 +353,9 @@ const Step1 = ({ stepperInstance, draftData, onSave }) => {
           <Form.Check
             type="switch"
             id="checkPrivacy1"
-            label="Make this course public"
+            label="Make this course private"
             name="isPrivate"
-            checked={!formData.isPrivate}
+            checked={formData.isPrivate}
             onChange={handleChange}
           />
         </Col>

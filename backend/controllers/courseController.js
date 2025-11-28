@@ -1,9 +1,10 @@
+import cloudinary, { CLOUDINARY_API_KEY, CLOUDINARY_CLOUD_NAME } from "../configs/cloudinary.js";
 import Course from "../models/courseModel.js";
 import DraftVideo from "../models/draftVideoModel.js";
 import Instructor from "../models/instructorModel.js";
 import Order from "../models/orderModel.js";
 import userInteraction from "../models/userInteraction.js";
-import { generateStreamUrl } from "../utils/aws/getObject.js"; 
+import { generateStreamUrl } from "../utils/aws/getObject.js";
 
 import Fuse from "fuse.js";
 
@@ -11,7 +12,7 @@ import Fuse from "fuse.js";
 // helper: extract videoUrl from lectures and previewVideo in course
 const getAllVideoKeys = (data) => {
   const keys = new Set();
-  
+
   // check previewVideo
   if (data.previewVideo) {
     keys.add(data.previewVideo);
@@ -778,7 +779,7 @@ export const streamVideo = async (req, res) => {
 
     // generate url
     const streamUrl = await generateStreamUrl(key);
-    
+
     return res.json({
       success: true,
       streamUrl
@@ -789,5 +790,74 @@ export const streamVideo = async (req, res) => {
       success: false,
       message: "Server error"
     });
-  } 
+  }
+};
+
+// GET /api/courses/:id/images/upload
+export const generateImageUploadSignature = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { id } = req.params;
+
+    // check instructor
+    const instructorExists = await Instructor.exists({ user: userId });
+    if (!instructorExists) {
+      return res.status(403).json({
+        success: false,
+        message: "You don't have permission"
+      });
+    }
+
+    // check course
+    const course = await Course.findById(id);
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found"
+      });
+    }
+
+    // check ownership
+    if (!course.instructor?.ref?.equals(userId)) {
+      return res.status(403).json({
+        success: false,
+        message: "You cannot modify this course"
+      });
+    }
+
+    const timestamp = Math.round((new Date()).getTime() / 1000);
+    const public_id = `course_${id}_image`;
+    const folder = 'courses';
+    const transformation = 'w_1280,h_720,c_fill,g_auto';
+
+    // generate signature
+    const signature = cloudinary.utils.api_sign_request({
+      timestamp,
+      folder,
+      public_id,
+      overwrite: true,
+      transformation: transformation
+    }, process.env.CLOUDINARY_API_SECRET);
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        timestamp,
+        folder,
+        public_id,
+        signature,
+        transformation,
+        apiKey: CLOUDINARY_API_KEY,
+        cloudName: CLOUDINARY_CLOUD_NAME
+      }
+    });
+
+  } catch (error) {
+    console.error("Error generating upload image signature:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message
+    });
+  }
 };

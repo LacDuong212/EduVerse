@@ -112,6 +112,8 @@ const EditCourseForm = () => {
 
   // helper
   const hasMeaningfulDraftData = (draft) => {
+    if (!draft) return false;
+
     // get all keys from draft
     const keys = Object.keys(draft);
 
