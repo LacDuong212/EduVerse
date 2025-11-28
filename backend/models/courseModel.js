@@ -7,12 +7,8 @@ const courseSchema = new mongoose.Schema({
   description: String,
   image: String,
 
-  category: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Category",
-    required: true
-  },
-  
+  category: String,
+
   subCategory: String,
   language: String,
 
@@ -33,7 +29,21 @@ const courseSchema = new mongoose.Schema({
       title: { type: String, required: true },
       videoUrl: String,       // #TODO: file, img, doc
       duration: Number,
-      isFree: { type: Boolean, default: false }
+      isFree: { type: Boolean, default: false },
+      aiData: {
+        summary: String,
+        quizzes: [{
+          question: String,
+          options: [String],
+          correctAnswer: String,
+          explanation: String
+        }],
+        status: {
+          type: String,
+          enum: ['None', 'Processing', 'Completed', 'Failed'],
+          default: 'None'
+        }
+      }
     }]
   }],
 
