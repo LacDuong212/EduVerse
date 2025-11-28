@@ -20,19 +20,18 @@ export const ADMIN_MENU_ITEMS = [{
     label: 'All Courses',
     parentKey: 'courses',
     url: '/all-courses'
-  }, 
-  // {
-  //   key: 'course-category',
-  //   label: 'Course Category',
-  //   url: '/admin/course-category',
+  }, {
+    key: 'category',
+    label: 'Category',
+    parentKey: 'courses',
+    url: '/category'
+  }],
+  // ,{
+  //   key: 'course-detail',
+  //   label: 'Course Detail',
+  //   url: '/course-detail',
   //   parentKey: 'courses'
-  // },
-   {
-    key: 'course-detail',
-    label: 'Course Detail',
-    url: '/course-detail',
-    parentKey: 'courses'
-  }]
+  // }]
 }, {
   key: 'students',
   label: 'Students',
@@ -42,17 +41,18 @@ export const ADMIN_MENU_ITEMS = [{
   key: 'instructors',
   label: 'Instructors',
   icon: FaUserTie,
-  children: [{
-    key: 'instructors',
-    label: 'Instructors',
-    url: '/instructors',
-    parentKey: 'instructors'
-  }, {
-    key: 'instructor-detail',
-    label: 'Instructor Detail',
-    url: '/instructor-detail',
-    parentKey: 'instructors'
-  }]
+  url: '/instructors'
+  // children: [{
+  //   key: 'instructors',
+  //   label: 'Instructors',
+  //   url: '/instructors',
+  //   parentKey: 'instructors'
+  // }, {
+  //   key: 'instructor-detail',
+  //   label: 'Instructor Detail',
+  //   url: '/instructor-detail',
+  //   parentKey: 'instructors'
+  // }]
   //  {
   //   key: 'instructor-requests',
   //   label: 'Instructor Requests',
@@ -67,12 +67,13 @@ export const ADMIN_MENU_ITEMS = [{
 //   icon: FaUserCog,
 //   url: '/admin/administrators'
 // },
- {
-  key: 'reviews',
-  label: 'Reviews',
-  icon: FaRegCommentDots,
-  url: '/reviews'
-}, {
+//  {
+//   key: 'reviews',
+//   label: 'Reviews',
+//   icon: FaRegCommentDots,
+//   url: '/reviews'
+// }, 
+{
   key: 'earnings',
   label: 'Earnings',
   icon: FaChartBar,

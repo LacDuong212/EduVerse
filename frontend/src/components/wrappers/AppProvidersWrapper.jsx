@@ -3,7 +3,7 @@ import { LayoutProvider } from '@/context/useLayoutContext';
 import { NotificationProvider } from '@/context/useNotificationContext';
 
 import Aos from 'aos';
-import { Suspense, useEffect } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -17,6 +17,8 @@ const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 const AppProvidersWrapper = ({ children }) => {
   const dispatch = useDispatch();
+
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   const { userData } = useSelector((state) => state.auth);
   const { status: wishlistStatus } = useSelector((state) => state.wishlist);
@@ -37,6 +39,8 @@ const AppProvidersWrapper = ({ children }) => {
         }
       } catch (error) {
         dispatch(setLogout());
+      } finally {
+        setIsCheckingAuth(false);
       }
     };
 
@@ -44,6 +48,8 @@ const AppProvidersWrapper = ({ children }) => {
   }, [dispatch]);
 
   useEffect(() => {
+    if (isCheckingAuth) return;
+
     if (userData?._id) {
       if (wishlistStatus === 'idle') {
         dispatch(fetchWishlist(userData._id));
@@ -53,7 +59,7 @@ const AppProvidersWrapper = ({ children }) => {
         dispatch(fetchCartCount());
       }
     }
-  }, [userData, wishlistStatus, cartStatus, dispatch]);
+  }, [userData, wishlistStatus, cartStatus, dispatch, isCheckingAuth]);
 
   useEffect(() => {
     Aos.init();

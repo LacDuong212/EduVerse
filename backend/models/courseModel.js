@@ -6,10 +6,16 @@ const courseSchema = new mongoose.Schema({
   subtitle: String,
   description: String,
   image: String,
-  category: String,
+
+  category: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Category",
+    required: true
+  },
+  
   subCategory: String,
   language: String,
-  
+
   instructor: {
     ref: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     name: String,
@@ -21,7 +27,7 @@ const courseSchema = new mongoose.Schema({
   durationUnit: { type: String, enum: ["hour", "minute", "second", "day"], default: "hour" },
   lecturesCount: Number,
 
-  curriculum: [{ 
+  curriculum: [{
     section: { type: String, required: true },
     lectures: [{
       title: { type: String, required: true },

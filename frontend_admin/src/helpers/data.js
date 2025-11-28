@@ -6,37 +6,6 @@ const axiosConfig = {
   withCredentials: true,
 };
 
-export const getAllStudents = async (page = 1, search = "") => {
-  try {
-    const response = await axios.get(
-      `${backendUrl}/api/students?page=${page}&limit=5&search=${encodeURIComponent(search)}`,
-      axiosConfig
-    );
-    if (response.data.success) {
-      return response.data;
-    }
-    return { data: [], pagination: { total: 0, page: 1, totalPages: 1 } };
-  } catch (error) {
-    console.error("Error fetching students:", error);
-    return { data: [], pagination: { total: 0, page: 1, totalPages: 1 } };
-  }
-};
-
-export const getAllInstructors = async (page = 1, search = "") => {
-  try {
-    const response = await axios.get(
-      `${backendUrl}/api/instructors?page=${page}&limit=5&search=${encodeURIComponent(search)}`,
-      axiosConfig
-    );
-    if (response.data.success) {
-      return response.data;
-    }
-    return { data: [], pagination: { total: 0, page: 1, totalPages: 1 } };
-  } catch (error) {
-    console.error("Error fetching instructor:", error);
-    return { data: [], pagination: { total: 0, page: 1, totalPages: 1 } };
-  }
-};
 export const getAllAdminitrators = async (page = 1, search = "") => {
   try {
     const response = await axios.get(
@@ -49,6 +18,23 @@ export const getAllAdminitrators = async (page = 1, search = "") => {
     return { data: [], pagination: { total: 0, page: 1, totalPages: 1 } };
   } catch (error) {
     console.error("Error fetching administrators:", error);
+    return { data: [], pagination: { total: 0, page: 1, totalPages: 1 } };
+  }
+};
+
+//STUDENT
+export const getAllStudents = async (page = 1, search = "") => {
+  try {
+    const response = await axios.get(
+      `${backendUrl}/api/students?page=${page}&limit=5&search=${encodeURIComponent(search)}`,
+      axiosConfig
+    );
+    if (response.data.success) {
+      return response.data;
+    }
+    return { data: [], pagination: { total: 0, page: 1, totalPages: 1 } };
+  } catch (error) {
+    console.error("Error fetching students:", error);
     return { data: [], pagination: { total: 0, page: 1, totalPages: 1 } };
   }
 };
@@ -94,6 +80,23 @@ export const deleteStudent = async (id) => {
   }
 };
 
+// INSTRUCTOR
+export const getAllInstructors = async (page = 1, search = "") => {
+  try {
+    const response = await axios.get(
+      `${backendUrl}/api/instructors?page=${page}&limit=5&search=${encodeURIComponent(search)}`,
+      axiosConfig
+    );
+    if (response.data.success) {
+      return response.data;
+    }
+    return { data: [], pagination: { total: 0, page: 1, totalPages: 1 } };
+  } catch (error) {
+    console.error("Error fetching instructor:", error);
+    return { data: [], pagination: { total: 0, page: 1, totalPages: 1 } };
+  }
+};
+
 export const blockInstructor = async (id) => {
   try {
     const response = await axios.patch(
@@ -136,5 +139,46 @@ export const updateCourseStatus = async ({ id, status }) => {
   } catch (error) {
     console.error("Update status failed: ", error);
     return { success: false, message: error.message };
+  }
+};
+
+// CATEGORY
+export const getAllCategories = async () => {
+  try {
+    const response = await axios.get(`${backendUrl}/api/category`, { params: { mode: 'all' } });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    return null;
+  }
+};
+
+export const createCategory = async (data) => {
+  try {
+    const response = await axios.post(`${backendUrl}/api/category`, data);
+    return response.data;
+  } catch (error) {
+    console.error("Error creating category:", error);
+    return { success: false, message: error.response?.data?.message || "Error" };
+  }
+};
+
+export const updateCategory = async (id, data) => {
+  try {
+    const response = await axios.put(`${backendUrl}/api/category/${id}`, data);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating category:", error);
+    return { success: false, message: error.response?.data?.message || "Error" };
+  }
+};
+
+export const deleteCategory = async (id) => {
+  try {
+    const response = await axios.delete(`${backendUrl}/api/category/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting category:", error);
+    return { success: false, message: error.response?.data?.message || "Error" };
   }
 };
