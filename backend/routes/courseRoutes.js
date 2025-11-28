@@ -4,6 +4,7 @@ import { getAllCourses, getCourseFilters, getCourseById,
     createCourse, updateCourse, setCoursePrivacy,
     streamVideo, generateImageUploadSignature
 } from "../controllers/courseController.js";
+import { processLectureAI } from "../controllers/aiController.js";
 import userAuth from "../middlewares/userAuth.js";
 
 const courseRoute = express.Router();
@@ -20,6 +21,8 @@ courseRoute.get("/:id", getCourseById);
 
 courseRoute.post("/:id/viewed", userAuth, courseViewed);
 courseRoute.post("/", userAuth, createCourse);
+
+courseRoute.post("/generate-ai", userAuth, processLectureAI);
 
 courseRoute.put("/:id", userAuth, updateCourse);
 courseRoute.patch("/:id", userAuth, setCoursePrivacy);

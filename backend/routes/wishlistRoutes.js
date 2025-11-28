@@ -1,4 +1,5 @@
 import express from "express";
+import userAuth from "../middlewares/userAuth.js";
 import { 
     addToWishlist,
     removeFromWishlist,
@@ -8,6 +9,7 @@ import {
 } from "../controllers/wishlistController.js";
 
 const router = express.Router();
+router.use(userAuth);
 
 router.post("/add", addToWishlist);
 router.delete("/remove", removeFromWishlist);

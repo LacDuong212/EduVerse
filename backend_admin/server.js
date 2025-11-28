@@ -8,6 +8,7 @@ import connectDB from './configs/mongodb.js';
 import accountRoute from './routes/accountRoutes.js';
 import authRoute from './routes/authRoutes.js';
 import courseRoute from './routes/courseRoutes.js';
+import categoryRoute from './routes/categoryRoutes.js';
 import dashboardRoute from './routes/dashboardRoutes.js';
 import earningRoute from './routes/earningRoutes.js';
 import instructorRoute from './routes/instructorRoutes.js';
@@ -32,6 +33,7 @@ app.get('/', (req, res) => res.send("API is running"));
 app.use('/api/account', accountRoute);
 app.use('/api/auth', authRoute);
 app.use('/api/courses', courseRoute);
+app.use('/api/category', categoryRoute)
 app.use('/api/dashboard', dashboardRoute);
 app.use('/api/earnings', earningRoute);
 app.use('/api/instructors', instructorRoute);

@@ -10,7 +10,7 @@ const AdminResetPassword = lazy(() => import('@/app/auth/reset-password/page'));
 const AdminNotFoundPage = lazy(() => import("@/app/not-found"));
 const AdminDashboard = lazy(() => import('@/app/dashboard/page'));
 const AdminAllCourses = lazy(() => import('@/app/all-courses/page'));
-const CourseCategory = lazy(() => import('@/app/course-category/page'));
+const AdminCategory = lazy(() => import('@/app/category/page'));
 const ComingSoonPage = lazy(() => import('@/app/coming-soon/page'));
 const AdminStudents = lazy(() => import('@/app/students/page'));
 const AdminInstructors = lazy(() => import('@/app/instructors/page'));
@@ -47,9 +47,9 @@ export const adminRoutes = [{
   name: 'All Courses',
   element: <AdminAllCourses />
 }, {
-  path: '/course-category',
-  name: 'Course Category',
-  element: <CourseCategory />
+  path: '/category',
+  name: 'Category',
+  element: <AdminCategory />
 }, {
   path: '/course-detail',
   name: 'Course Detail',

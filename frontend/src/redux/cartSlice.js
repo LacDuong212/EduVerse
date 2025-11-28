@@ -7,7 +7,7 @@ export const fetchCart = createAsyncThunk(
   "cart/fetchCart",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/`);
+      const response = await axios.get(`${API_URL}/`, { withCredentials: true });
       return response.data.cart;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
@@ -19,7 +19,7 @@ export const fetchCartCount = createAsyncThunk(
   "cart/fetchCartCount",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/count`);
+      const response = await axios.get(`${API_URL}/count`, { withCredentials: true });
       return response.data.count;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
@@ -31,7 +31,11 @@ export const addToCart = createAsyncThunk(
   "cart/addToCart",
   async ({ courseId }, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/add`, { courseId });
+      const response = await axios.post(
+        `${API_URL}/add`, 
+        { courseId }, 
+        { withCredentials: true }
+      );
       return response.data.cart; 
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
@@ -44,7 +48,8 @@ export const removeFromCart = createAsyncThunk(
   async ({ courseId }, { rejectWithValue }) => {
     try {
       const response = await axios.delete(`${API_URL}/remove`, {
-        data: { courseId }
+        data: { courseId },
+        withCredentials: true 
       });
       return response.data.cart;
     } catch (error) {
@@ -57,7 +62,7 @@ export const clearCartApi = createAsyncThunk(
   "cart/clearCartApi",
   async (_, { rejectWithValue }) => {
     try {
-      await axios.delete(`${API_URL}/clear`);
+      await axios.delete(`${API_URL}/clear`, { withCredentials: true });
       return [];
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
@@ -76,7 +81,6 @@ const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
-    // Reducer reset local
     resetCart: (state) => {
       state.items = [];
       state.totalItem = 0;
