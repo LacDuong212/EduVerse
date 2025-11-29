@@ -1,9 +1,10 @@
-import cloudinary, { CLOUDINARY_API_KEY, CLOUDINARY_CLOUD_NAME } from "../configs/cloudinary.js";
 import Course from "../models/courseModel.js";
 import DraftVideo from "../models/draftVideoModel.js";
 import Instructor from "../models/instructorModel.js";
 import Order from "../models/orderModel.js";
 import userInteraction from "../models/userInteraction.js";
+
+import cloudinary, { CLOUDINARY_API_KEY, CLOUDINARY_CLOUD_NAME } from "../configs/cloudinary.js";
 import { generateStreamUrl } from "../utils/aws/getObject.js";
 
 import Fuse from "fuse.js";
@@ -828,7 +829,7 @@ export const generateImageUploadSignature = async (req, res) => {
     const timestamp = Math.round((new Date()).getTime() / 1000);
     const public_id = `course_${id}_image`;
     const folder = 'courses';
-    const transformation = 'w_1280,h_720,c_fill,g_auto';
+    const transformation = 'w_1280,h_720,c_fill,g_auto,f_auto,q_auto,d_av4_khpvlh';
 
     // generate signature
     const signature = cloudinary.utils.api_sign_request({

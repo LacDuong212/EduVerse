@@ -4,9 +4,11 @@ import Instructor from "../models/instructorModel.js";
 import Order from "../models/orderModel.js";
 import userModel from "../models/userModel.js";
 import Review from "../models/reviewModel.js";
+
+import { generateUploadUrl } from "../utils/aws/putObject.js";
+
 import Fuse from "fuse.js";
 import mongoose from "mongoose";
-import { generateUploadUrl } from "../utils/aws/putObject.js";
 
 
 const fetchInstructorFields = async (filter, fields, allowedFields) => {
@@ -44,7 +46,7 @@ const getInstructorStudentIds = async (userId) => {
   return Array.from(studentIdSet).map(id => new mongoose.Types.ObjectId(id));
 }
 
-// Helper: get date ranges and Mongo formats
+// helper: get date ranges and Mongo formats
 const getDateConfig = (period) => {
   const now = new Date();
   const start = new Date();

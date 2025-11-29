@@ -101,8 +101,8 @@ export const instructorRoutes = [{
   isNested: true,
   element: null
 }, {
-  path: '/instructor/balance',
-  name: 'My Balance',
+  path: '/instructor/earnings',
+  name: 'Earnings',
   isNested: true,
   element: null
 }, {

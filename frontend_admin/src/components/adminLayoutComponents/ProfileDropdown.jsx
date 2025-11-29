@@ -29,7 +29,7 @@ const ProfileDropdown = ({ className }) => {
     name: admin?.name || 'Admin',
     email: admin?.email || 'admin@example.com',
     pfpImg:
-      'https://res.cloudinary.com/dw1fjzfom/image/upload/v1761843471/admin-def_hdu7uo.png',
+      'https://res.cloudinary.com/dw1fjzfom/image/upload/v1757337425/av4_khpvlh.png',
   };
 
   const themeModes = [{

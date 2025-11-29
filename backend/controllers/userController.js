@@ -1,6 +1,5 @@
 import userModel from "../models/userModel.js";
-import {} from "../configs/cloudinary.js";
-import fs from "fs";
+import cloudinary, { CLOUDINARY_API_KEY, CLOUDINARY_CLOUD_NAME } from "../configs/cloudinary.js";
 
 
 // GET /user/profile
@@ -80,32 +79,54 @@ export const deleteAccount = async (req, res) => {
   }
 };
 
-// POST /user/avatar
-export const uploadUserAvatar = async (req, res) => {
+// GET /api/user/avatar/upload
+export const generateAvatarUploadSignature = async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ message: "No file uploaded" });
+    const userId = req.userId;
+
+    // check user
+    const userExists = await userModel.exists({ _id: userId });
+    if (!userExists) {
+      return res.status(403).json({
+        success: false,
+        message: "Permission not granted"
+      });
     }
 
-    const userId = req.userId; // comes from auth middleware
-    //const result = await uploadAvatar(req.file.path, userId); // upload to cloudinary
+    const timestamp = Math.round((new Date()).getTime() / 1000);
+    const public_id = `user_${userId}_avatar`;
+    const folder = 'avatars';
+    const transformation = 'w_500,h_500,c_fill,g_auto,f_auto,q_auto,d_av4_khpvlh';
 
-    // update DB with new avatar URL
-    await userModel.findByIdAndUpdate(userId, { pfpImg: result.secure_url });
+    // generate signature
+    const signature = cloudinary.utils.api_sign_request({
+      timestamp,
+      folder,
+      public_id,
+      overwrite: true,
+      transformation: transformation
+    }, process.env.CLOUDINARY_API_SECRET);
 
-    // cleanup temp file after upload (multer stuff)
-    fs.unlink(req.file.path, (err) => {
-      if (err) console.error("Temp file cleanup failed:", err);
-    });
-
-    res.json({
+    return res.status(200).json({
       success: true,
-      message: "Avatar uploaded successfully",
-      avatarUrl: result.secure_url,
+      uploadData: {
+        timestamp,
+        folder,
+        public_id,
+        signature,
+        transformation,
+        apiKey: CLOUDINARY_API_KEY,
+        cloudName: CLOUDINARY_CLOUD_NAME
+      }
     });
-  } catch (err) {
-    console.error("Avatar upload error:", err);
-    res.status(500).json({ message: "Error uploading avatar" });
+
+  } catch (error) {
+    console.error("Error generating upload avatar signature: ", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message
+    });
   }
 };
 
