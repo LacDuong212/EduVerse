@@ -7,7 +7,11 @@ const courseSchema = new mongoose.Schema({
   description: String,
   image: String,
 
-  category: String,
+  category: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: "Category",
+    required: true 
+  },
 
   subCategory: String,
   language: String,

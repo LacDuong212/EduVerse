@@ -10,8 +10,8 @@ const CourseDetail = () => {
     loading,
     error,
     refetch,
-    owned,            // 🔹 lấy thêm từ hook
-    handleAddToCart,  // 🔹 lấy thêm từ hook
+    owned,
+    handleAddToCart,
   } = useCourseDetail();
 
   if (loading) {
@@ -32,7 +32,6 @@ const CourseDetail = () => {
       <PageMetaData title="Course Detail" />
       <main>
         <PageIntro course={course} />
-        {/* 🔹 truyền thêm owned + onAddToCart cho CourseDetails */}
         <CourseDetails
           course={course}
           owned={owned}

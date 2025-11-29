@@ -242,7 +242,7 @@ const Reviews = () => {
           return (
             <Fragment key={idx}>
               <div className="d-md-flex my-4">
-                <div className="avatar avatar-xl me-4 flex-shrink-0">
+                <div className="avatar avatar-md me-4 flex-shrink-0">
                   <img
                     className="avatar-img rounded-circle"
                     src={review.avatar}

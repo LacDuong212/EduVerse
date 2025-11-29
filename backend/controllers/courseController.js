@@ -1,5 +1,6 @@
 import cloudinary, { CLOUDINARY_API_KEY, CLOUDINARY_CLOUD_NAME } from "../configs/cloudinary.js";
 import Course from "../models/courseModel.js";
+import Category from "../models/categoryModel.js";
 import DraftVideo from "../models/draftVideoModel.js";
 import Instructor from "../models/instructorModel.js";
 import Order from "../models/orderModel.js";
@@ -36,24 +37,40 @@ const getAllVideoKeys = (data) => {
 
 export const getHomeCourses = async (req, res) => {
   try {
-    const newest = await Course.find()
+    const publicCourseFilter = {
+      isPrivate: false,
+      isDeleted: false,
+      status: "Live"
+    };
+
+    const newest = await Course.find(publicCourseFilter)
+      .populate("category", "name slug")
       .sort({ createdAt: -1 })
       .limit(8);
 
-    const bestSellers = await Course.find()
+    const bestSellers = await Course.find(publicCourseFilter)
+      .populate("category", "name slug")
       .sort({ studentsEnrolled: -1 })
       .limit(6);
 
-    const topRated = await Course.find()
+    const topRated = await Course.find(publicCourseFilter)
+      .populate("category", "name slug")
       .sort({ "rating.average": -1, "rating.count": -1 })
       .limit(8);
 
     const biggestDiscounts = await Course.aggregate([
-      { $match: { discountPrice: { $ne: null } } },
+      { 
+        $match: { 
+          ...publicCourseFilter,
+          discountPrice: { $ne: null }
+        } 
+      },
       { $addFields: { discountAmount: { $subtract: ["$price", "$discountPrice"] } } },
       { $sort: { discountAmount: -1 } },
       { $limit: 4 }
     ]);
+
+    await Course.populate(biggestDiscounts, { path: "category", select: "name slug" });
 
     res.json({
       newest,
@@ -69,7 +86,7 @@ export const getHomeCourses = async (req, res) => {
 
 export const getFullCourses = async (req, res) => {
   try {
-    const courses = await Course.find();
+    const courses = await Course.find().populate("category", "name slug");
 
     res.status(200).json({
       success: true,
@@ -107,11 +124,13 @@ export const getAllCourses = async (req, res) => {
     if (price === "free") mongoFilter.price = 0;
     if (price === "paid") mongoFilter.price = { $gt: 0 };
 
-    let courseDocs = await Course.find(mongoFilter).lean();
+    let courseDocs = await Course.find(mongoFilter)
+      .populate("category", "name slug")
+      .lean();
 
     if (search) {
       const fuse = new Fuse(courseDocs, {
-        keys: ["title", "subtitle", "category", "subCategory", "tags"],
+        keys: ["title", "subtitle", "category.name", "subCategory", "tags"],
         threshold: 0.5,
         ignoreLocation: true,
         minMatchCharLength: 1,
@@ -230,7 +249,7 @@ export const getCourseFilters = async (req, res) => {
       status: "Live"
     };
 
-    const categoriesPromise = Course.distinct("category", liveFilter);
+    const categoriesPromise = Category.find().select("name slug").sort({ name: 1 });
     const languagesPromise = Course.distinct("language", liveFilter);
 
     const levels = ["All", "Beginner", "Intermediate", "Advanced"];
@@ -242,7 +261,7 @@ export const getCourseFilters = async (req, res) => {
 
     res.json({
       success: true,
-      categories: categories.filter(Boolean),
+      categories: categories,
       languages: languages.filter(Boolean),
       levels
     });
@@ -260,7 +279,7 @@ export const getCourseById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const course = await Course.findById(id);
+    const course = await Course.findById(id).populate("category", "name slug");
 
     if (!course) {
       return res.status(404).json({ success: false, message: "Course not found" });
@@ -322,6 +341,7 @@ export const getViewedCourses = async (req, res) => {
     const total = await Course.countDocuments(filter);
 
     const courses = await Course.find(filter)
+      .populate("category", "name slug")
       .sort({ createdAt: -1, _id: -1 })
       .skip((page - 1) * limit)
       .limit(limit);
@@ -350,7 +370,10 @@ export const getOwnedCourses = async (req, res) => {
     const orders = await Order.find({
       user: req.userId,
       status: "completed",
-    }).populate("courses.course");
+    }).populate({
+      path: "courses.course",
+      populate: { path: "category", select: "name slug" }
+    });
 
     // extract unique courses
     const ownedCourses = [];
@@ -414,7 +437,8 @@ export const getRelatedCourses = async (req, res) => {
     let relatedCourses = await Course.find({
       _id: { $ne: id },
       $or: conditions
-    }).select("title thumbnail instructor studentsEnrolled rating price discountPrice ");
+    }).select("title thumbnail instructor studentsEnrolled rating price discountPrice ")
+    .populate("category", "name slug");
 
     // Loại bỏ trùng lặp (nếu có)
     const seen = new Set();
@@ -635,7 +659,7 @@ export const validateCourse = (course) => {
     return { success: false, message: 'Title is required.' };
   }
 
-  if (!category || !category.trim()) {
+  if (!category) {
     return { success: false, message: 'Category is required.' };
   }
 

@@ -1,5 +1,7 @@
 import { Col, Container, Row } from 'react-bootstrap';
-import TrendingCourseSlider from './TrendingCourseSlider';
+import CommonCourseSlider from './CommonCourseSlider';
+
+
 const TrendingCourses = () => {
   return <section className="pb-5 pt-0 pt-lg-5">
     <Container>
@@ -12,7 +14,7 @@ const TrendingCourses = () => {
       <Row>
         <Col lg={12}>
           <div className="tiny-slider arrow-round arrow-blur arrow-hover">
-            <TrendingCourseSlider />
+            <CommonCourseSlider source="biggestDiscounts" />
           </div>
         </Col>
       </Row>

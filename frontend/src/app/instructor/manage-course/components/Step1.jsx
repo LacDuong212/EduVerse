@@ -6,10 +6,14 @@ import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 import { toast } from 'react-toastify';
 
+import { getAllCategories } from '@/helpers/data';
+
 
 const Step1 = ({ stepperInstance, draftData, onSave }) => {
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState({});
+
+  const [categories, setCategories] = useState([]);
 
   // initialize from props or set defaults
   const [formData, setFormData] = useState({
@@ -48,6 +52,22 @@ const Step1 = ({ stepperInstance, draftData, onSave }) => {
       isPrivate: draftData.isPrivate !== undefined ? draftData.isPrivate : true,
     });
   }, [draftDataString]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await getAllCategories();
+        if (response && response.success) {
+          setCategories(response.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch categories", error);
+        toast.error("Could not load categories");
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   // handle input changes
   const handleChange = (e) => {
@@ -181,6 +201,8 @@ const Step1 = ({ stepperInstance, draftData, onSave }) => {
           <Form.Group controlId="categorySelect">
             <Form.Label>Category <span className="text-danger">*</span></Form.Label>
             <ChoicesFormInput
+              key={categories.length}
+
               className={!!errors.category ? 'is-invalid' : ''}
               value={formData.category}
               onChange={(val) =>
@@ -188,12 +210,13 @@ const Step1 = ({ stepperInstance, draftData, onSave }) => {
               }
             >
               <option value="">Select category</option>
-              <option value="Engineer">Engineer</option>
-              <option value="Medical">Medical</option>
-              <option value="Information technology">Information technology</option>
-              <option value="Finance">Finance</option>
-              <option value="Marketing">Marketing</option>
+              {categories.map((cat) => (
+                <option key={cat._id} value={cat._id}>
+                  {cat.name}
+                </option>
+              ))}
             </ChoicesFormInput>
+
             <Form.Control.Feedback type="invalid" className="d-block">
               {errors.category}
             </Form.Control.Feedback>

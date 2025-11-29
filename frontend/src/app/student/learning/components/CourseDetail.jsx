@@ -74,7 +74,7 @@ const CourseDetail = () => {
                       </NavLink>
                     </NavItem>
 
-                    <NavItem className="me-2 me-sm-4" role="presentation">
+                    {/* <NavItem className="me-2 me-sm-4" role="presentation">
                       <NavLink
                         as="button"
                         eventKey="discussion"
@@ -84,7 +84,7 @@ const CourseDetail = () => {
                       >
                         Discussion
                       </NavLink>
-                    </NavItem>
+                    </NavItem> */}
                   </Nav>
                 </CardHeader>
 

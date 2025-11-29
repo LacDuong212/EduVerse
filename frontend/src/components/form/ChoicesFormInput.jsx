@@ -24,12 +24,13 @@ const ChoicesFormInput = ({
       placeholder: true,
       allowHTML: true,
       shouldSort: false,
+      itemSelectText: '',
     });
 
     const element = choicesInstance.current.passedElement.element;
 
     const handleChange = (e) => {
-      if (!(e.target instanceof HTMLSelectElement)) return;
+      if (e.target !== element) return;
       onChange?.(e.target.value);
     };
 
@@ -37,9 +38,11 @@ const ChoicesFormInput = ({
 
     return () => {
       element.removeEventListener('change', handleChange);
-      choicesInstance.current?.destroy();
+      if (choicesInstance.current) {
+        choicesInstance.current.destroy();
+      }
     };
-  }, []); // run once
+  }, []);
 
   // sync external `value` changes with Choices.js
   useEffect(() => {
@@ -51,12 +54,16 @@ const ChoicesFormInput = ({
     }
   }, [value]);
 
-  return allowInput ? (
-    <input ref={choicesRef} multiple={multiple} className={className} {...props} />
-  ) : (
-    <select ref={choicesRef} multiple={multiple} className={className} {...props}>
-      {children}
-    </select>
+  return (
+    <div className="choices-wrapper">
+      {allowInput ? (
+        <input ref={choicesRef} multiple={multiple} className={className} {...props} />
+      ) : (
+        <select ref={choicesRef} multiple={multiple} className={className} {...props}>
+          {children}
+        </select>
+      )}
+    </div>
   );
 };
 

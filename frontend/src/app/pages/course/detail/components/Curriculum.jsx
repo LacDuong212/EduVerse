@@ -58,12 +58,10 @@ const Curriculum = ({ coursePrice }) => {
       </div>
     );
 
-  // 🔥 handlePlay giờ chỉ xử lý lecture PREMIUM (không free)
   const handlePlay = (lecture) => {
     if (!lecture?.isFree) {
-      return toggle(); // Premium → mở modal
+      return toggle();
     }
-    // lecture free sẽ dùng GlightBox, KHÔNG navigate nữa
   };
 
   return (
@@ -95,7 +93,6 @@ const Curriculum = ({ coursePrice }) => {
                 <Fragment key={lecture._id || i}>
                   <div className="d-flex justify-content-between align-items-center">
                     <div className="position-relative d-flex align-items-center">
-                      {/* 🔥 FREE: dùng GlightBox; PREMIUM: dùng Button + handlePlay */}
                       {lecture.isFree && lecture.videoUrl ? (
                         <GlightBox
                           data-glightbox
