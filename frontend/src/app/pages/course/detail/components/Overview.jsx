@@ -42,19 +42,23 @@ const Overview = () => {
 
   // const features = ['Digital marketing course introduction', 'Customer Life cycle', 'What is Search engine optimization(SEO)', 'Facebook ADS', 'Facebook Messenger Chatbot', 'Search engine optimization tools', 'Why SEO', 'URL Structure', 'Featured Snippet', 'SEO tips and tricks', 'Google tag manager'];
   return <>
-    <h5 className="mb-3">Course Description</h5>
-    <p className="mb-3">
-      Welcome to the <strong> {course?.title}</strong>
-    </p>
-    <div className="mb-3">
-      {course?.description
-        ? <div
-          className="clamped-html"
-          dangerouslySetInnerHTML={{ __html: course.description }}
-        />
-        : '(No full description)'}
-    </div>
-    <Card className="shadow-sm border-0 rounded-3 mb-4">
+    <fieldset className="border border-2 p-3 rounded mb-3">
+      <legend className="h4 float-none w-auto px-1 mb-0">
+        Description
+      </legend>
+      <div>
+        {course?.description ? (
+          <div
+            className="clamped-html"
+            dangerouslySetInnerHTML={{ __html: course.description }}
+          />
+        ) : (
+          <span className="text-muted">(No full description)</span>
+        )}
+      </div>
+    </fieldset>
+
+    <Card className="shadow-sm border-0 rounded-3">
       <CardBody className="p-4">
         <Reviews />
       </CardBody>
