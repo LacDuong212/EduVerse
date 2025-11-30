@@ -1,0 +1,287 @@
+//
+// general.scss
+// Theme general elements and helper styling
+
+
+// plyr and GLightbox theme
+.plyr__control--overlaid,
+.plyr--audio .plyr__control.plyr__tab-focus,
+.plyr--audio .plyr__control:hover,
+.plyr--audio .plyr__control[aria-expanded=true],
+.plyr--video .plyr__control.plyr__tab-focus,
+.plyr--video .plyr__control:hover,
+.plyr--video .plyr__control[aria-expanded=true],
+.plyr__menu__container .plyr__control[role=menuitemradio][aria-checked=true]:before{
+  background: var(--#{$prefix}primary);
+}
+.plyr--full-ui input[type=range]{
+  color: var(--#{$prefix}primary);
+}
+
+
+/* rtl:raw:
+.glightbox-clean .gclose, .glightbox-modern .gclose{
+  right: auto !important;
+  left: 20px;
+}
+*/
+
+// Search
+.nav-search .dropdown-menu{
+  top: 120%;
+  visibility: hidden;
+  opacity: 0;
+  display: block;
+  transition: $transition-base;
+  width: 300px;
+  left: auto;
+  right: 0;
+}
+.nav-search .dropdown-menu.show{
+  top: 100%;
+  visibility: visible;
+  opacity: 1;
+}
+@include media-breakpoint-down(sm) {
+  .nav-search .dropdown-menu{
+    width: 100%;
+  }
+}
+
+// Back to top
+.back-top {
+  cursor: pointer;
+  position: fixed !important;
+  bottom: 40px;
+  right: 40px;
+  display: block;
+  z-index: 99;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(50%);
+  transition: $transition-base;
+  background: rgba(var(--#{$prefix}primary-rgb), 0.1);
+  color: var(--#{$prefix}primary);
+  border-radius: 10%;
+  width: 52px;
+  height: 52px;
+  line-height: 52px;
+  text-align: center;
+  i{
+    font-size: 1.6rem;
+    vertical-align: middle;
+  }
+  &:hover{
+    background: var(--#{$prefix}primary);
+    color: var(--#{$prefix}white);
+  }
+  &.back-top-show {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0%);
+  }
+}
+@include media-breakpoint-down(md) {
+  .back-top {
+    bottom: 10px;
+    right: 10px;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    i{
+      font-size: 1rem;
+    }
+  }
+}
+
+// To flip element in RTL
+/* rtl:raw:
+  .rtl-flip {
+    transform: scaleX(-1);
+  }
+  .rtl-flip.bi:before{
+    transform: inherit;
+  }
+*/
+
+// Ribbon css/* ===== Compact, clean ribbon at top-left ===== */
+.ribbon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  overflow: hidden;
+  width: 90px;      /* ↓ nhỏ hơn trước */
+  height: 90px;     /* ↓ nhỏ hơn trước */
+  pointer-events: none;
+}
+
+.ribbon span {
+  position: absolute;
+  display: block;
+  width: 125px;     /* ↓ ngắn hơn, không che nhiều */
+  padding: 6px 0;   /* ↓ mảnh hơn */
+  background: linear-gradient(45deg, #ff4757, #ff6b81);
+  color: #fff;
+  font-weight: 800;
+  text-align: center;
+  font-size: 1.25rem;
+  transform: rotate(-45deg);
+  top: 0px;
+  left: -35px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  border-radius: 2px;
+    animation: 
+    ribbonGlow 2.5s ease-in-out infinite alternate,
+    gradientMove 5s linear infinite;
+}
+
+.ribbon span::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 2px;
+}
+
+/* Ribbon lớn, nổi bật */
+.ribbon-lg {
+  width: 150px;
+  height: 150px;
+}
+.ribbon-lg span {
+  animation: salePulse 3s infinite ease-in-out;
+}
+@keyframes ribbonGlow {
+  0% { box-shadow: 0 0 5px rgba(255, 80, 100, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(255, 80, 100, 0.7); }
+  100% { box-shadow: 0 0 8px rgba(255, 80, 100, 0.4); }
+}
+
+/* Gradient di chuyển */
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+
+}
+.ribbon-lg span {
+  width: 220px;
+  padding: 12px 0;
+  font-size: 1.1rem;
+  top: 28px;
+  left: -50px;
+  background: linear-gradient(45deg, #ff4757, #ff6b81);
+  text-transform: uppercase;
+}
+// .ribbon::before{
+//   content: "";
+//   position: absolute;
+//   top: 0px;
+//   right: -20px;
+//   border-top: 0.75em $border-style  var(--#{$prefix}white);
+//   border-bottom: 0.75em $border-style  var(--#{$prefix}white);
+//   border-right: 20px $border-style transparent;
+//   border-left: 0px $border-style transparent;
+// }
+
+//Upload remove button
+.uploadremove {
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+  text-align: center;
+  border: 0;
+  padding: 0;
+  background: var(--#{$prefix}danger);
+  border-radius: 50%;
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
+  transition: $transition-base;
+}
+
+// Sticky element
+.sticky-element {
+  position: fixed;
+  bottom: 50px;
+  left: 50px;
+  width: 300px;
+  visibility: hidden;
+  z-index: 1000;
+  opacity: 0;
+  transform: translateX(-50%);
+  transition: $transition-base;
+}
+
+.sticky-element.sticky-element-sticked {
+  visibility: visible;
+  opacity: 1;
+  transform: translateX(0%);
+}
+
+// Quick fix for bootstrap font width
+.bi.fa-fw{
+  display: inline-block;
+}
+
+// pre loader
+.preloader {
+  background-color: var(--#{$prefix}white);
+  position: fixed;
+  z-index: 1190;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 0;
+
+  .preloader-item {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    text-align: center;
+    transform: translate(-50%, -50%);
+  }
+}
+
+
+// Radio button css for soft success color
+.btn-success-soft-check{
+  background-color: var(--#{$prefix}light);
+  text-align: start;
+}
+
+.btn-success-soft-check:hover {
+  background-color: rgba(var(--bs-success-rgb), 0.2) !important;
+  border: $border-width $border-style var(--#{$prefix}success) !important;
+}
+.btn-check:active+.btn-success-soft-check, .btn-check:checked+.btn-success-soft-check, .btn-success-soft-check.active, .btn-success-soft-check:active, .show>.btn-success-soft-check.dropdown-toggle {
+  background-color: rgba(var(--bs-success-rgb), 0.2);
+  color: none;
+  border: $border-width $border-style var(--#{$prefix}success) !important;
+}
+.btn-check:focus + .btn, .btn-round-shadow:focus {
+  box-shadow: none;
+}
+
+// Radio button css for success color
+.btn-primary-check{
+  border:$border-width $border-style var(--#{$prefix}secondary);
+}
+
+.btn-primary-check:hover {
+  background-color:var(--#{$prefix}primary);
+  color: var(--#{$prefix}white);
+  border:$border-width $border-style var(--#{$prefix}primary);
+}
+.btn-check:active+.btn-primary-check, .btn-check:checked+.btn-primary-check, .btn-primary-check.active, .btn-primary-check:active, .show>.btn-primary-check.dropdown-toggle {
+  background-color:var(--#{$prefix}primary);
+  color: var(--#{$prefix}white);
+  border:$border-width $border-style var(--#{$prefix}primary);
+}
+.btn-check:focus + .btn, .btn-round-shadow:focus {
+  box-shadow: none;
+}

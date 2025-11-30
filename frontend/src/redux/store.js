@@ -1,5 +1,4 @@
 import authReducer from './authSlice';
-import adminReducer from './adminSlice';
 import coursesReducer from './coursesSlice';
 import cartReducer from './cartSlice';
 import wishlistReducer from './wishlistSlice';
@@ -11,7 +10,6 @@ import { configureStore } from '@reduxjs/toolkit';
 // combine all reducers
 const rootReducer = combineReducers({
   auth: authReducer,
-  admin: adminReducer,
   courses: coursesReducer,
   cart: cartReducer,
   wishlist: wishlistReducer

@@ -8,7 +8,7 @@ const Counter = ({ totalCourses, activeCourses, inactiveCourses }) => {
   return (
     <Row className="justify-content-center text-center">
       <Col>
-        <div className="d-flex justify-content-center gap-5 flex-wrap">
+        <div className="d-flex justify-content-center gap-4 flex-wrap">
           <div className="d-flex align-items-center">
             <div className="icon-lg fs-4 text-info bg-info bg-opacity-25 rounded flex-centered">
               <FaBook />

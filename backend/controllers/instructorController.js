@@ -4,9 +4,12 @@ import Instructor from "../models/instructorModel.js";
 import Order from "../models/orderModel.js";
 import userModel from "../models/userModel.js";
 import Review from "../models/reviewModel.js";
+
+import { generateUploadUrl } from "../utils/aws/putObject.js";
+
 import Fuse from "fuse.js";
 import mongoose from "mongoose";
-import { generateUploadUrl } from "../utils/aws/putObject.js";
+
 
 const fetchInstructorFields = async (filter, fields, allowedFields) => {
   const selectFields = fields
@@ -19,421 +22,31 @@ const fetchInstructorFields = async (filter, fields, allowedFields) => {
   return Instructor.findOne(filter).select(selectFields);
 };
 
-// GET /api/instructors/:id?fields=field1,field2,...
-export const getPublicFields = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { fields } = req.query;
+// helper: get course ids for an instructor
+const getInstructorCourseIds = async (userId) => {
+  const courses = await Course.find(
+    { "instructor.ref": userId, isDeleted: false },
+    '_id'
+  ).lean();
 
-    const allowedFields = [
-      'stats',
-      'rating',
-      'myCourses',
-      'introduction',
-      'address',
-      'skills',
-      'education',
-      'occupation'
-    ];
-
-    const instructor = await fetchInstructorFields({ user: id }, fields, allowedFields);
-
-    if (!instructor) {
-      return res.status(404).json({ success: false, message: 'Instructor not found' });
-    }
-
-    res.json({ success: true, instructor });
-  } catch (error) {
-    console.error('Error fetching public fields:', error);
-    res.status(500).json({ success: false, message: 'Failed to fetch instructor data' });
-  }
+  return courses.map(course => course._id);
 };
 
-// GET /api/instructor?fields=field1,field2,...
-export const getPrivateFields = async (req, res) => {
-  try {
-    const { fields } = req.query;
-    const userId = req.userId;
+// helper: get student ids for an instructor
+const getInstructorStudentIds = async (userId) => {
+  const courseIds = await getInstructorCourseIds(userId);
+  const orders = await Order.find(
+    {
+      status: 'completed',
+      "courses.course": { $in: courseIds }
+    },
+    'user'
+  ).lean();
+  const studentIdSet = new Set(orders.map(order => order.user.toString()));
+  return Array.from(studentIdSet).map(id => new mongoose.Types.ObjectId(id));
+}
 
-    const allowedFields = [
-      'linkedAccounts',
-      'myStudents',
-      'enrollments'
-    ];
-
-    const instructor = await fetchInstructorFields({ user: userId }, fields, allowedFields);
-
-    if (!instructor) {
-      return res.status(404).json({ success: false, message: 'Instructor not found' });
-    }
-
-    res.json({ success: true, instructor });
-  } catch (error) {
-    console.error('Error fetching private fields:', error);
-    res.status(500).json({ success: false, message: 'Failed to fetch instructor data' });
-  }
-};
-
-// POST /api/instructors
-export const createInstructor = async (req, res) => {
-  try {
-    const userId = req.userId;
-
-    // prevent duplicate instructors for same user
-    const existing = await Instructor.findOne({ userId });
-    if (existing) {
-      return res.status(400).json({
-        success: false,
-        message: 'You are already registered as an instructor.'
-      });
-    }
-
-    // create instructor
-    const instructor = new Instructor({ user: userId });
-    await instructor.save();
-
-    // change role in userModel
-    const user = await userModel.findById(userId);
-    if (user) {
-      user.role = 'instructor';
-      await user.save();
-    }
-
-    res.status(201).json({
-      success: true,
-      message: 'Instructor created successfully.',
-      instructor
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Server error while creating instructor.',
-      error: error.message
-    });
-  }
-};
-
-export const updateInstructor = async (req, res) => {
-
-};
-
-// GET /api/instructor/courses?page=&limit=&search=&sort=
-export const getInstructorCourses = async (req, res) => {
-  try {
-    const userId = req.userId;
-
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
-    const searchTerm = req.query.search || '';
-    const sortParam = req.query.sort || '';
-
-    // find instructor by user ref
-    const instructor = await Instructor.findOne({ user: userId });
-    if (!instructor) {
-      return res.status(404).json({ success: false, message: 'Instructor not found' });
-    }
-
-    // fetch all courses for the instructor
-    const allCourses = await Course.find({ "instructor.ref": userId, isDeleted: false }).lean();
-
-    // sorting function helper
-    const sortFunctions = {
-      '': (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt),        // default: updatedAt desc
-      'newest': (a, b) => new Date(b.createdAt) - new Date(a.createdAt),  // createdAt desc
-      'oldest': (a, b) => new Date(a.createdAt) - new Date(b.createdAt),  // createdAt asc
-      'mostPopular': (a, b) => (b.studentsEnrolled || 0) - (a.studentsEnrolled || 0), // desc
-      'leastPopular': (a, b) => (a.studentsEnrolled || 0) - (b.studentsEnrolled || 0), // asc
-      'highestRating': (a, b) => (b.rating?.average || 0) - (a.rating?.average || 0), // desc
-      'lowestRating': (a, b) => (a.rating?.average || 0) - (b.rating?.average || 0),  // asc
-    };
-    // fallback to default sort if invalid
-    const sortFn = sortFunctions[sortParam] || sortFunctions[''];
-
-    let filteredCourses = allCourses;
-
-    // filter by searchTerm first
-    if (searchTerm.trim() !== '') {
-      const fuse = new Fuse(allCourses, {
-        keys: ['title', 'subtitle', 'description', 'category', 'subCategory', 'tags'],
-        threshold: 0.3,
-      });
-      filteredCourses = fuse.search(searchTerm).map(result => result.item);
-    }
-
-    // then sort the filtered list
-    filteredCourses.sort(sortFn);
-
-    // total count after search filter
-    const total = filteredCourses.length;
-
-    // sort the filtered results
-    filteredCourses.sort((a, b) => {
-      if (sortParam === 'updatedAt') {
-        return new Date(b.updatedAt) - new Date(a.updatedAt);
-      }
-      if (sortParam === 'createdAt') {
-        return new Date(b.createdAt) - new Date(a.createdAt);
-      }
-      return 0;
-    });
-
-    // paginate
-    const pagedCourses = filteredCourses.slice(skip, skip + limit);
-
-    const totalActive = filteredCourses.filter(c => !c.isPrivate && c.status === "Live").length;
-    const totalInactive = total - totalActive;
-
-    return res.status(200).json({
-      success: true,
-      data: pagedCourses,
-      total,
-      page,
-      totalPages: Math.ceil(total / limit),
-      totalActive,
-      totalInactive,
-    });
-  } catch (err) {
-    console.error('Error fetching instructor courses:', err);
-    res.status(500).json({ success: false, message: 'Internal server error' });
-  }
-};
-
-// GET /api/instructor/courses/:id
-export const getMyCourseById = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const userId = req.userId;
-
-    const course = await Course.findOne({ _id: id, isDeleted: false }).lean();
-    if (!course) {
-      return res.status(404).json({ success: false, message: "Course not found" });
-    }
-
-    if (!course.instructor?.ref?.equals(userId)) {
-      return res.status(403).json({ success: false, message: "Cannot access this course" });
-    }
-
-    return res.json({ success: true, course });
-  } catch (error) {
-    console.error(`Error fetching instructor course with id(${req.params.id}):`, error);
-    return res.status(500).json({ success: false, message: "Cannot get instructor's course" });
-  }
-};
-
-export const getAllInstructors = async (req, res) => {
-  try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 7;
-    const search = req.query.search?.trim() || "";
-
-    const instructorDocs = await userModel
-      .find(
-        { role: 'instructor' },
-        'name email isVerified isActivated createdAt updatedAt pfpImg'
-      )
-      .sort({ createdAt: -1 });
-
-    const instructors = instructorDocs.map((doc) => doc.toObject());
-
-    let results = instructors;
-    if (search) {
-      const fuse = new Fuse(instructors, {
-        keys: ["name", "email"],
-        threshold: 0.4,
-        distance: 100,
-        includeScore: true,
-      });
-
-      const fuzzyResults = fuse.search(search);
-      results = fuzzyResults.map(r => r.item);
-    }
-
-    const total = results.length;
-    const paginated = results.slice((page - 1) * limit, page * limit);
-
-    res.json({
-      success: true,
-      data: paginated,
-      pagination: {
-        total,
-        page,
-        totalPages: Math.ceil(total / limit),
-      },
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch instructors",
-      error: error.message,
-    });
-  }
-};
-
-// PATCH /user/instructors/:id/block
-export const blockInstructor = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const updatedInstructor = await userModel.findOneAndUpdate(
-      { _id: id, role: 'instructor' },
-      { isActivated: false },
-      { new: true }
-    );
-
-    if (!updatedInstructor) {
-      return res.status(404).json({ success: false, message: "Instructor not found" });
-    }
-
-    res.json({ success: true, data: updatedInstructor });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to block instructor",
-      error: error.message,
-    });
-  }
-};
-
-// PATCH /user/instructors/:id/unblock
-export const unblockInstructor = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const updatedInstructor = await userModel.findOneAndUpdate(
-      { _id: id, role: 'instructor' },
-      { isActivated: true },
-      { new: true }
-    );
-
-    if (!updatedInstructor) {
-      return res.status(404).json({ success: false, message: "Instructor not found" });
-    }
-
-    res.json({ success: true, data: updatedInstructor });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to unblock instructor",
-      error: error.message,
-    });
-  }
-};
-
-// GET /api/instructor/courses/:id/earnings?period=["day","week","month","year"]
-export const getCourseEarnings = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { period } = req.query; // "day","week","month","year"
-    const userId = req.userId;
-
-    // validate ownership
-    const course = await Course.findOne({ _id: id, isDeleted: false }).select('instructor');
-    if (!course) return res.status(404).json({ success: false, message: "Course not found" });
-    if (!course.instructor?.ref?.equals(userId)) {
-      return res.status(403).json({ success: false, message: "Unauthorized" });
-    }
-
-    // setup date logic
-    const { start, mongoFormat, unit } = getDateConfig(period);
-
-    // aggregation pipeline
-    const earnings = await Order.aggregate([
-      {
-        $match: {
-          status: 'completed',
-          createdAt: { $gte: start }, // filter by calculated start date
-          "courses.course": new mongoose.Types.ObjectId(id)
-        }
-      },
-      { $unwind: "$courses" },
-      {
-        $match: {
-          "courses.course": new mongoose.Types.ObjectId(id)
-        }
-      },
-      {
-        $group: {
-          _id: { $dateToString: { format: mongoFormat, date: "$createdAt" } },
-          total: { $sum: "$courses.pricePaid" }
-        }
-      },
-      { $sort: { _id: 1 } }
-    ]);
-
-    // fill gaps (empty days/hours)
-    const chartData = fillChartData(earnings, start, unit);
-
-    return res.json({
-      success: true,
-      data: chartData,
-      totalEarnings: earnings.reduce((acc, curr) => acc + curr.total, 0)
-    });
-  } catch (error) {
-    console.error(`Error fetching earnings for course (${req.params.id}):`, error);
-    return res.status(500).json({ success: false, message: "Server Error" });
-  }
-};
-
-// GET /api/instructor/courses/:id/studentsEnrolled?period=["day","week","month","year"]
-export const getStudentsEnrolled = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { period } = req.query; // "day","week","month","year"
-    const userId = req.userId;
-
-    // validate ownership
-    const course = await Course.findOne({ _id: id, isDeleted: false }).select('instructor');
-    if (!course) return res.status(404).json({ success: false, message: "Course not found" });
-    if (!course.instructor?.ref?.equals(userId)) {
-      return res.status(403).json({ success: false, message: "Unauthorized" });
-    }
-
-    // setup date logic
-    const { start, mongoFormat, unit } = getDateConfig(period);
-
-    // aggregation pipeline
-    const enrollments = await Order.aggregate([
-      {
-        $match: {
-          status: 'completed',
-          createdAt: { $gte: start },
-          "courses.course": new mongoose.Types.ObjectId(id)
-        }
-      },
-      // Unwind is strictly safer to ensure we count the specific course instance
-      { $unwind: "$courses" },
-      {
-        $match: {
-          "courses.course": new mongoose.Types.ObjectId(id)
-        }
-      },
-      {
-        $group: {
-          _id: { $dateToString: { format: mongoFormat, date: "$createdAt" } },
-          total: { $sum: 1 } // <--- CHANGE: Count 1 instead of summing price
-        }
-      },
-      { $sort: { _id: 1 } }
-    ]);
-
-    // fill gaps
-    const chartData = fillChartData(enrollments, start, unit);
-
-    const totalCount = enrollments.reduce((acc, curr) => acc + curr.total, 0);
-
-    return res.json({
-      success: true,
-      data: chartData,
-      totalEnrolled: totalCount
-    });
-  } catch (error) {
-    console.error(`Error fetching enrollments for course (${req.params.id}):`, error);
-    return res.status(500).json({ success: false, message: "Server Error" });
-  }
-};
-
-// Helper: get date ranges and Mongo formats
+// helper: get date ranges and Mongo formats
 const getDateConfig = (period) => {
   const now = new Date();
   const start = new Date();
@@ -574,6 +187,323 @@ const fillChartData = (mongoData, start, unit) => {
   return results;
 };
 
+
+// GET /api/instructors/:id?fields=field1,field2,...
+export const getPublicFields = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { fields } = req.query;
+
+    const allowedFields = [
+      'stats',
+      'rating',
+      'myCourses',
+      'introduction',
+      'address',
+      'skills',
+      'education',
+      'occupation'
+    ];
+
+    const instructor = await fetchInstructorFields({ user: id }, fields, allowedFields);
+
+    if (!instructor) {
+      return res.status(404).json({ success: false, message: 'Instructor not found' });
+    }
+
+    res.json({ success: true, instructor });
+  } catch (error) {
+    console.error('Error fetching public fields:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch instructor data' });
+  }
+};
+
+// GET /api/instructor?fields=field1,field2,...
+export const getPrivateFields = async (req, res) => {
+  try {
+    const { fields } = req.query;
+    const userId = req.userId;
+
+    const allowedFields = [
+      'linkedAccounts',
+      'myStudents',
+      'enrollments'
+    ];
+
+    const instructor = await fetchInstructorFields({ user: userId }, fields, allowedFields);
+
+    if (!instructor) {
+      return res.status(404).json({ success: false, message: 'Instructor not found' });
+    }
+
+    res.json({ success: true, instructor });
+  } catch (error) {
+    console.error('Error fetching private fields:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch instructor data' });
+  }
+};
+
+// POST /api/instructors
+export const createInstructor = async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    // prevent duplicate instructors for same user
+    const existing = await Instructor.findOne({ userId });
+    if (existing) {
+      return res.status(400).json({
+        success: false,
+        message: 'You are already registered as an instructor.'
+      });
+    }
+
+    // create instructor
+    const instructor = new Instructor({ user: userId });
+    await instructor.save();
+
+    // change role in userModel
+    const user = await userModel.findById(userId);
+    if (user) {
+      user.role = 'instructor';
+      await user.save();
+    }
+
+    res.status(201).json({
+      success: true,
+      message: 'Instructor created successfully.',
+      instructor
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server error while creating instructor.',
+      error: error.message
+    });
+  }
+};
+
+// PATCH /api/instructors/:id
+export const updateInstructor = async (req, res) => {
+
+};
+
+// GET /api/instructor/courses?page=&limit=&search=&sort=
+export const getInstructorCourses = async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    const searchTerm = req.query.search || '';
+    const sortParam = req.query.sort || '';
+
+    // find instructor by user ref
+    const instructor = await Instructor.findOne({ user: userId });
+    if (!instructor) {
+      return res.status(404).json({ success: false, message: 'Instructor not found' });
+    }
+
+    // fetch all courses for the instructor
+    const allCourses = await Course.find({ "instructor.ref": userId, isDeleted: false }).lean();
+
+    // sorting function helper
+    const sortFunctions = {
+      '': (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt),        // default: updatedAt desc
+      'newest': (a, b) => new Date(b.createdAt) - new Date(a.createdAt),  // createdAt desc
+      'oldest': (a, b) => new Date(a.createdAt) - new Date(b.createdAt),  // createdAt asc
+      'mostPopular': (a, b) => (b.studentsEnrolled || 0) - (a.studentsEnrolled || 0), // desc
+      'leastPopular': (a, b) => (a.studentsEnrolled || 0) - (b.studentsEnrolled || 0), // asc
+      'highestRating': (a, b) => (b.rating?.average || 0) - (a.rating?.average || 0), // desc
+      'lowestRating': (a, b) => (a.rating?.average || 0) - (b.rating?.average || 0),  // asc
+    };
+    // fallback to default sort if invalid
+    const sortFn = sortFunctions[sortParam] || sortFunctions[''];
+
+    let filteredCourses = allCourses;
+
+    // filter by searchTerm first
+    if (searchTerm.trim() !== '') {
+      const fuse = new Fuse(allCourses, {
+        keys: ['title', 'subtitle', 'description', 'category', 'subCategory', 'tags'],
+        threshold: 0.3,
+      });
+      filteredCourses = fuse.search(searchTerm).map(result => result.item);
+    }
+
+    // then sort the filtered list
+    filteredCourses.sort(sortFn);
+
+    // total count after search filter
+    const total = filteredCourses.length;
+
+    // sort the filtered results
+    filteredCourses.sort((a, b) => {
+      if (sortParam === 'updatedAt') {
+        return new Date(b.updatedAt) - new Date(a.updatedAt);
+      }
+      if (sortParam === 'createdAt') {
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      }
+      return 0;
+    });
+
+    // paginate
+    const pagedCourses = filteredCourses.slice(skip, skip + limit);
+
+    const totalActive = filteredCourses.filter(c => !c.isPrivate && c.status === "Live").length;
+    const totalInactive = total - totalActive;
+
+    return res.status(200).json({
+      success: true,
+      data: pagedCourses,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+      totalActive,
+      totalInactive,
+    });
+  } catch (err) {
+    console.error('Error fetching instructor courses:', err);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
+// GET /api/instructor/courses/:id
+export const getMyCourseById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.userId;
+
+    const course = await Course.findOne({ _id: id, isDeleted: false }).lean();
+    if (!course) {
+      return res.status(404).json({ success: false, message: "Course not found" });
+    }
+
+    if (!course.instructor?.ref?.equals(userId)) {
+      return res.status(403).json({ success: false, message: "Cannot access this course" });
+    }
+
+    return res.json({ success: true, course });
+  } catch (error) {
+    console.error(`Error fetching instructor course with id(${req.params.id}):`, error);
+    return res.status(500).json({ success: false, message: "Cannot get instructor's course" });
+  }
+};
+
+// GET /api/instructor/courses/:id/earnings?period=["day","week","month","year"]
+export const getCourseEarnings = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { period } = req.query; // "day","week","month","year"
+    const userId = req.userId;
+
+    // validate ownership
+    const course = await Course.findOne({ _id: id, isDeleted: false }).select('instructor');
+    if (!course) return res.status(404).json({ success: false, message: "Course not found" });
+    if (!course.instructor?.ref?.equals(userId)) {
+      return res.status(403).json({ success: false, message: "Unauthorized" });
+    }
+
+    // setup date logic
+    const { start, mongoFormat, unit } = getDateConfig(period);
+
+    // aggregation pipeline
+    const earnings = await Order.aggregate([
+      {
+        $match: {
+          status: 'completed',
+          createdAt: { $gte: start }, // filter by calculated start date
+          "courses.course": new mongoose.Types.ObjectId(id)
+        }
+      },
+      { $unwind: "$courses" },
+      {
+        $match: {
+          "courses.course": new mongoose.Types.ObjectId(id)
+        }
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: mongoFormat, date: "$createdAt" } },
+          total: { $sum: "$courses.pricePaid" }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ]);
+
+    // fill gaps (empty days/hours)
+    const chartData = fillChartData(earnings, start, unit);
+
+    return res.json({
+      success: true,
+      data: chartData,
+      totalEarnings: earnings.reduce((acc, curr) => acc + curr.total, 0)
+    });
+  } catch (error) {
+    console.error(`Error fetching earnings for course (${req.params.id}):`, error);
+    return res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
+
+// GET /api/instructor/courses/:id/studentsEnrolled?period=["day","week","month","year"]
+export const getStudentsEnrolled = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { period } = req.query; // "day","week","month","year"
+    const userId = req.userId;
+
+    // validate ownership
+    const course = await Course.findOne({ _id: id, isDeleted: false }).select('instructor');
+    if (!course) return res.status(404).json({ success: false, message: "Course not found" });
+    if (!course.instructor?.ref?.equals(userId)) {
+      return res.status(403).json({ success: false, message: "Unauthorized" });
+    }
+
+    // setup date logic
+    const { start, mongoFormat, unit } = getDateConfig(period);
+
+    // aggregation pipeline
+    const enrollments = await Order.aggregate([
+      {
+        $match: {
+          status: 'completed',
+          createdAt: { $gte: start },
+          "courses.course": new mongoose.Types.ObjectId(id)
+        }
+      },
+      // Unwind is strictly safer to ensure we count the specific course instance
+      { $unwind: "$courses" },
+      {
+        $match: {
+          "courses.course": new mongoose.Types.ObjectId(id)
+        }
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: mongoFormat, date: "$createdAt" } },
+          total: { $sum: 1 } // <--- CHANGE: Count 1 instead of summing price
+        }
+      },
+      { $sort: { _id: 1 } }
+    ]);
+
+    // fill gaps
+    const chartData = fillChartData(enrollments, start, unit);
+
+    const totalCount = enrollments.reduce((acc, curr) => acc + curr.total, 0);
+
+    return res.json({
+      success: true,
+      data: chartData,
+      totalEnrolled: totalCount
+    });
+  } catch (error) {
+    console.error(`Error fetching enrollments for course (${req.params.id}):`, error);
+    return res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
+
 // GET /api/instructor/courses/:id/students?page=&limit=&search=
 export const getCourseStudentsAndReviews = async (req, res) => {
   try {
@@ -598,7 +528,7 @@ export const getCourseStudentsAndReviews = async (req, res) => {
     }
 
     // check ownership
-    if (!course.instructor.ref.equals(userId)) {
+    if (!course?.instructor?.ref?.equals(userId)) {
       return res.status(403).json({ success: false, message: "Cannot access this course" });
     }
 
@@ -697,13 +627,13 @@ export const getCourseStudentsAndReviews = async (req, res) => {
   }
 };
 
-// GET /api/instructor/dashboard
-export const getDashboardData = async (req, res) => {
+// GET /api/instructor/counters
+export const getInstructorCounters = async (req, res) => {
   try {
     const userId = req.userId;
 
-    const instructor = await Instructor.findOne({ user: userId });
-    if (!instructor) {
+    const isInstructor = await Instructor.exists({ user: userId });
+    if (!isInstructor) {
       return res.status(403).json({ success: false, message: "You don't have access to this resource" });
     }
 
@@ -722,14 +652,13 @@ export const getDashboardData = async (req, res) => {
       return res.json({
         success: true,
         averageRating: 0,
-        earningsData: [],
-        topCoursesData: [],
         totalCourses,
         totalStudents,
         totalOrders
       });
     }
 
+    // get average rating ---
     const avgRating = await Review.aggregate([
       {
         $match: {
@@ -757,12 +686,52 @@ export const getDashboardData = async (req, res) => {
         }
       }
     ]);
+
     const averageRating =
       avgRating.length > 0 && avgRating[0].avgRating != null
         ? parseFloat(avgRating[0].avgRating.toFixed(1))
         : 0;
 
+    return res.json({
+      success: true,
+      averageRating,
+      totalCourses,
+      totalStudents,
+      totalOrders
+    });
+  } catch (error) {
+    console.error("Populate instructor dashboard data error: ", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
+  }
+};
+
+// GET /api/instructor/dashboard
+export const getDashboardData = async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    const isInstructor = await Instructor.exists({ user: userId });
+    if (!isInstructor) {
+      return res.status(403).json({ success: false, message: "You don't have access to this resource" });
+    }
+
+    const courseIds = await getInstructorCourseIds(userId);
+
+    if (courseIds.length === 0) {
+      return res.json({
+        success: true,
+        earningsData: [],
+        topCoursesData: []
+      });
+    }
+
+    // time config ---
     const { start, mongoFormat, unit } = getDateConfig('month');
+
+    // get earings ---
     const earnings = await Order.aggregate([
       {
         $match: {
@@ -787,8 +756,10 @@ export const getDashboardData = async (req, res) => {
       },
       { $sort: { "_id.month": 1 } }
     ]);
+
     const earningsData = fillChartData(earnings, start, unit);
 
+    // get top courses ---
     const topCourses = await Order.aggregate([
       {
         $match: {
@@ -835,12 +806,8 @@ export const getDashboardData = async (req, res) => {
 
     return res.json({
       success: true,
-      averageRating,
       earningsData,
-      topCoursesData: topCourses,
-      totalCourses,
-      totalStudents,
-      totalOrders
+      topCoursesData: topCourses
     });
   } catch (error) {
     console.error("Populate instructor dashboard data error: ", error);
@@ -850,30 +817,6 @@ export const getDashboardData = async (req, res) => {
     });
   }
 };
-
-// helper: get course ids for an instructor
-const getInstructorCourseIds = async (userId) => {
-  const courses = await Course.find(
-    { "instructor.ref": userId, isDeleted: false },
-    '_id'
-  ).lean();
-
-  return courses.map(course => course._id);
-};
-
-// helper: get student ids for an instructor
-const getInstructorStudentIds = async (userId) => {
-  const courseIds = await getInstructorCourseIds(userId);
-  const orders = await Order.find(
-    {
-      status: 'completed',
-      "courses.course": { $in: courseIds }
-    },
-    'user'
-  ).lean();
-  const studentIdSet = new Set(orders.map(order => order.user.toString()));
-  return Array.from(studentIdSet).map(id => new mongoose.Types.ObjectId(id));
-}
 
 // POST /api/instructor/videos/upload
 export const generateVideoUploadUrl = async (req, res) => {

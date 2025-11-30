@@ -69,7 +69,7 @@ const MarketingCourse = ({ col = 6, courseData }) => {
                 <ul className="list-group list-group-borderless">
                   <li className="list-group-item">
                     <span>Category:</span>
-                    <span className="h6 mb-0">{courseData?.category || ''}</span>
+                    <span className="h6 mb-0">{courseData?.category?.name || "(Not specified)"}</span>
                   </li>
                   <li className="list-group-item">
                     <span>Subcategory:</span>

@@ -1,6 +1,7 @@
 import { setLogout, setUserData } from '@/redux/authSlice';
 
 import axios from 'axios';
+import { useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 
@@ -48,10 +49,56 @@ export default function useProfile() {
       toast.success('Log out successfully');
     }
   };
+  
+  const [isAvatarUploading, setIsAvatarUploading] = useState(false);
+  const uploadAvatar = useCallback(async (file) => {
+    if (!file) return;
+
+    setIsAvatarUploading(true);
+
+    try {
+      const response = await axios.get(
+        `${backendUrl}/api/user/avatar/upload`,
+        { withCredentials: true }
+      );
+      
+      if (!response.data.success) toast.error(response.data.message || "Failed to upload avatar");
+
+      const { signature, timestamp, folder, public_id, transformation, apiKey, cloudName } = response.data.uploadData;
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('api_key', apiKey);
+      formData.append('timestamp', timestamp);
+      formData.append('signature', signature);
+      formData.append('folder', folder);
+      formData.append('public_id', public_id);
+      formData.append("overwrite", "true");
+      formData.append('transformation', transformation);
+
+      const cloudinaryRes = await axios.post(
+        `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+        formData
+      );
+
+      const newAvatarUrl = cloudinaryRes.data.secure_url;
+
+      return newAvatarUrl;
+
+    } catch (error) {
+      console.error("Avatar upload failed:", error);
+      toast.error("Failed to upload avatar");
+    } finally {
+      setIsAvatarUploading(false);
+    }
+  }, []);
 
   return {
     user,
     updateProfile,
     logout,
+
+    uploadAvatar,
+    isAvatarUploading,
   };
 }

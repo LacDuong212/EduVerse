@@ -20,9 +20,15 @@ const AddSection = ({ onAddSection }) => {
     toggle();
   };
 
+  const onFormSubmit = (e) => {
+    e.preventDefault();   // stop page refresh
+    e.stopPropagation();  // stops event from reaching parent form
+    handleSave();
+  };
+
   return (
     <>
-      <Button variant="primary-soft" size="sm" onClick={toggle} className="mb-0">
+      <Button variant="dark-soft" size="sm" onClick={toggle} className="mb-0">
         <BsPlusCircle className="me-2" />
         Add Section
       </Button>
@@ -34,6 +40,7 @@ const AddSection = ({ onAddSection }) => {
         aria-labelledby="addSectionLabel"
         aria-hidden="true"
         onHide={handleCancel}
+        onClick={(e) => e.stopPropagation()}
       >
         <ModalHeader className="bg-dark">
           <h5 className="modal-title text-white" id="addSectionLabel">
@@ -50,7 +57,7 @@ const AddSection = ({ onAddSection }) => {
         </ModalHeader>
 
         <ModalBody>
-          <form className="row text-start g-3" onSubmit={e => e.preventDefault()}>
+          <form className="row text-start g-3" onSubmit={onFormSubmit}>
             <Col xs={12}>
               <label className="form-label">
                 Section Title <span className="text-danger">*</span>
@@ -61,8 +68,11 @@ const AddSection = ({ onAddSection }) => {
                 placeholder="Enter section title"
                 value={title}
                 onChange={e => setTitle(e.target.value)}
+                autoFocus
               />
             </Col>
+            {/* hidden button to prevent triggering outside of modal */}
+            <button type="submit" className="d-none"></button>
           </form>
         </ModalBody>
 
@@ -70,9 +80,15 @@ const AddSection = ({ onAddSection }) => {
           <button type="button" className="btn btn-danger-soft my-0" onClick={handleCancel}>
             Cancel
           </button>
-          <button type="button" className="btn btn-success my-0" onClick={handleSave}>
-            Save Section
-          </button>
+          {(title && title.trim()) ? 
+            <button type="button" className="btn btn-success my-0" onClick={handleSave}>
+              Save Section
+            </button>
+          : (
+            <button type="button" className="btn my-0" disabled>
+              Save Section
+            </button>
+          )}
         </ModalFooter>
       </Modal>
     </>

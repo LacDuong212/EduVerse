@@ -7,7 +7,7 @@ export const fetchWishlist = createAsyncThunk(
   "wishlist/fetchWishlist",
   async (userId, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/${userId}`);
+      const response = await axios.get(`${API_URL}/${userId}`, { withCredentials: true });
       return response.data.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
@@ -19,13 +19,16 @@ export const addToWishlist = createAsyncThunk(
   "wishlist/addToWishlist",
   async ({ userId, course }, { rejectWithValue }) => {
     try {
-
       const courseIdToSend = course._id;
 
-      const response = await axios.post(`${API_URL}/add`, {
-        userId,
-        courseId: courseIdToSend
-      });
+      const response = await axios.post(
+        `${API_URL}/add`, 
+        {
+          userId,
+          courseId: courseIdToSend
+        },
+        { withCredentials: true } 
+      );
 
       const newItem = response.data.data;
 
@@ -44,7 +47,8 @@ export const removeFromWishlist = createAsyncThunk(
   async ({ userId, courseId }, { rejectWithValue }) => {
     try {
       await axios.delete(`${API_URL}/remove`, {
-        data: { userId, courseId }
+        data: { userId, courseId },
+        withCredentials: true 
       });
 
       return courseId;

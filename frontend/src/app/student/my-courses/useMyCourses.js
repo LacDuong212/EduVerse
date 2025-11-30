@@ -50,7 +50,7 @@ export const useMyCourses = () => {
         const normalized = (data.courses || []).map((c) => ({
           _id: c._id,
           name: c.title || "Untitled Course",
-          image: c.thumbnail || "/images/placeholder.jpg",
+          image: c.image || c.thumbnail || "https://placehold.co/640x360?text=No+Video+Preview",
           totalLectures: c.lecturesCount ?? c.totalLectures ?? 0,
           completedLectures: 0,
           firstLectureId: getFirstLectureId(c),

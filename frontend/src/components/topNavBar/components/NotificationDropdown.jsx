@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 
 const NotificationDropdown = () => {
   return (
-    <Dropdown className="nav-item ms-2 ms-sm-3">
+    <Dropdown className="nav-item">
       <DropdownToggle className="btn btn-light btn-round arrow-none mb-0" as="a" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
         <BsBell className="fa-fw" />
       </DropdownToggle>

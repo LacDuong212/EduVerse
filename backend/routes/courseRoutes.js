@@ -1,9 +1,10 @@
 import express from "express";
-import { getFullCourses, getAllCourses, getCourseFilters, getCourseById, 
-    courseViewed, getViewedCourses, getHomeCourses, getOwnedCourses, getRelatedCourses, getCoursesOverview, 
-    createCourse, updateCourse, updateCourseStatus, setCoursePrivacy ,
-    streamVideo
+import { getAllCourses, getCourseFilters, getCourseById, 
+    courseViewed, getViewedCourses, getHomeCourses, getOwnedCourses, getRelatedCourses,
+    createCourse, updateCourse, setCoursePrivacy,
+    streamVideo, generateImageUploadSignature
 } from "../controllers/courseController.js";
+import { processLectureAI } from "../controllers/aiController.js";
 import userAuth from "../middlewares/userAuth.js";
 import { verifyAdminToken } from "../middlewares/adminAuth.js";
 import {
@@ -13,18 +14,19 @@ import {
 const courseRoute = express.Router();
 
 courseRoute.get("/home", getHomeCourses);
-// courseRoute.get("/full", getFullCourses);
 courseRoute.get("/", getAllCourses);
 courseRoute.get("/filters", getCourseFilters);
-courseRoute.get("/overview", userAuth, getCoursesOverview);
 courseRoute.get("/my-courses", userAuth, getOwnedCourses);
 courseRoute.get("/viewed", userAuth, getViewedCourses);
+courseRoute.get("/:id/images/upload", userAuth, generateImageUploadSignature);
 courseRoute.get("/:id/related", getRelatedCourses);
 courseRoute.get("/:id/videos/:key", userAuth, streamVideo);
 courseRoute.get("/:id", getCourseById);
 
 courseRoute.post("/:id/viewed", userAuth, courseViewed);
 courseRoute.post("/", userAuth, createCourse);
+
+courseRoute.post("/generate-ai", userAuth, processLectureAI);
 
 courseRoute.put("/:id", userAuth, updateCourse);
 courseRoute.patch("/:id", userAuth, setCoursePrivacy);

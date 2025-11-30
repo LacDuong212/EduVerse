@@ -1,10 +1,12 @@
-import Admin from "../models/adminModel.js";
 import Course from "../models/courseModel.js";
+import Category from "../models/categoryModel.js";
 import DraftVideo from "../models/draftVideoModel.js";
 import Instructor from "../models/instructorModel.js";
 import Order from "../models/orderModel.js";
 import userInteraction from "../models/userInteraction.js";
-import { generateStreamUrl } from "../utils/aws/getObject.js"; 
+
+import cloudinary, { CLOUDINARY_API_KEY, CLOUDINARY_CLOUD_NAME } from "../configs/cloudinary.js";
+import { generateStreamUrl } from "../utils/aws/getObject.js";
 
 import Fuse from "fuse.js";
 
@@ -12,7 +14,7 @@ import Fuse from "fuse.js";
 // helper: extract videoUrl from lectures and previewVideo in course
 const getAllVideoKeys = (data) => {
   const keys = new Set();
-  
+
   // check previewVideo
   if (data.previewVideo) {
     keys.add(data.previewVideo);
@@ -36,24 +38,40 @@ const getAllVideoKeys = (data) => {
 
 export const getHomeCourses = async (req, res) => {
   try {
-    const newest = await Course.find()
+    const publicCourseFilter = {
+      isPrivate: false,
+      isDeleted: false,
+      status: "Live"
+    };
+
+    const newest = await Course.find(publicCourseFilter)
+      .populate("category", "name slug")
       .sort({ createdAt: -1 })
       .limit(8);
 
-    const bestSellers = await Course.find()
+    const bestSellers = await Course.find(publicCourseFilter)
+      .populate("category", "name slug")
       .sort({ studentsEnrolled: -1 })
       .limit(6);
 
-    const topRated = await Course.find()
+    const topRated = await Course.find(publicCourseFilter)
+      .populate("category", "name slug")
       .sort({ "rating.average": -1, "rating.count": -1 })
       .limit(8);
 
     const biggestDiscounts = await Course.aggregate([
-      { $match: { discountPrice: { $ne: null } } },
+      { 
+        $match: { 
+          ...publicCourseFilter,
+          discountPrice: { $ne: null }
+        } 
+      },
       { $addFields: { discountAmount: { $subtract: ["$price", "$discountPrice"] } } },
       { $sort: { discountAmount: -1 } },
       { $limit: 4 }
     ]);
+
+    await Course.populate(biggestDiscounts, { path: "category", select: "name slug" });
 
     res.json({
       newest,
@@ -69,7 +87,7 @@ export const getHomeCourses = async (req, res) => {
 
 export const getFullCourses = async (req, res) => {
   try {
-    const courses = await Course.find();
+    const courses = await Course.find().populate("category", "name slug");
 
     res.status(200).json({
       success: true,
@@ -82,52 +100,6 @@ export const getFullCourses = async (req, res) => {
       success: false,
       message: "Server error while fetching courses",
     });
-  }
-};
-
-export const getCoursesOverview = async (req, res) => {
-  try {
-    const userId = req.userId;
-
-    const admin = await Admin.findById(userId);
-    if (!admin || !admin.isVerified || !admin.isApproved) {
-      return res.status(401).json({
-        success: false,
-        message: "Access denied",
-      });
-    }
-
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
-
-    const courses = await Course.find(/*{ isDeleted: false }*/) // #TODO
-      .select("image thumbnail title instructor level createdAt price status isPrivate")
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .lean(); // lean = faster, returns plain JS objects
-
-    const [totalCourses, activatedCourses, pendingCourses] = await Promise.all([
-      Course.countDocuments({ isDeleted: false }),
-      Course.countDocuments({ status: "Live", isDeleted: false }),
-      Course.countDocuments({ status: "Pending", isDeleted: false }),
-    ]);
-
-    res.status(200).json({
-      success: true,
-      data: courses,
-      meta: {
-        totalCourses,
-        activatedCourses,
-        pendingCourses,
-        currentPage: page,
-        totalPages: Math.ceil(totalCourses / limit),
-      },
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
@@ -153,11 +125,13 @@ export const getAllCourses = async (req, res) => {
     if (price === "free") mongoFilter.price = 0;
     if (price === "paid") mongoFilter.price = { $gt: 0 };
 
-    let courseDocs = await Course.find(mongoFilter).lean();
+    let courseDocs = await Course.find(mongoFilter)
+      .populate("category", "name slug")
+      .lean();
 
     if (search) {
       const fuse = new Fuse(courseDocs, {
-        keys: ["title", "subtitle", "category", "subCategory", "tags"],
+        keys: ["title", "subtitle", "category.name", "subCategory", "tags"],
         threshold: 0.5,
         ignoreLocation: true,
         minMatchCharLength: 1,
@@ -276,7 +250,7 @@ export const getCourseFilters = async (req, res) => {
       status: "Live"
     };
 
-    const categoriesPromise = Course.distinct("category", liveFilter);
+    const categoriesPromise = Category.find().select("name slug").sort({ name: 1 });
     const languagesPromise = Course.distinct("language", liveFilter);
 
     const levels = ["All", "Beginner", "Intermediate", "Advanced"];
@@ -288,7 +262,7 @@ export const getCourseFilters = async (req, res) => {
 
     res.json({
       success: true,
-      categories: categories.filter(Boolean),
+      categories: categories,
       languages: languages.filter(Boolean),
       levels
     });
@@ -306,7 +280,7 @@ export const getCourseById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const course = await Course.findById(id);
+    const course = await Course.findById(id).populate("category", "name slug");
 
     if (!course) {
       return res.status(404).json({ success: false, message: "Course not found" });
@@ -368,6 +342,7 @@ export const getViewedCourses = async (req, res) => {
     const total = await Course.countDocuments(filter);
 
     const courses = await Course.find(filter)
+      .populate("category", "name slug")
       .sort({ createdAt: -1, _id: -1 })
       .skip((page - 1) * limit)
       .limit(limit);
@@ -396,7 +371,10 @@ export const getOwnedCourses = async (req, res) => {
     const orders = await Order.find({
       user: req.userId,
       status: "completed",
-    }).populate("courses.course");
+    }).populate({
+      path: "courses.course",
+      populate: { path: "category", select: "name slug" }
+    });
 
     // extract unique courses
     const ownedCourses = [];
@@ -460,7 +438,8 @@ export const getRelatedCourses = async (req, res) => {
     let relatedCourses = await Course.find({
       _id: { $ne: id },
       $or: conditions
-    }).select("title thumbnail instructor studentsEnrolled rating price discountPrice ");
+    }).select("title thumbnail instructor studentsEnrolled rating price discountPrice ")
+    .populate("category", "name slug");
 
     // Loại bỏ trùng lặp (nếu có)
     const seen = new Set();
@@ -479,162 +458,6 @@ export const getRelatedCourses = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Server error",
-    });
-  }
-};
-
-export const getEarningsHistory = async (req, res) => {
-  try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 4;
-
-    const skip = (page - 1) * limit;
-
-    const matchStage = {};
-
-    const results = await Order.aggregate([
-      { $unwind: "$courses" },
-
-      {
-        $lookup: {
-          from: "courses",
-          localField: "courses.course",
-          foreignField: "_id",
-          as: "courseDetails",
-        },
-      },
-
-      { $unwind: "$courseDetails" },
-
-      { $match: matchStage },
-
-      { $sort: { createdAt: -1 } },
-
-      {
-        $facet: {
-          data: [
-            { $skip: skip },
-            { $limit: limit },
-            {
-              $project: {
-                _id: "$_id",
-                name: "$courseDetails.title",
-                date: "$createdAt",
-                amount: "$courses.pricePaid",
-                status: "$status",
-                paymentMethod: {
-                  $switch: {
-                    branches: [
-                      {
-                        case: { $eq: ["$paymentMethod", "momo"] },
-                        then: { type: "momo", image: "/assets/images/payment/momo.svg" }
-                      },
-                      {
-                        case: { $eq: ["$paymentMethod", "vnpay"] },
-                        then: { type: "vnpay", image: "/assets/images/payment/vnpay.svg" }
-                      }
-                    ],
-                    default: { type: "unknown", image: "" }
-                  }
-                }
-              }
-            }
-          ],
-          pagination: [
-            { $count: "total" }
-          ]
-        }
-      }
-    ]);
-
-    const data = results[0].data;
-    const totalItems = results[0].pagination[0] ? results[0].pagination[0].total : 0;
-    const totalPages = Math.ceil(totalItems / limit);
-
-    res.json({
-      success: true,
-      data: data,
-      pagination: {
-        total: totalItems,
-        page: page,
-        totalPages: totalPages,
-        limit: limit
-      }
-    });
-
-  } catch (error) {
-    console.error("Error fetching earnings history:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch earnings history",
-      error: error.message,
-    });
-  }
-};
-
-export const getEarningsStats = async (req, res) => {
-  try {
-    const stats = await Order.aggregate([
-      {
-        $facet: {
-          completed: [
-            { $match: { status: "completed" } },
-            {
-              $group: {
-                _id: null,
-                totalRevenue: { $sum: "$totalAmount" },
-                totalOrders: { $sum: 1 },
-              },
-            },
-          ],
-          pending: [
-            { $match: { status: "pending" } },
-            {
-              $group: {
-                _id: null,
-                pendingRevenue: { $sum: "$totalAmount" },
-              },
-            },
-          ],
-        },
-      },
-    ]);
-
-    const completedData = stats[0].completed[0] || { totalRevenue: 0, totalOrders: 0 };
-    const pendingData = stats[0].pending[0] || { pendingRevenue: 0 };
-
-    const earningsCardsData = [
-      {
-        title: "Total Sales",
-        amount: completedData.totalRevenue,
-        variant: "success",
-        isInfo: false,
-      },
-      {
-        title: "Pending Revenue",
-        amount: pendingData.pendingRevenue,
-        variant: "orange",
-        isInfo: false,
-      },
-      {
-        title: "Completed Orders",
-        amount: completedData.totalOrders,
-        variant: "primary",
-        isInfo: false,
-      },
-    ];
-
-    res.json({
-      success: true,
-      data: earningsCardsData,
-    });
-
-  } catch (error) {
-    console.error("Error fetching earnings stats:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch earnings stats",
-      error: error.message,
     });
   }
 };
@@ -837,7 +660,7 @@ export const validateCourse = (course) => {
     return { success: false, message: 'Title is required.' };
   }
 
-  if (!category || !category.trim()) {
+  if (!category) {
     return { success: false, message: 'Category is required.' };
   }
 
@@ -913,55 +736,6 @@ const parseDurationToHours = (duration, durationUnit) => {
   return { hours: Math.round(hours * 100) / 100 };
 }
 
-// PATCH /api/courses/:id?newStatus=
-export const updateCourseStatus = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { newStatus } = req.query;
-    const adminId = req.adminId;
-
-    const admin = await Admin.findById(adminId);
-    if (!admin || !admin.isVerified || !admin.isApproved) {
-      return res.status(401).json({
-        success: false,
-        message: 'Access denied'
-      });
-    }
-
-    const allowedStatus = ['Rejected', 'Pending', 'Live', 'Blocked'];
-
-    if (!allowedStatus.includes(newStatus)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid status'
-      });
-    }
-
-    const course = await Course.findById(id);
-    if (!course) {
-      return res.status(404).json({
-        success: false,
-        message: 'Course not found'
-      });
-    }
-
-    course.status = newStatus;
-    await course.save();
-
-    return res.status(200).json({
-      success: true,
-      message: 'Status updated successfully',
-      course
-    });
-  } catch (error) {
-    console.error('Error updating course status:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Internal server error'
-    });
-  }
-};
-
 // PATCH /api/courses/:id?setPrivacy=
 export const setCoursePrivacy = async (req, res) => {
   try {
@@ -1030,7 +804,7 @@ export const streamVideo = async (req, res) => {
 
     // generate url
     const streamUrl = await generateStreamUrl(key);
-    
+
     return res.json({
       success: true,
       streamUrl
@@ -1041,5 +815,74 @@ export const streamVideo = async (req, res) => {
       success: false,
       message: "Server error"
     });
-  } 
+  }
+};
+
+// GET /api/courses/:id/images/upload
+export const generateImageUploadSignature = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { id } = req.params;
+
+    // check instructor
+    const instructorExists = await Instructor.exists({ user: userId });
+    if (!instructorExists) {
+      return res.status(403).json({
+        success: false,
+        message: "You don't have permission"
+      });
+    }
+
+    // check course
+    const course = await Course.findById(id);
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found"
+      });
+    }
+
+    // check ownership
+    if (!course.instructor?.ref?.equals(userId)) {
+      return res.status(403).json({
+        success: false,
+        message: "You cannot modify this course"
+      });
+    }
+
+    const timestamp = Math.round((new Date()).getTime() / 1000);
+    const public_id = `course_${id}_image`;
+    const folder = 'courses';
+    const transformation = 'w_1280,h_720,c_fill,g_auto,f_auto,q_auto,d_av4_khpvlh';
+
+    // generate signature
+    const signature = cloudinary.utils.api_sign_request({
+      timestamp,
+      folder,
+      public_id,
+      overwrite: true,
+      transformation: transformation
+    }, process.env.CLOUDINARY_API_SECRET);
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        timestamp,
+        folder,
+        public_id,
+        signature,
+        transformation,
+        apiKey: CLOUDINARY_API_KEY,
+        cloudName: CLOUDINARY_CLOUD_NAME
+      }
+    });
+
+  } catch (error) {
+    console.error("Error generating upload image signature:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message
+    });
+  }
 };

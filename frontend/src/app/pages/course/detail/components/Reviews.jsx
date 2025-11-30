@@ -229,7 +229,7 @@ const Reviews = () => {
 
       {/* Optional: thông báo cho guest / chưa enroll */}
       {!isEnrolled && (
-        <p className="text-muted mt-3">
+        <p className="text-muted text-center mt-4">
           Only students who enrolled in this course can leave a review.
         </p>
       )}
@@ -242,7 +242,7 @@ const Reviews = () => {
           return (
             <Fragment key={idx}>
               <div className="d-md-flex my-4">
-                <div className="avatar avatar-xl me-4 flex-shrink-0">
+                <div className="avatar avatar-md me-4 flex-shrink-0">
                   <img
                     className="avatar-img rounded-circle"
                     src={review.avatar}

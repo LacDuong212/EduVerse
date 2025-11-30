@@ -1,28 +1,29 @@
-import express from 'express';
-import cors from 'cors';
 import 'dotenv/config';
+import express from 'express';
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
 
 import { startAllTasks } from './utils/scheduler.js';
 import "./services/CronTasks.js";
 
 import connectDB from './configs/mongodb.js';
 import authRoute from './routes/authRoutes.js';
-import adminRoute from './routes/adminRoutes.js';
-import userRoute from './routes/userRoutes.js';
-import courseRoute from './routes/courseRoutes.js';
 import cartRoute from './routes/cartRoutes.js';
-import wishlistRoutes from "./routes/wishlistRoutes.js";
+import categoryRoute from './routes/categoryRoutes.js';
+import chatbotRoute from './routes/chatbotRoutes.js';
+import courseRoute from './routes/courseRoutes.js';
+import instructorRoute from './routes/instructorRoutes.js';
 import orderRoute from './routes/orderRoutes.js';
 import paymentRoute from './routes/paymentRoutes.js';
 import reviewRoute from './routes/reviewRoutes.js';
-import chatbotRoute from './routes/chatbotRoutes.js';
-import instructorRoute from './routes/instructorRoutes.js';
 import studentRoute from "./routes/studentRoute.js";
+import userRoute from './routes/userRoutes.js';
+import wishlistRoutes from "./routes/wishlistRoutes.js";
 
 import session from 'express-session';
 import passport from 'passport';
 import configurePassport from './configs/passport.js';
+
 
 //Initialize Express
 const app = express();
@@ -54,11 +55,11 @@ app.use(passport.session());
 // API Endpoints
 app.get('/', (req, res) => res.send("API is running"));
 app.use('/api/auth', authRoute);
-app.use('/api/admin', adminRoute);
 app.use("/api/student", studentRoute);
 app.use('/api/user', userRoute);
 app.use('/api', instructorRoute);
 app.use('/api/courses', courseRoute);
+app.use('/api/category', categoryRoute);
 app.use('/api/cart', cartRoute);
 app.use("/api/wishlist", wishlistRoutes);
 app.use('/api/orders', orderRoute);

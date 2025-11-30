@@ -1,6 +1,6 @@
 import patternImg from '@/assets/images/pattern/04.png';
 
-import { Card, Col, Container, Row } from 'react-bootstrap';
+import { Card, Col, Container, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { BsPatchCheckFill } from 'react-icons/bs';
 import { FaBook, FaSlidersH, FaStar, FaUserGraduate } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
@@ -43,22 +43,37 @@ const Banner = ({
                 </Col>
                 <Col className="d-md-flex justify-content-between align-items-center mt-4">
                   <div>
-                    <h1 className="my-1 fs-4">
+                    <h1 className="fs-4 d-flex align-items-center gap-2">
                       {accountData?.name} <BsPatchCheckFill className="text-info small" />
                     </h1>
                     <ul className="list-inline mb-0">
-                      <li className="list-inline-item h6 fw-light me-3 mb-1 mb-sm-0">
-                        <FaStar className="text-warning me-2" />
-                        {accountData?.averageRating}
-                      </li>
-                      <li className="list-inline-item h6 fw-light me-3 mb-1 mb-sm-0">
-                        <FaUserGraduate className="text-orange me-2" />
-                        {accountData?.totalStudents}
-                      </li>
-                      <li className="list-inline-item h6 fw-light me-3 mb-1 mb-sm-0">
-                        <FaBook className="text-purple me-2" />
-                        {accountData?.totalCourses}
-                      </li>
+                      <OverlayTrigger
+                        placement="bottom"
+                        overlay={<Tooltip id="tip">Average Rating</Tooltip>}
+                      >
+                        <li className="list-inline-item h6 fw-light me-3 mb-1 mb-sm-0">
+                          <FaStar className="text-warning mb-1 me-1" />
+                          {parseFloat(accountData?.averageRating).toFixed(1)}
+                        </li>
+                      </OverlayTrigger>
+                      <OverlayTrigger
+                        placement="bottom"
+                        overlay={<Tooltip id="tip">Courses Owned</Tooltip>}
+                      >
+                        <li className="list-inline-item h6 fw-light me-3 mb-1 mb-sm-0">
+                          <FaBook className="text-orange mb-1 me-1" />
+                          {accountData?.totalCourses}
+                        </li>
+                      </OverlayTrigger>
+                      <OverlayTrigger
+                        placement="bottom"
+                        overlay={<Tooltip id="tip">Students Enrolled</Tooltip>}
+                      >
+                        <li className="list-inline-item h6 fw-light me-3 mb-1 mb-sm-0">
+                          <FaUserGraduate className="text-success mb-1 me-1" />
+                          {accountData?.totalStudents}
+                        </li>
+                      </OverlayTrigger>
                     </ul>
                   </div>
                   <div className="d-flex align-items-center mt-2 mt-md-0">
