@@ -131,8 +131,6 @@ const CreateCourseForm = () => {
 
   // submit handler
   const handleSubmitCourse = async () => {
-    console.log('Submitting final draft...', courseDraft);
-
     if (isSubmitting) return; // prevent double-submit
 
     // validation

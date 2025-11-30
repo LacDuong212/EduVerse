@@ -44,7 +44,6 @@ const EditCourseForm = () => {
         // check for an existing draft
         const storedDraft = sessionStorage.getItem(DYNAMIC_DRAFT_KEY);
         if (storedDraft && hasMeaningfulDraftData(JSON.parse(storedDraft))) {
-          console.log('Restoring draft from sessionStorage...');
           setCourseDraft(JSON.parse(storedDraft));
         } else {
           // if no draft, fetch instead
@@ -170,8 +169,6 @@ const EditCourseForm = () => {
 
   // submit handler
   const handleSubmitCourse = async () => {
-    console.log('Submitting final draft...', courseDraft);
-
     if (isSubmitting) return; // prevent double-submit
 
     // validation
