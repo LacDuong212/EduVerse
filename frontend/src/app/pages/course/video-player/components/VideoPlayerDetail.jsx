@@ -1,28 +1,42 @@
 // app/pages/course/video-player/components/VideoPlayerDetail.jsx
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import useToggle from "@/hooks/useToggle";
 import { Collapse, Row, Spinner } from "react-bootstrap";
 import Plyr from "plyr-react";
-import { useVideoStream } from '@/hooks/useStreamUrl';
-
+import { useVideoStream } from "@/hooks/useStreamUrl";
+import useLectureTracking from "@/hooks/useLearningProgress";
 import "plyr-react/plyr.css";
+
 import Playlist from "./Playlist";
 import { toPlyrSource, parseYouTubeId } from "@/utils/plyrSource";
-export default function VideoPlayerDetail({ course, loading, error, courseId, lectureId }) {
-  // UI toggle giống template
+
+export default function VideoPlayerDetail({
+  course,
+  loading,
+  error,
+  courseId,
+  lectureId,
+}) {
   const { isTrue: isOpen, toggle } = useToggle(true);
   const navigate = useNavigate();
 
-  // Chuẩn hóa dữ liệu lectures
+  // 🎯 ref tới container bao quanh Plyr
+  const playerContainerRef = useRef(null);
+
+  // ----- Chuẩn hóa lectures -----
   const lectures = useMemo(
-    () => (course?.curriculum ? course.curriculum.flatMap((s) => s.lectures || []) : []),
+    () =>
+      course?.curriculum
+        ? course.curriculum.flatMap((s) => s.lectures || [])
+        : [],
     [course]
   );
 
-  // Chọn bài hiện tại (ưu tiên lectureId → free → preview)
+  // ----- Chọn lecture hiện tại -----
   const current = useMemo(() => {
     if (!course) return null;
+
     return (
       lectures.find((l) => l._id === lectureId) ||
       lectures.find((l) => l.isFree) ||
@@ -32,40 +46,34 @@ export default function VideoPlayerDetail({ course, loading, error, courseId, le
             title: course.title,
             videoUrl: course.previewVideo,
             isFree: true,
+            duration: course.duration, // optional
           }
         : null)
     );
   }, [course, lectures, lectureId]);
 
-  // video source gốc (key S3 hoặc URL youtube, v.v.)
   const rawVideoSource = current?.videoUrl || null;
 
-  // 🔥 Dùng hook stream URL
-  // - Nếu rawVideoSource là URL http(s) → hook trả lại chính URL đó (không gọi backend)
-  // - Nếu là key kiểu "videos/....mp4" → hook gọi backend → streamUrl là S3 signed URL
+  // ----- Lấy stream URL -----
   const {
     streamUrl,
     loading: streamLoading,
     error: streamError,
   } = useVideoStream(courseId, rawVideoSource);
 
-  // Xác định provider để fingerprint chắc chắn
+  // ----- Provider -----
   const provider = useMemo(() => {
     const urlForDetect = streamUrl || rawVideoSource;
     const yt = urlForDetect ? parseYouTubeId(urlForDetect) : null;
     return yt ? "yt" : "html5";
   }, [streamUrl, rawVideoSource]);
 
-  // Nguồn phát Plyr (YouTube/mp4) dựa trên URL cuối cùng
+  // ----- Source cho Plyr -----
   const source = useMemo(() => {
     if (!current || !course) return null;
 
-    // với YouTube: dùng URL (streamUrl hoặc raw) → parseYouTubeId sẽ xử lý được
-    // với HTML5: bắt buộc phải có streamUrl (URL S3 signed)
     const effectiveUrl =
-      provider === "yt"
-        ? streamUrl || rawVideoSource
-        : streamUrl;
+      provider === "yt" ? streamUrl || rawVideoSource : streamUrl;
 
     if (!effectiveUrl) return null;
 
@@ -76,7 +84,7 @@ export default function VideoPlayerDetail({ course, loading, error, courseId, le
     );
   }, [current, course, provider, streamUrl, rawVideoSource]);
 
-  // Fingerprint cho key => ép Plyr remount “đủ sâu” mỗi khi đổi bài/nguồn
+  // ----- Key để ép Plyr remount khi đổi lecture/source -----
   const playerKey = useMemo(() => {
     const baseUrl =
       provider === "yt"
@@ -93,22 +101,114 @@ export default function VideoPlayerDetail({ course, loading, error, courseId, le
     ].join("|");
   }, [courseId, current?._id, provider, streamUrl, rawVideoSource]);
 
-  // Log hỗ trợ debug (tắt nếu muốn)
+  // ====== 🔥 Tracking hook ======
+  const lectureDurationSec =
+    typeof current?.duration === "number" ? current.duration : undefined;
+
+  const {
+    reportTimeUpdate,
+    reportCompleted,
+    resetTracking,
+  } = useLectureTracking({
+    courseId,
+    lectureId: current?._id,
+    durationSec: lectureDurationSec,
+  });
+
+  // Reset khi đổi lecture
   useEffect(() => {
-    if (current) {
-      // eslint-disable-next-line no-console
-      console.log({
-        from: "VideoPlayerDetail",
-        params: { courseId, lectureId },
-        lecturesLen: lectures.length,
-        current,
-        provider,
-        rawVideoSource,
-        stream: { streamUrl, streamLoading, streamError },
-        source,
-        playerKey,
+    if (!current?._id) return;
+    resetTracking();
+    console.log("[useLectureTracking] resetTracking for", {
+      courseId,
+      lectureId: current._id,
+    });
+  }, [courseId, current?._id, resetTracking]);
+
+  // ====== 🎯 Gắn listener trực tiếp lên <video> bên trong Plyr ======
+  useEffect(() => {
+    // nếu chưa có lecture hoặc chưa có source thì thôi
+    if (!current?._id || !source) {
+      console.log("[VideoPlayerDetail] SKIP attach: no current or source", {
+        lectureId: current?._id,
+        hasSource: !!source,
       });
+      return;
     }
+
+    const container = playerContainerRef.current;
+    if (!container) {
+      console.log("[VideoPlayerDetail] ❌ No container for tracking", {
+        lectureId: current?._id,
+      });
+      return;
+    }
+
+    const videoEl = container.querySelector("video");
+
+    if (!videoEl) {
+      console.log("[VideoPlayerDetail] ❌ No <video> element found", {
+        lectureId: current?._id,
+      });
+      return;
+    }
+
+    console.log("[VideoPlayerDetail] ✅ Attach native video events", {
+      lectureId: current?._id,
+      readyState: videoEl.readyState,
+    });
+
+    const handleTime = () => {
+      const t = videoEl.currentTime || 0;
+      const dur = videoEl.duration || 0;
+
+      console.log(
+        "%c[video timeupdate]",
+        "color: #4ea1ff; font-weight: bold;",
+        { time: t, duration: dur, lectureId: current?._id }
+      );
+
+      reportTimeUpdate(t);
+    };
+
+    const handleEnded = () => {
+      const durationFromPlayer = videoEl.duration || 0;
+      const t = videoEl.currentTime || durationFromPlayer || 0;
+
+      console.log(
+        "%c[video ended]",
+        "color: #ff6f61; font-weight: bold;",
+        { finalTime: t, durationFromPlayer, lectureId: current?._id }
+      );
+
+      reportCompleted(t, durationFromPlayer);
+    };
+
+    videoEl.addEventListener("timeupdate", handleTime);
+    videoEl.addEventListener("ended", handleEnded);
+
+    return () => {
+      videoEl.removeEventListener("timeupdate", handleTime);
+      videoEl.removeEventListener("ended", handleEnded);
+      console.log("[VideoPlayerDetail] 🔁 Detach video events", {
+        lectureId: current?._id,
+      });
+    };
+  }, [reportTimeUpdate, reportCompleted, current?._id, playerKey, source]);
+
+  // ====== Debug tổng thể ======
+  useEffect(() => {
+    if (!current) return;
+    console.log("[VideoPlayerDetail] debug", {
+      params: { courseId, lectureId },
+      lecturesLen: lectures.length,
+      current,
+      provider,
+      rawVideoSource,
+      stream: { streamUrl, streamLoading, streamError },
+      source,
+      playerKey,
+    });
   }, [
     courseId,
     lectureId,
@@ -123,13 +223,13 @@ export default function VideoPlayerDetail({ course, loading, error, courseId, le
     playerKey,
   ]);
 
-  // UI trạng thái (giữ đúng layout full-screen)
+  // ====== Overlay trạng thái ======
   const overlayStatus =
-    loading || streamLoading ? ( // 🔥 thêm loading video từ hook
+    loading || streamLoading ? (
       <div className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
         <Spinner animation="border" variant="light" />
       </div>
-    ) : error || streamError ? ( // 🔥 merge error course + error video
+    ) : error || streamError ? (
       <div className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center text-danger">
         {String(error || streamError)}
       </div>
@@ -149,11 +249,14 @@ export default function VideoPlayerDetail({ course, loading, error, courseId, le
         <div className="d-flex w-100">
           {/* LEFT: Player */}
           <div className="overflow-hidden fullscreen-video w-100 position-relative">
-            <div className="video-player rounded-3">
-              {/* Tracks (caption) nếu có, có thể nối thêm vào source */}
+            {/* 👇 Container có ref để query <video> */}
+            <div
+              className="video-player rounded-3"
+              ref={playerContainerRef}
+            >
               {source && (
                 <Plyr
-                  key={playerKey} // 👈 Key đổi theo fingerprint (lecture + provider + url/id)
+                  key={playerKey}
                   playsInline
                   crossOrigin="anonymous"
                   controls
@@ -164,7 +267,7 @@ export default function VideoPlayerDetail({ course, loading, error, courseId, le
             {overlayStatus}
           </div>
 
-          {/* RIGHT: Sidebar toggle + collapse */}
+          {/* RIGHT: Sidebar + playlist */}
           <div className="justify-content-end position-relative">
             <button
               onClick={toggle}
@@ -179,7 +282,11 @@ export default function VideoPlayerDetail({ course, loading, error, courseId, le
               </span>
             </button>
 
-            <Collapse className="collapse-horizontal" in={isOpen} dimension="width">
+            <Collapse
+              className="collapse-horizontal"
+              in={isOpen}
+              dimension="width"
+            >
               <div>
                 <Playlist
                   course={course}

@@ -366,8 +366,10 @@ const Reviews = () => {
                       </div>
                     </div>
                   ) : 
+                  
                   (
                     <>
+                      <p className="mb-2">{review.description}</p>
                       {/* <p className="mb-2">{review.description}</p>
                       <div
                         className="btn-group"
