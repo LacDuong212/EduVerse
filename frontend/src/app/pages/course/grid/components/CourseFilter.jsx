@@ -27,8 +27,7 @@ const CourseFilter = ({
       try {
         const res = await axios.get(`${backendUrl}/api/courses/filters`);
         if (res.data.categories) {
-          const categoryList = res.data.categories.map(name => ({ name }));
-          setAllCategories(categoryList);
+          setAllCategories(res.data.categories);
         }
         if (res.data.languages) {
           setAllLanguages(res.data.languages);
@@ -51,9 +50,9 @@ const CourseFilter = ({
 
   const isAll = !category;
   const handleSelectAll = () => setCategory('');
-  const handleSelectCat = (name) => {
-    if (category === name) setCategory('');
-    else setCategory(name);
+  const handleSelectCat = (id) => {
+    if (category === id) setCategory('');
+    else setCategory(id);
   };
 
   return (
@@ -80,16 +79,16 @@ const CourseFilter = ({
 
           {/* Primary categories */}
           {primaryCats.map((c, idx) => (
-            <div key={c.name + idx} className="d-flex justify-content-between align-items-center">
+            <div key={c._id || idx} className="d-flex justify-content-between align-items-center">
               <div className="form-check">
                 <input
                   className="form-check-input"
                   type="checkbox"
-                  id={`cat-${idx}`}
-                  checked={category === c.name}
-                  onChange={() => handleSelectCat(c.name)}
+                  id={`cat-${c._id}`}
+                  checked={category === c._id}
+                  onChange={() => handleSelectCat(c._id)}
                 />
-                <label className="form-check-label" htmlFor={`cat-${idx}`}>
+                <label className="form-check-label" htmlFor={`cat-${c._id}`}>
                   {c.name}
                 </label>
               </div>
@@ -103,16 +102,16 @@ const CourseFilter = ({
                 <div>
                   <Card className="card-body p-0">
                     {moreCats.map((c, i) => (
-                      <div key={c.name + i} className="d-flex justify-content-between align-items-center">
+                      <div key={c._id || i} className="d-flex justify-content-between align-items-center">
                         <div className="form-check">
                           <input
                             className="form-check-input"
                             type="checkbox"
-                            id={`cat-more-${i}`}
-                            checked={category === c.name}
-                            onChange={() => handleSelectCat(c.name)}
+                            id={`cat-more-${c._id}`}
+                            checked={category === c._id}
+                            onChange={() => handleSelectCat(c._id)}
                           />
-                          <label className="form-check-label" htmlFor={`cat-more-${i}`}>
+                          <label className="form-check-label" htmlFor={`cat-more-${c._id}`}>
                             {c.name}
                           </label>
                         </div>

@@ -1,6 +1,6 @@
 import axios from "axios";
 import { blogsData, courseResumeData, eventScheduleData, playListData, pricingPlans, studentReviewData, testimonialData, userReviewData } from '@/assets/data/other';
-import { booksData, collegesData, courseCategories, coursesData, eventsData, instructorsData } from '@/assets/data/products';
+import { booksData, collegesData, coursesData, eventsData, instructorsData } from '@/assets/data/products';
 import { sleep } from '@/utils/promise';
 
 
@@ -34,10 +34,6 @@ export const getProductById = async id => {
 export const getAllEventSchedule = async () => {
   await sleep();
   return eventScheduleData;
-};
-export const getAllCategories = async () => {
-  await sleep();
-  return courseCategories;
 };
 export const getAllUserReviews = async () => {
   await sleep();
@@ -101,5 +97,15 @@ export const updateCourseStatus = async ({ id, status }) => {
   } catch (error) {
     console.error("Update status failed: ", error);
     return { success: false, message: error.message };
+  }
+};
+
+export const getAllCategories = async () => {
+  try {
+    const response = await axios.get(`${backendUrl}/api/category`); 
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return null;
   }
 };

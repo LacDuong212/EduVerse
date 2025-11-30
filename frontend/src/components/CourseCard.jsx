@@ -8,6 +8,8 @@ import { toast } from 'react-toastify';
 import { useDispatch, useSelector } from 'react-redux';
 import { addToWishlist, removeFromWishlist } from '@/redux/wishlistSlice';
 
+const DEFAULT_COURSE_IMG = "https://res.cloudinary.com/dw1fjzfom/image/upload/v1764427835/course_default_image_pwqnyo.jpg";
+
 const clamp = (n, min, max) => Math.max(min, Math.min(max, n ?? 0));
 
 const CourseCard = ({ course }) => {
@@ -22,11 +24,16 @@ const CourseCard = ({ course }) => {
 
   const currentCourseId = course._id || course.courseId;
 
-const isWishlisted = wishlistItems.some((item) => {
+  const isWishlisted = wishlistItems.some((item) => {
     const itemCourseId = item.courseId?._id || item.courseId;
-    
+
     return itemCourseId?.toString() === currentCourseId?.toString();
-});
+  });
+
+  const handleImageError = (e) => {
+    e.target.onerror = null;
+    e.target.src = DEFAULT_COURSE_IMG;
+  };
 
   const handleWishlistToggle = async (e) => {
     e.preventDefault();
@@ -38,24 +45,24 @@ const isWishlisted = wishlistItems.some((item) => {
     }
 
     if (!currentCourseId) {
-       toast.error("Error: Course ID missing");
-       return;
+      toast.error("Error: Course ID missing");
+      return;
     }
 
     try {
       if (isWishlisted) {
-        await dispatch(removeFromWishlist({ 
-            userId: userData._id, 
-            courseId: currentCourseId 
+        await dispatch(removeFromWishlist({
+          userId: userData._id,
+          courseId: currentCourseId
         })).unwrap();
-        
+
         toast.success("Removed from wishlist");
       } else {
         const coursePayload = { ...course, _id: currentCourseId };
-        
-        await dispatch(addToWishlist({ 
-            userId: userData._id, 
-            course: coursePayload 
+
+        await dispatch(addToWishlist({
+          userId: userData._id,
+          course: coursePayload
         })).unwrap();
 
         toast.success("Added to wishlist");
@@ -69,7 +76,7 @@ const isWishlisted = wishlistItems.some((item) => {
   const image =
     course.image ||
     course.thumbnail ||
-    'https://res.cloudinary.com/dw1fjzfom/image/upload/v1757337425/av4_khpvlh.png';
+    DEFAULT_COURSE_IMG;
 
   const title = course.title || course.name || 'Untitled';
 
@@ -109,7 +116,7 @@ const isWishlisted = wishlistItems.some((item) => {
   const badge =
     course.badge || {
       class: 'bg-primary',
-      text: course.level || course.category || 'Course',
+      text: course.level || course.category?.name || 'Course',
     };
 
   return (
@@ -120,7 +127,19 @@ const isWishlisted = wishlistItems.some((item) => {
         <div className="ribbon"><span>-{discountPercent}%</span></div>
       ) : null}
 
-      <img src={image} className="card-img-top" alt={title} style={{objectFit: 'cover', height: '200px'}} />
+      <img 
+        src={image} 
+        className="card-img-top" 
+        alt={title} 
+        onError={handleImageError}
+        onClick={() => navigate(`/courses/${currentCourseId}`)}
+        style={{
+            objectFit: 'cover', 
+            height: '240px',
+            width: '100%',
+            cursor: 'pointer'
+        }} 
+      />
 
       <CardBody className="d-flex flex-column pb-0">
         <div className="flex-grow-1">
@@ -160,14 +179,14 @@ const isWishlisted = wishlistItems.some((item) => {
         </div>
 
         <div className="mt-auto d-flex justify-content-end align-items-end">
-          {isFree ? <h5 className="text-success mb-0">Free</h5> : 
-               hasDiscount ? (
-                 <div>
-                    <small className="text-muted text-decoration-line-through me-2">{formatCurrency(price)}</small>
-                    <h5 className="text-success mb-0">{formatCurrency(discountPrice)}</h5>
-                 </div>
-               ) : <h5 className="text-success mb-0">{formatCurrency(price)}</h5>
-             }
+          {isFree ? <h5 className="text-success mb-0">Free</h5> :
+            hasDiscount ? (
+              <div>
+                <small className="text-muted text-decoration-line-through me-2">{formatCurrency(price)}</small>
+                <h5 className="text-success mb-0">{formatCurrency(discountPrice)}</h5>
+              </div>
+            ) : <h5 className="text-success mb-0">{formatCurrency(price)}</h5>
+          }
         </div>
       </CardBody>
 

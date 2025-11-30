@@ -44,11 +44,10 @@ import {
 } from 'react-icons/fa';
 import courseImg18 from '@/assets/images/courses/4by3/18.jpg';
 import courseImg21 from '@/assets/images/courses/4by3/21.jpg';
-import { useState } from 'react'; // 🔹 chỉ còn useState
+import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
 const PricingCard = ({ course, owned, onShowCurriculum, onAddToCart, courseId }) => {
-  // 🔹 gọi hook của bạn
   const { streamUrl, loading: videoLoading, error: videoError } = useVideoStream(
     courseId,
     course?.previewVideo
@@ -74,7 +73,6 @@ const PricingCard = ({ course, owned, onShowCurriculum, onAddToCart, courseId })
     return url;
   };
 
-  // 🔹 ưu tiên dùng streamUrl từ hook, fallback về previewVideo cũ (giữ nguyên behavior trước đây)
   const previewHref = getEmbedUrl(streamUrl || course?.previewVideo);
 
   return (
@@ -87,9 +85,9 @@ const PricingCard = ({ course, owned, onShowCurriculum, onAddToCart, courseId })
             <GlightBox
               href={previewHref}
               className="btn btn-lg text-danger btn-round btn-white-shadow mb-0"
-              data-glightbox="type: video"   // 👈 EP TYPE Ở ĐÂY
+              data-glightbox="type: video"
               data-gallery="course-video"
-              data-type="video"              // 👈 NẾU WRAPPER CỦA BẠN FORWARD ATTR NÀY
+              data-type="video"
             >
               <FaPlay />
             </GlightBox>
@@ -98,7 +96,6 @@ const PricingCard = ({ course, owned, onShowCurriculum, onAddToCart, courseId })
       </div>
 
       <CardBody className="px-3">
-        {/* phần dưới giữ nguyên y chang code của bạn */}
         <div className="d-flex justify-content-between align-items-center">
           <div>
             <div className="d-flex align-items-center">
@@ -240,7 +237,6 @@ const PopularTags = () => {
   );
 };
 
-// 🔹 nhận thêm owned + onAddToCart từ page
 const CourseDetails = ({ course, owned, onAddToCart }) => {
   const [activeKey, setActiveKey] = useState('overview'); // tab mặc định
 
@@ -310,7 +306,7 @@ const CourseDetails = ({ course, owned, onAddToCart }) => {
                         Instructor
                       </NavLink>
                     </NavItem>
-                    <NavItem className="me-2 me-sm-4" role="presentation">
+                    {/* <NavItem className="me-2 me-sm-4" role="presentation">
                       <NavLink
                         as="button"
                         eventKey="reviews"
@@ -342,7 +338,7 @@ const CourseDetails = ({ course, owned, onAddToCart }) => {
                       >
                         Comment
                       </NavLink>
-                    </NavItem>
+                    </NavItem> */}
                   </Nav>
                 </CardHeader>
                 <CardBody className="p-4">
@@ -351,7 +347,6 @@ const CourseDetails = ({ course, owned, onAddToCart }) => {
                       <Overview />
                     </TabPane>
 
-                    {/* ⚠ Tab Curriculum vẫn render bình thường  */}
                     <TabPane
                       eventKey="curriculum"
                       className="fade"
@@ -371,7 +366,7 @@ const CourseDetails = ({ course, owned, onAddToCart }) => {
                     >
                       <Instructor instructor={course?.instructor} />
                     </TabPane>
-                    <TabPane
+                    {/* <TabPane
                       eventKey="reviews"
                       className="fade"
                       role="tabpanel"
@@ -383,7 +378,7 @@ const CourseDetails = ({ course, owned, onAddToCart }) => {
                     </TabPane>
                     <TabPane eventKey="comment" className="fade" role="tabpanel">
                       <Comment />
-                    </TabPane>
+                    </TabPane> */}
                   </TabContent>
                 </CardBody>
               </TabContainer>
@@ -392,11 +387,10 @@ const CourseDetails = ({ course, owned, onAddToCart }) => {
           <Col lg={4} className="pt-5 pt-lg-0">
             <Row className="mb-5 mb-lg-0">
               <Col md={6} lg={12}>
-                {/* ✅ Free trial: nếu đã mua thì chuyển sang trang học, chưa mua thì chỉ bật tab curriculum */}
                 <PricingCard
                   course={course}
                   owned={owned}
-                  courseId={course?._id || id}   // 🔹 thêm dòng này
+                  courseId={course?._id || id}
                   onShowCurriculum={() => {
                     if (owned) {
                       const courseId = course?._id || id;
@@ -439,20 +433,20 @@ const CourseDetails = ({ course, owned, onAddToCart }) => {
                       </span>
                       <span>{course?.language}</span>
                     </li>
-                    <li className="list-group-item d-flex justify-content-between align-items-center">
+                    {/* <li className="list-group-item d-flex justify-content-between align-items-center">
                       <span className="h6 fw-light mb-0">
                         <FaMedal className="fa-fw text-primary me-1" />
                         Certificate
                       </span>
                       <span>Yes</span>
-                    </li>
+                    </li> */}
                   </ul>
                 </Card>
               </Col>
-              <Col md={6} lg={12}>
+              {/* <Col md={6} lg={12}>
                 <RecentlyViewed />
                 <PopularTags />
-              </Col>
+              </Col> */}
             </Row>
           </Col>
         </Row>
