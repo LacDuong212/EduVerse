@@ -6,23 +6,26 @@ import {
   FaStarHalfAlt,
   FaUserGraduate,
 } from "react-icons/fa";
+import { useNavigate, useParams } from "react-router-dom";
 
 // giống helper trong CourseCard
 const clamp = (n, min, max) => Math.max(min, Math.min(max, n ?? 0));
 
 const Intro = ({ course, progress }) => {
+  const navigate = useNavigate();
+  const { courseId } = useParams(); // /student/courses/:courseId
+
   // ------- Fallback dữ liệu từ course -------
   const title = course?.title || "Course title";
   const description =
-    course?.subtitle ||
-    "This course does not have a description yet.";
+    course?.subtitle || "This course does not have a description yet.";
 
   const instructorName = course?.instructor?.name || "Unknown instructor";
 
   // ⭐️ rating: dùng chung style với CourseCard
   const rawStar =
     typeof course?.rating === "object"
-      ? (course?.rating?.average ?? course?.rating?.star)
+      ? course?.rating?.average ?? course?.rating?.star
       : course?.rating;
 
   const starNum = Number(rawStar);
@@ -39,17 +42,34 @@ const Intro = ({ course, progress }) => {
   const language = course?.language || "Unknown language";
   const studentsEnrolled = Number(course?.studentsEnrolled ?? 0);
 
-  // ------- Progress (nếu có) -------
+  // ------- Progress theo số lecture completed -------
+  // Backend: totalLectures, completedLecturesCount
   const totalLessons =
-    progress?.totalLessons ??
-    course?.lecturesCount ??
-    0;
-  const completedLessons = progress?.completedLessons ?? 0;
+    progress?.totalLectures ?? course?.lecturesCount ?? 0;
+  const completedLessons = progress?.completedLecturesCount ?? 0;
 
   const progressPercent =
     totalLessons > 0
       ? Math.round((completedLessons / totalLessons) * 100)
       : 0;
+
+  // LECTURE đang học gần nhất (từ progress)
+  const lastLectureId = progress?.lastLectureId;
+
+  // Fallback: nếu không có lastLectureId, lấy lecture đầu tiên của course (nếu muốn)
+  const firstLectureId =
+    course?.curriculum?.[0]?.lectures?.[0]?._id || null;
+
+  const handleContinueLearning = () => {
+    if (!courseId) return;
+
+    const targetLectureId = lastLectureId || firstLectureId;
+    if (!targetLectureId) return;
+
+    navigate(`/courses/${courseId}/watch/${targetLectureId}`);
+  };
+
+  const disabledContinue = !courseId && !lastLectureId && !firstLectureId;
 
   return (
     <section className="bg-blue py-7">
@@ -116,7 +136,12 @@ const Intro = ({ course, progress }) => {
               {studentsEnrolled.toLocaleString()} already enrolled
             </h6>
 
-            <button type="button" className="btn btn-warning mb-3 w-100">
+            <button
+              type="button"
+              className="btn btn-warning mb-3 w-100"
+              onClick={handleContinueLearning}
+              disabled={disabledContinue}
+            >
               Continue learning
             </button>
 
