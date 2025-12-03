@@ -11,15 +11,25 @@ export default function useInstructorDashboard() {
         { withCredentials: true }
       );
 
-      if (data?.success) return data;
+      if (data?.success) return {
+        earningsData: data?.earningsData || [],
+        topCoursesData: data?.topCoursesData || [],
+      };
 
       toast.error('Failed to fetch dashboard data');
 
-      return null;
+      return {
+        earningsData: [],
+        topCoursesData: [],
+      };
     } catch (error) {
       console.error(error);
       toast.error('Failed to fetch dashboard data');
-      return null;
+      
+      return {
+        earningsData: [],
+        topCoursesData: [],
+      };
     }
   };
 

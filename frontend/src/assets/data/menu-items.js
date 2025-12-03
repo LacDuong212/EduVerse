@@ -1,5 +1,7 @@
-import { BsBasket, BsBook, BsCardChecklist, BsCreditCard2Front, BsGear, BsInfoCircle, BsPeople, BsPerson, BsUiChecksGrid, BsWallet2 } from 'react-icons/bs';
+import { BsBasket, BsBook, BsCardChecklist, BsCreditCard2Front, BsGear, BsInfoCircle, BsPerson, BsUiChecksGrid } from 'react-icons/bs';
+import { IoWalletOutline } from 'react-icons/io5'
 import { MdDoNotDisturb } from 'react-icons/md';
+import { PiStudent } from 'react-icons/pi';
 import { RiBook2Line } from 'react-icons/ri';
 
 //--GUEST
@@ -19,6 +21,11 @@ export const INSTRUCTOR_ACCOUNT_DROPDOWN_ITEMS = [{
   label: 'My Account',
   icon: BsPerson,
   url: '/instructor/account'
+}, {
+  key: 'earnings',
+  label: 'Earnings',
+  icon: IoWalletOutline,
+  url: '/instructor/earnings'
 }, {
   key: 'settings',
   label: 'Settings',
@@ -64,14 +71,14 @@ export const INSTRUCTOR_MENU_ITEMS = [{
 }, {
   key: 'students',
   label: 'Students',
-  icon: BsPeople,
+  icon: PiStudent,
   url: '/instructor/students',
   parentKey: 'instructor'
 }, {
-  key: 'balance',
-  label: 'Balance',
-  icon: BsWallet2,
-  url: '/instructor/balance',
+  key: 'earnings',
+  label: 'Earnings',
+  icon: IoWalletOutline,
+  url: '/instructor/earnings',
   parentKey: 'instructor'
 }, {
   key: 'settings',

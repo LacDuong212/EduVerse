@@ -342,7 +342,7 @@ const CourseDetails = ({ course, owned, onAddToCart }) => {
                   </Nav>
                 </CardHeader>
                 <CardBody className="p-4">
-                  <TabContent className="pt-2" id="course-pills-tabContent">
+                  <TabContent id="course-pills-tabContent">
                     <TabPane eventKey="overview" className="fade" role="tabpanel">
                       <Overview />
                     </TabPane>

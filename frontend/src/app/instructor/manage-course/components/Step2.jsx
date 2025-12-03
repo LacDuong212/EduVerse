@@ -345,7 +345,7 @@ const Step2 = ({ stepperInstance, draftData, onSave }) => {
                       />
                       <p className="small mb-0 mt-2">
                         <b>Note:</b> Only JPG, JPEG and PNG. Suggested size
-                        600×450px.
+                        600×450px. Maxium file size is 10MB.
                       </p>
                     </div>
                   )}
@@ -375,7 +375,7 @@ const Step2 = ({ stepperInstance, draftData, onSave }) => {
               <div className="d-sm-flex justify-content-center mt-2">
                 <button
                   type="button"
-                  className="btn btn-sm btn-danger-soft mb-3"
+                  className="btn btn-sm btn-danger-soft"
                   onClick={handleRemoveCourseImage}
                 >
                   Remove
@@ -393,7 +393,7 @@ const Step2 = ({ stepperInstance, draftData, onSave }) => {
               />
             </div>
           )}
-        {imageUploadError && <Alert variant="danger">Upload course image failed</Alert>}
+        {imageUploadError && <Alert className="mt-2 mb-0" variant="danger">Upload course image failed</Alert>}
         </Col>
 
         {/* --- VIDEO SECTION --- */}

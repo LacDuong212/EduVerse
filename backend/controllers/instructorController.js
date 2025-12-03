@@ -4,9 +4,12 @@ import Instructor from "../models/instructorModel.js";
 import Order from "../models/orderModel.js";
 import userModel from "../models/userModel.js";
 import Review from "../models/reviewModel.js";
+
+import { generateUploadUrl } from "../utils/aws/putObject.js";
+
 import Fuse from "fuse.js";
 import mongoose from "mongoose";
-import { generateUploadUrl } from "../utils/aws/putObject.js";
+
 
 const fetchInstructorFields = async (filter, fields, allowedFields) => {
   const selectFields = fields
@@ -18,6 +21,172 @@ const fetchInstructorFields = async (filter, fields, allowedFields) => {
 
   return Instructor.findOne(filter).select(selectFields);
 };
+
+// helper: get course ids for an instructor
+const getInstructorCourseIds = async (userId) => {
+  const courses = await Course.find(
+    { "instructor.ref": userId, isDeleted: false },
+    '_id'
+  ).lean();
+
+  return courses.map(course => course._id);
+};
+
+// helper: get student ids for an instructor
+const getInstructorStudentIds = async (userId) => {
+  const courseIds = await getInstructorCourseIds(userId);
+  const orders = await Order.find(
+    {
+      status: 'completed',
+      "courses.course": { $in: courseIds }
+    },
+    'user'
+  ).lean();
+  const studentIdSet = new Set(orders.map(order => order.user.toString()));
+  return Array.from(studentIdSet).map(id => new mongoose.Types.ObjectId(id));
+}
+
+// helper: get date ranges and Mongo formats
+const getDateConfig = (period) => {
+  const now = new Date();
+  const start = new Date();
+
+  let mongoFormat = ""; // How Mongo formats the date string (grouping ID)
+  let unit = "";        // How we step through the loop (day, week, month, year)
+
+  switch (period) {
+    case 'day': // "Past 7 Days"
+      start.setDate(now.getDate() - 6); // Go back 6 days + today = 7 days
+      start.setHours(0, 0, 0, 0);
+      mongoFormat = "%Y-%m-%d"; // "2023-11-18"
+      unit = 'day';
+      break;
+
+    case 'week': // "Past 4 Weeks"
+      start.setDate(now.getDate() - 28); // Approx 4 weeks ago
+      start.setHours(0, 0, 0, 0);
+      // Group by Year and ISO Week number (e.g., "2023-46")
+      mongoFormat = "%Y-%V";
+      unit = 'week';
+      break;
+
+    case 'month': // "Past 12 Months"
+      start.setMonth(now.getMonth() - 11); // Go back 11 months + current = 12
+      start.setDate(1); // Start from 1st of that month
+      start.setHours(0, 0, 0, 0);
+      mongoFormat = "%Y-%m"; // "2023-11"
+      unit = 'month';
+      break;
+
+    case 'year': // "Past 4 Years"
+      start.setFullYear(now.getFullYear() - 3); // Go back 3 years + current = 4
+      start.setMonth(0, 1); // Start Jan 1st
+      start.setHours(0, 0, 0, 0);
+      mongoFormat = "%Y"; // "2023"
+      unit = 'year';
+      break;
+
+    default: // Default to 7 days
+      start.setDate(now.getDate() - 6);
+      mongoFormat = "%Y-%m-%d";
+      unit = 'day';
+  }
+
+  return { start, mongoFormat, unit };
+};
+
+// helper: fill in missing dates with 0
+const fillChartData = (mongoData, start, unit) => {
+  const results = [];
+  const current = new Date(start);
+  const now = new Date();
+
+  const dataMap = {};
+  if (Array.isArray(mongoData)) {
+    mongoData.forEach(item => {
+      dataMap[item._id.month] = item.totalEarnings || item.total || 0;
+    });
+  }
+
+  const pad = (num) => num.toString().padStart(2, '0');
+
+  while (current <= now || (unit === 'week' && current.getTime() < now.getTime() + 7 * 24 * 60 * 60 * 1000)) {
+    let label = "";
+    let shouldBreak = false;
+
+    if (unit === 'day') {
+      // Format: YYYY-MM-DD (Local Time)
+      const year = current.getFullYear();
+      const month = pad(current.getMonth() + 1);
+      const day = pad(current.getDate());
+      label = `${year}-${month}-${day}`;
+
+      results.push({ name: label, value: dataMap[label] || 0 });
+
+      // Tăng 1 ngày
+      current.setDate(current.getDate() + 1);
+    }
+
+    else if (unit === 'month') {
+      // Format: YYYY-MM (Local Time)
+      const year = current.getFullYear();
+      const month = pad(current.getMonth() + 1);
+      label = `${year}-${month}`;
+
+      results.push({ name: label, value: dataMap[label] || 0 });
+
+      // Tăng 1 tháng
+      current.setMonth(current.getMonth() + 1);
+    }
+
+    else if (unit === 'year') {
+      // Format: YYYY
+      label = current.getFullYear().toString();
+      results.push({ name: label, value: dataMap[label] || 0 });
+
+      // Tăng 1 năm
+      current.setFullYear(current.getFullYear() + 1);
+    }
+
+    else if (unit === 'week') {
+      // Logic tính tuần thủ công để khớp với Mongo %V
+      const year = current.getFullYear();
+      const oneJan = new Date(year, 0, 1);
+      const numberOfDays = Math.floor((current - oneJan) / (24 * 60 * 60 * 1000));
+      const weekNum = Math.ceil((current.getDay() + 1 + numberOfDays) / 7);
+      const weekString = pad(weekNum);
+
+      // Label khớp với Mongo: "2025-47"
+      label = `${year}-${weekString}`;
+
+      // Tìm trong map, nếu không có thử check label dạng "Week X" (tuỳ nhu cầu hiển thị)
+      // Ở đây ta ưu tiên key khớp với Mongo ID
+      const foundValue = dataMap[label] || 0;
+
+      // Hiển thị ra UI là "Week 47" cho đẹp
+      results.push({ name: `Week ${weekString}`, value: foundValue });
+
+      // Tăng 7 ngày
+      current.setDate(current.getDate() + 7);
+
+      // Logic break an toàn: Nếu ngày current mới đã vượt quá xa tương lai
+      if (current > new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)) {
+        shouldBreak = true;
+      }
+      // Limit cứng 4-5 tuần nếu cần thiết (như code cũ của bạn)
+      // if (results.length >= 5) shouldBreak = true;
+    }
+
+    // Check thoát vòng lặp thủ công nếu cần
+    if (shouldBreak) break;
+
+    // Safety check: Tránh vòng lặp vô tận nếu logic tăng ngày bị lỗi
+    if (results.length > 3660) break; // Max 10 năm days
+  }
+
+  return results;
+};
+
 
 // GET /api/instructors/:id?fields=field1,field2,...
 export const getPublicFields = async (req, res) => {
@@ -113,6 +282,7 @@ export const createInstructor = async (req, res) => {
   }
 };
 
+// PATCH /api/instructors/:id
 export const updateInstructor = async (req, res) => {
 
 };
@@ -334,147 +504,6 @@ export const getStudentsEnrolled = async (req, res) => {
   }
 };
 
-// Helper: get date ranges and Mongo formats
-const getDateConfig = (period) => {
-  const now = new Date();
-  const start = new Date();
-
-  let mongoFormat = ""; // How Mongo formats the date string (grouping ID)
-  let unit = "";        // How we step through the loop (day, week, month, year)
-
-  switch (period) {
-    case 'day': // "Past 7 Days"
-      start.setDate(now.getDate() - 6); // Go back 6 days + today = 7 days
-      start.setHours(0, 0, 0, 0);
-      mongoFormat = "%Y-%m-%d"; // "2023-11-18"
-      unit = 'day';
-      break;
-
-    case 'week': // "Past 4 Weeks"
-      start.setDate(now.getDate() - 28); // Approx 4 weeks ago
-      start.setHours(0, 0, 0, 0);
-      // Group by Year and ISO Week number (e.g., "2023-46")
-      mongoFormat = "%Y-%V";
-      unit = 'week';
-      break;
-
-    case 'month': // "Past 12 Months"
-      start.setMonth(now.getMonth() - 11); // Go back 11 months + current = 12
-      start.setDate(1); // Start from 1st of that month
-      start.setHours(0, 0, 0, 0);
-      mongoFormat = "%Y-%m"; // "2023-11"
-      unit = 'month';
-      break;
-
-    case 'year': // "Past 4 Years"
-      start.setFullYear(now.getFullYear() - 3); // Go back 3 years + current = 4
-      start.setMonth(0, 1); // Start Jan 1st
-      start.setHours(0, 0, 0, 0);
-      mongoFormat = "%Y"; // "2023"
-      unit = 'year';
-      break;
-
-    default: // Default to 7 days
-      start.setDate(now.getDate() - 6);
-      mongoFormat = "%Y-%m-%d";
-      unit = 'day';
-  }
-
-  return { start, mongoFormat, unit };
-};
-
-// helper: fill in missing dates with 0
-const fillChartData = (mongoData, start, unit) => {
-  const results = [];
-  const current = new Date(start);
-  const now = new Date();
-
-  const dataMap = {};
-  if (Array.isArray(mongoData)) {
-    mongoData.forEach(item => {
-      dataMap[item._id.month] = item.totalEarnings || item.total || 0;
-    });
-  }
-
-  const pad = (num) => num.toString().padStart(2, '0');
-
-  while (current <= now || (unit === 'week' && current.getTime() < now.getTime() + 7 * 24 * 60 * 60 * 1000)) {
-    let label = "";
-    let shouldBreak = false;
-
-    if (unit === 'day') {
-      // Format: YYYY-MM-DD (Local Time)
-      const year = current.getFullYear();
-      const month = pad(current.getMonth() + 1);
-      const day = pad(current.getDate());
-      label = `${year}-${month}-${day}`;
-
-      results.push({ name: label, value: dataMap[label] || 0 });
-
-      // Tăng 1 ngày
-      current.setDate(current.getDate() + 1);
-    }
-
-    else if (unit === 'month') {
-      // Format: YYYY-MM (Local Time)
-      const year = current.getFullYear();
-      const month = pad(current.getMonth() + 1);
-      label = `${year}-${month}`;
-
-      results.push({ name: label, value: dataMap[label] || 0 });
-
-      // Tăng 1 tháng
-      current.setMonth(current.getMonth() + 1);
-    }
-
-    else if (unit === 'year') {
-      // Format: YYYY
-      label = current.getFullYear().toString();
-      results.push({ name: label, value: dataMap[label] || 0 });
-
-      // Tăng 1 năm
-      current.setFullYear(current.getFullYear() + 1);
-    }
-
-    else if (unit === 'week') {
-      // Logic tính tuần thủ công để khớp với Mongo %V
-      const year = current.getFullYear();
-      const oneJan = new Date(year, 0, 1);
-      const numberOfDays = Math.floor((current - oneJan) / (24 * 60 * 60 * 1000));
-      const weekNum = Math.ceil((current.getDay() + 1 + numberOfDays) / 7);
-      const weekString = pad(weekNum);
-
-      // Label khớp với Mongo: "2025-47"
-      label = `${year}-${weekString}`;
-
-      // Tìm trong map, nếu không có thử check label dạng "Week X" (tuỳ nhu cầu hiển thị)
-      // Ở đây ta ưu tiên key khớp với Mongo ID
-      const foundValue = dataMap[label] || 0;
-
-      // Hiển thị ra UI là "Week 47" cho đẹp
-      results.push({ name: `Week ${weekString}`, value: foundValue });
-
-      // Tăng 7 ngày
-      current.setDate(current.getDate() + 7);
-
-      // Logic break an toàn: Nếu ngày current mới đã vượt quá xa tương lai
-      if (current > new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)) {
-        shouldBreak = true;
-      }
-      // Limit cứng 4-5 tuần nếu cần thiết (như code cũ của bạn)
-      // if (results.length >= 5) shouldBreak = true;
-    }
-
-    // Check thoát vòng lặp thủ công nếu cần
-    if (shouldBreak) break;
-
-    // Safety check: Tránh vòng lặp vô tận nếu logic tăng ngày bị lỗi
-    if (results.length > 3660) break; // Max 10 năm days
-  }
-
-  return results;
-};
-
 // GET /api/instructor/courses/:id/students?page=&limit=&search=
 export const getCourseStudentsAndReviews = async (req, res) => {
   try {
@@ -598,13 +627,13 @@ export const getCourseStudentsAndReviews = async (req, res) => {
   }
 };
 
-// GET /api/instructor/dashboard
-export const getDashboardData = async (req, res) => {
+// GET /api/instructor/counters
+export const getInstructorCounters = async (req, res) => {
   try {
     const userId = req.userId;
 
-    const instructor = await Instructor.findOne({ user: userId });
-    if (!instructor) {
+    const isInstructor = await Instructor.exists({ user: userId });
+    if (!isInstructor) {
       return res.status(403).json({ success: false, message: "You don't have access to this resource" });
     }
 
@@ -623,14 +652,13 @@ export const getDashboardData = async (req, res) => {
       return res.json({
         success: true,
         averageRating: 0,
-        earningsData: [],
-        topCoursesData: [],
         totalCourses,
         totalStudents,
         totalOrders
       });
     }
 
+    // get average rating ---
     const avgRating = await Review.aggregate([
       {
         $match: {
@@ -658,12 +686,52 @@ export const getDashboardData = async (req, res) => {
         }
       }
     ]);
+
     const averageRating =
       avgRating.length > 0 && avgRating[0].avgRating != null
         ? parseFloat(avgRating[0].avgRating.toFixed(1))
         : 0;
 
+    return res.json({
+      success: true,
+      averageRating,
+      totalCourses,
+      totalStudents,
+      totalOrders
+    });
+  } catch (error) {
+    console.error("Populate instructor dashboard data error: ", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
+  }
+};
+
+// GET /api/instructor/dashboard
+export const getDashboardData = async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    const isInstructor = await Instructor.exists({ user: userId });
+    if (!isInstructor) {
+      return res.status(403).json({ success: false, message: "You don't have access to this resource" });
+    }
+
+    const courseIds = await getInstructorCourseIds(userId);
+
+    if (courseIds.length === 0) {
+      return res.json({
+        success: true,
+        earningsData: [],
+        topCoursesData: []
+      });
+    }
+
+    // time config ---
     const { start, mongoFormat, unit } = getDateConfig('month');
+
+    // get earings ---
     const earnings = await Order.aggregate([
       {
         $match: {
@@ -688,8 +756,10 @@ export const getDashboardData = async (req, res) => {
       },
       { $sort: { "_id.month": 1 } }
     ]);
+
     const earningsData = fillChartData(earnings, start, unit);
 
+    // get top courses ---
     const topCourses = await Order.aggregate([
       {
         $match: {
@@ -736,12 +806,8 @@ export const getDashboardData = async (req, res) => {
 
     return res.json({
       success: true,
-      averageRating,
       earningsData,
-      topCoursesData: topCourses,
-      totalCourses,
-      totalStudents,
-      totalOrders
+      topCoursesData: topCourses
     });
   } catch (error) {
     console.error("Populate instructor dashboard data error: ", error);
@@ -751,30 +817,6 @@ export const getDashboardData = async (req, res) => {
     });
   }
 };
-
-// helper: get course ids for an instructor
-const getInstructorCourseIds = async (userId) => {
-  const courses = await Course.find(
-    { "instructor.ref": userId, isDeleted: false },
-    '_id'
-  ).lean();
-
-  return courses.map(course => course._id);
-};
-
-// helper: get student ids for an instructor
-const getInstructorStudentIds = async (userId) => {
-  const courseIds = await getInstructorCourseIds(userId);
-  const orders = await Order.find(
-    {
-      status: 'completed',
-      "courses.course": { $in: courseIds }
-    },
-    'user'
-  ).lean();
-  const studentIdSet = new Set(orders.map(order => order.user.toString()));
-  return Array.from(studentIdSet).map(id => new mongoose.Types.ObjectId(id));
-}
 
 // POST /api/instructor/videos/upload
 export const generateVideoUploadUrl = async (req, res) => {

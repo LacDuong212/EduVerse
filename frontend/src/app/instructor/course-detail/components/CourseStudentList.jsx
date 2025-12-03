@@ -45,7 +45,7 @@ const CourseStudentRow = ({ studentData }) => {
           </div>
         </div>
       </td>
-      <td className="text-center text-sm-start">
+      <td className="text-center">
         {student?.enrolledAt
           ? new Date(student?.enrolledAt).toLocaleString("en-GB", {
             year: "numeric",
@@ -101,12 +101,12 @@ const CourseStudentRow = ({ studentData }) => {
           "-"
         )}
       </td>
-      <td>
+      <td className="text-center">
         <OverlayTrigger
           placement="top"
           overlay={<Tooltip id={`tooltip-message-${student?._id}`}>Message</Tooltip>}
         >
-          <a title="Message" href="#" className="btn btn-success-soft btn-round me-2 mb-0 flex-centered" data-bs-toggle="tooltip" data-bs-placement="top">
+          <a title="Message" href="#" className="btn btn-success-soft btn-round mb-0 flex-centered" data-bs-toggle="tooltip" data-bs-placement="top">
             <FaRegEnvelope className="far fa-envelope" />
           </a>
         </OverlayTrigger>
@@ -151,13 +151,13 @@ const CourseStudentList = ({ col = 12, courseId = '' }) => {
                   <th scope="col" className="border-0 rounded-start">
                     Student Name
                   </th>
-                  <th scope="col" className="border-0">
+                  <th scope="col" className="border-0 text-center">
                     Enrolled At
                   </th>
-                  <th scope="col" className="border-0">
+                  <th scope="col" className="border-0 text-center">
                     Review
                   </th>
-                  <th scope="col" className="border-0 rounded-end">
+                  <th scope="col" className="border-0 text-center rounded-end">
                     Action
                   </th>
                 </tr>

@@ -229,7 +229,7 @@ const Reviews = () => {
 
       {/* Optional: thông báo cho guest / chưa enroll */}
       {!isEnrolled && (
-        <p className="text-muted mt-3">
+        <p className="text-muted text-center mt-4">
           Only students who enrolled in this course can leave a review.
         </p>
       )}
@@ -366,8 +366,10 @@ const Reviews = () => {
                       </div>
                     </div>
                   ) : 
+                  
                   (
                     <>
+                      <p className="mb-2">{review.description}</p>
                       {/* <p className="mb-2">{review.description}</p>
                       <div
                         className="btn-group"
