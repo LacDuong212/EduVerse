@@ -176,7 +176,7 @@ const Hero = () => {
               Get Started
             </a>
             <div className="d-flex align-items-center justify-content-center py-2 ms-0 ms-sm-4">
-              <GlightBox data-glightbox data-gallery="office-tour" href="https://www.youtube.com/embed/tXHviS-4ygo" className="btn btn-round btn-primary-shadow mb-0 overflow-visible me-7">
+              <GlightBox data-glightbox data-gallery="office-tour" href="https://www.youtube.com/embed/tXHviS-4ygo" className="btn btn-round btn-primary-shadow mb-2 overflow-visible me-7">
                 <FaPlay />
                 <h6 className="mb-0 ms-3 fw-normal position-absolute start-100 top-50 translate-middle-y">Watch video</h6>
               </GlightBox>

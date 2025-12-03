@@ -103,12 +103,14 @@ export const STUDENT_ACCOUNT_DROPDOWN_ITEMS = [{
   label: 'Settings',
   icon: BsGear,
   url: '/student/settings'
-}, {
-  key: 'help',
-  label: 'Help',
-  icon: BsInfoCircle,
-  url: '/help'
-}];
+}
+// , {
+//   key: 'help',
+//   label: 'Help',
+//   icon: BsInfoCircle,
+//   url: '/help'
+// }
+];
 export const STUDENT_APP_MENU_ITEMS = [{
   key: 'home',
   label: 'Home',
@@ -136,28 +138,32 @@ export const STUDENT_MENU_ITEMS = [{
   icon: BsBasket,
   url: '/student/courses',
   parentKey: 'student'
-}, {
-  key: 'payment-info',
-  label: 'Payment Info',
-  icon: BsCreditCard2Front,
-  url: '/student/payment-info',
-  parentKey: 'student'
-}, {
-  key: 'wish-list',
-  label: 'Wish List',
-  icon: BsCardChecklist,
-  url: '/student/wish-list',
-  parentKey: 'student'
-}, {
+}, 
+// {
+//   key: 'payment-info',
+//   label: 'Payment Info',
+//   icon: BsCreditCard2Front,
+//   url: '/student/payment-info',
+//   parentKey: 'student'
+// }, {
+//   key: 'wish-list',
+//   label: 'Wish List',
+//   icon: BsCardChecklist,
+//   url: '/student/wish-list',
+//   parentKey: 'student'
+// }, 
+{
   key: 'settings',
   label: 'Settings',
   icon: BsGear,
   url: '/student/settings',
   parentKey: 'student'
-}, {
-  key: 'deactivate-account',
-  label: 'Deactivate Account',
-  icon: MdDoNotDisturb,
-  url: '/student/deactivate-account',
-  parentKey: 'student'
-}];
+}
+// , {
+//   key: 'deactivate-account',
+//   label: 'Deactivate Account',
+//   icon: MdDoNotDisturb,
+//   url: '/student/deactivate-account',
+//   parentKey: 'student'
+// }
+];

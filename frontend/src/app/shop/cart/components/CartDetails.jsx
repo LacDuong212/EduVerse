@@ -21,7 +21,6 @@ const CartCard = ({ image, title, price, onRemove }) => {
         </div>
       </td>
       <td className="text-center">
-        {/* ✅ dùng formatCurrency */}
         <h5 className="text-success mb-0">{formatCurrency(price)}</h5>
       </td>
       <td>
@@ -40,12 +39,12 @@ const CartDetails = () => {
     displayedCourses,
     displayedTotal,
     removeFromCart,
+    handleClearCart,
     reloadCart,
   } = useCartDetail();
 
   const isEmpty = displayedCourses.length === 0;
 
-  // ✅ giữ số để tính toán, chỉ format khi render
   const originalTotal = displayedCourses.reduce(
     (sum, c) => sum + (Number(c?.price ?? 0) || 0),
     0
@@ -53,10 +52,10 @@ const CartDetails = () => {
   const couponDiscount = Math.max(
     0,
     originalTotal -
-      displayedCourses.reduce(
-        (sum, c) => sum + (Number(c?.discountPrice ?? c?.price ?? 0) || 0),
-        0
-      )
+    displayedCourses.reduce(
+      (sum, c) => sum + (Number(c?.discountPrice ?? c?.price ?? 0) || 0),
+      0
+    )
   );
   const totalToPay = Number(displayedTotal || 0);
 
@@ -70,7 +69,7 @@ const CartDetails = () => {
         <Row className="g-4 g-sm-5">
           <Col lg={8} className="mb-4 mb-sm-0">
             <Card className="card-body p-4 shadow">
-              <Alert
+              {/* <Alert
                 show={isTrue}
                 onClose={toggle}
                 className="alert alert-danger alert-dismissible d-flex justify-content-between align-items-center fade show py-3 pe-2"
@@ -90,7 +89,7 @@ const CartDetails = () => {
                 >
                   <BsXLg />
                 </button>
-              </Alert>
+              </Alert> */}
 
               <div className="table-responsive border-0 rounded-3">
                 <table className="table align-middle p-4 mb-0">
@@ -100,7 +99,6 @@ const CartDetails = () => {
                         key={item.courseId}
                         image={item.thumbnail || '/placeholder-course.png'}
                         title={item.title || 'Untitled'}
-                        // ✅ truyền số, không toFixed
                         price={Number(item.discountPrice ?? item.price ?? 0)}
                         onRemove={() => removeFromCart([item.courseId])}
                       />
@@ -118,8 +116,20 @@ const CartDetails = () => {
                     </button>
                   </div>
                 </Col>
-                <Col md={6} className="text-md-end">
-                  <button className="btn btn-primary mb-0" onClick={reloadCart}>
+                <Col md={6} className="text-md-end d-flex justify-content-md-end gap-2">
+                  <button
+                    className="btn btn-outline-danger mb-0"
+                    onClick={handleClearCart}
+                  >
+                    <i className="bi bi-trash me-1"></i>
+                    Clear cart
+                  </button>
+
+                  <button
+                    className="btn btn-primary mb-0"
+                    onClick={reloadCart}
+                  >
+                    <i className="bi bi-arrow-clockwise me-1"></i>
                     Update cart
                   </button>
                 </Col>
@@ -134,21 +144,18 @@ const CartDetails = () => {
                 <li className="list-group-item px-0 d-flex justify-content-between">
                   <span className="h6 fw-light mb-0">Original Price</span>
                   <span className="h6 fw-light mb-0 fw-bold">
-                    {/* ✅ format */}
                     {formatCurrency(originalTotal)}
                   </span>
                 </li>
                 <li className="list-group-item px-0 d-flex justify-content-between">
                   <span className="h6 fw-light mb-0">Coupon Discount</span>
                   <span className="text-danger">
-                    {/* ✅ format và thêm dấu trừ (chỉ hiển thị) */}
                     -{formatCurrency(couponDiscount)}
                   </span>
                 </li>
                 <li className="list-group-item px-0 d-flex justify-content-between">
                   <span className="h5 mb-0">Total</span>
                   <span className="h5 mb-0">
-                    {/* ✅ format */}
                     {formatCurrency(totalToPay)}
                   </span>
                 </li>
