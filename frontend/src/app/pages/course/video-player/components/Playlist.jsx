@@ -23,7 +23,7 @@ import {
 } from 'react-bootstrap';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { BsLockFill, BsPencilSquare, BsPlayFill, BsTrashFill } from 'react-icons/bs';
+import { BsLockFill, BsPencilSquare, BsPlayFill, BsTrashFill, BsCheckCircleFill } from 'react-icons/bs';
 import { FaPlay } from 'react-icons/fa';
 import * as yup from 'yup';
 
@@ -32,8 +32,9 @@ import * as yup from 'yup';
  * - course: object từ API getCourseById (bắt buộc)
  * - onSelect?: (lecture) => void  // callback khi chọn bài (nếu không truyền sẽ navigate theo route)
  * - currentId?: string            // _id lecture đang phát để active UI
+ * - lectureProgress?: { [lectureId]: { status, lastPositionSec, durationSec, percentage?, currentTimeSec?, positionSec? } }
  */
-const Playlist = ({ course, onSelect, currentId }) => {
+const Playlist = ({ course, onSelect, currentId, lectureProgress = {} }) => {
   const navigate = useNavigate();
 
   const { isTrue: isOpenAddNote, toggle: toggleAddNote } = useToggle();
@@ -45,14 +46,12 @@ const Playlist = ({ course, onSelect, currentId }) => {
     [course]
   );
 
-  // -------- NEW: quản lý active section theo currentId (controlled Accordion) ----------
-  // Tạo eventKey ổn định cho mỗi section (ưu tiên _id nếu có)
+  // -------- quản lý active section theo currentId (controlled Accordion) ----------
   const sectionKeys = useMemo(
     () => sections.map((sec, idx) => String(sec?._id ?? idx)),
     [sections]
   );
 
-  // Tìm eventKey (section) chứa lecture hiện tại
   const findSectionKeyByLectureId = (lecId) => {
     if (!lecId) return sectionKeys[0] ?? '0';
     for (let i = 0; i < sections.length; i++) {
@@ -68,27 +67,67 @@ const Playlist = ({ course, onSelect, currentId }) => {
 
   useEffect(() => {
     setActiveKey(findSectionKeyByLectureId(currentId));
-    // chỉ cần phụ thuộc currentId + kích thước sections để tránh re-run không cần thiết
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentId, sections.length]);
   // ------------------------------------------------------------------------------------
 
-  // Schema note (giữ logic form cũ của bạn)
+  // 🔐 xác định "section đang mở được" theo rule:
+  // - Nếu section có >3 lecture: cần completed >= 3 để mở section tiếp theo
+  // - Nếu section có <=3 lecture: cần completed = số lecture trong section
+  const unlockedSectionIndex = useMemo(() => {
+    if (!Array.isArray(sections) || sections.length === 0) return 0;
+
+    let unlocked = 0;
+    let allPreviousFinished = true;
+
+    for (let idx = 0; idx < sections.length; idx++) {
+      if (!allPreviousFinished) break;
+
+      const sec = sections[idx];
+      const lecs = Array.isArray(sec?.lectures) ? sec.lectures : [];
+
+      const totalLectures = lecs.length;
+      const limit = Math.min(3, totalLectures);
+
+      let completedCount = 0;
+      lecs.forEach((lecture) => {
+        const id = lecture?._id;
+        if (!id) return;
+        const lecProg =
+          lectureProgress?.[id] ||
+          lectureProgress?.[id?.toString?.()] ||
+          null;
+
+        if (lecProg?.status === 'completed') {
+          completedCount += 1;
+        }
+      });
+
+      unlocked = idx;
+
+      if (completedCount < limit) {
+        allPreviousFinished = false;
+      }
+    }
+
+    return unlocked;
+  }, [sections, lectureProgress]);
+
+  // Schema note
   const noteSchema = yup.object({
     note: yup.string().required('please enter your note'),
   });
   const { control, handleSubmit } = useForm({ resolver: yupResolver(noteSchema) });
 
- const formatDuration = (sec) => {
-  if (!sec || isNaN(sec)) return "--";
+  const formatDuration = (sec) => {
+    if (!sec || isNaN(sec)) return '--';
 
-  const minutes = Math.floor(sec / 60);
-  const seconds = sec % 60;
+    const minutes = Math.floor(sec / 60);
+    const seconds = sec % 60;
 
-  return `${minutes}m ${seconds}s`;
-};
+    return `${minutes}m ${seconds}s`;
+  };
 
-  // Component hiển thị note inline (demo giữ như cũ)
   const PlayNote = () => (
     <>
       <Button
@@ -142,11 +181,11 @@ const Playlist = ({ course, onSelect, currentId }) => {
     </>
   );
 
-  // Handler chọn bài: ưu tiên gọi onSelect; nếu không có thì navigate theo route bạn đang dùng
+  // Handler chọn bài
   const handlePlay = (lecture) => {
     if (!lecture) return;
     if (typeof onSelect === 'function') onSelect(lecture);
-    else navigate(`/courses/${course._id}/watch/${lecture._id}`); // 👈 SPA điều hướng
+    else navigate(`/courses/${course._id}/watch/${lecture._id}`);
   };
 
   return (
@@ -156,7 +195,6 @@ const Playlist = ({ course, onSelect, currentId }) => {
           <h1 className="mt-2 fs-5">{course?.title || 'Course'}</h1>
           {course?.instructor?.ref && (
             <h6 className="mb-0 fw-normal">
-              {/* Nếu có tên instructor, thay anchor này */}
               <a href="#">By Instructor</a>
             </h6>
           )}
@@ -174,7 +212,6 @@ const Playlist = ({ course, onSelect, currentId }) => {
 
           <Row>
             <Col xs={12}>
-              {/* Controlled Accordion để không tự reset về section 1 */}
               <Accordion
                 activeKey={activeKey}
                 onSelect={(ek) => setActiveKey(ek)}
@@ -184,23 +221,143 @@ const Playlist = ({ course, onSelect, currentId }) => {
               >
                 {sections.map((sec, sIdx) => {
                   const ek = String(sec?._id ?? sIdx);
+                  const lecturesInSection = Array.isArray(sec?.lectures) ? sec.lectures : [];
+
+                  const limitByThree = lecturesInSection.length > 3;
+                  const isFutureSectionLocked = sIdx > unlockedSectionIndex;
+
+                  // ✅ NEW: tính trạng thái completed cho SECTION
+                  const nonNoteLectures = lecturesInSection.filter((l) => !l?.isNote);
+                  let sectionCompleted = false;
+                  if (nonNoteLectures.length > 0) {
+                    sectionCompleted = nonNoteLectures.every((lecture) => {
+                      const id = lecture?._id;
+                      if (!id) return false;
+                      const lecProg =
+                        lectureProgress?.[id] ||
+                        lectureProgress?.[id?.toString?.()] ||
+                        null;
+                      return lecProg?.status === 'completed';
+                    });
+                  }
+
                   return (
                     <AccordionItem eventKey={ek} key={ek}>
                       <AccordionHeader id={`heading-${ek}`}>
-                        <span className="mb-0 fw-bold">{sec?.section || `Section ${sIdx + 1}`}</span>
+                        <span className="mb-0 fw-bold d-inline-flex align-items-center">
+                          {sec?.section || `Section ${sIdx + 1}`}
+                          {isFutureSectionLocked && ' 🔒'}
+                          {sectionCompleted && !isFutureSectionLocked && (
+                            <BsCheckCircleFill
+                              size={14}
+                              className="text-success ms-2"
+                              title="Section completed"
+                            />
+                          )}
+                        </span>
                       </AccordionHeader>
 
                       <AccordionBody className="px-3">
                         <div className="vstack gap-3">
-                          {(sec?.lectures || []).map((lecture, lIdx) => {
-                            const isLockedUI = !lecture?.isFree; // chỉ hiển thị icon khóa; không chặn click
+                          {lecturesInSection.map((lecture, lIdx) => {
+                            const isQuotaLocked = limitByThree && lIdx >= 3;
+                            const isLocked = isFutureSectionLocked || isQuotaLocked;
+
                             const isActive = currentId === lecture?._id;
+
+                            const lecProg =
+                              lectureProgress?.[lecture?._id] ||
+                              lectureProgress?.[lecture?._id?.toString?.()] ||
+                              {};
+
+                            const status = lecProg?.status || 'not_started';
+                            const isCompleted = status === 'completed';
+                            const isInProgress = status === 'in_progress';
+                            const hasProgress = !!lecProg && status !== 'not_started';
+
+                            // ⭐️ TÍNH % PROGRESS
+                            let progressPercent = 0;
+
+                            if (typeof lecProg?.percentage === 'number') {
+                              progressPercent = Math.round(lecProg.percentage);
+                            } else {
+                              const lastPos =
+                                typeof lecProg?.lastPositionSec === 'number'
+                                  ? lecProg.lastPositionSec
+                                  : typeof lecProg?.currentTimeSec === 'number'
+                                  ? lecProg.currentTimeSec
+                                  : typeof lecProg?.positionSec === 'number'
+                                  ? lecProg.positionSec
+                                  : undefined;
+
+                              const durFromProg =
+                                typeof lecProg?.durationSec === 'number'
+                                  ? lecProg.durationSec
+                                  : undefined;
+
+                              const durationBase =
+                                durFromProg ??
+                                (typeof lecture?.duration === 'number'
+                                  ? lecture.duration
+                                  : undefined);
+
+                              if (
+                                typeof lastPos === 'number' &&
+                                typeof durationBase === 'number' &&
+                                durationBase > 0
+                              ) {
+                                progressPercent = Math.round(
+                                  (lastPos / durationBase) * 100
+                                );
+                              }
+                            }
+
+                            if (progressPercent > 100) progressPercent = 100;
+                            if (progressPercent < 0 || !Number.isFinite(progressPercent)) {
+                              progressPercent = 0;
+                            }
+
+                            if (isCompleted && progressPercent === 0) {
+                              progressPercent = 100;
+                            }
+
                             const timeLabel =
                               typeof lecture?.duration === 'number'
                                 ? formatDuration(lecture.duration)
-                                : (lecture?.time || '--');
+                                : lecture?.time || '--';
 
-                            const isNote = Boolean(lecture?.isNote); // nếu dữ liệu cũ có cờ này thì vẫn render block note
+                            const isNote = Boolean(lecture?.isNote);
+
+                            // 🎨 Variant + icon button theo trạng thái
+                            let btnVariant = 'light';
+                            let btnContent = null;
+
+                            if (isLocked) {
+                              btnVariant = 'light';
+                              btnContent = <BsLockFill size={11} />;
+                            } else if (isCompleted) {
+                              btnVariant = 'success';
+                              btnContent = <BsCheckCircleFill size={11} />;
+                            } else if (isInProgress && hasProgress) {
+                              btnVariant = 'outline-primary';
+                              btnContent = (
+                                <span className="small fw-bold">
+                                  {progressPercent}%
+                                </span>
+                              );
+                            } else {
+                              btnVariant = 'primary';
+                              btnContent = <FaPlay className="me-0" size={11} />;
+                            }
+
+                            let titleColorClass = '';
+                            if (isCompleted) {
+                              titleColorClass = 'text-success';
+                            } else if (isInProgress) {
+                              titleColorClass = 'text-primary';
+                            } else if (isActive) {
+                              titleColorClass = 'text-danger';
+                            }
 
                             return (
                               <Fragment key={lecture?._id || `${sIdx}-${lIdx}`}>
@@ -226,21 +383,24 @@ const Playlist = ({ course, onSelect, currentId }) => {
                                 ) : (
                                   <div className="d-flex justify-content-between align-items-center">
                                     <div className="position-relative d-flex align-items-center">
-                                      {/* Icon trạng thái: free/play hoặc locked (không disable) */}
                                       <Button
-                                        variant={isActive ? 'danger' : isLockedUI ? 'light' : 'danger-soft'}
+                                        variant={btnVariant}
                                         size="sm"
                                         className="btn-round mb-0 stretched-link position-static"
-                                        onClick={() => handlePlay(lecture)}
+                                        onClick={() => {
+                                          if (!isLocked) handlePlay(lecture);
+                                        }}
+                                        disabled={isLocked}
                                         title={lecture?.title}
                                       >
-                                        {isLockedUI ? <BsLockFill size={11} /> : <FaPlay className="me-0" size={11} />}
+                                        {btnContent}
                                       </Button>
 
                                       <span
-                                        className={`d-inline-block text-truncate ms-2 mb-0 h6 fw-light w-100px w-sm-200px ${
-                                          isActive ? 'text-danger' : ''
-                                        }`}
+                                        className={
+                                          `d-inline-block text-truncate ms-2 mb-0 h6 fw-light w-100px w-sm-200px ` +
+                                          (titleColorClass || '')
+                                        }
                                         title={lecture?.title}
                                       >
                                         {lecture?.title || 'Untitled'}

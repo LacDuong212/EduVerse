@@ -14,30 +14,51 @@ export default function useLearningCourseDetail() {
   const [loading, setLoading] = useState(false);
 
   const fetchCourse = useCallback(async () => {
-    if (!courseId || !backendUrl) return;
+    console.log("====================================");
+    console.log("[useLearningCourseDetail] START FETCH");
+    console.log("[useLearningCourseDetail] courseId:", courseId);
+    console.log("[useLearningCourseDetail] backendUrl:", backendUrl);
+
+    if (!courseId || !backendUrl) {
+      console.warn("[useLearningCourseDetail] SKIP: Missing param", {
+        courseId,
+        backendUrl,
+      });
+      return;
+    }
 
     setLoading(true);
     try {
-      // 🔥 Gọi đúng API backend của bạn
-      const { data } = await axios.get(
-        `${backendUrl}/api/student/my-courses/${courseId}`,
-        { withCredentials: true }
-      );
+      const url = `${backendUrl}/api/student/my-courses/${courseId}`;
+      console.log("[useLearningCourseDetail] GET:", url);
+
+      const { data } = await axios.get(url, { withCredentials: true });
+
+      console.log("[useLearningCourseDetail] RESPONSE:", data);
 
       if (data.success) {
+        console.log("[useLearningCourseDetail] SET COURSE:", data.course);
         setCourse(data.course);
       } else {
+        console.error("[useLearningCourseDetail] Backend returned success=false");
         toast.error(data.message || "Cannot load course");
       }
     } catch (err) {
-      if (err.response?.status === 404 || err.response?.status === 403) {
+      console.error("[useLearningCourseDetail] ERROR:", err);
+
+      const status = err.response?.status;
+      const message = err.response?.data?.message || err.message;
+
+      if (status === 404 || status === 403) {
         toast.error("You are not enrolled in this course");
         navigate("/student/courses");
       } else {
-        toast.error(err.response?.data?.message || err.message);
+        toast.error(message);
       }
     } finally {
       setLoading(false);
+      console.log("[useLearningCourseDetail] END FETCH");
+      console.log("====================================");
     }
   }, [courseId, backendUrl, navigate]);
 

@@ -49,8 +49,6 @@
           return;
         }
 
-
-        // chưa login -> chắc chắn chưa sở hữu, KHÔNG gọi API
         if (!user) {
           setOwned(false);
           setOwnedChecking(false);
