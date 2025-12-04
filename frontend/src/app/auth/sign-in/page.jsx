@@ -1,6 +1,6 @@
 import PageMetaData from '@/components/PageMetaData';
 import { Col, Row } from 'react-bootstrap';
-import { FaChevronLeft, FaFacebookF, FaGoogle } from "react-icons/fa";
+import { FaChevronLeft, FaGoogle } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import AuthLayout from "@/app/auth/components/AuthLayout";
 import SignInForm from "@/app/auth/sign-in/components/SignInForm";
@@ -34,7 +34,7 @@ export default function SignInPage() {
               <Col xxl={12} className="d-grid">
                 <a href={`${backendUrl}/api/auth/google`} className="btn bg-google mb-2 mb-xxl-0">
                   <FaGoogle className="text-white me-2" />
-                  Login with Google
+                  Sign in with Google
                 </a>
               </Col>
             </Row>

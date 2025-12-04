@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { toast } from "react-toastify";
 
-import { fetchCart, removeFromCart as removeFromCartAction } from "@/redux/cartSlice";
+import { fetchCart, removeFromCart as removeFromCartAction, clearCart } from "@/redux/cartSlice";
 
 function getId(item) {
   return item?.courseId || item?._id || item?.id;
@@ -63,9 +63,31 @@ export default function useCartDetail() {
     }
   };
 
+  const handleClearCart = async () => {
+    if (!items || items.length === 0) {
+      toast.info("Your shopping cart is empty.");
+      return;
+    }
+
+    const isConfirmed = window.confirm("Are you sure you want to delete the entire cart?");
+    if (!isConfirmed) return;
+
+    try {
+      await dispatch(clearCart()).unwrap();
+
+      setSelected([]);
+      
+      toast.success("Cart cleared!");
+    } catch (error) {
+      console.error("Clear cart error:", error);
+      const message = error?.message || "An error occurred while deleting the cart.";
+      toast.error(message);
+    }
+  };
+
   const handleCheckout = async (paymentMethod) => {
     if (!displayedCourses.length) {
-      toast.error('Giỏ hàng của bạn đang rỗng.');
+      toast.error('Your shopping cart is empty.');
       return false;
     }
 
@@ -118,6 +140,7 @@ export default function useCartDetail() {
     toggleSelect,
     toggleSelectAll,
     removeFromCart,
+    handleClearCart,
     handleCheckout,
     reloadCart: () => dispatch(fetchCart()),
     loading: status === 'loading'

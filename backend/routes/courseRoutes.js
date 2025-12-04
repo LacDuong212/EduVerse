@@ -6,6 +6,10 @@ import { getAllCourses, getCourseFilters, getCourseById,
 } from "../controllers/courseController.js";
 import { processLectureAI } from "../controllers/aiController.js";
 import userAuth from "../middlewares/userAuth.js";
+<<<<<<< HEAD
+=======
+import { verifyAdminToken } from "../middlewares/adminAuth.js";
+>>>>>>> master
 import {
   getCourseProgress,
   updateLectureProgress,
@@ -29,6 +33,7 @@ courseRoute.post("/generate-ai", userAuth, processLectureAI);
 
 courseRoute.put("/:id", userAuth, updateCourse);
 courseRoute.patch("/:id", userAuth, setCoursePrivacy);
+courseRoute.patch("/:id", verifyAdminToken, updateCourseStatus);
 
 courseRoute.get("/:courseId/progress", userAuth, getCourseProgress);
 courseRoute.post("/:courseId/progress/lectures/:lectureId", userAuth, updateLectureProgress);

@@ -58,7 +58,7 @@ export const removeFromCart = createAsyncThunk(
   }
 );
 
-export const clearCartApi = createAsyncThunk(
+export const clearCart = createAsyncThunk(
   "cart/clearCartApi",
   async (_, { rejectWithValue }) => {
     try {
@@ -124,7 +124,7 @@ const cartSlice = createSlice({
       })
 
       // --- Clear Cart ---
-      .addCase(clearCartApi.fulfilled, (state) => {
+      .addCase(clearCart.fulfilled, (state) => {
         state.items = [];
         state.totalItem = 0;
         state.status = "succeeded";
