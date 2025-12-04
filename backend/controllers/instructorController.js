@@ -879,3 +879,42 @@ export const generateVideoUploadUrl = async (req, res) => {
     });
   }
 };
+
+// GET /api/instructor/profile
+export const getProfile = async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    const instructor = await Instructor.findOne({ user: userId }).populate("user");
+    if (!instructor) {
+      res.status(404).json({ success: false, message: "Instructor not found" });
+    }
+
+    return res.json({
+      success: true,
+      instructor: {
+        id: instructor.user?._id,
+        name: instructor.user?.name,
+        email: instructor.user?.email,
+        pfpImg: instructor.user?.pfpImg || '',
+        phonenumber: instructor.user?.phonenumber || '',
+        website: instructor.user?.website || '',
+        socials: {
+          facebook: instructor.user?.socials?.facebook || '',
+          twitter: instructor.user?.socials?.twitter || '',
+          instagram: instructor.user?.socials.instagram || '',
+          youtube: instructor.user?.socials.youtube || '',
+        },
+        introduction: instructor.introduction || '',
+        address: instructor.address || '',
+        occupation: instructor.occupation || '',
+        skills: instructor.skills || [],
+        education: instructor.education || [],
+        isApproved: instructor.isApproved || false,
+      }
+    });
+
+  } catch (error) {
+    res.status(400).json({ success: false, message: "Server Error" });
+  }
+};

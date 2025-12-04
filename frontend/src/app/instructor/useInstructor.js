@@ -3,10 +3,8 @@ import { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 
-
-const backendUrl = import.meta.env.VITE_BACKEND_URL;
-
 export default function useInstructor() {
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const userId = useSelector((state) => state.auth.userData?._id);
 
   const fetchPublicFields = async (fields) => {
@@ -125,11 +123,34 @@ export default function useInstructor() {
     }
   };
 
+  const fetchInstructorProfile = async () => {
+    try {
+      const { data } = await axios.get(
+        `${backendUrl}/api/instructor/profile`,
+        { withCredentials: true }
+      );
+
+      if (!data.success) {
+        throw new Error(data.message || "Failed to fetch profile")
+      }
+        
+      return { instructor: data.instructor ?? {} };
+    } catch (error) {
+      throw new Error(data.message || "Failed to fetch profile")
+    }
+  }; 
+
+  const updateInstructorProfile = async () => {
+
+  };
+
   return {
     fetchPublicFields,
     fetchPrivateFields,
     fetchCourses,
     setCoursePrivacy,
-    fetchInstructorCounters
+    fetchInstructorCounters,
+    fetchInstructorProfile,
+    updateInstructorProfile,
   };
 };

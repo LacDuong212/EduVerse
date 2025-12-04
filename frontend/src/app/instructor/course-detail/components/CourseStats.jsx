@@ -129,13 +129,14 @@ const CourseStats = ({ col = 6, courseId = '' }) => {
         {/* --- EARNINGS CARD --- */}
         <Col md={6} xxl={12}>
           <Card className="bg-transparent border overflow-hidden">
-            <CardHeader className="bg-light border-bottom">
-              <h5 className="card-header-title mb-0">Total Course Earning</h5>
+            <CardHeader className="bg-light border-bottom d-flex justify-content-between">
+              <h5 className="card-header-title mb-0">Total Earning:</h5>
+              <span className="h5 text-end mb-0">{formatCurrency(totalRevenue)}</span>
             </CardHeader>
             <CardBody className="p-0">
               <div className="d-sm-flex justify-content-between p-3">
                 <h4 className="mb-0 me-3">
-                  {earningsLoading ? 'Loading...' : formatCurrency(totalRevenue)}
+                  {earningsLoading ? 'Loading...' : formatCurrency(earningsData[earningsData?.length-1])}
                 </h4>
                 <p className="mb-0">{getChangeDisplay(earningsData, true)}</p>
               </div>
@@ -154,8 +155,9 @@ const CourseStats = ({ col = 6, courseId = '' }) => {
         {/* --- ENROLLMENTS CARD --- */}
         <Col md={6} xxl={12}>
           <Card className="bg-transparent border overflow-hidden">
-            <CardHeader className="bg-light border-bottom">
-              <h5 className="card-header-title mb-0">New Enrollment This Month</h5>
+            <CardHeader className="bg-light border-bottom d-flex justify-content-between">
+              <h5 className="card-header-title mb-0">Total Enrollments:</h5>
+              <span className="h5 text-end mb-0">{totalEnrollments}</span>
             </CardHeader>
             <CardBody className="p-0">
               <div className="d-sm-flex justify-content-between p-3">
