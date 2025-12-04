@@ -70,7 +70,11 @@ const CourseRow = ({
       <td className="text-center">{completedLectures}</td>
       <td>
         {percentage === 100 ? (
-          <Button variant="light" size="sm" className="me-1">
+          <Button  
+    
+            className="icons-center"
+            onClick={gotoLearning}
+           variant="light" size="sm" >
             <BsArrowRepeat className="me-1 icons-center" />
             Restart
           </Button>

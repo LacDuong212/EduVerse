@@ -29,7 +29,6 @@ export const useMyCourses = () => {
     limit: 8,
   });
 
-  // 👉 stats cho Counter
   const [stats, setStats] = useState({
     total: 0,
     completed: 0,
@@ -40,31 +39,97 @@ export const useMyCourses = () => {
     try {
       setLoading(true);
 
-      // ✅ ĐÚNG: /api/students/my-courses (có "s")
       const { data } = await axios.get(
         `${backendUrl}/api/student/my-courses`,
         { withCredentials: true }
       );
 
       if (data.success) {
-        const normalized = (data.courses || []).map((c) => ({
+        const courses = data.courses || [];
+
+        // 1) normalize
+        const normalized = courses.map((c) => ({
           _id: c._id,
           name: c.title || "Untitled Course",
-          image: c.image || c.thumbnail || "https://placehold.co/640x360?text=No+Video+Preview",
+          image:
+            c.image ||
+            c.thumbnail ||
+            "https://placehold.co/640x360?text=No+Video+Preview",
           totalLectures: c.lecturesCount ?? c.totalLectures ?? 0,
-          completedLectures: 0,
+          completedLectures: 0, // sẽ override sau
           firstLectureId: getFirstLectureId(c),
           hasPreview: !!c.previewVideo,
         }));
 
-        setCourseData(normalized);
+        // 2) lấy progress từng course
+        let withProgress = normalized;
 
-        // 👉 dùng stats từ backend
-        const totalCourses = data.stats?.totalCourses ?? normalized.length;
-        const completedCourses = data.stats?.completedCourses ?? 0;
-        const inProgressCourses =
-          data.stats?.inProgressCourses ??
-          Math.max(0, totalCourses - completedCourses);
+        if (courses.length > 0) {
+          try {
+            const progressResults = await Promise.all(
+              courses.map(async (c) => {
+                try {
+                  const url = `${backendUrl}/api/courses/${encodeURIComponent(
+                    c._id
+                  )}/progress`;
+
+                  const { data: pData } = await axios.get(url, {
+                    withCredentials: true,
+                  });
+
+                  const completedLecturesCount =
+                    pData?.progress?.completedLecturesCount ?? 0;
+
+                  return {
+                    courseId: c._id,
+                    completedLectures: completedLecturesCount,
+                  };
+                } catch (err) {
+                  console.warn(
+                    "[useMyCourses] cannot load progress for course",
+                    c._id,
+                    err
+                  );
+                  return {
+                    courseId: c._id,
+                    completedLectures: 0,
+                  };
+                }
+              })
+            );
+
+            const progressMap = {};
+            for (const item of progressResults) {
+              progressMap[item.courseId] = item.completedLectures;
+            }
+
+            withProgress = normalized.map((item) => ({
+              ...item,
+              completedLectures: progressMap[item._id] ?? 0,
+            }));
+          } catch (err) {
+            console.warn("[useMyCourses] progress batch error", err);
+          }
+        }
+
+        // ✅ set courseData với completedLectures
+        setCourseData(withProgress);
+
+        // 3) TÍNH stats: số course đã hoàn thành / đang học
+        const totalCourses = withProgress.length;
+        let completedCourses = 0;
+        let inProgressCourses = 0;
+
+        withProgress.forEach((c) => {
+          const total = Number(c.totalLectures || 0);
+          const done = Number(c.completedLectures || 0);
+
+          if (total > 0 && done >= total) {
+            completedCourses += 1;
+          } else if (done > 0 && done < total) {
+            inProgressCourses += 1;
+          }
+        });
 
         setStats({
           total: totalCourses,
@@ -72,11 +137,10 @@ export const useMyCourses = () => {
           inProgress: inProgressCourses,
         });
 
-        // giữ pagination cho UI cũ nhưng 1 trang
         setPagination({
           page: 1,
           total: totalCourses,
-          limit: normalized.length || 8,
+          limit: withProgress.length || 8,
           totalPages: 1,
         });
       } else {
@@ -88,6 +152,7 @@ export const useMyCourses = () => {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     fetchMyCourses(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -21,6 +21,9 @@ export default function VideoPlayerDetail({
   lectureId,
 }) {
   const [resumeShownForLectureId, setResumeShownForLectureId] = useState(null);
+  const [hasStartedPlayback, setHasStartedPlayback] = useState(false); // 👈 NEW
+
+
 
   const { isTrue: isOpen, toggle } = useToggle(true);
   const navigate = useNavigate();
@@ -56,12 +59,12 @@ export default function VideoPlayerDetail({
       lectures.find((l) => l.isFree) ||
       (course.previewVideo
         ? {
-            _id: "preview",
-            title: course.title,
-            videoUrl: course.previewVideo,
-            isFree: true,
-            duration: course.duration, // optional
-          }
+          _id: "preview",
+          title: course.title,
+          videoUrl: course.previewVideo,
+          isFree: true,
+          duration: course.duration, // optional
+        }
         : null)
     );
   }, [course, lectures, lectureId]);
@@ -204,10 +207,15 @@ export default function VideoPlayerDetail({
   }, [courseId, current?._id, resetTracking]);
 
   // ====== Hỏi user có muốn resume nếu đang dở (không áp dụng cho completed) ======
- // ====== Hỏi user có muốn resume nếu đang dở (CHỈ 1 LẦN / lecture) ======
-// ====== Hỏi user có muốn resume nếu đang dở (CHỈ từ lần thứ 2 trở đi) ======
+  // ====== Hỏi user có muốn resume nếu đang dở (CHỈ 1 LẦN / lecture) ======
+  // ====== Hỏi user có muốn resume nếu đang dở (CHỈ từ lần thứ 2 trở đi) ======
+  // ====== Hỏi user có muốn resume nếu đang dở (CHỈ 1 LẦN / lecture / mỗi lần vào page) ======
+  // ====== Hỏi user có muốn resume nếu đang dở (CHỈ 1 LẦN, TRƯỚC KHI BẮT ĐẦU XEM) ======
 useEffect(() => {
   if (!current?._id) return;
+
+  // 👉 Nếu đã bắt đầu xem rồi thì không được bật dialog nữa
+  if (hasStartedPlayback) return;
 
   // Nếu lecture này đã show dialog trong lần vào hiện tại rồi thì không show lại nữa
   if (resumeShownForLectureId === current._id) {
@@ -220,29 +228,26 @@ useEffect(() => {
       : 0;
 
   const isCompleted = currentProgress?.status === "completed";
-  const viewCount =
-    typeof currentProgress?.viewCount === "number"
-      ? currentProgress.viewCount
-      : 0;
 
-  // Chỉ show dialog nếu:
+  // ✅ Chỉ cần:
   // - Có progress > 0
   // - Chưa completed
-  // - ĐÂY KHÔNG PHẢI LẦN ĐẦU (viewCount > 1)
-  if (savedPos > 0 && !isCompleted && viewCount > 1) {
+  if (savedPos > 0 && !isCompleted) {
     setShowResumeDialog(true);
     setResumeShownForLectureId(current._id); // đánh dấu đã show cho lecture này
   } else {
-    // lần đầu hoặc chưa có progress thì đảm bảo dialog tắt
+    // chưa có progress hoặc đã completed thì không hiện dialog
     setShowResumeDialog(false);
   }
 }, [
   current?._id,
   currentProgress?.status,
   currentProgress?.lastPositionSec,
-  currentProgress?.viewCount,
+  hasStartedPlayback,          // 👈 NEW
   resumeShownForLectureId,
 ]);
+
+
 
   // ====== Attach native video events (tracking) ======
   useEffect(() => {
@@ -290,6 +295,11 @@ useEffect(() => {
       const t = videoEl.currentTime || 0;
       const dur = videoEl.duration || lectureDurationSec || 0;
 
+      // 👇 NEW: đánh dấu là user đã bắt đầu xem
+      if (!hasStartedPlayback && t > 0) {
+        setHasStartedPlayback(true);
+      }
+
       // ⛔ lecture completed → chỉ xem lại, không track nữa
       if (isAlreadyCompleted) return;
 
@@ -318,6 +328,7 @@ useEffect(() => {
         }));
       }
     };
+
 
     const handleEnded = () => {
       const durationFromPlayer = videoEl.duration || lectureDurationSec || 0;
@@ -357,15 +368,17 @@ useEffect(() => {
         lectureId: current?._id,
       });
     };
-  }, [
-    reportTimeUpdate,
-    reportCompleted,
-    current?._id,
-    playerKey,
-    source,
-    lectureDurationSec,
-    currentProgress,
-  ]);
+}, [
+  reportTimeUpdate,
+  reportCompleted,
+  current?._id,
+  playerKey,
+  source,
+  lectureDurationSec,
+  currentProgress,
+  hasStartedPlayback, // 👈 NEW
+]);
+
 
   // ====== SEEK theo lựa chọn của user (resume / restart), KHÔNG autoplay ======
   useEffect(() => {
