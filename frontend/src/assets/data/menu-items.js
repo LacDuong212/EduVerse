@@ -131,13 +131,15 @@ export const STUDENT_MENU_ITEMS = [{
   icon: BsPerson,
   url: '/student/account',
   parentKey: 'student'
-}, {
-  key: 'dashboard',
-  label: 'Dashboard',
-  icon: BsUiChecksGrid,
-  url: '/student/dashboard',
-  parentKey: 'student'
-}, {
+}, 
+// {
+//   key: 'dashboard',
+//   label: 'Dashboard',
+//   icon: BsUiChecksGrid,
+//   url: '/student/dashboard',
+//   parentKey: 'student'
+// }, 
+{
   key: 'courses',
   label: 'My Courses',
   icon: BsBasket,

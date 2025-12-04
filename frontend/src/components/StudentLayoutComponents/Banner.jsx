@@ -58,11 +58,11 @@ const Banner = ({
                       </li>
                     </ul>
                   </div>
-                  <div className="mt-2 mt-sm-0">
+                  {/* <div className="mt-2 mt-sm-0">
                     <Link to="/become-instructor" className="btn btn-outline-primary mb-0">
                       Become an Instructor
                     </Link>
-                  </div>
+                  </div> */}
                 </Col>
               </Row>
             </Card>
