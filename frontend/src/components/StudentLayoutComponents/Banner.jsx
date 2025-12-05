@@ -3,12 +3,18 @@ import patternImg from '@/assets/images/pattern/04.png';
 import { Card, Col, Container, Row } from 'react-bootstrap';
 import { FaSlidersH } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
+import useLearningStreak from "@/hooks/useLearningStreak";
+import StreakBadge from "./StreakBadge";
+import { useMyCourses } from "./useMyCourses"; // 👈 thêm
 
+const Banner = ({ toggleOffCanvas, studentData }) => {
+  const { streak, loading: streakLoading } = useLearningStreak();
+  const { stats: courseStats } = useMyCourses(); // 👈 lấy stats
 
-const Banner = ({
-  toggleOffCanvas,
-  studentData
-}) => {
+  const completedCourses = courseStats?.completed ?? (studentData.completedCourses ?? 0);
+  const completedLectures =
+    courseStats?.totalCompletedLectures ?? (studentData.completedLectures ?? 0);
+
   return (
     <section className="pt-0">
       {/* Banner Background */}
@@ -42,27 +48,28 @@ const Banner = ({
                 </Col>
                 <Col className="d-md-flex justify-content-between align-items-center mt-4">
                   <div>
-                    <h1 className="my-1 fs-4">{studentData.name ?? 'Student'}</h1>
+                   <h1 className="my-1 fs-4">{studentData.name ?? 'Student'}</h1>
                     <ul className="list-inline mb-0">
-                      <li className="list-inline-item me-3 mb-1 mb-sm-0">
+                      {/* <li className="list-inline-item me-3 mb-1 mb-sm-0">
                         <span className="h6">{studentData.point ?? 0}</span>
                         &nbsp;<span className="text-body fw-light">Points</span>
+                      </li> */}
+                      <li className="list-inline-item me-3 mb-1 mb-sm-0">
+                        <span className="h6">{completedCourses}</span>
+                        &nbsp;
+                        <span className="text-body fw-light">Completed Courses</span>
                       </li>
                       <li className="list-inline-item me-3 mb-1 mb-sm-0">
-                        <span className="h6">{studentData.completedCourses ?? 0}</span>
-                        &nbsp;<span className="text-body fw-light">Completed Courses</span>
-                      </li>
-                      <li className="list-inline-item me-3 mb-1 mb-sm-0">
-                        <span className="h6">{studentData.completedLectures ?? 0}</span>
-                        &nbsp; <span className="text-body fw-light">Completed Lectures</span>
+                        <span className="h6">{completedLectures}</span>
+                        &nbsp;
+                        <span className="text-body fw-light">Completed Lectures</span>
                       </li>
                     </ul>
                   </div>
-                  {/* <div className="mt-2 mt-sm-0">
-                    <Link to="/become-instructor" className="btn btn-outline-primary mb-0">
-                      Become an Instructor
-                    </Link>
-                  </div> */}
+                  <div className="mt-4 mt-sm-4">
+                    <StreakBadge streak={streak} loading={streakLoading} />
+                  </div>
+
                 </Col>
               </Row>
             </Card>

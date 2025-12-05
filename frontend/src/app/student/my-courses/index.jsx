@@ -110,7 +110,7 @@ const StudentMyCourses = () => {
     <>
       <PageMetaData title="My Courses" />
       <Card className="bg-transparent border rounded-3">
-        <CardHeader className="bg-transparent border-bottom">
+        {/* <CardHeader className="bg-transparent border-bottom">
           <Row className="g-3 align-items-center justify-content-between">
             <Col md={8}>
               <form className="rounded position-relative">
@@ -131,7 +131,7 @@ const StudentMyCourses = () => {
               </form>
             </Col>
           </Row>
-        </CardHeader>
+        </CardHeader> */}
 
         <CardBody>
           <Counter stats={stats} loading={loading} />

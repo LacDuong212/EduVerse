@@ -1,6 +1,8 @@
 // controllers/courseProgressController.js
 import Course from "../models/courseModel.js";
 import CourseProgress from "../models/courseProgressModel.js";
+import LearningStreak from "../models/learningStreakModel.js"; 
+
 
 // --- helpers ---
 const countLecturesFromCurriculum = (cur = []) =>
@@ -80,14 +82,17 @@ export const updateLectureProgress = async (req, res) => {
       isCompleted = false,
       deltaTimeSec = 0,
       isNewSession = false,
-
+      testDate,                // 👈 THÊM
     } = req.body || {};
 
     let progress = await CourseProgress.findOne({ userId, courseId });
 
     // nếu chưa có progress -> tạo mới
     if (!progress) {
-      console.log("[updateLectureProgress] CREATE new course progress", { userId, courseId });
+      console.log("[updateLectureProgress] CREATE new course progress", {
+        userId,
+        courseId,
+      });
       const course = await Course.findById(courseId);
       if (!course) {
         return res
@@ -111,50 +116,58 @@ export const updateLectureProgress = async (req, res) => {
       });
     }
 
-
     // tìm lecture progress
     let lecture = progress.lectures.find(
       (l) => l.lectureId.toString() === lectureId.toString()
     );
 
-   if (!lecture) {
-  lecture = {
-    lectureId,
-    status: "in_progress",
-    lastPositionSec: currentTimeSec,
-    durationSec,
-    viewCount: 1,               // lần đầu
-    totalTimeSpentSec: Math.max(0, deltaTimeSec || 0),
-    lastActivityAt: new Date(),
-  };
-  progress.lectures.push(lecture);
-} else {
-  lecture.lastPositionSec = currentTimeSec;
-  if (durationSec) lecture.durationSec = durationSec;
-  lecture.lastActivityAt = new Date();
+    if (!lecture) {
+      lecture = {
+        lectureId,
+        status: "in_progress",
+        lastPositionSec: currentTimeSec,
+        durationSec,
+        viewCount: 1, // lần đầu
+        totalTimeSpentSec: Math.max(0, deltaTimeSec || 0),
+        lastActivityAt: new Date(),
+      };
+      progress.lectures.push(lecture);
+    } else {
+      lecture.lastPositionSec = currentTimeSec;
+      if (durationSec) lecture.durationSec = durationSec;
+      lecture.lastActivityAt = new Date();
 
-  if (deltaTimeSec > 0) {
-    lecture.totalTimeSpentSec = (lecture.totalTimeSpentSec || 0) + deltaTimeSec;
-  }
+      if (deltaTimeSec > 0) {
+        lecture.totalTimeSpentSec =
+          (lecture.totalTimeSpentSec || 0) + deltaTimeSec;
+      }
 
-  if (lecture.status === "not_started") {
-    lecture.status = "in_progress";
-  }
+      if (lecture.status === "not_started") {
+        lecture.status = "in_progress";
+      }
 
-  // ✅ chỉ tăng nếu là session mới
-  if (isNewSession) {
-    lecture.viewCount = (lecture.viewCount || 0) + 1;
-  }
-}
+      // ✅ chỉ tăng nếu là session mới
+      if (isNewSession) {
+        lecture.viewCount = (lecture.viewCount || 0) + 1;
+      }
+    }
 
-
-    // nếu video hoàn thành
     if (isCompleted && lecture.status !== "completed") {
       lecture.status = "completed";
       lecture.completedAt = new Date();
       progress.completedLecturesCount += 1;
-    }
 
+      // ⭐ DÙNG testDate nếu có (chỉ test)
+      try {
+        await LearningStreak.registerActivity(userId, testDate || new Date());
+      } catch (streakErr) {
+        console.error(
+          "[updateLectureProgress] streak update error:",
+          streakErr
+        );
+      }
+    }
+    
     // update tổng
     progress.lastLectureId = lectureId;
     progress.lastPositionSec = currentTimeSec;

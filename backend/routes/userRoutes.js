@@ -11,6 +11,7 @@ userRoute.get('/avatar/upload', userAuth, generateAvatarUploadSignature);
 userRoute.get('/data', userAuth, getUserData);
 userRoute.get('/profile', userAuth, getProfile);
 
+
 userRoute.patch('/profile', userAuth, updateProfile);
 
 userRoute.delete('/profile', userAuth, deleteAccount);
