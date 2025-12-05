@@ -130,7 +130,7 @@ const PricingCard = ({ course, owned, onShowCurriculum, onAddToCart, courseId })
         </div>
 
         {owned ? (
-          <div className="mt-3">
+          <div className="mt-4">
             <Button
               variant="success"
               className="w-100"
@@ -140,21 +140,13 @@ const PricingCard = ({ course, owned, onShowCurriculum, onAddToCart, courseId })
             </Button>
           </div>
         ) : (
-          <div className="mt-3 d-sm-flex justify-content-sm-between">
-            <Button
-              variant="outline-primary"
-              className="mb-0"
-              onClick={onShowCurriculum}
-            >
-              Free trial
-            </Button>
-            &nbsp;
+          <div className="mt-4">
             <Button
               variant="success"
-              className="mb-0"
+              className="w-100"
               onClick={onAddToCart}
             >
-              Buy course
+              Add to Cart
             </Button>
           </div>
         )}

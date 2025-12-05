@@ -19,6 +19,7 @@ import reviewRoute from './routes/reviewRoutes.js';
 import studentRoute from "./routes/studentRoute.js";
 import userRoute from './routes/userRoutes.js';
 import wishlistRoutes from "./routes/wishlistRoutes.js";
+import couponRoutes from "./routes/couponRoutes.js";
 
 import session from 'express-session';
 import passport from 'passport';
@@ -62,6 +63,7 @@ app.use('/api/courses', courseRoute);
 app.use('/api/category', categoryRoute);
 app.use('/api/cart', cartRoute);
 app.use("/api/wishlist", wishlistRoutes);
+app.use("/api/coupons", couponRoutes);
 app.use('/api/orders', orderRoute);
 app.use('/api/payments', paymentRoute);
 app.use('/api/reviews', reviewRoute);

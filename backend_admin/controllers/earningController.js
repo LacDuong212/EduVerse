@@ -50,6 +50,10 @@ export const getEarningsHistory = async (req, res) => {
                       {
                         case: { $eq: ["$paymentMethod", "vnpay"] },
                         then: { type: "vnpay", image: "/payment/vnpay.svg" }
+                      },
+                      {
+                        case: { $eq: ["$paymentMethod", "free"] },
+                        then: { type: "freee", image: "/payment/free.svg" }
                       }
                     ],
                     default: { type: "unknown", image: "" }

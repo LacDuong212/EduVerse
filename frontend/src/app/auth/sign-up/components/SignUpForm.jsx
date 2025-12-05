@@ -1,7 +1,8 @@
+import { useState } from "react";
 import IconTextFormInput from '@/components/form/IconTextFormInput';
 import { Controller, useForm } from "react-hook-form";
 import { BsEnvelopeFill } from "react-icons/bs";
-import { FaLock, FaUser } from "react-icons/fa";
+import { FaLock, FaUser, FaEye, FaEyeSlash } from "react-icons/fa";
 import { yupResolver } from "@hookform/resolvers/yup";
 import useSignUp from "@/app/auth/sign-up/useSignUp";
 
@@ -20,6 +21,12 @@ export default function SignUpForm({ onSignUpSuccess }) {
   });
 
   const { loading, signUp } = useSignUp(onSignUpSuccess);
+
+  const [showPassword, setShowPassword] = useState(false);
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
 
   const onSubmit = (data) => {
     const { confirmPassword, terms, ...payload } = data;
@@ -51,27 +58,45 @@ export default function SignUpForm({ onSignUpSuccess }) {
       </div>
 
       {/* Password */}
-      <div className="mb-4">
+      <div className="mb-4 position-relative">
         <IconTextFormInput
           control={control}
-          type="password"
+          type={showPassword ? 'text' : 'password'}
           icon={FaLock}
-          placeholder="*********"
+          placeholder="Password"
           label="Password *"
           name="password"
         />
+
+        <button
+            type="button" 
+            onClick={togglePasswordVisibility}
+            className="position-absolute end-0 top-50 mt-3 translate-middle-y me-3 border-0 bg-transparent text-secondary"
+            style={{ zIndex: 5 }} 
+        >
+            {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+        </button>
       </div>
 
       {/* Confirm Password */}
-      <div className="mb-4">
+      <div className="mb-4 position-relative">
         <IconTextFormInput
           control={control}
-          type="password"
+          ype={showPassword ? 'text' : 'password'}
           icon={FaLock}
-          placeholder="*********"
+          placeholder="Confirm Password"
           label="Confirm Password *"
           name="confirmPassword"
         />
+
+        <button
+            type="button" 
+            onClick={togglePasswordVisibility}
+            className="position-absolute end-0 top-50 mt-3 translate-middle-y me-3 border-0 bg-transparent text-secondary"
+            style={{ zIndex: 5 }} 
+        >
+            {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+        </button>
       </div>
 
       {/* Terms checkbox */}

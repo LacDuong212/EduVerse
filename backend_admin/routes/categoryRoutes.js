@@ -1,4 +1,5 @@
-import express from "express";
+import express from 'express';
+import { adminAuth } from "../middlewares/adminAuth.js";
 import { 
   createCategory, 
   getAllCategories, 
@@ -6,11 +7,13 @@ import {
   deleteCategory 
 } from "../controllers/categoryController.js";
 
-const router = express.Router();
+const categoryRoute = express.Router();
 
-router.post("/", createCategory);
-router.get("/", getAllCategories);
-router.put("/:id", updateCategory);
-router.delete("/:id", deleteCategory);
+categoryRoute.use(adminAuth);
 
-export default router;
+categoryRoute.post("/", createCategory);
+categoryRoute.get("/", getAllCategories);
+categoryRoute.put("/:id", updateCategory);
+categoryRoute.delete("/:id", deleteCategory);
+
+export default categoryRoute;

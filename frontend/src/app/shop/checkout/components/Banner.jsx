@@ -1,33 +1,19 @@
 import { Col, Container, Row } from 'react-bootstrap';
+import pattern4 from '@/assets/images/pattern/04.png';
+
+
 const Banner = () => {
-  return <section className="py-0">
-      <Container>
-        <Row>
-          <Col xs={12}>
-            <div className="bg-light p-4 text-center rounded-3">
-              <h1 className="m-0">Checkout</h1>
-              <div className="d-flex justify-content-center">
-                <nav aria-label="breadcrumb">
-                  <ol className="breadcrumb breadcrumb-dots mb-0">
-                    <li className="breadcrumb-item">
-                      <a href="#">Home</a>
-                    </li>
-                    <li className="breadcrumb-item">
-                      <a href="#">Courses</a>
-                    </li>
-                    <li className="breadcrumb-item">
-                      <a href="#">Cart</a>
-                    </li>
-                    <li className="breadcrumb-item active" aria-current="page">
-                      Checkout
-                    </li>
-                  </ol>
-                </nav>
-              </div>
-            </div>
-          </Col>
-        </Row>
-      </Container>
-    </section>;
+  return <section className="bg-blue align-items-center d-flex" style={{
+    background: `url(${pattern4}) no-repeat center center`,
+    backgroundSize: 'cover'
+  }}>
+    <Container>
+      <Row>
+        <Col xs={12} className="text-center">
+          <h1 className="m-0 text-light">Checkout</h1>
+        </Col>
+      </Row>
+    </Container>
+  </section>;
 };
 export default Banner;

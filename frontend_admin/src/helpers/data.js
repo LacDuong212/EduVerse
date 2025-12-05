@@ -182,3 +182,58 @@ export const deleteCategory = async (id) => {
     return { success: false, message: error.response?.data?.message || "Error" };
   }
 };
+
+// COUPON
+export const getAllCoupons = async () => {
+  try {
+    const response = await axios.get(
+      `${backendUrl}/api/coupons`, 
+      axiosConfig
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching coupons:", error);
+    return { success: false, message: error.response?.data?.message || error.message };
+  }
+};
+
+export const createCoupon = async (couponData) => {
+  try {
+    const response = await axios.post(
+      `${backendUrl}/api/coupons`, 
+      couponData, 
+      axiosConfig
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error creating coupon:", error);
+    return { success: false, message: error.response?.data?.message || "Error creating coupon" };
+  }
+};
+
+export const updateCouponStatus = async (id, isActive) => {
+  try {
+    const response = await axios.put(
+      `${backendUrl}/api/coupons/${id}/status`, 
+      { isActive }, 
+      axiosConfig
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error updating coupon status:", error);
+    return { success: false, message: error.response?.data?.message || "Error updating status" };
+  }
+};
+
+export const deleteCoupon = async (id) => {
+  try {
+    const response = await axios.delete(
+      `${backendUrl}/api/coupons/${id}`, 
+      axiosConfig
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting coupon:", error);
+    return { success: false, message: error.response?.data?.message || "Error deleting coupon" };
+  }
+};

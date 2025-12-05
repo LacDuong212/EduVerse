@@ -51,10 +51,6 @@ export const publicRoutes = [{
   path: '/courses/:id',
   name: 'CourseDetails',
   element: <CourseDetails />
-}, {
-  path: '/become-instructor',
-  name: 'Become Instructor',
-  element: <BecomeInstructorPage />
 }];
 
 export const authRoutes = [{
@@ -202,6 +198,10 @@ export const studentRoutes = [{
   name: 'Deactivate Account',
   isNested: true,
   element: null
+}, {
+  path: '/student/become-instructor',
+  name: 'Become Instructor',
+  element: <BecomeInstructorPage />
 }, {
   path: '/student/*',
   name: 'Resource Not Found',

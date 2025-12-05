@@ -13,6 +13,7 @@ import dashboardRoute from './routes/dashboardRoutes.js';
 import earningRoute from './routes/earningRoutes.js';
 import instructorRoute from './routes/instructorRoutes.js';
 import studentRoute from './routes/studentRoutes.js';
+import couponRoute from './routes/couponRoutes.js';
 
 
 //Initialize Express
@@ -38,6 +39,7 @@ app.use('/api/dashboard', dashboardRoute);
 app.use('/api/earnings', earningRoute);
 app.use('/api/instructors', instructorRoute);
 app.use('/api/students', studentRoute);
+app.use('/api/coupons', couponRoute);
 
 // Port
 const PORT = process.env.PORT;

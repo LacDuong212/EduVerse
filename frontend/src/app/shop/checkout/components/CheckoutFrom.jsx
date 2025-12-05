@@ -1,207 +1,255 @@
+import { useState, useEffect } from 'react';
+import { Button, Card, Col, Container, Row, Form, InputGroup, Spinner } from 'react-bootstrap';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
+
 import momoImg from '@/assets/images/client/momo.svg';
 import vnpayImg from '@/assets/images/client/vnpay.svg';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { Button, Card, Col, Container, Row } from 'react-bootstrap';
-import { useForm } from 'react-hook-form';
-import { BsPencilSquare, BsTrash } from 'react-icons/bs';
-import * as yup from 'yup';
-import useCartDetail from '../../cart/useCartDetails';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
 import { formatCurrency } from '@/utils/currency';
+import useCartDetail from '../../cart/useCartDetails';
 
-const CheckoutProductCard = ({
-  image,
-  title,
-  price,
-  onRemove
-}) => {
-  return <>
-    <Row className="g-3">
-      <Col sm={4}>
-        <img className="rounded" src={image} alt="courses" />
-      </Col>
-      <Col sm={8}>
-        <h6 className="mb-0">
-          <a href="#">{title}</a>
-        </h6>
-        <div className="d-flex justify-content-between align-items-center mt-3">
-          <span className="text-success">{formatCurrency(price)}</span>
-          <div className="text-primary-hover">
-            <button
-              className="btn btn-link text-body p-0 me-2"
-              onClick={onRemove}
-            >
-              <BsTrash className="me-1" />
-              Remove
-            </button>
+const CheckoutProductCard = ({ image, title, price, discountPrice }) => {
+  return (
+    <>
+      <Row className="g-3 align-items-center">
+        <Col sm={3}>
+          <img className="rounded img-fluid" src={image} alt="course" style={{ maxHeight: '70px', objectFit: 'cover' }} />
+        </Col>
+        <Col sm={9}>
+          <h6 className="mb-1 text-truncate">
+            <Link to="#" className="text-decoration-none text-body">{title}</Link>
+          </h6>
+          <div className="d-flex justify-content-between align-items-center">
+            <span className="text-success fw-bold">
+              {formatCurrency(discountPrice ?? price ?? 0)}
+            </span>
           </div>
-        </div>
-      </Col>
-    </Row>
-    <hr />
-  </>;
+        </Col>
+      </Row>
+      <hr className="my-3" />
+    </>
+  );
 };
+
 const CheckoutFrom = () => {
-  const editEmailFormSchema = yup.object({
-    name: yup.string().required('Please enter your name'),
-    email: yup.string().email('Please enter valid email').required('Please enter your Email'),
-    phoneNo: yup.number().required('Please enter your phone number'),
-    postalCode: yup.string().required('Please enter your postal code'),
-    address: yup.string().required('Please enter your address')
-  });
-  const { control, handleSubmit } = useForm({
-    resolver: yupResolver(editEmailFormSchema),
-  });
   const navigate = useNavigate();
-  const { displayedCourses, displayedTotal, removeFromCart, handleCheckout } = useCartDetail();
-  const originalTotal = displayedCourses.reduce(
-    (sum, c) => sum + (Number(c?.price ?? 0) || 0),
-    0
-  );
-  const couponDiscount = Math.max(
-    0,
-    originalTotal -
-    displayedCourses.reduce(
-      (sum, c) => sum + (Number(c?.discountPrice ?? c?.price ?? 0) || 0),
-      0
-    )
-  );
-  const totalToPay = displayedTotal;
+  const location = useLocation();
+  const { selectedIds } = location.state || {};
 
-  const handlePlaceOrder = async () => {
-    const paymentMethod = document.querySelector(
-      'input[name="payment"]:checked'
-    )?.value;
+  const {
+    displayedCourses,
+    displayedSubTotal,
+    handleCheckout,
+    couponCode,
+    setCouponCode,
+    handleApplyCoupon,
+    handleRemoveCoupon,
+    appliedCoupon,
+    isApplyingCoupon,
+    couponDiscountAmount,
+    finalTotal
+  } = useCartDetail(selectedIds);
 
-    if (!paymentMethod) {
-      return toast.error('Vui lòng chọn phương thức thanh toán');
+  const [paymentMethod, setPaymentMethod] = useState('');
+
+  useEffect(() => {
+    if (finalTotal === 0) {
+      setPaymentMethod('free');
+    } else {
+      if (paymentMethod === 'free') setPaymentMethod('');
     }
+  }, [finalTotal]);
 
-    await handleCheckout(paymentMethod);
+  useEffect(() => {
+    if (!selectedIds || selectedIds.length === 0) {
+      toast.warning("Please select items from cart first.");
+      navigate('/cart');
+    }
+  }, [selectedIds, navigate]);
+
+  if (!selectedIds || selectedIds.length === 0) {
+    return (
+      <Container className="pt-5 text-center">
+        <Spinner animation="border" variant="primary" />
+        <p className="mt-2">Redirecting to cart...</p>
+      </Container>
+    );
   }
 
-  return <section className="pt-5">
-    <Container>
-      <Row className="g-4 g-sm-5">
-        <Col xl={8} className="mb-4 mb-sm-0">
-          <Card className="card-body shadow p-4">
-            <Row className="g-3">
-              <h5>Payment method</h5>
-              <Col xs={12}>
+  const onApplyCouponClick = () => {
+    handleApplyCoupon();
+  };
+
+  const onPlaceOrder = async () => {
+    if (finalTotal > 0 && !paymentMethod) {
+      return toast.error('Please select payment method');
+    }
+
+    const result = await handleCheckout(paymentMethod);
+
+    if (result) {
+      if (result.type === 'redirect_internal') {
+        navigate(result.url);
+      } else if (result.type === 'redirect_external') {
+        window.location.href = result.url;
+      }
+    }
+  };
+
+  const isFreeOrder = finalTotal === 0;
+
+  return (
+    <section className="pt-5">
+      <Container>
+        <Row className="g-4 g-sm-5">
+          <Col xl={8} className="mb-4 mb-sm-0">
+            <Card className="card-body shadow p-4">
+              <h4 className="mb-4">Select Payment Method</h4>
+
+              {isFreeOrder ? (
+                <div className="alert alert-success d-flex align-items-center">
+                  <i className="bi bi-check-circle-fill fs-4 me-2"></i>
+                  <div>
+                    <h6 className="mb-0">Free Order</h6>
+                    <small>No payment required. You will be enrolled immediately.</small>
+                  </div>
+                </div>
+              ) : (
                 <div className="d-flex flex-column gap-3">
                   {/* MOMO */}
-                  <div className="form-check border rounded p-3 d-flex align-items-center justify-content-between hover-shadow-sm">
+                  <div
+                    className={`border rounded p-3 d-flex align-items-center justify-content-between cursor-pointer ${paymentMethod === 'momo' ? 'border-primary bg-light' : ''}`}
+                    onClick={() => setPaymentMethod('momo')}
+                    style={{ cursor: 'pointer' }}
+                  >
                     <div className="d-flex align-items-center">
-                      <input
-                        className="form-check-input me-3"
+                      <Form.Check
                         type="radio"
                         name="payment"
                         id="momo"
-                        value="momo"
+                        checked={paymentMethod === 'momo'}
+                        readOnly
+                        className="me-3"
                       />
-                      <label className="form-check-label fw-semibold" htmlFor="momo">
-                        Thanh toán qua MOMO
+                      <label className="form-check-label fw-semibold cursor-pointer" htmlFor="momo">
+                        Payment via MoMo Wallet
                       </label>
                     </div>
-                    <img
-                      src={momoImg}
-                      alt="MOMO"
-                      className="rounded ms-3"
-                      style={{ width: '40px', height: 'auto' }}
-                    />
+                    <img src={momoImg} alt="MOMO" className="rounded" style={{ width: '40px' }} />
                   </div>
 
                   {/* VNPAY */}
-                  <div className="form-check border rounded p-3 d-flex align-items-center justify-content-between hover-shadow-sm">
+                  <div
+                    className={`border rounded p-3 d-flex align-items-center justify-content-between cursor-pointer ${paymentMethod === 'vnpay' ? 'border-primary bg-light' : ''}`}
+                    onClick={() => setPaymentMethod('vnpay')}
+                    style={{ cursor: 'pointer' }}
+                  >
                     <div className="d-flex align-items-center">
-                      <input
-                        className="form-check-input me-3"
+                      <Form.Check
                         type="radio"
                         name="payment"
                         id="vnpay"
-                        value="vnpay"
+                        checked={paymentMethod === 'vnpay'}
+                        readOnly
+                        className="me-3"
                       />
-                      <label className="form-check-label fw-semibold" htmlFor="vnpay">
-                        Thanh toán qua VNPAY
+                      <label className="form-check-label fw-semibold cursor-pointer" htmlFor="vnpay">
+                        Payment via VNPAY
                       </label>
                     </div>
-                    <img
-                      src={vnpayImg}
-                      alt="VNPAY"
-                      className="rounded ms-3"
-                      style={{ width: '130px', height: 'auto' }}
-                    />
+                    <img src={vnpayImg} alt="VNPAY" className="rounded" style={{ width: '100px' }} />
                   </div>
                 </div>
-              </Col>
-            </Row>
-          </Card>
-        </Col>
-        <Col xl={4}>
-          <Row className="mb-0">
-            <Col md={6} xl={12}>
-              <Card className="card-body shadow p-4 mb-4">
-                <h4 className="mb-4">Order Summary</h4>
-                <div className="mb-3">
-                  {/* <div className="d-flex justify-content-between align-items-center">
-                    <span>Transaction code</span>
-                    <p className="mb-0 h6 fw-light">AB12365E</p>
-                  </div> */}
-                  <div className="input-group mt-2">
-                    <input className="form-control form-control" placeholder="COUPON CODE" />
-                    <button type="button" className="btn btn-primary">
-                      Apply
-                    </button>
-                  </div>
-                </div>
-                <hr />
+              )}
+            </Card>
+          </Col>
+
+          <Col xl={4}>
+            <Card className="card-body shadow p-4 mb-4 position-sticky top-0">
+              <h4 className="mb-4">Order Summary</h4>
+
+              <div className="mb-3" style={{ maxHeight: '300px', overflowY: 'auto' }}>
                 {displayedCourses.map((item) => (
                   <CheckoutProductCard
-                    key={item.courseId}
+                    key={item.courseId || item._id}
                     image={item.thumbnail || '/placeholder-course.png'}
                     title={item.title || 'Untitled'}
-                    price={(item.discountPrice ?? item.price ?? 0).toFixed(2)}
-                    onRemove={() => removeFromCart([item.courseId])}
+                    price={item.price}
+                    discountPrice={item.discountPrice}
                   />
                 ))}
-                <ul className="list-group list-group-borderless mb-2">
-                  <li className="list-group-item px-0 d-flex justify-content-between">
-                    <span className="h6 fw-light mb-0">Original Price</span>
-                    <span className="h6 fw-light mb-0 fw-bold">
-                      {formatCurrency(originalTotal)}
+              </div>
+
+              <div className="mb-3">
+                <label className="form-label">Discount Code</label>
+                {appliedCoupon ? (
+                  <div className="alert alert-success d-flex justify-content-between align-items-center py-2 px-3 small mb-0">
+                    <span>
+                      <i className="bi bi-tag-fill me-1"></i>
+                      <strong>{appliedCoupon.couponCode}</strong> (-{appliedCoupon.discountPercent}%)
                     </span>
-                  </li>
+                    <Button
+                      variant="link"
+                      size="sm"
+                      className="text-danger p-0 text-decoration-none"
+                      onClick={handleRemoveCoupon}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                ) : (
+                  <InputGroup>
+                    <Form.Control
+                      placeholder="Enter Coupon Code"
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                    />
+                    <Button
+                      variant="primary"
+                      onClick={onApplyCouponClick}
+                      disabled={isApplyingCoupon || !couponCode}
+                    >
+                      {isApplyingCoupon ? <Spinner size="sm" /> : 'Apply'}
+                    </Button>
+                  </InputGroup>
+                )}
+              </div>
+
+              <hr />
+
+              {/* Tổng tiền */}
+              <ul className="list-group list-group-borderless mb-2">
+                <li className="list-group-item px-0 d-flex justify-content-between">
+                  <span className="h6 fw-light mb-0">Subtotal</span>
+                  <span className="h6 fw-light mb-0 fw-bold">{formatCurrency(displayedSubTotal)}</span>
+                </li>
+                {appliedCoupon && (
                   <li className="list-group-item px-0 d-flex justify-content-between">
-                    <span className="h6 fw-light mb-0">Coupon Discount</span>
-                    <span className="text-danger">
-                      -{formatCurrency(couponDiscount)}
-                    </span>
+                    <span className="h6 fw-light mb-0 text-success">Discount</span>
+                    <span className="text-success">-{formatCurrency(couponDiscountAmount)}</span>
                   </li>
-                  <li className="list-group-item px-0 d-flex justify-content-between">
-                    <span className="h5 mb-0">Total</span>
-                    <span className="h5 mb-0">
-                      {formatCurrency(totalToPay)}
-                    </span>
-                  </li>
-                </ul>
-                <div className="d-grid">
-                  <Button variant="success" size="lg" onClick={handlePlaceOrder}>
-                    Place Order
-                  </Button>
-                </div>
-                <p className="small mb-0 mt-2 text-center">
-                  By completing your purchase, you agree to these
-                  <a href="#">
-                    <strong>Terms of Service</strong>
-                  </a>
-                </p>
-              </Card>
-            </Col>
-          </Row>
-        </Col>
-      </Row>
-    </Container>
-  </section>;
+                )}
+                <li className="list-group-item px-0 d-flex justify-content-between border-top mt-2 pt-2">
+                  <span className="h5 mb-0">Total</span>
+                  <span className="h5 mb-0 text-primary">{formatCurrency(finalTotal)}</span>
+                </li>
+              </ul>
+
+              <div className="d-grid mt-4">
+                <Button
+                  variant="success"
+                  size="lg"
+                  onClick={onPlaceOrder}
+                  disabled={displayedCourses.length === 0}
+                >
+                  Place Order
+                </Button>
+              </div>
+            </Card>
+          </Col>
+        </Row>
+      </Container>
+    </section>
+  );
 };
 export default CheckoutFrom;

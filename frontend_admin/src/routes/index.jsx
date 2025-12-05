@@ -11,6 +11,7 @@ const AdminNotFoundPage = lazy(() => import("@/app/not-found"));
 const AdminDashboard = lazy(() => import('@/app/dashboard/page'));
 const AdminAllCourses = lazy(() => import('@/app/all-courses/page'));
 const AdminCategory = lazy(() => import('@/app/category/page'));
+const AdminCoupons = lazy(() => import('@/app/coupons/page'));
 const ComingSoonPage = lazy(() => import('@/app/coming-soon/page'));
 const AdminStudents = lazy(() => import('@/app/students/page'));
 const AdminInstructors = lazy(() => import('@/app/instructors/page'));
@@ -50,6 +51,10 @@ export const adminRoutes = [{
   path: '/category',
   name: 'Category',
   element: <AdminCategory />
+}, {
+  path: '/coupons',
+  name: 'Coupons',
+  element: <AdminCoupons />
 }, {
   path: '/course-detail',
   name: 'Course Detail',

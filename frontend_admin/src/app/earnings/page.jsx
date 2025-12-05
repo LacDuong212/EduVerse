@@ -50,7 +50,19 @@ const InvoiceHistoryCard = ({
       year: 'numeric'
     })}</td>
     <td>
-      <img src={paymentMethod.image} className={` ${paymentMethod.type === 'vnpay' ? 'h-30px' : 'h-40px'}`} height={paymentMethod.type === 'momo' ? 30 : 40} alt="paymentMethodImg" />
+      <img
+        src={paymentMethod.image}
+        className="d-inline-block"
+        style={{
+          height: paymentMethod.type === 'vnpay'
+            ? '30px'
+            : paymentMethod.type === 'momo'
+              ? '50px'
+              : '35px',
+          width: 'auto'
+        }}
+        alt="paymentMethodImg"
+      />
     </td>
     <td>
       ₫{amount}&nbsp;

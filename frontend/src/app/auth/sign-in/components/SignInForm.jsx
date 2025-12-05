@@ -1,20 +1,48 @@
-import { Controller } from "react-hook-form";
+import { useState } from "react";
 import IconTextFormInput from '@/components/form/IconTextFormInput';
 import { Link } from "react-router-dom";
 import { BsEnvelopeFill } from "react-icons/bs";
-import { FaLock } from "react-icons/fa";
+import { FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import useSignIn from "@/app/auth/sign-in/useSignIn";
 
 export default function SignInForm() {
   const { loading, login, control } = useSignIn();
 
+  const [showPassword, setShowPassword] = useState(false);
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
     <form onSubmit={login}>
       <div className="mb-4">
-        <IconTextFormInput control={control} icon={BsEnvelopeFill} placeholder="E-mail" label="Email address *" name="email" />
+        <IconTextFormInput
+          control={control}
+          icon={BsEnvelopeFill}
+          placeholder="E-mail"
+          label="Email address *"
+          name="email" />
       </div>
-      <div className="mb-4">
-        <IconTextFormInput type='password' control={control} icon={FaLock} placeholder="Password" label="Password *" name="password" />
+
+      <div className="mb-4 position-relative">
+        <IconTextFormInput
+          type={showPassword ? 'text' : 'password'}
+          control={control}
+          icon={FaLock}
+          placeholder="Password"
+          label="Password *"
+          name="password" />
+        
+        <button
+            type="button" 
+            onClick={togglePasswordVisibility}
+            className="position-absolute end-0 top-50 mt-1 translate-middle-y me-3 border-0 bg-transparent text-secondary"
+            style={{ zIndex: 5 }} 
+        >
+            {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+        </button>
+
         <div id="passwordHelpBlock" className="form-text">
           Your password must be 8 characters at least
         </div>

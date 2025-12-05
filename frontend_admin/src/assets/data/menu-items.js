@@ -1,6 +1,7 @@
 import { BsBasket, BsHouse } from 'react-icons/bs';
 import { FaChartBar, FaRegCommentDots, FaUserCog } from 'react-icons/fa';
 import { FaUserGraduate, FaUserTie } from 'react-icons/fa6';
+import { BiSolidCoupon } from "react-icons/bi";
 
 export const ADMIN_MENU_ITEMS = [{
   key: 'admin',
@@ -32,6 +33,11 @@ export const ADMIN_MENU_ITEMS = [{
   //   url: '/course-detail',
   //   parentKey: 'courses'
   // }]
+},{
+  key: 'coupons',
+  label: 'Coupons',
+  icon: BiSolidCoupon,
+  url: '/coupons'
 }, {
   key: 'students',
   label: 'Students',

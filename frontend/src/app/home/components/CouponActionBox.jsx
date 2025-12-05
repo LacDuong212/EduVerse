@@ -1,13 +1,22 @@
-import { useNavigate } from 'react-router-dom';
-import { Button, Col, Container, Row } from 'react-bootstrap';
-const ActionBox = () => {
-  const navigate = useNavigate();
+import { useState } from 'react';
+import { Container, Row, Col, Button } from 'react-bootstrap';
 
-  const handleButtonClick = () => {
-    navigate('/student/become-instructor');
+const CouponActionBox = () => {
+  const [isCopied, setIsCopied] = useState(false);
+  const couponCode = "WELCOME50";
+
+  const handleCopyClick = () => {
+    navigator.clipboard.writeText(couponCode);
+    
+    setIsCopied(true);
+
+    setTimeout(() => {
+      setIsCopied(false);
+    }, 2000);
   };
 
-  return <section className="pt-0 pt-lg-5">
+  return (
+    <section className="pt-0 pt-lg-5">
       <Container className="position-relative">
         <figure className="position-absolute top-50 start-50 translate-middle ms-2">
           <svg>
@@ -17,27 +26,47 @@ const ActionBox = () => {
             <path className="fill-white opacity-4" d="m20.499 10.25c0 5.66-4.589 10.249-10.25 10.249-5.66 0-10.249-4.589-10.249-10.249-0-5.661 4.589-10.25 10.249-10.25 5.661-0 10.25 4.589 10.25 10.25z" />
           </svg>
         </figure>
+
         <Row>
           <Col xs={12}>
-            <div className="bg-primary p-4 p-sm-5 rounded-3">
+            <div className="bg-purple p-4 p-sm-5 rounded-3">
               <Row className="position-relative">
+                {/* SVG Decoration Left */}
                 <figure className="fill-white opacity-1 position-absolute top-50 start-0 translate-middle-y">
                   <svg width="141px" height="141px">
                     <path d="M140.520,70.258 C140.520,109.064 109.062,140.519 70.258,140.519 C31.454,140.519 -0.004,109.064 -0.004,70.258 C-0.004,31.455 31.454,-0.003 70.258,-0.003 C109.062,-0.003 140.520,31.455 140.520,70.258 Z" />
                   </svg>
                 </figure>
+
                 <Col xs={11} className="mx-auto position-relative">
                   <Row className="align-items-center">
+                    {/* Text Section */}
                     <Col lg={7}>
-                      <h3 className="text-white">Become an Instructor!</h3>
+                      <h3 className="text-white">Special Welcome Offer!</h3>
                       <p className="text-white mb-3 mb-lg-0">
-                        Speedily say has suitable disposal add boy. On forth doubt miles of child. Exercise joy man children rejoiced. Yet uncommonly
-                        his ten who diminution astonished.
+                        Start your learning journey with a huge discount. 
+                        Use code <span className="fw-bold text-warning h4 align-middle mx-1">{couponCode}</span> 
+                        at checkout to get 50% off all courses. Don't miss out!
                       </p>
                     </Col>
+
+                    {/* Button Section */}
                     <Col lg={5} className="text-lg-end">
-                      <Button variant="outline-warning" className="mb-0" onClick={() => navigate("/student/become-instructor")}>
-                        Start Teaching Today
+                      <Button 
+                        variant={isCopied ? "success" : "outline-warning"} 
+                        className="mb-0" 
+                        onClick={handleCopyClick}
+                        disabled={isCopied}
+                      >
+                        {isCopied ? (
+                          <span>
+                            <i className="bi bi-check-circle me-2"></i> Copied!
+                          </span>
+                        ) : (
+                          <span>
+                            Copy Code: {couponCode}
+                          </span>
+                        )}
                       </Button>
                     </Col>
                   </Row>
@@ -47,6 +76,8 @@ const ActionBox = () => {
           </Col>
         </Row>
       </Container>
-    </section>;
+    </section>
+  );
 };
-export default ActionBox;
+
+export default CouponActionBox;

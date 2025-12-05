@@ -2,6 +2,7 @@
 import PageMetaData from '@/components/PageMetaData';
 import ActionBox from './components/ActionBox';
 import Counter from './components/Counter';
+import CouponActionBox from './components/CouponActionBox';
 import Hero from './components/Hero';
 import NewestCourses from './components/NewestCourses';
 // import Reviews from './components/Reviews';
@@ -18,6 +19,7 @@ const HomePage = () => {
       <main>
         <Hero />
         <Counter />
+        <CouponActionBox />
         <NewestCourses />
         <ActionBox />
         <TrendingCourses />
