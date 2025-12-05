@@ -12,7 +12,7 @@ import { toast } from "react-toastify";
 
 // constants ---
 const MAX_EDUCATION_LENGTH = 5;
-const MAX_SKILLS_LENGTH = 5;
+const MAX_SKILLS_LENGTH = 6;
 
 // react-quill settings ---
 const QUILL_MODULES = {
@@ -56,10 +56,9 @@ const MyProfile = () => {
   const [educationList, setEducationList] = useState([]);
   const [skillList, setSkillList] = useState([]);
 
+  const [errors, setErrors] = useState({});
+
   // helper
-  // if preview = "", shows name initials
-  // if preview = null, shows user.pfpImg
-  // if preview = <url>, show new avatar
   const currentAvatarSrc = previewAvatar === "" ? null : (previewAvatar || instructor?.pfpImg);
 
   useEffect(() => {
@@ -129,27 +128,61 @@ const MyProfile = () => {
     setSkillList(skillList.filter((_, i) => i !== index));
   };
 
-  // #TODO: validation
-
-  // submission
-  const handleFormSubmit = (e) => {
+  // validation & submission
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
+    setErrors({}); // reset errors
 
     // collect data
     const formData = new FormData(e.target);
+    const name = formData.get("name");
+    const occupation = formData.get("occupation");
+    const phonenumber = formData.get("phonenumber");
+
+    // validation ---
+    const newErrors = {};
+
+    if (!name || name.trim() === "") newErrors.name = "Name is required";
+    if (!occupation || occupation.trim() === "") newErrors.occupation = "Occupation is required";
+
+    if (phonenumber && phonenumber.trim() !== "") {
+      const phoneRegex = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/;
+      if (!phoneRegex.test(phonenumber)) {
+        newErrors.phonenumber = "Invalid phone number format";
+      }
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      toast.error("Please fix the errors in the form.");
+      return;
+    }
+
+    const isEducationInvalid = educationList.some(edu => !edu.institution.trim() || !edu.fieldOfStudy.trim());
+    if (isEducationInvalid) {
+      toast.error("Please fill out all Education fields (Institution & Field of Study)");
+      return;
+    }
+
+    const isSkillsInvalid = skillList.some(skill => !skill.name.trim());
+    if (isSkillsInvalid) {
+      toast.error("Please provide a name for all Skills");
+      return;
+    }
 
     // construct payload
     const payload = {
-      name: formData.get("name"),
-      phonenumber: formData.get("phonenumber"),
+      name: name,
+      occupation: occupation,
+      phonenumber: phonenumber,
       address: formData.get("address"),
-      // rich text & arrays (from state, not formData)
+      // rich text & arrays (from state)
       introduction: introduction,
       education: educationList,
       skills: skillList,
       // avatar logic
       pfpImg: previewAvatar !== null ? previewAvatar : instructor?.pfpImg,
-      // socials (from formData but by name)
+      // socials
       socials: {
         facebook: formData.get("facebook"),
         twitter: formData.get("twitter"),
@@ -159,8 +192,12 @@ const MyProfile = () => {
       website: formData.get("website"),
     };
 
-    toast.info("Comming soon")
-    // await updateProfile(payload);
+    try {
+      await updateInstructorProfile(payload);
+
+    } catch (error) {
+      toast.error(error.message || "Failed to update profile");
+    }
   };
 
   return (
@@ -208,7 +245,7 @@ const MyProfile = () => {
                 {/* Upload Button */}
                 <div>
                   <label className="btn btn-primary-soft btn-sm" htmlFor="uploadfile-1">{isAvatarUploading ? "Uploading..." : "Change"}</label>
-                  <input id="uploadfile-1" className="d-none" type="file" onChange={handleFileChange} disabled={isAvatarUploading}/>
+                  <input id="uploadfile-1" className="d-none" type="file" onChange={handleFileChange} disabled={isAvatarUploading} />
                 </div>
               </div>
             </Col>
@@ -221,14 +258,26 @@ const MyProfile = () => {
                 <Col md={6}>
                   <label className="form-label mb-0">Full Name <span className="text-danger">*</span></label>
                   <div className="input-group">
-                    <input type="text" name="name" className="form-control" defaultValue={instructor?.name || ""} />
+                    <input
+                      type="text"
+                      name="name"
+                      className={`form-control ${errors.name ? "is-invalid rounded" : ""}`}
+                      defaultValue={instructor?.name || ""}
+                    />
+                    {errors.name && <div className="invalid-feedback rounded">{errors.name}</div>}
                   </div>
                 </Col>
                 {/* Opcupation */}
                 <Col md={6}>
                   <label className="form-label mb-0">Occupation <span className="text-danger">*</span></label>
                   <div className="input-group">
-                    <input type="text" name="address" className="form-control" defaultValue={instructor?.occupation || ""} />
+                    <input
+                      type="text"
+                      name="occupation"
+                      className={`form-control ${errors.occupation ? "is-invalid rounded" : ""}`}
+                      defaultValue={instructor?.occupation || ""}
+                    />
+                    {errors.occupation && <div className="invalid-feedback">{errors.occupation}</div>}
                   </div>
                 </Col>
               </Row>
@@ -249,32 +298,21 @@ const MyProfile = () => {
                     <input type="text" className="form-control" defaultValue={instructor?.email || ''} disabled />
                   </div>
                 </Col>
-                {/* Phonenumber #TODO: verify? */}
+                {/* Phonenumber */}
                 <Col md={6}>
                   <label className="form-label mb-0">Phone Number</label>
                   <div className="input-group">
-                    <input type="text" name="phonenumber" className="form-control" defaultValue={instructor?.phonenumber || ''} />
-                    {/* <button
-                  type="button"
-                  className="btn btn-outline-primary"
-                  onClick={() => null}
-                  title="Verify phone number"
-                >
-                  Verify
-                </button> */}
+                    <input 
+                      type="text" 
+                      name="phonenumber" 
+                      className={`form-control ${errors.phonenumber ? "is-invalid rounded" : ""}`} 
+                      defaultValue={instructor?.phonenumber || ''} 
+                    />
+                    {errors.phonenumber && <div className="invalid-feedback">{errors.phonenumber}</div>}
                   </div>
                 </Col>
               </Row>
             </Col>
-
-            {/* Username */}
-            {/* <Col md={6}>
-              <label className="form-label">Username</label>
-              <div className="input-group">
-                <span className="input-group-text">eduverse.com/</span>
-                <input type="text" className="form-control" defaultValue={instructor?.username} disabled />
-              </div>
-            </Col> */}
 
             {/* Address */}
             <Col xs={12}>
@@ -311,28 +349,28 @@ const MyProfile = () => {
                   <FaFacebook className="fab fa-facebook text-facebook mb-1 me-2 fs-5" />
                   Facebook profile URL
                 </label>
-                <input className="form-control" type="text" name="facebook" value={instructor?.socials?.facebook} placeholder="facebook.com/your_username" />
+                <input className="form-control" type="text" name="facebook" defaultValue={instructor?.socials?.facebook} placeholder="facebook.com/your_username" />
               </div>
               <div className="mb-3">
                 <label className="form-label d-flex align-items-center mb-0">
                   <BsTwitter className="bi bi-twitter text-twitter mb-1 me-2 fs-5" />
                   Twitter profile URL
                 </label>
-                <input className="form-control" type="text" name="twitter" value={instructor?.socials?.twitter} placeholder="x.com/your_username" />
+                <input className="form-control" type="text" name="twitter" defaultValue={instructor?.socials?.twitter} placeholder="x.com/your_username" />
               </div>
               <div className="mb-3">
                 <label className="form-label d-flex align-items-center mb-0">
                   <FaInstagram className="fab fa-instagram text-danger mb-1 me-2 fs-5" />
                   Instagram profile URL
                 </label>
-                <input className="form-control" type="text" name="instagram" value={instructor?.socials?.instagram} placeholder="instagram.com/your_username" />
+                <input className="form-control" type="text" name="instagram" defaultValue={instructor?.socials?.instagram} placeholder="instagram.com/your_username" />
               </div>
               <div className="">
                 <label className="form-label d-flex align-items-center mb-0">
                   <FaYoutube className="fab fa-youtube text-youtube mb-1 me-2 fs-5" />
                   YouTube channel URL
                 </label>
-                <input className="form-control" type="text" name="youtube" value={instructor?.socials?.youtube} placeholder="youtube.com/@your_channel" />
+                <input className="form-control" type="text" name="youtube" defaultValue={instructor?.socials?.youtube} placeholder="youtube.com/@your_channel" />
               </div>
             </Col>
 
@@ -344,20 +382,20 @@ const MyProfile = () => {
                   <FaGlobe className="text-success mb-1 me-2 fs-5" />
                   Website URL
                 </label>
-                <input className="form-control" type="text" name="website"value={instructor?.website} placeholder="https://www.example.com" />
+                <input className="form-control" type="text" name="website" defaultValue={instructor?.website} placeholder="https://www.example.com" />
               </div>
             </Col>
           </Row>
 
           <Row className="mt-md-1 g-4">
             {/* EDUCATION */}
-            <Col md={7}>
+            <Col md={12}>
               <h5>Education</h5>
               {educationList.map((edu, index) => (
                 <div className="input-group mb-2" key={index}>
                   <input
                     type="text"
-                    className="form-control"
+                    className={`form-control ${(edu.fieldOfStudy === "" && educationList.length > 0) ? "border-danger" : ""}`}
                     placeholder="Bachelor in..."
                     style={{ flexBasis: "30%" }}
                     value={edu.fieldOfStudy}
@@ -366,7 +404,7 @@ const MyProfile = () => {
                   <span className="input-group-text bg-light">at</span>
                   <input
                     type="text"
-                    className="form-control"
+                    className={`form-control ${(edu.institution === "" && educationList.length > 0) ? "border-danger" : ""}`}
                     placeholder="University..."
                     value={edu.institution}
                     onChange={(e) => handleEducationChange(index, "institution", e.target.value)}
@@ -387,55 +425,55 @@ const MyProfile = () => {
                 </button>
               )}
             </Col>
+          </Row>
 
+          <Row className="mt-2 g-4">
             {/* SKILLS */}
-            <Col md={5}>
-              <h5>Skills</h5>
-              <div className="d-flex flex-column gap-3">
-                {skillList.map((skill, index) => (
-                  <div key={index} className="">
-                    <div className="input-group mb-1">
-                      <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Web Design..."
-                        value={skill.name}
-                        onChange={(e) => handleSkillChange(index, "name", e.target.value)}
-                      />
-                      <span className="input-group-text text-primary" title="Evaluation">
-                        {skill.level}%
-                      </span>
-                      <button
-                        type="button"
-                        className="btn btn-danger-soft border p-0"
-                        onClick={() => handleRemoveSkill(index)}
-                        title="Remove skill"
-                      >
-                        <BsX size={23} />
-                      </button>
-                    </div>
-                    <div className="d-flex align-items-center small mt-1">
-                      <span className="me-2">0</span>
-                      <input
-                        type="range"
-                        className="form-range flex-grow-1"
-                        min={0}
-                        max={100}
-                        step={1}
-                        value={skill.level}
-                        onChange={(e) => handleSkillChange(index, "level", Number(e.target.value))}
-                      />
-                      <span className="ms-2">100</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+            <h5>Skills</h5>
+            {skillList.map((skill, index) => (
+              <Col sm={12} md={6} lg={4} key={index} className="mt-0">
+                <div className="input-group mb-1">
+                  <input
+                    type="text"
+                    className={`form-control ${(skill.name === "" && skillList.length > 0) ? "border-danger" : ""}`}
+                    placeholder="Web Design..."
+                    value={skill.name}
+                    onChange={(e) => handleSkillChange(index, "name", e.target.value)}
+                  />
+                  <span className="input-group-text text-primary" title="Evaluation">
+                    {skill.level}%
+                  </span>
+                  <button
+                    type="button"
+                    className="btn btn-danger-soft border p-0"
+                    onClick={() => handleRemoveSkill(index)}
+                    title="Remove skill"
+                  >
+                    <BsX size={23} />
+                  </button>
+                </div>
+                <div className="d-flex align-items-center small mt-1 mb-2">
+                  <span className="me-2">0</span>
+                  <input
+                    type="range"
+                    className="form-range flex-grow-1"
+                    min={0}
+                    max={100}
+                    step={1}
+                    value={skill.level}
+                    onChange={(e) => handleSkillChange(index, "level", Number(e.target.value))}
+                  />
+                  <span className="ms-2">100</span>
+                </div>
+              </Col>
+            ))}
+            <div className="mt-0">
               {skillList.length < MAX_SKILLS_LENGTH && (
                 <button type="button" className="btn btn-sm btn-light mb-0 d-flex align-items-center" onClick={handleAddSkill}>
                   <BsPlus className="mb-1 me-1 fs-5" /> Add Skill
                 </button>
               )}
-            </Col>
+            </div>
           </Row>
 
           {/* SUBMISSION */}

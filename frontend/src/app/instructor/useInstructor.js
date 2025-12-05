@@ -133,15 +133,44 @@ export default function useInstructor() {
       if (!data.success) {
         throw new Error(data.message || "Failed to fetch profile")
       }
-        
+
       return { instructor: data.instructor ?? {} };
     } catch (error) {
-      throw new Error(data.message || "Failed to fetch profile")
+      throw new Error(error || "Failed to fetch profile")
     }
-  }; 
+  };
 
-  const updateInstructorProfile = async () => {
+  const updateInstructorProfile = async (payload) => {
+    try {
+      const { data } = await axios.put(
+        `${backendUrl}/api/instructor/profile`,
+        payload,
+        { withCredentials: true }
+      );
 
+      if (data.success) {
+        toast.success("Profile updated successfully!");
+      }
+
+    } catch (error) {
+      // check if the server sent a response (4xx/5xx errors)
+      if (error.response && error.response.data) {
+
+        // if specific validation array
+        if (error.response.data.errors && Array.isArray(error.response.data.errors)) {
+          error.response.data.errors.forEach(err => toast.error(err));
+          throw new Error("Cannot update profile");
+        }
+
+        // if a single message
+        if (error.response.data.message) {
+          throw new Error(error.response.data.message);
+        }
+      }
+
+      // network errors (server down, no internet)
+      throw new Error("Network error, please try again later");
+    }
   };
 
   return {
