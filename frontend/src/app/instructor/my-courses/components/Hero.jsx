@@ -27,11 +27,13 @@ const MyCoursesHero = ({ totalCourses, activeCourses, inactiveCourses }) => {
           </Col>
         </Row>
       </Container>
+      <Container>
       <Counter
         totalCourses={totalCourses}
         activeCourses={activeCourses}
         inactiveCourses={inactiveCourses}
       />
+      </Container>
       <figure className="position-absolute top-50 end-0 translate-middle-y mt-5 me-n5 d-none d-xxl-inline-flex">
         <svg className="fill-warning rotate-186 opacity-8">
           <path d="m83.9 54.3c0 7.7-2.5 15.1-7.4 21.3-11.8 15.1-33.7 17.8-48.8 6-7.3-5.7-12-13.9-13.1-23.1s1.4-18.3 7.1-25.6c11.8-15.1 33.7-17.8 48.8-6 7.3 5.7 12 13.9 13.1 23.1 0.2 1.4 0.3 2.8 0.3 4.3zm-69.2-0.2c0 1.4 0.1 2.9 0.3 4.3 1.1 9.1 5.7 17.2 13 22.9 15 11.7 36.6 9 48.3-6 5.7-7.2 8.1-16.2 7-25.4-1.1-9.1-5.7-17.2-13-22.9-15-11.7-36.6-9-48.3 6-4.8 6.1-7.3 13.5-7.3 21.1z" />

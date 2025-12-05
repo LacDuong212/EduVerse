@@ -3,10 +3,8 @@ import { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 
-
-const backendUrl = import.meta.env.VITE_BACKEND_URL;
-
 export default function useInstructor() {
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const userId = useSelector((state) => state.auth.userData?._id);
 
   const fetchPublicFields = async (fields) => {
@@ -125,11 +123,63 @@ export default function useInstructor() {
     }
   };
 
+  const fetchInstructorProfile = async () => {
+    try {
+      const { data } = await axios.get(
+        `${backendUrl}/api/instructor/profile`,
+        { withCredentials: true }
+      );
+
+      if (!data.success) {
+        throw new Error(data.message || "Failed to fetch profile")
+      }
+
+      return { instructor: data.instructor ?? {} };
+    } catch (error) {
+      throw new Error(error || "Failed to fetch profile")
+    }
+  };
+
+  const updateInstructorProfile = async (payload) => {
+    try {
+      const { data } = await axios.put(
+        `${backendUrl}/api/instructor/profile`,
+        payload,
+        { withCredentials: true }
+      );
+
+      if (data.success) {
+        toast.success("Profile updated successfully!");
+      }
+
+    } catch (error) {
+      // check if the server sent a response (4xx/5xx errors)
+      if (error.response && error.response.data) {
+
+        // if specific validation array
+        if (error.response.data.errors && Array.isArray(error.response.data.errors)) {
+          error.response.data.errors.forEach(err => toast.error(err));
+          throw new Error("Cannot update profile");
+        }
+
+        // if a single message
+        if (error.response.data.message) {
+          throw new Error(error.response.data.message);
+        }
+      }
+
+      // network errors (server down, no internet)
+      throw new Error("Network error, please try again later");
+    }
+  };
+
   return {
     fetchPublicFields,
     fetchPrivateFields,
     fetchCourses,
     setCoursePrivacy,
-    fetchInstructorCounters
+    fetchInstructorCounters,
+    fetchInstructorProfile,
+    updateInstructorProfile,
   };
 };

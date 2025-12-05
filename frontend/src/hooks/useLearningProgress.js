@@ -1,144 +1,147 @@
-import { useCallback, useRef } from "react";
-import axios from "axios";
+  import { useCallback, useRef, useEffect } from "react";
+  import axios from "axios";
 
-const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-export default function useLectureTracking({
-  courseId,
-  lectureId,
-  durationSec,
-  minDeltaSeconds = 5, // ⬅️ mỗi 5s mới gửi 1 lần
-} = {}) {
-  const lastReportedTimeRef = useRef(0);
+  export default function useLectureTracking({
+    courseId,
+    lectureId,
+    durationSec,
+    minDeltaSeconds = 5,
+    initialStatus, // ⬅️ NEW
+  } = {}) {
+    const lastReportedTimeRef = useRef(0);
 
-  const sendUpdate = useCallback(
-    async ({ currentTimeSec, isCompleted = false, durationOverride }) => {
-      if (!backendUrl || !courseId || !lectureId) {
-        console.log("[useLectureTracking] SKIP send: missing data", {
-          hasBackend: !!backendUrl,
-          courseId,
-          lectureId,
-        });
-        return;
-      }
+    // 🔒 nếu lecture đã completed => disable tracking (không gửi timeupdate nữa)
+    const disabledRef = useRef(initialStatus === "completed");
 
-      const current = Math.max(0, Number(currentTimeSec) || 0);
-      const last = lastReportedTimeRef.current || 0;
-      const rawDelta = current - last;
+    useEffect(() => {
+      disabledRef.current = initialStatus === "completed";
+    }, [initialStatus, courseId, lectureId]);
 
-      console.log("[useLectureTracking] ENTER sendUpdate", {
-        backendUrl,
-        courseId,
-        lectureId,
-        currentTimeSec: current,
-        isCompleted,
-      });
-
-      // ⛔ Không cho delta âm (seek ngược, bug timeupdate)
-      const safeDelta = rawDelta > 0 ? rawDelta : 0;
-  const isNewSession = last === 0 && current > 0 && !isCompleted;
-      if (!isCompleted) {
-        // 1) Lần đầu, player đang ở 0s -> bỏ qua
-        if (last === 0 && current === 0) {
-          console.log("[useLectureTracking] SKIP (initial 0s)", {
-            current,
-            last,
-          });
-          return;
-        }
-
-        // 2) Chỉ gửi khi đã trôi ít nhất minDeltaSeconds
-        if (last > 0 && safeDelta < minDeltaSeconds) {
-          console.log("[useLectureTracking] SKIP (delta < min)", {
+    const sendUpdate = useCallback(
+      async ({ currentTimeSec, isCompleted = false, durationOverride }) => {
+        if (!backendUrl || !courseId || !lectureId) {
+          console.log("[useLectureTracking] SKIP send: missing data", {
+            hasBackend: !!backendUrl,
+            courseId,
             lectureId,
-            lastReported: last,
-            current,
-            rawDelta,
-            safeDelta,
-            minDeltaSeconds,
           });
           return;
         }
-      }
 
-      // ✅ Chỉ khi QUYẾT ĐỊNH gửi mới update lastReported
-      if (safeDelta > 0) {
-        lastReportedTimeRef.current = current;
-      }
+        // ✅ Nếu lecture đã completed rồi và đây KHÔNG PHẢI là gói completed nữa → bỏ qua
+        if (disabledRef.current && !isCompleted) {
+          console.log(
+            "[useLectureTracking] SKIP: lecture already completed, ignore timeupdate",
+            { lectureId, currentTimeSec }
+          );
+          return;
+        }
 
-      const deltaTimeSec = safeDelta; // để float cũng được, BE vẫn + bình thường
+        const current = Math.max(0, Number(currentTimeSec) || 0);
+        const last = lastReportedTimeRef.current || 0;
+        const rawDelta = current - last;
 
-      console.log("[useLectureTracking] COMPUTED", {
-        lectureId,
-        lastReported: last,
-        current,
-        rawDelta,
-        deltaTimeSec,
-        isCompleted,
-      });
+        // ⛔ Không cho delta âm
+        const safeDelta = rawDelta > 0 ? rawDelta : 0;
 
-      const payload = {
-        currentTimeSec: Math.round(current), // vị trí cuối cùng: làm tròn
-        durationSec: durationOverride ?? durationSec ?? 0,
-        deltaTimeSec, // thời gian xem thêm: giữ float
-        isCompleted,
-        isNewSession,
-      };
+        let isNewSession =
+          last === 0 && current > 0 && !isCompleted && !disabledRef.current;
 
-      console.log("[useLectureTracking] SENDING", {
-        url: `${backendUrl}/api/courses/${courseId}/progress/lectures/${lectureId}`,
-        payload,
-      });
+        if (disabledRef.current) {
+          // đã completed rồi thì không coi là session mới nữa
+          isNewSession = false;
+        }
 
-      try {
-        await axios.post(
-          `${backendUrl}/api/courses/${courseId}/progress/lectures/${lectureId}`,
+        if (!isCompleted) {
+          if (last === 0 && current === 0) {
+            console.log("[useLectureTracking] SKIP (initial 0s)", {
+              current,
+              last,
+            });
+            return;
+          }
+
+          if (last > 0 && safeDelta < minDeltaSeconds) {
+            console.log("[useLectureTracking] SKIP (delta < min)", {
+              lectureId,
+              lastReported: last,
+              current,
+              rawDelta,
+              safeDelta,
+              minDeltaSeconds,
+            });
+            return;
+          }
+        }
+
+        if (safeDelta > 0) {
+          lastReportedTimeRef.current = current;
+        }
+
+        const payload = {
+          currentTimeSec: Math.round(current),
+          durationSec: durationOverride ?? durationSec ?? 0,
+          deltaTimeSec: safeDelta,
+          isCompleted,
+          isNewSession,
+        };
+
+        console.log("[useLectureTracking] SENDING", {
+          url: `${backendUrl}/api/courses/${courseId}/progress/lectures/${lectureId}`,
           payload,
-          { withCredentials: true }
-        );
-        console.log("[useLectureTracking] DONE");
-      } catch (err) {
-        console.error("update lecture progress error:", err);
-      }
-    },
-    [courseId, lectureId, durationSec, minDeltaSeconds]
-  );
+        });
 
-  const reportTimeUpdate = useCallback(
-    (currentTimeSec) => {
-      console.log("[useLectureTracking] reportTimeUpdate", { currentTimeSec });
-      return sendUpdate({ currentTimeSec, isCompleted: false });
-    },
-    [sendUpdate]
-  );
+        try {
+          await axios.post(
+            `${backendUrl}/api/courses/${courseId}/progress/lectures/${lectureId}`,
+            payload,
+            { withCredentials: true }
+          );
+          console.log("[useLectureTracking] DONE");
+        } catch (err) {
+          console.error("update lecture progress error:", err);
+        }
+      },
+      [courseId, lectureId, durationSec, minDeltaSeconds]
+    );
 
-  const reportCompleted = useCallback(
-    (currentTimeSec, playerDurationSec) => {
-      const durationOverride =
-        durationSec || playerDurationSec || currentTimeSec;
+    const reportTimeUpdate = useCallback(
+      (currentTimeSec) => {
+        console.log("[useLectureTracking] reportTimeUpdate", { currentTimeSec });
+        return sendUpdate({ currentTimeSec, isCompleted: false });
+      },
+      [sendUpdate]
+    );
 
-      console.log("[useLectureTracking] reportCompleted", {
-        currentTimeSec,
-        durationOverride,
-      });
+    const reportCompleted = useCallback(
+      (currentTimeSec, playerDurationSec) => {
+        const durationOverride =
+          durationSec || playerDurationSec || currentTimeSec;
 
-      return sendUpdate({
-        currentTimeSec,
-        isCompleted: true, // ⬅️ bỏ qua minDelta, luôn gửi
-        durationOverride,
-      });
-    },
-    [sendUpdate, durationSec]
-  );
+        console.log("[useLectureTracking] reportCompleted", {
+          currentTimeSec,
+          durationOverride,
+        });
 
-  const resetTracking = useCallback(() => {
-    console.log("[useLectureTracking] resetTracking");
-    lastReportedTimeRef.current = 0;
-  }, []);
+        return sendUpdate({
+          currentTimeSec,
+          isCompleted: true,
+          durationOverride,
+        });
+      },
+      [sendUpdate, durationSec]
+    );
 
-  return {
-    reportTimeUpdate,
-    reportCompleted,
-    resetTracking,
-  };
-}
+    const resetTracking = useCallback(() => {
+      console.log("[useLectureTracking] resetTracking");
+      lastReportedTimeRef.current = 0;
+    }, []);
+
+    return {
+      reportTimeUpdate,
+      reportCompleted,
+      resetTracking,
+    };
+  }

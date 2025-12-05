@@ -217,10 +217,10 @@ const MyStudentsList = ({
                   <th scope="col" className="border-0 ps-3">
                     Student Name
                   </th>
-                  <th scope="col" className="border-0 text-center">
+                  <th scope="col" className="border-0 text-center d-none d-md-table-cell">
                     Enrolled At
                   </th>
-                  <th scope="col" className="border-0 text-center">
+                  <th scope="col" className="border-0 text-center d-none d-md-table-cell">
                     Recent Review
                   </th>
                   <th scope="col" className="border-0 text-center">
@@ -259,7 +259,10 @@ const MyStudentsList = ({
             <p className="mb-0 text-center text-sm-start ps-2">
               Showing {totalStudents === 0 ? 0 : start} to {end} of {totalStudents} students
             </p>
-            <nav aria-label="navigation">
+            <nav 
+              className="d-flex justify-content-center mb-0"
+              aria-label="navigation"
+            >
               <ul className="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
                 <li
                   className={`page-item ${page === 1 ? "disabled" : ""}`}

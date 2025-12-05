@@ -10,7 +10,7 @@ const Banner = ({
   studentData
 }) => {
   return (
-    <section className="pt-0">
+    <section className="pt-0 pb-2 pb-lg-5">
       {/* Banner Background */}
       <Container fluid className="px-0">
         <div className="bg-blue h-100px h-md-200px rounded-0"
@@ -58,11 +58,11 @@ const Banner = ({
                       </li>
                     </ul>
                   </div>
-                  <div className="mt-2 mt-sm-0">
+                  {/* <div className="mt-2 mt-sm-0">
                     <Link to="/become-instructor" className="btn btn-outline-primary mb-0">
                       Become an Instructor
                     </Link>
-                  </div>
+                  </div> */}
                 </Col>
               </Row>
             </Card>

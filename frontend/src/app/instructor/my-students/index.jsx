@@ -9,7 +9,7 @@ const InstructorMyStudents = () => {
     <>
       <PageMetaData title="My Students" />
       <Hero />
-      <Container className="mt-5">
+      <Container className="my-5">
         <MyStudentsList />
       </Container>
     </>

@@ -30,13 +30,13 @@ const linkedAccountSubSchema = new mongoose.Schema({
 
 // profile details
 const skillSubSchema = new mongoose.Schema({
-  skill: { type: String },
-  skillRating: { type: Number, min: 0, max: 5, default: 0 },
+  name: { type: String, required: true },
+  level: { type: Number, min: 0, max: 100, required: true, default: 0 },
 });
 const educationSubSchema = new mongoose.Schema({
-  institution: { type: String },
-  degree: { type: String },
-  fieldOfStudy: { type: String },
+  institution: { type: String, required: true },
+  degree: { type: String, default: "" },
+  fieldOfStudy: { type: String, required: true },
   startDate: { type: Date },
   endDate: { type: Date },
   addedAt: { type: Date, default: Date.now },

@@ -6,23 +6,43 @@ import {
   FaStarHalfAlt,
   FaUserGraduate,
 } from "react-icons/fa";
+import { useNavigate, useParams } from "react-router-dom";
 
 // giống helper trong CourseCard
 const clamp = (n, min, max) => Math.max(min, Math.min(max, n ?? 0));
 
+// normalize status giống bên CourseMaterial / Playlist
+const normalizeStatus = (rawStatus, lastPositionSec, durationSec) => {
+  const s = (rawStatus || "").toString().toLowerCase();
+
+  if (s === "completed") return "completed";
+  if (s === "in-progress" || s === "in_progress") return "in-progress";
+
+  // Không có status rõ ràng → đoán từ thời gian
+  const pos = Number(lastPositionSec || 0);
+  const dur = Number(durationSec || 0);
+
+  if (dur > 0 && pos >= dur) return "completed";
+  if (pos > 0 && pos < dur) return "in-progress";
+
+  return "not-started";
+};
+
 const Intro = ({ course, progress }) => {
+  const navigate = useNavigate();
+  const { courseId } = useParams(); // /student/courses/:courseId
+
   // ------- Fallback dữ liệu từ course -------
   const title = course?.title || "Course title";
   const description =
-    course?.subtitle ||
-    "This course does not have a description yet.";
+    course?.subtitle || "This course does not have a description yet.";
 
   const instructorName = course?.instructor?.name || "Unknown instructor";
 
   // ⭐️ rating: dùng chung style với CourseCard
   const rawStar =
     typeof course?.rating === "object"
-      ? (course?.rating?.average ?? course?.rating?.star)
+      ? course?.rating?.average ?? course?.rating?.star
       : course?.rating;
 
   const starNum = Number(rawStar);
@@ -39,17 +59,121 @@ const Intro = ({ course, progress }) => {
   const language = course?.language || "Unknown language";
   const studentsEnrolled = Number(course?.studentsEnrolled ?? 0);
 
-  // ------- Progress (nếu có) -------
+  // ------- Progress theo số lecture completed -------
   const totalLessons =
-    progress?.totalLessons ??
-    course?.lecturesCount ??
-    0;
-  const completedLessons = progress?.completedLessons ?? 0;
+    progress?.totalLectures ?? course?.lecturesCount ?? 0;
+  const completedLessons = progress?.completedLecturesCount ?? 0;
 
   const progressPercent =
     totalLessons > 0
       ? Math.round((completedLessons / totalLessons) * 100)
       : 0;
+
+  // IDs từ progress / course
+  const lastLectureIdRaw = progress?.lastLectureId;
+  const lastLectureId =
+    typeof lastLectureIdRaw === "string"
+      ? lastLectureIdRaw
+      : lastLectureIdRaw?.toString?.() ?? null;
+
+  const firstLectureIdRaw =
+    course?.curriculum?.[0]?.lectures?.[0]?._id || null;
+  const firstLectureId =
+    typeof firstLectureIdRaw === "string"
+      ? firstLectureIdRaw
+      : firstLectureIdRaw?.toString?.() ?? null;
+
+  const handleContinueLearning = () => {
+    if (!courseId) {
+      console.log("[Intro] No courseId in URL, cannot navigate");
+      return;
+    }
+
+    let firstInProgressLectureId = null;
+    let firstNotStartedLectureId = null;
+
+    if (
+      Array.isArray(course?.curriculum) &&
+      Array.isArray(progress?.lectures)
+    ) {
+      const progressMap = {};
+      for (const p of progress.lectures) {
+        const rawId = p?.lectureId;
+        const key =
+          typeof rawId === "string" ? rawId : rawId?.toString?.();
+        if (!key) continue;
+        progressMap[key] = p;
+      }
+
+      console.log("[Intro] progressMap keys:", Object.keys(progressMap));
+
+      outerLoop: for (const section of course.curriculum) {
+        const lectures = section?.lectures || [];
+        for (const lec of lectures) {
+          const rawLecId = lec?._id;
+          const lecId =
+            typeof rawLecId === "string"
+              ? rawLecId
+              : rawLecId?.toString?.();
+          if (!lecId) continue;
+
+          const p = progressMap[lecId] || {};
+          const status = normalizeStatus(
+            p.status,
+            p.lastPositionSec,
+            p.durationSec
+          );
+
+          console.log("[Intro] check lecture", {
+            lecId,
+            status,
+            progressItem: p,
+          });
+
+          if (!firstInProgressLectureId && status === "in-progress") {
+            firstInProgressLectureId = lecId;
+            // tiếp tục loop để xem có lecture not-started phía trên không? → không, mình ưu tiên in-progress trước
+            break outerLoop;
+          }
+
+          if (!firstNotStartedLectureId && status === "not-started") {
+            firstNotStartedLectureId = lecId;
+            // chưa break, vì có thể phía trên có in-progress (nhưng theo thứ tự đi từ trên xuống nên cái đầu gặp sẽ được giữ)
+          }
+        }
+      }
+    }
+
+    // ƯU TIÊN:
+    // 1. Lecture in-progress đầu tiên trong curriculum
+    // 2. Lecture not-started đầu tiên
+    // 3. lastLectureId từ backend
+    // 4. firstLectureId (lecture đầu tiên của course)
+    const targetLectureId =
+      firstInProgressLectureId ||
+      firstNotStartedLectureId ||
+      lastLectureId ||
+      firstLectureId;
+
+    console.log("[Intro] handleContinueLearning choose target:", {
+      courseId,
+      firstInProgressLectureId,
+      firstNotStartedLectureId,
+      lastLectureId,
+      firstLectureId,
+      targetLectureId,
+      rawProgress: progress,
+      curriculum: course?.curriculum,
+    });
+
+    if (!targetLectureId) return;
+
+    navigate(`/courses/${courseId}/watch/${targetLectureId}`);
+  };
+
+  const disabledContinue =
+    !courseId ||
+    (!lastLectureId && !firstLectureId && !Array.isArray(progress?.lectures));
 
   return (
     <section className="bg-blue py-7">
@@ -116,7 +240,12 @@ const Intro = ({ course, progress }) => {
               {studentsEnrolled.toLocaleString()} already enrolled
             </h6>
 
-            <button type="button" className="btn btn-warning mb-3 w-100">
+            <button
+              type="button"
+              className="btn btn-warning mb-3 w-100"
+              onClick={handleContinueLearning}
+              disabled={disabledContinue}
+            >
               Continue learning
             </button>
 

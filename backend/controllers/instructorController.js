@@ -282,11 +282,6 @@ export const createInstructor = async (req, res) => {
   }
 };
 
-// PATCH /api/instructors/:id
-export const updateInstructor = async (req, res) => {
-
-};
-
 // GET /api/instructor/courses?page=&limit=&search=&sort=
 export const getInstructorCourses = async (req, res) => {
   try {
@@ -877,5 +872,138 @@ export const generateVideoUploadUrl = async (req, res) => {
       success: false,
       message: "Server error"
     });
+  }
+};
+
+// GET /api/instructor/profile
+export const getProfile = async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    const instructor = await Instructor.findOne({ user: userId }).populate("user");
+    if (!instructor) {
+      res.status(404).json({ success: false, message: "Instructor not found" });
+    }
+
+    return res.json({
+      success: true,
+      instructor: {
+        id: instructor.user?._id,
+        name: instructor.user?.name,
+        email: instructor.user?.email,
+        pfpImg: instructor.user?.pfpImg || '',
+        phonenumber: instructor.user?.phonenumber || '',
+        website: instructor.user?.website || '',
+        socials: {
+          facebook: instructor.user?.socials?.facebook || '',
+          twitter: instructor.user?.socials?.twitter || '',
+          instagram: instructor.user?.socials.instagram || '',
+          youtube: instructor.user?.socials.youtube || '',
+        },
+        introduction: instructor.introduction || '',
+        address: instructor.address || '',
+        occupation: instructor.occupation || '',
+        skills: instructor.skills || [],
+        education: instructor.education || [],
+        isApproved: instructor.isApproved || false,
+      }
+    });
+
+  } catch (error) {
+    res.status(400).json({ success: false, message: "Server Error" });
+  }
+};
+
+// PUT /api/instructor/profile
+export const updateProfile = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const payload = req.body;
+
+    const errors = [];
+
+    if (!payload.name || payload.name.trim() === "") {
+      errors.push("Name is required");
+    }
+    if (!payload.occupation || payload.occupation.trim() === "") {
+      errors.push("Occupation is required");
+    }
+
+    if (payload.phonenumber && payload.phonenumber.trim() !== "") {
+        const phoneRegex = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/; 
+        if (!phoneRegex.test(payload.phonenumber)) {
+            errors.push("Invalid phone number format");
+        }
+    }
+
+    if (payload.education && Array.isArray(payload.education) && payload.education.length > 0) {
+      payload.education.forEach((edu, index) => {
+        if (!edu.institution || edu.institution.trim() === "") {
+          errors.push(`Education item #${index + 1}: Institution is required`);
+        }
+        if (!edu.fieldOfStudy || edu.fieldOfStudy.trim() === "") {
+          errors.push(`Education item #${index + 1}: Field of Study is required`);
+        }
+      });
+    }
+
+    if (payload.skills && Array.isArray(payload.skills) && payload.skills.length > 0) {
+      payload.skills.forEach((skill, index) => {
+        if (!skill.name || skill.name.trim() === "") {
+          errors.push(`Skill item #${index + 1}: Name is required`);
+        }
+        if (skill.level === undefined || skill.level === null || skill.level < 0 || skill.level > 100) {
+          errors.push(`Skill item #${index + 1}: Level must be between 0 and 100`);
+        }
+      });
+    }
+
+    if (errors.length > 0) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Validation failed", 
+        errors: errors 
+      });
+    }
+
+    const userUpdates = {
+      name: payload.name,
+      phonenumber: payload.phonenumber,
+      website: payload.website,
+      socials: payload.socials,
+      pfpImg: payload.pfpImg,
+    };
+
+    const instructorUpdates = {
+      occupation: payload.occupation,
+      address: payload.address,
+      introduction: payload.introduction,
+      education: payload.education,
+      skills: payload.skills,
+    };
+
+    const [updatedUser, updatedInstructor] = await Promise.all([
+      userModel.findByIdAndUpdate(userId, { $set: userUpdates }),
+      Instructor.findOneAndUpdate({ user: userId }, { $set: instructorUpdates })
+    ]);
+
+    if (!updatedUser || !updatedInstructor) {
+      return res.status(404).json({ success: false, message: "Cannot find profile" });
+    }
+
+    const combinedProfile = {
+      ...updatedInstructor.toObject(),
+      user: updatedUser.toObject() 
+    };
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      //instructor: combinedProfile,
+    });
+
+  } catch (error) {
+    console.error("Update instructor profile error:", error);
+    return res.status(500).json({ success: false, message: "Internal server error" });
   }
 };

@@ -11,7 +11,7 @@ const Banner = ({
   accountData
 }) => {
   return (
-    <section className="pt-0">
+    <section className="pt-0 pb-2 pb-lg-5">
       {/* Banner Background */}
       <Container fluid className="px-0">
         <div className="bg-blue h-100px h-md-200px rounded-0"
@@ -43,7 +43,7 @@ const Banner = ({
                 </Col>
                 <Col className="d-md-flex justify-content-between align-items-center mt-4">
                   <div>
-                    <h1 className="fs-4 d-flex align-items-center gap-2">
+                    <h1 className="fs-4 mt-2 d-flex align-items-center gap-2">
                       {accountData?.name} <BsPatchCheckFill className="text-info small" />
                     </h1>
                     <ul className="list-inline mb-0">

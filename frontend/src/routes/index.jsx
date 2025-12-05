@@ -13,7 +13,6 @@ import InstructorDashboard from "../app/instructor/dashboard";
 import InstructorManageCoursePage from "../app/instructor/manage-course";
 import InstructorMyCourses from "../app/instructor/my-courses";
 import InstructorMyStudents from "../app/instructor/my-students";
-import VideoUploadTest from "../app/instructor/temp/VideoUploadTest";
 
 // STUDENT
 const Checkout = lazy(() => import('@/app/shop/checkout/page'));
@@ -30,6 +29,7 @@ import HomePage from "../app/home/page";
 import CoursesPage from "../app/pages/course/grid/page";
 import BecomeInstructorPage from '../app/student/become-instructor';
 import CourseDetails from "../app/pages/course/detail/page";
+import InstructorDetailsPage from "../app/pages/instructors/detail";
 import VideoPlayer from "../app/pages/course/video-player/page";
 import NotFoundPage from '../app/not-found';
 
@@ -51,6 +51,10 @@ export const publicRoutes = [{
   path: '/courses/:id',
   name: 'CourseDetails',
   element: <CourseDetails />
+}, {
+  path: '/instructors/:id',
+  name: 'Instructor Details',
+  element: <InstructorDetailsPage />
 }];
 
 export const authRoutes = [{
@@ -121,11 +125,6 @@ export const instructorRoutes = [{
   name: 'Update Course',
   isNested: false,
   element: <InstructorCourseDetail />
-}, {
-  path: '/instructor/videos/upload-test',
-  name: 'Upload Video',
-  isNested: false,
-  element: <VideoUploadTest />
 }, {
   path: '/instructor/*',
   name: 'Resource Not Found',
