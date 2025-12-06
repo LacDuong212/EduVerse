@@ -10,6 +10,7 @@ const ResetPassword = lazy(() => import('@/app/auth/reset-password/page'));
 import InstructorAccount from "../app/instructor/account";
 import InstructorCourseDetail from "../app/instructor/course-detail";
 import InstructorDashboard from "../app/instructor/dashboard";
+import InstructorEarnings from '../app/instructor/earnings';
 import InstructorManageCoursePage from "../app/instructor/manage-course";
 import InstructorMyCourses from "../app/instructor/my-courses";
 import InstructorMyStudents from "../app/instructor/my-students";
@@ -104,12 +105,7 @@ export const instructorRoutes = [{
   path: '/instructor/earnings',
   name: 'Earnings',
   isNested: true,
-  element: null
-}, {
-  path: '/instructor/deactivate-account',
-  name: 'Deactivate Account',
-  isNested: true,
-  element: null
+  element: <InstructorEarnings />
 }, {
   path: '/instructor/courses/create',
   name: 'Create Course',

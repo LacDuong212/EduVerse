@@ -181,7 +181,7 @@ export default function useInstructor() {
         `${backendUrl}/api/instructor/students?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}&sort=${sort}`,
         { withCredentials: true }
       );
-      
+
       if (data?.success) return data;
 
       throw new Error(data?.message || "Cannot fetch students");
@@ -190,6 +190,28 @@ export default function useInstructor() {
       throw new Error(error.response.data?.message || "Failed to fetch students");
     }
   }, [userId]);
+
+  const fetchInstructorEarnings = async () => {
+    try {
+      const { data } = await axios.get(
+        `${backendUrl}/api/instructor/earnings`,
+        { withCredentials: true }
+      );
+
+      if (data?.success) 
+        return {
+          earningsData: data.earningsData || [],
+          thisMonthEarnings: data.thisMonthEarnings || 0,
+          toBePaid: data.toBePaid || 0,
+          lifeTimeEarnings: data.lifeTimeEarnings || 0
+        } 
+      else
+        throw new Error(data?.message || "Cannot get earnings");
+    } catch (error) {
+      console.error("Failed to get earnings", error);
+      throw new Error(error.response?.data?.message || "Failed to get earnings")
+    }
+  };
 
   return {
     fetchPublicFields,
@@ -200,5 +222,6 @@ export default function useInstructor() {
     fetchInstructorProfile,
     updateInstructorProfile,
     fetchStudents,
+    fetchInstructorEarnings,
   };
 };

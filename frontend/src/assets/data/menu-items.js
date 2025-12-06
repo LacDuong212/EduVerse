@@ -1,6 +1,5 @@
-import { BsBasket, BsBook, BsCardChecklist, BsCreditCard2Front, BsGear, BsInfoCircle, BsPerson, BsUiChecksGrid } from 'react-icons/bs';
+import { BsBasket, BsBook, BsGear, BsInfoCircle, BsPerson, BsUiChecksGrid } from 'react-icons/bs';
 import { IoWalletOutline } from 'react-icons/io5'
-import { MdDoNotDisturb } from 'react-icons/md';
 import { PiStudent } from 'react-icons/pi';
 import { RiBook2Line } from 'react-icons/ri';
 
@@ -85,12 +84,6 @@ export const INSTRUCTOR_MENU_ITEMS = [{
   label: 'Settings',
   icon: BsGear,
   url: '/instructor/settings',
-  parentKey: 'instructor'
-}, {
-  key: 'deactivate-account',
-  label: 'Deactivate Account',
-  icon: MdDoNotDisturb,
-  url: '/instructor/deactivate-account',
   parentKey: 'instructor'
 }];
 

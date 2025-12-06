@@ -11,7 +11,7 @@ const Banner = ({
   accountData
 }) => {
   return (
-    <section className="pt-0 pb-2 pb-lg-5">
+    <section className="py-0 mb-2 mb-xl-5">
       {/* Banner Background */}
       <Container fluid className="px-0">
         <div className="bg-blue h-100px h-md-200px rounded-0"

@@ -1095,3 +1095,98 @@ export const getInstructorStudents = async (req, res) => {
     return res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
+
+// GET /api/instructor/earnings
+export const getInstructorEarnings = async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    const isInstructor = await Instructor.exists({ user: userId });
+    if (!isInstructor) {
+      return res.status(403).json({ success: false, message: "You don't have access to this resource" });
+    }
+
+    const courseIds = await getInstructorCourseIds(userId);
+
+    if (courseIds.length === 0) {
+      return res.json({
+        success: true,
+        earningsData: [],
+        totalEarning: 0
+      });
+    }
+
+    // get life time earnings ---
+    const lifetimeAggregation = await Order.aggregate([
+      {
+        $match: {
+          status: 'completed',
+          "courses.course": { $in: courseIds }
+        }
+      },
+      { $unwind: "$courses" },
+      {
+        $match: {
+          "courses.course": { $in: courseIds }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$courses.pricePaid" }
+        }
+      }
+    ]);
+
+    const lifeTimeEarnings = lifetimeAggregation[0]?.total || 0;
+
+    // time config ---
+    const { start, mongoFormat, unit } = getDateConfig('month');
+
+    // get earings ---
+    const earnings = await Order.aggregate([
+      {
+        $match: {
+          status: 'completed',
+          createdAt: { $gte: start },
+          "courses.course": { $in: courseIds },
+        }
+      },
+      { $unwind: "$courses" },
+      {
+        $match: {
+          "courses.course": { $in: courseIds }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            month: { $dateToString: { format: mongoFormat, date: "$createdAt" } }
+          },
+          totalEarnings: { $sum: "$courses.pricePaid" }
+        }
+      },
+      { $sort: { "_id.month": 1 } }
+    ]);
+
+    const earningsData = fillChartData(earnings, start, unit);
+
+    // get this month earnings ---
+    const thisMonthEarnings = earningsData.length > 0 ? earningsData[earningsData.length - 1].value : 0;
+    
+    // res ---
+    return res.json({
+      success: true,
+      earningsData,
+      thisMonthEarnings,
+      toBePaid: thisMonthEarnings * 0.8,        // platform takes 20%
+      lifeTimeEarnings: lifeTimeEarnings * 0.8  // net profit
+    });
+  } catch (error) {
+    console.error("Populate instructor dashboard data error: ", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
+  }
+};
