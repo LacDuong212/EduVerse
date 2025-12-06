@@ -30,7 +30,9 @@ const TopNavigationBar = () => {
     <TopNavbar>
       <Container>
         <div onClick={onLogoClick} style={{ cursor: 'pointer' }}>
-          <LogoBox width={130} />
+          <Link className="navbar-brand py-0" to="/">
+            <LogoBox width={130} />
+          </Link>
         </div>
         <TopbarMenuToggler />
         <SimpleAppMenu mobileMenuOpen={appMenuControl.open} menuClassName="mx-auto" topMenuItems={STUDENT_APP_MENU_ITEMS} />

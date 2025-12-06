@@ -7,6 +7,7 @@ import SimpleAppMenu from '../TopNavbar/components/SimpleAppMenu';
 import TopbarMenuToggler from '../TopNavbar/components/TopbarMenuToggler';
 import { useLayoutContext } from '@/context/useLayoutContext';
 import { Container, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 
 
 const TopNavigationBar = () => {
@@ -20,7 +21,9 @@ const TopNavigationBar = () => {
           overlay={<Tooltip>Home</Tooltip>}
         >
           <span className="d-inline-block">
-            <LogoBox width={130} />
+            <Link className="navbar-brand py-0" to="/">
+              <LogoBox width={130} />
+            </Link>
           </span>
         </OverlayTrigger>
 
@@ -37,7 +40,7 @@ const TopNavigationBar = () => {
             overlay={<Tooltip>Notifications</Tooltip>}
           >
             <span className="d-inline-block">
-          <NotificationDropdown />
+              <NotificationDropdown />
             </span>
           </OverlayTrigger>
           <ProfileDropdown className="nav-item ms-3" dropdownItems={INSTRUCTOR_ACCOUNT_DROPDOWN_ITEMS} />
