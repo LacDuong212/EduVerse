@@ -14,20 +14,20 @@ const HomePage = () => {
   useHomeCourses();
 
   return <>
-      <PageMetaData title="Home" />
-  
-      <main>
-        <Hero />
-        <Counter />
-        <CouponActionBox />
-        <NewestCourses />
-        <ActionBox />
-        <TrendingCourses />
-        <BestSellersSection />
-        <TopRatedSection />
-        {/* <Reviews /> */}
-      </main>
-     
-    </>;
+    <PageMetaData title="Home" />
+
+    <main>
+      <Hero />
+      <Counter />
+      <CouponActionBox />
+      <NewestCourses />
+      <ActionBox />
+      <TrendingCourses />
+      <BestSellersSection />
+      <TopRatedSection />
+      {/* <Reviews /> */}
+    </main>
+
+  </>;
 };
 export default HomePage;

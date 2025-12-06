@@ -47,25 +47,24 @@ export const ADMIN_MENU_ITEMS = [{
   key: 'instructors',
   label: 'Instructors',
   icon: FaUserTie,
-  url: '/instructors'
-  // children: [{
-  //   key: 'instructors',
-  //   label: 'Instructors',
-  //   url: '/instructors',
-  //   parentKey: 'instructors'
-  // }, {
+  children: [{
+    key: 'instructors',
+    label: 'Instructors',
+    url: '/instructors',
+    parentKey: 'instructors'
+  }, 
+  // {
   //   key: 'instructor-detail',
   //   label: 'Instructor Detail',
   //   url: '/instructor-detail',
   //   parentKey: 'instructors'
   // }]
-  //  {
-  //   key: 'instructor-requests',
-  //   label: 'Instructor Requests',
-  //   url: '/admin/instructor-requests',
-  //   parentKey: 'instructors',
-  //   badge: '2'
-  // }]
+   {
+    key: 'instructor-requests',
+    label: 'Instructor Requests',
+    url: '/instructor-requests',
+    parentKey: 'instructors',
+  }]
 },
 //  {
 //   key: 'administrators',

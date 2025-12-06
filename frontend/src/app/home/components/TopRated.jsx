@@ -3,7 +3,7 @@ import CommonCourseSlider from './CommonCourseSlider';
 
 
 const TopRatedSection = () => {
-  return <section className="pb-5 pt-0 pt-lg-5">
+  return <section className="pt-0">
     <Container>
       <Row className="mb-4">
         <Col lg={8} className="mx-auto text-center">

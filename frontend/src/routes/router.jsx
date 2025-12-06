@@ -1,5 +1,6 @@
 import PublicRouteLayout from "../layouts/PublicRouteLayout";
 import ProtectedRoute from "../components/ProtectedRoute";
+import ScrollToTop from "../components/ScrollToTop";
 
 import InstructorLayout from '../layouts/InstructorLayout';
 import StudentLayout from "../layouts/StudentLayout";
@@ -11,6 +12,8 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 const AppRouter = props => {
 
   return (
+    <>
+    <ScrollToTop />
     <Routes>
       <Route path="/" element={<Navigate to="/home" replace />} />
 
@@ -65,6 +68,7 @@ const AppRouter = props => {
       </Route>
 
     </Routes>
+    </>
   );
 };
 
