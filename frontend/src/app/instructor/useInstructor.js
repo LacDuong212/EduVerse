@@ -173,6 +173,24 @@ export default function useInstructor() {
     }
   };
 
+  const fetchStudents = useCallback(async (page, limit, search = '', sort = '') => {
+    if (!userId) return null;
+
+    try {
+      const { data } = await axios.get(
+        `${backendUrl}/api/instructor/students?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}&sort=${sort}`,
+        { withCredentials: true }
+      );
+      
+      if (data?.success) return data;
+
+      throw new Error(data?.message || "Cannot fetch students");
+    } catch (error) {
+      console.error(error);
+      throw new Error(error.response.data?.message || "Failed to fetch students");
+    }
+  }, [userId]);
+
   return {
     fetchPublicFields,
     fetchPrivateFields,
@@ -181,5 +199,6 @@ export default function useInstructor() {
     fetchInstructorCounters,
     fetchInstructorProfile,
     updateInstructorProfile,
+    fetchStudents,
   };
 };

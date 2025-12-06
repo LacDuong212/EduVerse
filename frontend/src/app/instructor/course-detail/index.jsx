@@ -9,14 +9,16 @@ const InstructorCourseDetail = () => {
   const { course, loading, error, refetch } = useMyCourseDetail();
 
   if (loading) {
-    return <Container>Loading...</Container>;
+    return <Container className="d-flex flex-column align-items-center justify-content-center">
+      Loading...
+    </Container>;
   }
 
   if (error) {
     return (
-      <Container>
-        <h1>Error loading course</h1>
-        <button onClick={refetch}>Retry</button>
+      <Container className="d-flex flex-column align-items-center justify-content-center mt-5">
+        <h3>Error loading course</h3>
+        <button onClick={refetch} className="btn btn-primary">Retry</button>
       </Container>
     );
   }

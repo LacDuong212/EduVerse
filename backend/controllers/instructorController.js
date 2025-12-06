@@ -1,4 +1,5 @@
 import Course from "../models/courseModel.js";
+import CourseProgress from "../models/courseProgressModel.js";
 import DraftVideo from "../models/draftVideoModel.js";
 import Instructor from "../models/instructorModel.js";
 import Order from "../models/orderModel.js";
@@ -930,10 +931,10 @@ export const updateProfile = async (req, res) => {
     }
 
     if (payload.phonenumber && payload.phonenumber.trim() !== "") {
-        const phoneRegex = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/; 
-        if (!phoneRegex.test(payload.phonenumber)) {
-            errors.push("Invalid phone number format");
-        }
+      const phoneRegex = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/;
+      if (!phoneRegex.test(payload.phonenumber)) {
+        errors.push("Invalid phone number format");
+      }
     }
 
     if (payload.education && Array.isArray(payload.education) && payload.education.length > 0) {
@@ -959,10 +960,10 @@ export const updateProfile = async (req, res) => {
     }
 
     if (errors.length > 0) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Validation failed", 
-        errors: errors 
+      return res.status(400).json({
+        success: false,
+        message: "Validation failed",
+        errors: errors
       });
     }
 
@@ -993,7 +994,7 @@ export const updateProfile = async (req, res) => {
 
     const combinedProfile = {
       ...updatedInstructor.toObject(),
-      user: updatedUser.toObject() 
+      user: updatedUser.toObject()
     };
 
     return res.status(200).json({
@@ -1005,5 +1006,92 @@ export const updateProfile = async (req, res) => {
   } catch (error) {
     console.error("Update instructor profile error:", error);
     return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+// GET /api/instructor/students?page=&limit=&search=&sort=
+export const getInstructorStudents = async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    const searchTerm = req.query.search || "";
+    const sortParam = req.query.sort || "";
+
+    const instructorExists = await Instructor.exists({ user: userId });
+    if (!instructorExists) {
+      return res.status(404).json({ success: false, message: "Instructor not found" });
+    }
+
+    const courseIds = await getInstructorCourseIds(userId);
+    const studentIds = await getInstructorStudentIds(userId);
+
+    const studentsRaw = await userModel.find({ _id: { $in: studentIds } })
+      .select("name email pfpImg isActivated").lean();
+
+    const orders = await Order.find({
+      user: { $in: studentIds },
+      status: "completed",
+      "courses.course": { $in: courseIds }
+    }).select("user courses").lean();
+
+    const courseCountMap = {};
+
+    orders.forEach(order => {
+      const studentIdStr = order.user.toString();
+      order.courses.forEach(item => {
+        if (courseIds.some(id => id.toString() === item.course.toString())) {
+           courseCountMap[studentIdStr] = (courseCountMap[studentIdStr] || 0) + 1;
+        }
+      });
+    });
+
+    let allStudents = studentsRaw.map(student => ({
+      id: student._id,
+      name: student.name,
+      email: student.email,
+      pfpImg: student.pfpImg,
+      isActivated: student.isActivated,
+      coursesJoined: courseCountMap[student._id.toString()] || 0
+    }));
+
+    if (searchTerm.trim() !== '') {
+      const fuse = new Fuse(allStudents, {
+        keys: ['name'],
+        threshold: 0.3,
+      });
+      allStudents = fuse.search(searchTerm).map(result => result.item);
+    }
+
+    const sortFunctions = {
+      '': (a, b) => 0,
+      'nameAsc': (a, b) => a.name.localeCompare(b.name), // A - Z
+      'nameDesc': (a, b) => b.name.localeCompare(a.name), // Z - A
+    };
+
+    const sortFn = sortFunctions[sortParam] || sortFunctions[''];
+    allStudents.sort(sortFn);
+
+    const total = allStudents.length;
+    const totalActive = allStudents.filter(s => s.isActivated).length;
+    const totalInactive = total - totalActive;
+
+    const pagedStudents = allStudents.slice(skip, skip + limit);
+
+    return res.status(200).json({ 
+      success: true, 
+      students: pagedStudents, // data
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+      totalActive,
+      totalInactive,
+    });
+
+  } catch (error) {
+    console.error('Error fetching instructor students:', error);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };

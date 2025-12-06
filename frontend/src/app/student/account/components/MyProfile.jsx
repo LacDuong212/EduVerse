@@ -175,22 +175,22 @@ const MyProfile = () => {
               <input className="form-control" type="text" name="facebook" placeholder="facebook.com/your_username" defaultValue={user?.socials?.facebook || ''} />
             </div>
             <div className="mb-3">
-              <label className="form-label d-flex align-items-center">
-                <BsTwitter className="bi bi-twitter text-twitter me-2 fs-5" />
+              <label className="form-label d-flex align-items-center mb-0">
+                <BsTwitter className="bi bi-twitter text-twitter mb-1 me-2 fs-5" />
                 Twitter profile URL
               </label>
               <input className="form-control" type="text" name="twitter" placeholder="x.com/your_username" defaultValue={user?.socials?.twitter || ''} />
             </div>
             <div className="mb-3">
-              <label className="form-label d-flex align-items-center">
-                <FaInstagram className="fab fa-instagram text-danger me-2 fs-5" />
+              <label className="form-label d-flex align-items-center mb-0">
+                <FaInstagram className="fab fa-instagram text-danger mb-1 me-2 fs-5" />
                 Instagram profile URL
               </label>
               <input className="form-control" type="text" name="instagram" placeholder="instagram.com/your_username" defaultValue={user?.socials?.instagram || ''} />
             </div>
             <div className="mb-3">
-              <label className="form-label d-flex align-items-center">
-                <FaYoutube className="fab fa-youtube text-youtube me-2 fs-5" />
+              <label className="form-label d-flex align-items-center mb-0">
+                <FaYoutube className="fab fa-youtube text-youtube mb-1 me-2 fs-5" />
                 YouTube channel URL
               </label>
               <input className="form-control" type="text" name="youtube" placeholder="youtube.com/@your_channel" defaultValue={user?.socials?.youtube || ''} />

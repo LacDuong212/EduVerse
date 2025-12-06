@@ -43,7 +43,7 @@ const TopCoursesChart = ({ col = 6, topCoursesData = [] }) => {
     <Col xs={12} lg={col}>
       <Card className="bg-transparent border rounded-3">
         <CardHeader className="bg-transparent border-bottom">
-          <Row className="align-items-center">
+          <Row className="align-items-center g-2">
             <Col sm={8} md={7} lg={8}>
               <h5 className="mb-0">Top Earning Courses This Month</h5>
             </Col>

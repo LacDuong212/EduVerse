@@ -1,33 +1,27 @@
 import error404Img from '@/assets/images/element/error404.svg';
-// import Footer from './components/Footer';
-// import TopNavigationBar from './components/TopNavigationBar';
 import { Col, Container, Row } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
-
+import { Link, useNavigate } from 'react-router-dom';
 
 const NotFoundPage = () => {
-  return <>
-      {/* <TopNavigationBar /> */}
-      <main>
-        <section className="pt-5">
-          <Container>
-            <Row>
-              <Col xs={12} className="text-center">
-                <img src={error404Img} className="h-200px h-md-400px mb-4" alt="error404" />
-                <h1 className="display-1 text-danger mb-0">404</h1>
-                <h2>Oh no, something went wrong!</h2>
-                <p className="mb-4">Either something went wrong or this page doesn&apos;t exist anymore.</p>
-                <Link to="/" className="btn btn-primary mb-0">
-                  Take me to Homepage
-                </Link>
-              </Col>
-            </Row>
-          </Container>
-        </section>
-      </main>
+  const navigate = useNavigate();
 
-      {/* <Footer className="pt-5 bg-light" /> */}
-    </>;
+  return <>
+    <section>
+      <Container>
+        <Row>
+          <Col xs={12} className="text-center">
+            <img src={error404Img} className="h-300px mb-4" alt="error404" />
+            <h2 className="display-1 text-danger mb-0">404</h2>
+            <h3>Page not found!</h3>
+            <p className="mb-4">Either something went wrong or the page you are looking for doesn&apos;t exist.</p>
+            <button onClick={() => navigate(-1)} className="btn btn-primary mb-0">
+              Return
+            </button>
+          </Col>
+        </Row>
+      </Container>
+    </section>
+  </>;
 };
 
 export default NotFoundPage;

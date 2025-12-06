@@ -4,8 +4,9 @@ import { FaCircle, FaGripLines, FaStar } from "react-icons/fa";
 import { PiRectangleDashedBold } from "react-icons/pi";
 import Counter from "./Counter";
 
-const Hero = ({
-  title = "My Students"
+const MyStudentsHero = ({
+  title = "My Students",
+  countersData = {},
 }) => {
   const styles = {
     wrapper: {
@@ -15,7 +16,7 @@ const Hero = ({
     },
     shape1: {
       position: 'absolute',
-      top: '-20px',
+      top: '-30px',
       right: '16%',
       fontSize: '4rem',
       opacity: "0.5",
@@ -81,17 +82,15 @@ const Hero = ({
         {/* Main Content */}
         <div className="row align-items-center position-relative z-1">
           <Col className="text-center position-relative">
-            <h2 className="fw-bold text-dark mb-2">
-              {title}
-            </h2>
+            <h2>{title}</h2>
             <p className="mb-3 mx-auto" style={{ maxWidth: '400px' }}>
-              Manage your course participants. Track progress, enrollments, and statuses all in one place.
+              Manage courses you created. Track statuses, enrollments and basic details all in one place.
             </p>
-            <Counter />
+            <Counter {...countersData} />
           </Col>
         </div>
     </section>
   );
 };
 
-export default Hero;
+export default MyStudentsHero;

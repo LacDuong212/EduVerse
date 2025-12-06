@@ -1,113 +1,42 @@
 import ChoicesFormInput from '@/components/form/ChoicesFormInput';
-import { useState } from 'react';
 import { Card, CardBody, CardFooter, CardHeader, Col, OverlayTrigger, ProgressBar, Row, Tooltip } from 'react-bootstrap';
-import { FaAngleLeft, FaAngleRight, FaRegEnvelope, FaRegStar, FaSearch, FaStar, FaStarHalfAlt } from 'react-icons/fa';
+import { FaAngleLeft, FaAngleRight, FaRegEnvelope, FaSearch } from 'react-icons/fa';
+import { toast } from "react-toastify";
 
-
-const StudentRow = ({ studentData }) => {
-  const student = studentData?.student || {};
-  const recentReview = studentData?.recentReview || null;
-
+const StudentRow = ({ studentData = {} }) => {
   return (
     <tr>
       <td className="ps-3">
         <div className="d-flex align-items-center position-relative">
           <div className="avatar avatar-md flex-shrink-0">
-            {student?.pfpImg ? (
+            {studentData?.pfpImg ? (
               <img
-                src={student?.pfpImg}
+                src={studentData?.pfpImg}
                 className="rounded-circle"
                 alt={'avatar'}
               />
             ) : (
               <div className="avatar-img rounded-circle border-white border-3 shadow d-flex align-items-center justify-content-center bg-light text-dark fw-bold fs-4">
-                {(student?.name?.[0] || "S").toUpperCase()}
+                {(studentData?.name?.[0] || "S").toUpperCase()}
               </div>
             )}
           </div>
           <div className="mb-0 ms-2">
             <h6 className="mb-0">
-              <a href={`/instructor/students/${student?._id}`}>{student?.name}</a>
+              <a href={`/instructor/students/${studentData?._id}`}>{studentData?.name}</a>
             </h6>
-            <div className="overflow-hidden mt-1">
-              <div className="d-flex align-items-center justify-content-between mb-1">
-                <span className="small fw-bold">{student?.progress}%</span>
-              </div>
-              <div style={{ width: '160px' }}>
-                <ProgressBar
-                  now={student?.progress}
-                  className="progress progress-sm bg-opacity-10 w-100"
-                  aria-valuenow={student?.progress || 0}
-                  aria-valuemin={0}
-                  aria-valuemax={100}
-                />
-              </div>
-            </div>
           </div>
         </div>
       </td>
-      <td className="text-center">
-        {student?.enrolledAt
-          ? new Date(student?.enrolledAt).toLocaleString("en-GB", {
-            year: "numeric",
-            month: "2-digit",
-            day: "2-digit"
-          })
-          : "N/A"}
-      </td>
-      <td>
-        {recentReview ? (
-          <>
-            <div className="d-flex flex-wrap align-items-center mb-1">
-              <ul className="list-inline mb-0 me-2 d-flex align-items-center">
-                {(recentReview?.rating || recentReview?.rating === 0) && (
-                  <>
-                    {Array(Math.floor(recentReview.rating)).fill(0).map((_star, idx) => (
-                      <li key={idx} className="list-inline-item me-1 small">
-                        <FaStar size={14} className="text-warning mb-1" />
-                      </li>
-                    ))}
-                    {!Number.isInteger(recentReview.rating) && (
-                      <li className="list-inline-item me-1 small">
-                        <FaStarHalfAlt size={14} className="text-warning mb-1" />
-                      </li>
-                    )}
-                    {recentReview.rating < 5 &&
-                      Array(5 - Math.ceil(recentReview.rating)).fill(0).map((_star, idx) => (
-                        <li key={idx} className="list-inline-item me-1 small">
-                          <FaRegStar size={14} className="text-warning mb-1" />
-                        </li>
-                      ))}
-                  </>
-                )}
-              </ul>
-              <div className="small mt-0">
-                <span className="fw-bold"> • </span>
-                {recentReview.updatedAt
-                  ? new Date(recentReview.updatedAt).toLocaleString("en-GB", {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit",
-                  })
-                  : "N/A"}
-              </div>
-            </div>
-            <div title={recentReview?.description || ''}>
-              {recentReview?.description && recentReview.description.length > 100
-                ? `${recentReview.description.substring(0, 100)}...`
-                : recentReview?.description}
-            </div>
-          </>
-        ) : (
-          "-"
-        )}
+      <td className="text-center d-none d-md-table-cell">
+        {studentData?.coursesJoined || "-"}
       </td>
       <td className="text-center">
-        {student?.isActive === null ? (
+        {studentData?.isActivated === null ? (
           <div className="badge bg-secondary bg-opacity-10 text-secondary">
             -
           </div>
-        ) : student?.isActive ? (
+        ) : studentData?.isActivated ? (
           <div className="badge bg-success bg-opacity-10 text-success">
             Active
           </div>
@@ -120,11 +49,23 @@ const StudentRow = ({ studentData }) => {
       <td className="text-center">
         <OverlayTrigger
           placement="top"
-          overlay={<Tooltip id={`tooltip-message-${student?._id}`}>Message</Tooltip>}
+          overlay={<Tooltip id={`tooltip-message-${studentData?._id}`}>Copy Email</Tooltip>}
         >
-          <a title="Message" href="#" className="btn btn-success-soft btn-round me-2 mb-0 flex-centered" data-bs-toggle="tooltip" data-bs-placement="top">
-            <FaRegEnvelope className="far fa-envelope" />
-          </a>
+          <button
+            type="button"
+            className="btn btn-success-soft btn-round me-2 mb-0 flex-centered"
+            onClick={() => {
+              const email = studentData?.email;
+              if (email) {
+                navigator.clipboard.writeText(email);
+                toast.success("Email copied!");
+              } else {
+                toast.error("No email found");
+              }
+            }}
+          >
+            <FaRegEnvelope />
+          </button>
         </OverlayTrigger>
       </td>
     </tr>
@@ -145,7 +86,7 @@ const MyStudentsList = ({
   sort,
   setSort,
 }) => {
-  const NUMBER_OF_COLUMNS = 5;
+  const NUMBER_OF_COLUMNS = 4;
   const start = (page - 1) * limit + 1;
   const end = Math.min(start + students.length - 1, totalStudents);
 
@@ -196,13 +137,9 @@ const MyStudentsList = ({
                   value={sort}
                   onChange={handleSortChange}
                 >
-                  <option value="">Sort by</option>
-                  <option value="nameAsc">Name Ascending</option>
-                  <option value="nameDesc">Name Descending</option>
-                  <option value="newest">Newest</option>
-                  <option value="oldest">Oldest</option>
-                  <option value="mostProgess">Most Progress</option>
-                  <option value="leastProgress">Least Progress</option>
+                  <option value="">Options</option>
+                  <option value="nameAsc">A - Z</option>
+                  <option value="nameDesc">Z - A</option>
                 </ChoicesFormInput>
               </form>
             </Col>
@@ -211,17 +148,14 @@ const MyStudentsList = ({
 
         <CardBody className="p-0">
           <div className="table-responsive border-0">
-            <table className="table table-dark-gray align-middle table-hove mb-0">
+            <table className="table table-dark-gray align-middle table-hover mb-0">
               <thead>
                 <tr>
                   <th scope="col" className="border-0 ps-3">
                     Student Name
                   </th>
                   <th scope="col" className="border-0 text-center d-none d-md-table-cell">
-                    Enrolled At
-                  </th>
-                  <th scope="col" className="border-0 text-center d-none d-md-table-cell">
-                    Recent Review
+                    Courses Joined
                   </th>
                   <th scope="col" className="border-0 text-center">
                     Status
@@ -259,7 +193,7 @@ const MyStudentsList = ({
             <p className="mb-0 text-center text-sm-start ps-2">
               Showing {totalStudents === 0 ? 0 : start} to {end} of {totalStudents} students
             </p>
-            <nav 
+            <nav
               className="d-flex justify-content-center mb-0"
               aria-label="navigation"
             >
