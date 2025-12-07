@@ -25,6 +25,8 @@ import StudentMyCourses from '../app/student/my-courses';
 import StudentAccount from '../app/student/account';
 import LearningCourse from '../app/student/learning/page';
 
+import AccountSettingsPage from '../app/pages/accountSettings';
+
 // PUBLIC
 import HomePage from "../app/home/page";
 import CoursesPage from "../app/pages/course/grid/page";
@@ -100,7 +102,7 @@ export const instructorRoutes = [{
   path: '/instructor/settings',
   name: 'Settings',
   isNested: true,
-  element: null
+  element: <AccountSettingsPage />
 }, {
   path: '/instructor/earnings',
   name: 'Earnings',
@@ -182,7 +184,7 @@ export const studentRoutes = [{
   path: '/student/settings',
   name: 'Settings',
   isNested: true,
-  element: null
+  element: <AccountSettingsPage />
 }, {
   path: '/student/wish-list',
   name: 'Wish List',

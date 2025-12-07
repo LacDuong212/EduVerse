@@ -1,6 +1,6 @@
 import userModel from "../models/userModel.js";
 import cloudinary, { CLOUDINARY_API_KEY, CLOUDINARY_CLOUD_NAME } from "../configs/cloudinary.js";
-
+import bcrypt from 'bcryptjs';
 
 // GET /user/profile
 export const getProfile = async (req, res) => {
@@ -153,3 +153,37 @@ export const getUserData = async (req, res) => {
         res.json({success: false, message: error.message})
     }
 }
+
+// PATCH /api/user/change-password
+export const changePassword = async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+    const userId = req.userId;
+
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({ success: false, message: 'Please provide old and new passwords' });
+    }
+
+    const userExists = await userModel.findById(userId).select('+password');
+    if (!userExists) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const isMatch = await bcrypt.compare(oldPassword, userExists.password);
+    if (!isMatch) {
+      return res.status(400).json({ success: false, message: 'Password not match' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    userExists.password = hashedPassword;
+    await userExists.save();
+
+    res.json({ success: true, message: 'Password updated successfully' });
+
+  } catch (error) {
+    console.error("Change user password error:", error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};

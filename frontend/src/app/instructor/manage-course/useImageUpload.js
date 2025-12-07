@@ -8,7 +8,7 @@ export const useImageUpload = () => {
   const [error, setError] = useState(null);
 
   const uploadImage = useCallback(async (file, courseId) => {
-    if (!file || !courseId) return;
+    if (!file || !courseId) return;   // #TODO: handle when creating no courseId
 
     setIsUploading(true);
     setError(null);

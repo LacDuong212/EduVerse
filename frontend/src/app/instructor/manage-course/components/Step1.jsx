@@ -319,7 +319,7 @@ const Step1 = ({ stepperInstance, draftData, onSave }) => {
               type="text"
               name="price"
               placeholder="Enter price"
-              value={formData.price}
+              defaultValue={formData.price}
               onChange={handleChange}
               isInvalid={!!errors.price}
             />
@@ -337,7 +337,7 @@ const Step1 = ({ stepperInstance, draftData, onSave }) => {
               type="text"
               name="discountPrice"
               placeholder="Enter discount"
-              value={formData.discountPrice}
+              defaultValue={formData.discountPrice}
               onChange={handleChange}
               disabled={!formData.enableDiscount}
               isInvalid={!!errors.discountPrice}

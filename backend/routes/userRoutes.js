@@ -1,6 +1,7 @@
 import express from 'express';
 import { getProfile, updateProfile, deleteAccount, 
-    getUserData, generateAvatarUploadSignature
+    getUserData, generateAvatarUploadSignature,
+    changePassword
 } from '../controllers/userController.js';
 import userAuth from '../middlewares/userAuth.js';
 
@@ -13,6 +14,7 @@ userRoute.get('/profile', userAuth, getProfile);
 
 
 userRoute.patch('/profile', userAuth, updateProfile);
+userRoute.patch('/change-password', userAuth, changePassword);
 
 userRoute.delete('/profile', userAuth, deleteAccount);
 
