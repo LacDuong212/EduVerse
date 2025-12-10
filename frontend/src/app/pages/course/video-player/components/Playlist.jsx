@@ -203,10 +203,10 @@ const Playlist = ({ course, onSelect, currentId, lectureProgress = {} }) => {
         <CardBody>
           <div className="d-sm-flex justify-content-sm-between">
             <h5>Course content</h5>
-            <Button variant="warning" size="sm" type="button" onClick={toggleAddNote}>
+            {/* <Button variant="warning" size="sm" type="button" onClick={toggleAddNote}>
               <BsPencilSquare className="fa-fw me-2" />
               Add note
-            </Button>
+            </Button> */}
           </div>
           <hr />
 

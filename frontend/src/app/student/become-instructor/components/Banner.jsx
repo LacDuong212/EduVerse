@@ -157,12 +157,19 @@ const Banner = () => {
           <p className="text-muted">
             Connect with millions of students, make a real difference in their careers, and turn your knowledge into a rewarding journey doing what you love.
           </p>
+          <div className="alert alert-warning d-inline-flex align-items-center mt-2">
+              <div>
+                <strong>Warning:</strong><br />
+                After your instructor status is approved, you will lose access to your existing student data.
+              </div>
+            </div>
           {!isLoadingCheck && isRegistered && (
             <div className="alert alert-success d-inline-flex align-items-center mt-2">
               <i className="bi bi-check-circle-fill me-2 fs-5"></i>
               <div>
                 <strong>Application Submitted!</strong><br />
-                Your instructor profile is waiting for approval.
+                Your instructor profile is waiting for approval. 
+                If the review takes too long, please contact the admin via email: lduongwinf@gmail.com
               </div>
             </div>
           )}

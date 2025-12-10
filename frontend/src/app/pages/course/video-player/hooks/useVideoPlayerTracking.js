@@ -17,7 +17,13 @@ export default function useVideoPlayerTracking({
   const [resumeShownForLectureId, setResumeShownForLectureId] = useState(null);
   const [pendingSeekSec, setPendingSeekSec] = useState(null);
 
+  // State cho Modal kết thúc bài học
+  const [showConclusionDialog, setShowConclusionDialog] = useState(false);
+
   const lectureDurationSec = typeof currentLecture?.duration === "number" ? currentLecture.duration : undefined;
+
+  // ✅ FIX: Khai báo savedPos ở đây để dùng được trong return
+  const savedPos = currentProgress?.lastPositionSec || 0;
 
   // 1. Setup API Tracking Hook
   const { reportTimeUpdate, reportCompleted, resetTracking } = useLectureTracking({
@@ -31,8 +37,10 @@ export default function useVideoPlayerTracking({
   useEffect(() => {
     if (!currentLecture?._id) return;
     resetTracking();
-    setHasStartedPlayback(false); // Reset playback state
-    // Khởi tạo override rỗng để tránh lỗi
+    setHasStartedPlayback(false); 
+    setShowConclusionDialog(false); 
+    
+    // Khởi tạo override rỗng
     setLocalProgressOverrides((prev) => ({ ...prev, [currentLecture._id]: prev[currentLecture._id] || {} }));
   }, [courseId, currentLecture?._id, resetTracking, setLocalProgressOverrides]);
 
@@ -41,16 +49,16 @@ export default function useVideoPlayerTracking({
     if (!currentLecture?._id || hasStartedPlayback) return;
     if (resumeShownForLectureId === currentLecture._id) return;
 
-    const savedPos = currentProgress?.lastPositionSec || 0;
     const isCompleted = currentProgress?.status === "completed";
 
+    // Sử dụng savedPos đã khai báo ở trên
     if (savedPos > 0 && !isCompleted) {
       setShowResumeDialog(true);
       setResumeShownForLectureId(currentLecture._id);
     } else {
       setShowResumeDialog(false);
     }
-  }, [currentLecture?._id, currentProgress, hasStartedPlayback, resumeShownForLectureId]);
+  }, [currentLecture?._id, currentProgress, hasStartedPlayback, resumeShownForLectureId, savedPos]);
 
   // 4. Attach Events (TimeUpdate, Ended)
   useEffect(() => {
@@ -63,15 +71,13 @@ export default function useVideoPlayerTracking({
       const dur = videoEl.duration || lectureDurationSec || 0;
 
       if (!hasStartedPlayback && t > 0) setHasStartedPlayback(true);
-      if (currentProgress?.status === "completed") return; // Đã xong thì thôi
+      if (currentProgress?.status === "completed") return; 
 
-      // Debounce logic đơn giản: không report lại vị trí cũ sau F5
       const previousPos = currentProgress?.lastPositionSec || 0;
       if (t <= previousPos && !hasStartedPlayback) return; 
 
       reportTimeUpdate(t);
 
-      // Update Local UI ngay lập tức
       setLocalProgressOverrides((prev) => ({
         ...prev,
         [currentLecture._id]: {
@@ -85,9 +91,13 @@ export default function useVideoPlayerTracking({
 
     const handleEnded = () => {
       const t = videoEl.currentTime || videoEl.duration || 0;
+      
+      // 1. Report Server
       if (currentProgress?.status !== "completed") {
         reportCompleted(t, videoEl.duration);
       }
+      
+      // 2. Update Local UI (Completed)
       setLocalProgressOverrides((prev) => ({
         ...prev,
         [currentLecture._id]: {
@@ -97,6 +107,14 @@ export default function useVideoPlayerTracking({
           durationSec: t,
         },
       }));
+
+      // 3. Hiển thị Modal Summary/Quiz
+      const aiData = currentLecture?.aiData;
+      const hasAiContent = aiData && (aiData.summary || (aiData.quizzes && aiData.quizzes.length > 0));
+      
+      if (hasAiContent) {
+        setShowConclusionDialog(true);
+      }
     };
 
     videoEl.addEventListener("timeupdate", handleTime);
@@ -105,9 +123,9 @@ export default function useVideoPlayerTracking({
       videoEl.removeEventListener("timeupdate", handleTime);
       videoEl.removeEventListener("ended", handleEnded);
     };
-  }, [currentLecture?._id, source, playerKey, hasStartedPlayback, currentProgress, lectureDurationSec, reportTimeUpdate, reportCompleted, setLocalProgressOverrides]);
+  }, [currentLecture, source, playerKey, hasStartedPlayback, currentProgress, lectureDurationSec, reportTimeUpdate, reportCompleted, setLocalProgressOverrides]);
 
-  // 5. Logic Seek (Auto seek khi user chọn Resume/Restart)
+  // 5. Logic Seek
   useEffect(() => {
     if (pendingSeekSec == null || !currentLecture?._id) return;
     const videoEl = playerContainerRef.current?.querySelector("video");
@@ -129,15 +147,13 @@ export default function useVideoPlayerTracking({
   // Handlers cho Dialog
   const handleResume = useCallback(() => {
     setShowResumeDialog(false);
-    const pos = currentProgress?.lastPositionSec || 0;
-    if (pos > 0) setPendingSeekSec(pos);
-  }, [currentProgress]);
+    if (savedPos > 0) setPendingSeekSec(savedPos);
+  }, [savedPos]);
 
   const handleRestart = useCallback(() => {
     setShowResumeDialog(false);
     setPendingSeekSec(0);
     if (currentLecture?._id) {
-       // Reset local override về 0
        setLocalProgressOverrides(prev => ({
            ...prev,
            [currentLecture._id]: { status: 'not_started', lastPositionSec: 0, durationSec: lectureDurationSec || 0 }
@@ -151,8 +167,9 @@ export default function useVideoPlayerTracking({
     setShowResumeDialog,
     handleResume,
     handleRestart,
-    // data for dialog
-    savedPos: currentProgress?.lastPositionSec || 0,
-    durationForDialog: currentProgress?.durationSec ?? lectureDurationSec ?? 0
+    savedPos, // ✅ Giờ biến này đã tồn tại
+    durationForDialog: currentProgress?.durationSec ?? lectureDurationSec ?? 0,
+    showConclusionDialog,
+    setShowConclusionDialog
   };
 }

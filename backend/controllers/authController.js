@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import userModel from '../models/userModel.js';
+import instructorModel from "../models/instructorModel.js";
 import transporter from '../configs/nodemailer.js';
 
 export const register = async (req, res) => {
@@ -89,6 +90,13 @@ export const login = async (req, res) => {
 
         if (!user) {
             return res.status(401).json({ success: false, message: "Invalid email or password" });
+        }
+
+        if (!user.isActivated) {
+            return res.status(403).json({ 
+                success: false, 
+                message: "Your account has been blocked. Please contact the administrator to unlock it." 
+            });
         }
 
         if (!user.isVerified) {
