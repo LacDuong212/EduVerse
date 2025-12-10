@@ -71,7 +71,7 @@ const CommonCourseSlider = ({ source }) => {
   if (!list.length) return <p className="text-center text-muted">No courses found.</p>;
 
   return (
-    <TinySlider settings={courseSliderSettings} className="pb-1">
+    <TinySlider settings={courseSliderSettings} className="pb-0">
       {list.slice(0, 8).map((course, idx) => (
         <div key={course.id || course._raw?._id || idx}>
           <CommonCourseCard course={course} />

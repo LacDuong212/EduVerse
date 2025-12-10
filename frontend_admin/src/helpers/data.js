@@ -22,6 +22,23 @@ export const getAllAdminitrators = async (page = 1, search = "") => {
   }
 };
 
+export const updateCourseStatus = async ({ id, status }) => {
+  try {
+    const res = await axios.patch(
+      `${backendUrl}/api/courses/${id}?newStatus=${status}`,
+      {},
+      axiosConfig
+    );
+
+    if (res.data.success) {
+      return res.data;
+    }
+  } catch (error) {
+    console.error("Update status failed: ", error);
+    return { success: false, message: error.message };
+  }
+};
+
 //STUDENT
 export const getAllStudents = async (page = 1, search = "") => {
   try {
@@ -97,6 +114,22 @@ export const getAllInstructors = async (page = 1, search = "") => {
   }
 };
 
+export const getInstructorRequests = async (page = 1, search = "") => {
+  try {
+    const response = await axios.get(
+      `${backendUrl}/api/instructors/requests?page=${page}&limit=5&search=${encodeURIComponent(search)}`,
+      axiosConfig
+    );
+    if (response.data.success) {
+      return response.data;
+    }
+    return { data: [], pagination: { total: 0, page: 1, totalPages: 1 } };
+  } catch (error) {
+    console.error("Error fetching instructor requests:", error);
+    return { data: [], pagination: { total: 0, page: 1, totalPages: 1 } };
+  }
+};
+
 export const blockInstructor = async (id) => {
   try {
     const response = await axios.patch(
@@ -125,19 +158,29 @@ export const unblockInstructor = async (id) => {
   }
 };
 
-export const updateCourseStatus = async ({ id, status }) => {
+export const approveInstructorRequest = async (id) => {
   try {
-    const res = await axios.patch(
-      `${backendUrl}/api/courses/${id}?newStatus=${status}`,
+    const response = await axios.patch(
+      `${backendUrl}/api/instructors/${id}/approve`,
       {},
       axiosConfig
     );
-
-    if (res.data.success) {
-      return res.data;
-    }
+    return response.data;
   } catch (error) {
-    console.error("Update status failed: ", error);
+    console.error("Error approving instructor:", error);
+    return { success: false, message: error.message };
+  }
+};
+
+export const rejectInstructorRequest = async (id) => {
+  try {
+    const response = await axios.delete(
+      `${backendUrl}/api/instructors/${id}/reject`,
+      axiosConfig
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error rejecting instructor:", error);
     return { success: false, message: error.message };
   }
 };

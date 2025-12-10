@@ -71,7 +71,7 @@ const Counter = () => {
   ];
 
   return (
-    <section className="py-0 py-xl-5">
+    <section className="pt-0 pt-xl-5 pb-5">
       <Container>
         <Row className="g-4">
           {counterData.map((item, idx) => {

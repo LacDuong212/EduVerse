@@ -3,11 +3,7 @@ import { Button, Col, Container, Row } from 'react-bootstrap';
 const ActionBox = () => {
   const navigate = useNavigate();
 
-  const handleButtonClick = () => {
-    navigate('/student/become-instructor');
-  };
-
-  return <section className="pt-0 pt-lg-5">
+  return <section className="pt-0">
       <Container className="position-relative">
         <figure className="position-absolute top-50 start-50 translate-middle ms-2">
           <svg>
@@ -31,8 +27,9 @@ const ActionBox = () => {
                     <Col lg={7}>
                       <h3 className="text-white">Become an Instructor!</h3>
                       <p className="text-white mb-3 mb-lg-0">
-                        Speedily say has suitable disposal add boy. On forth doubt miles of child. Exercise joy man children rejoiced. Yet uncommonly
-                        his ten who diminution astonished.
+                        Inspire the next generation and shape the future of education. 
+                        Share your unique knowledge with millions of students worldwide to help them achieve their goals. 
+                        Make a lasting impact on the global community.
                       </p>
                     </Col>
                     <Col lg={5} className="text-lg-end">

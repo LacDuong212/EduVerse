@@ -265,7 +265,6 @@ export const createInstructor = async (req, res) => {
     // change role in userModel
     const user = await userModel.findById(userId);
     if (user) {
-      user.role = 'instructor';
       await user.save();
     }
 
@@ -278,6 +277,32 @@ export const createInstructor = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Server error while creating instructor.',
+      error: error.message
+    });
+  }
+};
+
+export const getCurrentInstructor = async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    const instructor = await Instructor.findOne({ user: userId });
+
+    if (!instructor) {
+      return res.status(404).json({
+        success: false,
+        message: 'Instructor not found for this user.'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      instructor
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server error.',
       error: error.message
     });
   }

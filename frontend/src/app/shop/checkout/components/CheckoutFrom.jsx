@@ -63,7 +63,7 @@ const CheckoutFrom = () => {
   useEffect(() => {
     if (!selectedIds || selectedIds.length === 0) {
       toast.warning("Please select items from cart first.");
-      navigate('/cart');
+      navigate('/student/cart');
     }
   }, [selectedIds, navigate]);
 

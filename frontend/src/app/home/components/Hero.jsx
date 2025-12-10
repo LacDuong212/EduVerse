@@ -157,17 +157,17 @@ const Hero = () => {
           <ul className="list-inline position-relative justify-content-center justify-content-lg-start mb-4">
             <li className="list-inline-item me-2 icons-center">
 
-              <BsPatchCheckFill className="me-1 text-dark" />
+              <BsPatchCheckFill className="me-1 text-body" />
               Learn with experts
             </li>
             <li className="list-inline-item me-2 icons-center">
 
-              <BsPatchCheckFill className="me-1 text-dark" />
+              <BsPatchCheckFill className="me-1 text-body" />
               Get certificate
             </li>
             <li className="list-inline-item icons-center">
 
-              <BsPatchCheckFill className="me-1 text-dark" />
+              <BsPatchCheckFill className="me-1 text-body" />
               Get membership
             </li>
           </ul>

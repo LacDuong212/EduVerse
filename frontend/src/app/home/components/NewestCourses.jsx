@@ -6,7 +6,7 @@ const NewestCourses = () => {
   const newestCourses = useSelector((s) => s.courses?.newest || []);
 
   return (
-    <section>
+    <section className='pt-0'>
       <Container>
         <Row className="mb-4">
           <Col lg={8} className="mx-auto text-center">

@@ -16,7 +16,7 @@ const CouponActionBox = () => {
   };
 
   return (
-    <section className="pt-0 pt-lg-5">
+    <section className="pt-0">
       <Container className="position-relative">
         <figure className="position-absolute top-50 start-50 translate-middle ms-2">
           <svg>
@@ -45,7 +45,7 @@ const CouponActionBox = () => {
                       <h3 className="text-white">Special Welcome Offer!</h3>
                       <p className="text-white mb-3 mb-lg-0">
                         Start your learning journey with a huge discount. 
-                        Use code <span className="fw-bold text-warning h4 align-middle mx-1">{couponCode}</span> 
+                        Use code <span className="text-warning h5">{couponCode} </span>
                         at checkout to get 50% off all courses. Don't miss out!
                       </p>
                     </Col>

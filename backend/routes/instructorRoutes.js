@@ -4,7 +4,8 @@ import { getPublicFields, getPrivateFields, createInstructor,
     getInstructorCourses, getMyCourseById, 
     getCourseEarnings, getStudentsEnrolled, getCourseStudentsAndReviews, 
     getInstructorCounters, getDashboardData, generateVideoUploadUrl,
-    getProfile, updateProfile, getInstructorStudents, getInstructorEarnings
+    getProfile, updateProfile, getInstructorStudents, getInstructorEarnings,
+    getCurrentInstructor
 } from '../controllers/instructorController.js';
 import userAuth from '../middlewares/userAuth.js';
 
@@ -23,6 +24,7 @@ instructorRoute.get('/instructor/earnings', userAuth, getInstructorEarnings);
 instructorRoute.get('/instructor/profile', userAuth, getProfile);
 instructorRoute.get('/instructor/students', userAuth, getInstructorStudents);
 instructorRoute.get('/instructor', userAuth, getPrivateFields);
+instructorRoute.get('/instructor/me', userAuth, getCurrentInstructor);
 
 instructorRoute.post('/instructor/videos/upload', userAuth, generateVideoUploadUrl);
 instructorRoute.post('/instructors', userAuth, createInstructor);
