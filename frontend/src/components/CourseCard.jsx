@@ -1,6 +1,6 @@
 import { Card, CardBody, CardFooter, CardTitle } from 'react-bootstrap';
 import { FaRegClock, FaRegHeart, FaRegStar, FaHeart, FaStar, FaStarHalfAlt, FaTable } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { formatCurrency } from '@/utils/currency';
 
 import { toast } from 'react-toastify';
@@ -22,7 +22,7 @@ const CourseCard = ({ course }) => {
 
   if (!course) return null;
 
-  const currentCourseId = course._id || course.courseId;
+  const currentCourseId = course._id || course.courseId || course.id;
 
   const isWishlisted = wishlistItems.some((item) => {
     const itemCourseId = item.courseId?._id || item.courseId;
@@ -127,18 +127,18 @@ const CourseCard = ({ course }) => {
         <div className="ribbon"><span>-{discountPercent}%</span></div>
       ) : null}
 
-      <img 
-        src={image} 
-        className="card-img-top" 
-        alt={title} 
+      <img
+        src={image}
+        className="card-img-top"
+        alt={title}
         onError={handleImageError}
         onClick={() => navigate(`/courses/${currentCourseId}`)}
         style={{
-            objectFit: 'cover', 
-            height: '240px',
-            width: '100%',
-            cursor: 'pointer'
-        }} 
+          objectFit: 'cover',
+          height: '240px',
+          width: '100%',
+          cursor: 'pointer'
+        }}
       />
 
       <CardBody className="d-flex flex-column pb-0">
@@ -150,8 +150,13 @@ const CourseCard = ({ course }) => {
             </span>
           </div>
 
-          <CardTitle onClick={() => navigate(`/courses/${currentCourseId}`)} style={{ cursor: 'pointer' }}>
-            {title}
+          <CardTitle>
+            <Link
+              to={`/courses/${currentCourseId}`}
+              className="text-decoration-none"
+            >
+              {title}
+            </Link>
           </CardTitle>
 
           {subtitle && <p className="mb-2 text-truncate-2">{subtitle}</p>}
@@ -181,8 +186,8 @@ const CourseCard = ({ course }) => {
         <div className="mt-auto d-flex justify-content-end align-items-end">
           {isFree ? <h5 className="text-success mb-0">Free</h5> :
             hasDiscount ? (
-              <div>
-                <small className="text-muted text-decoration-line-through me-2">{formatCurrency(price)}</small>
+              <div className="text-end">
+                <small className="text-secondary text-decoration-line-through">{formatCurrency(price)}</small>
                 <h5 className="text-success mb-0">{formatCurrency(discountPrice)}</h5>
               </div>
             ) : <h5 className="text-success mb-0">{formatCurrency(price)}</h5>

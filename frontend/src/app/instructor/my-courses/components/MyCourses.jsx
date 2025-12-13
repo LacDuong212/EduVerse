@@ -142,12 +142,12 @@ const MyCourses = ({
                       <div className="ms-2 flex-grow-1 text-wrap">
                         <div className="mb-1">
                           <h6 className="mb-0">
-                            <a
-                              href={`courses/${course._id}`}
+                            <Link
+                              to={`${course._id}`}
                               className="text-decoration-none d-inline-block"
                             >
                               {course.title}
-                            </a>
+                            </Link>
                           </h6>
                           <div className="small text-wrap">
                             {course.subtitle}

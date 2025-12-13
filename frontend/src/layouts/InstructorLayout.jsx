@@ -1,5 +1,3 @@
-import { useState } from 'react';
-import useInstructor from '../app/instructor/useInstructor';
 import { INSTRUCTOR_MENU_ITEMS } from '../assets/data/menu-items';
 import Banner from '../components/instructorLayoutComponents/Banner';
 import Footer from '../components/instructorLayoutComponents/Footer';
@@ -12,7 +10,6 @@ import clsx from 'clsx';
 import { Col, Container, Offcanvas, OffcanvasBody, OffcanvasHeader, OffcanvasTitle, Row } from 'react-bootstrap';
 import { FaSignOutAlt } from 'react-icons/fa';
 import { Link, useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
 
 
 const VerticalMenu = () => {
@@ -44,18 +41,8 @@ const VerticalMenu = () => {
 };
 
 const InstructorLayout = ({ children, isNested = false }) => {
-  const { user } = useProfile();
-  const { fetchInstructorCounters } = useInstructor();
   const { width } = useViewPort();
   const { isTrue: isOffCanvasMenuOpen, toggle: toggleOffCanvasMenu } = useToggle();
-  const [counterData, setCounterData] = useState({});
-
-  useEffect(() => {
-    const load = async () => {
-      setCounterData(await fetchInstructorCounters());
-    };
-    load();
-  }, []);
 
   return (
     <div className="d-flex flex-column min-vh-100">
@@ -64,7 +51,7 @@ const InstructorLayout = ({ children, isNested = false }) => {
       <main className="flex-grow-1">
         {isNested ? (
           <>
-            <Banner toggleOffCanvas={toggleOffCanvasMenu} accountData={{...user, ...counterData}} />
+            <Banner toggleOffCanvas={toggleOffCanvasMenu} />
             <section className="py-0">
               <Container>
                 <Row>

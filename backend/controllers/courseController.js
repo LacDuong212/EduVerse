@@ -505,7 +505,7 @@ export const createCourse = async (req, res) => {
         count: 0,
         total: 0
       },
-      status: 'Pending',
+      // status: "Pending",
       isPrivate: req.body.isPrivate || true,  // = !isPublished
       isDeleted: false,
     });
@@ -592,7 +592,7 @@ export const updateCourse = async (req, res) => {
     const oldKeys = getAllVideoKeys(course);  // snapshot old videos
 
     Object.assign(course, req.body);  // apply update
-    course.status = 'Pending';  // update status
+    // course.status = "Pending";  // update status
 
     const newKeys = getAllVideoKeys(course);  // get new videos
 

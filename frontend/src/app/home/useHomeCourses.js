@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import axios from "axios";
-import { toast } from "react-hot-toast";
+import { toast } from "react-toastify";
 import { setHomeCourses, setAllCourses } from "@/redux/coursesSlice";
 
 export default function useHomeCourses() {

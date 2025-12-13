@@ -1,5 +1,4 @@
 import Course from "../models/courseModel.js";
-import CourseProgress from "../models/courseProgressModel.js";
 import DraftVideo from "../models/draftVideoModel.js";
 import Instructor from "../models/instructorModel.js";
 import Order from "../models/orderModel.js";
@@ -23,7 +22,7 @@ const fetchInstructorFields = async (filter, fields, allowedFields) => {
   return Instructor.findOne(filter).select(selectFields);
 };
 
-// helper: get course ids for an instructor
+// helper: get all course ids belong to instructor
 const getInstructorCourseIds = async (userId) => {
   const courses = await Course.find(
     { "instructor.ref": userId, isDeleted: false },
@@ -31,6 +30,15 @@ const getInstructorCourseIds = async (userId) => {
   ).lean();
 
   return courses.map(course => course._id);
+};
+
+// helper: get "live" course ids belong to instructor
+const getInstructorLiveCourses = async (userId) => {
+  const courses = await Course.find(
+    { "instructor.ref": userId, isDeleted: false, status: "Live" }
+  ).lean();
+
+  return courses;
 };
 
 // helper: get student ids for an instructor
@@ -906,7 +914,7 @@ export const getProfile = async (req, res) => {
   try {
     const userId = req.userId;
 
-    const instructor = await Instructor.findOne({ user: userId }).populate("user");
+    const instructor = await Instructor.findOne({ user: userId }).populate("user").lean();
     if (!instructor) {
       res.status(404).json({ success: false, message: "Instructor not found" });
     }
@@ -1068,7 +1076,7 @@ export const getInstructorStudents = async (req, res) => {
       const studentIdStr = order.user.toString();
       order.courses.forEach(item => {
         if (courseIds.some(id => id.toString() === item.course.toString())) {
-           courseCountMap[studentIdStr] = (courseCountMap[studentIdStr] || 0) + 1;
+          courseCountMap[studentIdStr] = (courseCountMap[studentIdStr] || 0) + 1;
         }
       });
     });
@@ -1105,8 +1113,8 @@ export const getInstructorStudents = async (req, res) => {
 
     const pagedStudents = allStudents.slice(skip, skip + limit);
 
-    return res.status(200).json({ 
-      success: true, 
+    return res.status(200).json({
+      success: true,
       students: pagedStudents, // data
       total,
       page,
@@ -1198,7 +1206,7 @@ export const getInstructorEarnings = async (req, res) => {
 
     // get this month earnings ---
     const thisMonthEarnings = earningsData.length > 0 ? earningsData[earningsData.length - 1].value : 0;
-    
+
     // res ---
     return res.json({
       success: true,
@@ -1209,6 +1217,125 @@ export const getInstructorEarnings = async (req, res) => {
     });
   } catch (error) {
     console.error("Populate instructor dashboard data error: ", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
+  }
+};
+
+// GET /api/instructors/:id
+export const getInstructorDetails = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) return res.status(400).json({ success: false, message: "Instructor id is required" });
+
+    const instructor = await Instructor.findOne({ user: id }).populate("user").lean();
+    if (!instructor) return res.status(404).json({ success: false, message: "Instructor not found" });
+
+    const publicCourses = await getInstructorLiveCourses(id);
+
+    if (publicCourses.length === 0) {
+      return res.json({
+        success: true,
+        instructor: {
+          id: instructor.user?._id,
+          name: instructor.user?.name,
+          email: instructor.user?.email,
+          pfpImg: instructor.user?.pfpImg || '',
+          phonenumber: instructor.user?.phonenumber || '',
+          website: instructor.user?.website || '',
+          socials: {
+            facebook: instructor.user?.socials?.facebook || '',
+            twitter: instructor.user?.socials?.twitter || '',
+            instagram: instructor.user?.socials.instagram || '',
+            youtube: instructor.user?.socials.youtube || '',
+          },
+          introduction: instructor.introduction || '',
+          address: instructor.address || '',
+          occupation: instructor.occupation || '',
+          skills: instructor.skills || [],
+          education: instructor.education || [],
+
+          totalPublicCourses: 0,
+          totalStudents: 0,
+          totalReviews: 0,
+          averageRating: 0.0,
+
+          courses: [],
+        }
+      });
+    }
+
+    const publicCourseIds = publicCourses.map(c => c._id);
+
+    const totalStudents = (await getInstructorStudentIds(id)).length;
+
+    const avgRating = await Review.aggregate([
+      {
+        $match: {
+          course: { $in: publicCourseIds },
+          isDeleted: false,
+        }
+      },
+      { $sort: { createdAt: -1 } },
+      {
+        $group: {
+          _id: { course: "$course", user: "$user" },
+          latestReview: { $first: "$$ROOT" }
+        }
+      },
+      {
+        $project: {
+          rating: "$latestReview.rating"
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          avgRating: { $avg: "$rating" },
+          totalReviews: { $sum: 1 }
+        }
+      }
+    ]);
+
+    const averageRating =
+      avgRating.length > 0 && avgRating[0].avgRating != null
+        ? parseFloat(avgRating[0].avgRating.toFixed(1))
+        : 0;
+
+    return res.json({
+      success: true,
+      instructor: {
+        id: instructor.user?._id,
+        name: instructor.user?.name,
+        email: instructor.user?.email,
+        pfpImg: instructor.user?.pfpImg || '',
+        phonenumber: instructor.user?.phonenumber || '',
+        website: instructor.user?.website || '',
+        socials: {
+          facebook: instructor.user?.socials?.facebook || '',
+          twitter: instructor.user?.socials?.twitter || '',
+          instagram: instructor.user?.socials.instagram || '',
+          youtube: instructor.user?.socials.youtube || '',
+        },
+        introduction: instructor.introduction || '',
+        address: instructor.address || '',
+        occupation: instructor.occupation || '',
+        skills: instructor.skills || [],
+        education: instructor.education || [],
+
+        totalPublicCourses: publicCourseIds.length,
+        totalStudents,
+        totalReviews: avgRating.length,
+        averageRating,
+
+        courses: publicCourses,
+      }
+    });
+  } catch (error) {
+    console.error("Get instructor details error: ", error);
     res.status(500).json({
       success: false,
       message: "Server error"

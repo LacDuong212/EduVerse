@@ -19,7 +19,7 @@ const rootReducer = combineReducers({
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['auth'], // only persist auth
+  whitelist: [],  // add reducer names you want to persist here
 };
 
 // create persisted reducer
