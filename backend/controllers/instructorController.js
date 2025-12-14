@@ -1,4 +1,5 @@
 import Course from "../models/courseModel.js";
+import CourseProgress from "../models/courseProgressModel.js";
 import DraftVideo from "../models/draftVideoModel.js";
 import Instructor from "../models/instructorModel.js";
 import Order from "../models/orderModel.js";
@@ -113,7 +114,8 @@ const fillChartData = (mongoData, start, unit) => {
   const dataMap = {};
   if (Array.isArray(mongoData)) {
     mongoData.forEach(item => {
-      dataMap[item._id.month] = item.totalEarnings || item.total || 0;
+      // support multiple aggregation result field names (earnings, enrollments,...)
+      dataMap[item._id.month] = item.totalEarnings || item.totalEnrollments || 0;
     });
   }
 
@@ -437,7 +439,7 @@ export const getCourseEarnings = async (req, res) => {
     // setup date logic
     const { start, mongoFormat, unit } = getDateConfig(period);
 
-    // aggregation pipeline
+    // aggregation pipeline (group by the same shape used in dashboard)
     const earnings = await Order.aggregate([
       {
         $match: {
@@ -454,20 +456,20 @@ export const getCourseEarnings = async (req, res) => {
       },
       {
         $group: {
-          _id: { $dateToString: { format: mongoFormat, date: "$createdAt" } },
-          total: { $sum: "$courses.pricePaid" }
+          _id: { month: { $dateToString: { format: mongoFormat, date: "$createdAt" } } },
+          totalEarnings: { $sum: "$courses.pricePaid" }
         }
       },
-      { $sort: { _id: 1 } }
+      { $sort: { "_id.month": 1 } }
     ]);
 
-    // fill gaps (empty days/hours)
+    // fill gaps (empty days/months/weeks) using helper
     const chartData = fillChartData(earnings, start, unit);
 
     return res.json({
       success: true,
       data: chartData,
-      totalEarnings: earnings.reduce((acc, curr) => acc + curr.total, 0)
+      totalEarnings: earnings.reduce((acc, curr) => acc + (curr.totalEarnings || 0), 0)
     });
   } catch (error) {
     console.error(`Error fetching earnings for course (${req.params.id}):`, error);
@@ -492,7 +494,7 @@ export const getStudentsEnrolled = async (req, res) => {
     // setup date logic
     const { start, mongoFormat, unit } = getDateConfig(period);
 
-    // aggregation pipeline
+    // aggregation pipeline: group by the same shape used in dashboard (month key)
     const enrollments = await Order.aggregate([
       {
         $match: {
@@ -501,7 +503,6 @@ export const getStudentsEnrolled = async (req, res) => {
           "courses.course": new mongoose.Types.ObjectId(id)
         }
       },
-      // Unwind is strictly safer to ensure we count the specific course instance
       { $unwind: "$courses" },
       {
         $match: {
@@ -510,17 +511,17 @@ export const getStudentsEnrolled = async (req, res) => {
       },
       {
         $group: {
-          _id: { $dateToString: { format: mongoFormat, date: "$createdAt" } },
-          total: { $sum: 1 } // <--- CHANGE: Count 1 instead of summing price
+          _id: { month: { $dateToString: { format: mongoFormat, date: "$createdAt" } } },
+          totalEnrollments: { $sum: 1 }
         }
       },
-      { $sort: { _id: 1 } }
+      { $sort: { "_id.month": 1 } }
     ]);
 
-    // fill gaps
+    // fill gaps (empty days/months/weeks) using helper
     const chartData = fillChartData(enrollments, start, unit);
 
-    const totalCount = enrollments.reduce((acc, curr) => acc + curr.total, 0);
+    const totalCount = enrollments.reduce((acc, curr) => acc + (curr.totalEnrollments || 0), 0);
 
     return res.json({
       success: true,
@@ -575,35 +576,7 @@ export const getCourseStudentsAndReviews = async (req, res) => {
         }
       },
       { $unwind: "$student" },
-      { // get student review
-        $lookup: {
-          from: "reviews",
-          let: { userId: "$user", courseId: "$courses.course" },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $eq: ["$user", "$$userId"] },
-                    { $eq: ["$course", "$$courseId"] },
-                    { $eq: ["isDeleted", false] }
-                  ]
-                }
-              }
-            },
-            {
-              $project: {
-                _id: 0,
-                rating: 1,
-                description: 1,
-                updatedAt: 1,
-              }
-            }
-          ],
-          as: "review"
-        }
-      },
-      { // shaping what to return
+      { // shaping what to return (student info only)
         $project: {
           _id: 0,
           student: {
@@ -612,14 +585,64 @@ export const getCourseStudentsAndReviews = async (req, res) => {
             email: "$student.email",
             pfpImg: "$student.pfpImg",
             enrolledAt: "$updatedAt"
-          },
-          review: { $ifNull: [{ $arrayElemAt: ["$review", 0] }, null] }  // get first review or null (only 1 review/user/course)
+          }
         }
       }
     ]);
 
-    // get student progress and percentage #TODO
-    for (let i = 0; i < students.length; i++) students[i].student.progress = 0;
+    // fetch reviews separately and map them by user
+    if (students.length > 0) {
+      const userIds = students.map(s => s.student._id);
+      const reviews = await Review.find({ course: id, user: { $in: userIds }, isDeleted: false })
+        .sort({ updatedAt: -1 })
+        .select('rating description updatedAt user')
+        .lean();
+
+      const reviewMap = {};
+      for (const r of reviews) {
+        const uid = r.user.toString();
+        if (!reviewMap[uid]) {
+          reviewMap[uid] = {
+            rating: r.rating,
+            description: r.description,
+            updatedAt: r.updatedAt
+          };
+        }
+      }
+
+      for (let i = 0; i < students.length; i++) {
+        const uid = students[i].student._id.toString();
+        students[i].review = reviewMap[uid] || null;
+      }
+    } else {
+      for (let i = 0; i < students.length; i++) students[i].review = null;
+    }
+
+    // get student progress and percentage
+    if (students.length > 0) {
+      const userIds = students.map(s => s.student._id);
+      const progresses = await CourseProgress.find({ courseId: id, userId: { $in: userIds } }).lean();
+
+      const progressMap = {};
+      progresses.forEach(p => {
+        const uid = p.userId.toString();
+        const percentage = p.totalLectures ? Math.round((p.completedLecturesCount / p.totalLectures) * 100) : 0;
+        progressMap[uid] = {
+          percentage,
+          completedLectures: p.completedLecturesCount || 0,
+          totalLectures: p.totalLectures || 0
+        };
+      });
+
+      for (let i = 0; i < students.length; i++) {
+        const uid = students[i].student._id.toString();
+        const prog = progressMap[uid];
+        students[i].student.progress = prog ? prog.percentage : 0;
+        students[i].student.progressDetails = prog || { percentage: 0, completedLectures: 0, totalLectures: 0 };
+      }
+    } else {
+      for (let i = 0; i < students.length; i++) students[i].student.progress = 0;
+    }
 
     let filtered = students;
 

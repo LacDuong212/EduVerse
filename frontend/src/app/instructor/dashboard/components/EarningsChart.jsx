@@ -86,7 +86,7 @@ const EarningsChart = ({ col = 6, earningsData = [] }) => {
     } else {
       return (
         <>
-          <span className="text-secondary me-1"><BsDash /></span>
+          <span className="text-info"><BsDash /></span>
         </>
       );
     }
