@@ -7,7 +7,7 @@ const orderRoute = express.Router();
 orderRoute.use(userAuth);
 
 orderRoute.get("/", getOrders);
-orderRoute.get("/:id", getOrderById);
+orderRoute.get("/:id",  getOrderById);
 orderRoute.post("/create", createOrder);
 orderRoute.patch("/:id/update", updateOrder);
 

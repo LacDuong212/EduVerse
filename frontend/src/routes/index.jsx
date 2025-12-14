@@ -24,7 +24,8 @@ import WishList from "../app/shop/wishlist/page";
 import StudentMyCourses from '../app/student/my-courses';
 import StudentAccount from '../app/student/account';
 import LearningCourse from '../app/student/learning/page';
-
+import OrderListPage from '../app/student/my-orders/OrderListPage';
+import OrderDetailPage from '../app/student/my-orders/detail/OrderDetailPage';
 import AccountSettingsPage from '../app/pages/accountSettings';
 
 // PUBLIC
@@ -160,6 +161,16 @@ export const studentRoutes = [{
   name: 'Account',
   isNested: true,
   element: <StudentAccount />
+}, {
+  path: '/student/orders',
+  name: 'My Orders',
+  isNested: true,
+  element: <OrderListPage />
+}, {
+  path: '/student/orders/:id',
+  name: 'Order Detail',
+  isNested: true,
+  element: <OrderDetailPage />
 }, {
   path: '/student/payment-success',
   name: 'Payment Success',

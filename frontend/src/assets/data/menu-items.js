@@ -1,4 +1,4 @@
-import { BsBasket, BsBook, BsGear, BsInfoCircle, BsPerson, BsUiChecksGrid } from 'react-icons/bs';
+import { BsBasket, BsBook, BsGear, BsInfoCircle, BsPerson, BsUiChecksGrid, BsBagCheck  } from 'react-icons/bs';
 import { IoWalletOutline } from 'react-icons/io5'
 import { PiStudent } from 'react-icons/pi';
 import { RiBook2Line } from 'react-icons/ri';
@@ -99,6 +99,11 @@ export const STUDENT_ACCOUNT_DROPDOWN_ITEMS = [{
   icon: BsBook,
   url: '/student/courses'
 }, {
+  key: 'orders',
+  label: 'My Orders',
+  icon: BsBagCheck,
+  url: '/student/orders'
+}, {
   key: 'settings',
   label: 'Settings',
   icon: BsGear,
@@ -122,7 +127,7 @@ export const STUDENT_APP_MENU_ITEMS = [{
 }];
 export const STUDENT_MENU_ITEMS = [{
   key: 'account',
-  label: 'Account',
+  label: 'My Account',
   icon: BsPerson,
   url: '/student/account',
   parentKey: 'student'
@@ -139,6 +144,14 @@ export const STUDENT_MENU_ITEMS = [{
   label: 'My Courses',
   icon: BsBasket,
   url: '/student/courses',
+  parentKey: 'student'
+}, 
+{
+  
+  key: 'orders',
+  label: 'My Orders',
+  icon: BsUiChecksGrid,
+  url: '/student/orders',
   parentKey: 'student'
 }, 
 // {

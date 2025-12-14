@@ -31,9 +31,10 @@ export const getOrderById = async (req, res) => {
     }
 
     // check ownership
-    if (order.user.toString() !== req.userId) {
-      return res.status(403).json({ success: false, message: "Unauthorized access" });
-    }
+   if (order.user.toString() !== req.userId.toString()) {
+  return res.status(403).json({ success: false, message: "Unauthorized access" });
+}
+
 
     res.status(200).json({ success: true, order });
   } catch (error) {
