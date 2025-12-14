@@ -8,7 +8,7 @@ export const useImageUpload = () => {
   const [error, setError] = useState(null);
 
   const uploadImage = useCallback(async (file, courseId) => {
-    if (!file || !courseId) return;   // #TODO: handle when creating no courseId
+    if (!file) throw new Error("No image to upload");
 
     setIsUploading(true);
     setError(null);
@@ -16,7 +16,7 @@ export const useImageUpload = () => {
 
     try {
       const { data: response } = await axios.get(
-        `${backendUrl}/api/courses/${courseId}/images/upload`,
+        `${backendUrl}/api/courses/${courseId || '-'}/images/upload`,
         { withCredentials: true }
       );
 

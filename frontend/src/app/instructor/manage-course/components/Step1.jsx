@@ -15,6 +15,22 @@ const Step1 = ({ stepperInstance, draftData, onSave }) => {
 
   const [categories, setCategories] = useState([]);
 
+  // helpers: format/parse numbers with thousand separators
+  const formatNumber = (n) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(n);
+  const parseInputNumber = (s) => {
+    if (typeof s === 'number') return s;
+    const digits = String(s || '').replace(/[^0-9.-]/g, '');
+    if (digits === '') return NaN;
+    return Number(digits);
+  };
+  const toFormattedString = (v) => {
+    if (v === 0) return '0';
+    if (v === null || v === undefined || v === '') return '';
+    const n = Number(v);
+    if (!Number.isFinite(n)) return String(v);
+    return formatNumber(n);
+  };
+
   // initialize from props or set defaults
   const [formData, setFormData] = useState({
     title: '',
@@ -45,8 +61,8 @@ const Step1 = ({ stepperInstance, draftData, onSave }) => {
       language: draftData.language || '',
       duration: draftData.duration || '',
       durationUnit: draftData.durationUnit || 'hour',
-      price: draftData.price === 0 ? 0 : draftData.price,
-      discountPrice: draftData.discountPrice || '',
+      price: toFormattedString(draftData.price === 0 ? 0 : draftData.price),
+      discountPrice: toFormattedString(draftData.discountPrice || ''),
       enableDiscount: draftData.enableDiscount || false,
       description: draftData.description || '',
       isPrivate: draftData.isPrivate !== undefined ? draftData.isPrivate : true,
@@ -72,10 +88,19 @@ const Step1 = ({ stepperInstance, draftData, onSave }) => {
   // handle input changes
   const handleChange = (e) => {
     const { name, type, checked, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
+
+    // format numeric currency-like inputs with thousand separators
+    if (name === 'price' || name === 'discountPrice') {
+      // allow empty
+      const stripped = String(value || '').replace(/[^0-9.-]/g, '');
+      const formatted = stripped === '' ? '' : formatNumber(Number(stripped));
+      setFormData((prev) => ({ ...prev, [name]: formatted }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: type === 'checkbox' ? checked : value,
+      }));
+    }
 
     // clear the specific error when the user starts typing
     if (errors[name]) {
@@ -98,7 +123,7 @@ const Step1 = ({ stepperInstance, draftData, onSave }) => {
   // validation
   const validateForm = () => {
     const newErrors = {};
-    const price = Number(formData.price);
+    const price = parseInputNumber(formData.price);
 
     if (!formData.title || formData.title.trim() === '') {
       newErrors.title = 'Course title is required.';
@@ -116,18 +141,18 @@ const Step1 = ({ stepperInstance, draftData, onSave }) => {
       newErrors.language = 'Please select a language.';
     }
 
-    if (!formData.price) {
+    if (isNaN(price)) {
       newErrors.price = 'Price is required.';
-    } else if (isNaN(Number(formData.price)) || Number(formData.price) < 0) {
+    } else if (price < 0) {
       newErrors.price = 'Price must be a valid, positive number.';
     }
 
     if (formData.enableDiscount) {
-      const discountPrice = Number(formData.discountPrice);
+      const discountPrice = parseInputNumber(formData.discountPrice);
 
-      if (!formData.discountPrice) {
+      if (isNaN(discountPrice)) {
         newErrors.discountPrice = 'Discount price is required when enabled.';
-      } else if (isNaN(discountPrice) || discountPrice <= 0) {
+      } else if (discountPrice <= 0) {
         newErrors.discountPrice = 'Discount must be a valid, positive number.';
       } else if (!newErrors.price && discountPrice >= price) {
         newErrors.discountPrice = 'Discount price must be less than the regular price.';
@@ -145,7 +170,14 @@ const Step1 = ({ stepperInstance, draftData, onSave }) => {
 
     // run validation
     if (validateForm()) {
-      onSave(formData);
+      // convert formatted strings to numbers before saving
+      const payload = {
+        ...formData,
+        price: parseInputNumber(formData.price),
+        discountPrice: formData.discountPrice ? parseInputNumber(formData.discountPrice) : undefined
+      };
+
+      onSave(payload);
       stepperInstance?.next();
 
       // inform progress saved
@@ -177,6 +209,7 @@ const Step1 = ({ stepperInstance, draftData, onSave }) => {
             name="title"
             placeholder="Enter course title"
             value={formData.title}
+            maxLength={84}
             onChange={handleChange}
             isInvalid={!!errors.title}
           />
@@ -193,6 +226,7 @@ const Step1 = ({ stepperInstance, draftData, onSave }) => {
             name="subtitle"
             placeholder="Enter short description"
             value={formData.subtitle}
+            maxLength={240}
             onChange={handleChange}
           />
         </Col>
@@ -319,7 +353,8 @@ const Step1 = ({ stepperInstance, draftData, onSave }) => {
               type="text"
               name="price"
               placeholder="Enter price"
-              defaultValue={formData.price}
+              value={formData.price}
+              maxLength={12}
               onChange={handleChange}
               isInvalid={!!errors.price}
             />
@@ -337,7 +372,8 @@ const Step1 = ({ stepperInstance, draftData, onSave }) => {
               type="text"
               name="discountPrice"
               placeholder="Enter discount"
-              defaultValue={formData.discountPrice}
+              value={formData.discountPrice}
+              maxLength={12}
               onChange={handleChange}
               disabled={!formData.enableDiscount}
               isInvalid={!!errors.discountPrice}

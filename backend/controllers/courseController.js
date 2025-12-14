@@ -9,6 +9,7 @@ import cloudinary, { CLOUDINARY_API_KEY, CLOUDINARY_CLOUD_NAME } from "../config
 import { generateStreamUrl } from "../utils/aws/getObject.js";
 
 import Fuse from "fuse.js";
+import mongoose from "mongoose";
 
 // HELPERS ---
 // helper: extract videoUrl from lectures and previewVideo in course
@@ -35,6 +36,11 @@ const getAllVideoKeys = (data) => {
   return keys;
 };
 
+// helper: check if is object id
+const isObjectId = (value) =>
+  mongoose.Types.ObjectId.isValid(value) &&
+  String(new mongoose.Types.ObjectId(value)) === value;
+
 
 export const getHomeCourses = async (req, res) => {
   try {
@@ -60,11 +66,11 @@ export const getHomeCourses = async (req, res) => {
       .limit(8);
 
     const biggestDiscounts = await Course.aggregate([
-      { 
-        $match: { 
+      {
+        $match: {
           ...publicCourseFilter,
           discountPrice: { $ne: null }
-        } 
+        }
       },
       { $addFields: { discountAmount: { $subtract: ["$price", "$discountPrice"] } } },
       { $sort: { discountAmount: -1 } },
@@ -439,7 +445,7 @@ export const getRelatedCourses = async (req, res) => {
       _id: { $ne: id },
       $or: conditions
     }).select("title thumbnail instructor studentsEnrolled rating price discountPrice ")
-    .populate("category", "name slug");
+      .populate("category", "name slug");
 
     // Loại bỏ trùng lặp (nếu có)
     const seen = new Set();
@@ -833,27 +839,26 @@ export const generateImageUploadSignature = async (req, res) => {
       });
     }
 
-    // check course
-    const course = await Course.findById(id);
-    if (!course) {
-      return res.status(404).json({
-        success: false,
-        message: "Course not found"
-      });
-    }
-
-    // check ownership
-    if (!course.instructor?.ref?.equals(userId)) {
-      return res.status(403).json({
-        success: false,
-        message: "You cannot modify this course"
-      });
-    }
-
     const timestamp = Math.round((new Date()).getTime() / 1000);
-    const public_id = `course_${id}_image`;
-    const folder = 'courses';
+    let public_id = `ins_${userId}_course_image`;
+    let folder = 'drafts';
     const transformation = 'w_1280,h_720,c_fill,g_auto,f_auto,q_auto,d_av4_khpvlh';
+
+    if (isObjectId(id)) {
+      // check course
+      const course = await Course.findById(id);
+      if (course) {
+        if (!course.instructor?.ref?.equals(userId)) {
+          return res.status(403).json({
+            success: false,
+            message: "You cannot modify this course"
+          });
+        }
+
+        public_id = `course_${id}_image`;
+        folder = 'courses';
+      }
+    }
 
     // generate signature
     const signature = cloudinary.utils.api_sign_request({
