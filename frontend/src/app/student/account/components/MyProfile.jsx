@@ -1,18 +1,14 @@
 import useProfile from '@/hooks/useProfile';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Card, CardBody, CardHeader, Col, OverlayTrigger, Row, Tooltip } from "react-bootstrap";
-import { BsQuestionCircle, BsTwitter, BsX } from "react-icons/bs";
-import { FaFacebook, FaGlobe, FaInstagram, FaUndo, FaYoutube } from "react-icons/fa";
+import { BsQuestionCircle, BsX } from "react-icons/bs";
+import { FaFacebook, FaGlobe, FaInstagram, FaLinkedin, FaUndo, FaYoutube } from "react-icons/fa";
 import { toast } from 'react-toastify';
 
 const MyProfile = () => {
-  const { user, uploadAvatar, isAvatarUploading } = useProfile();
+  const { user, uploadAvatar, isAvatarUploading, updateProfile } = useProfile();
   const [previewAvatar, setPreviewAvatar] = useState(null);
   const currentAvatarSrc = previewAvatar === "" ? null : (previewAvatar || user?.pfpImg);
-
-  useEffect(() => {
-
-  }, []);
 
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
@@ -39,34 +35,62 @@ const MyProfile = () => {
     setPreviewAvatar("");
   };
 
-  const handleSubmit = (e) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (isSubmitting) return;
 
     // collect data
     const formData = new FormData(e.target);
-    const name = formData.get("name");
-    const phonenumber = formData.get("phonenumber");
+    const name = (formData.get("name") || '').trim();
+    const phonenumber = (formData.get("phonenumber") || '').trim();
 
-    // validate input
-    // name: required
-    // phonenumber: valid phone number (regex) if provided
+    // validations
+    if (!name) {
+      toast.error('Full name is required');
+      return;
+    }
+
+    // phone: accept digits, spaces, +, -, parentheses; require 7-15 digits
+    if (phonenumber) {
+      const digitsOnly = phonenumber.replace(/\D/g, '');
+      if (digitsOnly.length < 7 || digitsOnly.length > 15) {
+        toast.error('Phone number is invalid');
+        return;
+      }
+    }
 
     const payload = {
-      name: name,
-      phonenumber: phonenumber,
-      pfpImg: currentAvatarSrc,
+      name,
+      phonenumber,
+      pfpImg: currentAvatarSrc === "" ? "" : currentAvatarSrc || null,
       bio: formData.get("bio"),
       socials: {
-        facebook: formData.get("facebook"),
-        twitter: formData.get("twitter"),
-        instagram: formData.get("instagram"),
-        youtube: formData.get("youtube"),
+        facebook: formData.get("facebook") || '',
+        linkedin: formData.get("linkedin") || '',
+        instagram: formData.get("instagram") || '',
+        youtube: formData.get("youtube") || '',
       },
-      website: formData.get("website"),
+      website: formData.get("website") || '',
     };
 
-    console.log("profileData: ", payload);  // temp, testing
-    toast.info("Comming soon");
+    setIsSubmitting(true);
+    try {
+      const result = await updateProfile(payload);
+      if (result && result.success) {
+        toast.success('Profile updated');
+        setPreviewAvatar(null);
+      } else {
+        toast.error(result?.message || 'Failed to update profile');
+      }
+    } catch (err) {
+      console.error('Update profile error:', err);
+      toast.error(err?.message || 'Failed to update profile');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -81,9 +105,9 @@ const MyProfile = () => {
               <div className="d-flex flex-column align-items-center me-2 gap-3">
                 <div className="mt-2 position-relative" style={{ width: "160px", height: "160px" }}>
                   {currentAvatarSrc ? (
-                    <img src={currentAvatarSrc} className="rounded-3 border border-dark border-3 shadow w-100 h-100 object-fit-cover" alt="Avatar" />
+                    <img src={currentAvatarSrc} className="rounded-3 border border-body border-3 shadow w-100 h-100 object-fit-cover" alt="Avatar" />
                   ) : (
-                    <div className="rounded-3 border border-dark border-3 shadow d-flex align-items-center justify-content-center bg-light w-100 h-100 fs-1 fw-bold">{(user?.name?.[0] || "U").toUpperCase()}</div>
+                    <div className="rounded-3 border border-body border-3 shadow d-flex align-items-center justify-content-center bg-light w-100 h-100 fs-1 fw-bold">{(user?.name?.[0] || "U").toUpperCase()}</div>
                   )}
                   {currentAvatarSrc ? (
                     <button
@@ -176,17 +200,17 @@ const MyProfile = () => {
             </div>
             <div className="mb-3">
               <label className="form-label d-flex align-items-center mb-0">
-                <BsTwitter className="bi bi-twitter text-twitter mb-1 me-2 fs-5" />
-                Twitter profile URL
-              </label>
-              <input className="form-control" type="text" name="twitter" placeholder="x.com/your_username" defaultValue={user?.socials?.twitter || ''} />
-            </div>
-            <div className="mb-3">
-              <label className="form-label d-flex align-items-center mb-0">
                 <FaInstagram className="fab fa-instagram text-danger mb-1 me-2 fs-5" />
                 Instagram profile URL
               </label>
               <input className="form-control" type="text" name="instagram" placeholder="instagram.com/your_username" defaultValue={user?.socials?.instagram || ''} />
+            </div>
+            <div className="mb-3">
+              <label className="form-label d-flex align-items-center mb-0">
+                <FaLinkedin className="fa fa-linkedin text-linkedin mb-1 me-2 fs-5" />
+                Linkedin profile URL
+              </label>
+              <input className="form-control" type="text" name="linkedin" placeholder="linkedin.com/in/your_username" defaultValue={user?.socials?.linkedin || ''} />
             </div>
             <div className="mb-3">
               <label className="form-label d-flex align-items-center mb-0">
@@ -205,8 +229,8 @@ const MyProfile = () => {
           </Col>
 
           <div className="d-flex justify-content-center justify-content-md-end mt-4">
-            <button type="submit" className="btn btn-primary mb-0" disabled={isAvatarUploading}>
-              Save Changes
+            <button type="submit" className="btn btn-primary mb-0" disabled={isAvatarUploading || isSubmitting}>
+              {isSubmitting ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
         </form>

@@ -1,4 +1,4 @@
-import { setLogout, setUserData } from '@/redux/authSlice';
+import { setLogout } from '@/redux/authSlice';
 
 import axios from 'axios';
 import { useCallback, useState } from 'react';
@@ -20,13 +20,9 @@ export default function useProfile() {
       );
 
       if (data.success) {
-        dispatch(setUserData(data.user));
-        toast.success('Profile updated!');
-
         return { success: true, user: data.user };
       } else {
-        toast.error(data.message || 'Something went wrong');
-        return { success: false };
+        return { success: false, message: data.message };
       }
     } catch (error) {
       toast.error(error.response?.data?.message || error.message);
@@ -87,7 +83,7 @@ export default function useProfile() {
 
     } catch (error) {
       console.error("Avatar upload failed:", error);
-      toast.error("Failed to upload avatar");
+      throw new Error("Failed to upload avatar");
     } finally {
       setIsAvatarUploading(false);
     }

@@ -90,12 +90,12 @@ export const instructorRoutes = [{
   element: <InstructorMyCourses />
 }, {
   path: '/instructor/students',
-  name: 'Students',
+  name: 'My Students',
   isNested: false,
   element: <InstructorMyStudents />
 }, {
-  path: '/instructor/account',
-  name: 'Account',
+  path: '/instructor/profile',
+  name: 'My Profile',
   isNested: true,
   element: <InstructorAccount />
 }, {
@@ -156,8 +156,8 @@ export const studentRoutes = [{
   isNested: false,
   element: <Checkout />
 }, {
-  path: '/student/account',
-  name: 'Account',
+  path: '/student/profile',
+  name: 'Profile',
   isNested: true,
   element: <StudentAccount />
 }, {
