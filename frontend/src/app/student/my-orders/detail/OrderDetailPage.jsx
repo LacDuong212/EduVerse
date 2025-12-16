@@ -1,3 +1,4 @@
+// src/app/pages/student/orders/OrderDetailPage.jsx
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import {
@@ -16,7 +17,20 @@ import axios from "axios";
 import { formatCurrency } from "@/utils/currency";
 import { paymentLabel, statusLabel, statusVariant } from "@/utils/order";
 
-import { FaArrowLeft, FaCalendarAlt, FaCreditCard, FaReceipt, FaTag } from "react-icons/fa";
+import {
+  FaArrowLeft,
+  FaCalendarAlt,
+  FaCreditCard,
+  FaReceipt,
+  FaTag,
+  FaInfoCircle,
+} from "react-icons/fa";
+
+const shortOrderCode = (id) => {
+  const s = String(id || "");
+  if (!s) return "";
+  return s.slice(-4).toUpperCase();
+};
 
 export default function OrderDetailPage() {
   const { id } = useParams();
@@ -26,10 +40,10 @@ export default function OrderDetailPage() {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // ✅ NEW: error state
+  // ✅ error state
   const [error, setError] = useState(null);
 
-  // ✅ NEW: cancel flow
+  // ✅ cancel flow
   const [showCancel, setShowCancel] = useState(false);
   const [cancelLoading, setCancelLoading] = useState(false);
 
@@ -89,7 +103,7 @@ export default function OrderDetailPage() {
     });
   }, [order]);
 
-  // ✅ NEW: cancel order handler
+  // ✅ cancel order handler
   const handleCancelOrder = async () => {
     if (!backendUrl || !order?._id) return;
     setCancelLoading(true);
@@ -126,7 +140,7 @@ export default function OrderDetailPage() {
     );
   }
 
-  // ✅ NEW: Error UI (no infinite spinner)
+  // ✅ Error UI (no infinite spinner)
   if (error && !order) {
     return (
       <Card className="border-0 shadow-sm">
@@ -149,6 +163,8 @@ export default function OrderDetailPage() {
 
   if (!order) return null;
 
+  const orderCode = shortOrderCode(order._id);
+
   return (
     <div>
       {/* ===== Top bar ===== */}
@@ -160,13 +176,19 @@ export default function OrderDetailPage() {
               {statusLabel(order.status)}
             </Badge>
           </div>
-          <div className="text-muted small mt-1">
-            Order ID: <span className="fw-semibold">{order._id}</span>
+
+          {/* ✅ stronger contrast */}
+          <div className="text-body small mt-1" title={order._id}>
+            Order <span className="fw-semibold">#{orderCode}</span>
+            <span className="ms-2 text-muted">·</span>
+            <span className="ms-2 text-muted">
+              ID: {String(order._id).slice(0, 8)}…
+            </span>
           </div>
         </div>
 
         <div className="d-flex gap-2">
-          {/* ✅ NEW: Cancel order (pending only) */}
+          {/* Cancel order (pending only) */}
           {canCancel && (
             <Button
               variant="outline-danger"
@@ -184,42 +206,46 @@ export default function OrderDetailPage() {
         </div>
       </div>
 
-      {/* ✅ show inline error (if any) */}
+      {/* inline error (if any) */}
       {error ? <Alert variant="warning">{error}</Alert> : null}
 
-      {/* ===== Meta info (gộp Created at + Payment) ===== */}
-      <Row className="g-3 mb-3">
-        <Col lg={12}>
-          <Card className="border-0 shadow-sm">
-            <Card.Body>
-              <Row className="g-3">
-                <Col md={6}>
-                  <div className="d-flex align-items-center gap-2 mb-1">
-                    <FaCalendarAlt className="text-muted" />
-                    <span className="fw-semibold">Created at</span>
-                  </div>
-                  <div className="text-muted">{createdAt}</div>
-                </Col>
+      {/* ===== Information ===== */}
+      <Card className="border-0 shadow-sm mb-3">
+        <Card.Body>
+          <div className="d-flex align-items-center gap-2 mb-3">
+            <FaInfoCircle className="text-muted" />
+            <h5 className="mb-0">Information</h5>
+          </div>
 
-                <Col md={6}>
-                  <div className="d-flex align-items-center gap-2 mb-1">
-                    <FaCreditCard className="text-muted" />
-                    <span className="fw-semibold">Payment</span>
-                  </div>
-                  <div className="text-muted">
-                    {paymentLabel(order.paymentMethod)}
-                    {!canLearn && (
-                      <span className="ms-2 text-muted small">
-                        · Access locked until completed
-                      </span>
-                    )}
-                  </div>
-                </Col>
-              </Row>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
+          <Row className="g-3">
+            <Col md={6}>
+              <div className="d-flex align-items-center gap-2 mb-1">
+                <FaCalendarAlt className="text-muted" />
+                <span className="fw-semibold text-body">Created at</span>
+              </div>
+              <div className="text-body">{createdAt}</div>
+            </Col>
+
+            <Col md={6}>
+              <div className="d-flex align-items-center gap-2 mb-1">
+                <FaCreditCard className="text-muted" />
+                <span className="fw-semibold text-body">Payment</span>
+              </div>
+
+              <div>
+                <span className="fw-semibold text-body">
+                  {paymentLabel(order.paymentMethod)}
+                </span>
+                {!canLearn && (
+                  <span className="ms-2 text-muted small">
+                    · Access locked until completed
+                  </span>
+                )}
+              </div>
+            </Col>
+          </Row>
+        </Card.Body>
+      </Card>
 
       {/* ===== Courses ===== */}
       <Card className="border-0 shadow-sm mb-3">
@@ -265,25 +291,31 @@ export default function OrderDetailPage() {
                               height: "100%",
                               objectFit: "cover",
                             }}
+                            onError={(e) => {
+                              e.currentTarget.style.display = "none";
+                            }}
                           />
                         ) : null}
                       </div>
 
                       <div>
-                        <div className="fw-semibold">{r.title}</div>
-                        <div className="text-muted small">
-                          Course ID: {r.courseId || "N/A"}
-                        </div>
+                        <div className="fw-semibold text-body">{r.title}</div>
+                        {!canLearn ? (
+                          <div className="text-muted small">
+                            Access locked until order is completed
+                          </div>
+                        ) : (
+                          <div className="text-muted small">Ready to learn</div>
+                        )}
                       </div>
                     </div>
                   </td>
 
-                  <td className="text-end fw-semibold">
+                  <td className="text-end fw-semibold text-body">
                     {formatCurrency(r.pricePaid)}
                   </td>
 
                   <td className="text-end">
-                    {/* ✅ NEW: disable learning unless completed */}
                     {r.courseId ? (
                       canLearn ? (
                         <Button
@@ -317,47 +349,45 @@ export default function OrderDetailPage() {
         </Card.Body>
       </Card>
 
-      {/* ===== Summary (BOTTOM) ===== */}
+      {/* ===== Summary ===== */}
       <Card className="border-0 shadow-sm">
         <Card.Body>
           <div className="d-flex align-items-center gap-2 mb-3">
             <FaReceipt className="text-muted" />
-            <h5 className="mb-0">Order summary</h5>
+            <h5 className="mb-0">Summary</h5>
           </div>
 
-          <Row className="gy-2">
-            <Col md={6}>
-              <div className="d-flex justify-content-between text-muted">
-                <span>Sub total</span>
-                <span className="fw-semibold">
-                  {formatCurrency(order.subTotal)}
-                </span>
-              </div>
+          <div className="ms-auto" style={{ maxWidth: 400 }}>
+            <div className="d-flex justify-content-between text-body">
+              <span>Sub total</span>
+              <span className="fw-semibold text-body">
+                {formatCurrency(order.subTotal)}
+              </span>
+            </div>
 
-              <div className="d-flex justify-content-between text-muted mt-1">
-                <span className="d-flex align-items-center gap-2">
-                  <FaTag />
-                  Discount
-                </span>
-                <span className="fw-semibold">
-                  {formatCurrency(order.discountAmount)}
-                </span>
-              </div>
-            </Col>
+            <div className="d-flex justify-content-between text-body mt-1">
+              <span className="d-flex align-items-center gap-2">
+                <FaTag />
+                Discount
+              </span>
+              <span className="fw-semibold text-body">
+                {formatCurrency(order.discountAmount)}
+              </span>
+            </div>
 
-            <Col md={6}>
-              <div className="d-flex justify-content-between align-items-center h-100">
-                <span className="fw-semibold fs-5">Total</span>
-                <span className="fw-bold fs-5">
-                  {formatCurrency(order.totalAmount)}
-                </span>
-              </div>
-            </Col>
-          </Row>
+            <hr className="my-2" />
+
+            <div className="d-flex justify-content-between align-items-center">
+              <span className="fw-semibold fs-5 text-body">Total</span>
+              <span className="fw-bold fs-5 text-body">
+                {formatCurrency(order.totalAmount)}
+              </span>
+            </div>
+          </div>
         </Card.Body>
       </Card>
 
-      {/* ✅ NEW: Cancel confirm modal */}
+      {/* Cancel confirm modal */}
       <Modal show={showCancel} onHide={() => setShowCancel(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title>Cancel this order?</Modal.Title>
