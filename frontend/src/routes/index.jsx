@@ -28,7 +28,7 @@ import LearningCourse from '../app/student/learning/page';
 import AccountSettingsPage from '../app/pages/accountSettings';
 
 // PUBLIC
-import HomePage from "../app/home/page";
+import HomePage from "../app/pages/home/page";
 import CoursesPage from "../app/pages/course/grid/page";
 import BecomeInstructorPage from '../app/student/become-instructor';
 import CourseDetails from "../app/pages/course/detail/page";

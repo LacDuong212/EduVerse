@@ -42,7 +42,7 @@ const Overview = () => {
 
   // const features = ['Digital marketing course introduction', 'Customer Life cycle', 'What is Search engine optimization(SEO)', 'Facebook ADS', 'Facebook Messenger Chatbot', 'Search engine optimization tools', 'Why SEO', 'URL Structure', 'Featured Snippet', 'SEO tips and tricks', 'Google tag manager'];
   return <>
-    <fieldset className="border border-2 p-3 rounded mb-3">
+    <fieldset className="border border-2 p-3 pt-1 rounded mb-3">
       <legend className="h4 float-none w-auto px-1 mb-0">
         Description
       </legend>

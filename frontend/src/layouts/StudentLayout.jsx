@@ -10,8 +10,9 @@ import { FaSignOutAlt } from 'react-icons/fa';
 import { Link, useLocation } from 'react-router-dom';
 
 const Banner = lazy(() => import('../components/StudentLayoutComponents/Banner'));
+import ChatbotWidget from '@/components/ChatbotWidget';
 const Footer = lazy(() => import('../components/Footer'));
-const Preloader = lazy(() => import('../components/Preloader'));
+const Preloader = lazy(() => import('../components/preloader'));
 const TopNavigationBar = lazy(() => import('../components/StudentLayoutComponents/TopNavigationBar'));
 
 
@@ -100,6 +101,8 @@ const StudentLayout = ({ children, isNested = false }) => {
           </section>
         )}
       </main>
+
+      <ChatbotWidget />
 
       <Suspense>
         <Footer className={"bg-light pt-5"} />
