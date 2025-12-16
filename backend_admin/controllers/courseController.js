@@ -1,6 +1,6 @@
 import Course from "../models/courseModel.js";
 import Fuse from "fuse.js";
-
+import axios from "axios";
 
 export const getCoursesOverview = async (req, res) => {
   try {
@@ -110,9 +110,50 @@ export const updateCourseStatus = async (req, res) => {
 
     // TODO: Gửi email thông báo cho Instructor
 
+    try {
+      let notiType = 'INFO';
+      // Default message
+      let notiMessage = `The status of your course "${course.title}" has been updated to ${newStatus}.`;
+
+      // Customize message based on status
+      if (newStatus === 'Live') {
+        notiType = 'APPROVED';
+        notiMessage = `Congratulations! Your course "${course.title}" has been approved and is now live.`;
+      } else if (newStatus === 'Rejected') {
+        notiType = 'REJECTED';
+        notiMessage = `Your course "${course.title}" has been rejected. Please review our feedback and try again.`;
+      } else if (newStatus === 'Blocked') {
+        notiType = 'BLOCKED';
+        notiMessage = `Warning: Your course "${course.title}" has been blocked due to policy violation.`;
+      } else if (newStatus === 'Pending') {
+        notiType = 'INFO';
+        notiMessage = `Your course "${course.title}" has been set back to Pending status.`;
+      }
+
+      // Get safe Instructor ID
+      let rawId = course.instructor?.ref || course.instructor?._id || course.instructor;
+
+      // Chuyển đổi sang String để đảm bảo không gửi Object (ObjectId) sang bên kia
+      const instructorId = String(rawId);
+
+      console.log("Final Instructor ID (String):", instructorId);
+
+      // Call User Backend API
+      await axios.post('http://localhost:5000/api/internal/notify', {
+        userId: instructorId,
+        type: notiType,
+        message: notiMessage
+      });
+
+      console.log(`[AdminBE] Sent notification to UserBE for instructor: ${instructorId}`);
+
+    } catch (notifyError) {
+      console.error('[AdminBE] Failed to send notification:', notifyError.message);
+    }
+
     return res.status(200).json({
       success: true,
-      message: 'Status updated successfully',
+      message: `Course updated to ${newStatus} successfully`,
       course
     });
   } catch (error) {
