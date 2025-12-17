@@ -55,6 +55,10 @@ export const publicRoutes = [{
   name: 'CourseDetails',
   element: <CourseDetails />
 }, {
+  path: '/instructors',
+  name: 'All Instructors',
+  element: <NotFoundPage />
+}, {
   path: '/instructors/:id',
   name: 'Instructor Details',
   element: <InstructorDetailsPage />

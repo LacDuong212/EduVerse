@@ -33,13 +33,22 @@ const getInstructorCourseIds = async (userId) => {
   return courses.map(course => course._id);
 };
 
-// helper: get "live" course ids belong to instructor
+// helper: get "live" course belong to instructor
 const getInstructorLiveCourses = async (userId) => {
   const courses = await Course.find(
     { "instructor.ref": userId, isDeleted: false, status: "Live" }
   ).lean();
 
   return courses;
+};
+
+// helper: get "live" course ids belong to instructor
+const getInstructorLiveCourseIds = async (userId) => {
+  const courses = await Course.find(
+    { "instructor.ref": userId, isDeleted: false, status: "Live" }
+  ).lean();
+
+  return courses.map(course => course._id);
 };
 
 // helper: get student ids for an instructor
@@ -1377,6 +1386,113 @@ export const getInstructorDetails = async (req, res) => {
         averageRating,
 
         courses: publicCourses,
+      }
+    });
+  } catch (error) {
+    console.error("Get instructor details error: ", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
+  }
+};
+
+// GET /api/instructors/:id/basic
+export const getInstructorBasicDetails = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) return res.status(400).json({ success: false, message: "Instructor id is required" });
+
+    const instructor = await Instructor.findOne({ user: id }).populate("user").lean();
+    if (!instructor) return res.status(404).json({ success: false, message: "Instructor not found" });
+
+    const publicCourseIds = await getInstructorLiveCourseIds(id);
+
+    if (publicCourseIds.length === 0) {
+      return res.json({
+        success: true,
+        instructor: {
+          id: instructor.user?._id,
+          name: instructor.user?.name,
+          email: instructor.user?.email,
+          pfpImg: instructor.user?.pfpImg || '',
+          phonenumber: instructor.user?.phonenumber || '',
+          website: instructor.user?.website || '',
+          socials: {
+            facebook: instructor.user?.socials?.facebook || '',
+            twitter: instructor.user?.socials?.twitter || '',
+            instagram: instructor.user?.socials.instagram || '',
+            youtube: instructor.user?.socials.youtube || '',
+          },
+          introduction: instructor.introduction || '',
+          occupation: instructor.occupation || '',
+
+          totalPublicCourses: 0,
+          totalStudents: 0,
+          totalReviews: 0,
+          averageRating: 0.0,
+        }
+      });
+    }
+
+    const totalStudents = (await getInstructorStudentIds(id)).length;
+
+    const avgRating = await Review.aggregate([
+      {
+        $match: {
+          course: { $in: publicCourseIds },
+          isDeleted: false,
+        }
+      },
+      { $sort: { createdAt: -1 } },
+      {
+        $group: {
+          _id: { course: "$course", user: "$user" },
+          latestReview: { $first: "$$ROOT" }
+        }
+      },
+      {
+        $project: {
+          rating: "$latestReview.rating"
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          avgRating: { $avg: "$rating" },
+          totalReviews: { $sum: 1 }
+        }
+      }
+    ]);
+
+    const averageRating =
+      avgRating.length > 0 && avgRating[0].avgRating != null
+        ? parseFloat(avgRating[0].avgRating.toFixed(1))
+        : 0;
+
+    return res.json({
+      success: true,
+      instructor: {
+        id: instructor.user?._id,
+        name: instructor.user?.name,
+        email: instructor.user?.email,
+        pfpImg: instructor.user?.pfpImg || '',
+        phonenumber: instructor.user?.phonenumber || '',
+        website: instructor.user?.website || '',
+        socials: {
+          facebook: instructor.user?.socials?.facebook || '',
+          twitter: instructor.user?.socials?.twitter || '',
+          instagram: instructor.user?.socials.instagram || '',
+          youtube: instructor.user?.socials.youtube || '',
+        },
+        introduction: instructor.introduction || '',
+        occupation: instructor.occupation || '',
+
+        totalPublicCourses: publicCourseIds.length,
+        totalStudents,
+        totalReviews: avgRating.length,
+        averageRating,
       }
     });
   } catch (error) {

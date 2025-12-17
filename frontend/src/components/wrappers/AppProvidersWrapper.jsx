@@ -1,4 +1,4 @@
-import FallbackLoading from '../FallbackLoading';
+import Preloader from '../preloader';
 import { LayoutProvider } from '@/context/useLayoutContext';
 import { NotificationProvider } from '@/context/useNotificationContext';
 
@@ -80,7 +80,7 @@ const AppProvidersWrapper = ({ children }) => {
   return (
     <LayoutProvider>
       <NotificationProvider>
-        <Suspense fallback={<FallbackLoading />}>{children}</Suspense>
+        <Suspense fallback={<Preloader />}>{children}</Suspense>
       </NotificationProvider>
 
       <ToastContainer

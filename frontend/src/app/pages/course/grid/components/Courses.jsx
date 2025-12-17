@@ -40,6 +40,27 @@ const Courses = () => {
     clearFilters,
   } = useCourseList();
 
+  // local debounced search input
+  const [searchInput, setSearchInput] = useState(search);
+
+  // sync local input when global search changes
+  useEffect(() => {
+    setSearchInput(search);
+  }, [search]);
+
+  // debounce committing the value to search
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      const q = searchInput?.trim() || '';
+      if (q !== (search || '')) {
+        setSearch(q);
+        setPage(1);
+      }
+    }, 1000);
+
+    return () => clearTimeout(handler);
+  }, [searchInput, search, setSearch, setPage]);
+
   // hydrate state from URL
   useEffect(() => {
     // read all values from URL
@@ -85,6 +106,11 @@ const Courses = () => {
 
   const onSearchClick = (e) => {
     e.preventDefault();
+    const q = searchInput?.trim() || '';
+    if (q !== (search || '')) {
+      setSearch(q);
+      setPage(1);
+    }
   };
 
   const showingFrom = total ? (page - 1) * limit + (allCourses.length ? 1 : 0) : 0;
@@ -105,8 +131,8 @@ const Courses = () => {
                       className="form-control me-1"
                       type="search"
                       placeholder="Find your course"
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
+                      value={searchInput}
+                      onChange={(e) => setSearchInput(e.target.value)}
                     />
                     <button
                       type="button"

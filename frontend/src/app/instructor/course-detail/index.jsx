@@ -4,14 +4,17 @@ import CourseInfo from './components/CourseInfo';
 import CourseStudentList from './components/CourseStudentList';
 import { Col, Container, Row } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
+import { FaAngleRight, FaRegEdit } from 'react-icons/fa';
 
 const InstructorCourseDetail = () => {
   const { course, loading, error, refetch } = useMyCourseDetail();
 
   if (loading) {
-    return <Container className="d-flex flex-column align-items-center justify-content-center">
-      Loading...
-    </Container>;
+    return (
+      <Container className="d-flex flex-column align-items-center justify-content-center mt-5">
+        Loading...
+      </Container>
+    );
   }
 
   if (error) {
@@ -26,11 +29,19 @@ const InstructorCourseDetail = () => {
   return (
     <Container className="mt-3 mb-5">
       <Row className="mb-3">
-        <Col xs={12} className="d-sm-flex justify-content-between align-items-center">
-          <h1 className="h3 mb-2 mb-sm-0">Course Details</h1>
-          <Link to={`/instructor/courses/edit/${course?._id}`} className="btn btn-sm btn-primary mb-0">
-            Edit Course
-          </Link>
+        <Col xs={12} className="d-flex justify-content-between align-items-center">
+          <div className="d-flex align-items-center">
+            <h1 className="h3 mb-2 mb-sm-0">Course Details</h1>
+            <Link 
+              to={`/instructor/courses/edit/${course?._id}`} 
+              className="ms-3 btn btn-primary-soft rounded-circle p-2"
+            >
+              <FaRegEdit className="fs-4 p-1" />
+            </Link>
+          </div>
+          {(course?.status?.toLowerCase() === 'live') && <Link className="fw-bold" to={course?._id ? `/courses/${course._id}` : "/courses"}>
+            View Public Details<span className="fs-5"><FaAngleRight /></span>
+          </Link>}
         </Col>
       </Row>
       <Row className="g-4">

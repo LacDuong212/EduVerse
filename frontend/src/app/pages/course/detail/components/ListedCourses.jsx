@@ -185,9 +185,9 @@ const ListedCourses = () => {
     }
   }), []);
 
-  useEffect(() => {
-    if (relatedCourses) console.log('Related Courses loaded:', relatedCourses.length);
-  }, [relatedCourses]);
+  // useEffect(() => {
+  //   if (relatedCourses) console.log('Related Courses loaded:', relatedCourses.length);
+  // }, [relatedCourses]);
 
   if (!relatedCourses || relatedCourses.length === 0) return null;
 

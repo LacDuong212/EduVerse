@@ -288,8 +288,12 @@ export const getCourseById = async (req, res) => {
 
     const course = await Course.findById(id).populate("category", "name slug");
 
-    if (!course) {
+    if (!course || course.isDeleted) {
       return res.status(404).json({ success: false, message: "Course not found" });
+    }
+
+    if (!(course.status.toLowerCase() === "live")) {
+      return res.json({ success: false, message: "Course not available" })
     }
 
     return res.json({ success: true, course });
