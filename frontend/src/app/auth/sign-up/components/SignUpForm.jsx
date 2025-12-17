@@ -82,7 +82,7 @@ export default function SignUpForm({ onSignUpSuccess }) {
       <div className="mb-4 position-relative">
         <IconTextFormInput
           control={control}
-          ype={showPassword ? 'text' : 'password'}
+          type={showPassword ? 'text' : 'password'}
           icon={FaLock}
           placeholder="Confirm Password"
           label="Confirm Password *"

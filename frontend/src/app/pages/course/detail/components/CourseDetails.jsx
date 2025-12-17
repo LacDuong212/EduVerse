@@ -3,12 +3,9 @@ import courseImg21 from '@/assets/images/courses/4by3/21.jpg';
 import GlightBox from '@/components/GlightBox';
 import { useVideoStream } from '@/hooks/useStreamUrl';
 import { formatCurrency } from '@/utils/currency';
-import Comment from './Comment';
 import Curriculum from './Curriculum';
-import Faqs from './Faqs';
 import Instructor from './Instructor';
 import Overview from './Overview';
-import Reviews from './Reviews';
 
 import { useState } from 'react';
 import {
@@ -18,10 +15,6 @@ import {
   CardHeader,
   Col,
   Container,
-  Dropdown,
-  DropdownItem,
-  DropdownMenu,
-  DropdownToggle,
   Nav,
   NavItem,
   NavLink,

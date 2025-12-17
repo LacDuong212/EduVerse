@@ -1,8 +1,9 @@
 import express from "express";
 import { getAllCourses, getCourseFilters, getCourseById, 
-    courseViewed, getViewedCourses, getHomeCourses, getOwnedCourses, getRelatedCourses,
+    getHomeCourses, getOwnedCourses, getRelatedCourses,
     createCourse, updateCourse, setCoursePrivacy,
-    streamVideo, generateImageUploadSignature
+    streamVideo, generateImageUploadSignature,
+    getRecommendedCourses, getPopularTags
 } from "../controllers/courseController.js";
 import { processLectureAI } from "../controllers/aiController.js";
 import userAuth from "../middlewares/userAuth.js";
@@ -13,16 +14,16 @@ import {
 const courseRoute = express.Router();
 
 courseRoute.get("/home", getHomeCourses);
+courseRoute.get("/recommendations", userAuth, getRecommendedCourses);
 courseRoute.get("/", getAllCourses);
 courseRoute.get("/filters", getCourseFilters);
 courseRoute.get("/my-courses", userAuth, getOwnedCourses);
-courseRoute.get("/viewed", userAuth, getViewedCourses);
+courseRoute.get("/tags", getPopularTags);
 courseRoute.get("/:id/images/upload", userAuth, generateImageUploadSignature);
 courseRoute.get("/:id/related", getRelatedCourses);
 courseRoute.get("/:id/videos/:key", userAuth, streamVideo);
 courseRoute.get("/:id", getCourseById);
 
-courseRoute.post("/:id/viewed", userAuth, courseViewed);
 courseRoute.post("/", userAuth, createCourse);
 
 courseRoute.post("/generate-ai", userAuth, processLectureAI);

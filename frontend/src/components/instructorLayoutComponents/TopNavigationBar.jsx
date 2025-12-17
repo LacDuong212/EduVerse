@@ -1,10 +1,10 @@
 import { INSTRUCTOR_APP_MENU_ITEMS, INSTRUCTOR_ACCOUNT_DROPDOWN_ITEMS } from '@/assets/data/menu-items.js';
 import LogoBox from '../LogoBox';
-import TopNavbar from '../TopNavbar';
-import NotificationDropdown from '../TopNavbar/components/NotificationDropdown'
-import ProfileDropdown from '../TopNavbar/components/ProfileDropdown';
-import SimpleAppMenu from '../TopNavbar/components/SimpleAppMenu';
-import TopbarMenuToggler from '../TopNavbar/components/TopbarMenuToggler';
+import TopNavbar from '../TopNavBar';
+import NotificationDropdown from '../TopNavBar/components/NotificationDropdown'
+import ProfileDropdown from '../TopNavBar/components/ProfileDropdown';
+import SimpleAppMenu from '../TopNavBar/components/SimpleAppMenu';
+import TopbarMenuToggler from '../TopNavBar/components/TopbarMenuToggler';
 import { useLayoutContext } from '@/context/useLayoutContext';
 import { Container, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
@@ -35,14 +35,7 @@ const TopNavigationBar = () => {
         />
 
         <ul className="nav flex-row align-items-center list-unstyled ms-xl-auto">
-          <OverlayTrigger
-            placement="bottom"
-            overlay={<Tooltip>Notifications</Tooltip>}
-          >
-            <span className="d-inline-block">
-              <NotificationDropdown />
-            </span>
-          </OverlayTrigger>
+          <NotificationDropdown />
           <ProfileDropdown className="nav-item ms-3" dropdownItems={INSTRUCTOR_ACCOUNT_DROPDOWN_ITEMS} />
         </ul>
       </Container>

@@ -1,13 +1,15 @@
 import AddSection from './AddSection';
 import AddLecture from './AddLecture';
-import { useState, useEffect } from 'react';
-import { Accordion, AccordionBody, AccordionHeader, AccordionItem, Button, Row } from 'react-bootstrap';
-import { FaEdit, FaTimes, FaPlus } from 'react-icons/fa';
+import axios from 'axios';
+import { useState, useEffect, useCallback } from 'react';
+import { Accordion, AccordionBody, AccordionHeader, AccordionItem, Button, Row, Badge, Spinner } from 'react-bootstrap';
+import { FaEdit, FaTimes, FaPlus, FaRobot, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
 import { FaSection } from 'react-icons/fa6';
 import { toast } from 'react-toastify';
 
 
 const Step3 = ({ stepperInstance, draftData, onSave }) => {
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
   // local state
   const [curriculum, setCurriculum] = useState([]);
   const [errors, setErrors] = useState({});
@@ -29,6 +31,103 @@ const Step3 = ({ stepperInstance, draftData, onSave }) => {
       }))
     );
   }, [curriculumJson]);
+
+  const handleGenerateAI = async (sectionIdx, lectureIdx) => {
+    const section = curriculum[sectionIdx];
+    const lecture = section.lectures[lectureIdx];
+
+    // Validation kỹ trước khi gọi
+    if (!draftData?._id || !lecture._id) {
+      toast.warning("Please save the course changes first before generating AI.");
+      return;
+    }
+    if (!lecture.videoUrl || typeof lecture.videoUrl !== 'string' || lecture.videoUrl.startsWith('blob:')) {
+      toast.warning("Video must be uploaded and saved before AI processing.");
+      return;
+    }
+
+    try {
+      // Update UI ngay lập tức sang trạng thái Processing
+      updateLectureAIStatus(sectionIdx, lectureIdx, 'Processing');
+      toast.info("AI Background job started...");
+
+      const { data } = await axios.post(
+        `${backendUrl}/api/courses/generate-ai`,
+        {
+          courseId: draftData._id,
+          lectureId: lecture._id,
+          videoKey: lecture.videoUrl // Giả sử videoUrl chứa key hoặc url hợp lệ
+        },
+        { withCredentials: true }
+      );
+
+      if (!data.success) {
+        throw new Error(data.message);
+      }
+      // Backend trả về success ngay, UI đã set Processing, Polling sẽ lo phần còn lại
+
+    } catch (error) {
+      console.error("AI Generation Error:", error);
+      toast.error(error.message || "Failed to start AI generation");
+      updateLectureAIStatus(sectionIdx, lectureIdx, 'Failed');
+    }
+  };
+
+  // 2. Helper update local state cho AI Status
+  const updateLectureAIStatus = (sectionIdx, lectureIdx, status) => {
+    setCurriculum(prev => {
+      const updated = [...prev];
+      // Đảm bảo object aiData tồn tại
+      if (!updated[sectionIdx].lectures[lectureIdx].aiData) {
+        updated[sectionIdx].lectures[lectureIdx].aiData = {};
+      }
+      updated[sectionIdx].lectures[lectureIdx].aiData.status = status;
+      return updated;
+    });
+  };
+
+  // 3. Polling: Tự động check trạng thái mỗi 10s nếu có lecture đang "Processing"
+  useEffect(() => {
+    const hasProcessingItems = curriculum.some(sec =>
+      sec.lectures?.some(lec => lec.aiData?.status === 'Processing')
+    );
+
+    if (!hasProcessingItems || !draftData?._id) return;
+
+    const intervalId = setInterval(async () => {
+      try {
+        // Gọi API lấy lại toàn bộ course để refresh status (hoặc viết API riêng check status lecture)
+        const { data } = await axios.get(
+          `${backendUrl}/api/instructor/courses/${draftData._id}`,
+          { withCredentials: true }
+        );
+
+        if (data.success && data.course) {
+          // Merge status mới vào curriculum hiện tại mà không làm mất các thay đổi chưa lưu khác (nếu có)
+          setCurriculum(prev => {
+            return prev.map((section, sIdx) => ({
+              ...section,
+              lectures: section.lectures.map((lec, lIdx) => {
+                // Tìm lecture tương ứng trong data mới từ server
+                const serverSection = data.course.curriculum.find(s => s.section === section.section); // Cần logic map tốt hơn nếu tên section trùng, tốt nhất là map theo _id
+                const serverLecture = serverSection?.lectures?.find(l => l._id === lec._id); // Map theo ID là chuẩn nhất
+
+                if (serverLecture && serverLecture.aiData?.status !== lec.aiData?.status) {
+                  // Nếu status thay đổi (VD: Processing -> Completed), cập nhật lại lecture
+                  return { ...lec, aiData: serverLecture.aiData };
+                }
+                return lec;
+              })
+            }));
+          });
+        }
+      } catch (err) {
+        console.error("Polling error", err);
+      }
+    }, 10000); // 10 giây
+
+    return () => clearInterval(intervalId);
+  }, [curriculum, backendUrl, draftData?._id]);
 
   // these are calculated on every render
   const totalSections = curriculum.length;
@@ -177,6 +276,58 @@ const Step3 = ({ stepperInstance, draftData, onSave }) => {
     }
   };
 
+  const renderAIButton = (sectionIdx, lectureIdx, lecture) => {
+    // Chỉ hiện nếu Course đã có trong DB (đã save draft lần đầu) và Lecture đã có ID
+    if (!draftData?._id || !lecture._id) return null;
+
+    const status = lecture.aiData?.status || 'None';
+
+    if (status === 'Processing') {
+      return (
+        <Button variant="info-soft" size="sm" className="btn-round me-2" disabled>
+          <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-1"/>
+          Processing...
+        </Button>
+      );
+    }
+
+    if (status === 'Completed') {
+      return (
+        <div className="d-flex align-items-center me-2">
+            <span className="text-success me-2 fw-bold" title="AI Generated">
+                <FaCheckCircle /> Done
+            </span>
+             {/* Nút regenerate nếu muốn tạo lại */}
+            <Button 
+                variant="purple-soft" 
+                size="sm" 
+                className="btn-round" 
+                onClick={() => handleGenerateAI(sectionIdx, lectureIdx)}
+                title="Regenerate AI Content"
+            >
+                <FaRobot />
+            </Button>
+        </div>
+      );
+    }
+    
+    // Status = None hoặc Failed
+    return (
+      <div className="d-flex align-items-center me-2">
+         {status === 'Failed' && <span className="text-danger me-2"><FaExclamationCircle /> Failed</span>}
+         <Button
+            variant={status === 'Failed' ? "danger-soft" : "purple-soft"}
+            size="sm"
+            className="btn-round"
+            onClick={() => handleGenerateAI(sectionIdx, lectureIdx)}
+            title="Generate AI Summary & Quizzes"
+            >
+            <FaRobot className="me-1"/> {status === 'Failed' ? 'Retry AI' : 'Gen AI'}
+        </Button>
+      </div>
+    );
+  };
+
   return (
     <>
       <form
@@ -256,6 +407,8 @@ const Step3 = ({ stepperInstance, draftData, onSave }) => {
                       </div>
 
                       <div className="d-flex align-items-center ms-3 flex-shrink-0">
+                        {renderAIButton(i, idx, lecture)}
+                        
                         <Button
                           variant="primary-soft"
                           size="sm"

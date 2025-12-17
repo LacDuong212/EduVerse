@@ -18,11 +18,11 @@ const learningStreakSchema = new mongoose.Schema(
       default: 0,
     },
     lastActiveDate: {
-      type: String, // dạng 'YYYY-MM-DD'
+      type: String,
     },
     activeDates: [
       {
-        type: String, // lưu các ngày user đã học (optional, để thống kê / hiển thị calendar)
+        type: String,
       },
     ],
   },
