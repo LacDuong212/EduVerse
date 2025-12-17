@@ -7,6 +7,7 @@ const initialState = {
   topRated: [],
   biggestDiscounts: [],
   allCourses: [],
+  recommended: [],
 };
 
 const getId = (x) => x?.courseId ?? x?._id ?? x?.id ?? null;
@@ -28,7 +29,6 @@ const coursesSlice = createSlice({
     appendCourses: (state, action) => {
       const incoming = Array.isArray(action.payload) ? action.payload : [];
 
-      // Chỉ giữ item có id hợp lệ
       const normalizedIncoming = incoming.filter((x) => getId(x));
 
       const existingIds = new Set(state.allCourses.map(getId).filter(Boolean));
@@ -37,12 +37,14 @@ const coursesSlice = createSlice({
 
       state.allCourses.push(...toAdd);
     },
-    // (tuỳ chọn) đổi currency runtime
     setCurrency: (state, action) => {
       state.currency = action.payload || state.currency;
+    },
+    setRecommendedCourses: (state, action) => {
+      state.recommended = action.payload;
     },
   },
 });
 
-export const { setHomeCourses, setAllCourses, appendCourses, setCurrency } = coursesSlice.actions;
+export const { setHomeCourses, setAllCourses, appendCourses, setCurrency, setRecommendedCourses } = coursesSlice.actions;
 export default coursesSlice.reducer;

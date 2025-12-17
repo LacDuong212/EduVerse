@@ -5,10 +5,6 @@ import {
   CardHeader,
   Col,
   Container,
-  Dropdown,
-  DropdownItem,
-  DropdownMenu,
-  DropdownToggle,
   Nav,
   NavItem,
   NavLink,
@@ -17,9 +13,7 @@ import {
   TabContent,
   TabPane
 } from 'react-bootstrap';
-import Comment from './Comment';
 import Curriculum from './Curriculum';
-import Faqs from './Faqs';
 import Instructor from './Instructor';
 import Overview from './Overview';
 import Reviews from './Reviews';
