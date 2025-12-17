@@ -3,7 +3,7 @@ import { Alert, Card, CardBody, CardHeader, Col, Row } from 'react-bootstrap';
 import { FaStar } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
-const MarketingCourse = ({ col = 6, courseData }) => {
+const CourseInfo = ({ col = 6, courseData }) => {
   const statusBadge =
     courseData?.status === "Live"
       ? "success"
@@ -188,4 +188,4 @@ const MarketingCourse = ({ col = 6, courseData }) => {
   );
 };
 
-export default MarketingCourse;
+export default CourseInfo;

@@ -5,6 +5,7 @@ import querystring from 'qs';
 import moment from 'moment';
 
 import Order from "../models/orderModel.js";
+import Course from "../models/courseModel.js";
 
 // --- Config chung ---
 const frontendUrl = process.env.FRONTEND_URL;
@@ -166,6 +167,24 @@ const processMomoIpn = async (body) => {
             order.expiresAt = undefined;
             await order.save();
 
+            // increment course enrollments for completed order
+            try {
+                const counts = (order.courses || []).reduce((m, c) => {
+                    const id = c.course.toString();
+                    m[id] = (m[id] || 0) + 1;
+                    return m;
+                }, {});
+                const bulkOps = Object.entries(counts).map(([id, cnt]) => ({
+                    updateOne: {
+                        filter: { _id: new mongoose.Types.ObjectId(id) },
+                        update: { $inc: { studentsEnrolled: cnt } }
+                    }
+                }));
+                if (bulkOps.length) await Course.bulkWrite(bulkOps);
+            } catch (err) {
+                console.error('MoMo IPN - Failed to increment course enrollments:', err);
+            }
+
             console.log(`MoMo IPN - Order ${orderId} confirmed successfully.`);
         } else {
             console.log(`MoMo IPN - Order ${orderId} failed. ResultCode: ${resultCode}, Message: ${message}`);
@@ -277,6 +296,24 @@ const processVnpayIpn = async (vnp_Params) => {
                 order.status = 'completed';
                 order.expiresAt = undefined;
                 await order.save();
+
+                // increment course enrollments for completed order
+                try {
+                    const counts = (order.courses || []).reduce((m, c) => {
+                        const id = c.course.toString();
+                        m[id] = (m[id] || 0) + 1;
+                        return m;
+                    }, {});
+                    const bulkOps = Object.entries(counts).map(([id, cnt]) => ({
+                        updateOne: {
+                            filter: { _id: new mongoose.Types.ObjectId(id) },
+                            update: { $inc: { studentsEnrolled: cnt } }
+                        }
+                    }));
+                    if (bulkOps.length) await Course.bulkWrite(bulkOps);
+                } catch (err) {
+                    console.error('VNPAY IPN - Failed to increment course enrollments:', err);
+                }
 
             } else {
                 order.status = 'cancelled';
@@ -443,6 +480,24 @@ export const handleMomoReturn = async (req, res) => { // 1. Thêm async
                         order.status = 'completed';
                         order.expiresAt = undefined;
                         await order.save();
+
+                        try {
+                          const counts = (order.courses || []).reduce((m, c) => {
+                            const id = c.course.toString();
+                            m[id] = (m[id] || 0) + 1;
+                            return m;
+                          }, {});
+                          const bulkOps = Object.entries(counts).map(([id, cnt]) => ({
+                            updateOne: {
+                              filter: { _id: new mongoose.Types.ObjectId(id) },
+                              update: { $inc: { studentsEnrolled: cnt } }
+                            }
+                          }));
+                          if (bulkOps.length) await Course.bulkWrite(bulkOps);
+                        } catch (err) {
+                          console.error('[MOMO Return] Failed to increment course enrollments:', err);
+                        }
+
                         console.log(`[MOMO Return] Cập nhật đơn hàng ${orderId} -> completed`);
                     } else {
                         order.status = 'cancelled';

@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
-import { toast } from "react-hot-toast";
+import { toast } from "react-toastify";
 
 import { setAllCourses } from "@/redux/coursesSlice";
 
@@ -45,7 +45,7 @@ export default function useCourseList() {
   };
 
   const fetchCourses = useCallback(async () => {
-    if (page === 0) return;
+    if (page <= 0) return;
 
     try {
       setLoading(true);
@@ -62,7 +62,6 @@ export default function useCourseList() {
       };
 
       const res = await axios.get(`${backendUrl}/api/courses`, { params });
-
       const parsed = parseCoursesResponse(res);
 
       dispatch(setAllCourses(parsed.list));
@@ -75,10 +74,6 @@ export default function useCourseList() {
       setLoading(false);
     }
   }, [backendUrl, category, dispatch, limit, page, search, sort, price, level, language]);
-
-  useEffect(() => {
-    setPage(1);
-  }, [category, search, sort, price, level, language]);
 
   useEffect(() => {
     fetchCourses();

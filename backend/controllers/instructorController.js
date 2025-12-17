@@ -23,7 +23,7 @@ const fetchInstructorFields = async (filter, fields, allowedFields) => {
   return Instructor.findOne(filter).select(selectFields);
 };
 
-// helper: get course ids for an instructor
+// helper: get all course ids belong to instructor
 const getInstructorCourseIds = async (userId) => {
   const courses = await Course.find(
     { "instructor.ref": userId, isDeleted: false },
@@ -31,6 +31,15 @@ const getInstructorCourseIds = async (userId) => {
   ).lean();
 
   return courses.map(course => course._id);
+};
+
+// helper: get "live" course ids belong to instructor
+const getInstructorLiveCourses = async (userId) => {
+  const courses = await Course.find(
+    { "instructor.ref": userId, isDeleted: false, status: "Live" }
+  ).lean();
+
+  return courses;
 };
 
 // helper: get student ids for an instructor
@@ -105,7 +114,8 @@ const fillChartData = (mongoData, start, unit) => {
   const dataMap = {};
   if (Array.isArray(mongoData)) {
     mongoData.forEach(item => {
-      dataMap[item._id.month] = item.totalEarnings || item.total || 0;
+      // support multiple aggregation result field names (earnings, enrollments,...)
+      dataMap[item._id.month] = item.totalEarnings || item.totalEnrollments || 0;
     });
   }
 
@@ -328,6 +338,28 @@ export const getInstructorCourses = async (req, res) => {
     // fetch all courses for the instructor
     const allCourses = await Course.find({ "instructor.ref": userId, isDeleted: false }).lean();
 
+    // compute enrollments per course
+    // const courseIds = allCourses.map(c => c._id);
+    // let enrollmentAgg = [];
+    // if (courseIds.length > 0) {
+    //   enrollmentAgg = await Order.aggregate([
+    //     { $match: { status: 'completed', "courses.course": { $in: courseIds } } },
+    //     { $unwind: "$courses" },
+    //     { $match: { "courses.course": { $in: courseIds } } },
+    //     { $group: { _id: "$courses.course", count: { $sum: 1 } } }
+    //   ]);
+    // }
+
+    // const enrollMap = (enrollmentAgg || []).reduce((m, item) => {
+    //   m[item._id.toString()] = item.count || 0;
+    //   return m;
+    // }, {});
+
+    // // attach enrollment count to each course
+    // allCourses.forEach(course => {
+    //   course.studentsEnrolled = enrollMap[course._id.toString()] || 0;
+    // });
+
     // sorting function helper
     const sortFunctions = {
       '': (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt),        // default: updatedAt desc
@@ -429,7 +461,7 @@ export const getCourseEarnings = async (req, res) => {
     // setup date logic
     const { start, mongoFormat, unit } = getDateConfig(period);
 
-    // aggregation pipeline
+    // aggregation pipeline (group by the same shape used in dashboard)
     const earnings = await Order.aggregate([
       {
         $match: {
@@ -446,20 +478,20 @@ export const getCourseEarnings = async (req, res) => {
       },
       {
         $group: {
-          _id: { $dateToString: { format: mongoFormat, date: "$createdAt" } },
-          total: { $sum: "$courses.pricePaid" }
+          _id: { month: { $dateToString: { format: mongoFormat, date: "$createdAt" } } },
+          totalEarnings: { $sum: "$courses.pricePaid" }
         }
       },
-      { $sort: { _id: 1 } }
+      { $sort: { "_id.month": 1 } }
     ]);
 
-    // fill gaps (empty days/hours)
+    // fill gaps (empty days/months/weeks) using helper
     const chartData = fillChartData(earnings, start, unit);
 
     return res.json({
       success: true,
       data: chartData,
-      totalEarnings: earnings.reduce((acc, curr) => acc + curr.total, 0)
+      totalEarnings: earnings.reduce((acc, curr) => acc + (curr.totalEarnings || 0), 0)
     });
   } catch (error) {
     console.error(`Error fetching earnings for course (${req.params.id}):`, error);
@@ -484,7 +516,7 @@ export const getStudentsEnrolled = async (req, res) => {
     // setup date logic
     const { start, mongoFormat, unit } = getDateConfig(period);
 
-    // aggregation pipeline
+    // aggregation pipeline: group by the same shape used in dashboard (month key)
     const enrollments = await Order.aggregate([
       {
         $match: {
@@ -493,7 +525,6 @@ export const getStudentsEnrolled = async (req, res) => {
           "courses.course": new mongoose.Types.ObjectId(id)
         }
       },
-      // Unwind is strictly safer to ensure we count the specific course instance
       { $unwind: "$courses" },
       {
         $match: {
@@ -502,17 +533,17 @@ export const getStudentsEnrolled = async (req, res) => {
       },
       {
         $group: {
-          _id: { $dateToString: { format: mongoFormat, date: "$createdAt" } },
-          total: { $sum: 1 } // <--- CHANGE: Count 1 instead of summing price
+          _id: { month: { $dateToString: { format: mongoFormat, date: "$createdAt" } } },
+          totalEnrollments: { $sum: 1 }
         }
       },
-      { $sort: { _id: 1 } }
+      { $sort: { "_id.month": 1 } }
     ]);
 
-    // fill gaps
+    // fill gaps (empty days/months/weeks) using helper
     const chartData = fillChartData(enrollments, start, unit);
 
-    const totalCount = enrollments.reduce((acc, curr) => acc + curr.total, 0);
+    const totalCount = enrollments.reduce((acc, curr) => acc + (curr.totalEnrollments || 0), 0);
 
     return res.json({
       success: true,
@@ -567,35 +598,7 @@ export const getCourseStudentsAndReviews = async (req, res) => {
         }
       },
       { $unwind: "$student" },
-      { // get student review
-        $lookup: {
-          from: "reviews",
-          let: { userId: "$user", courseId: "$courses.course" },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $eq: ["$user", "$$userId"] },
-                    { $eq: ["$course", "$$courseId"] },
-                    { $eq: ["isDeleted", false] }
-                  ]
-                }
-              }
-            },
-            {
-              $project: {
-                _id: 0,
-                rating: 1,
-                description: 1,
-                updatedAt: 1,
-              }
-            }
-          ],
-          as: "review"
-        }
-      },
-      { // shaping what to return
+      { // shaping what to return (student info only)
         $project: {
           _id: 0,
           student: {
@@ -604,14 +607,64 @@ export const getCourseStudentsAndReviews = async (req, res) => {
             email: "$student.email",
             pfpImg: "$student.pfpImg",
             enrolledAt: "$updatedAt"
-          },
-          review: { $ifNull: [{ $arrayElemAt: ["$review", 0] }, null] }  // get first review or null (only 1 review/user/course)
+          }
         }
       }
     ]);
 
-    // get student progress and percentage #TODO
-    for (let i = 0; i < students.length; i++) students[i].student.progress = 0;
+    // fetch reviews separately and map them by user
+    if (students.length > 0) {
+      const userIds = students.map(s => s.student._id);
+      const reviews = await Review.find({ course: id, user: { $in: userIds }, isDeleted: false })
+        .sort({ updatedAt: -1 })
+        .select('rating description updatedAt user')
+        .lean();
+
+      const reviewMap = {};
+      for (const r of reviews) {
+        const uid = r.user.toString();
+        if (!reviewMap[uid]) {
+          reviewMap[uid] = {
+            rating: r.rating,
+            description: r.description,
+            updatedAt: r.updatedAt
+          };
+        }
+      }
+
+      for (let i = 0; i < students.length; i++) {
+        const uid = students[i].student._id.toString();
+        students[i].review = reviewMap[uid] || null;
+      }
+    } else {
+      for (let i = 0; i < students.length; i++) students[i].review = null;
+    }
+
+    // get student progress and percentage
+    if (students.length > 0) {
+      const userIds = students.map(s => s.student._id);
+      const progresses = await CourseProgress.find({ courseId: id, userId: { $in: userIds } }).lean();
+
+      const progressMap = {};
+      progresses.forEach(p => {
+        const uid = p.userId.toString();
+        const percentage = p.totalLectures ? Math.round((p.completedLecturesCount / p.totalLectures) * 100) : 0;
+        progressMap[uid] = {
+          percentage,
+          completedLectures: p.completedLecturesCount || 0,
+          totalLectures: p.totalLectures || 0
+        };
+      });
+
+      for (let i = 0; i < students.length; i++) {
+        const uid = students[i].student._id.toString();
+        const prog = progressMap[uid];
+        students[i].student.progress = prog ? prog.percentage : 0;
+        students[i].student.progressDetails = prog || { percentage: 0, completedLectures: 0, totalLectures: 0 };
+      }
+    } else {
+      for (let i = 0; i < students.length; i++) students[i].student.progress = 0;
+    }
 
     let filtered = students;
 
@@ -906,7 +959,7 @@ export const getProfile = async (req, res) => {
   try {
     const userId = req.userId;
 
-    const instructor = await Instructor.findOne({ user: userId }).populate("user");
+    const instructor = await Instructor.findOne({ user: userId }).populate("user").lean();
     if (!instructor) {
       res.status(404).json({ success: false, message: "Instructor not found" });
     }
@@ -1068,7 +1121,7 @@ export const getInstructorStudents = async (req, res) => {
       const studentIdStr = order.user.toString();
       order.courses.forEach(item => {
         if (courseIds.some(id => id.toString() === item.course.toString())) {
-           courseCountMap[studentIdStr] = (courseCountMap[studentIdStr] || 0) + 1;
+          courseCountMap[studentIdStr] = (courseCountMap[studentIdStr] || 0) + 1;
         }
       });
     });
@@ -1105,8 +1158,8 @@ export const getInstructorStudents = async (req, res) => {
 
     const pagedStudents = allStudents.slice(skip, skip + limit);
 
-    return res.status(200).json({ 
-      success: true, 
+    return res.status(200).json({
+      success: true,
       students: pagedStudents, // data
       total,
       page,
@@ -1198,7 +1251,7 @@ export const getInstructorEarnings = async (req, res) => {
 
     // get this month earnings ---
     const thisMonthEarnings = earningsData.length > 0 ? earningsData[earningsData.length - 1].value : 0;
-    
+
     // res ---
     return res.json({
       success: true,
@@ -1209,6 +1262,125 @@ export const getInstructorEarnings = async (req, res) => {
     });
   } catch (error) {
     console.error("Populate instructor dashboard data error: ", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
+  }
+};
+
+// GET /api/instructors/:id
+export const getInstructorDetails = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) return res.status(400).json({ success: false, message: "Instructor id is required" });
+
+    const instructor = await Instructor.findOne({ user: id }).populate("user").lean();
+    if (!instructor) return res.status(404).json({ success: false, message: "Instructor not found" });
+
+    const publicCourses = await getInstructorLiveCourses(id);
+
+    if (publicCourses.length === 0) {
+      return res.json({
+        success: true,
+        instructor: {
+          id: instructor.user?._id,
+          name: instructor.user?.name,
+          email: instructor.user?.email,
+          pfpImg: instructor.user?.pfpImg || '',
+          phonenumber: instructor.user?.phonenumber || '',
+          website: instructor.user?.website || '',
+          socials: {
+            facebook: instructor.user?.socials?.facebook || '',
+            twitter: instructor.user?.socials?.twitter || '',
+            instagram: instructor.user?.socials.instagram || '',
+            youtube: instructor.user?.socials.youtube || '',
+          },
+          introduction: instructor.introduction || '',
+          address: instructor.address || '',
+          occupation: instructor.occupation || '',
+          skills: instructor.skills || [],
+          education: instructor.education || [],
+
+          totalPublicCourses: 0,
+          totalStudents: 0,
+          totalReviews: 0,
+          averageRating: 0.0,
+
+          courses: [],
+        }
+      });
+    }
+
+    const publicCourseIds = publicCourses.map(c => c._id);
+
+    const totalStudents = (await getInstructorStudentIds(id)).length;
+
+    const avgRating = await Review.aggregate([
+      {
+        $match: {
+          course: { $in: publicCourseIds },
+          isDeleted: false,
+        }
+      },
+      { $sort: { createdAt: -1 } },
+      {
+        $group: {
+          _id: { course: "$course", user: "$user" },
+          latestReview: { $first: "$$ROOT" }
+        }
+      },
+      {
+        $project: {
+          rating: "$latestReview.rating"
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          avgRating: { $avg: "$rating" },
+          totalReviews: { $sum: 1 }
+        }
+      }
+    ]);
+
+    const averageRating =
+      avgRating.length > 0 && avgRating[0].avgRating != null
+        ? parseFloat(avgRating[0].avgRating.toFixed(1))
+        : 0;
+
+    return res.json({
+      success: true,
+      instructor: {
+        id: instructor.user?._id,
+        name: instructor.user?.name,
+        email: instructor.user?.email,
+        pfpImg: instructor.user?.pfpImg || '',
+        phonenumber: instructor.user?.phonenumber || '',
+        website: instructor.user?.website || '',
+        socials: {
+          facebook: instructor.user?.socials?.facebook || '',
+          twitter: instructor.user?.socials?.twitter || '',
+          instagram: instructor.user?.socials.instagram || '',
+          youtube: instructor.user?.socials.youtube || '',
+        },
+        introduction: instructor.introduction || '',
+        address: instructor.address || '',
+        occupation: instructor.occupation || '',
+        skills: instructor.skills || [],
+        education: instructor.education || [],
+
+        totalPublicCourses: publicCourseIds.length,
+        totalStudents,
+        totalReviews: avgRating.length,
+        averageRating,
+
+        courses: publicCourses,
+      }
+    });
+  } catch (error) {
+    console.error("Get instructor details error: ", error);
     res.status(500).json({
       success: false,
       message: "Server error"

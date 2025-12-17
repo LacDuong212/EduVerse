@@ -22,11 +22,11 @@ const getChartOptions = (seriesData, categories, colorVar, isCurrency = false) =
     chart: {
       height: 130,
       type: 'area',
-      sparkline: { enabled: true }, // Note: Sparkline hides axes. If you want to see dates on the bottom, set this to false.
+      sparkline: { enabled: true }, // sparkline hides axes (set to false to see dates on the bottom)
     },
     dataLabels: { enabled: false },
     stroke: { curve: 'smooth', width: 2 },
-    colors: [getCSSVar(colorVar)], // Dynamic color
+    colors: [getCSSVar(colorVar)], // dynamic color
     fill: {
       type: 'gradient',
       gradient: {
@@ -36,15 +36,15 @@ const getChartOptions = (seriesData, categories, colorVar, isCurrency = false) =
     },
     xaxis: {
       type: 'category',
-      categories: categories, // The dates go here
+      categories: categories, // dates
       crosshairs: { width: 1 },
     },
     tooltip: {
       fixed: { enabled: false },
-      x: { show: true }, // Shows the date in tooltip
+      x: { show: true }, // shows the date in tooltip
       y: {
         formatter: (val) => isCurrency ? `${val}${currency}` : val,
-        title: { formatter: () => '' } // Hides the series name in tooltip
+        title: { formatter: () => '' } // hides the series name in tooltip
       },
       marker: { show: false }
     }
@@ -73,14 +73,14 @@ const getChangeDisplay = (dataArray, isCurrency = false) => {
   } else {
     return (
       <>
-        <span className="text-secondary me-1">0 <BsDash /></span> vs. last month
+        <span className="text-info">Unchanged</span> vs. last month
       </>
     );
   }
 };
 
 const CourseStats = ({ col = 6, courseId = '' }) => {
-  // 1. Fetch Data
+  // fetch data
   const {
     data: earningsData,
     total: totalRevenue,
@@ -93,14 +93,14 @@ const CourseStats = ({ col = 6, courseId = '' }) => {
     loading: enrollmentsLoading
   } = useCourseEnrollments(courseId, 'month');
 
-  // 2. Process Earnings Data
+  // process earnings data
   const earningsChartConfig = useMemo(() => {
     if (!earningsData || earningsData.length === 0) return null;
 
-    // Map 'value' for Y-axis
+    // map 'value' for Y-axis
     const values = earningsData.map(item => item.value);
 
-    // Map 'name' (2024-11) to 'MM/yy' (11/24) for X-axis
+    // map 'name' (2024-11) to 'MM/yy' (11/24) for X-axis
     const categories = earningsData.map(item => {
       const [year, month] = item.name.split('-');
       return `${month}/${year}`;
@@ -109,7 +109,7 @@ const CourseStats = ({ col = 6, courseId = '' }) => {
     return getChartOptions(values, categories, '--bs-success', true);
   }, [earningsData]);
 
-  // 3. Process Enrollments Data
+  // process enrollments data
   const enrollmentsChartConfig = useMemo(() => {
     if (!enrollmentsData || enrollmentsData.length === 0) return null;
 
@@ -121,6 +121,17 @@ const CourseStats = ({ col = 6, courseId = '' }) => {
     });
 
     return getChartOptions(values, categories, '--bs-purple');
+  }, [enrollmentsData]);
+
+  // latest (current month) values to display in the cards
+  const latestEarningsValue = useMemo(() => {
+    if (!earningsData || earningsData.length === 0) return 0;
+    return earningsData[earningsData.length - 1].value || 0;
+  }, [earningsData]);
+
+  const latestEnrollmentsValue = useMemo(() => {
+    if (!enrollmentsData || enrollmentsData.length === 0) return 0;
+    return enrollmentsData[enrollmentsData.length - 1].value || 0;
   }, [enrollmentsData]);
 
   return (
@@ -136,7 +147,7 @@ const CourseStats = ({ col = 6, courseId = '' }) => {
             <CardBody className="p-0">
               <div className="d-sm-flex justify-content-between p-3">
                 <h4 className="mb-0 me-3">
-                  {earningsLoading ? 'Loading...' : formatCurrency(earningsData[earningsData?.length-1])}
+                  {earningsLoading ? 'Loading...' : formatCurrency(latestEarningsValue)}
                 </h4>
                 <p className="mb-0">{getChangeDisplay(earningsData, true)}</p>
               </div>
@@ -162,7 +173,7 @@ const CourseStats = ({ col = 6, courseId = '' }) => {
             <CardBody className="p-0">
               <div className="d-sm-flex justify-content-between p-3">
                 <h4 className="mb-0">
-                  {enrollmentsLoading ? 'Loading...' : totalEnrollments}
+                  {enrollmentsLoading ? 'Loading...' : latestEnrollmentsValue}
                 </h4>
                 <p className="mb-0">{getChangeDisplay(enrollmentsData)}</p>
               </div>

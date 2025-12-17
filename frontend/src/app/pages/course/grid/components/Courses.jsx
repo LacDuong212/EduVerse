@@ -1,6 +1,8 @@
 import ChoicesFormInput from '@/components/form/ChoicesFormInput';
 import { Button, Col, Container, Offcanvas, OffcanvasBody, OffcanvasHeader, Row } from 'react-bootstrap';
 import { FaSearch, FaSlidersH } from 'react-icons/fa';
+import { useSearchParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import Pagination from './Pagination';
 import CourseFilter from './CourseFilter';
 import useToggle from '@/hooks/useToggle';
@@ -12,6 +14,9 @@ import useCourseList from '../useCourseList';
 const Courses = () => {
   const { isTrue, toggle } = useToggle();
   const { width } = useViewPort();
+
+  const [ searchParams, setSearchParams ] = useSearchParams();
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const {
     allCourses,
@@ -34,6 +39,49 @@ const Courses = () => {
     setLanguage,
     clearFilters,
   } = useCourseList();
+
+  // hydrate state from URL
+  useEffect(() => {
+    // read all values from URL
+    const paramSearch = searchParams.get("search") || "";
+    const paramCategory = searchParams.get("category") || "";
+    const paramSort = searchParams.get("sort") || "newest";
+    const paramLevel = searchParams.get("level") || "";
+    const paramPrice = searchParams.get("price") || "";
+    const paramLanguage = searchParams.get("language") || "";
+
+    // batch update the state (if exists in URL)
+    if(paramSearch) setSearch(paramSearch);
+    if(paramCategory) setCategory(paramCategory);
+    if(paramSort) setSort(paramSort);
+    if(paramLevel) setLevel(paramLevel === 'All' ? '' : paramLevel);
+    if(paramPrice) setPrice(paramPrice);
+    if(paramLanguage) setLanguage(paramLanguage);
+
+    // if any filter exists, reset to page 1
+    setPage(1);
+
+    // mark init from URL done
+    setIsInitialized(true);
+  }, [searchParams]);
+
+  // update URL when filters change
+  useEffect(() => {
+    // no changing URL if not done initing
+    if (!isInitialized) return;
+
+    const params = {};
+    if (search?.trim()) params.search = search.trim();
+    if (category) params.category = category;
+    if (sort && sort !== 'newest') params.sort = sort;
+    if (level) params.level = level;
+    if (price) params.price = price;
+    if (language) params.language = language;
+
+    // use "replace: true" to not create unnecessary history entries while searching
+    setSearchParams(params, { replace: true });
+
+  }, [search, category, sort, level, price, language, isInitialized, setSearchParams]);
 
   const onSearchClick = (e) => {
     e.preventDefault();

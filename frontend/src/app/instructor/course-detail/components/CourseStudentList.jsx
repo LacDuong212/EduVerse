@@ -1,8 +1,8 @@
 import { useCourseStudentList } from '../useMyCourseDetail';
 import { useState } from 'react';
 import { Card, CardBody, CardFooter, CardHeader, Col, OverlayTrigger, ProgressBar, Row, Tooltip } from 'react-bootstrap';
-import { FaAngleLeft, FaAngleRight, FaRegEnvelope, FaRegStar, FaSearch, FaStar, FaStarHalfAlt } from 'react-icons/fa';
-
+import { FaAngleLeft, FaAngleRight, FaRegEnvelope, FaRegStar, FaStar, FaStarHalfAlt } from 'react-icons/fa';
+import { toast } from 'react-toastify';
 
 const CourseStudentRow = ({ studentData }) => {
   const student = studentData?.student || {};
@@ -19,7 +19,7 @@ const CourseStudentRow = ({ studentData }) => {
                 alt={'avatar'}
               />
             ) : (
-              <div className="avatar-img rounded-circle border-white border-3 shadow d-flex align-items-center justify-content-center bg-light text-dark fw-bold fs-4">
+              <div className="avatar-img rounded-circle border border-body border-1 d-flex align-items-center justify-content-center fw-bold fs-4">
                 {(student?.name?.[0] || "S").toUpperCase()}
               </div>
             )}
@@ -54,26 +54,26 @@ const CourseStudentRow = ({ studentData }) => {
           })
           : "N/A"}
       </td>
-      <td>
+      <td style={{ maxWidth: "320px" }}>
         {review ? (
           <>
             <div className="d-flex flex-wrap align-items-center mb-1">
-              <ul className="list-inline mb-0 me-2 d-flex align-items-center">
+              <ul className="list-inline mb-0 me-1 d-flex align-items-center">
                 {(review?.rating || review?.rating === 0) && (
                   <>
                     {Array(Math.floor(review.rating)).fill(0).map((_star, idx) => (
-                      <li key={idx} className="list-inline-item me-1 small">
+                      <li key={idx} className="list-inline-item small">
                         <FaStar size={14} className="text-warning mb-1" />
                       </li>
                     ))}
                     {!Number.isInteger(review.rating) && (
-                      <li className="list-inline-item me-1 small">
+                      <li className="list-inline-item small">
                         <FaStarHalfAlt size={14} className="text-warning mb-1" />
                       </li>
                     )}
                     {review.rating < 5 &&
                       Array(5 - Math.ceil(review.rating)).fill(0).map((_star, idx) => (
-                        <li key={idx} className="list-inline-item me-1 small">
+                        <li key={idx} className="list-inline-item small">
                           <FaRegStar size={14} className="text-warning mb-1" />
                         </li>
                       ))}
@@ -98,17 +98,29 @@ const CourseStudentRow = ({ studentData }) => {
             </div>
           </>
         ) : (
-          "-"
+          <div className="text-center">-</div>
         )}
       </td>
       <td className="text-center">
         <OverlayTrigger
           placement="top"
-          overlay={<Tooltip id={`tooltip-message-${student?._id}`}>Message</Tooltip>}
+          overlay={<Tooltip id={`tooltip-message-${student?._id}`}>Copy Email</Tooltip>}
         >
-          <a title="Message" href="#" className="btn btn-success-soft btn-round mb-0 flex-centered" data-bs-toggle="tooltip" data-bs-placement="top">
-            <FaRegEnvelope className="far fa-envelope" />
-          </a>
+          <button
+            type="button"
+            className="btn btn-success-soft btn-round me-2 mb-0 flex-centered"
+            onClick={() => {
+              const email = studentData?.student?.email;
+              if (email) {
+                navigator.clipboard.writeText(email);
+                toast.success("Email copied!");
+              } else {
+                toast.error("No email found");
+              }
+            }}
+          >
+            <FaRegEnvelope />
+          </button>
         </OverlayTrigger>
       </td>
     </tr>
@@ -170,12 +182,12 @@ const CourseStudentList = ({ col = 12, courseId = '' }) => {
             </table>
           </div>
         </CardBody>
-        <CardFooter className="bg-transparent">
+        <CardFooter className="bg-transparent p-2">
           <div className="d-sm-flex justify-content-sm-between align-items-sm-center">
-            <p className="mb-0 text-center text-sm-start">
+            <p className="mb-0 text-center text-sm-start ps-2">
               Showing {total === 0 ? 0 : start} to {end} of {total} students
             </p>
-            <nav aria-label="navigation">
+            <nav aria-label="navigation" className="d-flex justify-content-center mb-0">
               <ul className="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
 
                 {/* Prev */}

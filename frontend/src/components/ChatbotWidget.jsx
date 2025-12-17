@@ -1,8 +1,12 @@
 import LogoBox from "./LogoBox";
+import useProfile from "@/hooks/useProfile";
 import { useEffect, useRef, useState } from "react";
 import { BsChatDots, BsX, BsSend } from "react-icons/bs";
+import { Link } from "react-router-dom";
 
 export default function ChatbotWidget() {
+  const { user } = useProfile();
+
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
@@ -21,16 +25,8 @@ export default function ChatbotWidget() {
         setOpen(false);
       }
     }
-
-    if (open) {
-      document.addEventListener("mousedown", handleClickOutside);
-    } else {
-      document.removeEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    if (open) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open]);
 
   const sendMessage = async () => {
@@ -38,24 +34,29 @@ export default function ChatbotWidget() {
 
     const userMessage = { from: "user", text: input };
     setMessages((prev) => [...prev, userMessage]);
+
     const currentInput = input; // keep a copy
     setInput("");
 
     try {
+      let sessionId = "guest-0712";
+      if (user && user._id) sessionId = "edv_user_" + user._id;
+
       const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/chatbot/message`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: currentInput,
-          sessionId: "sample-0712", // #TODO: user or guest
-          languageCode: "en-US",
+          sessionId: sessionId,
+          languageCode: "en-US",    // #TODO: detect browser language
         }),
       });
 
       const data = await res.json();
       const botMessage = {
         from: "bot",
-        text: data.reply || "(No reply from bot)",
+        text: data.reply || "(No reply)",
+        action: data.action
       };
 
       setMessages((prev) => [...prev, botMessage]);
@@ -104,7 +105,7 @@ export default function ChatbotWidget() {
             height: "500px",
             borderRadius: "15px",
             zIndex: 1050,
-            overflow: "hidden", // Ensure header/footer round correctly
+            overflow: "hidden",
           }}
         >
           {/* Header */}
@@ -122,19 +123,30 @@ export default function ChatbotWidget() {
             {messages.map((msg, i) => (
               <div
                 key={i}
-                className={`d-flex mb-2 ${
-                  msg.from === "user"
-                    ? "justify-content-end"
-                    : "justify-content-start"
-                }`}
+                className={`d-flex mb-2 ${msg.from === "user"
+                  ? "justify-content-end"
+                  : "justify-content-start"
+                  }`}
               >
                 <div
-                  className={`p-2 rounded-3 text-break ${
-                    msg.from === "user" ? "text-white bg-primary" : "border"
-                  }`}
+                  className={`p-2 rounded-3 text-break ${msg.from === "user" ? "text-white bg-primary" : "border"
+                    }`}
                   style={{ maxWidth: "80%" }}
                 >
-                  {msg.text}
+                  {/* Message Text */}
+                  <div>{msg.text}</div>
+
+                  {/* Action Button */}
+                  {msg.from === "bot" && msg.action && msg.action.url && (
+                    <div className="mt-2 border-top pt-2">
+                      <Link
+                        to={msg.action.url}
+                        className="btn btn-sm btn-outline-primary w-100 fw-bold"
+                      >
+                        {msg.action.label || "View Results"}
+                      </Link>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

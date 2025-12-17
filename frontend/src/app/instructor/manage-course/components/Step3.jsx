@@ -287,7 +287,7 @@ const Step3 = ({ stepperInstance, draftData, onSave }) => {
                     onClick={() => openAddLectureModal(i)}
                     className="mb-0"
                   >
-                    <FaPlus className="me-2" /> Add Lecture
+                    <FaPlus className="mb-1 me-1" /> Add Lecture
                   </Button>
                 </AccordionBody>
               </AccordionItem>

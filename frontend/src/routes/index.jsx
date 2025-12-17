@@ -29,7 +29,7 @@ import OrderDetailPage from '../app/student/my-orders/detail/OrderDetailPage';
 import AccountSettingsPage from '../app/pages/accountSettings';
 
 // PUBLIC
-import HomePage from "../app/home/page";
+import HomePage from "../app/pages/home/page";
 import CoursesPage from "../app/pages/course/grid/page";
 import BecomeInstructorPage from '../app/student/become-instructor';
 import CourseDetails from "../app/pages/course/detail/page";
@@ -91,12 +91,12 @@ export const instructorRoutes = [{
   element: <InstructorMyCourses />
 }, {
   path: '/instructor/students',
-  name: 'Students',
+  name: 'My Students',
   isNested: false,
   element: <InstructorMyStudents />
 }, {
-  path: '/instructor/account',
-  name: 'Account',
+  path: '/instructor/profile',
+  name: 'My Profile',
   isNested: true,
   element: <InstructorAccount />
 }, {
@@ -157,8 +157,8 @@ export const studentRoutes = [{
   isNested: false,
   element: <Checkout />
 }, {
-  path: '/student/account',
-  name: 'Account',
+  path: '/student/profile',
+  name: 'Profile',
   isNested: true,
   element: <StudentAccount />
 }, {

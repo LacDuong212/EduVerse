@@ -2,8 +2,8 @@ import useProfile from "@/hooks/useProfile";
 import useInstructor from "../../useInstructor";
 import { useEffect, useState } from "react";
 import { Card, CardBody, CardHeader, Col, OverlayTrigger, Row, Tooltip } from "react-bootstrap";
-import { BsPlus, BsQuestionCircle, BsTwitter, BsX } from "react-icons/bs";
-import { FaAngleRight, FaFacebook, FaGlobe, FaInstagram, FaUndo, FaYoutube } from "react-icons/fa";
+import { BsPlus, BsQuestionCircle, BsX } from "react-icons/bs";
+import { FaAngleRight, FaFacebook, FaGlobe, FaInstagram, FaLinkedin, FaUndo, FaYoutube } from "react-icons/fa";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
 import { Link } from "react-router-dom";
@@ -185,7 +185,7 @@ const MyProfile = () => {
       // socials
       socials: {
         facebook: formData.get("facebook"),
-        twitter: formData.get("twitter"),
+        linkedin: formData.get("linkedin"),
         instagram: formData.get("instagram"),
         youtube: formData.get("youtube"),
       },
@@ -217,9 +217,9 @@ const MyProfile = () => {
                 {/* Avatar */}
                 <div className="mt-2 position-relative" style={{ width: "160px", height: "160px" }}>
                   {currentAvatarSrc ? (
-                    <img src={currentAvatarSrc} className="rounded-3 border border-dark border-3 shadow w-100 h-100 object-fit-cover" alt="Avatar" />
+                    <img src={currentAvatarSrc} className="rounded-3 border border-body border-3 shadow w-100 h-100 object-fit-cover" alt="Avatar" />
                   ) : (
-                    <div className="rounded-3 border border-dark border-3 shadow d-flex align-items-center justify-content-center bg-light w-100 h-100 fs-1 fw-bold">{(instructor?.name?.[0] || "I").toUpperCase()}</div>
+                    <div className="rounded-3 border border-body border-3 shadow d-flex align-items-center justify-content-center bg-light w-100 h-100 fs-1 fw-bold">{(instructor?.name?.[0] || "I").toUpperCase()}</div>
                   )}
                   {/* Remove & Undo Buttons */}
                   {currentAvatarSrc ? (
@@ -353,17 +353,17 @@ const MyProfile = () => {
               </div>
               <div className="mb-3">
                 <label className="form-label d-flex align-items-center mb-0">
-                  <BsTwitter className="bi bi-twitter text-twitter mb-1 me-2 fs-5" />
-                  Twitter profile URL
-                </label>
-                <input className="form-control" type="text" name="twitter" defaultValue={instructor?.socials?.twitter} placeholder="x.com/your_username" />
-              </div>
-              <div className="mb-3">
-                <label className="form-label d-flex align-items-center mb-0">
                   <FaInstagram className="fab fa-instagram text-danger mb-1 me-2 fs-5" />
                   Instagram profile URL
                 </label>
                 <input className="form-control" type="text" name="instagram" defaultValue={instructor?.socials?.instagram} placeholder="instagram.com/your_username" />
+              </div>
+              <div className="mb-3">
+                <label className="form-label d-flex align-items-center mb-0">
+                  <FaLinkedin className="fa fa-linkedin text-linkedin mb-1 me-2 fs-5" />
+                  Linkedin profile URL
+                </label>
+                <input className="form-control" type="text" name="linkedin" defaultValue={instructor?.socials?.linkedin} placeholder="linkedin.com/in/your_username" />
               </div>
               <div className="">
                 <label className="form-label d-flex align-items-center mb-0">

@@ -37,7 +37,7 @@ export const updateProfile = async (req, res) => {
 
     const user = await userModel
       .findByIdAndUpdate(req.userId, updates, { new: true, runValidators: true })
-      .select("name email phonenumber bio website socials isVerified");
+      .select("name email phonenumber pfpImg bio website socials");
 
     if (!user) {
       return res.status(404).json({

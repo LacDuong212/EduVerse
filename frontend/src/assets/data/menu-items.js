@@ -17,9 +17,9 @@ export const GUEST_APP_MENU_ITEMS = [{
 //---INSTRUCTOR
 export const INSTRUCTOR_ACCOUNT_DROPDOWN_ITEMS = [{
   key: 'account',
-  label: 'My Account',
+  label: 'My Profile',
   icon: BsPerson,
-  url: '/instructor/account'
+  url: '/instructor/profile'
 }, {
   key: 'earnings',
   label: 'Earnings',
@@ -50,10 +50,10 @@ export const INSTRUCTOR_APP_MENU_ITEMS = [{
   url: '/instructor/students'
 }];
 export const INSTRUCTOR_MENU_ITEMS = [{
-  key: 'account',
-  label: 'Account',
+  key: 'profile',
+  label: 'My Profile',
   icon: BsPerson,
-  url: '/instructor/account',
+  url: '/instructor/profile',
   parentKey: 'instructor'
 }, {
   key: 'dashboard',
@@ -69,7 +69,7 @@ export const INSTRUCTOR_MENU_ITEMS = [{
   parentKey: 'instructor'
 }, {
   key: 'students',
-  label: 'Students',
+  label: 'My Students',
   icon: PiStudent,
   url: '/instructor/students',
   parentKey: 'instructor'
@@ -89,10 +89,10 @@ export const INSTRUCTOR_MENU_ITEMS = [{
 
 //---STUDENT
 export const STUDENT_ACCOUNT_DROPDOWN_ITEMS = [{
-  key: 'account',
-  label: 'My Account',
+  key: 'profile',
+  label: 'My Profile',
   icon: BsPerson,
-  url: '/student/account'
+  url: '/student/profile'
 }, {
   key: 'courses',
   label: 'My Courses',
@@ -126,10 +126,10 @@ export const STUDENT_APP_MENU_ITEMS = [{
   url: '/courses'
 }];
 export const STUDENT_MENU_ITEMS = [{
-  key: 'account',
-  label: 'My Account',
+  key: 'profile',
+  label: 'My Profile',
   icon: BsPerson,
-  url: '/student/account',
+  url: '/student/profile',
   parentKey: 'student'
 }, 
 // {

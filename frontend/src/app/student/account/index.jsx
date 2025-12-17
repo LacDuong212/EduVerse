@@ -5,7 +5,7 @@ const StudentAccount = () => {
 
   return (
     <div className='pb-5'>
-      <PageMetaData title="Account" />
+      <PageMetaData title="My Profile" />
       <MyProfile />
     </div>
   );

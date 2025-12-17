@@ -229,7 +229,7 @@ const AddLecture = ({ show, onClose, onSave, initialLecture = null, courseId }) 
   return (
     <Modal show={show} onHide={!isUploading ? onClose : undefined} backdrop={isUploading ? 'static' : true} size="lg">
       <ModalHeader className="bg-orange">
-        <h5 className="modal-title">{initialLecture ? 'Edit Lecture' : 'Add Lecture'}</h5>
+        <h5 className="modal-title text-white">{initialLecture ? 'Edit Lecture' : 'Add Lecture'}</h5>
         {!isUploading && <button type="button" className="btn btn-sm btn-light mb-0 ms-auto" onClick={onClose}><BsXLg /></button>}
       </ModalHeader>
 
@@ -240,6 +240,7 @@ const AddLecture = ({ show, onClose, onSave, initialLecture = null, courseId }) 
             <input
               className={`form-control ${errors.title ? 'is-invalid' : ''}`}
               type="text" value={title} disabled={isUploading}
+              maxLength={84}
               onChange={e => setTitle(e.target.value)}
             />
             {errors.title && <small className="text-danger">{errors.title}</small>}
@@ -250,7 +251,6 @@ const AddLecture = ({ show, onClose, onSave, initialLecture = null, courseId }) 
             <div className="btn-group ms-2" role="group">
               <input type="radio" className="btn-check" name="videoSource" id="srcUrl" value="url" checked={videoSource === 'url'} onChange={handleSourceChange} disabled={isUploading} />
               <label className="btn btn-sm btn-light btn-primary-soft-check border-0 m-0" htmlFor="srcUrl">External URL</label>
-
               <input type="radio" className="btn-check" name="videoSource" id="srcFile" value="file" checked={videoSource === 'file'} onChange={handleSourceChange} disabled={isUploading} />
               <label className="btn btn-sm btn-light btn-primary-soft-check border-0 m-0" htmlFor="srcFile">Upload File</label>
             </div>
@@ -287,20 +287,18 @@ const AddLecture = ({ show, onClose, onSave, initialLecture = null, courseId }) 
 
               {/* DURATION INPUT (Editable for URL) */}
               <Col md={4} className="mt-3">
-                <label className="form-label">Duration (Minutes) <span className="text-danger">*</span></label>
+                <label className="form-label">Duration (seconds) <span className="text-danger">*</span></label>
                 <input
                   type="number"
                   className={`form-control ${errors.duration ? 'is-invalid' : ''}`}
                   min="0"
-                  step="0.1"
-                  placeholder="e.g. 10.5"
+                  step="1"
+                  placeholder="e.g 120"
                   disabled={isUploading}
-                  // display: convert seconds to minutes
-                  value={duration > 0 ? (duration / 60).toFixed(1) : ''}
-                  // update: convert minutes to seconds
+                  value={duration > 0 ? duration : ''}
                   onChange={e => {
-                    const val = parseFloat(e.target.value);
-                    setDuration(isNaN(val) ? 0 : Math.round(val * 60));
+                    const val = parseInt(e.target.value, 10);
+                    setDuration(isNaN(val) ? 0 : Math.max(0, val));
                   }}
                 />
                 {errors.duration && <small className="text-danger">{errors.duration}</small>}
@@ -357,7 +355,7 @@ const AddLecture = ({ show, onClose, onSave, initialLecture = null, courseId }) 
 
           <Col xs={12} className="mt-3">
             <label className="form-label">Description</label>
-            <textarea className="form-control" rows={3} value={description} disabled={isUploading} onChange={e => setDescription(e.target.value)} />
+            <textarea className="form-control" rows={3} value={description} maxLength={360} disabled={isUploading} onChange={e => setDescription(e.target.value)} />
           </Col>
 
           <Col xs={12} className="mt-3">

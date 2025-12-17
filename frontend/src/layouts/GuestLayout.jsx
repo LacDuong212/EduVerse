@@ -1,9 +1,9 @@
 import { lazy, Suspense } from 'react';
-import { Container } from 'react-bootstrap';
 
+import ChatbotWidget from '@/components/ChatbotWidget';
 const TopNavigationBar = lazy(() => import('../components/GuestLayoutComponents/TopNavigationBar'));
 const Footer = lazy(() => import('../components/Footer'));
-const Preloader = lazy(() => import('../components/Preloader'));
+const Preloader = lazy(() => import('../components/preloader'));
 
 const GuestLayout = ({ children }) => {
   return (
@@ -17,6 +17,8 @@ const GuestLayout = ({ children }) => {
           {children}
         </section>
       </main>
+
+      <ChatbotWidget />
 
       <Suspense fallback={<Preloader />}>
         <Footer className="bg-light pt-5" />

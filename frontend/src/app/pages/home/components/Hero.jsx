@@ -1,6 +1,5 @@
 import { Col, Container, Row } from 'react-bootstrap';
 import { BsPatchCheckFill } from 'react-icons/bs';
-import element7 from '@/assets/images/element/07.png';
 import scienceImg from '@/assets/images/client/science.svg';
 import angularImg from '@/assets/images/client/angular.svg';
 import figmaImg from '@/assets/images/client/figma.svg';

@@ -1,15 +1,27 @@
 import patternImg from '@/assets/images/pattern/04.png';
+import useInstructor from '@/app/instructor/useInstructor';
+import useProfile from '@/hooks/useProfile';
 
+import { useEffect, useState } from 'react';
 import { Card, Col, Container, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { BsPatchCheckFill } from 'react-icons/bs';
 import { FaBook, FaSlidersH, FaStar, FaUserGraduate } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
+const Banner = ({ toggleOffCanvas }) => { 
+  const { user } = useProfile(); 
+  const { fetchInstructorCounters } = useInstructor();
 
-const Banner = ({
-  toggleOffCanvas,
-  accountData
-}) => {
+  const [accountData, setAccountData] = useState(null);
+
+  useEffect(() => {
+    const load = async () => {
+      const counterData = await fetchInstructorCounters();
+      setAccountData({...user, ...counterData});
+    };
+    load();
+  }, []);
+
   return (
     <section className="py-0 mb-2 mb-xl-5">
       {/* Banner Background */}

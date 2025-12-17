@@ -142,12 +142,12 @@ const MyCourses = ({
                       <div className="ms-2 flex-grow-1 text-wrap">
                         <div className="mb-1">
                           <h6 className="mb-0">
-                            <a
-                              href={`courses/${course._id}`}
+                            <Link
+                              to={`${course._id}`}
                               className="text-decoration-none d-inline-block"
                             >
                               {course.title}
-                            </a>
+                            </Link>
                           </h6>
                           <div className="small text-wrap">
                             {course.subtitle}
@@ -162,7 +162,7 @@ const MyCourses = ({
 
                             <div className="col-md-6 col-lg-4 col-xl-5 d-flex align-items-center">
                               <BsPersonFill className="text-info mb-1 me-1" />
-                              {course.enrolledCount || 0} Enrolled
+                              {course.studentsEnrolled || 0} Enrolled
                             </div>
                           </div>
                           <div className="row gx-2">

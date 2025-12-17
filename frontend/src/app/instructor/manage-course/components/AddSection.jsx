@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import useToggle from '@/hooks/useToggle';
 import { Button, Col, Modal, ModalBody, ModalFooter, ModalHeader } from 'react-bootstrap';
-import { BsPlusCircle, BsXLg } from 'react-icons/bs';
+import { BsXLg } from 'react-icons/bs';
+import { FaPlus } from 'react-icons/fa';
 
 const AddSection = ({ onAddSection }) => {
   const { isTrue, toggle } = useToggle();
@@ -28,8 +29,8 @@ const AddSection = ({ onAddSection }) => {
 
   return (
     <>
-      <Button variant="dark-soft" size="sm" onClick={toggle} className="mb-0">
-        <BsPlusCircle className="me-2" />
+      <Button variant="info-soft" size="sm" onClick={toggle} className="mb-0">
+        <FaPlus className="mb-1 me-1" />
         Add Section
       </Button>
 
@@ -42,7 +43,7 @@ const AddSection = ({ onAddSection }) => {
         onHide={handleCancel}
         onClick={(e) => e.stopPropagation()}
       >
-        <ModalHeader className="bg-dark">
+        <ModalHeader className="bg-info">
           <h5 className="modal-title text-white" id="addSectionLabel">
             Add Section
           </h5>
@@ -67,6 +68,7 @@ const AddSection = ({ onAddSection }) => {
                 className="form-control"
                 placeholder="Enter section title"
                 value={title}
+                maxLength={56}
                 onChange={e => setTitle(e.target.value)}
                 autoFocus
               />
