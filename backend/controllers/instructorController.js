@@ -338,6 +338,28 @@ export const getInstructorCourses = async (req, res) => {
     // fetch all courses for the instructor
     const allCourses = await Course.find({ "instructor.ref": userId, isDeleted: false }).lean();
 
+    // compute enrollments per course
+    // const courseIds = allCourses.map(c => c._id);
+    // let enrollmentAgg = [];
+    // if (courseIds.length > 0) {
+    //   enrollmentAgg = await Order.aggregate([
+    //     { $match: { status: 'completed', "courses.course": { $in: courseIds } } },
+    //     { $unwind: "$courses" },
+    //     { $match: { "courses.course": { $in: courseIds } } },
+    //     { $group: { _id: "$courses.course", count: { $sum: 1 } } }
+    //   ]);
+    // }
+
+    // const enrollMap = (enrollmentAgg || []).reduce((m, item) => {
+    //   m[item._id.toString()] = item.count || 0;
+    //   return m;
+    // }, {});
+
+    // // attach enrollment count to each course
+    // allCourses.forEach(course => {
+    //   course.studentsEnrolled = enrollMap[course._id.toString()] || 0;
+    // });
+
     // sorting function helper
     const sortFunctions = {
       '': (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt),        // default: updatedAt desc

@@ -162,7 +162,7 @@ const MyCourses = ({
 
                             <div className="col-md-6 col-lg-4 col-xl-5 d-flex align-items-center">
                               <BsPersonFill className="text-info mb-1 me-1" />
-                              {course.enrolledCount || 0} Enrolled
+                              {course.studentsEnrolled || 0} Enrolled
                             </div>
                           </div>
                           <div className="row gx-2">

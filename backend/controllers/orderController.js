@@ -137,6 +137,26 @@ export const createOrder = async (req, res) => {
 
     await order.save({ session });
 
+    // If the order is already completed (e.g., free payment), increment enrollment counters
+    if (order.status === 'completed') {
+      const counts = order.courses.reduce((m, c) => {
+        const id = c.course.toString();
+        m[id] = (m[id] || 0) + 1;
+        return m;
+      }, {});
+
+      const bulkOps = Object.entries(counts).map(([id, cnt]) => ({
+        updateOne: {
+          filter: { _id: new mongoose.Types.ObjectId(id) },
+          update: { $inc: { studentsEnrolled: cnt } }
+        }
+      }));
+
+      if (bulkOps.length) {
+        await Course.bulkWrite(bulkOps, { session });
+      }
+    }
+
     if (couponDoc) {
       await Coupon.findByIdAndUpdate(
         couponId,
