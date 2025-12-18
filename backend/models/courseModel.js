@@ -36,6 +36,14 @@ const courseSchema = new mongoose.Schema({
       isFree: { type: Boolean, default: false },
       aiData: {
         summary: String,
+        lessonNotes: {
+          keyConcepts: [{
+             term: String,
+             definition: String
+          }],
+          mainPoints: [String], 
+          practicalTips: [String] 
+        },
         quizzes: [{
           question: String,
           options: [String],

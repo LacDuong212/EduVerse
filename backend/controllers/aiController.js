@@ -62,6 +62,7 @@ export const processLectureAI = async (req, res) => {
       {
         $set: {
           "curriculum.$[].lectures.$[lec].aiData.summary": aiData.summary,
+          "curriculum.$[].lectures.$[lec].aiData.lessonNotes": aiData.lessonNotes,
           "curriculum.$[].lectures.$[lec].aiData.quizzes": aiData.quizzes,
           "curriculum.$[].lectures.$[lec].aiData.status": "Completed"
         }

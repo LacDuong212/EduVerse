@@ -35,16 +35,15 @@ export const processVideoWithGemini = async (videoKey) => {
 
     console.log(`> [2/5] Đang upload video lên Google Gemini...`);
     uploadResult = await fileManager.uploadFile(tempFilePath, {
-      mimeType: "video/mp4", // Hoặc check đuôi file để set đúng mimeType
+      mimeType: "video/mp4",
       displayName: "Lecture Video",
     });
 
     console.log(`> [3/5] Đợi Gemini xử lý video (File URI: ${uploadResult.file.uri})...`);
-    // Gemini cần thời gian để xử lý file video sau khi upload (State: PROCESSING -> ACTIVE)
     let file = await fileManager.getFile(uploadResult.file.name);
     while (file.state === "PROCESSING") {
-      process.stdout.write("."); // Hiệu ứng loading
-      await new Promise((resolve) => setTimeout(resolve, 5000)); // Chờ 5s check 1 lần
+      process.stdout.write(".");
+      await new Promise((resolve) => setTimeout(resolve, 5000));
       file = await fileManager.getFile(uploadResult.file.name);
     }
     console.log("\n> Video đã sẵn sàng!");
@@ -57,12 +56,42 @@ export const processVideoWithGemini = async (videoKey) => {
     const model = genAI.getGenerativeModel({
       model: "gemini-2.5-flash",
       generationConfig: {
-        responseMimeType: "application/json", // Bắt buộc trả về JSON
+        responseMimeType: "application/json",
         responseSchema: {
           type: SchemaType.OBJECT,
-          required: ["summary", "quizzes"],
           properties: {
             summary: { type: SchemaType.STRING },
+
+            lessonNotes: {
+              type: SchemaType.OBJECT,
+              properties: {
+                keyConcepts: {
+                  type: SchemaType.ARRAY,
+                  items: {
+                    type: SchemaType.OBJECT,
+                    properties: {
+                      term: { type: SchemaType.STRING },
+                      definition: { type: SchemaType.STRING }
+                    },
+                    required: ["term", "definition"]
+                  },
+                  description: "Các thuật ngữ chuyên môn kèm giải thích ngắn gọn"
+                },
+                mainPoints: {
+                  type: SchemaType.ARRAY,
+                  items: { type: SchemaType.STRING },
+                  description: "Tóm tắt các bước hoặc luồng tư duy chính của bài"
+                },
+                practicalTips: {
+                  type: SchemaType.ARRAY,
+                  items: { type: SchemaType.STRING },
+                  description: "Lời khuyên thực tế, lỗi thường gặp hoặc cách áp dụng"
+                }
+              },
+              required: ["keyConcepts", "mainPoints", "practicalTips"]
+            },
+
+            // 3. Quizzes (Nằm trong properties)
             quizzes: {
               type: SchemaType.ARRAY,
               items: {
@@ -76,7 +105,8 @@ export const processVideoWithGemini = async (videoKey) => {
                 }
               }
             }
-          }
+          },
+          required: ["summary", "lessonNotes", "quizzes"]
         }
       }
     });
@@ -88,22 +118,33 @@ export const processVideoWithGemini = async (videoKey) => {
           fileUri: uploadResult.file.uri
         }
       },
-      { text: "Bạn là giảng viên chuyên nghiệp. Nhiệm vụ: 1. Tóm tắt chi tiết video. 2. Tạo chính xác 5 câu hỏi trắc nghiệm (Quiz) từ nội dung video. Bắt buộc trả về JSON có đủ cả summary và quizzes." }
+      {
+        text: `Bạn là giảng viên chuyên nghiệp, tâm huyết. Hãy phân tích video và tạo nội dung học tập chất lượng cao:
+
+        1. **Tóm tắt (Summary):** 2-3 câu tổng quan nội dung video.
+
+        2. **Ghi chú bài học (Lesson Notes) - Phần quan trọng nhất:**
+           - **Khái niệm cốt lõi (Key Concepts):** Trích xuất 3-5 thuật ngữ quan trọng nhất. Với mỗi thuật ngữ, hãy giải thích ngắn gọn (1 câu) để người học dễ hiểu.
+           - **Nội dung trọng tâm (Main Points):** Tóm tắt 3-5 ý chính, các bước thực hiện hoặc tư duy cốt lõi trong bài.
+           - **Mẹo thực tế (Practical Tips):** Đưa ra 1-2 lời khuyên, cảnh báo lỗi thường gặp, hoặc ví dụ ứng dụng thực tế liên quan đến bài học.
+
+        3. **Trắc nghiệm (Quizzes):** 5 câu hỏi kiểm tra kiến thức (khó vừa phải).
+
+        Trả về JSON đúng cấu trúc đã định nghĩa.`
+      }
     ]);
 
     console.log(`> [5/5] Hoàn tất!`);
     const jsonResponse = JSON.parse(result.response.text());
 
-    // Dọn dẹp: Xóa file trên Cloud của Google để không rác
     await fileManager.deleteFile(uploadResult.file.name);
-    
+
     return jsonResponse;
 
   } catch (error) {
     console.error("Gemini Service Error:", error);
     throw error;
   } finally {
-    // Dọn dẹp: Xóa file tạm trên ổ cứng server
     if (tempFilePath && fs.existsSync(tempFilePath)) {
       fs.unlinkSync(tempFilePath);
     }
