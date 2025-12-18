@@ -42,9 +42,6 @@ const adaptCourseData = (c) => {
 const CommonCourseSlider = ({ source, courses }) => {
   const coursesState = useSelector((s) => s.courses || {});
   
-  // 2. Quyết định nguồn dữ liệu: 
-  // - Nếu có prop 'courses' truyền vào trực tiếp (dùng cho Related Course) -> Dùng nó
-  // - Nếu không, dùng 'source' để lấy từ Redux (dùng cho Top Rated, Newest...)
   let rawList = [];
   if (courses && Array.isArray(courses)) {
       rawList = courses;
@@ -78,12 +75,12 @@ const CommonCourseSlider = ({ source, courses }) => {
     },
   };
 
-  if (!list.length) return null; // Ẩn nếu không có dữ liệu thay vì hiện text báo lỗi
+  if (!list.length) return null;
 
   return (
     <TinySlider settings={courseSliderSettings} className="pb-0">
       {list.map((course, idx) => (
-        <div key={course.id || course._raw?._id || idx}>
+        <div key={course.id || course._raw?._id || idx} className="h-100">
           <CommonCourseCard course={course} />
         </div>
       ))}

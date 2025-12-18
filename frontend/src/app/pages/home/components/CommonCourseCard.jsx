@@ -37,7 +37,7 @@ const CommonCourseCard = ({ course }) => {
   };
 
   return (
-    <Card className="action-trigger-hover border bg-transparent position-relative h-100">
+    <Card className="action-trigger-hover border bg-transparent position-relative h-100 d-flex flex-column">
       {/* Ribbon */}
       {isFree ? (
         <div className="ribbon"><span>Free</span></div>
@@ -61,7 +61,7 @@ const CommonCourseCard = ({ course }) => {
         />
       </Link>
 
-      <CardBody className="pb-0">
+      <CardBody className="pb-0 d-flex flex-column flex-grow-1">
         <div className="d-flex justify-content-between mb-3">
           <span className="hstack gap-2">
             <span className="badge bg-primary bg-opacity-10 text-primary">
@@ -75,7 +75,14 @@ const CommonCourseCard = ({ course }) => {
           <Link
             to={detailPath}
             className="text-decoration-none text-truncate-2"
-            style={{ cursor: id ? 'pointer' : 'default', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
+            style={{
+              cursor: id ? 'pointer' : 'default',
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+              minHeight: '50px'
+            }}
             title={title}
           >
             {title}
@@ -95,7 +102,7 @@ const CommonCourseCard = ({ course }) => {
           </div>
         </div>
 
-        <div className="hstack gap-3">
+        <div className="hstack gap-3 mt-auto">
           <span className="h6 fw-light mb-0">
             <FaRegClock className="text-danger me-2" />
             {duration}
@@ -120,20 +127,21 @@ const CommonCourseCard = ({ course }) => {
           </div>
 
           <div className="text-end">
-            {isFree ? (
-              <h4 className="text-success mb-0">Free</h4>
-            ) : hasDiscount ? (
-              <>
-                <div className="small text-muted text-decoration-line-through">
+            <div className="d-flex flex-column align-items-end">
+              {hasDiscount && !isFree ? (
+                <span className="small text-muted text-decoration-line-through">
                   {formatCurrency(price)}
-                </div>
-                <h4 className="text-success mb-0">
-                  {formatCurrency(discountPrice)}
-                </h4>
-              </>
-            ) : (
-              <h4 className="text-success mb-0">{formatCurrency(price)}</h4>
-            )}
+                </span>
+              ) : (
+                <span className="small text-muted text-decoration-line-through" style={{ visibility: 'hidden' }}>
+                  &nbsp;
+                </span>
+              )}
+
+              <h4 className="text-success mb-0">
+                {isFree ? 'Free' : formatCurrency(hasDiscount ? discountPrice : price)}
+              </h4>
+            </div>
           </div>
         </div>
       </CardFooter>
