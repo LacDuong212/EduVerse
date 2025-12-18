@@ -45,8 +45,7 @@ const CourseRow = ({
             </h6>
 
             <div>
-              <div className="d-flex justify-content-between align-items-center mb-1">
-                <span className="text-muted small">Progress</span>
+              <div className="d-flex justify-content-end align-items-end mb-1">
                 <h6 className="mb-0 text-end">{percentage}%</h6>
               </div>
 
