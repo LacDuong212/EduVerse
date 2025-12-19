@@ -73,7 +73,7 @@ const CommonCourseSlider = ({ source }) => {
   return (
     <TinySlider settings={courseSliderSettings} className="pb-0">
       {list.slice(0, 8).map((course, idx) => (
-        <div key={course.id || course._raw?._id || idx}>
+        <div key={course.id || course._raw?._id || idx} className="h-100">
           <CommonCourseCard course={course} />
         </div>
       ))}

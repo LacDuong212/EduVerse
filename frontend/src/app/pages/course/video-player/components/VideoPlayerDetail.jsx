@@ -2,15 +2,13 @@ import { useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Row } from "react-bootstrap";
 
-// Hooks
 import useVideoPlayerData from "../hooks/useVideoPlayerData";
 import useVideoPlayerTracking from "../hooks/useVideoPlayerTracking";
 
-// Components
 import VideoScreen from "./VideoScreen";
 import CoursePlaylistSidebar from "./CoursePlaylistSidebar";
 import ResumeProgressDialog from "./ResumeProgressDialog";
-import LectureConclusionModal from "./LectureConclusionModal"; // Import Modal
+import LectureConclusionModal from "./LectureConclusionModal"; 
 
 export default function VideoPlayerDetail({
   course,
@@ -20,10 +18,8 @@ export default function VideoPlayerDetail({
   lectureId,
 }) {
   const navigate = useNavigate();
-  // State override UI local
   const [localProgressOverrides, setLocalProgressOverrides] = useState({});
 
-  // 1. Lấy dữ liệu video
   const {
     currentLecture,
     streamLoading,
@@ -32,10 +28,9 @@ export default function VideoPlayerDetail({
     playerKey,
     lectureProgressMap,
     currentProgress,
-    lectures // Lấy danh sách lectures phẳng từ hook (đã có ở code cũ)
+    lectures
   } = useVideoPlayerData(course, courseId, lectureId, localProgressOverrides);
 
-  // 2. Setup tracking & logic điều khiển player
   const {
     playerContainerRef,
     showResumeDialog,
@@ -44,7 +39,6 @@ export default function VideoPlayerDetail({
     handleRestart,
     savedPos,
     durationForDialog,
-    // Lấy state từ hook mới
     showConclusionDialog,
     setShowConclusionDialog
   } = useVideoPlayerTracking({
@@ -56,13 +50,11 @@ export default function VideoPlayerDetail({
     setLocalProgressOverrides
   });
 
-  // Handler chuyển bài
   const handleSelectLecture = useCallback((lec) => {
       if (!lec?._id) return;
       navigate(`/courses/${courseId}/watch/${lec._id}`);
   }, [navigate, courseId]);
 
-  //  Logic tìm bài tiếp theo
   const handleNextLesson = useCallback(() => {
     setShowConclusionDialog(false);
     if (!lectures || !currentLecture) return;
@@ -71,17 +63,20 @@ export default function VideoPlayerDetail({
     if (currentIndex !== -1 && currentIndex < lectures.length - 1) {
       const nextLecture = lectures[currentIndex + 1];
       handleSelectLecture(nextLecture);
-    } else {
-      // Đã là bài cuối cùng
-      // alert("Đây là bài học cuối cùng!");
     }
   }, [lectures, currentLecture, handleSelectLecture, setShowConclusionDialog]);
 
-  // Kiểm tra xem có phải bài cuối không để ẩn hiện nút "Next" trong modal
   const hasNextLesson = useMemo(() => {
     if (!lectures || !currentLecture) return false;
     const idx = lectures.findIndex(l => l._id === currentLecture._id);
     return idx !== -1 && idx < lectures.length - 1;
+  }, [lectures, currentLecture]);
+
+  const isLastLecture = useMemo(() => {
+    if (!lectures || !currentLecture) return false;
+    const idx = lectures.findIndex(l => l._id === currentLecture._id);
+    // Là bài cuối nếu index là phần tử cuối mảng
+    return idx !== -1 && idx === lectures.length - 1;
   }, [lectures, currentLecture]);
 
   return (
@@ -124,12 +119,15 @@ export default function VideoPlayerDetail({
         durationSeconds={durationForDialog}
       />
 
-      {/* Dialog Quiz & Summary */}
       <LectureConclusionModal 
         show={showConclusionDialog}
         onHide={() => setShowConclusionDialog(false)}
         aiData={currentLecture?.aiData}
         onNext={hasNextLesson ? handleNextLesson : null} 
+        
+        courseId={courseId}
+        lectureId={currentLecture?._id}
+        isLastLecture={isLastLecture}
       />
     </section>
   );

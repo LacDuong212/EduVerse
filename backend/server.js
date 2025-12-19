@@ -21,6 +21,7 @@ import studentRoute from "./routes/studentRoute.js";
 import userRoute from './routes/userRoutes.js';
 import wishlistRoutes from "./routes/wishlistRoutes.js";
 import couponRoutes from "./routes/couponRoutes.js";
+import quizRoute from './routes/quizRoutes.js';
 
 import session from 'express-session';
 import passport from 'passport';
@@ -80,6 +81,7 @@ app.use('/api/chatbot', chatbotRoute);
 
 app.use("/api/internal", internalRoutes);
 app.use("/api/notifications", notificationRoutes)
+app.use("/api/quiz", quizRoute);
 
 // Port
 const PORT = process.env.PORT || 5000;

@@ -102,75 +102,76 @@ export const getRecommendedCourses = async (req, res) => {
     let recommendedForYou = [];
     let debugSource = "None";
 
-    const orders = await Order.find({ user: userId })
-      .populate({
+    const [orders, wishlistItems, user] = await Promise.all([
+      Order.find({ user: userId }).populate({
         path: "courses.course",
-        populate: { path: "category", select: "name" } // Deep populate
-      });
-
-    const wishlistItems = await Wishlist.find({ userId: userId })
-      .populate({
+        populate: { path: "category", select: "name" }
+      }),
+      Wishlist.find({ userId: userId }).populate({
         path: "courseId",
-        populate: { path: "category", select: "name" } // Deep populate
-      });
+        populate: { path: "category", select: "name" }
+      }),
+      User.findById(userId).select("interests")
+    ]);
 
     const completedOrders = orders.filter(o => o.status === "completed");
-
     const purchasedCourses = [];
     completedOrders.forEach(o => o.courses.forEach(item => {
-      if (item.course) purchasedCourses.push(item.course)
+      if (item.course) purchasedCourses.push(item.course);
     }));
 
     const wishlistCourses = wishlistItems.map(item => item.courseId).filter(c => c !== null);
     const historyCourses = [...purchasedCourses, ...wishlistCourses];
     const purchasedIds = purchasedCourses.map(c => c._id.toString());
 
-    // --- CHIẾN LƯỢC 1: WARM START ---
-    if (historyCourses.length > 0) {
-      debugSource = "History(Order+Wishlist)";
+    const userInterests = user?.interests || [];
+
+    if (historyCourses.length > 0 || userInterests.length > 0) {
+
+      if (historyCourses.length > 0 && userInterests.length > 0) {
+        debugSource = "Hybrid(History + Interests)";
+      } else if (historyCourses.length > 0) {
+        debugSource = "HistoryOnly";
+      } else {
+        debugSource = "InterestsOnly";
+      }
+
+      const combinedTitle = [
+        ...historyCourses.map(c => c.title),
+        ...userInterests
+      ].join(" ");
+
+      const combinedSubtitle = historyCourses.map(c => c.subtitle).join(" ");
+
+      const combinedTags = [
+        ...historyCourses.flatMap(c => c.tags || []),
+        ...userInterests
+      ];
+
+      const combinedCategory = [
+        ...historyCourses.map(c => c.category?.name || ""),
+        ...userInterests
+      ].join(" ");
 
       const userProfile = {
-        title: historyCourses.map(c => c.title).join(" "),
-        subtitle: historyCourses.map(c => c.subtitle).join(" "),
-        tags: historyCourses.flatMap(c => c.tags || []),
-        category: { name: historyCourses.map(c => c.category?.name || "").join(" ") }
+        title: combinedTitle,
+        subtitle: combinedSubtitle,
+        tags: combinedTags,
+        category: { name: combinedCategory }
       };
 
       const candidates = await Course.find({
-          ...publicCourseFilter,
-          _id: { $nin: purchasedIds }
-        })
+        ...publicCourseFilter,
+        _id: { $nin: purchasedIds }
+      })
         .select("title subtitle category tags thumbnail price slug rating instructor duration lecturesCount studentsEnrolled")
         .populate("category", "name");
 
       recommendedForYou = getRecommendations(userProfile, candidates, 8);
     }
 
-    // --- CHIẾN LƯỢC 2: COLD START ---
-    if (recommendedForYou.length === 0) {
-      const user = await User.findById(userId);
-
-      if (user && user.interests && user.interests.length > 0) {
-        debugSource = "UserInterests";
-
-        const userProfile = {
-          title: user.interests.join(" "),
-          description: `Khóa học về ${user.interests.join(" ")}`,
-          tags: user.interests,
-          category: { name: user.interests.join(" ") }
-        };
-
-        const candidates = await Course.find(publicCourseFilter)
-          .select("title subtitle category tags thumbnail price slug rating instructor duration lecturesCount studentsEnrolled")
-          .populate("category", "name");
-
-        recommendedForYou = getRecommendations(userProfile, candidates, 8);
-      }
-    }
-
     // --- FALLBACK ---
     if (recommendedForYou.length === 0) {
-      console.log("-> Hit Fallback (BestSellers)");
       recommendedForYou = await Course.find(publicCourseFilter)
         .populate("category", "name slug")
         .sort({ studentsEnrolled: -1 })
@@ -460,62 +461,62 @@ export const getRelatedCourses = async (req, res) => {
     const { id } = req.params;
 
     const currentCourse = await Course.findById(id)
-        .populate("category", "name");
+      .populate("category", "name");
 
     if (!currentCourse) {
       return res.status(404).json({ success: false, message: "Course not found" });
     }
 
-    const publicCourseFilter = { 
-        isPrivate: false, 
-        isDeleted: false, 
-        status: "Live",
-        _id: { $ne: currentCourse._id }
+    const publicCourseFilter = {
+      isPrivate: false,
+      isDeleted: false,
+      status: "Live",
+      _id: { $ne: currentCourse._id }
     };
 
     let relatedCourses = [];
     let debugSource = "None";
 
     const targetProfile = {
-        title: currentCourse.title,
-        subtitle: currentCourse.subtitle || "",
-        tags: currentCourse.tags || [],
-        category: { name: currentCourse.category?.name || "" }
+      title: currentCourse.title,
+      subtitle: currentCourse.subtitle || "",
+      tags: currentCourse.tags || [],
+      category: { name: currentCourse.category?.name || "" }
     };
 
     const candidates = await Course.find(publicCourseFilter)
-        .select("title subtitle category tags thumbnail price discountPrice rating instructor studentsEnrolled duration lecturesCount level")
-        .populate("category", "name");
+      .select("title subtitle category tags thumbnail price discountPrice rating instructor studentsEnrolled duration lecturesCount level")
+      .populate("category", "name");
 
-    relatedCourses = getRecommendations(targetProfile, candidates, 5); 
+    relatedCourses = getRecommendations(targetProfile, candidates, 5);
 
     if (relatedCourses.length > 0) {
-        debugSource = "TF-IDF(ContentSimilarity)";
+      debugSource = "TF-IDF(ContentSimilarity)";
     }
 
     if (relatedCourses.length === 0 && currentCourse.category) {
-        console.log("-> Hit Fallback (SameCategory)");
-        relatedCourses = await Course.find({
-            ...publicCourseFilter,
-            category: currentCourse.category._id
-        })
+      console.log("-> Hit Fallback (SameCategory)");
+      relatedCourses = await Course.find({
+        ...publicCourseFilter,
+        category: currentCourse.category._id
+      })
         .select("title subtitle category tags thumbnail price discountPrice rating instructor studentsEnrolled duration lecturesCount level")
         .populate("category", "name")
         .sort({ studentsEnrolled: -1 })
         .limit(5);
-        
-        debugSource = "Fallback(SameCategory)";
+
+      debugSource = "Fallback(SameCategory)";
     }
 
     if (relatedCourses.length === 0) {
-        console.log("-> Hit Fallback (GlobalBestSellers)");
-        relatedCourses = await Course.find(publicCourseFilter)
+      console.log("-> Hit Fallback (GlobalBestSellers)");
+      relatedCourses = await Course.find(publicCourseFilter)
         .select("title subtitle category tags thumbnail price discountPrice rating instructor studentsEnrolled duration lecturesCount level")
         .populate("category", "name")
         .sort({ studentsEnrolled: -1 })
         .limit(5);
-        
-        debugSource = "Fallback(GlobalBestSellers)";
+
+      debugSource = "Fallback(GlobalBestSellers)";
     }
 
     res.json({
@@ -961,12 +962,12 @@ export const getPopularTags = async (req, res) => {
 
       { $unwind: "$tags" },
 
-      { 
-        $group: { 
+      {
+        $group: {
           _id: { $toLower: "$tags" },
           name: { $first: "$tags" },
           count: { $sum: 1 }
-        } 
+        }
       },
 
       { $sort: { count: -1 } },
