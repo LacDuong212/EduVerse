@@ -5,20 +5,18 @@ import {
   FaStar,
   FaStarHalfAlt,
   FaUserGraduate,
+  FaCertificate,
 } from "react-icons/fa";
 import { useNavigate, useParams } from "react-router-dom";
 
-// giống helper trong CourseCard
 const clamp = (n, min, max) => Math.max(min, Math.min(max, n ?? 0));
 
-// normalize status giống bên CourseMaterial / Playlist
 const normalizeStatus = (rawStatus, lastPositionSec, durationSec) => {
   const s = (rawStatus || "").toString().toLowerCase();
 
   if (s === "completed") return "completed";
   if (s === "in-progress" || s === "in_progress") return "in-progress";
 
-  // Không có status rõ ràng → đoán từ thời gian
   const pos = Number(lastPositionSec || 0);
   const dur = Number(durationSec || 0);
 
@@ -30,16 +28,14 @@ const normalizeStatus = (rawStatus, lastPositionSec, durationSec) => {
 
 const Intro = ({ course, progress }) => {
   const navigate = useNavigate();
-  const { courseId } = useParams(); // /student/courses/:courseId
+  const { courseId } = useParams();
 
-  // ------- Fallback dữ liệu từ course -------
   const title = course?.title || "Course title";
   const description =
     course?.subtitle || "This course does not have a description yet.";
 
   const instructorName = course?.instructor?.name || "Unknown instructor";
 
-  // ⭐️ rating: dùng chung style với CourseCard
   const rawStar =
     typeof course?.rating === "object"
       ? course?.rating?.average ?? course?.rating?.star
@@ -59,7 +55,6 @@ const Intro = ({ course, progress }) => {
   const language = course?.language || "Unknown language";
   const studentsEnrolled = Number(course?.studentsEnrolled ?? 0);
 
-  // ------- Progress theo số lecture completed -------
   const totalLessons =
     progress?.totalLectures ?? course?.lecturesCount ?? 0;
   const completedLessons = progress?.completedLecturesCount ?? 0;
@@ -69,7 +64,8 @@ const Intro = ({ course, progress }) => {
       ? Math.round((completedLessons / totalLessons) * 100)
       : 0;
 
-  // IDs từ progress / course
+  const isCompleted = progressPercent === 100;
+
   const lastLectureIdRaw = progress?.lastLectureId;
   const lastLectureId =
     typeof lastLectureIdRaw === "string"
@@ -84,91 +80,57 @@ const Intro = ({ course, progress }) => {
       : firstLectureIdRaw?.toString?.() ?? null;
 
   const handleContinueLearning = () => {
-    if (!courseId) {
-      console.log("[Intro] No courseId in URL, cannot navigate");
-      return;
-    }
+    if (!courseId) return;
 
     let firstInProgressLectureId = null;
     let firstNotStartedLectureId = null;
 
-    if (
-      Array.isArray(course?.curriculum) &&
-      Array.isArray(progress?.lectures)
-    ) {
+    if (Array.isArray(course?.curriculum) && Array.isArray(progress?.lectures)) {
       const progressMap = {};
       for (const p of progress.lectures) {
         const rawId = p?.lectureId;
-        const key =
-          typeof rawId === "string" ? rawId : rawId?.toString?.();
+        const key = typeof rawId === "string" ? rawId : rawId?.toString?.();
         if (!key) continue;
         progressMap[key] = p;
       }
-
-      console.log("[Intro] progressMap keys:", Object.keys(progressMap));
 
       outerLoop: for (const section of course.curriculum) {
         const lectures = section?.lectures || [];
         for (const lec of lectures) {
           const rawLecId = lec?._id;
-          const lecId =
-            typeof rawLecId === "string"
-              ? rawLecId
-              : rawLecId?.toString?.();
+          const lecId = typeof rawLecId === "string" ? rawLecId : rawLecId?.toString?.();
           if (!lecId) continue;
 
           const p = progressMap[lecId] || {};
-          const status = normalizeStatus(
-            p.status,
-            p.lastPositionSec,
-            p.durationSec
-          );
-
-          console.log("[Intro] check lecture", {
-            lecId,
-            status,
-            progressItem: p,
-          });
+          const status = normalizeStatus(p.status, p.lastPositionSec, p.durationSec);
 
           if (!firstInProgressLectureId && status === "in-progress") {
             firstInProgressLectureId = lecId;
-            // tiếp tục loop để xem có lecture not-started phía trên không? → không, mình ưu tiên in-progress trước
             break outerLoop;
           }
 
           if (!firstNotStartedLectureId && status === "not-started") {
             firstNotStartedLectureId = lecId;
-            // chưa break, vì có thể phía trên có in-progress (nhưng theo thứ tự đi từ trên xuống nên cái đầu gặp sẽ được giữ)
           }
         }
       }
     }
 
-    // ƯU TIÊN:
-    // 1. Lecture in-progress đầu tiên trong curriculum
-    // 2. Lecture not-started đầu tiên
-    // 3. lastLectureId từ backend
-    // 4. firstLectureId (lecture đầu tiên của course)
     const targetLectureId =
       firstInProgressLectureId ||
       firstNotStartedLectureId ||
       lastLectureId ||
       firstLectureId;
 
-    console.log("[Intro] handleContinueLearning choose target:", {
-      courseId,
-      firstInProgressLectureId,
-      firstNotStartedLectureId,
-      lastLectureId,
-      firstLectureId,
-      targetLectureId,
-      rawProgress: progress,
-      curriculum: course?.curriculum,
-    });
-
     if (!targetLectureId) return;
-
     navigate(`/courses/${courseId}/watch/${targetLectureId}`);
+  };
+
+  const handleViewResult = () => {
+    if (!courseId) return;
+    navigate(`/course/${courseId}/result`, { 
+        state: { assessment: progress?.aiAssessment } 
+    });
   };
 
   const disabledContinue =
@@ -182,23 +144,16 @@ const Intro = ({ course, progress }) => {
           {/* LEFT: info course */}
           <Col lg={8}>
             <h1 className="text-white">{title}</h1>
-
             <p className="text-white">{description}</p>
 
             <ul className="list-inline mb-5">
-              {/* Instructor */}
               <li className="list-inline-item h6 me-4 mb-1 mb-sm-0 text-white">
                 <span className="fw-light">By</span> {instructorName}
               </li>
-
-              {/* Rating (copy style từ CourseCard) */}
               <li className="list-inline-item me-4 mb-1 mb-sm-0">
                 <ul className="list-inline mb-0">
                   {Array.from({ length: fullStars }).map((_, idx) => (
-                    <li
-                      key={`f-${idx}`}
-                      className="list-inline-item me-1 small"
-                    >
+                    <li key={`f-${idx}`} className="list-inline-item me-1 small">
                       <FaStar size={14} className="text-warning" />
                     </li>
                   ))}
@@ -208,14 +163,10 @@ const Intro = ({ course, progress }) => {
                     </li>
                   )}
                   {Array.from({ length: emptyStars }).map((_, idx) => (
-                    <li
-                      key={`e-${idx}`}
-                      className="list-inline-item me-1 small"
-                    >
+                    <li key={`e-${idx}`} className="list-inline-item me-1 small">
                       <FaRegStar size={14} className="text-warning" />
                     </li>
                   ))}
-
                   <li className="list-inline-item ms-2 h6 text-white mb-0">
                     {Number.isFinite(star) ? star.toFixed(1) : "—"}/5.0
                   </li>
@@ -224,8 +175,6 @@ const Intro = ({ course, progress }) => {
                   </li>
                 </ul>
               </li>
-
-              {/* Language */}
               <li className="list-inline-item h6 mb-0 text-white">
                 <FaGlobe className="text-info me-2" />
                 {language}
@@ -249,16 +198,23 @@ const Intro = ({ course, progress }) => {
               Continue learning
             </button>
 
+            {isCompleted && (
+              <button
+                type="button"
+                className="btn btn-outline-info mb-4 w-100 d-flex align-items-center justify-content-center"
+                onClick={handleViewResult}
+              >
+                <FaCertificate className="me-2" />
+                View Feedback & Result
+              </button>
+            )}
+
             <div className="overflow-hidden mb-4">
               <h6 className="text-white">Your Progress</h6>
               <div className="progress progress-sm bg-white bg-opacity-10 mb-1">
                 <div
-                  className="progress-bar bg-white aos"
+                  className="progress-bar bg-white"
                   role="progressbar"
-                  data-aos="slide-right"
-                  data-aos-delay={200}
-                  data-aos-duration={1000}
-                  data-aos-easing="ease-in-out"
                   style={{ width: `${progressPercent}%` }}
                   aria-valuenow={progressPercent}
                   aria-valuemin={0}

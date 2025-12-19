@@ -1,5 +1,5 @@
 import Course from "../models/courseModel.js";
-import { processVideoWithGemini } from "../services/aiService.js";
+import { processVideoWithGemini, generateAssessmentService } from "../services/aiService.js";
 import Notification from "../models/notificationModel.js";
 import { getIO, getOnlineUsers } from "../configs/socket.js";
 
@@ -62,6 +62,7 @@ export const processLectureAI = async (req, res) => {
       {
         $set: {
           "curriculum.$[].lectures.$[lec].aiData.summary": aiData.summary,
+          "curriculum.$[].lectures.$[lec].aiData.lessonNotes": aiData.lessonNotes,
           "curriculum.$[].lectures.$[lec].aiData.quizzes": aiData.quizzes,
           "curriculum.$[].lectures.$[lec].aiData.status": "Completed"
         }
@@ -80,7 +81,7 @@ export const processLectureAI = async (req, res) => {
     }
 
   } catch (error) {
-    console.error(`> Xử lý AI thất bại cho Lecture: ${lectureId}`, error);
+    console.error(`> Handling AI failures for Lecture: ${lectureId}`, error);
 
     await Course.updateOne(
       { _id: courseId, "curriculum.lectures._id": lectureId },
@@ -96,4 +97,25 @@ export const processLectureAI = async (req, res) => {
       );
     }
   }
+};
+
+export const generateFinalAssessment = async (req, res) => {
+    try {
+        const { courseId } = req.body;
+        const userId = req.userId;
+
+        const assessmentResult = await generateAssessmentService(userId, courseId);
+
+        res.status(200).json({ 
+            success: true, 
+            assessment: assessmentResult 
+        });
+
+    } catch (error) {
+        console.error("AI Assessment Error:", error);
+        res.status(500).json({ 
+            success: false, 
+            message: error.message || "Error creating AI review!" 
+        });
+    }
 };

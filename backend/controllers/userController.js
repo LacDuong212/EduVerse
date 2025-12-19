@@ -7,7 +7,7 @@ export const getProfile = async (req, res) => {
   try {
     const user = await userModel
       .findById(req.userId)
-      .select("name email phonenumber bio website socials pfpImg isVerified role");
+      .select("name email phonenumber bio website socials pfpImg isVerified role interests");
 
     if (!user) {
       return res.status(404).json({

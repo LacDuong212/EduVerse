@@ -36,11 +36,20 @@ const courseSchema = new mongoose.Schema({
       isFree: { type: Boolean, default: false },
       aiData: {
         summary: String,
+        lessonNotes: {
+          keyConcepts: [{
+             term: String,
+             definition: String
+          }],
+          mainPoints: [String], 
+          practicalTips: [String] 
+        },
         quizzes: [{
           question: String,
           options: [String],
           correctAnswer: String,
-          explanation: String
+          explanation: String,
+          topic: { type: String, default: "General Knowledge" }
         }],
         status: {
           type: String,

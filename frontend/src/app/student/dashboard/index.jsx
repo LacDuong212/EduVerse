@@ -1,5 +1,6 @@
 import PageMetaData from '@/components/PageMetaData';
 import SkillRadarSection from "./components/SkillRadarSection"
+import ListedCourses from './components/ListedCourses';
 
 
 const StudentDashboard = () => {
@@ -9,6 +10,8 @@ const StudentDashboard = () => {
       <PageMetaData title="My Profile" />
       
       <SkillRadarSection />
+
+      <ListedCourses />
     </div>
 
   );

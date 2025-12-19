@@ -11,16 +11,16 @@ export default function VideoPlayer() {
   return (
     <>
       <PageMetaData title="Course Video" />
-      <main>
+      <section className='py-0'>
         <VideoPlayerDetail
-          key={`${courseId}:${lectureId}`}   // 👈 ép remount subtree
+          key={`${courseId}:${lectureId}`}
           course={course}
           loading={loading}
           error={error}
           courseId={courseId}
           lectureId={lectureId}
         />
-      </main>
+      </section>
     </>
   );
 }

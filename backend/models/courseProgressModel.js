@@ -33,6 +33,15 @@ const CourseProgressSchema = new Schema(
     lectures: [LectureProgressSchema],
     firstStartedAt: Date,
     lastActivityAt: Date,
+    isCompleted: { type: Boolean, default: false },
+    aiAssessment: {
+      generatedAt: Date,
+      overallScore: { type: Number, default: 0 },
+      summary: String,
+      strengths: [String],
+      weaknesses: [String],
+      recommendation: String
+    }
   },
   { timestamps: true }
 );
@@ -46,7 +55,6 @@ CourseProgressSchema.virtual("percentage").get(function () {
   );
 });
 
-// 🔥 Fix OverwriteModelError
 const CourseProgress =
   mongoose.models.CourseProgress ||
   mongoose.model("CourseProgress", CourseProgressSchema);
