@@ -48,7 +48,8 @@ const courseSchema = new mongoose.Schema({
           question: String,
           options: [String],
           correctAnswer: String,
-          explanation: String
+          explanation: String,
+          topic: { type: String, default: "General Knowledge" }
         }],
         status: {
           type: String,

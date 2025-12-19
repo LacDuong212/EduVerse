@@ -82,7 +82,7 @@ const CourseDetail = () => {
       }
 
       map[lectureId] = {
-        status,   // "completed" | "in-progress" | "not-started"
+        status,
         progress: percent,
       };
     }
@@ -91,7 +91,6 @@ const CourseDetail = () => {
     return map;
   }, [progress]);
 
-  // ⏳ Loading: chỉ dựa vào hook course (progress fail vẫn cho xem course)
   if (loading) {
     console.log("[CourseDetail] loading = true -> show spinner");
     return (

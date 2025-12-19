@@ -171,15 +171,9 @@ const Hero = () => {
             </li>
           </ul>
           <div className="d-sm-flex align-items-center justify-content-center justify-content-lg-start">
-            <a href="#" className="btn btn-lg btn-danger-soft me-2 mb-4 mb-sm-0"  onClick={handleGetStarted}>
+            <a href="#" className="btn btn-lg btn-danger-soft me-2 mb-4 mb-sm-0" onClick={handleGetStarted}>
               Get Started
             </a>
-            <div className="d-flex align-items-center justify-content-center py-2 ms-0 ms-sm-4">
-              <GlightBox data-glightbox data-gallery="office-tour" href="https://www.youtube.com/embed/tXHviS-4ygo" className="btn btn-round btn-primary-shadow mb-2 overflow-visible me-7">
-                <FaPlay />
-                <h6 className="mb-0 ms-3 fw-normal position-absolute start-100 top-50 translate-middle-y">Watch video</h6>
-              </GlightBox>
-            </div>
           </div>
         </Col>
         <Col lg={7} xl={6} className="text-center position-relative">
@@ -220,7 +214,7 @@ const Hero = () => {
           <div className="p-2 bg-white shadow rounded-3 position-absolute top-50 end-0 translate-middle-y mt-5 ms-5 d-none d-lg-block z-index-9">
             <img src={figmaImg} alt="Icon" />
           </div>
-          <div className="p-3 bg-blur border border-light shadow rounded-4 position-absolute bottom-0 start-0 z-index-9 d-none d-xl-block mb-5 ms-5">
+          {/* <div className="p-3 bg-blur border border-light shadow rounded-4 position-absolute bottom-0 start-0 z-index-9 d-none d-xl-block mb-5 ms-5">
             <div className="d-flex justify-content-between align-items-center">
               <span className="icon-lg bg-warning rounded-circle">
                 <FaEnvelope className="text-white" />
@@ -235,23 +229,7 @@ const Hero = () => {
                 <p className="mb-0 small text-white">Your admission completed</p>
               </div>
             </div>
-          </div>
-          <div className="p-3 bg-success d-inline-block rounded-4 shadow-lg position-absolute top-50 end-0 translate-middle-y mt-n7 z-index-1 d-none d-md-block" style={{
-            background: 'url(assets/images/pattern/01.png) no-repeat center center',
-            backgroundSize: 'cover'
-          }}>
-            <p className="text-white">Our daily new students</p>
-            <ul className="avatar-group mb-0">
-              {students.map((student, idx) => <li className="avatar avatar-sm" key={idx}>
-                <img className="avatar-img rounded-circle border-white" src={student} alt="avatar" />
-              </li>)}
-              <li className="avatar avatar-sm">
-                <div className="avatar-img rounded-circle border-white bg-primary">
-                  <span className="text-white position-absolute top-50 start-50 translate-middle small">1K+</span>
-                </div>
-              </li>
-            </ul>
-          </div>
+          </div> */}
           <div className="position-relative ms-sm-4">
             <img src={homeImg} alt="element-image" />
           </div>

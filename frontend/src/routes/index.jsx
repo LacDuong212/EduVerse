@@ -27,6 +27,7 @@ import LearningCourse from '../app/student/learning/page';
 import OrderListPage from '../app/student/my-orders/OrderListPage';
 import OrderDetailPage from '../app/student/my-orders/detail/OrderDetailPage';
 import AccountSettingsPage from '../app/pages/accountSettings';
+import CourseResultPage from "../app/pages/course/video-player/components/CourseResultPage";
 
 // PUBLIC
 import HomePage from "../app/pages/home/page";
@@ -51,6 +52,11 @@ export const publicRoutes = [{
   name: 'My Video Player',
   isNested: false,
   element: <VideoPlayer />
+}, {
+  path: '/course/:courseId/result',
+  name: 'Course Result',
+  isNested: false,
+  element: <CourseResultPage />
 }, {
   path: '/courses/:id',
   name: 'CourseDetails',

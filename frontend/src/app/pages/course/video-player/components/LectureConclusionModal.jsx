@@ -1,21 +1,40 @@
 import { useState, useEffect } from 'react';
-import { Modal, Button, Card, Alert, CardHeader, CardBody, CardTitle, Badge, Row, Col } from 'react-bootstrap';
+import { Modal, Button, Card, Alert, CardHeader, CardBody, CardTitle, Badge } from 'react-bootstrap';
 import {
   BsCheckCircleFill, BsXCircleFill, BsLightbulb, BsJournalText,
   BsQuestionCircle, BsKey, BsListCheck, BsLightningFill
 } from 'react-icons/bs';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
-export default function LectureConclusionModal({ show, onHide, aiData, onNext }) {
-  // 1. Lấy thêm lessonNotes từ props
+export default function LectureConclusionModal({ 
+  show, 
+  onHide, 
+  aiData, 
+  onNext, 
+  courseId,
+  lectureId,
+  isLastLecture
+}) {
+
   const { summary, quizzes, lessonNotes } = aiData || {};
+  const navigate = useNavigate();
 
   const [userAnswers, setUserAnswers] = useState({});
   const [checkedState, setCheckedState] = useState({});
+  const [loading, setLoading] = useState(false);
+
+  const [quizScore, setQuizScore] = useState(0);
+  const [wrongAnswers, setWrongAnswers] = useState([]);
 
   useEffect(() => {
     if (show) {
       setUserAnswers({});
       setCheckedState({});
+      setQuizScore(0);
+      setWrongAnswers([]);
+      setLoading(false);
     }
   }, [show, aiData]);
 
@@ -25,15 +44,91 @@ export default function LectureConclusionModal({ show, onHide, aiData, onNext })
   };
 
   const handleCheck = (qIndex) => {
+    const selectedOptIndex = userAnswers[qIndex];
+    const quiz = quizzes[qIndex];
+    const selectedText = quiz.options[selectedOptIndex];
+    const isCorrect = selectedText === quiz.correctAnswer;
+
     setCheckedState(prev => ({ ...prev, [qIndex]: true }));
+
+    if (isCorrect) {
+      setQuizScore(prev => prev + 1);
+    } else {
+      setWrongAnswers(prev => [
+        ...prev, 
+        {
+          question: quiz.question,
+          topic: quiz.topic || "General"
+        }
+      ]);
+    }
   };
 
-  // Cập nhật điều kiện hiển thị có nội dung
+  const handleNextOrFinish = async () => {
+    try {
+      setLoading(true);
+
+      if (quizzes && quizzes.length > 0) {
+        const answeredCount = Object.keys(checkedState).length;
+        if (answeredCount > 0) {
+           await axios.post(
+            `${import.meta.env.VITE_BACKEND_URL}/api/quiz/save`,
+            {
+              courseId,
+              lectureId,
+              score: quizScore,
+              totalQuestions: quizzes.length,
+              wrongAnswers: wrongAnswers
+            },
+            { withCredentials: true }
+          );
+        }
+      }
+
+      if (isLastLecture) {
+        toast.info("AI is analyzing your performance... Please wait!");
+        const { data } = await axios.post(
+          `${import.meta.env.VITE_BACKEND_URL}/api/courses/assessment`,
+          { courseId },
+          { withCredentials: true }
+        );
+
+        if (data.success) {
+          onHide();
+          navigate(`/course/${courseId}/result`, { state: { assessment: data.assessment } });
+        }
+      } else {
+        onNext();
+      }
+
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const hasContent = summary || lessonNotes || (quizzes && quizzes.length > 0);
+  
+  const allQuizzesCompleted = quizzes ? Object.keys(checkedState).length === quizzes.length : true;
+  
+  const isLocked = !allQuizzesCompleted;
 
   return (
-    <Modal show={show} onHide={onHide} size="lg" centered scrollable backdrop="static">
-      <Modal.Header closeButton className="bg-light border-bottom px-4">
+    <Modal 
+      show={show} 
+      onHide={isLocked ? undefined : onHide} 
+      size="lg" 
+      centered 
+      scrollable 
+      backdrop="static"
+      keyboard={false}
+    >
+      <Modal.Header 
+        closeButton={!isLocked} 
+        className="bg-light border-bottom px-4"
+      >
         <Modal.Title className="h5 text-primary">
           🎉 Congratulations on completing the lesson!
         </Modal.Title>
@@ -41,7 +136,8 @@ export default function LectureConclusionModal({ show, onHide, aiData, onNext })
 
       <Modal.Body className="p-4 bg-light bg-opacity-10">
         {!hasContent && <p className="text-center">The lesson is over. You can move on to the next one.</p>}
-
+        
+        {/* --- CÁC PHẦN HIỂN THỊ NỘI DUNG (GIỮ NGUYÊN) --- */}
         {summary && (
           <Card className="border rounded-3 mb-4">
             <CardHeader className="bg-light border-bottom">
@@ -79,19 +175,14 @@ export default function LectureConclusionModal({ show, onHide, aiData, onNext })
                           <Badge
                             bg="primary"
                             className="px-2 py-1 text-wrap text-start"
-                            style={{
-                              width: 'fit-content',
-                              display: 'block'
-                            }}
+                            style={{ width: 'fit-content', display: 'block' }}
                           >
                             {item.term}
                           </Badge>
                         </div>
-
                         <div className="small" style={{ lineHeight: '1.6' }}>
                           {item.definition || item.description}
                         </div>
-
                         {idx !== lessonNotes.keyConcepts.length - 1 && (
                           <div className="border-bottom opacity-25" style={{ gridColumn: '1 / -1', margin: '0.25rem 0' }} />
                         )}
@@ -135,21 +226,19 @@ export default function LectureConclusionModal({ show, onHide, aiData, onNext })
           </div>
         )}
 
-        {/* ==================== PHẦN 3: QUIZ (GIỮ NGUYÊN) ==================== */}
         {quizzes && quizzes.length > 0 && (
-          <div>
+          <div className="mt-4">
             <div className="d-flex align-items-center mb-3 mt-2">
               <BsQuestionCircle className="me-2 text-info fs-5" />
-              <h5 className="mb-0">Quick Knowledge Check</h5>
+              <h5 className="mb-0 fw-bold">Quick Knowledge Check</h5>
             </div>
 
             {quizzes.map((quiz, qIndex) => {
               const isChecked = checkedState[qIndex];
               const selected = userAnswers[qIndex];
-              // const isCorrect = quiz.options[selected] === quiz.correctAnswer; // Biến này code cũ ko dùng để render nhưng cứ để đó
-
+              
               return (
-                <Card key={qIndex} className="border rounded-3 mb-4">
+                <Card key={qIndex} className="border rounded-3 mb-4 shadow-sm">
                   <CardHeader className="bg-light border-bottom">
                     <h6 className="mb-0">
                       <span className="fw-bold me-2">Question {qIndex + 1}:</span>
@@ -160,64 +249,67 @@ export default function LectureConclusionModal({ show, onHide, aiData, onNext })
                   <CardBody>
                     <div className="vstack gap-2">
                       {quiz.options.map((opt, oIndex) => {
-                        let labelClass = "btn w-100 text-start d-flex justify-content-between align-items-center text-wrap h-auto";
-                        let icon = null;
+                         let labelClass = "btn w-100 text-start d-flex justify-content-between align-items-center text-wrap h-auto ";
+                         let icon = null;
 
-                        if (isChecked) {
-                          if (opt === quiz.correctAnswer) {
-                            labelClass += " btn-success";
-                            icon = <BsCheckCircleFill className="ms-2" />;
-                          } else if (selected === oIndex && opt !== quiz.correctAnswer) {
-                            labelClass += " btn-danger";
-                            icon = <BsXCircleFill className="ms-2" />;
-                          } else {
-                            labelClass += " btn-light text-muted opacity-50";
-                          }
-                        } else {
-                          if (selected === oIndex) {
-                            labelClass += " btn-primary";
-                          } else {
-                            labelClass += " btn-outline-primary";
-                          }
-                        }
+                         if (isChecked) {
+                           if (opt === quiz.correctAnswer) {
+                             labelClass += "btn-success";
+                             icon = <BsCheckCircleFill className="ms-2 flex-shrink-0" />;
+                           } else if (selected === oIndex && opt !== quiz.correctAnswer) {
+                             labelClass += "btn-danger";
+                             icon = <BsXCircleFill className="ms-2 flex-shrink-0" />;
+                           } else {
+                             labelClass += "btn-light text-muted opacity-50";
+                           }
+                         } else {
+                           if (selected === oIndex) {
+                             labelClass += "btn-primary";
+                           } else {
+                             labelClass += "btn-outline-primary";
+                           }
+                         }
 
-                        const inputId = `quiz-${qIndex}-opt-${oIndex}`;
+                         const inputId = `quiz-${qIndex}-opt-${oIndex}`;
 
-                        return (
-                          <div key={oIndex}>
-                            <input
-                              type="radio"
-                              className="btn-check"
-                              name={`quiz-${qIndex}`}
-                              id={inputId}
-                              checked={selected === oIndex}
-                              onChange={() => handleSelect(qIndex, oIndex)}
-                              disabled={isChecked}
-                            />
-                            <label className={labelClass} htmlFor={inputId}>
-                              <span>{opt}</span>
-                              {icon}
-                            </label>
-                          </div>
-                        );
+                         return (
+                           <div key={oIndex}>
+                             <input 
+                               type="radio" 
+                               className="btn-check" 
+                               name={`quiz-${qIndex}`} 
+                               id={inputId} 
+                               checked={selected === oIndex} 
+                               onChange={() => handleSelect(qIndex, oIndex)} 
+                               disabled={isChecked} 
+                             />
+                             <label className={labelClass} htmlFor={inputId}>
+                               <span>{opt}</span>
+                               {icon}
+                             </label>
+                           </div>
+                         )
                       })}
                     </div>
 
-                    {/* Action & Explanation Area */}
                     <div className="mt-3">
                       {isChecked && quiz.explanation && (
                         <Alert variant="info" className="mb-2">
-                          <BsLightbulb className="me-2" />
-                          <strong>Explanation:</strong> {quiz.explanation}
+                          <div className="d-flex">
+                            <BsLightbulb className="me-2 mt-1 flex-shrink-0" />
+                            <div>
+                              <strong>Explanation:</strong> {quiz.explanation}
+                            </div>
+                          </div>
                         </Alert>
                       )}
 
                       {!isChecked && (
                         <div className="d-flex justify-content-end">
-                          <Button
-                            variant="primary"
-                            className="next-btn mb-0"
-                            disabled={selected === undefined}
+                          <Button 
+                            variant="primary" 
+                            size="sm"
+                            disabled={selected === undefined} 
                             onClick={() => handleCheck(qIndex)}
                           >
                             Check Answer
@@ -232,14 +324,29 @@ export default function LectureConclusionModal({ show, onHide, aiData, onNext })
           </div>
         )}
       </Modal.Body>
-
+      
       <Modal.Footer className="bg-light">
-        <Button variant="outline-secondary" onClick={onHide}>Close</Button>
-        {onNext && (
-          <Button variant="primary" onClick={onNext}>
-            Next Lecture <i className="fas fa-arrow-right ms-1"></i>
-          </Button>
-        )}
+        <Button 
+          variant="outline-secondary" 
+          onClick={onHide} 
+          disabled={isLocked}
+        >
+          {isLocked ? "Complete Quiz to Close" : "Close"}
+        </Button>
+        
+        <Button 
+          variant={isLastLecture ? "success" : "primary"} 
+          onClick={handleNextOrFinish}
+          disabled={loading || isLocked}
+        >
+          {loading ? (
+             <span><span className="spinner-border spinner-border-sm me-2"/>Processing...</span>
+          ) : isLastLecture ? (
+             <span>🎓 Finish & Get Feedback</span>
+          ) : (
+             <span>Next Lecture <i className="fas fa-arrow-right ms-1"></i></span>
+          )}
+        </Button>
       </Modal.Footer>
     </Modal>
   );

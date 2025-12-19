@@ -5,7 +5,7 @@ import { getAllCourses, getCourseFilters, getCourseById,
     streamVideo, generateImageUploadSignature,
     getRecommendedCourses, getPopularTags
 } from "../controllers/courseController.js";
-import { processLectureAI } from "../controllers/aiController.js";
+import { processLectureAI, generateFinalAssessment } from "../controllers/aiController.js";
 import userAuth from "../middlewares/userAuth.js";
 import {
   getCourseProgress,
@@ -27,6 +27,7 @@ courseRoute.get("/:id", getCourseById);
 courseRoute.post("/", userAuth, createCourse);
 
 courseRoute.post("/generate-ai", userAuth, processLectureAI);
+courseRoute.post("/assessment", userAuth, generateFinalAssessment);
 
 courseRoute.put("/:id", userAuth, updateCourse);
 courseRoute.patch("/:id", userAuth, setCoursePrivacy);
