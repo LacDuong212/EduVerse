@@ -10,33 +10,27 @@ export const getRecommendations = (targetProfile, candidateCourses, limit = 8) =
   const TfIdf = natural.TfIdf;
   const tfidf = new TfIdf();
 
-  // 1. Chuẩn bị dữ liệu
   const processedDocs = [];
 
-  // Tạo văn bản cho TARGET (Vị trí index 0)
-  // Gộp Title + Description + Tags để phân tích
   const targetText = `${targetProfile.title || ''} ${targetProfile.description || ''} ${targetProfile.tags ? targetProfile.tags.join(' ') : ''}`;
   tfidf.addDocument(targetText);
 
-  // Thêm các CANDIDATES (Vị trí index 1 trở đi)
   candidateCourses.forEach((doc, index) => {
     const content = `${doc.title || ''} ${doc.description || ''} ${doc.category?.name || ''}`;
     tfidf.addDocument(content);
     
     processedDocs.push({
-      index: index + 1, // +1 vì vị trí 0 là target
+      index: index + 1,
       id: doc._id,
       doc: doc
     });
   });
 
-  // 2. Lấy từ khóa đặc trưng của Target
   const targetTerms = [];
   tfidf.listTerms(0).forEach(item => {
     if (item.tfidf > 0) targetTerms.push(item.term);
   });
 
-  // 3. Tính điểm tương đồng
   const recommendations = [];
   
   processedDocs.forEach(item => {
@@ -57,7 +51,6 @@ export const getRecommendations = (targetProfile, candidateCourses, limit = 8) =
     }
   });
 
-  // 4. Sắp xếp và trả về
   return recommendations
     .sort((a, b) => b.similarityScore - a.similarityScore)
     .slice(0, limit);

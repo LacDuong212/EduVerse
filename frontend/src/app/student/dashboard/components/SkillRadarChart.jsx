@@ -78,13 +78,13 @@ const SkillRadarChart = ({ radar, title = "Skill Radar (by Category)", height = 
   if (!radar || !radar.labels?.length) {
     return (
       <div className="p-4 border rounded bg-transparent text-muted">
-"No skill data available yet. Complete more courses to see your progress!"      
-</div>
+        "No skill data available yet. Complete more courses to see your progress!"
+      </div>
     );
   }
 
- const labels = radar.labels; // data labels
-const displayLabels = labels.map((c) => CATEGORY_TO_SKILL[c] || c);
+  const labels = radar.labels; // data labels
+  const displayLabels = labels.map((c) => CATEGORY_TO_SKILL[c] || c);
   const values = (radar.values || []).map(clamp);
   const systemAvgValues = (radar.systemAvgValues || []).map(clamp);
 
@@ -101,42 +101,42 @@ const displayLabels = labels.map((c) => CATEGORY_TO_SKILL[c] || c);
 
   const data = useMemo(
     () => ({
-        labels: displayLabels,
+      labels: displayLabels,
       datasets: [
-  // ✅ System Average (vẽ trước -> nằm dưới)
-  {
-    label: "System Average",
-    data: systemAvgValues,
+        // ✅ System Average (vẽ trước -> nằm dưới)
+        {
+          label: "System Average",
+          data: systemAvgValues,
 
-backgroundColor: "rgba(255, 0, 0, 0.66)", // xanh nhạt   
-     borderWidth: 0,
-    borderColor: "transparent",
-    pointRadius: 0,
-    pointHoverRadius: 0,
-    tension: 0.25,
-    order: 1,
-  },
+          backgroundColor: "rgba(255, 0, 0, 0.66)", // xanh nhạt   
+          borderWidth: 0,
+          borderColor: "transparent",
+          pointRadius: 0,
+          pointHoverRadius: 0,
+          tension: 0.25,
+          order: 1,
+        },
 
-  // ✅ My Skills (vẽ sau -> đè lên trên)
-  {
-    label: "My Skills",
-    data: values,
+        // ✅ My Skills (vẽ sau -> đè lên trên)
+        {
+          label: "My Skills",
+          data: values,
 
-    borderWidth: 5,
-    borderColor: t.primary,
-    backgroundColor: t.primary.includes("rgb")
-      ? t.primary.replace("rgb(", "rgba(").replace(")", ", 0.22)")
-      : "rgba(13,110,253,0.22)",
+          borderWidth: 5,
+          borderColor: t.primary,
+          backgroundColor: t.primary.includes("rgb")
+            ? t.primary.replace("rgb(", "rgba(").replace(")", ", 0.22)")
+            : "rgba(13,110,253,0.22)",
 
-    pointBackgroundColor: t.bodyBg,
-    pointBorderColor: t.primary,
-    pointBorderWidth: 2,
-    pointRadius: 5,
-    pointHoverRadius: 7,
+          pointBackgroundColor: t.bodyBg,
+          pointBorderColor: t.primary,
+          pointBorderWidth: 2,
+          pointRadius: 5,
+          pointHoverRadius: 7,
 
-    tension: 0.25,
-    order: 2,
-  },
+          tension: 0.25,
+          order: 2,
+        },
       ],
     }),
     [labels, values, systemAvgValues, t.primary, t.bodyBg]
