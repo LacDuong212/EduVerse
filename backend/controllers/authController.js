@@ -141,11 +141,11 @@ export const forgotPassword = async (req, res) => {
         const user = await userModel.findOne({ email });
 
         if (!user) {
-            return res.status(200).json({ success: true, message: "If this email is registered, a password reset OTP will be sent." });
+            return res.status(400).json({ success: false, message: "Email does not exist!" });
         }
 
         if (!user.isVerified) {
-            return res.status(401).json({ success: false, message: "Account not verified" });
+            return res.status(401).json({ success: false, message: "Account not verified!" });
         }
 
         const otp = Math.floor(100000 + Math.random() * 900000).toString();

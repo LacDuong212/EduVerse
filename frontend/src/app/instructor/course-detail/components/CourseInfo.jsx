@@ -164,8 +164,8 @@ const CourseInfo = ({ col = 6, courseData }) => {
                     {(courseData?.tags || []).map(tag =>
                       <Link
                         key={`tag-${courseData?._id}-${tag}`}
-                        to={`/courses?tags=${encodeURIComponent(tag)}`}
-                        className="badge bg-secondary bg-opacity-10 text-secondary mb-1 me-1 text-decoration-none"
+                        to={`/courses?search=${encodeURIComponent(tag)}`}
+                        className="badge bg-secondary bg-opacity-15 text-body mb-1 me-1 text-decoration-none"
                       >
                         {tag}
                       </Link>

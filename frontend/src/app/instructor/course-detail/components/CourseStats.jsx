@@ -4,7 +4,7 @@ import { formatCurrency } from '@/utils/currency';
 import { useMemo } from 'react';
 import ReactApexChart from 'react-apexcharts';
 import { Card, CardBody, CardHeader, Col, Row } from 'react-bootstrap';
-import { BsArrowUp, BsArrowDown, BsDash } from 'react-icons/bs';
+import { BsArrowUp, BsArrowDown } from 'react-icons/bs';
 
 
 // helper: get color variables safely

@@ -3,7 +3,9 @@ import Category from "../models/categoryModel.js";
 import DraftVideo from "../models/draftVideoModel.js";
 import Instructor from "../models/instructorModel.js";
 import Order from "../models/orderModel.js";
-import userInteraction from "../models/userInteraction.js";
+import User from "../models/userModel.js";
+import Wishlist from "../models/wishlistModel.js";
+import { getRecommendations } from "../utils/recommendationEngine.js";
 
 import cloudinary, { CLOUDINARY_API_KEY, CLOUDINARY_CLOUD_NAME } from "../configs/cloudinary.js";
 import { generateStreamUrl } from "../utils/aws/getObject.js";
@@ -88,6 +90,103 @@ export const getHomeCourses = async (req, res) => {
 
   } catch (error) {
     res.status(500).json({ message: "Error fetching home courses", error });
+  }
+};
+
+// GET /api/courses/recommendations (Private - CẦN Token)
+export const getRecommendedCourses = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const publicCourseFilter = { isPrivate: false, isDeleted: false, status: "Live" };
+
+    let recommendedForYou = [];
+    let debugSource = "None";
+
+    const orders = await Order.find({ user: userId })
+      .populate({
+        path: "courses.course",
+        populate: { path: "category", select: "name" } // Deep populate
+      });
+
+    const wishlistItems = await Wishlist.find({ userId: userId })
+      .populate({
+        path: "courseId",
+        populate: { path: "category", select: "name" } // Deep populate
+      });
+
+    const completedOrders = orders.filter(o => o.status === "completed");
+
+    const purchasedCourses = [];
+    completedOrders.forEach(o => o.courses.forEach(item => {
+      if (item.course) purchasedCourses.push(item.course)
+    }));
+
+    const wishlistCourses = wishlistItems.map(item => item.courseId).filter(c => c !== null);
+    const historyCourses = [...purchasedCourses, ...wishlistCourses];
+    const purchasedIds = purchasedCourses.map(c => c._id.toString());
+
+    // --- CHIẾN LƯỢC 1: WARM START ---
+    if (historyCourses.length > 0) {
+      debugSource = "History(Order+Wishlist)";
+
+      const userProfile = {
+        title: historyCourses.map(c => c.title).join(" "),
+        subtitle: historyCourses.map(c => c.subtitle).join(" "),
+        tags: historyCourses.flatMap(c => c.tags || []),
+        category: { name: historyCourses.map(c => c.category?.name || "").join(" ") }
+      };
+
+      const candidates = await Course.find({
+          ...publicCourseFilter,
+          _id: { $nin: purchasedIds }
+        })
+        .select("title subtitle category tags thumbnail price slug rating instructor duration lecturesCount studentsEnrolled")
+        .populate("category", "name");
+
+      recommendedForYou = getRecommendations(userProfile, candidates, 8);
+    }
+
+    // --- CHIẾN LƯỢC 2: COLD START ---
+    if (recommendedForYou.length === 0) {
+      const user = await User.findById(userId);
+
+      if (user && user.interests && user.interests.length > 0) {
+        debugSource = "UserInterests";
+
+        const userProfile = {
+          title: user.interests.join(" "),
+          description: `Khóa học về ${user.interests.join(" ")}`,
+          tags: user.interests,
+          category: { name: user.interests.join(" ") }
+        };
+
+        const candidates = await Course.find(publicCourseFilter)
+          .select("title subtitle category tags thumbnail price slug rating instructor duration lecturesCount studentsEnrolled")
+          .populate("category", "name");
+
+        recommendedForYou = getRecommendations(userProfile, candidates, 8);
+      }
+    }
+
+    // --- FALLBACK ---
+    if (recommendedForYou.length === 0) {
+      console.log("-> Hit Fallback (BestSellers)");
+      recommendedForYou = await Course.find(publicCourseFilter)
+        .populate("category", "name slug")
+        .sort({ studentsEnrolled: -1 })
+        .limit(8);
+      debugSource = "Fallback(BestSellers)";
+    }
+
+    res.json({
+      success: true,
+      debugSource,
+      courses: recommendedForYou
+    });
+
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -288,81 +387,17 @@ export const getCourseById = async (req, res) => {
 
     const course = await Course.findById(id).populate("category", "name slug");
 
-    if (!course) {
+    if (!course || course.isDeleted) {
       return res.status(404).json({ success: false, message: "Course not found" });
+    }
+
+    if (!(course.status.toLowerCase() === "live")) {
+      return res.json({ success: false, message: "Course not available" })
     }
 
     return res.json({ success: true, course });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
-  }
-};
-
-export const courseViewed = async (req, res) => {
-  const { id } = req.params;
-  const userId = req.userId;
-
-  try {
-    // Kiểm tra khóa học có tồn tại
-    const course = await Course.findById(id);
-    if (!course) {
-      return res.status(404).json({ success: false, message: "Course not found" });
-    }
-
-    // Ghi nhận lượt xem
-    await userInteraction.findOneAndUpdate(
-      { userId, productId: id, interactionType: 'view' },
-      { interactedAt: new Date() },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
-    );
-
-    return res.status(200).json({ success: true, message: "Course view recorded" });
-  } catch (error) {
-    console.error("Error recording course view:", error);
-    return res.status(500).json({ success: false, message: "Internal server error" });
-  }
-};
-
-export const getViewedCourses = async (req, res) => {
-  try {
-    const userId = req.userId; // từ middleware auth
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const { category, subCategory, search } = req.query;
-
-    // Lấy tất cả interactions 'view' của user
-    const interactions = await userInteraction.find({
-      userId,
-      interactionType: 'view'
-    }).sort({ interactedAt: -1 });
-
-    // Lấy danh sách courseId
-    let courseIds = interactions.map(i => i.productId);
-
-    // Lọc course theo các query params
-    const filter = { _id: { $in: courseIds } };
-    if (category) filter.category = category;
-    if (subCategory) filter.subCategory = subCategory;
-    if (search) filter.title = { $regex: search, $options: "i" };
-
-    const total = await Course.countDocuments(filter);
-
-    const courses = await Course.find(filter)
-      .populate("category", "name slug")
-      .sort({ createdAt: -1, _id: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit);
-
-    res.json({
-      success: true,
-      courses,
-      total,
-      page,
-      pages: Math.ceil(total / limit),
-    });
-  } catch (error) {
-    console.error("Error fetching viewed courses:", error);
-    res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 
@@ -424,47 +459,74 @@ export const getRelatedCourses = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Tìm course hiện tại
-    const currentCourse = await Course.findById(id);
+    const currentCourse = await Course.findById(id)
+        .populate("category", "name");
+
     if (!currentCourse) {
-      return res.status(404).json({
-        success: false,
-        message: "Course not found",
-      });
+      return res.status(404).json({ success: false, message: "Course not found" });
     }
 
-    // Điều kiện tìm related
-    const conditions = [
-      { tags: { $in: currentCourse.tags || [] } },
-      { category: currentCourse.category },
-      { subCategory: currentCourse.subCategory }
-    ];
+    const publicCourseFilter = { 
+        isPrivate: false, 
+        isDeleted: false, 
+        status: "Live",
+        _id: { $ne: currentCourse._id }
+    };
 
-    // Tìm tất cả course liên quan
-    let relatedCourses = await Course.find({
-      _id: { $ne: id },
-      $or: conditions
-    }).select("title thumbnail instructor studentsEnrolled rating price discountPrice ")
-      .populate("category", "name slug");
+    let relatedCourses = [];
+    let debugSource = "None";
 
-    // Loại bỏ trùng lặp (nếu có)
-    const seen = new Set();
-    relatedCourses = relatedCourses.filter(c => {
-      if (seen.has(c._id.toString())) return false;
-      seen.add(c._id.toString());
-      return true;
-    });
+    const targetProfile = {
+        title: currentCourse.title,
+        subtitle: currentCourse.subtitle || "",
+        tags: currentCourse.tags || [],
+        category: { name: currentCourse.category?.name || "" }
+    };
+
+    const candidates = await Course.find(publicCourseFilter)
+        .select("title subtitle category tags thumbnail price discountPrice rating instructor studentsEnrolled duration lecturesCount level")
+        .populate("category", "name");
+
+    relatedCourses = getRecommendations(targetProfile, candidates, 5); 
+
+    if (relatedCourses.length > 0) {
+        debugSource = "TF-IDF(ContentSimilarity)";
+    }
+
+    if (relatedCourses.length === 0 && currentCourse.category) {
+        console.log("-> Hit Fallback (SameCategory)");
+        relatedCourses = await Course.find({
+            ...publicCourseFilter,
+            category: currentCourse.category._id
+        })
+        .select("title subtitle category tags thumbnail price discountPrice rating instructor studentsEnrolled duration lecturesCount level")
+        .populate("category", "name")
+        .sort({ studentsEnrolled: -1 })
+        .limit(5);
+        
+        debugSource = "Fallback(SameCategory)";
+    }
+
+    if (relatedCourses.length === 0) {
+        console.log("-> Hit Fallback (GlobalBestSellers)");
+        relatedCourses = await Course.find(publicCourseFilter)
+        .select("title subtitle category tags thumbnail price discountPrice rating instructor studentsEnrolled duration lecturesCount level")
+        .populate("category", "name")
+        .sort({ studentsEnrolled: -1 })
+        .limit(5);
+        
+        debugSource = "Fallback(GlobalBestSellers)";
+    }
 
     res.json({
       success: true,
-      courses: relatedCourses,
+      debugSource,
+      courses: relatedCourses
     });
+
   } catch (error) {
     console.error("Error in getRelatedCourses:", error);
-    res.status(500).json({
-      success: false,
-      message: "Server error",
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -889,5 +951,38 @@ export const generateImageUploadSignature = async (req, res) => {
       message: "Internal Server Error",
       error: error.message
     });
+  }
+};
+
+export const getPopularTags = async (req, res) => {
+  try {
+    const tags = await Course.aggregate([
+      { $match: { status: "Live", isPrivate: false, isDeleted: false } },
+
+      { $unwind: "$tags" },
+
+      { 
+        $group: { 
+          _id: { $toLower: "$tags" },
+          name: { $first: "$tags" },
+          count: { $sum: 1 }
+        } 
+      },
+
+      { $sort: { count: -1 } },
+
+      { $limit: 20 }
+    ]);
+
+    const tagList = tags.map(t => t.name);
+
+    res.json({
+      success: true,
+      tags: tagList
+    });
+
+  } catch (error) {
+    console.error("Get Tags Error:", error);
+    res.status(500).json({ message: error.message });
   }
 };

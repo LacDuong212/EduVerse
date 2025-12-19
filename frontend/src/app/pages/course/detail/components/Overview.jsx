@@ -9,9 +9,9 @@ import { Card, CardBody } from 'react-bootstrap';
 const Overview = () => {
   const { course, loading, error, refetch } = useCourseDetail();
 
-  useEffect(() => {
-    console.log("course in PageIntro:", { course, loading, error });
-  }, [course, loading, error]);
+  // useEffect(() => {
+  //   console.log("course in PageIntro:", { course, loading, error });
+  // }, [course, loading, error]);
 
   if (loading) {
     return <section className="bg-light py-0 py-sm-5">

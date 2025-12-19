@@ -1,4 +1,3 @@
-import instructor7 from '@/assets/images/instructor/07.jpg';
 import { Card, CardBody } from 'react-bootstrap';
 import { FaFacebookF, FaInstagram, FaRegStar, FaStar, FaStarHalfAlt, FaTwitter, FaYoutube } from 'react-icons/fa';
 import { FaLinkedinIn } from 'react-icons/fa6';
@@ -55,6 +54,11 @@ const InstructorAvatarCard = ({ avatar = "", averageRating = 0.0, socials = {} }
               <FaInstagram />
             </a>
           </li>}
+          {socials.linkedin && <li className="list-inline-item">
+            <a className="btn px-2 btn-sm bg-linkedin" href={normalizeUrl(socials.linkedin)} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+              <FaLinkedinIn className="fab fa-fw fa-linkedin-in" />
+            </a>
+          </li>}
           {socials.twitter && <li className="list-inline-item">
             <a className="btn px-2 btn-sm bg-twitter" href={normalizeUrl(socials.twitter)} target="_blank" rel="noopener noreferrer" aria-label="Twitter">
               <FaTwitter />
@@ -63,11 +67,6 @@ const InstructorAvatarCard = ({ avatar = "", averageRating = 0.0, socials = {} }
           {socials.youtube && <li className="list-inline-item">
             <a className="btn px-2 btn-sm bg-youtube" href={normalizeUrl(socials.youtube)} target="_blank" rel="noopener noreferrer" aria-label="YouTube">
               <FaYoutube />
-            </a>
-          </li>}
-          {socials.linkedin && <li className="list-inline-item">
-            <a className="btn px-2 btn-sm bg-linkedin" href={normalizeUrl(socials.linkedin)} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
-              <FaLinkedinIn className="fab fa-fw fa-linkedin-in" />
             </a>
           </li>}
         </ul>

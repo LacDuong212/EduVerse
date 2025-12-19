@@ -63,10 +63,8 @@ const NavbarTopbar = () => {
           {currentTime}
         </div>
 
-        {/* Notification & Profile */}
         <div className="d-flex align-items-center ms-auto">
           <ul className="navbar-nav flex-row align-items-center">
-            <NotificationDropdown />
             <ProfileDropdown className="ms-2 ms-md-3" />
           </ul>
         </div>

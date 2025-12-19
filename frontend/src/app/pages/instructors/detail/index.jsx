@@ -3,7 +3,7 @@ import EducationAndSkillsCard from "./components/EducationAndSkillsCard";
 import InstructorAvatarCard from "./components/InstructorAvatarCard";
 import InstructorCounters from "./components/InstructorCounters";
 import InstructorInfo from "./components/InstructorInfo";
-import useGuest from "@/app/useGuest";
+import useGuest from "@/hooks/useGuest";
 import { useParams } from "react-router-dom";
 import PageMetaData from "@/components/PageMetaData";
 

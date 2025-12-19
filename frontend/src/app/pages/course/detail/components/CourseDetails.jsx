@@ -1,3 +1,13 @@
+import courseImg18 from '@/assets/images/courses/4by3/18.jpg';
+import courseImg21 from '@/assets/images/courses/4by3/21.jpg';
+import GlightBox from '@/components/GlightBox';
+import { useVideoStream } from '@/hooks/useStreamUrl';
+import { formatCurrency } from '@/utils/currency';
+import Curriculum from './Curriculum';
+import Instructor from './Instructor';
+import Overview from './Overview';
+
+import { useState } from 'react';
 import {
   Button,
   Card,
@@ -5,10 +15,6 @@ import {
   CardHeader,
   Col,
   Container,
-  Dropdown,
-  DropdownItem,
-  DropdownMenu,
-  DropdownToggle,
   Nav,
   NavItem,
   NavLink,
@@ -17,15 +23,6 @@ import {
   TabContent,
   TabPane
 } from 'react-bootstrap';
-import Comment from './Comment';
-import Curriculum from './Curriculum';
-import Faqs from './Faqs';
-import Instructor from './Instructor';
-import Overview from './Overview';
-import Reviews from './Reviews';
-import GlightBox from '@/components/GlightBox';
-import { useVideoStream } from '@/hooks/useStreamUrl';
-import { formatCurrency } from '@/utils/currency';
 import {
   FaBookOpen,
   FaClock,
@@ -42,10 +39,8 @@ import {
   FaTwitterSquare,
   FaUserClock
 } from 'react-icons/fa';
-import courseImg18 from '@/assets/images/courses/4by3/18.jpg';
-import courseImg21 from '@/assets/images/courses/4by3/21.jpg';
-import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+
 
 const PricingCard = ({ course, owned, onShowCurriculum, onAddToCart, courseId }) => {
   const { streamUrl, loading: videoLoading, error: videoError } = useVideoStream(
@@ -155,7 +150,6 @@ const PricingCard = ({ course, owned, onShowCurriculum, onAddToCart, courseId })
   );
 };
 
-
 const RecentlyViewed = () => {
   return (
     <Card className="card-body shadow p-4 mb-4">
@@ -202,24 +196,19 @@ const RecentlyViewed = () => {
   );
 };
 
-const PopularTags = () => {
-  const tags = [
-    'blog',
-    'business',
-    'theme',
-    'bootstrap',
-    'data science',
-    'web development',
-    'tips',
-    'machine learning'
-  ];
+const Tags = ({ tags = [] }) => {
   return (
     <Card className="card-body shadow p-4">
-      <h4 className="mb-3">Popular Tags</h4>
+      <h4 className="mb-3">Tags</h4>
       <ul className="list-inline mb-0">
         {tags.map((tag, idx) => (
           <li className="list-inline-item" key={idx}>
-            <Button variant="outline-light" size="sm">
+            <Button 
+              as={Link}
+              to={`/courses?search=${encodeURIComponent(tag)}`}
+              variant="outline-light" 
+              size="sm"
+            >
               {tag}
             </Button>
           </li>
@@ -435,10 +424,10 @@ const CourseDetails = ({ course, owned, onAddToCart }) => {
                   </ul>
                 </Card>
               </Col>
-              {/* <Col md={6} lg={12}>
-                <RecentlyViewed />
-                <PopularTags />
-              </Col> */}
+              <Col md={6} lg={12}>
+                {/* <RecentlyViewed /> */}
+                <Tags tags={course?.tags || []} />
+              </Col>
             </Row>
           </Col>
         </Row>

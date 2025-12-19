@@ -1,6 +1,7 @@
-import FallbackLoading from '../FallbackLoading';
+import Preloader from '../preloader';
 import { LayoutProvider } from '@/context/useLayoutContext';
 import { NotificationProvider } from '@/context/useNotificationContext';
+import { SocketContextProvider } from '@/context/SocketContext';
 
 import Aos from 'aos';
 import { Suspense, useEffect, useState } from 'react';
@@ -80,7 +81,9 @@ const AppProvidersWrapper = ({ children }) => {
   return (
     <LayoutProvider>
       <NotificationProvider>
-        <Suspense fallback={<FallbackLoading />}>{children}</Suspense>
+        <SocketContextProvider>
+          <Suspense fallback={<Preloader />}>{children}</Suspense>
+        </SocketContextProvider>
       </NotificationProvider>
 
       <ToastContainer

@@ -179,6 +179,20 @@ export const approveInstructor = async (req, res) => {
 
     await userModel.findByIdAndUpdate(instructor.user, { role: 'instructor' });
 
+    try {
+      const userId = String(instructor.user?._id || instructor.user);
+
+      await axios.post('http://localhost:5000/api/internal/notify', {
+        userId: userId,
+        type: 'APPROVED',
+        message: 'Congratulations! Your instructor application has been approved. You can now create courses.'
+      });
+      console.log(`[AdminBE] Instructor Approved Noti sent to User: ${userId}`);
+
+    } catch (notifyError) {
+      console.error('[AdminBE] Failed to send notification:', notifyError.message);
+    }
+
     res.json({
       success: true,
       message: "Approved successfully",
@@ -198,6 +212,20 @@ export const rejectInstructor = async (req, res) => {
 
     if (!deletedRequest) {
       return res.status(404).json({ success: false, message: "Request not found" });
+    }
+
+    try {
+      const userId = String(deletedRequest.user?._id || deletedRequest.user);
+
+      await axios.post('http://localhost:5000/api/internal/notify', {
+        userId: userId,
+        type: 'REJECTED',
+        message: 'We are sorry, but your instructor application has been rejected. Please contact support for more details.'
+      });
+      console.log(`[AdminBE] Instructor Rejected Noti sent to User: ${userId}`);
+
+    } catch (notifyError) {
+      console.error('[AdminBE] Failed to send notification:', notifyError.message);
     }
 
     res.json({

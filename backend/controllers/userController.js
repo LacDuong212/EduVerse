@@ -187,3 +187,28 @@ export const changePassword = async (req, res) => {
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
+
+export const updateInterests = async (req, res) => {
+  try {
+    const { interests } = req.body;
+    
+    if (!Array.isArray(interests)) {
+      return res.status(400).json({ success: false, message: "Interests must be an array" });
+    }
+
+    const user = await userModel.findByIdAndUpdate(
+      req.userId, 
+      { interests: interests },
+      { new: true }
+    );
+
+    res.json({ 
+      success: true, 
+      message: "Interests updated successfully",
+      user 
+    });
+
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
