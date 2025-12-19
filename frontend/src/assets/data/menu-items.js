@@ -126,19 +126,19 @@ export const STUDENT_APP_MENU_ITEMS = [{
   url: '/courses'
 }];
 export const STUDENT_MENU_ITEMS = [{
+  key: 'dashboard',
+  label: 'Dashboard',
+  icon: BsUiChecksGrid,
+  url: '/student/dashboard',
+  parentKey: 'student'
+}, {
   key: 'profile',
   label: 'My Profile',
   icon: BsPerson,
   url: '/student/profile',
   parentKey: 'student'
 }, 
-// {
-//   key: 'dashboard',
-//   label: 'Dashboard',
-//   icon: BsUiChecksGrid,
-//   url: '/student/dashboard',
-//   parentKey: 'student'
-// }, 
+
 {
   key: 'courses',
   label: 'My Courses',
