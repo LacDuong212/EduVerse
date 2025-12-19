@@ -104,19 +104,6 @@ const SkillRadarChart = ({ radar, title = "Skill Radar (by Category)", height = 
       labels: displayLabels,
       datasets: [
         // ✅ System Average (vẽ trước -> nằm dưới)
-        {
-          label: "System Average",
-          data: systemAvgValues,
-
-          backgroundColor: "rgba(255, 0, 0, 0.66)", // xanh nhạt   
-          borderWidth: 0,
-          borderColor: "transparent",
-          pointRadius: 0,
-          pointHoverRadius: 0,
-          tension: 0.25,
-          order: 1,
-        },
-
         // ✅ My Skills (vẽ sau -> đè lên trên)
         {
           label: "My Skills",
@@ -134,6 +121,17 @@ const SkillRadarChart = ({ radar, title = "Skill Radar (by Category)", height = 
           pointRadius: 5,
           pointHoverRadius: 7,
 
+          tension: 0.25,
+          order: 1,
+        }, {
+          label: "System Average",
+          data: systemAvgValues,
+
+          backgroundColor: "rgba(255, 0, 0, 0.66)", // xanh nhạt   
+          borderWidth: 0,
+          borderColor: "transparent",
+          pointRadius: 0,
+          pointHoverRadius: 0,
           tension: 0.25,
           order: 2,
         },
@@ -243,9 +241,9 @@ const SkillRadarChart = ({ radar, title = "Skill Radar (by Category)", height = 
           {/* <div className="text-muted small">Thang điểm 0–100%</div> */}
         </div>
 
-        <span className="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">
+        {/* <span className="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">
           Avg: {avg}%
-        </span>
+        </span> */}
       </div>
 
       <div style={{ height }}>
