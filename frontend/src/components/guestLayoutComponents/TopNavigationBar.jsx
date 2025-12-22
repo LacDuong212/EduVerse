@@ -1,8 +1,8 @@
 
 import { GUEST_APP_MENU_ITEMS } from '@/assets/data/menu-items.js';
 import LogoBox from '@/components/LogoBox';
-import TopNavbar from '@/components/TopNavbar';
-import SimpleAppMenu from '@/components/TopNavbar/components/SimpleAppMenu';
+import TopNavbar from '@/components/TopNavBar';
+import SimpleAppMenu from '@/components/TopNavBar/components/SimpleAppMenu';
 import { useLayoutContext } from '@/context/useLayoutContext';
 import { Container } from 'react-bootstrap';
 import { useSelector } from 'react-redux';
