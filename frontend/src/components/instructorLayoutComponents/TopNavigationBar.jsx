@@ -1,10 +1,10 @@
 import { INSTRUCTOR_APP_MENU_ITEMS, INSTRUCTOR_ACCOUNT_DROPDOWN_ITEMS } from '@/assets/data/menu-items.js';
 import LogoBox from '../LogoBox';
-import TopNavbar from '../TopNavBar1';
-import NotificationDropdown from '../TopNavBar1/components/NotificationDropdown'
-import ProfileDropdown from '../TopNavBar1/components/ProfileDropdown';
-import SimpleAppMenu from '../TopNavBar1/components/SimpleAppMenu';
-import TopbarMenuToggler from '../TopNavBar1/components/TopbarMenuToggler';
+import TopNavbar from '../TopNavBar';
+import NotificationDropdown from '../TopNavBar/components/NotificationDropdown'
+import ProfileDropdown from '../TopNavBar/components/ProfileDropdown';
+import SimpleAppMenu from '../TopNavBar/components/SimpleAppMenu';
+import TopbarMenuToggler from '../TopNavBar/components/TopbarMenuToggler';
 import { useLayoutContext } from '@/context/useLayoutContext';
 import { Container, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
