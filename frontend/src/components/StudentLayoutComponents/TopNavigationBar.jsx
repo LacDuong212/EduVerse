@@ -1,10 +1,10 @@
 import { STUDENT_APP_MENU_ITEMS, STUDENT_ACCOUNT_DROPDOWN_ITEMS } from '@/assets/data/menu-items.js';
 import LogoBox from '@/components/LogoBox';
-import TopNavbar from '@/components/TopNavbar';
-import NotificationDropdown from '@/components/TopNavbar/components/NotificationDropdown'
-import ProfileDropdown from '@/components/TopNavbar/components/ProfileDropdown';
-import SimpleAppMenu from '@/components/TopNavbar/components/SimpleAppMenu';
-import TopbarMenuToggler from '@/components/TopNavbar/components/TopbarMenuToggler';
+import TopNavbar from '@/components/TopNavBar';
+import NotificationDropdown from '@/components/TopNavBar/components/NotificationDropdown'
+import ProfileDropdown from '@/components/TopNavBar/components/ProfileDropdown';
+import SimpleAppMenu from '@/components/TopNavBar/components/SimpleAppMenu';
+import TopbarMenuToggler from '@/components/TopNavBar/components/TopbarMenuToggler';
 import { useLayoutContext } from '@/context/useLayoutContext';
 
 import { Container } from 'react-bootstrap';
