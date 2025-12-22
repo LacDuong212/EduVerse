@@ -9,6 +9,7 @@ export default function(passport) {
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
         callbackURL: '/api/auth/google/callback',
+        proxy: true,
       },
       async (accessToken, refreshToken, profile, done) => {
         const email = profile.emails[0].value;
@@ -52,9 +53,12 @@ export default function(passport) {
     done(null, user.id);
   });
 
-  passport.deserializeUser((id, done) => {
-    User.findById(id, (err, user) => {
-      done(err, user);
-    });
+  passport.deserializeUser(async (id, done) => {
+    try {
+      const user = await userModel.findById(id);
+      done(null, user);
+    } catch (err) {
+      done(err, null);
+    }
   });
 }
