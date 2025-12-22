@@ -57,7 +57,7 @@ authRoute.get(
         maxAge: 7 * 24 * 60 * 60 * 1000
     });
 
-    res.redirect(`${process.env.CLIENT_URL}?token=${token}`);
+    res.redirect(process.env.CLIENT_URL);
   }
 );
 

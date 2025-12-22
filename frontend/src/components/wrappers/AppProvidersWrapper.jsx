@@ -28,23 +28,9 @@ const AppProvidersWrapper = ({ children }) => {
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        const params = new URLSearchParams(window.location.search);
-        const urlToken = params.get('token');
-        if (urlToken) {
-            localStorage.setItem('token', urlToken);
-            window.history.replaceState({}, document.title, window.location.pathname);
-        }
-
-        const token = localStorage.getItem('token');
-
         const response = await axios.get(
           `${backendUrl}/api/auth/is-auth`,
-          { 
-             withCredentials: true,
-             headers: {
-                Authorization: token ? `Bearer ${token}` : '' 
-             }
-          }
+          { withCredentials: true }
         );
 
         if (response.data.success) {
