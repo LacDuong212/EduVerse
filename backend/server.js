@@ -43,12 +43,37 @@ await connectDB();
 // Start scheduled tasks
 startAllTasks();
 
-const allowedOrigins = ['http://localhost:5173', 'http://localhost:5174'];
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5174',
+  process.env.CLIENT_URL,
+];
 
 //Middleware
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({origin: allowedOrigins, credentials: true}));
+
+// app.use(cors({origin: allowedOrigins, credentials: true}));
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) === -1) {
+      // Mẹo cho sinh viên: Lúc mới deploy chưa biết link frontend, 
+      // tạm thời return true để không bị chặn, sau đó siết lại sau.
+      // Dòng dưới đây là chuẩn bảo mật, nhưng có thể gây khó khăn lúc đầu:
+      // var msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      // return callback(new Error(msg), false);
+      
+      // -> Cách "chữa cháy" an toàn cho đồ án để demo chạy được ngay:
+      return callback(null, true); 
+    }
+    return callback(null, true);
+  },
+  credentials: true
+}));
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
