@@ -24,6 +24,9 @@ const CourseRow = ({
  const gotoLearning = () => {
   navigate(`/student/courses/${_id}`);
 };
+ const gotoCourseDetail = () => {
+  navigate(`/courses/${_id}`);
+};
 
   return (
     <tr>
@@ -38,7 +41,7 @@ const CourseRow = ({
               <span
                 className="text-decoration-none text-primary"
                 style={{ cursor: "pointer" }}
-                onClick={gotoLearning}
+                onClick={gotoCourseDetail}
               >
                 {name}
               </span>
