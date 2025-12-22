@@ -1,6 +1,6 @@
 import { INSTRUCTOR_APP_MENU_ITEMS, INSTRUCTOR_ACCOUNT_DROPDOWN_ITEMS } from '@/assets/data/menu-items.js';
 import LogoBox from '../LogoBox';
-import TopNavbar from '../TopNavBar/index';
+import TopNavbar from '../TopNavBar/index.jsx';
 import NotificationDropdown from '../TopNavBar/components/NotificationDropdown'
 import ProfileDropdown from '../TopNavBar/components/ProfileDropdown';
 import SimpleAppMenu from '../TopNavBar/components/SimpleAppMenu';
