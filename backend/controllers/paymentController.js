@@ -80,6 +80,15 @@ const createMomoPaymentRequest = (orderId, amount, orderInfo, requestId, extraDa
             }
         };
 
+        console.log("MOMO CONFIG", {
+            momo_partnerCode,
+            momo_accessKey,
+            momo_secretKey: momo_secretKey?.length,
+            momo_apiEndpoint,
+            momo_ipnUrl,
+            momo_redirectUrl
+        });
+
         const req = https.request(options, res => {
             let body = '';
             res.setEncoding('utf8');
@@ -482,20 +491,20 @@ export const handleMomoReturn = async (req, res) => { // 1. Thêm async
                         await order.save();
 
                         try {
-                          const counts = (order.courses || []).reduce((m, c) => {
-                            const id = c.course.toString();
-                            m[id] = (m[id] || 0) + 1;
-                            return m;
-                          }, {});
-                          const bulkOps = Object.entries(counts).map(([id, cnt]) => ({
-                            updateOne: {
-                              filter: { _id: new mongoose.Types.ObjectId(id) },
-                              update: { $inc: { studentsEnrolled: cnt } }
-                            }
-                          }));
-                          if (bulkOps.length) await Course.bulkWrite(bulkOps);
+                            const counts = (order.courses || []).reduce((m, c) => {
+                                const id = c.course.toString();
+                                m[id] = (m[id] || 0) + 1;
+                                return m;
+                            }, {});
+                            const bulkOps = Object.entries(counts).map(([id, cnt]) => ({
+                                updateOne: {
+                                    filter: { _id: new mongoose.Types.ObjectId(id) },
+                                    update: { $inc: { studentsEnrolled: cnt } }
+                                }
+                            }));
+                            if (bulkOps.length) await Course.bulkWrite(bulkOps);
                         } catch (err) {
-                          console.error('[MOMO Return] Failed to increment course enrollments:', err);
+                            console.error('[MOMO Return] Failed to increment course enrollments:', err);
                         }
 
                         console.log(`[MOMO Return] Cập nhật đơn hàng ${orderId} -> completed`);
