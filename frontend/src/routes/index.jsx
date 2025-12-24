@@ -69,6 +69,10 @@ export const publicRoutes = [{
   path: '/instructors/:id',
   name: 'Instructor Details',
   element: <InstructorDetailsPage />
+}, {
+  path: '/*',
+  name: 'Not Found',
+  element: <NotFoundPage />
 }];
 
 export const authRoutes = [{

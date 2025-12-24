@@ -30,7 +30,7 @@ export const generateStreamUrl = async (key) => {
     const command = new GetObjectCommand(params);
     const s3 = getS3Client();
 
-    const signedUrl = await getSignedUrl(s3, command, { expiresIn: 2*60*60 }); // expires in 2 hours
+    const signedUrl = await getSignedUrl(s3, command, { expiresIn: 3*60*60 }); // expires in 3 hours
 
     return signedUrl;
   } catch (error) {

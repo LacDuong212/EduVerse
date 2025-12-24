@@ -1,8 +1,8 @@
 import { useState } from "react";
 import PageMetaData from '@/components/PageMetaData';
 import { Col, Row } from 'react-bootstrap';
-import { FaChevronLeft, FaFacebookF, FaGoogle } from "react-icons/fa";
-import { Link, useNavigate } from "react-router-dom";
+import { FaChevronLeft } from "react-icons/fa";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import AuthLayout from "@/app/auth/components/AuthLayout";
 import SignUpForm from "@/app/auth/sign-up/components/SignUpForm";
 import EmailVerifyModal from "@/app/auth/email-verify/EmailVerifyModal";
@@ -10,6 +10,7 @@ import EmailVerifyModal from "@/app/auth/email-verify/EmailVerifyModal";
 export default function SignUpPage() {
   const [showVerifyModal, setShowVerifyModal] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState("");
+  const location = useLocation();
   const navigate = useNavigate();
 
   return <>
@@ -37,7 +38,7 @@ export default function SignUpPage() {
             />
             <div className="mt-4 text-center">
               <span>
-                Already have an account?<Link to="/auth/sign-in"> Sign in here!</Link>
+                Already have an account?<Link to={`/auth/sign-in${location.search}`}> Sign in here!</Link>
               </span>
             </div>
           </Col>

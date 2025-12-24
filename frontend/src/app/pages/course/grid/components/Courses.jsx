@@ -15,7 +15,7 @@ const Courses = () => {
   const { isTrue, toggle } = useToggle();
   const { width } = useViewPort();
 
-  const [ searchParams, setSearchParams ] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [isInitialized, setIsInitialized] = useState(false);
 
   const {
@@ -72,12 +72,12 @@ const Courses = () => {
     const paramLanguage = searchParams.get("language") || "";
 
     // batch update the state (if exists in URL)
-    if(paramSearch) setSearch(paramSearch);
-    if(paramCategory) setCategory(paramCategory);
-    if(paramSort) setSort(paramSort);
-    if(paramLevel) setLevel(paramLevel === 'All' ? '' : paramLevel);
-    if(paramPrice) setPrice(paramPrice);
-    if(paramLanguage) setLanguage(paramLanguage);
+    if (paramSearch) setSearch(paramSearch);
+    if (paramCategory) setCategory(paramCategory);
+    if (paramSort) setSort(paramSort);
+    if (paramLevel) setLevel(paramLevel === 'All' ? '' : paramLevel);
+    if (paramPrice) setPrice(paramPrice);
+    if (paramLanguage) setLanguage(paramLanguage);
 
     // if any filter exists, reset to page 1
     setPage(1);
@@ -125,7 +125,13 @@ const Courses = () => {
           <Col lg={8} xl={9}>
             <Row className="mb-4 align-items-center">
               <Col xl={6}>
-                <form className="border rounded p-2">
+                <form
+                  className="border rounded p-2"
+                  onSubmit={(e) => {
+                    e.preventDefault(); // blocks page reload
+                    onSearchClick(e);   // triggers search logic
+                  }}
+                >
                   <div className="input-group input-borderless">
                     <input
                       className="form-control me-1"

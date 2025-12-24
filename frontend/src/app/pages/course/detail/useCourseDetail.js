@@ -131,6 +131,11 @@ export default function useCourseDetail() {
       return;
     }
 
+    if (userData?.role.toLowerCase() !== "student" ) {
+      toast.warning("You cannot perform this action");
+      return;
+    }
+
     if (owned) {
       toast.info("You already own this course");
       return;

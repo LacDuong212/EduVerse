@@ -93,7 +93,7 @@ export const getHomeCourses = async (req, res) => {
   }
 };
 
-// GET /api/courses/recommendations (Private - CẦN Token)
+// GET /api/courses/recommendations
 export const getRecommendedCourses = async (req, res) => {
   try {
     const userId = req.userId;

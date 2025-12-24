@@ -32,12 +32,14 @@ authRoute.post('/forgot-password', validate(forgotPasswordSchema), forgotPasswor
 authRoute.post('/reset-password', validate(resetPasswordSchema), resetPassword);
 authRoute.post('/verify-email', validate(verifyEmailSchema), verifyEmail);
 
-authRoute.get(
-  '/google',
+authRoute.get('/google', (req, res, next) => {
+  const redirectTo = req.query.redirectTo || '/';
+
   passport.authenticate('google', {
     scope: ['profile', 'email'],
-  })
-);
+    state: redirectTo,
+  })(req, res, next);
+});
 
 authRoute.get(
   '/google/callback',
@@ -46,18 +48,22 @@ authRoute.get(
     session: false,
   }),
   (req, res) => {
-    const token = jwt.sign({ id: req.user._id }, process.env.JWT_SECRET, { 
-        expiresIn: '7d' 
-    });
+    const token = jwt.sign(
+      { id: req.user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
 
     res.cookie('token', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-        maxAge: 7 * 24 * 60 * 60 * 1000
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.redirect('http://localhost:5173/'); 
+    const redirectTo = req.query.state || '/';
+
+    res.redirect(`http://localhost:5173${redirectTo}`);
   }
 );
 

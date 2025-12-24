@@ -1,4 +1,3 @@
-import ChatbotWidget from '@/components/ChatbotWidget';
 import PageMetaData from '@/components/PageMetaData';
 import ActionBox from './components/ActionBox';
 import Counter from './components/Counter';

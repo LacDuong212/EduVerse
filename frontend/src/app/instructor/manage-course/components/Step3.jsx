@@ -2,7 +2,7 @@ import AddSection from './AddSection';
 import AddLecture from './AddLecture';
 import axios from 'axios';
 import { useState, useEffect, useCallback } from 'react';
-import { Accordion, AccordionBody, AccordionHeader, AccordionItem, Button, Row, Badge, Spinner } from 'react-bootstrap';
+import { Accordion, AccordionBody, AccordionHeader, AccordionItem, Button, OverlayTrigger, Row, Spinner, Tooltip } from 'react-bootstrap';
 import { FaEdit, FaTimes, FaPlus, FaRobot, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
 import { FaSection } from 'react-icons/fa6';
 import { toast } from 'react-toastify';
@@ -276,17 +276,16 @@ const Step3 = ({ stepperInstance, draftData, onSave }) => {
     }
   };
 
+  // AI
   const renderAIButton = (sectionIdx, lectureIdx, lecture) => {
-    // Chỉ hiện nếu Course đã có trong DB (đã save draft lần đầu) và Lecture đã có ID
     if (!draftData?._id || !lecture._id) return null;
 
     const status = lecture.aiData?.status || 'None';
 
     if (status === 'Processing') {
       return (
-        <Button variant="info-soft" size="sm" className="btn-round me-2" disabled>
-          <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-1"/>
-          Processing...
+        <Button variant="purple-soft" size="sm" className="btn-round me-2 d-flex">
+          <Spinner animation="border" size="sm" role="status" aria-hidden="true" className="m-auto" />
         </Button>
       );
     }
@@ -294,36 +293,51 @@ const Step3 = ({ stepperInstance, draftData, onSave }) => {
     if (status === 'Completed') {
       return (
         <div className="d-flex align-items-center me-2">
-            <span className="text-success me-2 fw-bold" title="AI Generated">
-                <FaCheckCircle /> Done
-            </span>
-             {/* Nút regenerate nếu muốn tạo lại */}
-            <Button 
-                variant="purple-soft" 
-                size="sm" 
-                className="btn-round" 
+          <OverlayTrigger
+            placement="top"
+            overlay={<Tooltip>Quiz Generated</Tooltip>}
+          >
+            <div className="position-relative">
+              <Button
+                variant="purple-soft"
+                size="sm"
+                className="btn-round"
                 onClick={() => handleGenerateAI(sectionIdx, lectureIdx)}
-                title="Regenerate AI Content"
-            >
+              >
                 <FaRobot />
-            </Button>
+              </Button>
+              <FaCheckCircle
+                className="position-absolute top-0 start-100 translate-middle text-success bg-white rounded-circle"
+                fontSize={16}
+              />
+            </div>
+          </OverlayTrigger>
         </div>
       );
     }
-    
-    // Status = None hoặc Failed
+
     return (
       <div className="d-flex align-items-center me-2">
-         {status === 'Failed' && <span className="text-danger me-2"><FaExclamationCircle /> Failed</span>}
-         <Button
-            variant={status === 'Failed' ? "danger-soft" : "purple-soft"}
-            size="sm"
-            className="btn-round"
-            onClick={() => handleGenerateAI(sectionIdx, lectureIdx)}
-            title="Generate AI Summary & Quizzes"
+        <OverlayTrigger
+          placement="top"
+          overlay={<Tooltip>{status === "Failed" ? "Generation Failed" : "Generate Quiz"}</Tooltip>}
+        >
+          <div className="position-relative">
+            <Button
+              variant={'purple-soft'}
+              size="sm"
+              className="btn-round position-relative"
+              onClick={() => handleGenerateAI(sectionIdx, lectureIdx)}
             >
-            <FaRobot className="me-1"/> {status === 'Failed' ? 'Retry AI' : 'Gen AI'}
-        </Button>
+              <FaRobot />
+            </Button>
+            {(status === 'Failed') && <FaExclamationCircle
+              className="position-absolute top-0 start-100 translate-middle text-danger rounded-circle d-flex 
+            align-items-center justify-content-center"
+              fontSize={16}
+            />}
+          </div>
+        </OverlayTrigger>
       </div>
     );
   };
@@ -406,9 +420,9 @@ const Step3 = ({ stepperInstance, draftData, onSave }) => {
                         </span>
                       </div>
 
-                      <div className="d-flex align-items-center ms-3 flex-shrink-0">
+                      <div className="d-flex align-items-center">
                         {renderAIButton(i, idx, lecture)}
-                        
+
                         <Button
                           variant="primary-soft"
                           size="sm"

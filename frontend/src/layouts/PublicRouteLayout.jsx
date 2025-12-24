@@ -1,40 +1,28 @@
 import { useSelector } from "react-redux";
 import { Outlet } from "react-router-dom";
+
 import GuestLayout from "./GuestLayout";
-import StudentLayout from "./StudentLayout";
 import InstructorLayout from "./InstructorLayout";
+import StudentLayout from "./StudentLayout";
 
 export default function PublicRouteLayout() {
   const { isLoggedIn, userData } = useSelector(state => state.auth);
 
-  if (!isLoggedIn) {
-    return (
-      <GuestLayout>
-        <Outlet />
-      </GuestLayout>
-    );
+  // determine layout
+  let LayoutComponent = GuestLayout; // default to Guest
+
+  if (isLoggedIn) {
+    if (userData?.role === "instructor") {
+      LayoutComponent = InstructorLayout;
+    } else if (userData?.role === "student") {
+      LayoutComponent = StudentLayout;
+    }
   }
 
-  if (userData?.role === "instructor") {
-    return (
-      <InstructorLayout>
-        <Outlet />
-      </InstructorLayout>
-    );
-  }
-
-  if (userData?.role === "student") {
-    return (
-      <StudentLayout>
-        <Outlet />
-      </StudentLayout>
-    );
-  }
-
-  // fallback
+  // render layout
   return (
-    <GuestLayout>
+    <LayoutComponent>
       <Outlet />
-    </GuestLayout>
+    </LayoutComponent>
   );
 }

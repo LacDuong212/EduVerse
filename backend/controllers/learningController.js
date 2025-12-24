@@ -1,4 +1,3 @@
-// controllers/courseProgressController.js
 import Course from "../models/courseModel.js";
 import CourseProgress from "../models/courseProgressModel.js";
 import LearningStreak from "../models/learningStreakModel.js"; 
@@ -191,3 +190,22 @@ export const updateLectureProgress = async (req, res) => {
       .json({ success: false, message: "Server error" });
   }
 };
+
+export async function getLatestLearningProgress(userId) {
+  const progress = await CourseProgress.findOne({ userId })
+    .sort({ lastActivityAt: -1 })
+    .populate({
+      path: "courseId",
+      select: "title curriculum _id",
+    });
+
+  if (!progress) return null;
+
+  return {
+    courseId: progress.courseId._id,
+    courseTitle: progress.courseId.title,
+    curriculum: progress.courseId.curriculum,
+    lastLectureId: progress.lastLectureId,
+    completedCount: progress.completedLecturesCount,
+  };
+}

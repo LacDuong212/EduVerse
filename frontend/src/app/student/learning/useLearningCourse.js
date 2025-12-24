@@ -5,7 +5,6 @@ import axios from "axios";
 import { toast } from "react-toastify";
 
 export default function useLearningCourseDetail() {
-  // 🔥 Lấy đúng tên param theo route: /student/courses/:courseId
   const { courseId } = useParams();
   const navigate = useNavigate();
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -14,33 +13,18 @@ export default function useLearningCourseDetail() {
   const [loading, setLoading] = useState(false);
 
   const fetchCourse = useCallback(async () => {
-    console.log("====================================");
-    console.log("[useLearningCourseDetail] START FETCH");
-    console.log("[useLearningCourseDetail] courseId:", courseId);
-    console.log("[useLearningCourseDetail] backendUrl:", backendUrl);
 
-    if (!courseId || !backendUrl) {
-      console.warn("[useLearningCourseDetail] SKIP: Missing param", {
-        courseId,
-        backendUrl,
-      });
-      return;
-    }
+    if (!courseId || !backendUrl) return;
 
     setLoading(true);
     try {
       const url = `${backendUrl}/api/student/my-courses/${courseId}`;
-      console.log("[useLearningCourseDetail] GET:", url);
 
       const { data } = await axios.get(url, { withCredentials: true });
 
-      console.log("[useLearningCourseDetail] RESPONSE:", data);
-
       if (data.success) {
-        console.log("[useLearningCourseDetail] SET COURSE:", data.course);
         setCourse(data.course);
       } else {
-        console.error("[useLearningCourseDetail] Backend returned success=false");
         toast.error(data.message || "Cannot load course");
       }
     } catch (err) {
@@ -57,8 +41,6 @@ export default function useLearningCourseDetail() {
       }
     } finally {
       setLoading(false);
-      console.log("[useLearningCourseDetail] END FETCH");
-      console.log("====================================");
     }
   }, [courseId, backendUrl, navigate]);
 

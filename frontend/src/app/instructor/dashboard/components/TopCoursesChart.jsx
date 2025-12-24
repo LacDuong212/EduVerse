@@ -1,4 +1,5 @@
 import { currency } from '@/context/constants';
+import { formatCurrency } from '@/utils/currency';
 import ReactApexChart from 'react-apexcharts';
 import { Button, Card, CardBody, CardHeader, Col, Row } from 'react-bootstrap';
 import { FaCircle } from 'react-icons/fa';
@@ -26,9 +27,7 @@ const TopCoursesChart = ({ col = 6, topCoursesData = [] }) => {
     ),
     tooltip: {
       theme: 'dark',
-      y: {
-        formatter: (val) => `${val}${currency}`
-      }
+      y: { formatter: (val) => formatCurrency(val) }
     },
     responsive: [{
       breakpoint: 480,

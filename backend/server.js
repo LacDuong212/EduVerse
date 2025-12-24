@@ -11,7 +11,7 @@ import connectDB from './configs/mongodb.js';
 import authRoute from './routes/authRoutes.js';
 import cartRoute from './routes/cartRoutes.js';
 import categoryRoute from './routes/categoryRoutes.js';
-import chatbotRoute from './routes/chatbotRoutes.js';
+import chatbotRoute from './modules/chatbot/chatbotRoutes.js';
 import courseRoute from './routes/courseRoutes.js';
 import instructorRoute from './routes/instructorRoutes.js';
 import orderRoute from './routes/orderRoutes.js';
