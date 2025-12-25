@@ -19,7 +19,11 @@ export default function ProtectedRoute({ allowedRole }) {
   }
 
   if (allowedRole) {
-    if (allowedRole !== userData?.role) return <NotFoundPage />;
+    if (allowedRole !== userData?.role) return (
+      <Outlet>
+        <NotFoundPage />
+      </Outlet>
+    );
   }
 
   return <Outlet />;

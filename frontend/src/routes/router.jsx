@@ -7,6 +7,7 @@ import StudentLayout from "../layouts/StudentLayout";
 
 import { publicRoutes, authRoutes, studentRoutes, instructorRoutes } from "./index";
 
+import { useSelector } from "react-redux";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 
 
@@ -16,6 +17,7 @@ const HIDE_CHATBOT = [
 ];
 
 const AppRouter = props => {
+  const { isLoggedIn, userData } = useSelector(state => state.auth);
   const location = useLocation();
 
   const shouldHideChat = HIDE_CHATBOT.some(path => 
@@ -32,8 +34,7 @@ const AppRouter = props => {
         <Route path="/" element={<Navigate to="/home" replace />} />
 
         {/* INSTRUCTOR ROUTES */}
-        <Route element={<ProtectedRoute allowedRole={"instructor"} />}>
-          {(instructorRoutes || []).map((route, idx) => (
+        {userData?.role.toLowerCase() === "instructor" && (instructorRoutes || []).map((route, idx) => (
             <Route
               key={idx + route.name}
               path={route.path}
@@ -43,12 +44,10 @@ const AppRouter = props => {
                 </InstructorLayout>
               }
             />
-          ))}
-        </Route>
+        ))}
 
         {/* STUDENT ROUTES */}
-        <Route element={<ProtectedRoute allowedRole={"student"} />}>
-          {(studentRoutes || []).map((route, idx) => (
+        {userData?.role.toLowerCase() === "student" && (studentRoutes || []).map((route, idx) => (
             <Route
               key={idx + route.name}
               path={route.path}
@@ -58,8 +57,7 @@ const AppRouter = props => {
                 </StudentLayout>
               }
             />
-          ))}
-        </Route>
+        ))}
 
         {/* AUTH ROUTES */}
         {(authRoutes || []).map((route, idx) =>

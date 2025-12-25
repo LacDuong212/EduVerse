@@ -213,7 +213,7 @@ const Step2 = ({ stepperInstance, draftData, onSave }) => {
     let currentImageData = courseImageTab === 'url' ? courseImageURL : courseImageFile;
     if (!currentImageData) {
       setError('Please provide a course image by uploading or entering a URL.');
-      toast.error("Please fix the errors on the page");
+      toast.error("Please recheck course's image input.");
       return;
     }
 
@@ -226,7 +226,7 @@ const Step2 = ({ stepperInstance, draftData, onSave }) => {
 
       if (!validS3 && !validUrl) {
         setError('Invalid Video Source. Must be a valid URL (http/https) or an uploaded file (starting with "videos/..").');
-        toast.error("Please fix the errors on the page");
+        toast.error("Please recheck preview video input.");
         return;
       }
     }

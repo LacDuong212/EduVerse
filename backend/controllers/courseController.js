@@ -43,6 +43,122 @@ const isObjectId = (value) =>
   mongoose.Types.ObjectId.isValid(value) &&
   String(new mongoose.Types.ObjectId(value)) === value;
 
+// helper: course data validation
+export const validateCourse = (course) => {
+  // required fields
+  const {
+    title,
+    category,
+    level,
+    language,
+    price,
+    enableDiscount,
+    discountPrice,  // optional when enableDiscount = false
+    image,
+    curriculum
+  } = course;
+
+  if (!title || !title.trim()) {
+    return { success: false, message: 'Title is required.' };
+  }
+
+  if (!category) {
+    return { success: false, message: 'Category is required.' };
+  }
+
+  if (!level || !level.trim()) {
+    return { success: false, message: 'Level is required.' };
+  }
+
+  if (!language || !language.trim()) {
+    return { success: false, message: 'Language is required.' };
+  }
+
+  if (price == null || price < 0) {
+    return { success: false, message: 'A valid price is required.' };
+  }
+
+  if (enableDiscount) {
+    if (discountPrice == null || discountPrice < 0) {
+      return { success: false, message: 'Discount price is required when discount is enabled.' };
+    }
+
+    if (discountPrice >= price) {
+      return { success: false, message: 'Discount price must be less than the original price.' };
+    }
+  }
+
+  if (!image || !image.trim()) {
+    return { success: false, message: 'Course image is required.' };
+  }
+
+  if (!Array.isArray(curriculum) || curriculum.length === 0) {
+    return { success: false, message: 'Curriculum cannot be empty.' };
+  }
+
+  // #TODO: validation (string, number, etc.) for other fields as needed
+
+  return { success: true };
+};
+
+// helper: convert duration
+export const convertDuration = (
+  value,
+  fromUnit,
+  toUnit,
+  { precision = 2 } = {}
+) => {
+  const UNIT_IN_SECONDS = {
+    second: 1,
+    minute: 60,
+    hour: 3600,
+    day: 86400,
+  };
+
+  const num = Number(value);
+
+  if (!Number.isFinite(num)) {
+    return { error: "Value must be a number." };
+  }
+
+  if (num <= 0) {
+    return { error: "Value must be a positive number." };
+  }
+
+  if (!UNIT_IN_SECONDS[fromUnit]) {
+    return { error: `Invalid fromUnit: ${fromUnit}` };
+  }
+
+  if (!UNIT_IN_SECONDS[toUnit]) {
+    return { error: `Invalid toUnit: ${toUnit}` };
+  }
+
+  const seconds = num * UNIT_IN_SECONDS[fromUnit];
+  const result = seconds / UNIT_IN_SECONDS[toUnit];
+
+  const factor = 10 ** precision;
+  return {
+    value: Math.round(result * factor) / factor,
+    unit: toUnit,
+  };
+};
+
+// helper: calculate total duration
+export const calculateTotalDuration = (curriculum = []) => {
+  if (!Array.isArray(curriculum)) return 0;
+
+  return curriculum.reduce((total, section) => {
+    if (!Array.isArray(section.lectures)) return total;
+
+    const sectionTotal = section.lectures.reduce((sum, lecture) => {
+      const d = Number(lecture?.duration);
+      return Number.isFinite(d) && d > 0 ? sum + d : sum;
+    }, 0);
+
+    return total + sectionTotal;
+  }, 0);
+};
+
 
 export const getHomeCourses = async (req, res) => {
   try {
@@ -549,15 +665,16 @@ export const createCourse = async (req, res) => {
       return res.status(400).json(validation);
     }
 
-    // #TODO: parse in FE not here, calculate duration base off lectures
-    if (req.body.duration !== null) {
-      const duration = parseDurationToHours(req.body.duration, req.body.durationUnit);
+    if (req.body.duration) {
+      const duration = convertDuration(req.body.duration, req.body.durationUnit, 'second');
       if (duration.error) {
         return res.status(400).json({ success: false, message: duration.error });
       }
 
-      req.body.duration = duration.hours;
-      req.body.durationUnit = 'hour';
+      req.body.duration = duration.value;
+      req.body.durationUnit = duration.unit;
+    } else {
+      req.body.duration = calculateTotalDuration(req.body.curriculum);
     }
 
     const newCourse = new Course({
@@ -575,7 +692,7 @@ export const createCourse = async (req, res) => {
         total: 0
       },
       // status: "Pending",
-      isPrivate: req.body.isPrivate || true,  // = !isPublished
+      isPrivate: req.body.isPrivate === null ? true : req.body.isPrivate,  // = !isPublished
       isDeleted: false,
     });
 
@@ -647,21 +764,22 @@ export const updateCourse = async (req, res) => {
       return res.status(400).json(validation);
     }
 
-    // #TODO: parse in FE not here
-    if (req.body.duration !== null) {
-      const duration = parseDurationToHours(req.body.duration, req.body.durationUnit);
+    if (req.body.duration) {
+      const duration = convertDuration(req.body.duration, req.body.durationUnit, 'second');
       if (duration.error) {
         return res.status(400).json({ success: false, message: duration.error });
       }
 
-      req.body.duration = duration.hours;
-      req.body.durationUnit = 'hour';
+      req.body.duration = duration.value;
+      req.body.durationUnit = duration.unit;
+    } else {
+      req.body.duration = calculateTotalDuration(req.body.curriculum);
     }
 
     const oldKeys = getAllVideoKeys(course);  // snapshot old videos
 
     Object.assign(course, req.body);  // apply update
-    // course.status = "Pending";  // update status
+    // course.status = "Pending";     // update status
 
     const newKeys = getAllVideoKeys(course);  // get new videos
 
@@ -709,101 +827,6 @@ export const updateCourse = async (req, res) => {
     });
   }
 };
-
-// course validation helper
-export const validateCourse = (course) => {
-  // required fields
-  const {
-    title,
-    category,
-    level,
-    language,
-    price,
-    enableDiscount,
-    discountPrice,  // optional when enableDiscount = false
-    image,
-    curriculum
-  } = course;
-
-  if (!title || !title.trim()) {
-    return { success: false, message: 'Title is required.' };
-  }
-
-  if (!category) {
-    return { success: false, message: 'Category is required.' };
-  }
-
-  if (!level || !level.trim()) {
-    return { success: false, message: 'Level is required.' };
-  }
-
-  if (!language || !language.trim()) {
-    return { success: false, message: 'Language is required.' };
-  }
-
-  if (price == null || price < 0) {
-    return { success: false, message: 'A valid price is required.' };
-  }
-
-  if (enableDiscount) {
-    if (discountPrice == null || discountPrice < 0) {
-      return { success: false, message: 'Discount price is required when discount is enabled.' };
-    }
-
-    if (discountPrice >= price) {
-      return { success: false, message: 'Discount price must be less than the original price.' };
-    }
-  }
-
-  if (!image || !image.trim()) {
-    return { success: false, message: 'Course image is required.' };
-  }
-
-  if (!Array.isArray(curriculum) || curriculum.length === 0) {
-    return { success: false, message: 'Curriculum cannot be empty.' };
-  }
-
-  // #TODO: validation (string, number, etc.) for other fields as needed
-
-  return { success: true };
-};
-
-const parseDurationToHours = (duration, durationUnit) => {
-  if (isNaN(duration)) {
-    return { error: 'Duration must be a number.' };
-  }
-
-  if (!durationUnit || !['hour', 'minute', 'second', 'day'].includes(durationUnit)) {
-    return { error: 'Duration unit must be one of: hour, minute, second, day.' };
-  }
-
-  const durationNum = Number(duration);
-
-  if (durationNum <= 0) {
-    return { error: 'Duration must be a positive number.' };
-  }
-
-  let hours;
-  switch (durationUnit) {
-    case 'hour':
-      hours = durationNum;
-      break;
-    case 'minute':
-      hours = durationNum / 60;
-      break;
-    case 'second':
-      hours = durationNum / 3600;
-      break;
-    case 'day':
-      hours = durationNum * 24;
-      break;
-    default:
-      return { error: 'Invalid duration unit.' };
-  }
-
-  // round to 2 decimals
-  return { hours: Math.round(hours * 100) / 100 };
-}
 
 // PATCH /api/courses/:id?setPrivacy=
 export const setCoursePrivacy = async (req, res) => {

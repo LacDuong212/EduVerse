@@ -9,6 +9,35 @@ import { toast } from 'react-toastify';
 import { getAllCategories } from '@/helpers/data';
 
 
+// react-quill settings ---
+const QUILL_MODULES = {
+  toolbar: [
+    // header (1-6) + normal text (false)
+    [{ "header": [1, 2, 3, 4, 5, 6, false] }],
+    // font styles
+    ["bold", "italic", "underline", "strike"],
+    // lists & indents
+    [{ "list": "ordered" }, { "list": "bullet" }],
+    [{ "indent": "-1" }, { "indent": "+1" }],
+    // text alignment
+    [{ "align": [] }],
+    // links
+    ["link"],
+    // color pickers
+    [{ "color": [] }, { "background": [] }],
+    // clean formatting
+    ["clean"]
+  ],
+};
+// define supported formats (good for security/cleanup)
+const QUILL_FORMATS = [
+  "header",
+  "bold", "italic", "underline", "strike",
+  "list", "indent",
+  "link",
+  "align", "color", "background",
+];
+
 const Step1 = ({ stepperInstance, draftData, onSave }) => {
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState({});
@@ -183,7 +212,7 @@ const Step1 = ({ stepperInstance, draftData, onSave }) => {
       // inform progress saved
       toast.success('Step 1 saved!');
     } else {
-      toast.error('Please fix the errors on the page');
+      toast.error('Please check all error fields in step 1.');
     }
 
     setSaving(false);
@@ -401,6 +430,8 @@ const Step1 = ({ stepperInstance, draftData, onSave }) => {
               theme="snow"
               style={{ height: 400 }}
               value={formData.description}
+              modules={QUILL_MODULES}
+              formats={QUILL_FORMATS}
               onChange={(val) =>
                 handleCustomChange('description', val)
               }

@@ -13,6 +13,20 @@ import { toast } from "react-toastify";
 // constants ---
 const MAX_EDUCATION_LENGTH = 5;
 const MAX_SKILLS_LENGTH = 6;
+const MAX_INPUT_LENGTH = {
+  name: 48,
+  occupation: 48,
+  phonenumber: 18,
+  address: 128,
+  facebook: 128,
+  instagram: 128,
+  linkedin: 128,
+  youtube: 128,
+  website: 128,
+  fieldOfStudy: 96,
+  institution: 56,
+  skillName: 48,
+};
 
 // react-quill settings ---
 const QUILL_MODULES = {
@@ -154,7 +168,7 @@ const MyProfile = () => {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      toast.error("Please fix the errors in the form.");
+      toast.error("Please recheck all the fields in the form for error.");
       return;
     }
 
@@ -261,6 +275,7 @@ const MyProfile = () => {
                     <input
                       type="text"
                       name="name"
+                      maxLength={MAX_INPUT_LENGTH.name}
                       className={`form-control ${errors.name ? "is-invalid rounded" : ""}`}
                       defaultValue={instructor?.name || ""}
                     />
@@ -274,6 +289,7 @@ const MyProfile = () => {
                     <input
                       type="text"
                       name="occupation"
+                      maxLength={MAX_INPUT_LENGTH.occupation}
                       className={`form-control ${errors.occupation ? "is-invalid rounded" : ""}`}
                       defaultValue={instructor?.occupation || ""}
                     />
@@ -304,7 +320,8 @@ const MyProfile = () => {
                   <div className="input-group">
                     <input 
                       type="text" 
-                      name="phonenumber" 
+                      name="phonenumber"
+                      maxLength={MAX_INPUT_LENGTH.phonenumber}
                       className={`form-control ${errors.phonenumber ? "is-invalid rounded" : ""}`} 
                       defaultValue={instructor?.phonenumber || ''} 
                     />
@@ -318,7 +335,7 @@ const MyProfile = () => {
             <Col xs={12}>
               <label className="form-label mb-0">Address</label>
               <div className="input-group">
-                <input type="text" name="address" className="form-control" defaultValue={instructor?.address || ""} />
+                <input type="text" name="address" maxLength={96} className="form-control" defaultValue={instructor?.address || ""} />
               </div>
             </Col>
           </Row>
@@ -349,28 +366,28 @@ const MyProfile = () => {
                   <FaFacebook className="fab fa-facebook text-facebook mb-1 me-2 fs-5" />
                   Facebook profile URL
                 </label>
-                <input className="form-control" type="text" name="facebook" defaultValue={instructor?.socials?.facebook} placeholder="facebook.com/your_username" />
+                <input className="form-control" maxLength={MAX_INPUT_LENGTH.facebook} type="text" name="facebook" defaultValue={instructor?.socials?.facebook} placeholder="facebook.com/your_username" />
               </div>
               <div className="mb-3">
                 <label className="form-label d-flex align-items-center mb-0">
                   <FaInstagram className="fab fa-instagram text-danger mb-1 me-2 fs-5" />
                   Instagram profile URL
                 </label>
-                <input className="form-control" type="text" name="instagram" defaultValue={instructor?.socials?.instagram} placeholder="instagram.com/your_username" />
+                <input className="form-control" maxLength={MAX_INPUT_LENGTH.instagram} type="text" name="instagram" defaultValue={instructor?.socials?.instagram} placeholder="instagram.com/your_username" />
               </div>
               <div className="mb-3">
                 <label className="form-label d-flex align-items-center mb-0">
                   <FaLinkedin className="fa fa-linkedin text-linkedin mb-1 me-2 fs-5" />
                   Linkedin profile URL
                 </label>
-                <input className="form-control" type="text" name="linkedin" defaultValue={instructor?.socials?.linkedin} placeholder="linkedin.com/in/your_username" />
+                <input className="form-control" maxLength={MAX_INPUT_LENGTH.linkedin} type="text" name="linkedin" defaultValue={instructor?.socials?.linkedin} placeholder="linkedin.com/in/your_username" />
               </div>
               <div className="">
                 <label className="form-label d-flex align-items-center mb-0">
                   <FaYoutube className="fab fa-youtube text-youtube mb-1 me-2 fs-5" />
                   YouTube channel URL
                 </label>
-                <input className="form-control" type="text" name="youtube" defaultValue={instructor?.socials?.youtube} placeholder="youtube.com/@your_channel" />
+                <input className="form-control" maxLength={MAX_INPUT_LENGTH.youtube} type="text" name="youtube" defaultValue={instructor?.socials?.youtube} placeholder="youtube.com/@your_channel" />
               </div>
             </Col>
 
@@ -382,7 +399,7 @@ const MyProfile = () => {
                   <FaGlobe className="text-success mb-1 me-2 fs-5" />
                   Website URL
                 </label>
-                <input className="form-control" type="text" name="website" defaultValue={instructor?.website} placeholder="https://www.example.com" />
+                <input className="form-control" maxLength={MAX_INPUT_LENGTH.website} type="text" name="website" defaultValue={instructor?.website} placeholder="https://www.example.com" />
               </div>
             </Col>
           </Row>
@@ -399,6 +416,7 @@ const MyProfile = () => {
                     placeholder="Bachelor in..."
                     style={{ flexBasis: "30%" }}
                     value={edu.fieldOfStudy}
+                    maxLength={MAX_INPUT_LENGTH.fieldOfStudy}
                     onChange={(e) => handleEducationChange(index, "fieldOfStudy", e.target.value)}
                   />
                   <span className="input-group-text bg-light">at</span>
@@ -407,6 +425,7 @@ const MyProfile = () => {
                     className={`form-control ${(edu.institution === "" && educationList.length > 0) ? "border-danger" : ""}`}
                     placeholder="University..."
                     value={edu.institution}
+                    maxLength={MAX_INPUT_LENGTH.institution}
                     onChange={(e) => handleEducationChange(index, "institution", e.target.value)}
                   />
                   <button
@@ -438,6 +457,7 @@ const MyProfile = () => {
                     className={`form-control ${(skill.name === "" && skillList.length > 0) ? "border-danger" : ""}`}
                     placeholder="Web Design..."
                     value={skill.name}
+                    maxLength={MAX_INPUT_LENGTH.skillName}
                     onChange={(e) => handleSkillChange(index, "name", e.target.value)}
                   />
                   <span className="input-group-text text-primary" title="Evaluation">

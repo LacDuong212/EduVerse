@@ -1,4 +1,5 @@
 import { formatCurrency } from '@/utils/currency';
+import { secondsToDurationHM } from '@/utils/duration';
 import { Alert, Card, CardBody, CardHeader, Col, Row } from 'react-bootstrap';
 import { FaStar } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
@@ -142,7 +143,7 @@ const CourseInfo = ({ col = 6, courseData }) => {
                   </li>
                   <li className="list-group-item">
                     <span>Duration:</span>
-                    <span className="h6 mb-0">{courseData?.duration + 'h' || 'N/A'}</span>
+                    <span className="h6 mb-0">{secondsToDurationHM(courseData?.duration) || 'N/A'}</span>
                   </li>
                   <li className="list-group-item">
                     <span>Total Lectures:</span>

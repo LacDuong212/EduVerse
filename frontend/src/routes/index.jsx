@@ -139,11 +139,6 @@ export const instructorRoutes = [{
   name: 'Update Course',
   isNested: false,
   element: <InstructorCourseDetail />
-}, {
-  path: '/instructor/*',
-  name: 'Resource Not Found',
-  isNested: false,
-  element: <NotFoundPage />
 }];
 
 export const studentRoutes = [{
@@ -225,9 +220,4 @@ export const studentRoutes = [{
   path: '/student/become-instructor',
   name: 'Become Instructor',
   element: <BecomeInstructorPage />
-}, {
-  path: '/student/*',
-  name: 'Resource Not Found',
-  isNested: false,
-  element: <NotFoundPage />
 }];

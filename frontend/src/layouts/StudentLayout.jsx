@@ -95,12 +95,12 @@ const StudentLayout = ({ children, isNested = false }) => {
             </section>
           </>
         ) : (
-          <section className="pt-0">
-            <>{children}</>
+          <section className="py-0">
+            {children}
           </section>
         )}
       </main>
-      
+
       <Suspense>
         <Footer className={"bg-light pt-5"} />
       </Suspense>

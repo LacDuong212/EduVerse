@@ -24,7 +24,7 @@ const courseSchema = new mongoose.Schema({
 
   level: { type: String, enum: ["All", "Beginner", "Intermediate", "Advanced"] },
   duration: Number,
-  durationUnit: { type: String, enum: ["hour", "minute", "second", "day"], default: "hour" },
+  durationUnit: { type: String, enum: ["hour", "minute", "second", "day"], default: "second" },
   lecturesCount: Number,
 
   curriculum: [{

@@ -453,6 +453,28 @@ export const getMyCourseById = async (req, res) => {
   }
 };
 
+// GET /api/instructor/courses/:id/details
+export const getMyCourseInfoById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.userId;
+
+    const course = await Course.findOne({ _id: id, isDeleted: false }).populate("category", "name slug").lean();
+    if (!course) {
+      return res.status(404).json({ success: false, message: "Course not found" });
+    }
+
+    if (!course.instructor?.ref?.equals(userId)) {
+      return res.status(403).json({ success: false, message: "Cannot access this course" });
+    }
+
+    return res.json({ success: true, course });
+  } catch (error) {
+    console.error(`Error fetching instructor course with id(${req.params.id}):`, error);
+    return res.status(500).json({ success: false, message: "Cannot get instructor's course" });
+  }
+};
+
 // GET /api/instructor/courses/:id/earnings?period=["day","week","month","year"]
 export const getCourseEarnings = async (req, res) => {
   try {

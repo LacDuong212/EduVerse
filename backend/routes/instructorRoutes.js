@@ -1,11 +1,11 @@
 import express from 'express';
 
 import { getPublicFields, getPrivateFields, createInstructor, 
-    getInstructorCourses, getMyCourseById, 
+    getInstructorCourses, getMyCourseById, getMyCourseInfoById,
     getCourseEarnings, getStudentsEnrolled, getCourseStudentsAndReviews, 
     getInstructorCounters, getDashboardData, generateVideoUploadUrl,
     getProfile, updateProfile, getInstructorStudents, getInstructorEarnings,
-    getCurrentInstructor, getInstructorDetails, getInstructorBasicDetails
+    getCurrentInstructor, getInstructorDetails, getInstructorBasicDetails,
 } from '../controllers/instructorController.js';
 import userAuth from '../middlewares/userAuth.js';
 
@@ -14,6 +14,7 @@ const instructorRoute = express.Router();
 instructorRoute.get('/instructors/:id/basic', getInstructorBasicDetails);
 instructorRoute.get('/instructors/:id', getInstructorDetails);
 
+instructorRoute.get('/instructor/courses/:id/details', userAuth, getMyCourseInfoById);
 instructorRoute.get('/instructor/courses/:id/earnings', userAuth, getCourseEarnings);
 instructorRoute.get('/instructor/courses/:id/enrollments', userAuth, getStudentsEnrolled);
 instructorRoute.get('/instructor/courses/:id/students', userAuth, getCourseStudentsAndReviews);

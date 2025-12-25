@@ -36,8 +36,14 @@ const InstructorDashboard = () => {
       <WelcomeBack instructorName={instructorName} />
       <DashboardCounter counterData={counterData} />
       <Row className="mt-3 g-4">
-        <EarningsChart col={7} earningsData={earningsData} />
-        <TopCoursesChart col={5} topCoursesData={topCoursesData} />
+        {(topCoursesData && topCoursesData.length > 0) ? (
+          <>
+            <EarningsChart col={7} earningsData={earningsData} />
+            <TopCoursesChart col={5} topCoursesData={topCoursesData} />
+          </>
+        ) : (
+          <EarningsChart col={12} earningsData={earningsData} />
+        )}
       </Row>
     </Container>
   );

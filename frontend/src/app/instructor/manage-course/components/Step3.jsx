@@ -258,7 +258,7 @@ const Step3 = ({ stepperInstance, draftData, onSave }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!validate()) {
-      toast.error("Please fix the errors on the page");
+      toast.error("Please recheck course curriculum for errors.");
       return;
     }
 

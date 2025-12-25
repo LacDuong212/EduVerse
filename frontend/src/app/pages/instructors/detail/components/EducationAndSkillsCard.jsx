@@ -29,9 +29,11 @@ const EducationAndSkillsCard = ({ educationList = [], skillsList = [] }) => {
             </span>
             <div className="ms-3">
               <h6 className="mb-0">{edu.institution || 'Unknown Institution'}</h6>
-              <p className="mb-0 small">{edu.degree || edu.fieldOfStudy || ''} {edu.fieldOfStudy ? ` - ${edu.fieldOfStudy}` : ''}</p>
+              <p className="mb-0 small">
+                {edu.degree ? (edu.degree + "-" + edu.fieldOfStudy) : (edu.fieldOfStudy || "")}
+              </p>
               {(edu.startDate || edu.endDate) && (
-                <p className="mb-0 small text-muted">{formatDate(edu.startDate)} {edu.endDate ? ` - ${formatDate(edu.endDate)}` : '- Present'}</p>
+                <p className="mb-0 small">{formatDate(edu.startDate)} {edu.endDate ? ` - ${formatDate(edu.endDate)}` : '- Present'}</p>
               )}
             </div>
           </div>
@@ -54,18 +56,21 @@ const EducationAndSkillsCard = ({ educationList = [], skillsList = [] }) => {
                 const level = Math.max(0, Math.min(100, Number(skill.level || 0)));
                 const variant = colors[idx % colors.length];
                 return (
-                  <div key={idx} className="overflow-hidden mb-4">
-                    <h6 className="uppercase">{skill.name || skill.skill || 'Unknown'}</h6>
-                    <div className="progress progress-sm bg-primary bg-opacity-10">
+                  <div key={idx} className="overflow-hidden mb-3">
+                    <div className="d-flex align-items-end justify-content-between">
+                      <h6 className="mb-1 text-break">{skill.name || skill.skill || 'Unknown'}</h6>
+                      <span className="progress-percent-simple text-body">{level}%</span>
+                    </div>
+                    
+                    <div className="progress progress-sm">
                       <div className={`progress-bar bg-${variant} aos`} role="progressbar" style={{ width: `${level}%` }} aria-valuenow={level} aria-valuemin={0} aria-valuemax={100}>
-                        <span className="progress-percent-simple h6 mb-0">{level}%</span>
                       </div>
                     </div>
                   </div>
                 )
               })}
               {remaining > 0 && (
-                <div className="small text-muted">and {remaining} more</div>
+                <div className="small">and {remaining} more</div>
               )}
             </>
           );

@@ -217,7 +217,12 @@ const EditCourseForm = () => {
 
     } catch (error) {
       console.error('Failed to submit course changes', error);
-      toast.error(error.message || 'Failed to submit course changes');
+
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to submit course changes";
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }

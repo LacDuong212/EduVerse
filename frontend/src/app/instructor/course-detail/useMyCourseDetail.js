@@ -57,7 +57,10 @@ export default function useMyCourseDetail() {
     if (!id || !backendUrl) return;
     setLoading(true);
     try {
-      const { data } = await axios.get(`${backendUrl}/api/courses/${id}`);
+      const { data } = await axios.get(
+        `${backendUrl}/api/instructor/courses/${id}/details`,
+        { withCredentials: true },
+      );
       if (data && data.success) setCourse(data.course);
     } catch (err) {
       setError(err);
