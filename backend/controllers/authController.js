@@ -1,7 +1,6 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import userModel from '../models/userModel.js';
-import instructorModel from "../models/instructorModel.js";
 import transporter from '../configs/nodemailer.js';
 
 export const register = async (req, res) => {
@@ -36,7 +35,17 @@ export const register = async (req, res) => {
             text: `Hello ${user.name},\n\nYour OTP for email verification is: ${otp}\nThis OTP is valid for 10 minutes.\n\nThank you!\n`
         };
 
-        await transporter.sendMail(mailOptions);
+        try {
+            await transporter.sendMail(mailOptions);
+        } catch (mailError) {
+            await userModel.findByIdAndDelete(user._id);
+            
+            console.error("Error sending email:", mailError);
+            return res.status(500).json({ 
+                success: false, 
+                message: "Verification email could not be sent. Please check your email again or try again later." 
+            });
+        }
 
         res.status(201).json({ success: true, message: "Registration successful. Please verify your email with OTP." });
 
