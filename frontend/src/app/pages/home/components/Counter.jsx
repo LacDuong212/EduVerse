@@ -11,7 +11,6 @@ import {
 } from 'react-icons/fa';
 
 const Counter = () => {
-  // Lấy dữ liệu từ Redux (đã set bởi useHomeCourses + setAllCourses)
   const coursesState = useSelector((s) => s?.courses) || {};
   const newest = Array.isArray(coursesState.newest) ? coursesState.newest : [];
   const bestSellers = Array.isArray(coursesState.bestSellers) ? coursesState.bestSellers : [];
@@ -19,24 +18,21 @@ const Counter = () => {
   const biggestDiscounts = Array.isArray(coursesState.biggestDiscounts) ? coursesState.biggestDiscounts : [];
   const allCourses = Array.isArray(coursesState.allCourses) ? coursesState.allCourses : [];
 
-  // Nguồn dữ liệu: Ưu tiên allCourses (đúng tổng DB), nếu chưa có thì gộp 4 list Home
   const sourceCourses = useMemo(() => {
     if (allCourses.length > 0) return allCourses;
     return [...newest, ...bestSellers, ...topRated, ...biggestDiscounts];
   }, [allCourses, newest, bestSellers, topRated, biggestDiscounts]);
 
-  // Unique theo id (hỗ trợ _id / id / courseId)
   const courses = useMemo(() => {
     const map = new Map();
     for (const c of sourceCourses) {
       const id = c?._id ?? c?.id ?? c?.courseId;
-      if (!id) continue; // bỏ item rác
+      if (!id) continue;
       if (!map.has(id)) map.set(id, c);
     }
     return Array.from(map.values());
   }, [sourceCourses]);
 
-  // Tính toán số liệu
   const metrics = useMemo(() => {
     let learners = 0;
     let hours = 0;
@@ -49,7 +45,6 @@ const Counter = () => {
       const d = Number(c?.duration ?? 0);
       if (Number.isFinite(d)) hours += d;
 
-      // Ưu tiên khóa theo instructor.ref, fallback instructor.name
       const key = c?.instructor?.ref ?? c?.instructor?.name ?? null;
       if (key) instructors.add(key);
     }
@@ -57,12 +52,11 @@ const Counter = () => {
     return {
       totalCourses: courses.length,
       totalLearners: Math.max(0, learners),
-      totalHours: Math.max(0, Math.round(hours)),
+      totalHours: Math.max(0, Number(hours.toFixed(2))),
       totalInstructors: instructors.size,
     };
   }, [courses]);
 
-  // Dữ liệu hiển thị cho 4 ô counter
   const counterData = [
     { icon: FaBookOpen,          variant: 'primary', count: metrics.totalCourses,     suffix: '',  title: 'Courses' },
     { icon: FaUserGraduate,      variant: 'success', count: metrics.totalLearners,    suffix: '',  title: 'Learners' },

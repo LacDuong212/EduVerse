@@ -1,7 +1,6 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import userModel from '../models/userModel.js';
-import instructorModel from "../models/instructorModel.js";
 import transporter from '../configs/nodemailer.js';
 
 export const register = async (req, res) => {
@@ -30,13 +29,23 @@ export const register = async (req, res) => {
 
         // Send OTP to user's email
         const mailOptions = {
-            from: process.env.EMAIL_USER,
+            from: `"EduVerse Support" <${process.env.MAIL_FROM}>`,
             to: user.email,
             subject: 'Your verification OTP for EduVerse',
             text: `Hello ${user.name},\n\nYour OTP for email verification is: ${otp}\nThis OTP is valid for 10 minutes.\n\nThank you!\n`
         };
 
-        await transporter.sendMail(mailOptions);
+        try {
+            await transporter.sendMail(mailOptions);
+        } catch (mailError) {
+            await userModel.findByIdAndDelete(user._id);
+            
+            console.error("Error sending email:", mailError);
+            return res.status(500).json({ 
+                success: false, 
+                message: "Verification email could not be sent. Please check your email again or try again later." 
+            });
+        }
 
         res.status(201).json({ success: true, message: "Registration successful. Please verify your email with OTP." });
 
@@ -161,7 +170,7 @@ export const forgotPassword = async (req, res) => {
         await user.save();
 
         await transporter.sendMail({
-            from: process.env.EMAIL_USER,
+            from: `"EduVerse Support" <${process.env.MAIL_FROM}>`,
             to: user.email,
             subject: "Password Reset OTP",
             text: `Hello ${user.name},\n\nYour account recovery OTP is: ${otp}\nThis code is valid for 10 minutes.\n\nThank you!`

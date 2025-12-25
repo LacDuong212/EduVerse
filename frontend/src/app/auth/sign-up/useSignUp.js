@@ -1,8 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
-import { setLogin } from "@/redux/authSlice";
 
 export default function useSignUp(onSignUpSuccess) {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
