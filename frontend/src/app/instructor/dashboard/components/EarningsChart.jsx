@@ -59,7 +59,7 @@ const EarningsChart = ({ col = 6, earningsData = [] }) => {
       fixed: { enabled: false },
       x: { show: true },
       y: {
-        formatter: (val) => `${val}${currency}`,
+        formatter: (val) => formatCurrency(val),
         title: { formatter: () => '' }
       },
       marker: { show: false }

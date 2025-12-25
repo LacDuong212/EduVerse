@@ -6,7 +6,7 @@ import { getAllCourses, getCourseFilters, getCourseById,
     getRecommendedCourses, getPopularTags
 } from "../controllers/courseController.js";
 import { processLectureAI, generateFinalAssessment } from "../controllers/aiController.js";
-import userAuth from "../middlewares/userAuth.js";
+import userAuth, { checkAuth } from "../middlewares/userAuth.js";
 import {
   getCourseProgress,
   updateLectureProgress,
@@ -21,7 +21,7 @@ courseRoute.get("/my-courses", userAuth, getOwnedCourses);
 courseRoute.get("/tags", getPopularTags);
 courseRoute.get("/:id/images/upload", userAuth, generateImageUploadSignature);
 courseRoute.get("/:id/related", getRelatedCourses);
-courseRoute.get("/:id/videos/:key", userAuth, streamVideo);
+courseRoute.get("/:id/videos/:key", checkAuth, streamVideo);
 courseRoute.get("/:id", getCourseById);
 
 courseRoute.post("/", userAuth, createCourse);

@@ -18,6 +18,8 @@ const CourseCard = ({ course }) => {
 
   const { userData } = useSelector((state) => state.auth);
 
+  const isStudent = userData?.role?.toLowerCase() === "student";
+
   const wishlistItems = useSelector((state) => state.wishlist.items || []);
 
   if (!course) return null;
@@ -143,12 +145,12 @@ const CourseCard = ({ course }) => {
 
       <CardBody className="d-flex flex-column pb-0">
         <div className="flex-grow-1">
-          <div className="d-flex justify-content-between mb-2">
+          {isStudent && <div className="d-flex justify-content-between mb-2">
             <span className={`badge ${badge.class} bg-opacity-60`}>{badge.text}</span>
             <span role="button" className="h6 mb-0" onClick={handleWishlistToggle}>
               {isWishlisted ? <FaHeart fill="red" /> : <FaRegHeart />}
             </span>
-          </div>
+          </div>}
 
           <CardTitle>
             <Link

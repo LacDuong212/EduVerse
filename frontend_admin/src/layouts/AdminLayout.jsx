@@ -80,7 +80,8 @@ const AdminLayout = ({ children }) => {
           </div>
         ) : (
           <Offcanvas
-            className="flex-row custom-scrollbar h-100 "
+            className="flex-row custom-scrollbar h-100"
+            style={{ width: "fit-content" }}
             show={appMenuControl.open}
             placement="start"
             onHide={appMenuControl.toggle}

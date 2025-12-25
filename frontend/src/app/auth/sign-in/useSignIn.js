@@ -30,10 +30,14 @@ export default function useSignIn() {
       const response = await axios.post(`${backendUrl}/api/auth/login`, data);
 
       if (response.data.success) {
+        let defaultRedirect = "/"
         try {
           const profile = await axios.get(`${backendUrl}/api/user/profile`);
           if (profile.data.success) {
             dispatch(setLogin(profile.data.user));
+            defaultRedirect = profile.data.user?.role === "student"
+              ? "/"
+              : "/instructor/dashboard";
           } else {
             dispatch(setLogout());
           }
@@ -44,12 +48,13 @@ export default function useSignIn() {
         toast.success("Login successful!");
 
         const params = new URLSearchParams(location.search);
-        const redirectTo = params.get("redirectTo") || "/";
+        const redirectTo = params.get("redirectTo") || defaultRedirect;
         navigate(redirectTo, { replace: true });
       } else {
         toast.error(response.data.message || "Invalid credentials");
       }
     } catch (err) {
+      console.log(err)
       toast.error("Login failed. Please try again.");
     } finally {
       setLoading(false);

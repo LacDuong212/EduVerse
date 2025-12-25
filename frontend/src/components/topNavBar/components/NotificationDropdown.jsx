@@ -164,7 +164,6 @@ const NotificationDropdown = () => {
     >
       <DropdownToggle
         className="btn btn-light btn-round mb-0 arrow-none"
-        href="#"
         role="button"
         style={{ overflow: 'visible' }}
       >

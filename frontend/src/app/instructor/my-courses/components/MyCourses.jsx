@@ -2,9 +2,8 @@ import ChoicesFormInput from '@/components/form/ChoicesFormInput';
 import { formatCurrency } from '@/utils/currency';
 import { Button, Card, CardBody, CardFooter, CardHeader, Col, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { BsPersonFill } from 'react-icons/bs';
-import { FaAngleLeft, FaAngleRight, FaFile, FaFolder, FaGlobe, FaLock, FaRegEdit, FaSearch, FaStar } from 'react-icons/fa';
+import { FaAngleLeft, FaAngleRight, FaFile, FaFolder, FaGlobe, FaLock, FaPlus, FaRegEdit, FaSearch, FaStar } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
-
 
 const MyCourses = ({
   courses,
@@ -53,8 +52,9 @@ const MyCourses = ({
   return (
     <Card className="border bg-transparent rounded-3">
       <CardHeader className="bg-transparent border-bottom">
-        <Row className="align-items-center justify-content-between g-2">
-          <Col md={8}>
+        <Row className="align-items-center justify-content-between g-2 g-md-4">
+          {/* SEARCH */}
+          <Col md={6}>
             <form className="rounded position-relative" onSubmit={handleSearchSubmit}>
               <input
                 className="form-control pe-5 bg-transparent"
@@ -72,23 +72,38 @@ const MyCourses = ({
               </button>
             </form>
           </Col>
-          <Col md={4}>
-            <form>
-              <ChoicesFormInput
-                className="form-select js-choice border-0 z-index-9 bg-transparent"
-                aria-label=".form-select-sm"
-                value={sort}
-                onChange={handleSortChange}
+
+          {/* ACTIONS (Sort + Create Button) */}
+          <Col md={6}>
+            <div className="d-flex align-items-center justify-content-end gap-2">
+              {/* Sort Dropdown */}
+              <form className="flex-grow-1">
+                <ChoicesFormInput
+                  className="form-select js-choice border-0 z-index-9 bg-transparent"
+                  aria-label=".form-select-sm"
+                  value={sort}
+                  onChange={handleSortChange}
+                >
+                  <option value="">Sort by</option>
+                  <option value="newest">Newest</option>
+                  <option value="oldest">Oldest</option>
+                  <option value="mostPopular">Most Popular</option>
+                  <option value="leastPopular">Least Popular</option>
+                  <option value="highestRating">Highest Rating</option>
+                  <option value="lowestRating">Lowest Rating</option>
+                </ChoicesFormInput>
+              </form>
+              {/* Create Button */}
+              <Button
+                variant="primary"
+                as={Link}
+                to="/instructor/courses/create"
+                className="btn-sm d-flex align-items-center justify-content-center mb-0"
               >
-                <option value="">Sort by</option>
-                <option value="newest">Newest</option>
-                <option value="oldest">Oldest</option>
-                <option value="mostPopular">Most Popular</option>
-                <option value="leastPopular">Least Popular</option>
-                <option value="highestRating">Highest Rating</option>
-                <option value="lowestRating">Lowest Rating</option>
-              </ChoicesFormInput>
-            </form>
+                <FaPlus className="me-0 my-1 me-sm-1" /> {/* Margin only on larger screens */}
+                <span className="d-none d-sm-block">Create Course</span> {/* Text hidden on mobile */}
+              </Button>
+            </div>
           </Col>
         </Row>
       </CardHeader>

@@ -12,7 +12,7 @@ const PaymentSuccessPage = () => {
               <Col xs={12} className="text-center">
                 <img
                   src={successImg}
-                  className="h-200px h-md-400px mb-4"
+                  className="h-200px h-md-440px mb-4"
                   alt="payment success"
                 />
                 <h1 className="display-4 text-success mb-2">Payment Successful!</h1>

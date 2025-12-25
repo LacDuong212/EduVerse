@@ -8,7 +8,7 @@ const ListedCourses = () => {
   if (!relatedCourses || relatedCourses.length === 0) return null;
 
   return (
-    <section className="pt-0 pb-0">
+    <section className="pt-0">
       <Container>
         <Row className="mb-4">
           <Col lg={12}>

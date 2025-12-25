@@ -28,7 +28,7 @@ const ProfileDropdown = ({ className }) => {
   const displayData = {
     name: admin?.name || 'Admin',
     email: admin?.email || 'admin@example.com',
-    pfpImg:
+    pfpImg: admin?.pfpImg || 
       'https://res.cloudinary.com/dw1fjzfom/image/upload/v1757337425/av4_khpvlh.png',
   };
 
