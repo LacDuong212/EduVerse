@@ -44,7 +44,7 @@ authRoute.get('/google', (req, res, next) => {
 authRoute.get(
   '/google/callback',
   passport.authenticate('google', {
-    failureRedirect: 'http://localhost:5173/auth/sign-in',
+    failureRedirect: `${process.env.CLIENT_URL}/auth/sign-in`,
     session: false,
   }),
   (req, res) => {
@@ -62,8 +62,7 @@ authRoute.get(
     });
 
     const redirectTo = req.query.state || '/';
-
-    res.redirect(`http://localhost:5173${redirectTo}`);
+    res.redirect(process.env.CLIENT_URL + redirectTo);
   }
 );
 

@@ -19,8 +19,11 @@ export const SocketContextProvider = ({ children }) => {
   useEffect(() => {
     if (userData && userData._id) {
       const newSocket = io(backendUrl, {
-        transports: ['websocket'],
+        transports: ['polling', 'websocket'],
+        withCredentials: true,
+
         reconnection: true,
+        reconnectionAttempts: 5,
       });
 
       setSocket(newSocket);

@@ -37,23 +37,43 @@ const app = express();
 
 const server = http.createServer(app);
 
+app.set('trust proxy', 1);
+
 // Connect to MongoDB
 await connectDB();
 
 // Start scheduled tasks
 startAllTasks();
 
-const allowedOrigins = ['http://localhost:5173', 'http://localhost:5174'];
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5174',
+  process.env.CLIENT_URL,
+];
 
 //Middleware
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({origin: allowedOrigins, credentials: true}));
+
+// app.use(cors({origin: allowedOrigins, credentials: true}));
+
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS']
+}));
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
+    proxy: true,
+    cookie: {
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+      maxAge: 24 * 60 * 60 * 1000
+    }
   })
 );
 

@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react';
 
-const TopNavigationBar = lazy(() => import('../components/GuestLayoutComponents/TopNavigationBar'));
+const TopNavigationBar = lazy(() => import('../components/guestLayoutComponents/TopNavigationBar'));
 const Footer = lazy(() => import('../components/Footer'));
 const Preloader = lazy(() => import('../components/preloader'));
 
