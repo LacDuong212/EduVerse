@@ -29,7 +29,7 @@ export const register = async (req, res) => {
 
         // Send OTP to user's email
         const mailOptions = {
-            from: process.env.EMAIL_USER,
+            from: `"EduVerse Support" <${process.env.EMAIL_USER}>`,
             to: user.email,
             subject: 'Your verification OTP for EduVerse',
             text: `Hello ${user.name},\n\nYour OTP for email verification is: ${otp}\nThis OTP is valid for 10 minutes.\n\nThank you!\n`
@@ -170,7 +170,7 @@ export const forgotPassword = async (req, res) => {
         await user.save();
 
         await transporter.sendMail({
-            from: process.env.EMAIL_USER,
+            from: `"EduVerse Support" <${process.env.EMAIL_USER}>`,
             to: user.email,
             subject: "Password Reset OTP",
             text: `Hello ${user.name},\n\nYour account recovery OTP is: ${otp}\nThis code is valid for 10 minutes.\n\nThank you!`
