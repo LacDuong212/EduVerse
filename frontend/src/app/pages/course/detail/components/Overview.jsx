@@ -1,17 +1,11 @@
-import { useEffect } from 'react';
 import { Col, Container, Row } from 'react-bootstrap';
 import useCourseDetail from '../useCourseDetail';
-import { FaCheckCircle } from 'react-icons/fa';
 import Reviews from './Reviews';
 import { Card, CardBody } from 'react-bootstrap';
 
 
 const Overview = () => {
   const { course, loading, error, refetch } = useCourseDetail();
-
-  // useEffect(() => {
-  //   console.log("course in PageIntro:", { course, loading, error });
-  // }, [course, loading, error]);
 
   if (loading) {
     return <section className="bg-light py-0 py-sm-5">
@@ -50,10 +44,12 @@ const Overview = () => {
         {course?.description ? (
           <div
             className="clamped-html"
-            dangerouslySetInnerHTML={{ __html: course.description }}
+            dangerouslySetInnerHTML={{
+              __html: course.description.replace(/&nbsp;/g, ' ')
+            }}
           />
         ) : (
-          <span className="text-muted">(No full description)</span>
+          <span>(No full description)</span>
         )}
       </div>
     </fieldset>

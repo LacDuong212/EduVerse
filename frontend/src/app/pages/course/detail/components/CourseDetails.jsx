@@ -150,52 +150,6 @@ const PricingCard = ({ course, owned, onShowCurriculum, onAddToCart, courseId })
   );
 };
 
-const RecentlyViewed = () => {
-  return (
-    <Card className="card-body shadow p-4 mb-4">
-      <h4 className="mb-3">Recently Viewed</h4>
-      <Row className="gx-3 mb-3">
-        <Col xs={4}>
-          <img className="rounded" src={courseImg21} alt="course" />
-        </Col>
-        <Col xs={8}>
-          <h6 className="mb-0">
-            <Link to="">Fundamentals of Business Analysis</Link>
-          </h6>
-          <ul className="list-group list-group-borderless mt-1 d-flex justify-content-between">
-            <li className="list-group-item px-0 d-flex justify-content-between">
-              <span className="text-success">{formatCurrency(130)}</span>
-              <span className="h6 fw-light">
-                4.5
-                <FaStar className="text-warning ms-1" />
-              </span>
-            </li>
-          </ul>
-        </Col>
-      </Row>
-      <Row className="gx-3">
-        <Col xs={4}>
-          <img className="rounded" src={courseImg18} alt="course" />
-        </Col>
-        <Col xs={8}>
-          <h6 className="mb-0">
-            <Link to="">The Complete Video Production Bootcamp</Link>
-          </h6>
-          <ul className="list-group list-group-borderless mt-1 d-flex justify-content-between">
-            <li className="list-group-item px-0 d-flex justify-content-between">
-              <span className="text-success">{formatCurrency(150)}</span>
-              <span className="h6 fw-light">
-                4.0
-                <FaStar className="text-warning ms-1" />
-              </span>
-            </li>
-          </ul>
-        </Col>
-      </Row>
-    </Card>
-  );
-};
-
 const Tags = ({ tags = [] }) => {
   return (
     <Card className="card-body shadow p-4">
@@ -403,7 +357,7 @@ const CourseDetails = ({ course, owned, onAddToCart }) => {
                     <li className="list-group-item d-flex justify-content-between align-items-center">
                       <span className="h6 fw-light mb-0">
                         <FaSignal className="fa-fw text-primary me-1" />
-                        Skills
+                        Level
                       </span>
                       <span>{course?.level}</span>
                     </li>
