@@ -1,6 +1,7 @@
 import GlightBox from '@/components/GlightBox';
 import { useVideoStream } from '@/hooks/useStreamUrl';
 import { formatCurrency } from '@/utils/currency';
+import { secondsToDurationHM } from '@/utils/duration';
 import Curriculum from './Curriculum';
 import Instructor from './Instructor';
 import Overview from './Overview';
@@ -339,7 +340,7 @@ const CourseDetails = ({ course, owned, onAddToCart }) => {
                         <FaClock className="fa-fw text-primary me-1" />
                         Duration
                       </span>
-                      <span>{course?.duration}h</span>
+                      <span>{secondsToDurationHM(course?.duration)}</span>
                     </li>
                     <li className="list-group-item d-flex justify-content-between align-items-center">
                       <span className="h6 fw-light mb-0">

@@ -27,6 +27,7 @@ import {
 import { BsPatchCheckFill } from "react-icons/bs";
 import element1 from "@/assets/images/element/01.svg";
 import { formatCurrency } from "@/utils/currency";
+import { secondsToDuration } from "@/utils/duration";
 import { useVideoStream } from "@/hooks/useStreamUrl";
 import useToggle from "@/hooks/useToggle";
 import useCourseDetail from "../useCourseDetail";
@@ -150,9 +151,8 @@ const Curriculum = ({ coursePrice, premiumAction }) => {
                       </Row>
                     </div>
 
-                    <p className="mb-0 small text-muted">
-                      {lecture.time ||
-                        (lecture.duration ? `${lecture.duration}m` : "--")}
+                    <p className="mb-0 small">
+                      {(lecture.duration ? `${secondsToDuration(lecture.duration || 0)}` : "--")}
                     </p>
                   </div>
 
