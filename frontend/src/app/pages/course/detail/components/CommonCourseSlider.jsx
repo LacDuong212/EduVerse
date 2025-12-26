@@ -18,7 +18,7 @@ const adaptCourseData = (c) => {
   const hasDiscount = Number.isFinite(discountPrice) && discountPrice < price;
   const discountPercent = hasDiscount ? Math.round(((price - discountPrice) / price) * 100) : 0;
 
-  const duration = Number.isFinite(c?.duration) ? `${c.duration}h` : c?.duration || '—';
+  const duration = Number.isFinite(c?.duration) ? `${c.duration}` : c?.duration || '—';
 
   return {
     id: c?._id || c?.id,

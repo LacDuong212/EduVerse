@@ -9,6 +9,7 @@ import {
   FaClock,
   FaChalkboardTeacher
 } from 'react-icons/fa';
+import { secondsToHours } from '@/utils/duration'
 
 const Counter = () => {
   const coursesState = useSelector((s) => s?.courses) || {};
@@ -35,7 +36,7 @@ const Counter = () => {
 
   const metrics = useMemo(() => {
     let learners = 0;
-    let hours = 0;
+    let totalSeconds = 0;
     const instructors = new Set();
 
     for (const c of courses) {
@@ -43,7 +44,7 @@ const Counter = () => {
       if (Number.isFinite(s)) learners += s;
 
       const d = Number(c?.duration ?? 0);
-      if (Number.isFinite(d)) hours += d;
+      if (Number.isFinite(d)) totalSeconds += d;
 
       const key = c?.instructor?.ref ?? c?.instructor?.name ?? null;
       if (key) instructors.add(key);
@@ -52,16 +53,16 @@ const Counter = () => {
     return {
       totalCourses: courses.length,
       totalLearners: Math.max(0, learners),
-      totalHours: Math.max(0, Number(hours.toFixed(2))),
+      totalHours: secondsToHours(totalSeconds),
       totalInstructors: instructors.size,
     };
   }, [courses]);
 
   const counterData = [
-    { icon: FaBookOpen,          variant: 'primary', count: metrics.totalCourses,     suffix: '',  title: 'Courses' },
-    { icon: FaUserGraduate,      variant: 'success', count: metrics.totalLearners,    suffix: '',  title: 'Learners' },
-    { icon: FaClock,             variant: 'warning', count: metrics.totalHours,       suffix: 'h', title: 'Total Hours' },
-    { icon: FaChalkboardTeacher, variant: 'info',    count: metrics.totalInstructors, suffix: '',  title: 'Instructors' },
+    { icon: FaBookOpen,          variant: 'primary', count: metrics.totalCourses,     suffix: '',  title: 'Courses', decimals: 0 },
+    { icon: FaUserGraduate,      variant: 'success', count: metrics.totalLearners,    suffix: '',  title: 'Learners', decimals: 0 },
+    { icon: FaClock,             variant: 'warning', count: metrics.totalHours,       suffix: 'h', title: 'Total Hours', decimals: 2 },
+    { icon: FaChalkboardTeacher, variant: 'info',    count: metrics.totalInstructors, suffix: '',  title: 'Instructors', decimals: 0 },
   ];
 
   return (
@@ -85,6 +86,8 @@ const Counter = () => {
                           suffix={item.suffix}
                           duration={1.2}
                           preserveValue={false}
+                          decimals={item.decimals}
+                          decimal=","
                         />
                       </h5>
                     </div>

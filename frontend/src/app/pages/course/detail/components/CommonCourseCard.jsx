@@ -6,6 +6,7 @@ import {
   FaTable,
 } from 'react-icons/fa';
 import { formatCurrency } from '@/utils/currency';
+import { secondsToHours } from '@/utils/duration';
 
 const DEFAULT_COURSE_IMG = "https://res.cloudinary.com/dw1fjzfom/image/upload/v1764427835/course_default_image_pwqnyo.jpg";
 
@@ -105,7 +106,7 @@ const CommonCourseCard = ({ course }) => {
         <div className="hstack gap-3 mt-auto">
           <span className="h6 fw-light mb-0">
             <FaRegClock className="text-danger me-2" />
-            {duration}
+            {secondsToHours(duration).toLocaleString('vi-VN')}h
           </span>
           <span className="h6 fw-light mb-0">
             <FaTable className="text-orange me-2" />

@@ -82,3 +82,11 @@ export const secondsToDurationHM = (seconds) => {
 
   return `${minutes}m`;
 };
+
+export const secondsToHours = (seconds) => {
+  const num = Number(seconds);
+  if (!Number.isFinite(num) || num <= 0) return 0;
+
+  const hours = num / 3600;
+  return Number(hours.toFixed(2));
+};

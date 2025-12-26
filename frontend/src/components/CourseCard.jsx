@@ -2,6 +2,7 @@ import { Card, CardBody, CardFooter, CardTitle } from 'react-bootstrap';
 import { FaRegClock, FaRegHeart, FaRegStar, FaHeart, FaStar, FaStarHalfAlt, FaTable } from 'react-icons/fa';
 import { useNavigate, Link } from 'react-router-dom';
 import { formatCurrency } from '@/utils/currency';
+import { secondsToHours } from '@/utils/duration';
 
 import { toast } from 'react-toastify';
 
@@ -107,10 +108,10 @@ const CourseCard = ({ course }) => {
     : 0;
   const rawDuration =
     course.duration ?? course.totalDuration ?? course.totalHours ?? null;
-  const durationText =
-    typeof rawDuration === 'number'
-      ? `${rawDuration} hours`
-      : (typeof rawDuration === 'string' ? rawDuration : '—');
+  const hoursValue = secondsToHours(rawDuration);
+  const durationText = hoursValue > 0 
+  ? `${hoursValue.toString().replace('.', ',')} hours` 
+  : '—';
 
   const lectures =
     course.lectures ?? course.lecturesCount ?? course.lectureCount ?? 0;
