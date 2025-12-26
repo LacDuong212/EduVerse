@@ -61,7 +61,7 @@ export default function useCourseDetail() {
 
   // check ownership (PRIVATE)
   const checkOwned = useCallback(async (signal) => {
-    if (!userData?._id || !id || !backendUrl) {
+    if (!userData?._id || userData?.role.toLowerCase() !== "student" || !id || !backendUrl) {
       setOwned(false);
       setOwnedChecking(false);
       return;

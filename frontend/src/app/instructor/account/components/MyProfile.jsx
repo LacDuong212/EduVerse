@@ -73,7 +73,8 @@ const MyProfile = () => {
   const [errors, setErrors] = useState({});
 
   // helper
-  const currentAvatarSrc = previewAvatar === "" ? null : (previewAvatar || instructor?.pfpImg);
+  const savedAvatarSrc = instructor?.pfpImg || "";
+  const currentAvatarSrc = previewAvatar === "" ? null : (previewAvatar || savedAvatarSrc);
 
   useEffect(() => {
     const loadInstructor = async () => {
@@ -208,8 +209,8 @@ const MyProfile = () => {
 
     try {
       await updateInstructorProfile(payload);
-
     } catch (error) {
+      console.log("Update profile error: ", error)
       toast.error(error.message || "Failed to update profile");
     }
   };
@@ -245,7 +246,7 @@ const MyProfile = () => {
                     >
                       <BsX size={24} />
                     </button>
-                  ) : (
+                  ) : (savedAvatarSrc &&
                     <button
                       type="button"
                       className="btn btn-primary btn-sm position-absolute top-0 start-100 translate-middle rounded-circle p-0 d-flex align-items-center justify-content-center border border-2 border-white"

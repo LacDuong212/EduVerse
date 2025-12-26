@@ -26,15 +26,41 @@ import {
 } from "react-icons/fa";
 import { BsPatchCheckFill } from "react-icons/bs";
 import element1 from "@/assets/images/element/01.svg";
-import { formatCurrency } from '@/utils/currency';
+import { formatCurrency } from "@/utils/currency";
+import { useVideoStream } from "@/hooks/useStreamUrl";
 import useToggle from "@/hooks/useToggle";
-import useCourseDetail from "../useCourseDetail"; // 🔗 hook bạn cung cấp
+import useCourseDetail from "../useCourseDetail";
 import { useNavigate } from "react-router-dom";
-// 🔥 thêm GlightBox
 import GlightBox from "@/components/GlightBox";
 
-const Curriculum = ({ coursePrice }) => {
-  const { course, loading, error } = useCourseDetail(); // ✅ lấy dữ liệu thật
+
+const LecturePlayButton = ({ courseId, lecture, sectionId }) => {
+  const { streamUrl, loading } = useVideoStream(courseId, lecture.videoUrl);
+
+  // if video is loading
+  if (loading) {
+    return (
+      <div className="btn-round mb-0 stretched-link position-static flex-centered btn btn-sm btn-light">
+        <Spinner animation="border" size="sm" style={{ width: "10px", height: "10px" }} />
+      </div>
+    );
+  }
+
+  // if video is loaded, render the GlightBox
+  return (
+    <GlightBox
+      data-glightbox
+      data-gallery={`section-${sectionId}`}
+      href={streamUrl}
+      className="btn-round mb-0 stretched-link position-static flex-centered btn btn-sm btn-danger-soft"
+    >
+      <FaPlay className="me-0" size={11} />
+    </GlightBox>
+  );
+};
+
+const Curriculum = ({ coursePrice, premiumAction }) => {
+  const { course, loading, error } = useCourseDetail();
   const { isTrue: isOpen, toggle } = useToggle();
   const navigate = useNavigate();
 
@@ -75,9 +101,7 @@ const Curriculum = ({ coursePrice }) => {
           <AccordionItem
             key={section._id || idx}
             eventKey={`${idx}`}
-            className={clsx({
-              "mb-3": course.curriculum.length - 1 !== idx,
-            })}
+            className={clsx({ "mb-3": course.curriculum.length - 1 !== idx, })}
           >
             <AccordionHeader as="h6" className="font-base">
               <div className="fw-bold rounded d-sm-flex d-inline-block collapsed">
@@ -93,26 +117,22 @@ const Curriculum = ({ coursePrice }) => {
                 <Fragment key={lecture._id || i}>
                   <div className="d-flex justify-content-between align-items-center">
                     <div className="position-relative d-flex align-items-center">
-                      {lecture.isFree && lecture.videoUrl ? (
-                        <GlightBox
-                          data-glightbox
-                          data-gallery={`section-${section._id || idx}`}
-                          href={lecture.videoUrl}
-                          className="btn-round mb-0 stretched-link position-static flex-centered btn btn-sm btn-danger-soft"
-                        >
-                          <FaPlay className="me-0" size={11} />
-                        </GlightBox>
+                      {lecture.isFree ? (
+                        <LecturePlayButton
+                          courseId={course._id}
+                          lecture={lecture}
+                          sectionId={section._id || idx}
+                        />
                       ) : (
                         <Button
-                          variant={lecture.isFree ? "danger-soft" : "light"}
+                          variant="light"
                           size="sm"
                           className="btn-round mb-0 stretched-link position-static flex-centered"
-                          onClick={() => handlePlay(lecture)}
+                          onClick={toggle}
                         >
                           <FaPlay className="me-0" size={11} />
                         </Button>
                       )}
-
                       <Row className="g-sm-0 align-items-center">
                         <Col sm="auto">
                           <span className="d-inline-block text-truncate ms-2 mb-0 h6 fw-light w-200px w-md-400px">
@@ -144,7 +164,6 @@ const Curriculum = ({ coursePrice }) => {
         ))}
       </Accordion>
 
-      {/* 💎 Premium Modal giữ nguyên */}
       <Modal
         show={isOpen}
         onHide={toggle}
@@ -160,23 +179,10 @@ const Curriculum = ({ coursePrice }) => {
           <figure className="position-absolute bottom-0 end-0 mb-n4 me-n4 d-none d-sm-block">
             <img src={element1} alt="element" />
           </figure>
-          <figure className="position-absolute top-0 end-0 z-index-n1 opacity-2">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="818.6px"
-              height="235.1px"
-              viewBox="0 0 818.6 235.1"
-            >
-              <path
-                className="fill-info"
-                d="M735,226.3c-5.7,0.6-11.5,1.1-17.2,1.7c-66.2,6.8-134.7,13.7-192.6-16.6..."
-              />
-            </svg>
-          </figure>
-          <h2>
-            Get Premium Course in{" "}
-            <span className="text-success">{formatCurrency(coursePrice)}</span>
-          </h2>
+          <h3>
+            Get Course now for the price of
+            <span className="h1 ms-1 text-success"> {formatCurrency(coursePrice)}</span>
+          </h3>
           <p>
             Unlock full access to all lectures, materials and exclusive
             instructor support.
@@ -193,28 +199,24 @@ const Curriculum = ({ coursePrice }) => {
                   <BsPatchCheckFill className="text-success" />
                   Tuition Assistance
                 </li>
-                <li className="list-group-item text-body">
-                  <BsPatchCheckFill className="text-success" />
-                  Diploma course
-                </li>
               </ul>
             </Col>
             <Col sm={6}>
               <ul className="list-group list-group-borderless">
                 <li className="list-group-item text-body">
                   <BsPatchCheckFill className="text-success" />
-                  Intermediate courses
+                  Leveled courses for you
                 </li>
                 <li className="list-group-item text-body">
                   <BsPatchCheckFill className="text-success" />
-                  Over 200 online courses
+                  Over 10+ online courses
                 </li>
               </ul>
             </Col>
           </Row>
 
-          <Button variant="orange-soft" size="lg">
-            Purchase premium
+          <Button variant="orange-soft" size="lg" onClick={premiumAction}>
+            Purchase Course
           </Button>
         </ModalBody>
         <ModalFooter className="d-block bg-info">
@@ -223,7 +225,7 @@ const Curriculum = ({ coursePrice }) => {
               {[FaFacebookF, FaInstagram, FaTwitter, FaLinkedinIn].map(
                 (Icon, i) => (
                   <li className="list-inline-item" key={i}>
-                    <a className="btn btn-white btn-sm shadow px-2" href="#">
+                    <a className="btn btn-white btn-sm shadow px-2 mb-0" href="#">
                       <Icon className="fa-fw" />
                     </a>
                   </li>
@@ -234,13 +236,13 @@ const Curriculum = ({ coursePrice }) => {
               <p className="mb-1 small">
                 <a href="#" className="text-white">
                   <FaRegEnvelope className="fa-fw me-2" />
-                  example@gmail.com
+                  example@d2v-team.com
                 </a>
               </p>
               <p className="mb-0 small">
                 <a href="#" className="text-white">
                   <FaHeadset className="fa-fw me-2" />
-                  123-456-789
+                  0111-222-333
                 </a>
               </p>
             </div>

@@ -1,6 +1,7 @@
 import Review from "../models/reviewModel.js";
 import Course from "../models/courseModel.js";
 import { recalculateCourseRating } from "../helpers/recalculateCourseRating.js";
+
 // GET /reviews/:courseId?page=&limit=  (for guest)
 export const getCourseReviewsForGuests = async (req, res) => {
   try {
@@ -108,7 +109,6 @@ export const createReview = async (req, res) => {
     });
     await review.save();
 
-    // ⭐ SAU KHI TẠO REVIEW: update lại rating course
     await recalculateCourseRating(courseId);
 
     res.status(200).json({ success: true, message: "Review created", review });
