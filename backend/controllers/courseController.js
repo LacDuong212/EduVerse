@@ -126,11 +126,11 @@ export const convertDuration = (
   }
 
   if (!UNIT_IN_SECONDS[fromUnit]) {
-    return { error: `Invalid fromUnit: ${fromUnit}` };
+    return { error: `Invalid from unit: ${fromUnit}` };
   }
 
   if (!UNIT_IN_SECONDS[toUnit]) {
-    return { error: `Invalid toUnit: ${toUnit}` };
+    return { error: `Invalid to unit: ${toUnit}` };
   }
 
   const seconds = num * UNIT_IN_SECONDS[fromUnit];
@@ -691,7 +691,7 @@ export const createCourse = async (req, res) => {
         count: 0,
         total: 0
       },
-      // status: "Pending",
+      status: "Pending",
       isPrivate: req.body.isPrivate === null ? true : req.body.isPrivate,  // = !isPublished
       isDeleted: false,
     });
@@ -764,22 +764,36 @@ export const updateCourse = async (req, res) => {
       return res.status(400).json(validation);
     }
 
+    const oldCalculatedDuration = calculateTotalDuration(course.curriculum);  // sum of lectures' duration
+    const newCurriculum = req.body.curriculum;
+
     if (req.body.duration) {
-      const duration = convertDuration(req.body.duration, req.body.durationUnit, 'second');
-      if (duration.error) {
-        return res.status(400).json({ success: false, message: duration.error });
+      const convertedDuration = convertDuration(req.body.duration, req.body.durationUnit, 'second');
+      if (convertedDuration.error) {
+        return res.status(400).json({ success: false, message: convertedDuration.error });
       }
 
-      req.body.duration = duration.value;
-      req.body.durationUnit = duration.unit;
+      // req.body.duration = newCalcDuration.value;
+      // req.body.durationUnit = newCalcDuration.unit;
+
+      // check if new duration is calculated (not set by user), then we'll auto update duration
+      if (convertedDuration?.value === oldCalculatedDuration) {
+        req.body.duration = calculateTotalDuration(newCurriculum);
+        req.body.durationUnit = 'second';
+      }
+      // if new duration is set by user, we'll just convert it to seconds instead
+      else {
+        req.body.duration = convertedDuration?.value || 0;
+        req.body.durationUnit = 'second';
+      }
     } else {
-      req.body.duration = calculateTotalDuration(req.body.curriculum);
+      req.body.duration = calculateTotalDuration(newCurriculum);
+      req.body.durationUnit = 'second';
     }
 
     const oldKeys = getAllVideoKeys(course);  // snapshot old videos
 
     Object.assign(course, req.body);  // apply update
-    // course.status = "Pending";     // update status
 
     const newKeys = getAllVideoKeys(course);  // get new videos
 
@@ -802,6 +816,7 @@ export const updateCourse = async (req, res) => {
       );
     }
 
+    course.status = "Pending";  // update status
     await course.save();
 
     return res.json({
@@ -926,7 +941,7 @@ export const generateImageUploadSignature = async (req, res) => {
     }
 
     const timestamp = Math.round((new Date()).getTime() / 1000);
-    let public_id = `ins_${userId}_course_image`;
+    let public_id = `ins_${userId}_course_image_${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
     let folder = 'drafts';
     const transformation = 'w_1280,h_720,c_fill,g_auto,f_auto,q_auto,d_av4_khpvlh';
 

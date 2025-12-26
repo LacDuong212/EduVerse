@@ -1,8 +1,7 @@
 import ChatbotWidget from "../app/chatbot";
+import ProtectedRoute from "../components/ProtectedRoute";
 import ScrollToTop from "../components/ScrollToTop";
-import InstructorLayout from "../layouts/InstructorLayout";
-import PublicRouteLayout from "../layouts/PublicRouteLayout";
-import StudentLayout from "../layouts/StudentLayout";
+import RoleBasedLayout from "../layouts/RoleBasedLayout";
 
 import { publicRoutes, authRoutes, studentRoutes, instructorRoutes } from "./index";
 
@@ -26,37 +25,40 @@ const AppRouter = props => {
   return (
     <>
       <ScrollToTop />
-
       {!shouldHideChat && <ChatbotWidget />}
 
       <Routes>
         <Route path="/" element={<Navigate to="/home" replace />} />
 
         {/* INSTRUCTOR ROUTES */}
-        {userData?.role.toLowerCase() === "instructor" && (instructorRoutes || []).map((route, idx) => (
-          <Route
-            key={idx + route.name}
-            path={route.path}
-            element={
-              <InstructorLayout {...props} isNested={route.isNested}>
-                {route.element}
-              </InstructorLayout>
-            }
-          />
-        ))}
+        <Route element={<ProtectedRoute allowedRole={"instructor"} />}>
+          {(instructorRoutes || []).map((route, idx) => (
+            <Route
+              key={idx + route.name}
+              path={route.path}
+              element={
+                <RoleBasedLayout {...props} isNested={route.isNested}>
+                  {route.element}
+                </RoleBasedLayout>
+              }
+            />
+          ))}
+        </Route>
 
         {/* STUDENT ROUTES */}
-        {userData?.role.toLowerCase() === "student" && (studentRoutes || []).map((route, idx) => (
-          <Route
-            key={idx + route.name}
-            path={route.path}
-            element={
-              <StudentLayout {...props} isNested={route.isNested}>
-                {route.element}
-              </StudentLayout>
-            }
-          />
-        ))}
+        <Route element={<ProtectedRoute allowedRole={"student"} />}>
+          {(studentRoutes || []).map((route, idx) => (
+            <Route
+              key={idx + route.name}
+              path={route.path}
+              element={
+                <RoleBasedLayout isNested={route.isNested}>
+                  {route.element}
+                </RoleBasedLayout>
+              }
+            />
+          ))}
+        </Route>
 
         {/* AUTH ROUTES */}
         {(authRoutes || []).map((route, idx) =>
@@ -68,15 +70,17 @@ const AppRouter = props => {
         )}
 
         {/* PUBLIC ROUTES */}
-        <Route element={<PublicRouteLayout />}>
-          {(publicRoutes || []).map((route, idx) => (
-            <Route
-              key={idx + route.name}
-              path={route.path}
-              element={route.element}
-            />
-          ))}
-        </Route>
+        {(publicRoutes || []).map((route, idx) => (
+          <Route
+            key={idx + route.name}
+            path={route.path}
+            element={
+              <RoleBasedLayout>
+                {route.element}
+              </RoleBasedLayout>
+            }
+          />
+        ))}
 
       </Routes>
     </>

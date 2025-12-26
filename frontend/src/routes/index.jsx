@@ -71,6 +71,10 @@ export const publicRoutes = [{
   name: 'Instructor Details',
   element: <InstructorDetailsPage />
 }, {
+  path: '/student/become-instructor',
+  name: 'Become Instructor',
+  element: <BecomeInstructorPage />
+}, {
   path: '/*',
   name: 'Not Found',
   element: <NotFoundPage />
@@ -216,8 +220,4 @@ export const studentRoutes = [{
   name: 'Deactivate Account',
   isNested: true,
   element: null
-}, {
-  path: '/student/become-instructor',
-  name: 'Become Instructor',
-  element: <BecomeInstructorPage />
 }];

@@ -1,6 +1,7 @@
 import { useSelector } from "react-redux";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import NotFoundPage from "../app/not-found";
+import RoleBasedLayout from "../layouts/RoleBasedLayout";
 
 
 export default function ProtectedRoute({ allowedRole }) {
@@ -18,11 +19,11 @@ export default function ProtectedRoute({ allowedRole }) {
     );
   }
 
-  if (allowedRole) {
-    if (allowedRole !== userData?.role) return (
-      <Outlet>
+  if (allowedRole && allowedRole !== userData?.role) {
+    return (
+      <RoleBasedLayout isNested={false}>
         <NotFoundPage />
-      </Outlet>
+      </RoleBasedLayout>
     );
   }
 

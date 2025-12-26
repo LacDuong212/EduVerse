@@ -14,6 +14,7 @@ const Banner = () => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const { userData } = useSelector((state) => state.auth);
 
+  const [isInstructor, setIsInstructor] = useState(false);
   const [isRegistered, setIsRegistered] = useState(false);
   const [isLoadingCheck, setIsLoadingCheck] = useState(true);
 
@@ -42,6 +43,13 @@ const Banner = () => {
   }, [userData, setValue]);
 
   const checkInstructorStatus = async () => {
+    if (userData?.role.toLowerCase() === "instructor") {
+      setIsLoadingCheck(false);
+      setIsRegistered(true);
+      setIsInstructor(true);
+      return;
+    }
+
     setIsLoadingCheck(true);
     try {
       const res = await axios.get(
@@ -154,22 +162,32 @@ const Banner = () => {
             Unlock the potential of learners around the globe by sharing your expertise.
             Whether you're an industry pro or a passionate enthusiast, you have the power to inspire.
           </p>
-          <p className="text-muted">
+          <p>
             Connect with millions of students, make a real difference in their careers, and turn your knowledge into a rewarding journey doing what you love.
           </p>
-          <div className="alert alert-warning d-inline-flex align-items-center mt-2">
-              <div>
-                <strong>Warning:</strong><br />
-                After your instructor status is approved, you will lose access to your existing student data.
-              </div>
+          <div className="alert alert-warning d-flex align-items-center mt-2 w-100">
+            <div>
+              <strong>Warning:</strong><br />
+              After your instructor status is approved, you will lose access to your existing student data.
             </div>
-          {!isLoadingCheck && isRegistered && (
-            <div className="alert alert-success d-inline-flex align-items-center mt-2">
+          </div>
+          {!isLoadingCheck && isRegistered && !isInstructor && (
+            <div className="alert alert-success d-flex align-items-center mt-2 w-100">
               <i className="bi bi-check-circle-fill me-2 fs-5"></i>
               <div>
                 <strong>Application Submitted!</strong><br />
-                Your instructor profile is waiting for approval. 
+                Your instructor profile is waiting for approval.
                 If the review takes too long, please contact the admin via email: lduongwinf@gmail.com
+              </div>
+            </div>
+          )}
+          {isInstructor && (
+            <div className="alert alert-success d-flex align-items-center mt-2 w-100">
+              <i className="bi bi-check-circle-fill me-2 fs-5"></i>
+              <div>
+                <strong>Application Approved!</strong><br />
+                Your are already an instructor!
+                Happy teaching!
               </div>
             </div>
           )}

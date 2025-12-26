@@ -69,7 +69,7 @@ const Step1 = ({ stepperInstance, draftData, onSave }) => {
     level: '',
     language: '',
     duration: '',
-    durationUnit: 'hour',
+    durationUnit: 'second',
     price: '',
     discountPrice: '',
     enableDiscount: false,

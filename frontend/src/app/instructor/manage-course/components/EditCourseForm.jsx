@@ -218,10 +218,39 @@ const EditCourseForm = () => {
     } catch (error) {
       console.error('Failed to submit course changes', error);
 
-      const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Failed to submit course changes";
+      let message = "Failed to submit course changes";
+      if (error.response) {
+        const status = error.response.status;
+        const serverMessage = error.response.data?.message;
+
+        switch (status) {
+          case 413:
+            message = "Course too large! Please reduce the size of your course.";
+            break;
+          case 400:
+            message = serverMessage || "Invalid data. Please check your inputs.";
+            break;
+          case 401:
+            message = serverMessage || "Session expired. Please login again.";
+            break;
+          case 403:
+            message = serverMessage || "You do not have permission to create a course.";
+            break;
+          case 404:
+            message = serverMessage || "Course not found. It may have been deleted.";
+            break;
+          case 500:
+            message = serverMessage || "Server error. Please try again later.";
+            break;
+          default:
+            message = serverMessage || `Error: ${status}`;
+        }
+      } else if (error.request) {
+        message = "Network error. Please check your internet connection.";
+      } else {
+        message = error.message;
+      }
+
       toast.error(message);
     } finally {
       setIsSubmitting(false);
