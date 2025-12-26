@@ -1,5 +1,3 @@
-import courseImg18 from '@/assets/images/courses/4by3/18.jpg';
-import courseImg21 from '@/assets/images/courses/4by3/21.jpg';
 import GlightBox from '@/components/GlightBox';
 import { useVideoStream } from '@/hooks/useStreamUrl';
 import { formatCurrency } from '@/utils/currency';
@@ -26,18 +24,9 @@ import {
 import {
   FaBookOpen,
   FaClock,
-  FaCopy,
-  FaFacebookSquare,
   FaGlobe,
-  FaLinkedin,
-  FaMedal,
   FaPlay,
-  FaShareAlt,
   FaSignal,
-  FaStar,
-  FaStopwatch,
-  FaTwitterSquare,
-  FaUserClock
 } from 'react-icons/fa';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
@@ -157,10 +146,10 @@ const Tags = ({ tags = [] }) => {
       <ul className="list-inline mb-0">
         {tags.map((tag, idx) => (
           <li className="list-inline-item" key={idx}>
-            <Button 
+            <Button
               as={Link}
               to={`/courses?search=${encodeURIComponent(tag)}`}
-              variant="outline-light" 
+              variant="outline-light"
               size="sm"
             >
               {tag}
@@ -178,7 +167,6 @@ const CourseDetails = ({ course, owned, onAddToCart }) => {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  // 🔹 handle đổi tab (giữ nguyên logic)
   const handleSelectTab = (k) => {
     if (!k) return;
 
@@ -288,9 +276,8 @@ const CourseDetails = ({ course, owned, onAddToCart }) => {
                       role="tabpanel"
                     >
                       <Curriculum
-                        coursePrice={
-                          course?.discountPrice || course?.price || 0
-                        }
+                        coursePrice={course?.discountPrice || course?.price || 0}
+                        premiumAction={onAddToCart}
                       />
                     </TabPane>
 
@@ -368,18 +355,10 @@ const CourseDetails = ({ course, owned, onAddToCart }) => {
                       </span>
                       <span>{course?.language}</span>
                     </li>
-                    {/* <li className="list-group-item d-flex justify-content-between align-items-center">
-                      <span className="h6 fw-light mb-0">
-                        <FaMedal className="fa-fw text-primary me-1" />
-                        Certificate
-                      </span>
-                      <span>Yes</span>
-                    </li> */}
                   </ul>
                 </Card>
               </Col>
               <Col md={6} lg={12}>
-                {/* <RecentlyViewed /> */}
                 <Tags tags={course?.tags || []} />
               </Col>
             </Row>

@@ -5,10 +5,25 @@ import { BsQuestionCircle, BsX } from "react-icons/bs";
 import { FaFacebook, FaGlobe, FaInstagram, FaLinkedin, FaUndo, FaYoutube } from "react-icons/fa";
 import { toast } from 'react-toastify';
 
+// constants
+const MAX_INPUT_LENGTH = {
+  name: 48,
+  phonenumber: 18,
+  bio: 256,
+  facebook: 128,
+  instagram: 128,
+  linkedin: 128,
+  youtube: 128,
+  website: 128,
+};
+const MAX_BIO_LINES = 5;
+
 const MyProfile = () => {
   const { user, uploadAvatar, isAvatarUploading, updateProfile } = useProfile();
   const [previewAvatar, setPreviewAvatar] = useState(null);
-  const currentAvatarSrc = previewAvatar === "" ? null : (previewAvatar || user?.pfpImg);
+
+  const savedAvatarSrc = user?.pfpImg || "";
+  const currentAvatarSrc = previewAvatar === "" ? null : (previewAvatar || savedAvatarSrc);
 
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
@@ -33,6 +48,20 @@ const MyProfile = () => {
     e.preventDefault();
     e.stopPropagation();
     setPreviewAvatar("");
+  };
+
+  const handleBioChange = (e) => {
+    const value = e.target.value;
+
+    // split by line breaks
+    const lines = value.split(/\r\n|\r|\n/);
+
+    if (lines.length <= MAX_BIO_LINES) {
+      e.target.value = value;
+    } else {
+      // prevent adding more lines
+      e.preventDefault();
+    }
   };
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -81,7 +110,6 @@ const MyProfile = () => {
       const result = await updateProfile(payload);
       if (result && result.success) {
         toast.success('Profile updated');
-        setPreviewAvatar(null);
       } else {
         toast.error(result?.message || 'Failed to update profile');
       }
@@ -118,7 +146,7 @@ const MyProfile = () => {
                     >
                       <BsX size={24} />
                     </button>
-                  ) : (
+                  ) : (savedAvatarSrc &&
                     <button
                       type="button"
                       className="btn btn-primary btn-sm position-absolute top-0 start-100 translate-middle rounded-circle p-0 d-flex align-items-center justify-content-center border border-2 border-white"
@@ -144,6 +172,7 @@ const MyProfile = () => {
                     <input
                       type="text"
                       name="name"
+                      maxLength={MAX_INPUT_LENGTH.name}
                       className="form-control"
                       defaultValue={user?.name || ""}
                     />
@@ -174,6 +203,7 @@ const MyProfile = () => {
                     <input
                       type="text"
                       name="phonenumber"
+                      maxLength={MAX_INPUT_LENGTH.phonenumber}
                       className="form-control"
                       defaultValue={user?.phonenumber || ''}
                     />
@@ -185,8 +215,16 @@ const MyProfile = () => {
 
           <Col xs={12}>
             <label className="h5 form-label mt-4">Bio</label>
-            <textarea className="form-control" name="bio" rows={3} placeholder='I am not a robot...' defaultValue={user?.bio} />
-            <div className="form-text">Brief description for your profile.</div>
+            <textarea
+              className="form-control"
+              maxLength={MAX_INPUT_LENGTH.bio}
+              name="bio"
+              rows={3}
+              placeholder='I am not a robot...'
+              defaultValue={user?.bio}
+              onChange={handleBioChange}
+            />
+            <div className="form-text">Brief description for your profile. Max 5 lines.</div>
           </Col>
 
           <Col xs={12}>
@@ -196,35 +234,35 @@ const MyProfile = () => {
                 <FaFacebook className="fab fa-facebook text-facebook me-2 fs-5" />
                 Facebook profile URL
               </label>
-              <input className="form-control" type="text" name="facebook" placeholder="facebook.com/your_username" defaultValue={user?.socials?.facebook || ''} />
+              <input className="form-control" maxLength={MAX_INPUT_LENGTH.facebook} type="text" name="facebook" placeholder="facebook.com/your_username" defaultValue={user?.socials?.facebook || ''} />
             </div>
             <div className="mb-3">
               <label className="form-label d-flex align-items-center mb-0">
                 <FaInstagram className="fab fa-instagram text-danger mb-1 me-2 fs-5" />
                 Instagram profile URL
               </label>
-              <input className="form-control" type="text" name="instagram" placeholder="instagram.com/your_username" defaultValue={user?.socials?.instagram || ''} />
+              <input className="form-control" maxLength={MAX_INPUT_LENGTH.instagram} type="text" name="instagram" placeholder="instagram.com/your_username" defaultValue={user?.socials?.instagram || ''} />
             </div>
             <div className="mb-3">
               <label className="form-label d-flex align-items-center mb-0">
                 <FaLinkedin className="fa fa-linkedin text-linkedin mb-1 me-2 fs-5" />
                 Linkedin profile URL
               </label>
-              <input className="form-control" type="text" name="linkedin" placeholder="linkedin.com/in/your_username" defaultValue={user?.socials?.linkedin || ''} />
+              <input className="form-control" maxLength={MAX_INPUT_LENGTH.linkedin} type="text" name="linkedin" placeholder="linkedin.com/in/your_username" defaultValue={user?.socials?.linkedin || ''} />
             </div>
             <div className="mb-3">
               <label className="form-label d-flex align-items-center mb-0">
                 <FaYoutube className="fab fa-youtube text-youtube mb-1 me-2 fs-5" />
                 YouTube channel URL
               </label>
-              <input className="form-control" type="text" name="youtube" placeholder="youtube.com/@your_channel" defaultValue={user?.socials?.youtube || ''} />
+              <input className="form-control" maxLength={MAX_INPUT_LENGTH.youtube} type="text" name="youtube" placeholder="youtube.com/@your_channel" defaultValue={user?.socials?.youtube || ''} />
             </div>
             <div className="mb-3">
               <label className="form-label d-flex align-items-center mb-0">
                 <FaGlobe className="text-success mb-1 me-2 fs-5" />
                 Website URL
               </label>
-              <input className="form-control" type="text" name="website" defaultValue={user?.website || ''} placeholder="https://www.example.com" />
+              <input className="form-control" maxLength={MAX_INPUT_LENGTH.website} type="text" name="website" defaultValue={user?.website || ''} placeholder="https://www.example.com" />
             </div>
           </Col>
 

@@ -1,5 +1,4 @@
 import ChatbotWidget from "../app/chatbot";
-import ProtectedRoute from "../components/ProtectedRoute";
 import ScrollToTop from "../components/ScrollToTop";
 import InstructorLayout from "../layouts/InstructorLayout";
 import PublicRouteLayout from "../layouts/PublicRouteLayout";
@@ -20,7 +19,7 @@ const AppRouter = props => {
   const { isLoggedIn, userData } = useSelector(state => state.auth);
   const location = useLocation();
 
-  const shouldHideChat = HIDE_CHATBOT.some(path => 
+  const shouldHideChat = HIDE_CHATBOT.some(path =>
     location.pathname.startsWith(path)
   );
 
@@ -35,28 +34,28 @@ const AppRouter = props => {
 
         {/* INSTRUCTOR ROUTES */}
         {userData?.role.toLowerCase() === "instructor" && (instructorRoutes || []).map((route, idx) => (
-            <Route
-              key={idx + route.name}
-              path={route.path}
-              element={
-                <InstructorLayout {...props} isNested={route.isNested}>
-                  {route.element}
-                </InstructorLayout>
-              }
-            />
+          <Route
+            key={idx + route.name}
+            path={route.path}
+            element={
+              <InstructorLayout {...props} isNested={route.isNested}>
+                {route.element}
+              </InstructorLayout>
+            }
+          />
         ))}
 
         {/* STUDENT ROUTES */}
         {userData?.role.toLowerCase() === "student" && (studentRoutes || []).map((route, idx) => (
-            <Route
-              key={idx + route.name}
-              path={route.path}
-              element={
-                <StudentLayout {...props} isNested={route.isNested}>
-                  {route.element}
-                </StudentLayout>
-              }
-            />
+          <Route
+            key={idx + route.name}
+            path={route.path}
+            element={
+              <StudentLayout {...props} isNested={route.isNested}>
+                {route.element}
+              </StudentLayout>
+            }
+          />
         ))}
 
         {/* AUTH ROUTES */}
@@ -64,7 +63,7 @@ const AppRouter = props => {
           <Route
             key={idx + route.name}
             path={route.path}
-            element={route.element}
+            element={isLoggedIn ? (<Navigate to="/home" replace />) : route.element}
           />
         )}
 

@@ -131,6 +131,7 @@ export const getMyCourses = async (req, res) => {
     });
   }
 };
+
 export const getMyCourseById = async (req, res) => {
   try {
     const userId = req.userId;
@@ -250,6 +251,40 @@ export const getMyCourseById = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Error fetching course detail",
+      error: error?.message || error,
+    });
+  }
+};
+
+// 
+export const isMyCourseById = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { courseId } = req.params;
+
+    if (!userId) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Unauthorized: no userId" });
+    }
+
+    const student = await Student.findOne({
+      user: userId,
+      "myCourses.course": courseId,
+    }).select("_id");
+
+    // if student is found = enrolled
+    const isEnrolled = !!student;
+
+    return res.status(200).json({
+      success: true,
+      isEnrolled,
+    });
+  } catch (error) {
+    console.error("isMyCourseById error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error checking enrollment status",
       error: error?.message || error,
     });
   }

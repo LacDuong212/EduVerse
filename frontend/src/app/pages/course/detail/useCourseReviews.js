@@ -1,20 +1,23 @@
 import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
+import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 
+// helper: map review object from response
 function mapReviewFromApi(review) {
   return {
     id: review._id,
     name: review.user?.name || "Student",
     avatar:
       review.user?.pfpImg ||
-      "/images/avatar-placeholder.png", // TODO: đổi path theo project
+      "https://res.cloudinary.com/dw1fjzfom/image/upload/v1757337425/av4_khpvlh.png",
     rating: review.rating ?? 0,
     description: review.description || "",
     time: review.updatedAt || review.createdAt,
   };
 }
 
+// helper: calculate review stats
 function computeStats(reviews) {
   const total = reviews.length;
   if (!total) {
@@ -42,16 +45,11 @@ function computeStats(reviews) {
   };
 }
 
-/**
- * Hook cho toàn bộ logic review của 1 course:
- * - GET /api/reviews/user/:courseId (nếu login) / fallback /:courseId (guest)
- * - POST /api/reviews
- * - PATCH /api/reviews/:reviewId
- * - DELETE /api/reviews/:reviewId
- */
 export default function useCourseReviews(courseId, options = {}) {
   const { pageSize = 10 } = options;
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
+  const { userData } = useSelector((state) => state.auth);
 
   const [userReviews, setUserReviews] = useState([]);
   const [othersReviews, setOthersReviews] = useState([]);
@@ -62,125 +60,90 @@ export default function useCourseReviews(courseId, options = {}) {
   });
   const [page, setPage] = useState(1);
 
-  const [loading, setLoading] = useState(false);        // load list
-  const [actionLoading, setActionLoading] = useState(false); // create/update/delete
-  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
 
-  // ✅ NEW: trạng thái enroll (đã mua / đã học) course này chưa
   const [isEnrolled, setIsEnrolled] = useState(false);
-  const [isEnrolledChecking, setIsEnrolledChecking] = useState(false);
+  const [isEnrolledChecking, setIsEnrolledChecking] = useState(true); // default true to allow check to run
 
-  // ✅ NEW: check xem user có sở hữu course không
+  // check enrollment status
   useEffect(() => {
-    if (!courseId || !backendUrl) return;
+    if (!courseId) return;
+
+    // if not student
+    if (!userData || userData.role?.toLowerCase() !== "student") {
+      setIsEnrolled(false);
+      setIsEnrolledChecking(false);
+      return;
+    }
 
     let cancelled = false;
-
     const checkEnroll = async () => {
       setIsEnrolledChecking(true);
       try {
         const { data } = await axios.get(
-          `${backendUrl}/api/student/my-courses/${courseId}`,
+          `${backendUrl}/api/student/my-courses/check/${courseId}`,
           { withCredentials: true }
         );
 
-        if (cancelled) return;
-
-        if (data?.success && data.course) {
-          setIsEnrolled(true);
-        } else {
-          setIsEnrolled(false);
+        if (!cancelled && data?.success) {
+          setIsEnrolled(data.isEnrolled);
         }
       } catch (err) {
-        if (cancelled) return;
-        // 401/403 hoặc lỗi khác -> coi như chưa enroll / guest
-        setIsEnrolled(false);
+        if (!cancelled) setIsEnrolled(false);
       } finally {
         if (!cancelled) setIsEnrolledChecking(false);
       }
     };
 
     checkEnroll();
+    return () => { cancelled = true; };
+  }, [backendUrl, courseId, userData]);
 
-    return () => {
-      cancelled = true;
-    };
-  }, [backendUrl, courseId]);
-
+  // fetch reviews
   const fetchReviews = useCallback(async () => {
     if (!courseId || !backendUrl) return;
+    
+    // prevent double-fetch
+    if (userData && userData.role?.toLowerCase() === "student" && isEnrolledChecking) return;
 
     setLoading(true);
-    setError(null);
-
     try {
-      // 1️⃣ cố gắng dùng endpoint user (có auth)
-      const urlUser = `${backendUrl}/api/reviews/user/${courseId}`;
-      const resUser = await axios.get(urlUser, {
-        params: { page, limit: pageSize },
-        withCredentials: true,
-      });
+      let endpoint = "";
+      let config = { params: { page, limit: pageSize } };
 
-      if (resUser.data?.success) {
-        const {
-          userReviews: user = [],
-          othersReviews: others = [],
-          pagination: pag,
-        } = resUser.data;
-
-        setUserReviews(user.map(mapReviewFromApi));
-        setOthersReviews(others.map(mapReviewFromApi));
-        if (pag) setPagination(pag);
+      if (isEnrolled) {
+        endpoint = `${backendUrl}/api/reviews/user/${courseId}`;
+        config.withCredentials = true;
       } else {
-        // success=false nhưng vẫn 200 => fallback guest
-        const urlGuest = `${backendUrl}/api/reviews/${courseId}`;
-        const resGuest = await axios.get(urlGuest, {
-          params: { page, limit: pageSize },
-        });
+        endpoint = `${backendUrl}/api/reviews/${courseId}`;
+      }
 
-        if (resGuest.data?.success) {
-          const {
-            othersReviews: others = [],
-            pagination: pag,
-          } = resGuest.data;
-          setUserReviews([]);
-          setOthersReviews(others.map(mapReviewFromApi));
-          if (pag) setPagination(pag);
+      const { data } = await axios.get(endpoint, config);
+
+      if (data?.success) {
+        if (isEnrolled) {
+          setUserReviews((data.userReviews || []).map(mapReviewFromApi));
+        } else {
+          setUserReviews([]); 
         }
+        setOthersReviews((data.othersReviews || []).map(mapReviewFromApi));
+        if (data.pagination) setPagination(data.pagination);
       }
     } catch (err) {
-      // 2️⃣ lỗi auth => dùng endpoint guest
-      if (err.response?.status === 401 || err.response?.status === 403) {
-        try {
-          const urlGuest = `${backendUrl}/api/reviews/${courseId}`;
-          const resGuest = await axios.get(urlGuest, {
-            params: { page, limit: pageSize },
-          });
-
-          if (resGuest.data?.success) {
-            const {
-              othersReviews: others = [],
-              pagination: pag,
-            } = resGuest.data;
-            setUserReviews([]);
-            setOthersReviews(others.map(mapReviewFromApi));
-            if (pag) setPagination(pag);
-          }
-        } catch (guestErr) {
-          setError(guestErr);
-        }
-      } else {
-        setError(err);
-      }
+      console.error(err);
+      toast.error("Failed to load reviews");
     } finally {
       setLoading(false);
     }
-  }, [backendUrl, courseId, page, pageSize]);
+  }, [backendUrl, courseId, page, pageSize, isEnrolled, isEnrolledChecking, userData]);
 
+  // trigger fetch when enrollment status is determined/changes
   useEffect(() => {
     fetchReviews();
   }, [fetchReviews]);
 
+  // Calculations
   const allReviews = [...userReviews, ...othersReviews];
   const stats = computeStats(allReviews);
 
@@ -195,7 +158,6 @@ export default function useCourseReviews(courseId, options = {}) {
   const createReview = async ({ rating, description }) => {
     if (!courseId) return { success: false };
 
-    // ✅ NEW: chặn luôn từ frontend nếu chưa enroll
     if (!isEnrolled) {
       toast.error("You must enroll in this course before leaving a review.");
       return { success: false };
@@ -275,22 +237,16 @@ export default function useCourseReviews(courseId, options = {}) {
   };
 
   return {
-    // data
     userReviews,
     othersReviews,
     allReviews,
-    stats,          // { averageRating, totalReviews, distribution }
+    stats,
     pagination,
     page,
-    isEnrolled,          // ✅ NEW: export cho component dùng
-    isEnrolledChecking,  // ✅ NEW: export nếu UI muốn show loading
-
-    // loading & error
+    isEnrolled,
+    isEnrolledChecking,
     loading,
     actionLoading,
-    error,
-
-    // actions
     goToPage,
     createReview,
     updateReview,
