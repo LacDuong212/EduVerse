@@ -1,6 +1,4 @@
-// app/pages/course-learning/CourseDetail.jsx (đường dẫn tuỳ bạn)
-
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import {
   Card,
   CardBody,
@@ -18,9 +16,8 @@ import {
 import { useParams } from "react-router-dom";
 
 import CourseMaterial from "./CourseMaterial";
-// import Discussion from "./Discussion";
-import useLearningCourseDetail from "../useLearningCourse";   // hook fetch course
-import useCourseProgress from "@/hooks/useCourseProgress";         // hook progress
+import useLearningCourseDetail from "../useLearningCourse";
+import useCourseProgress from "@/hooks/useCourseProgress";
 
 const CourseDetail = () => {
   const { courseId } = useParams(); // /student/courses/:courseId
@@ -179,10 +176,9 @@ const CourseDetail = () => {
                         previewVideo={course.previewVideo}
                         instructor={course.instructor}
                         description={course.description}
-                        lectureTracking={lectureTracking} // ✅ tracking
+                        lectureTracking={lectureTracking}
                       />
 
-                      {/* progressError chỉ cảnh báo, không chặn curriculum */}
                       {progressError && (
                         <p className="text-danger small mt-2">
                           Cannot load progress: {String(progressError)}
@@ -190,13 +186,11 @@ const CourseDetail = () => {
                       )}
                     </TabPane>
 
-                    {/* TAB: DISCUSSION */}
                     <TabPane
                       eventKey="discussion"
                       className="fade"
                       role="tabpanel"
                     >
-                      {/* <Discussion courseId={course._id} /> */}
                     </TabPane>
                   </TabContent>
                 </CardBody>

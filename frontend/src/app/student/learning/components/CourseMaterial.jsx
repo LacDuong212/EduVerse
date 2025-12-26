@@ -9,11 +9,8 @@
   import { FaPlay } from "react-icons/fa";
   import { BsCheckCircleFill } from "react-icons/bs";
   import course1 from "@/assets/images/courses/4by3/01.jpg";
+  import { secondsToDuration } from "@/utils/duration";
 
-  // Props nhận từ CourseDetail:
-  // - title, description, previewVideo, instructor (tuỳ bạn dùng trong header nếu muốn)
-  // - curriculum: [{ section, lectures: [{ _id, title, videoUrl, duration, isFree }] }]
-  // - lectureTracking?: { [lectureId]: { status: "completed" | "in-progress" | "not-started", progress?: number } }
   const CourseMaterial = ({
     title,
     description,
@@ -228,7 +225,7 @@
 
                           {lecture.duration != null && (
                             <li className="nav-item">
-                              {Math.round(lecture.duration)} min
+                              {secondsToDuration(lecture.duration)}
                             </li>
                           )}
 
