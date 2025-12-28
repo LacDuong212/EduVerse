@@ -7,41 +7,48 @@ import SimpleAppMenu from '@/components/TopNavBar/components/SimpleAppMenu';
 import TopbarMenuToggler from '@/components/TopNavBar/components/TopbarMenuToggler';
 import { useLayoutContext } from '@/context/useLayoutContext';
 
-import { Container } from 'react-bootstrap';
+import { Container, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 import { Link } from "react-router";
 import { CiHeart } from "react-icons/ci";
 import { BsCart3 } from 'react-icons/bs';
 
 const TopNavigationBar = () => {
   const { appMenuControl } = useLayoutContext();
-  const navigate = useNavigate();
 
   const cartCount = useSelector((state) => state.cart?.totalItem || 0);
   const wishlistCount = useSelector((state) => (state.wishlist?.items || []).length);
 
-  const onLogoClick = (e) => {
-    e.preventDefault();
-    navigate('/home');
-  };
-
   return (
     <TopNavbar>
       <Container>
-        <div onClick={onLogoClick} style={{ cursor: 'pointer' }}>
-          <Link className="navbar-brand py-0" to="/">
-            <LogoBox width={130} />
-          </Link>
-        </div>
+        <OverlayTrigger
+          placement="bottom"
+          overlay={<Tooltip>Home</Tooltip>}
+        >
+          <span className="d-inline-block">
+            <Link className="navbar-brand py-0" to="/home">
+              <LogoBox width={130} />
+            </Link>
+          </span>
+        </OverlayTrigger>
+
         <TopbarMenuToggler />
         <SimpleAppMenu mobileMenuOpen={appMenuControl.open} menuClassName="mx-auto" topMenuItems={STUDENT_APP_MENU_ITEMS} />
-        <ul className="nav flex-row align-items-center list-unstyled ms-xl-auto">
+
+        <ul className="nav flex-row align-items-center justify-content-end gap-2 gap-md-3 list-unstyled">
+          
           <NotificationDropdown />
-          <li className="nav-item ms-3 position-relative" style={{ cursor: 'pointer' }}>
-            <Link to="/student/wishlist" className="btn btn-light btn-round mb-0 arrow-none">
-              <CiHeart className="bi bi-cart3 fa-fw fs-5" />
-            </Link>
+
+          <li className="nav-item position-relative" style={{ cursor: 'pointer' }}>
+            <OverlayTrigger
+              placement="bottom"
+              overlay={<Tooltip>Wishlist</Tooltip>}
+            >
+              <Link to="/student/wishlist" className="btn btn-light btn-round mb-0 arrow-none">
+                <CiHeart className="bi bi-cart3 fa-fw fs-5" />
+              </Link>
+            </OverlayTrigger>
             {wishlistCount > 0 && (
               <span
                 className="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-danger mt-xl-2 ms-n1"
@@ -51,10 +58,16 @@ const TopNavigationBar = () => {
               </span>
             )}
           </li>
-          <li className="nav-item ms-3 position-relative" style={{ cursor: 'pointer' }}>
-            <Link to="/student/cart" className="btn btn-light btn-round mb-0 arrow-none">
-              <BsCart3 className="bi bi-cart3 fa-fw" />
-            </Link>
+          
+          <li className="nav-item position-relative" style={{ cursor: 'pointer' }}>
+            <OverlayTrigger
+              placement="bottom"
+              overlay={<Tooltip>Cart</Tooltip>}
+            >
+              <Link to="/student/cart" className="btn btn-light btn-round mb-0 arrow-none">
+                <BsCart3 className="bi bi-cart3 fa-fw" />
+              </Link>
+            </OverlayTrigger>
             {cartCount > 0 && (
               <span
                 className="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-primary mt-xl-2 ms-n1"
@@ -64,7 +77,8 @@ const TopNavigationBar = () => {
               </span>
             )}
           </li>
-          <ProfileDropdown className="nav-item ms-3" dropdownItems={STUDENT_ACCOUNT_DROPDOWN_ITEMS} />
+
+          <ProfileDropdown className="nav-item" dropdownItems={STUDENT_ACCOUNT_DROPDOWN_ITEMS} />
         </ul>
       </Container>
     </TopNavbar>

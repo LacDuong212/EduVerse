@@ -62,16 +62,16 @@ const ProfileDropdown = ({ className, dropdownItems }) => {
 
       {/* Menu */}
       <DropdownMenu as="ul" className="dropdown-animation dropdown-menu-end shadow mt-2" aria-labelledby="profileDropdown">
-        <li className="px-3 mb-3">
+        <li className="px-3">
           <div className="d-flex align-items-center">
             <div className="avatar me-3">
               {user?.pfpImg ? (
                 <img
-                  className="avatar-img rounded-circle border border-light border-2 shadow"
+                  className="avatar-img rounded-circle border border-body border-2 shadow"
                   src={user.pfpImg}
                   alt="User Avatar" />
               ) : (
-                <div className="avatar-img rounded-circle border border-white border-1 shadow d-flex align-items-center justify-content-center bg-light text-dark fw-bold fs-4">
+                <div className="avatar-img rounded-circle border border-body border-1 shadow d-flex align-items-center justify-content-center bg-light text-dark fw-bold fs-4">
                   {(user?.name?.[0] || "U").toUpperCase()}
                 </div>
               )}

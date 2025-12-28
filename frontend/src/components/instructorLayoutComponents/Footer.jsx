@@ -11,7 +11,7 @@ const Footer = () => {
       <Container>
         <Row className="align-items-center">
           <Col md={4} className="text-center text-md-start mb-3 mb-md-0">
-            <Link to="/">
+            <Link to="/home">
               <img className="h-20px" src={logoLight} height={20} width={94} alt="logo" />
             </Link>
           </Col>

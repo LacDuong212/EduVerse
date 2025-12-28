@@ -22,7 +22,7 @@ const Footer = ({
       <Container>
         <Row className="g-4">
           <Col lg={3}>
-            <Link className="me-0" to="/">
+            <Link className="me-0" to="/home">
               <img className="light-mode-item h-40px" width={189} height={40} src={logo} alt="logo" />
               <img className="dark-mode-item h-40px" width={189} height={40} src={logoLight} alt="logo" />
             </Link>
@@ -31,26 +31,22 @@ const Footer = ({
             </p>
             <ul className="list-inline mb-0 mt-3">
               <li className="list-inline-item">
-
-                <a className="btn btn-white btn-sm shadow px-2 text-facebook" href="#">
+                <a className="btn btn-white btn-sm shadow px-2 text-facebook">
                   <FaFacebookF className="fa-fw" />
                 </a>
               </li>
               <li className="list-inline-item">
-
-                <a className="btn btn-white btn-sm shadow px-2 text-instagram" href="#">
+                <a className="btn btn-white btn-sm shadow px-2 text-instagram">
                   <FaInstagram className="fa-fw" />
                 </a>
               </li>
               <li className="list-inline-item">
-
-                <a className="btn btn-white btn-sm shadow px-2 text-twitter" href="#">
+                <a className="btn btn-white btn-sm shadow px-2 text-twitter">
                   <FaTwitter className="fa-fw" />
                 </a>
               </li>
               <li className="list-inline-item">
-
-                <a className="btn btn-white btn-sm shadow px-2 text-linkedin" href="#">
+                <a className="btn btn-white btn-sm shadow px-2 text-linkedin">
                   <FaLinkedinIn className="fa-fw" />
                 </a>
               </li>
@@ -62,7 +58,7 @@ const Footer = ({
                 <h5 className="mb-2 mb-md-4">{link.title}</h5>
                 <ul className="nav flex-column">
                   {link.items.map((item, idx) => <li className="nav-item" key={idx}>
-                    <Link className="nav-link" to={item.link ?? ''}>
+                    <Link className="nav-link" to={item.link ?? ""}>
                       {item.name}
                     </Link>
                   </li>)}
@@ -102,7 +98,7 @@ const Footer = ({
               <div className="text-body text-primary-hover">
 
                 Copyrights ©{currentYear} EduVerse. Modified by{" "}
-                <Link to="#" target="_blank" className="text-body">
+                <Link target="_blank" className="text-body">
                   {OUR_GROUP_NAME}
                 </Link>
               </div>
@@ -137,14 +133,14 @@ const Footer = ({
                     </Dropdown>
                   </li>
                   <li className="list-inline-item">
-                    <a className="nav-link" href="#">
+                    <Link className="nav-link" href="#">
                       Terms of use
-                    </a>
+                    </Link>
                   </li>
                   <li className="list-inline-item">
-                    <a className="nav-link pe-0" href="#">
+                    <Link className="nav-link pe-0" href="#">
                       Privacy policy
-                    </a>
+                    </Link>
                   </li>
                 </ul>
               </div>
