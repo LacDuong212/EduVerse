@@ -139,7 +139,7 @@ export const updateCourseStatus = async (req, res) => {
       console.log("Final Instructor ID (String):", instructorId);
 
       // Call User Backend API
-      await axios.post('http://localhost:5000/api/internal/notify', {
+      await axios.post(`${process.env.BACKEND_USER}/api/internal/notify`, {
         userId: instructorId,
         type: notiType,
         message: notiMessage
