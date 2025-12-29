@@ -22,7 +22,11 @@ const app = express();
 // Connect to MongoDB
 await connectDB();
 
-const allowedOrigins = ['http://localhost:5173', 'http://localhost:5174'];
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5174',
+  process.env.CLIENT_URL,
+];
 
 //Middleware
 app.use(express.json());
