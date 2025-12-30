@@ -37,7 +37,7 @@ export default function useSignIn() {
 
       navigate(redirectTo, { replace: true });
     } catch (err) {
-      toast.error("Login failed. Please try again.");
+      toast.error(err || "Login failed. Please try again.");
     } finally {
       setLoading(false);
     }

@@ -25,18 +25,18 @@ export const authAdminRoutes = [{
   path: '/auth/sign-in',
   name: 'Admin Sign In',
   element: <AdminSignIn />
-}, {
-  path: '/auth/sign-up',
-  name: 'Admin Sign Up',
-  element: <AdminSignUp />
-}, {
-  path: '/auth/forgot-password',
-  name: 'Admin Forgot Password',
-  element: <AdminForgotPassword />
-}, {
-  path: '/auth/reset-password',
-  name: 'Admin Reset Password',
-  element: <AdminResetPassword />
+// }, {
+//   path: '/auth/sign-up',
+//   name: 'Admin Sign Up',
+//   element: <AdminSignUp />
+// }, {
+//   path: '/auth/forgot-password',
+//   name: 'Admin Forgot Password',
+//   element: <AdminForgotPassword />
+// }, {
+//   path: '/auth/reset-password',
+//   name: 'Admin Reset Password',
+//   element: <AdminResetPassword />
 }];
 
 export const adminRoutes = [{

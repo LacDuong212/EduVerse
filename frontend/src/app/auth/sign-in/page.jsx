@@ -1,14 +1,19 @@
 import PageMetaData from '@/components/PageMetaData';
+import { useState } from 'react';
 import { Col, Row } from 'react-bootstrap';
 import { FaChevronLeft, FaGoogle } from "react-icons/fa";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import AuthLayout from "@/app/auth/components/AuthLayout";
 import SignInForm from "@/app/auth/sign-in/components/SignInForm";
+import EmailVerifyModal from "@/app/auth/email-verify/EmailVerifyModal";
 
 export default function SignInPage() {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const location = useLocation();
-  
+  const navigate = useNavigate();
+  const [showVerifyModal, setShowVerifyModal] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState("");
+
   return <>
     <PageMetaData title="Sign-In" />
     <AuthLayout>
@@ -26,7 +31,12 @@ export default function SignInPage() {
             </div>
             <h1 className="fs-2">Login into EduVerse!</h1>
             <p className="lead mb-4">Nice to see you! Please log in with your account.</p>
-            <SignInForm />
+            <SignInForm 
+              onSignUpSuccess={(email) => {
+                setRegisteredEmail(email);
+                setShowVerifyModal(true);
+              }}
+            />
             <Row>
               <div className="position-relative my-4">
                 <hr />
@@ -47,6 +57,17 @@ export default function SignInPage() {
           </Col>
         </Row>
       </Col>
+
+      <EmailVerifyModal
+        show={showVerifyModal}
+        onHide={() => setShowVerifyModal(false)}
+        email={registeredEmail}
+        mode="register"
+        onVerifySuccess={() => {
+          setShowVerifyModal(false);
+          navigate("/auth/sign-in");
+        }}
+      />
     </AuthLayout>
   </>;
 }

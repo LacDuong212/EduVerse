@@ -73,7 +73,17 @@ export default function useEmailVerify(initialEmail = "", onVerifySuccess) {
       if (onVerifySuccess) onVerifySuccess(userEmail);
 
     } catch (error) {
-      toast.error(error.response?.data?.message || "Verification failed");
+      if (error.response) {
+        const { data } = error.response;
+        toast.error(data?.message || "Verification Error");
+      } else if (error.request) {
+        // if network error (server is down or unreachable)
+        toast.error("Unable to connect to server. Please try again later.");
+      } else {
+        // if unknown error
+        console.log("Verify email error: ", error)
+        toast.error("An unexpected error occurred.");
+      }
     } finally {
       setLoading(false);
     }

@@ -3,10 +3,10 @@ import IconTextFormInput from '@/components/form/IconTextFormInput';
 import { Link } from "react-router-dom";
 import { BsEnvelopeFill } from "react-icons/bs";
 import { FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
-import useSignIn from "@/app/auth/sign-in/useSignIn";
+import useSignIn from "../useSignIn";
 
-export default function SignInForm() {
-  const { loading, login, control } = useSignIn();
+export default function SignInForm({ onSignUpSuccess }) {
+  const { loading, login, control } = useSignIn(onSignUpSuccess);
 
   const [showPassword, setShowPassword] = useState(false);
 
@@ -22,7 +22,9 @@ export default function SignInForm() {
           icon={BsEnvelopeFill}
           placeholder="E-mail"
           label="Email address *"
-          name="email" />
+          name="email"
+          disabled={loading}
+        />
       </div>
 
       <div className="mb-4 position-relative">
@@ -32,7 +34,9 @@ export default function SignInForm() {
           icon={FaLock}
           placeholder="Password"
           label="Password *"
-          name="password" />
+          name="password" 
+          disabled={loading}
+        />
         
         <button
             type="button" 
@@ -57,7 +61,11 @@ export default function SignInForm() {
       <div className="align-items-center mt-0">
         <div className="d-grid">
           <button className="btn btn-primary mb-0" disabled={loading} type="submit">
-            Login
+            {loading ? (
+                <span>Signing in...</span> 
+            ) : (
+                "Login"
+            )}
           </button>
         </div>
       </div>
