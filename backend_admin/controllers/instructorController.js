@@ -182,7 +182,7 @@ export const approveInstructor = async (req, res) => {
     try {
       const userId = String(instructor.user?._id || instructor.user);
 
-      await axios.post('http://localhost:5000/api/internal/notify', {
+      await axios.post(`${process.env.BACKEND_USER}/api/internal/notify`, {
         userId: userId,
         type: 'APPROVED',
         message: 'Congratulations! Your instructor application has been approved. You can now create courses.'
@@ -217,7 +217,7 @@ export const rejectInstructor = async (req, res) => {
     try {
       const userId = String(deletedRequest.user?._id || deletedRequest.user);
 
-      await axios.post('http://localhost:5000/api/internal/notify', {
+      await axios.post(`${process.env.BACKEND_USER}/api/internal/notify`, {
         userId: userId,
         type: 'REJECTED',
         message: 'We are sorry, but your instructor application has been rejected. Please contact support for more details.'

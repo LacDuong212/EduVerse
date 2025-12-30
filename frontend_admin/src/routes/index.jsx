@@ -17,7 +17,7 @@ const AdminStudents = lazy(() => import('@/app/students/page'));
 const AdminInstructors = lazy(() => import('@/app/instructors/page'));
 // const AdminAdminstrators = lazy(() => import('@/app/administrators/page'));
 const AdminInstructorRequests = lazy(() => import('@/app/instructor-requests/page'));
-const AdminReviews = lazy(() => import('@/app/reviews/page'));
+// const AdminReviews = lazy(() => import('@/app/reviews/page'));
 const AdminEarnings = lazy(() => import('@/app/earnings/page'));
 const AdminSettings = lazy(() => import('@/app/admin-settings/page'));
 
