@@ -5,6 +5,7 @@ import path from "path";
 import { pipeline } from "stream/promises";
 import { getObject } from "../utils/aws/getObject.js";
 
+import Course from "../models/courseModel.js"
 import CourseProgress from "../models/courseProgressModel.js";
 import QuizProgress from "../models/quizProgressModel.js";
 
@@ -158,26 +159,45 @@ export const processVideoWithGemini = async (videoKey) => {
 };
 
 export const generateAssessmentService = async (userId, courseId) => {
-    const quizData = await QuizProgress.findOne({ userId, courseId });
-    if (!quizData) {
-        throw new Error("No quiz data found for assessment.");
+    const [quizData, course] = await Promise.all([
+        QuizProgress.findOne({ userId, courseId }),
+        Course.findById(courseId).select("title curriculum")
+    ]);
+
+    if (!quizData || !course) {
+        throw new Error("Required data for assessment not found.");
     }
+
+    const allLecturesInCourse = course.curriculum.flatMap(section => section.lectures);
 
     let totalScore = 0, totalMax = 0;
     const topicMistakes = {}; 
+    const passedLectureIds = [];
 
     quizData.quizzes.forEach(q => {
         totalScore += q.score;
         totalMax += q.totalQuestions;
+
+        if (q.score === q.totalQuestions && q.totalQuestions > 0) {
+            passedLectureIds.push(q.lectureId.toString());
+        }
+
         q.wrongAnswers.forEach(w => {
-            const topic = w.topic || "General";
+            const topic = w.topic || "General Concepts";
             topicMistakes[topic] = (topicMistakes[topic] || 0) + 1;
         });
     });
 
+    const strongPointsList = allLecturesInCourse
+        .filter(lec => passedLectureIds.includes(lec._id.toString()))
+        .map(lec => lec.title);
+
     const avgScore = totalMax === 0 ? 0 : Math.round((totalScore / totalMax) * 100);
+    
     const weakTopics = Object.entries(topicMistakes)
-        .sort(([, a], [, b]) => b - a).slice(0, 3).map(([k]) => k);
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 3)
+        .map(([topicName]) => topicName);
 
     const model = genAI.getGenerativeModel({ 
         model: "gemini-2.5-flash",
@@ -197,25 +217,27 @@ export const generateAssessmentService = async (userId, courseId) => {
     });
 
     const prompt = `
-      Act as an AI Mentor. Evaluate the student's performance based on the following data:
-      - Total Score: ${avgScore}/100.
-      - Weak Topics (frequently missed): ${weakTopics.join(", ") || "None"}.
+      Act as an expert AI Mentor. Evaluate the student's performance for the course: "${course.title}".
       
-      **Requirements:**
-      1. **Summary:** An encouraging overview (2-3 sentences).
-      2. **Strengths:** Identify 2 strong points based on the score.
-      3. **Weaknesses:** Identify 2 areas for improvement based on weak topics.
-      4. **Recommendation:** Specific advice to improve.
+      **Student Data:**
+      - Overall Course Score: ${avgScore}/100.
+      - Mastered Lessons (100% correct): ${strongPointsList.length > 0 ? strongPointsList.join(", ") : "Showing consistent effort"}.
+      - Weak Areas (Concepts missed): ${weakTopics.length > 0 ? weakTopics.join(", ") : "No major weaknesses detected"}.
+      
+      **Requirements for your response:**
+      1. **Summary:** 2-3 encouraging sentences about their journey in "${course.title}".
+      2. **Strengths:** Identify 2 strengths. Use the Mastered Lessons list as concrete evidence.
+      3. **Weaknesses:** Identify 2 areas to review based on the Weak Areas.
+      4. **Recommendation:** 1-2 actionable tips to improve or move to advanced topics.
 
-      **OUTPUT MUST BE IN ENGLISH.**
-      Return JSON format.
+      **OUTPUT MUST BE IN ENGLISH. RETURN JSON ONLY.**
     `;
 
     const result = await model.generateContent(prompt);
     const aiData = JSON.parse(result.response.text());
 
     const courseProgress = await CourseProgress.findOne({ userId, courseId });
-    if (!courseProgress) throw new Error("Course progress not found.");
+    if (!courseProgress) throw new Error("Course progress record not found.");
 
     courseProgress.isCompleted = true;
     courseProgress.aiAssessment = { 
@@ -225,6 +247,5 @@ export const generateAssessmentService = async (userId, courseId) => {
     };
     
     await courseProgress.save();
-
     return courseProgress.aiAssessment;
 };

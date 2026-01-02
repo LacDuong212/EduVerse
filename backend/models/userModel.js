@@ -24,25 +24,18 @@ const userSchema = new mongoose.Schema({
   googleId: { type: String, unique: true, sparse: true }
 }, { timestamps: true });
 
-userSchema.post("save", async function () {
-  await Course.updateMany(
-    { "instructor.ref": this._id },
-    {
-      "instructor.name": this.name,
-      "instructor.avatar": this.avatar
-    }
-  );
-});
-
-userSchema.post("save", async function () {
+userSchema.post("findByIdAndUpdate", async function (doc) {
+  console.log("erdtfygvhbujnk");
   if (!this.isModified("name") && !this.isModified("avatar")) return;
 
   try {
     await Course.updateMany(
-      { "instructor.ref": this._id },
+      { "instructor.ref": doc._id },
       {
-        "instructor.name": this.name,
-        "instructor.avatar": this.avatar
+        $set: {
+          "instructor.name": doc.name,
+          "instructor.avatar": doc.pfpImg
+        }
       }
     );
   } catch (err) {
