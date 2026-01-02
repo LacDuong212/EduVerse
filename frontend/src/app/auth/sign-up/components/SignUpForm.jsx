@@ -4,16 +4,20 @@ import { Controller, useForm } from "react-hook-form";
 import { BsEnvelopeFill } from "react-icons/bs";
 import { FaLock, FaUser, FaEye, FaEyeSlash } from "react-icons/fa";
 import { yupResolver } from "@hookform/resolvers/yup";
-import useSignUp from "@/app/auth/sign-up/useSignUp";
+import useSignUp from "../useSignUp";
 
 import { signUpSchema } from '../signUpSchema';
+import { useSearchParams } from "react-router-dom";
 
 export default function SignUpForm({ onSignUpSuccess }) {
+  const [searchParams] = useSearchParams();
+  const emailFromUrl = searchParams.get("email") || "";
+
   const { control, handleSubmit, formState: { errors } } = useForm({
     resolver: yupResolver(signUpSchema),
     defaultValues: {
       name: "",
-      email: "",
+      email: emailFromUrl,
       password: "",
       confirmPassword: "",
       terms: false,
@@ -23,10 +27,7 @@ export default function SignUpForm({ onSignUpSuccess }) {
   const { loading, signUp } = useSignUp(onSignUpSuccess);
 
   const [showPassword, setShowPassword] = useState(false);
-
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const onSubmit = (data) => {
     const { confirmPassword, terms, ...payload } = data;
@@ -66,13 +67,15 @@ export default function SignUpForm({ onSignUpSuccess }) {
           placeholder="Password"
           label="Password *"
           name="password"
+          disabled={loading}
         />
 
         <button
             type="button" 
-            onClick={togglePasswordVisibility}
+            onClick={() => setShowPassword(!showPassword)}
             className="position-absolute end-0 top-50 mt-3 translate-middle-y me-3 border-0 bg-transparent text-secondary"
             style={{ zIndex: 5 }} 
+            disabled={loading}
         >
             {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
         </button>
@@ -82,20 +85,22 @@ export default function SignUpForm({ onSignUpSuccess }) {
       <div className="mb-4 position-relative">
         <IconTextFormInput
           control={control}
-          type={showPassword ? 'text' : 'password'}
+          type={showConfirm ? 'text' : 'password'}
           icon={FaLock}
           placeholder="Confirm Password"
           label="Confirm Password *"
           name="confirmPassword"
+          disabled={loading}
         />
 
         <button
             type="button" 
-            onClick={togglePasswordVisibility}
+            onClick={() => setShowConfirm(!showConfirm)}
             className="position-absolute end-0 top-50 mt-3 translate-middle-y me-3 border-0 bg-transparent text-secondary"
             style={{ zIndex: 5 }} 
+            disabled={loading}
         >
-            {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+            {showConfirm ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
         </button>
       </div>
 

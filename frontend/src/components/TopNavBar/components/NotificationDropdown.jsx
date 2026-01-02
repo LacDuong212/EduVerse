@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Dropdown, DropdownToggle, DropdownMenu, Card, CardHeader, CardBody, CardFooter } from 'react-bootstrap';
+import { Dropdown, DropdownToggle, DropdownMenu, Card, CardHeader, CardBody, CardFooter, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { BsBan, BsBell, BsCheckCircle, BsInfoCircle, BsExclamationCircle } from 'react-icons/bs';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
@@ -80,8 +80,8 @@ const NotificationItem = ({ noti }) => {
         </div>
         <div>
           <h6 className="mb-1">{noti.type || "New Notification"}</h6>
-          <p className="text-body m-0 fw-bold">{noti.message}</p>
-          <small>{formatTimeAgo(noti.createdAt)}</small>
+          <p className="text-body m-0">{noti.message}</p>
+          <small className="text-secondary">{formatTimeAgo(noti.createdAt)}</small>
         </div>
 
         {!noti.isRead && (
@@ -92,7 +92,7 @@ const NotificationItem = ({ noti }) => {
   );
 };
 
-const NotificationDropdown = () => {
+const NotificationDropdown = ({ className }) => {
   const { userData } = useSelector((state) => state.auth);
   const { socket } = useSocketContext();
 
@@ -107,7 +107,7 @@ const NotificationDropdown = () => {
           setNotifications(res.data);
           setUnreadCount(res.data.filter(n => !n.isRead).length);
         } catch (err) {
-          console.error("Lỗi tải thông báo:", err);
+          console.error("Error loading notification:", err);
         }
       };
       fetchNotifications();
@@ -134,13 +134,13 @@ const NotificationDropdown = () => {
         await axios.put(`${BACKEND_URL}/api/notifications/mark-all-read/${userData._id}`);
         setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
       } catch (err) {
-        console.error("Lỗi mark read:", err);
+        console.error("Failed to mark as read:", err);
       }
     }
   };
 
   const handleClearAll = async (e) => {
-    e.preventDefault(); 
+    e.preventDefault();
 
     if (!userData?._id) return;
 
@@ -149,7 +149,7 @@ const NotificationDropdown = () => {
       setUnreadCount(0);
 
       await axios.delete(`${BACKEND_URL}/api/notifications/clear-all/${userData._id}`);
-      
+
       console.log("All notifications have been deleted!");
     } catch (err) {
       console.error("Error deleting notifications:", err);
@@ -159,42 +159,47 @@ const NotificationDropdown = () => {
   return (
     <Dropdown
       drop="start"
-      className="nav-item ms-2 ms-md-3"
+      className={className}
       onToggle={handleToggle}
     >
-      <DropdownToggle
-        className="btn btn-light btn-round mb-0 arrow-none"
-        role="button"
-        style={{ overflow: 'visible' }}
+      <OverlayTrigger
+        placement="bottom"
+        overlay={<Tooltip>Notifications</Tooltip>}
       >
-        <BsBell className="bi bi-cart3 fa-fw fs-10" />
-        {unreadCount > 0 && (
-          <span className="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-warning mt-xl-2 ms-n1" style={{ zIndex: 10, pointerEvents: 'none' }}>
-            {unreadCount > 99 ? '99+' : unreadCount}
-          </span>
-        )}
-      </DropdownToggle>
+        <DropdownToggle
+          className="btn btn-light btn-round mb-0 arrow-none"
+          role="button"
+          style={{ overflow: 'visible' }}
+        >
+          <BsBell className="bi bi-cart3 fa-fw fs-10" />
+          {unreadCount > 0 && (
+            <span className="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-warning mt-xl-2 ms-n1" style={{ zIndex: 10, pointerEvents: 'none' }}>
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </span>
+          )}
+        </DropdownToggle>
+      </OverlayTrigger>
 
-      <DropdownMenu className="dropdown-animation dropdown-menu-end dropdown-menu-size-md p-0 shadow-lg border-0">
+      <DropdownMenu className="dropdown-animation dropdown-menu-end dropdown-menu-size-md p-0 shadow-lg border-0 mt-2">
         <Card className="bg-transparent">
-          <CardHeader className="bg-transparent border-bottom py-4 d-flex justify-content-between align-items-center">
+          <CardHeader className="bg-transparent border-bottom py-3 d-flex justify-content-between">
             <h6 className="m-0">
               Notifications
             </h6>
-            <Link className="small" to="#" onClick={handleClearAll}>
+            <Link className="small fw-bold" to="#" onClick={handleClearAll}>
               Clear all
             </Link>
           </CardHeader>
 
           <CardBody className="p-0">
-            <ul className="list-group list-unstyled list-group-flush" style={{ maxHeight: '400px', overflowY: 'auto' }}>
+            <ul className="list-group list-unstyled list-group-flush" style={{ maxHeight: '420px', overflowY: 'auto' }}>
               {notifications.length > 0 ? (
                 notifications.map((noti, idx) => (
                   <NotificationItem key={noti._id || idx} noti={noti} />
                 ))
               ) : (
-                <li className="p-4 text-center text-muted">
-                  <BsBell size={24} className="mb-2 opacity-25" />
+                <li className="p-4 text-center">
+                  <BsBell size={24} className="mb-2" />
                   <p className="small m-0">No notifications yet</p>
                 </li>
               )}

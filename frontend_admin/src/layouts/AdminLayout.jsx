@@ -1,4 +1,4 @@
-import { lazy } from 'react';
+
 import { useDispatch } from 'react-redux';
 import { Offcanvas, OffcanvasBody, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { BsGearFill, BsGlobe, BsPower } from 'react-icons/bs';
@@ -7,11 +7,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { logoutAdmin } from '@/redux/adminSlice';
 import logoImg from '@/assets/images/logo/logo_light.svg';
 import AppMenu from '@/components/admin/AppMenu';
+import NavbarTopbar from '@/components/adminLayoutComponents/NavbarTopbar';
 import { useLayoutContext } from '@/context/useLayoutContext';
 import useViewPort from '@/hooks/useViewPort';
-
-
-const NavbarTopbar = lazy(() => import('@/components/adminLayoutComponents/NavbarTopbar'));
 
 const AdminLayout = ({ children }) => {
   const { width } = useViewPort();

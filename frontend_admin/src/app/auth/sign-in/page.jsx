@@ -15,11 +15,11 @@ export default function SignInPage() {
             <h1 className="fs-2">Login into EduVerse!</h1>
             <p className="lead mb-4">Nice to see you! Please log in with your account.</p>
             <SignInForm />
-            <div className="mt-4 text-center">
+            {/* <div className="mt-4 text-center">
               <span>
                 Don&apos;t have an account? <Link to="/auth/sign-up">Sign up now!</Link>
               </span>
-            </div>
+            </div> */}
           </Col>
         </Row>
       </Col>

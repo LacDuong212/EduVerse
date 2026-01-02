@@ -3,52 +3,48 @@ import { GUEST_APP_MENU_ITEMS } from '@/assets/data/menu-items.js';
 import LogoBox from '@/components/LogoBox';
 import TopNavbar from '@/components/TopNavBar';
 import SimpleAppMenu from '@/components/TopNavBar/components/SimpleAppMenu';
+import TopbarMenuToggler from '@/components/TopNavBar/components/TopbarMenuToggler';
 import { useLayoutContext } from '@/context/useLayoutContext';
-import { Container } from 'react-bootstrap';
-import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { Container, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from 'react-bootstrap';
+
 const TopNavigationBar = () => {
   const { appMenuControl } = useLayoutContext();
   const navigate = useNavigate();
 
-  const onLogoClick = (e) => {
-    e.preventDefault();
-    navigate('/home');
-  };
-  const onCartClick = (e) => {
-    // Chặn Bootstrap dropdown toggle, điều hướng luôn
-    e.preventDefault();
-    e.stopPropagation();
-    navigate('/student/cart');
-  };
   return (
     <TopNavbar>
       <Container >
-        {/* ✅ Logo */}
-        <div onClick={onLogoClick} style={{ cursor: 'pointer' }}>
-          <LogoBox width={130} />
-        </div>
+        <OverlayTrigger
+          placement="bottom"
+          overlay={<Tooltip>Home</Tooltip>}
+        >
+          <span className="d-inline-block">
+            <Link className="navbar-brand py-0" to="/home">
+              <LogoBox width={130} />
+            </Link>
+          </span>
+        </OverlayTrigger>
 
-        {/* ✅ Menu giữa */}
+        <TopbarMenuToggler />
         <SimpleAppMenu
           mobileMenuOpen={appMenuControl.open}
           menuClassName="mx-auto"
           topMenuItems={GUEST_APP_MENU_ITEMS}
         />
 
-        {/* ✅ Nút Login / Register */}
-        <div className="d-flex align-items-center ms-xl-auto pt-1">
+        <div className="d-flex align-items-center ms-xl-auto gap-2">
           <Button
             variant="outline-primary"
-            className="me-2 d-flex align-items-center"
+            className="d-flex align-items-center mb-0"
             onClick={() => navigate('/auth/sign-in')}
           >
             Sign-in
           </Button>
           <Button
             variant="primary"
-            className="d-flex align-items-center"
+            className="d-flex align-items-center mb-0"
             onClick={() => navigate('/auth/sign-up')}
           >
             Sign-up

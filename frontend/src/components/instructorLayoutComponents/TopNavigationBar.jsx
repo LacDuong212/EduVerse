@@ -21,7 +21,7 @@ const TopNavigationBar = () => {
           overlay={<Tooltip>Home</Tooltip>}
         >
           <span className="d-inline-block">
-            <Link className="navbar-brand py-0" to="/">
+            <Link className="navbar-brand py-0" to="/home">
               <LogoBox width={130} />
             </Link>
           </span>
@@ -34,9 +34,9 @@ const TopNavigationBar = () => {
           topMenuItems={INSTRUCTOR_APP_MENU_ITEMS}
         />
 
-        <ul className="nav flex-row align-items-center list-unstyled ms-xl-auto">
+        <ul className="nav flex-row align-items-center justify-content-end gap-2 gap-md-3 list-unstyled">
           <NotificationDropdown />
-          <ProfileDropdown className="nav-item ms-3" dropdownItems={INSTRUCTOR_ACCOUNT_DROPDOWN_ITEMS} />
+          <ProfileDropdown className="nav-item" dropdownItems={INSTRUCTOR_ACCOUNT_DROPDOWN_ITEMS} />
         </ul>
       </Container>
     </TopNavbar>

@@ -6,8 +6,10 @@ import {
     logout,
     forgotPassword, 
     resetPassword,
-    verifyEmail } from '../controllers/authController.js';
+    verifyEmail,
+    sendOTP, 
 
+} from '../controllers/authController.js';
 import { 
     loginSchema, 
     registerSchema, 
@@ -31,6 +33,7 @@ authRoute.get('/is-auth', checkAuth, isAuthenticated);
 authRoute.post('/forgot-password', validate(forgotPasswordSchema), forgotPassword);
 authRoute.post('/reset-password', validate(resetPasswordSchema), resetPassword);
 authRoute.post('/verify-email', validate(verifyEmailSchema), verifyEmail);
+authRoute.post('/send-otp', sendOTP);
 
 authRoute.get('/google', (req, res, next) => {
   const redirectTo = req.query.redirectTo || '/';

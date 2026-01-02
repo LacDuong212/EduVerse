@@ -74,7 +74,7 @@ const Step1 = ({ stepperInstance, draftData, onSave }) => {
     discountPrice: '',
     enableDiscount: false,
     description: '',
-    isPrivate: true,
+    isPrivate: false,
   });
 
   const draftDataString = JSON.stringify(draftData);
@@ -89,12 +89,12 @@ const Step1 = ({ stepperInstance, draftData, onSave }) => {
       level: draftData.level || '',
       language: draftData.language || '',
       duration: draftData.duration || '',
-      durationUnit: draftData.durationUnit || 'hour',
+      durationUnit: draftData.durationUnit || 'second',
       price: toFormattedString(draftData.price === 0 ? 0 : draftData.price),
       discountPrice: toFormattedString(draftData.discountPrice || ''),
       enableDiscount: draftData.enableDiscount || false,
       description: draftData.description || '',
-      isPrivate: draftData.isPrivate !== undefined ? draftData.isPrivate : true,
+      isPrivate: draftData.isPrivate ?? false,
     });
   }, [draftDataString]);
 

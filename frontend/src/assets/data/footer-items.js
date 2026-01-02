@@ -5,10 +5,10 @@ export const footerLinks = [{
   title: 'Company',
   items: [{
     name: 'About us',
-    link: '/about'
+    // link: '/about'
   }, {
     name: 'Contact us',
-    link: '/contact'
+    // link: '/contact-us'
   }, {
     name: 'News and Blogs'
   }, {
@@ -22,7 +22,7 @@ export const footerLinks = [{
     name: 'Documentation'
   }, {
     name: 'Faq',
-    link: '/help/faq'
+    // link: '/help/faq'
   }, {
     name: 'Form'
   }, {
@@ -32,17 +32,17 @@ export const footerLinks = [{
   title: 'Teaching',
   items: [{
     name: 'Become a teacher',
-    link: '/become-instructor'
+    link: '/student/become-instructor'
   }, {
     name: 'How to guide',
-    link: '/help/faq'
+    // link: '/help/faq'
   }, {
     name: 'Term & condition'
   }]
 }];
 export const footerLinks2 = [{
   name: 'About',
-  link: '/pages/about/about-us'
+  // link: '/pages/about/about-us'
 }, {
   name: 'Terms'
 }, {

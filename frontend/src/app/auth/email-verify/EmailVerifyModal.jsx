@@ -5,7 +5,7 @@ export default function EmailVerifyModal({ show, onHide, email, onVerifySuccess 
   const emailVerify = useEmailVerify(email, onVerifySuccess);
 
   return (
-    <Modal show={show} onHide={onHide} centered>
+    <Modal show={show} onHide={onHide} centered onEntered={() => emailVerify.inputRefs.current[0]?.focus()}>
       <Form onSubmit={emailVerify.onSubmit} onPaste={emailVerify.handlePaste}>
         <Modal.Header className="border-0 position-relative">
       <Modal.Title className="w-100 text-center m-0">

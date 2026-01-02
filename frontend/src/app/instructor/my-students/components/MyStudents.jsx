@@ -1,9 +1,11 @@
 import ChoicesFormInput from '@/components/form/ChoicesFormInput';
 import { Card, CardBody, CardFooter, CardHeader, Col, OverlayTrigger, ProgressBar, Row, Tooltip } from 'react-bootstrap';
 import { FaAngleLeft, FaAngleRight, FaRegEnvelope, FaSearch } from 'react-icons/fa';
+import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 
 const StudentRow = ({ studentData = {} }) => {
+  const id = studentData?._id || studentData?.id;
   return (
     <tr>
       <td className="ps-3">
@@ -23,7 +25,7 @@ const StudentRow = ({ studentData = {} }) => {
           </div>
           <div className="mb-0 ms-2">
             <h6 className="mb-0">
-              <a href={`/instructor/students/${studentData?._id}`}>{studentData?.name}</a>
+              <Link to={null}>{studentData?.name}</Link>
             </h6>
           </div>
         </div>
