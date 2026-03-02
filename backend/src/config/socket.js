@@ -14,7 +14,7 @@ export const initSocket = (server) => {
       methods: ["GET", "POST"],
       credentials: true
     },
-    transports: ['polling', 'websocket'],
+    transports: ["polling", "websocket"],
     pingTimeout: 60000, 
     
     connectionStateRecovery: {
@@ -24,12 +24,10 @@ export const initSocket = (server) => {
   });
 
   io.on("connection", (socket) => {
-    // 1. Khi user login, báo danh
     socket.on("newUser", (userId) => {
       addNewUser(userId, socket.id);
     });
 
-    // 2. Khi user tắt tab
     socket.on("disconnect", () => {
       removeUser(socket.id);
     });
@@ -38,9 +36,7 @@ export const initSocket = (server) => {
   return io;
 };
 
-// --- Helper Functions ---
 const addNewUser = (userId, socketId) => {
-  // Xóa socket cũ của user đó nếu có (tránh duplicate)
   onlineUsers = onlineUsers.filter(u => u.userId !== userId); 
   onlineUsers.push({ userId, socketId });
   console.log("Online Users:", onlineUsers);

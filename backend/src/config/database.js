@@ -5,7 +5,7 @@ const connectDB = async () => {
     console.log("MongoDB connected successfully");
   })
 
-  await mongoose.connect(`${process.env.MONGODB_URI}/eduverse`);
+  await mongoose.connect(`${process.env.MONGODB_URI}/eduverse2`);
 }
 
 export default connectDB;

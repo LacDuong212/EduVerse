@@ -1,11 +1,9 @@
-import { getLatestLearningProgress } from "../../controllers/learningController.js";
-import { sendMessageToDialogflow } from "../../services/dialogflowService.js";
+import { getLatestLearningProgress } from "#modules/learning/learning.controller.js";
+import { sendMessageToDialogflow } from "#services/dialogflow.service.js";
 
-import { INTENT } from "./chatbotConfig.js";
-import {
-  handleCourseSearch, handleLearningProgress, handlePageNavigation
-} from "./chatbotHandler.js";
-import { protoToJSON, getBotText } from "./chatbotUtils.js";
+import { INTENT } from "./chatbot.config.js";
+import { handleCourseSearch, handleLearningProgress, handlePageNavigation } from "./chatbot.service.js";
+import { protoToJSON, getBotText } from "./chatbot.utils.js";
 
 /**
  * @param {*} req user's message + session (history) + language

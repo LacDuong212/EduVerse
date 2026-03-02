@@ -54,7 +54,7 @@ export const PAGE_MAP = {
   },
 
   // exception ---
-  // cant get details if no id  #TODO: get current page context (fe)
+  // cant get details if no id, #TODO: get current page context (fe)
   "course_details": { path: "/courses" },
   "instructor_details": { path: "/instructors" },
   "my_course_details": {
