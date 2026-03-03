@@ -1,14 +1,26 @@
+import AppError from "#exceptions/app.error.js";
+
 const validate = (schema) => async (req, res, next) => {
   try {
-    await schema.validate({
+    const validatedData = await schema.parseAsync({
       body: req.body,
       query: req.query,
       params: req.params,
     });
-    
+
+    req.body = validatedData.body;
+    req.query = validatedData.query;
+    req.params = validatedData.params;
+
     return next();
   } catch (error) {
-    return res.status(400).json({ success: false, message: error.message });
+    const formattedErrors = error.errors.map(e => ({
+      field: e.path.length > 1 ? e.path[1] : e.path[0],
+      message: e.message
+    }));
+
+    const validationError = new AppError("Validation Failed", 400, formattedErrors);
+    next(validationError);
   }
 };
 

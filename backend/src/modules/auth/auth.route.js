@@ -2,38 +2,18 @@ import express from "express";
 import jwt from "jsonwebtoken";
 import passport from "passport";
 
-import { JWT_EXPIRATION } from "#constants/others.js";
-import { checkAuth } from "#middlewares/user.auth.js";
+import { COOKIE_MAX_AGE, JWT_EXPIRATION } from "#constants/others.js";
+import { checkAuth } from "#middlewares/auth.middleware.js";
 import validate from "#middlewares/validate.js";
-import { 
-  register,
-  login,
-  logout,
-  isAuthenticated,
-  forgotPassword,
-  resetPassword,
-  verifyEmail,
-  sendOTP
-} from "#modules/auth/auth.controller.js";
-import {
-  loginSchema,
-  registerSchema,
-  forgotPasswordSchema,
-  resetPasswordSchema,
-  verifyEmailSchema
-} from "#modules/auth/auth.validation.js";
+import * as authController from "#modules/auth/auth.controller.js";
+import * as authSchema from "#modules/auth/auth.validation.js";
 
 
 const authRoute = express.Router();
 
-authRoute.post("/register", validate(registerSchema), register);
-authRoute.post("/login", validate(loginSchema), login);
-authRoute.post("/logout", logout);
-authRoute.get("/is-auth", checkAuth, isAuthenticated);
-authRoute.post("/forgot-password", validate(forgotPasswordSchema), forgotPassword);
-authRoute.post("/reset-password", validate(resetPasswordSchema), resetPassword);
-authRoute.post("/verify-email", validate(verifyEmailSchema), verifyEmail);
-authRoute.post("/send-otp", sendOTP);
+// authRoute.post("/register", validate(authSchema.registerSchema), authController.register);
+// authRoute.post("/login", validate(authSchema.loginSchema), authController.login);
+// authRoute.post("/logout", authController.logout);
 
 authRoute.get("/google", (req, res, next) => {
   const redirectTo = req.query.redirectTo || "/";
@@ -61,7 +41,7 @@ authRoute.get(
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: COOKIE_MAX_AGE,
     });
 
     const redirectTo = req.query.state || '/';

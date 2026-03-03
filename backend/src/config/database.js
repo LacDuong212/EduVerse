@@ -1,4 +1,7 @@
 import mongoose from "mongoose";
+import { normalizeId } from "#utils/mongoose-plugins.js";
+
+mongoose.plugin(normalizeId);
 
 const connectDB = async () => {
   mongoose.connection.on("connected", () => {

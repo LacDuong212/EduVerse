@@ -1,5 +1,5 @@
-import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
-import userModel from '../models/userModel.js';
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import userModel from "#modules/user/user.model.js";
 
 export default function(passport) {
   passport.use(
@@ -7,7 +7,7 @@ export default function(passport) {
       {
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: '/api/auth/google/callback',
+        callbackURL: "/api/auth/google/callback",
         proxy: true,
       },
       async (accessToken, refreshToken, profile, done) => {

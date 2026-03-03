@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema({
     youtube: { type: String, default: '' },
   },
   pfpImg: { type: String, default: '' },
-  password: { type: String, required: false },
+  password: { type: String, required: false, select: false },
   verifyOtp: { type: String, default: '' },
   verifyOtpExpireAt: { type: Number, default: 0 },
   isVerified: { type: Boolean, default: false },

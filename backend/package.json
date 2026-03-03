@@ -1,22 +1,25 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "server.js",
+  "description": "edv2-backend",
+  "main": "./src/server.js",
   "type": "module",
   "imports": {
     "#config/*": "./src/config/*",
     "#middlewares/*": "./src/middlewares/*",
     "#modules/*": "./src/modules/*",
-    "#shared/*": "./src/shared/*",
+    
     "#constants/*": "./src/shared/constants/*",
+    "#exceptions/*": "./src/shared/exceptions/*",
     "#services/*": "./src/shared/services/*",
-    "#utils/*": "./src/shared/utils/*"
+    "#utils/*": "./src/shared/utils/*",
+    "#shared/*": "./src/shared/*"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "server": "nodemon server.js",
-    "start": "node server.js"
+    "server": "nodemon ./src/server.js",
+    "base": "nodemon server.js", 
+    "start": "node ./src/server.js"
   },
   "keywords": [],
   "author": "",
