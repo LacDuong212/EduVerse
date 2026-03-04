@@ -11,6 +11,12 @@ import apiRouter from "#modules/index.js";
 
 const app = express();
 
+// request logger (for development)
+if (process.env.NODE_ENV === "development") {
+  const { requestLogger } = await import("#middlewares/requestLogger.middleware.js");
+  app.use(requestLogger);
+}
+
 // basic security & parsing
 app.set("trust proxy", 1);
 app.use(express.json({ limit: "5mb" }));

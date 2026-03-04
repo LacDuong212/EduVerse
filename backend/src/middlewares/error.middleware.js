@@ -1,20 +1,18 @@
 import { transformError } from "#exceptions/error.handler.js";
+import logger from "#utils/logger.js";
+import { sendError } from "#utils/response.js";
 
 const errorMiddleware = (err, req, res, next) => {
-  let error = transformError(err);
+  logger.logErrorWithContext(err, req);
+  
+  const error = transformError(err); 
 
   const statusCode = error.statusCode || 500;
-  const status = error.status || "error";
+  const message = error.message || "Internal Server Error";
+  const errors = error.errors || null;
+  const stack = err.stack;
 
-  const response = {
-    success: false,
-    status: status,
-    message: error.message || "Internal Server Error",
-    ...(error.errors && { errors: error.errors }),
-    ...(process.env.NODE_ENV === "development" && { stack: err.stack })
-  };
-
-  res.status(statusCode).json(response);
+  return sendError(res, statusCode, message, errors, stack);
 };
 
 export default errorMiddleware;

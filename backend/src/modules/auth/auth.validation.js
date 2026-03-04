@@ -3,9 +3,10 @@ import { z } from "zod";
 const nameRegex = /^[\p{L}'\-\s]+$/u;
 const otpRegex = /^[0-9]{6}$/;
 
-const emailSchema = z
-  .string({ required_error: "Email is required" })
-  .email("Email must be a valid email");
+const emailSchema = z.string({ required_error: "Email is required" })
+  .trim()
+  .email("Invalid email format")
+  .toLowerCase();
 
 const complexPasswordSchema = z
   .string({ required_error: "Password is required" })
@@ -54,5 +55,11 @@ export const resetPasswordSchema = z.object({
       .string({ required_error: "OTP is required" })
       .regex(otpRegex, "OTP must be 6 digits"),
     newPassword: complexPasswordSchema,
+  }),
+});
+
+export const resendOtpSchema = z.object({
+  body: z.object({
+    email: emailSchema,
   }),
 });
