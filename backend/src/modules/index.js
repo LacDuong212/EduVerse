@@ -18,6 +18,7 @@ import instructorRoute from "#modules/instructor/instructor.route.js";
 // import userRoute from "#modules/user/user.route.js";
 // import wishlistRoute from "#modules/wishlist/wishlist.route.js";
 
+// @route /api
 const apiRouter = Router();
 
 apiRouter.use("/auth", authRoute);

@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import AppError from "#exceptions/app.error.js";
+import { toAuthUserDto } from "#modules/user/user.mapper.js";
 import User from "#modules/user/user.model.js";
 import asyncHandler from "#utils/asyncHandler.js";
 
@@ -12,12 +13,12 @@ export const protect = asyncHandler(async (req, res, next) => {
 
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-  const currentUser = await User.findById(decoded.id).select("-password");
+  const currentUser = await User.findById(decoded.userId).select("-password");
   if (!currentUser) {
     return next(new AppError("The user belonging to this token no longer exists.", 401));
   }
 
-  req.user = currentUser;
+  req.user = toAuthUserDto(currentUser);
   next();
 });
 
@@ -47,9 +48,8 @@ export const checkAuth = async (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
-    const user = await User.findById(decoded.id).select("-password");
-    
-    req.user = user || null;
+    const user = await User.findById(decoded.userId).select("-password");
+    req.user = toAuthUserDto(user);
     
   } catch (error) {
     req.user = null;

@@ -1,7 +1,6 @@
 import AppError from "#exceptions/app.error.js";
 import asyncHandler from "#utils/asyncHandler.js";
-import { sendResponse, sendError } from "#utils/responseHandler.js";
-
+import { sendSuccessResponse } from "#utils/response.js";
 import * as instructorService from "./instructor.service.js";
 
 // @desc  Get instructor details
@@ -14,5 +13,5 @@ export const getInstructorDetails = asyncHandler(async (req, res, next) => {
   }
 
   const instructor = await instructorService.getInstructorDetails(user.id);
-  sendResponse(res, 200, "Instructor details retrieved successfully", instructor);
+  sendSuccessResponse(res, 200, "Instructor details retrieved successfully", instructor);
 });
