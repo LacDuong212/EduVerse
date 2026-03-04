@@ -7,7 +7,7 @@ import * as authService from "./auth.service.js";
 // @route POST /register
 export const register = asyncHandler(async (req, res) => {
   await authService.registerUser(req.body);
-  sendSuccessResponse(res, 200, true, "Registration successful! Please check your email for the OTP to verify your account.");
+  sendSuccessResponse(res, 200, "Registration successful! Please check your email for the OTP to verify your account.");
 });
 
 // @desc  Login user

@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
 import transporter from "#config/nodemailer.js";
 import AppError from "#exceptions/app.error.js";
-import { toAuthUserDto } from "#modules/user/user.mapper.js";
+import { toAuthUserDto } from "#modules/user/user.mapper.js"
 import User from "#modules/user/user.model.js";
 
 export const registerUser = async (userData) => {
@@ -45,7 +45,7 @@ export const registerUser = async (userData) => {
 
   await transporter.sendMail(mailOptions);
   
-  return user;
+  return toAuthUserDto(user);
 };
 
 export const verifyEmail = async (email, otp) => {
@@ -73,7 +73,7 @@ export const verifyEmail = async (email, otp) => {
   user.verifyOtpExpireAt = 0;
   
   await user.save();
-  return user;
+  return toAuthUserDto(user);
 };
 
 export const loginUser = async (email, password) => {
@@ -142,7 +142,6 @@ export const resetPassword = async (email, otp, newPassword) => {
     throw new AppError("Account not verified", 401);
   }
 
-  // 2. Validate OTP
   if (user.verifyOtp !== otp || user.verifyOtp === '') {
     throw new AppError("Invalid OTP", 400);
   }
