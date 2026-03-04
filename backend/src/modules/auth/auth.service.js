@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
 import transporter from "#config/nodemailer.js";
 import AppError from "#exceptions/app.error.js";
-import { toAuthUserDto } from "#modules/user/user.mapper.js";
+import { toAuthUserDto } from "#modules/user/user.mapper.js"
 import User from "#modules/user/user.model.js";
 
 export const registerUser = async (userData) => {
@@ -103,7 +103,7 @@ export const loginUser = async (email, password) => {
 
 export const sendPasswordResetOtp = async (email) => {
   const cleanEmail = email.toLowerCase().trim();
-  const user = await User.findOne({ email: cleanEmail });
+  const user = await userModel.findOne({ email: cleanEmail });
 
   if (!user) {
     return false;
@@ -132,7 +132,7 @@ export const sendPasswordResetOtp = async (email) => {
 export const resetPassword = async (email, otp, newPassword) => {
   const cleanEmail = email.toLowerCase().trim();
   
-  const user = await User.findOne({ email: cleanEmail });
+  const user = await userModel.findOne({ email: cleanEmail });
 
   if (!user) {
     return false;
@@ -142,7 +142,6 @@ export const resetPassword = async (email, otp, newPassword) => {
     throw new AppError("Account not verified", 401);
   }
 
-  // 2. Validate OTP
   if (user.verifyOtp !== otp || user.verifyOtp === '') {
     throw new AppError("Invalid OTP", 400);
   }
@@ -162,7 +161,7 @@ export const resetPassword = async (email, otp, newPassword) => {
 
 export const resendVerificationOtp = async (email) => {
   const cleanEmail = email.toLowerCase().trim();
-  const user = await User.findOne({ email: cleanEmail });
+  const user = await userModel.findOne({ email: cleanEmail });
 
   if (!user) {
     return false;
