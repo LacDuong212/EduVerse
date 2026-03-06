@@ -10,10 +10,10 @@ const logger = {
     console.error(`\x1b[31m[ERROR]\x1b[0m [${new Date().toISOString()}] ${msg}`, error.stack || error);
   },
   logErrorWithContext: (err, req) => {
-    const { method, originalUrl, ip } = req;
+    const { method, originalUrl, statusCode, ip } = req;
     
     console.error("\x1b[31m%s\x1b[0m %s\x1b[31m %s\x1b[0m", "[EXCEPTION]", `[${new Date().toISOString()}]`, "------------------");
-    console.error(`Method: ${method} | URL: ${originalUrl} | IP: ${ip}`);
+    console.error(`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`);
     console.error(`Message: ${err.message}`);
     
     if (process.env.NODE_ENV === "development" && err.stack) {

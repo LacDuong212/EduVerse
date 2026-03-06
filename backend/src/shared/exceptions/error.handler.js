@@ -6,16 +6,16 @@ const handleJWTError = () =>
 const handleJWTExpiredError = () => 
   new AppError("Your session has expired. Please log in again.", 401);
 
-const handleCastErrorDB = (err) => 
-  new AppError(`Invalid ${err.path}: ${err.value}.`, 400);
+const handleCastErrorDB = () => 
+  new AppError("The resource you are looking for has an invalid ID format.", 400);
 
 const handleDuplicateFieldsDB = (err) => {
-  const value = err.errmsg.match(/([""])(\\?.)*?\1/)[0];
-  return new AppError(`Duplicate field value: ${value}. Please use another value!`, 400);
+  const field = Object.keys(err.keyValue)[0];
+  return new AppError(`This ${field} is already in use. Please try another one!`, 400);
 };
 
 export const transformError = (err) => {
-  if (err.name === "CastError") return handleCastErrorDB(err);
+  if (err.name === "CastError") return handleCastErrorDB();
   if (err.code === 11000) return handleDuplicateFieldsDB(err);
   if (err.name === "JsonWebTokenError") return handleJWTError();
   if (err.name === "TokenExpiredError") return handleJWTExpiredError();

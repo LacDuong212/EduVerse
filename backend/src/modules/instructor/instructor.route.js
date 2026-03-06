@@ -5,7 +5,7 @@ import * as instructorController from "./instructor.controller.js";
 const publicRoutes = Router();
 const privateRoutes = Router();
 
-// publicRoutes.post("/", protect, restrictTo("student"), instructorController.applyToBeInstructor);
+publicRoutes.post("/", protect, restrictTo("student"), instructorController.becomeInstructor);
 // publicRoutes.get("/:id", instructorController.getInstructorById);
 
 // privateRoutes.get("/", instructorController.getInstructorDetails);

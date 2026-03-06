@@ -23,24 +23,4 @@ const userSchema = new mongoose.Schema({
   googleId: { type: String, unique: true, sparse: true }
 }, { timestamps: true });
 
-// #TODO: PLEASE MOVE TO SERVICE
-// userSchema.post("findByIdAndUpdate", async function (doc) {
-//   console.log("erdtfygvhbujnk");
-//   if (!this.isModified("name") && !this.isModified("avatar")) return;
-
-//   try {
-//     await Course.updateMany(
-//       { "instructor.ref": doc._id },
-//       {
-//         $set: {
-//           "instructor.name": doc.name,
-//           "instructor.avatar": doc.pfpImg
-//         }
-//       }
-//     );
-//   } catch (err) {
-//     console.error("Failed to update instructor info in courses: ", err);
-//   }
-// });
-
 export default mongoose.model("User", userSchema) || mongoose.models.user;

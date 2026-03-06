@@ -1,7 +1,9 @@
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 import transporter from "#config/nodemailer.js";
 import AppError from "#exceptions/app.error.js";
+import { createNewStudent } from "#modules/student/student.service.js";
 import { toAuthUserDto } from "#modules/user/user.mapper.js"
 import User from "#modules/user/user.model.js";
 
@@ -19,6 +21,7 @@ export const registerUser = async (userData) => {
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   const otpExpiry = Date.now() + 10 * 60 * 1000;
 
+  const isNew = false;
   if (!user) {
     user = new User({
       name,
@@ -27,6 +30,8 @@ export const registerUser = async (userData) => {
       verifyOtp: otp,
       verifyOtpExpireAt: otpExpiry,
     });
+
+    isNew = true;
   } else {
     user.name = name;
     user.password = hashPassword;
@@ -34,7 +39,11 @@ export const registerUser = async (userData) => {
     user.verifyOtpExpireAt = otpExpiry;
   }
 
-  await user.save();
+  const saved = await user.save();
+  
+  if (isNew) {
+    await createNewStudent(saved._id);
+  }
 
   const mailOptions = {
     from: `"EduVerse Support" <${process.env.MAIL_FROM}>`,
@@ -86,7 +95,7 @@ export const loginUser = async (email, password) => {
   }
 
   if (!user.isActivated) {
-    throw new AppError("Your account has been blocked.", 403);
+    throw new AppError("Your account has been deactivated.", 403);
   }
 
   if (!user.isVerified) {
@@ -201,4 +210,12 @@ export const checkValidUser = (user) => {
     isValid: false,
     user: null,
   };
+};
+
+export const getUserFromToken = async (token) => {
+  if (!token) return null;
+
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const user = await User.findById(decoded.userId).select("-password");
+  return toAuthUserDto(user);
 };
