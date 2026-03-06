@@ -1,4 +1,9 @@
 import mongoose from "mongoose";
+import Category from "#modules/category/category.model.js"; // yes
+
+export const DURATION_UNIT_ENUM = ["second", "hour", "minute", "day"];
+export const LEVEL_ENUM = ["all", "beginner", "intermediate", "advanced"];
+export const STATUS_ENUM = ["draft", "pending", "live", "blocked", "rejected"];
 
 const courseSchema = new mongoose.Schema({
   title: { type: String, required: true },
@@ -21,9 +26,9 @@ const courseSchema = new mongoose.Schema({
     avatar: String
   },
 
-  level: { type: String, enum: ["all", "beginner", "intermediate", "advanced"] },
+  level: { type: String, enum: LEVEL_ENUM },
   duration: Number,
-  durationUnit: { type: String, enum: ["hour", "minute", "second", "day"], default: "second" },
+  durationUnit: { type: String, enum: DURATION_UNIT_ENUM, default: DURATION_UNIT_ENUM[0] },
   lecturesCount: Number,
 
   curriculum: [{
@@ -75,7 +80,7 @@ const courseSchema = new mongoose.Schema({
   discountPrice: { type: Number, min: 0, default: null },
   enableDiscount: { type: Boolean, default: false },
 
-  status: { type: String, enum: ["draft", "pending", "live", "blocked", "rejected"], default: "draft" },
+  status: { type: String, enum: STATUS_ENUM, default: STATUS_ENUM[0] },
 
   isPrivate: { type: Boolean, default: true },
   isDeleted: { type: Boolean, default: false }
@@ -83,18 +88,13 @@ const courseSchema = new mongoose.Schema({
   timestamps: true
 });
 
-courseSchema.index({ title: "text", category: 1, subCategory: 1, tags: 1 });
-
-// #TODO: PLEASE MOVE TO SERVICE
-// courseSchema.pre("save", async function (next) {
-//   if (!this.isModified("instructor.ref")) return next();
-
-//   const user = await User.findById(this.instructor.ref).select("name pfpImg");
-//   if (user) {
-//     this.instructor.name = user.name;
-//     this.instructor.avatar = user.pfpImg;
-//   }
-//   next();
-// });
+courseSchema.index({ 
+  title: "text", 
+  subtitle: "text", 
+  tags: "text" 
+}, {
+  weights: { title: 10, tags: 5, subtitle: 2 },
+  name: "CourseSearchIndex"
+});
 
 export default mongoose.model("Course", courseSchema);

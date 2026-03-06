@@ -196,11 +196,6 @@ export const studentRoutes = [{
   isNested: false,
   element: <PaymentFailed />
 }, {
-  path: '/student/payment-info',
-  name: 'Payment Info',
-  isNested: true,
-  element: null
-}, {
   path: '/student/dashboard',
   name: 'dashboard',
   isNested: true,

@@ -1,0 +1,7 @@
+
+
+export const TITLE_MAX_LENGTH = 96;
+export const SUBTITLE_MAX_LENGTH = 186;
+export const DESCRIPTION_MAX_LENGTH = 2000;
+export const SECTION_TITLE_MAX_LENGTH = 128;
+export const LECTURE_TITLE_MAX_LENGTH = 186;

@@ -12,7 +12,7 @@ const PaymentFailedPage = () => {
               <Col xs={12} className="text-center">
                 <img
                   src={failedImg}
-                  className="h-200px h-md-400px mb-4"
+                  className="h-200px h-md-440px mb-4"
                   alt="payment failed"
                 />
                 <h1 className="display-4 text-danger mb-2">Payment Failed</h1>
