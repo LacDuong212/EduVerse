@@ -1,4 +1,5 @@
 import Fuse from "fuse.js";
+import { getPaginationOptions } from "#utils/pagination.js";
 import * as courseMapper from "./course.mapper.js";
 import Course from "./course.model.js";
 
@@ -64,9 +65,10 @@ export const getGlobalCourseStats = async () => {
 };
 
 export const queryCourses = async (filters) => {
+  const { page, limit, skip } = getPaginationOptions(filters);
   const {
-    page = 1, limit = 10, search, category,
-    subCategory, sort, price, level, language
+    search, category, subCategory, 
+    sort, price, level, language
   } = filters;
 
   const query = { ...publicFilter };
@@ -95,17 +97,16 @@ export const queryCourses = async (filters) => {
 
     finalDocs = fuse.search(search).map(r => r.item);
   } else {
-    finalDocs = await Course.find(baseQuery)
+    finalDocs = await Course.find(query)
       .populate("category", "name slug")
       .lean();
   }
 
   const sortedDocs = sortDocs(finalDocs, sort);
   const total = sortedDocs.length;
-  const skip = (page - 1) * limit;
   const paginatedDocs = sortedDocs.slice(skip, skip + limit);
 
-  return { courses: paginatedDocs, total };
+  return { courses: paginatedDocs, total, page, limit };
 };
 
 const sortDocs = (docs, strategy) => {

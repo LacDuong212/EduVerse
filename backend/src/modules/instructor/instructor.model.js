@@ -9,10 +9,10 @@ const statsSubSchema = new mongoose.Schema({
   averageRating: { type: Number, min: 0, max: 5, default: 0 },
 });
 const myCoursesSubSchema = new mongoose.Schema({
-  course: { type: mongoose.Schema.Types.ObjectId, ref: "Course", unique: true },
+  course: { type: mongoose.Schema.Types.ObjectId, ref: "Course" },
 });
 const myStudentsSubSchema = new mongoose.Schema({
-  student: { type: mongoose.Schema.Types.ObjectId, ref: "User", unique: true },
+  student: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   addedAt: { type: Date, default: Date.now },
 });
 

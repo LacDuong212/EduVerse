@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 import transporter from "#config/nodemailer.js";
 import AppError from "#exceptions/app.error.js";
+import { isApprovedInstructor } from "#modules/instructor/instructor.service.js";
 import { createNewStudent } from "#modules/student/student.service.js";
 import { toAuthUserDto } from "#modules/user/user.mapper.js"
 import User from "#modules/user/user.model.js";
@@ -21,7 +22,7 @@ export const registerUser = async (userData) => {
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   const otpExpiry = Date.now() + 10 * 60 * 1000;
 
-  const isNew = false;
+  let isNew = false;
   if (!user) {
     user = new User({
       name,
@@ -100,6 +101,10 @@ export const loginUser = async (email, password) => {
 
   if (!user.isVerified) {
     throw new AppError("Please verify your email first!", 401, { needVerify: true });
+  }
+
+  if (user.role === "instructor" && !(await isApprovedInstructor(user._id))) {
+    throw new AppError("You account have been blocked.", 403);
   }
 
   const isMatch = await bcrypt.compare(password, user.password);

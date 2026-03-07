@@ -36,7 +36,7 @@ export const logout = asyncHandler(async (req, res) => {
 });
 
 // @desc  Verify email with OTP
-// @route POST /verify-email
+// @route POST /auth/verify-email
 export const verifyEmail = asyncHandler(async (req, res) => {
   const { email, otp } = req.body;
 
@@ -46,7 +46,7 @@ export const verifyEmail = asyncHandler(async (req, res) => {
 });
 
 // @desc  Resend OTP for email verification
-// @route POST /forgot-password
+// @route POST /auth/forgot-password
 export const forgotPassword = asyncHandler(async (req, res) => {
   const { email } = req.body;
 
@@ -56,7 +56,7 @@ export const forgotPassword = asyncHandler(async (req, res) => {
 });
 
 // @desc  Reset password using OTP
-// @route POST /reset-password
+// @route POST /auth/reset-password
 export const resetPassword = asyncHandler(async (req, res) => {
   const { email, otp, newPassword } = req.body;
 
@@ -66,7 +66,7 @@ export const resetPassword = asyncHandler(async (req, res) => {
 });
 
 // @desc  Resend OTP for email verification
-// @route POST /resend-otp
+// @route POST /auth/resend-otp
 export const sendOTP = asyncHandler(async (req, res) => {
   const { email } = req.body;
 
@@ -76,7 +76,7 @@ export const sendOTP = asyncHandler(async (req, res) => {
 });
 
 // @desc  Check if user is authenticated
-// @route GET /status
+// @route GET /auth/status
 export const isAuthenticated = (req, res) => {
   const { isValid, user } = authService.checkValidUser(req.user);
 
@@ -85,7 +85,7 @@ export const isAuthenticated = (req, res) => {
 };
 
 // @desc  Google OAuth callback
-// @route GET /google/callback
+// @route GET /auth/google/callback
 export const googleAuthCallback = asyncHandler(async (req, res) => {
   const user = req.user;
 
