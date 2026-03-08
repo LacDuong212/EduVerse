@@ -2,13 +2,15 @@ import mongoose from "mongoose";
 
 const { Schema } = mongoose;
 
-const LectureProgressSchema = new Schema(
+export const LECTURE_STATUS_ENUM =["not_started", "in_progress", "completed"] ;
+
+const lectureProgressSchema = new Schema(
   {
     lectureId: { type: Schema.Types.ObjectId, required: true },
     status: {
       type: String,
-      enum: ["not_started", "in_progress", "completed"],
-      default: "not_started",
+      enum: LECTURE_STATUS_ENUM,
+      default: LECTURE_STATUS_ENUM[0],
     },
     lastPositionSec: { type: Number, default: 0, min: 0 },
     durationSec: { type: Number, default: 0, min: 0 },
@@ -21,16 +23,16 @@ const LectureProgressSchema = new Schema(
   { _id: false }
 );
 
-const CourseProgressSchema = new Schema(
+const courseProgressSchema = new Schema(
   {
-    userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    courseId: { type: Schema.Types.ObjectId, ref: "Course", required: true },
+    user: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    course: { type: Schema.Types.ObjectId, ref: "Course", required: true },
     totalLectures: { type: Number, default: 0, min: 0 },
     completedLecturesCount: { type: Number, default: 0, min: 0 },
     totalTimeSpentSec: { type: Number, default: 0, min: 0 },
     lastLectureId: { type: Schema.Types.ObjectId },
     lastPositionSec: { type: Number, default: 0, min: 0 },
-    lectures: [LectureProgressSchema],
+    lectures: [lectureProgressSchema],
     firstStartedAt: Date,
     lastActivityAt: Date,
     isCompleted: { type: Boolean, default: false },
@@ -46,13 +48,13 @@ const CourseProgressSchema = new Schema(
   { timestamps: true }
 );
 
-CourseProgressSchema.index({ userId: 1, courseId: 1 }, { unique: true });
+courseProgressSchema.index({ user: 1, course: 1 }, { unique: true });
 
-CourseProgressSchema.virtual("percentage").get(function () {
+courseProgressSchema.virtual("percentage").get(function () {
   if (!this.totalLectures) return 0;
   return Math.round(
     (this.completedLecturesCount / this.totalLectures) * 100
   );
 });
 
-export default mongoose.model("CourseProgress", CourseProgressSchema) || mongoose.models.CourseProgress;
+export default mongoose.model("CourseProgress", courseProgressSchema) || mongoose.models.CourseProgress;

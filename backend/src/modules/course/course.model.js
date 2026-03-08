@@ -4,6 +4,7 @@ import Category from "#modules/category/category.model.js"; // yes
 export const DURATION_UNIT_ENUM = ["second", "hour", "minute", "day"];
 export const LEVEL_ENUM = ["all", "beginner", "intermediate", "advanced"];
 export const STATUS_ENUM = ["draft", "pending", "live", "blocked", "rejected"];
+export const AI_DATA_STATUS = ["none", "processing", "completed", "failed"];
 
 const courseSchema = new mongoose.Schema({
   title: { type: String, required: true },
@@ -55,11 +56,7 @@ const courseSchema = new mongoose.Schema({
           explanation: String,
           topic: { type: String, default: "General Knowledge" }
         }],
-        status: {
-          type: String,
-          enum: ["none", "processing", "completed", "failed"],
-          default: "none"
-        }
+        status: { type: String, enum: AI_DATA_STATUS, default: AI_DATA_STATUS[0] }
       }
     }]
   }],

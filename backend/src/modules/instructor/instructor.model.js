@@ -1,26 +1,10 @@
 import mongoose from "mongoose";
 
-// account details
-const statsSubSchema = new mongoose.Schema({
-  totalCourses: { type: Number, default: 0 },
-  totalStudents: { type: Number, default: 0 },
-  totalOrders: { type: Number, default: 0 },
-  totalRatings: { type: Number, default: 0 },
-  averageRating: { type: Number, min: 0, max: 5, default: 0 },
-});
-const myCoursesSubSchema = new mongoose.Schema({
-  course: { type: mongoose.Schema.Types.ObjectId, ref: "Course" },
-});
-const myStudentsSubSchema = new mongoose.Schema({
-  student: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-  addedAt: { type: Date, default: Date.now },
-});
-
-// profile details
 const skillSubSchema = new mongoose.Schema({
   name: { type: String, required: true },
   level: { type: Number, min: 0, max: 100, required: true, default: 0 },
 });
+
 const educationSubSchema = new mongoose.Schema({
   institution: { type: String, required: true },
   degree: { type: String, default: '' },
@@ -32,10 +16,14 @@ const educationSubSchema = new mongoose.Schema({
 
 const instructorSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User", unique: true, required: true },
-  stats: statsSubSchema,
+  stats: {
+    totalCourses: { type: Number, default: 0 },
+    totalStudents: { type: Number, default: 0 },
+    totalReviews: { type: Number, default: 0 },
+    ratingSum: { type: Number, default: 0 },
+  },
 
-  myCourses: [myCoursesSubSchema],
-  myStudents: [myStudentsSubSchema],
+  myCourses: [{ type: mongoose.Schema.Types.ObjectId, ref: "Course" }],
 
   introduction: { type: String, default: '' },
   address: { type: String, default: '' },
