@@ -41,4 +41,9 @@ const orderSchema = new mongoose.Schema({
   expiresAt: { type: Date, default: () => Date.now() + ORDER_EXPIRATION },
 }, { timestamps: true });
 
+orderSchema.index(
+  { expiresAt: 1 },
+  { expireAfterSeconds: 0, partialFilterExpression: { status: "pending" } }
+);
+
 export default mongoose.model("Order", orderSchema);
