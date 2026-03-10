@@ -1,4 +1,6 @@
 import Fuse from "fuse.js";
+import AppError from "#exceptions/app.error.js";
+import { existsEnrollment } from "#modules/enrollment/enrollment.service.js";
 import { getPaginationOptions } from "#utils/pagination.js";
 import courseMapper from "./course.mapper.js";
 import Course from "./course.model.js";
@@ -130,7 +132,8 @@ export const getCourseInfoForVideoId = async (videoId) => {
     { $unwind: "$sections" },
     { $unwind: "$sections.lectures" },
     { $match: { "sections.lectures.videoId": videoId } },
-    { $lookup: {
+    {
+      $lookup: {
         from: "courses",
         localField: "courseId",
         foreignField: "_id",
@@ -138,7 +141,8 @@ export const getCourseInfoForVideoId = async (videoId) => {
       }
     },
     { $unwind: "$courseInfo" },
-    { $project: {
+    {
+      $project: {
         _id: 0,
         courseId: 1,
         insId: "$courseInfo.instructor.ref",
@@ -148,11 +152,42 @@ export const getCourseInfoForVideoId = async (videoId) => {
   ]);
 
   const courseInfo = result[0];
-  
+
   return {
     courseId: courseInfo?.courseId || null,
     insId: courseInfo?.insId || null,
     isFree: courseInfo?.isFree ?? false
+  };
+};
+
+export const getCoursePublicDetails = async (user, courseId) => {
+  if (!courseId) throw new AppError("Invalid course ID format.", 400);
+
+  const details = await Course.findOne({ _id: courseId, ...publicFilter })
+    .populate([{
+      path: "category",
+      select: "name slug",
+    }, {
+      path: "curriculum",
+      select: {
+        "_id": 0,
+        "sections.lectures.aiData": 0,
+        "__v": 0
+      }
+    }]).lean();
+  if (!details && Object.keys(details).length === 0) throw new AppError("Course not found.", 404);
+
+  let isOwned = undefined;
+  if (user) {
+    const isCreator = user.role === "instructor" && user.userId === details.instructor?.ref;
+    const isBought = user.role === "student" && (await existsEnrollment(user.userId, courseId));
+
+    isOwned = !!(isCreator || isBought);
+  }
+
+  return {
+    ...courseMapper.toCourseDetailsDto(details),
+    isOwned,
   };
 };
 
@@ -162,5 +197,6 @@ export default {
   getGlobalCourseStats,
   queryCourses,
   getCourseInfoForVideoId,
+  getCoursePublicDetails,
 
 };

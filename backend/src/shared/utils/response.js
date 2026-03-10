@@ -13,6 +13,7 @@ const createResponse = (success, message, payload = null, key = "data") => {
     response[key] = payload;
   }
 
+  response.timestamp = new Date().toISOString();
   return response;
 };
 
