@@ -1,7 +1,8 @@
 import Fuse from "fuse.js";
 import { getPaginationOptions } from "#utils/pagination.js";
-import * as courseMapper from "./course.mapper.js";
+import courseMapper from "./course.mapper.js";
 import Course from "./course.model.js";
+import Curriculum from "./curriculum.model.js";
 
 const publicFilter = {
   isPrivate: false,
@@ -67,7 +68,7 @@ export const getGlobalCourseStats = async () => {
 export const queryCourses = async (filters) => {
   const { page, limit, skip } = getPaginationOptions(filters);
   const {
-    search, category, subCategory, 
+    search, category, subCategory,
     sort, price, level, language
   } = filters;
 
@@ -121,4 +122,45 @@ const sortDocs = (docs, strategy) => {
     ratingLowToHigh: (a, b) => (a.rating?.average || 0) - (b.rating?.average || 0),
   };
   return docs.sort(strategies[strategy] || strategies.newest);
+};
+
+export const getCourseInfoForVideoId = async (videoId) => {
+  const result = await Curriculum.aggregate([
+    { $match: { "sections.lectures.videoId": videoId } },
+    { $unwind: "$sections" },
+    { $unwind: "$sections.lectures" },
+    { $match: { "sections.lectures.videoId": videoId } },
+    { $lookup: {
+        from: "courses",
+        localField: "courseId",
+        foreignField: "_id",
+        as: "courseInfo"
+      }
+    },
+    { $unwind: "$courseInfo" },
+    { $project: {
+        _id: 0,
+        courseId: 1,
+        insId: "$courseInfo.instructor.ref",
+        isFree: "$sections.lectures.isFree"
+      }
+    }
+  ]);
+
+  const courseInfo = result[0];
+  
+  return {
+    courseId: courseInfo?.courseId || null,
+    insId: courseInfo?.insId || null,
+    isFree: courseInfo?.isFree ?? false
+  };
+};
+
+
+export default {
+  getHomeDashboardData,
+  getGlobalCourseStats,
+  queryCourses,
+  getCourseInfoForVideoId,
+
 };

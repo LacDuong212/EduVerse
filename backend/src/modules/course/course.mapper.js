@@ -44,3 +44,9 @@ export const toCourseCardDtoList = (courses) => {
   if (!Array.isArray(courses)) return [];
   return courses.map(course => toCourseCardDto(course));
 };
+
+export default {
+  toCourseCardDto,
+  toCourseCardDtoList,
+  
+};

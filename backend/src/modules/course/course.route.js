@@ -1,8 +1,9 @@
 import { Router } from "express";
 import validate from "#middlewares/zodValidator.middleware.js"
-import * as courseController from "./course.controller.js";
+import courseController from "./course.controller.js";
 import * as courseSchema from "./course.validation.js";
 
+// @route /courses
 const courseRoute = Router();
 
 courseRoute.get("/", validate(courseSchema.courseQuerySchema), courseController.getAllCourses);

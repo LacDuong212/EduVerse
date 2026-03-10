@@ -1,7 +1,7 @@
 import asyncHandler from "#utils/asyncHandler.js";
 import { sendPaginatedResponse, sendSuccessResponse } from "#utils/response.js";
-import * as courseMapper from "./course.mapper.js";
-import * as courseService from "./course.service.js";
+import courseMapper from "./course.mapper.js";
+import courseService from "./course.service.js";
 
 // @desc  Get grouped public courses for home page
 // @route GET /courses/home
@@ -35,3 +35,11 @@ export const getAllCourses = asyncHandler(async (req, res) => {
     },
   );
 });
+
+
+export default {
+  getHomeCourses,
+  getCourseStats,
+  getAllCourses,
+
+};

@@ -1,6 +1,11 @@
 import mongoose from "mongoose";
+import Enum from "#utils/enum.js"
 
-export const STATUS_ENUM = ["active", "completed", "refunded"];
+export const STATUS_ENUM = new Enum({
+  active: "active",
+  completed: "completed",
+  refunded: "refunded"
+});
 
 const enrollmentSchema = new mongoose.Schema({
   student: { 
@@ -22,8 +27,8 @@ const enrollmentSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: STATUS_ENUM,
-    default: STATUS_ENUM[0]
+    enum: STATUS_ENUM.values(),
+    default: STATUS_ENUM.active
   },
   enrolledAt: {
     type: Date,
