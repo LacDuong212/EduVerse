@@ -10,3 +10,15 @@ export const countCompletedOrdersByCourseIds = async (courseIds = []) => {
 
   return count;
 };
+
+export const getOrderStatusByUserIdAndCourseId = async (userId, courseId) => {
+  if (!userId || !courseId) return null;
+
+  const order = await Order.findOne({
+    user: userId,
+    "courses.course": courseId,
+  }).lean();
+
+  if (!order) return null;
+  else return order.status || null;
+};

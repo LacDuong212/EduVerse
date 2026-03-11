@@ -51,6 +51,9 @@ const orderSchema = new mongoose.Schema({
   expiresAt: { type: Date, default: () => Date.now() + ORDER_EXPIRATION },
 }, { timestamps: true });
 
+orderSchema.index({ user: 1, "courses.course": 1 });
+orderSchema.index({ user: 1, status: 1 });
+orderSchema.index({ createdAt: -1 });
 orderSchema.index(
   { expiresAt: 1 },
   { expireAfterSeconds: 0, partialFilterExpression: { status: "pending" } }

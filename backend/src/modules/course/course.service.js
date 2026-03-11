@@ -115,7 +115,7 @@ export const queryCourses = async (filters) => {
 const sortDocs = (docs, strategy) => {
   const strategies = {
     newest: (a, b) => b.createdAt - a.createdAt,
-    oldest: { createdAt: 1 },
+    oldest: (a, b) => a.createdAt - b.createdAt,
     priceHighToLow: (a, b) => b.price - a.price,
     priceLowToHigh: (a, b) => a.price - b.price,
     mostPopular: (a, b) => b.studentsEnrolled - a.studentsEnrolled,

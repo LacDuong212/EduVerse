@@ -2,8 +2,8 @@ import { Router } from "express";
 import { protect, restrictTo } from "#middlewares/auth.middleware.js";
 
 import authRoute from "#modules/auth/auth.route.js";
-// import cartRoute from "#modules/cart/cart.route.js";
-// import categoryRoute from "#modules/category/category.route.js";
+import cartRoute from "#modules/cart/cart.route.js";
+import categoryRoute from "#modules/category/category.route.js";
 // import couponRoute from "#modules/coupon/coupon.route.js";
 import courseRoute from "#modules/course/course.route.js";
 // import chatbotRoute from "#modules/chatbot/chatbot.route.js";
@@ -23,8 +23,8 @@ import videoRoute from "#modules/video/video.route.js";
 const apiRouter = Router();
 
 apiRouter.use("/auth", authRoute);
-// apiRouter.use("/cart", cartRoute);
-// apiRouter.use("/category", categoryRoute);
+apiRouter.use("/cart", cartRoute);
+apiRouter.use("/categories", categoryRoute);
 // apiRouter.use("/coupons", couponRoute);
 apiRouter.use("/courses", courseRoute);
 // apiRouter.use("/chatbot", chatbotRoute);
