@@ -10,7 +10,7 @@ export const createPayment = asyncHandler(async (req, res) => {
   const { orderId, paymentMethod } = req.body;
 
   if (!orderId || !paymentMethod)
-    return next(new AppError("Missing required fields", 400));
+    return new AppError("Missing required fields", 400);
 
   const rawIp =
     req.headers["x-forwarded-for"] ||

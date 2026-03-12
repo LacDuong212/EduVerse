@@ -14,11 +14,12 @@ export const createPayment = (orderId, amount, orderInfo) => {
 
         const requestId = `${orderId}-${Date.now()}`;
         const requestType = "payWithMethod";
+        const extraData = "";
 
         const rawSignature =
             `accessKey=${MOMO_ACCESS_KEY}` +
             `&amount=${amount}` +
-            `&extraData=` +
+            `&extraData=${extraData}` +
             `&ipnUrl=${MOMO_IPN_URL}` +
             `&orderId=${orderId}` +
             `&orderInfo=${orderInfo}` +
@@ -41,6 +42,7 @@ export const createPayment = (orderId, amount, orderInfo) => {
             redirectUrl: MOMO_REDIRECT_URL,
             ipnUrl: MOMO_IPN_URL,
             requestType,
+            extraData,
             signature,
             lang: "en"
         });
