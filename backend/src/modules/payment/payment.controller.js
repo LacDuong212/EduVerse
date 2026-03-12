@@ -1,11 +1,11 @@
 import asyncHandler from "#shared/utils/asyncHandler.js";
 import { sendSuccessResponse } from "#utils/response.js";
 import AppError from "#exceptions/app.error.js";
-import paymentService from "./payment.service.js";
+import * as paymentService from "./payment.service.js";
 import * as momoProvider from "./providers/momo.provider.js";
 import * as vnpayProvider from "./providers/vnpay.provider.js";
 
-export const createPayment = asyncHandler(async (req, res, next) => {
+export const createPayment = asyncHandler(async (req, res) => {
 
   const { orderId, paymentMethod } = req.body;
 
@@ -32,8 +32,9 @@ export const momoIpn = asyncHandler(async (req, res) => {
   const { isValid, amount, resultCode } =
     momoProvider.verifySignature(req.body);
 
-  if (!isValid)
-    throw new AppError("Invalid signature", 400);
+  if (!isValid) {
+    return res.status(200).json({ message: "Invalid signature" });
+  }
 
   const { orderId, transId } = req.body;
 
@@ -65,6 +66,9 @@ export const vnpayIpn = asyncHandler(async (req, res) => {
     return res.status(200).json({ RspCode: "97", Message: "Checksum failed" });
 
   const orderId = req.query["vnp_TxnRef"];
+  if (!orderId)
+    return res.status(200).json({ RspCode: "01", Message: "Invalid request" });
+  
   const amount = Number(req.query["vnp_Amount"]) / 100;
   const rspCode = req.query["vnp_ResponseCode"];
   const transactionId = req.query["vnp_TransactionNo"];
