@@ -34,25 +34,32 @@ export const getOrderById = async (orderId, userId) => {
  * Create new order
  */
 export const createOrder = async (userId, body) => {
-  const { cart, paymentMethod, couponCode } = body;
+  const { selectedCourseIds, paymentMethod, couponCode } = body;
 
-  if (!cart?.courses?.length)
-    throw new AppError("Cart is empty", 400);
+  if (!selectedCourseIds || !selectedCourseIds.length)
+    throw new AppError("No courses selected", 400);
 
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
-    const courseIds = cart.courses.map(c => c.courseId || c._id);
+    const cart = await Cart.findOne({ user: userId })
+      .populate("courses.course")
+      .session(session);
 
-    const dbCourses = await Course.find({
-      _id: { $in: courseIds }
-    }).session(session);
+    if (!cart || !cart.courses.length)
+      throw new AppError("Cart is empty", 400);
 
-    if (!dbCourses.length)
-      throw new AppError("Courses not found", 400);
+    const selectedItems = cart.courses.filter(item =>
+      selectedCourseIds.includes(item.course._id.toString())
+    );
 
-    const coursesToOrder = dbCourses.map(course => {
+    if (!selectedItems.length)
+      throw new AppError("Selected courses not found in cart", 400);
+
+    const coursesToOrder = selectedItems.map(item => {
+      const course = item.course;
+
       const priceToUse =
         (course.discountPrice && course.discountPrice < course.price)
           ? course.discountPrice
@@ -126,9 +133,15 @@ export const createOrder = async (userId, body) => {
       );
     }
 
-    await Cart.findOneAndUpdate(
+    await Cart.updateOne(
       { user: userId },
-      { $set: { courses: [] } },
+      {
+        $pull: {
+          courses: {
+            course: { $in: selectedCourseIds }
+          }
+        }
+      },
       { session }
     );
 

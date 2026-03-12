@@ -12,11 +12,18 @@ export const createPayment = asyncHandler(async (req, res) => {
   if (!orderId || !paymentMethod)
     return next(new AppError("Missing required fields", 400));
 
+  const rawIp =
+    req.headers["x-forwarded-for"] ||
+    req.socket.remoteAddress ||
+    "127.0.0.1";
+
+  const ipAddr = rawIp === "::1" ? "127.0.0.1" : rawIp;
+
   const result = await paymentService.createPayment({
     orderId,
-    userId: req.user._id,
+    userId: req.user.userId,
     paymentMethod,
-    ipAddr: req.ip
+    ipAddr
   });
 
   return sendSuccessResponse(
