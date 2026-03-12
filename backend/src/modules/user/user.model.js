@@ -1,6 +1,10 @@
 import mongoose from "mongoose";
+import Enum from "#utils/enum.js";
 
-export const ROLE_ENUM = ["student", "instructor"];
+export const ROLE_ENUM = new Enum({
+  student: "student",
+  instructor: "instructor"
+});
 
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
@@ -21,7 +25,7 @@ const userSchema = new mongoose.Schema({
   isVerified: { type: Boolean, default: false },
   isActivated: { type: Boolean, default: true },
   interests: [{ type: String }],
-  role: { type: String, enum: ROLE_ENUM, default: ROLE_ENUM[0] },
+  role: { type: String, enum: ROLE_ENUM.values(), default: ROLE_ENUM.student },
   googleId: { type: String, unique: true, sparse: true }
 }, { timestamps: true });
 

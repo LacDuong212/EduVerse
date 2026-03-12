@@ -34,7 +34,8 @@ const instructorSchema = new mongoose.Schema({
 
   isApproved: { type: Boolean, default: false }
 }, {
-  timestamps: true
+  timestamps: true,
+  _id: false
 });
 
 export default mongoose.model("Instructor", instructorSchema);

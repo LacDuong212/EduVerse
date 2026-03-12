@@ -1,48 +1,48 @@
 import { z } from "zod";
-import * as CONSTANTS from "#constants/course.js"
+import * as CONSTANTS from "./course.constant.js"
 import { LEVEL_ENUM } from "./course.model.js";
 
 const hexEncodeRegex = /^[0-9a-fA-F]{24}$/;
 
-export const titleSchema = z.string({ required_error: "Course title is required" })
+const titleSchema = z.string({ error: "Course title is required" })
   .trim()
   .min(1, "Course title cannot be empty")
   .max(CONSTANTS.TITLE_MAX_LENGTH, "Course title too long.");
 
-export const subtitleSchema = z.string()
+const subtitleSchema = z.string()
   .trim()
   .max(CONSTANTS.SUBTITLE_MAX_LENGTH, "Course subtitle too long")
   .optional()
   .or(z.literal(""));
 
-export const descriptionSchema = z.string()
+const descriptionSchema = z.string()
   .trim()
   .max(CONSTANTS.DESCRIPTION_MAX_LENGTH, "Course description too long")
   .optional()
   .or(z.literal(""));
 
-export const categoryIdSchema = z.string({ required_error: "Category is required" })
+const categoryIdSchema = z.string({ error: "Category is required" })
   .trim()
   .regex(hexEncodeRegex, "Invalid Category ID");
 
-export const languageSchema = z.string({ required_error: "Language is required" });
+const languageSchema = z.string({ error: "Language is required" });
 
-export const levelSchema = z.string({ required_error: "Level is required" });
+const levelSchema = z.string({ error: "Level is required" });
 
-export const priceSchema = z.number({ required_error: "Price is required" })
+const priceSchema = z.number({ error: "Price is required" })
   .min(0, "Price must be 0 or greater");
 
-export const discountPriceSchema = z.number()
+const discountPriceSchema = z.number()
   .min(0, "Discount price must be 0 or greater")
   .optional()
   .nullable();
 
-export const imageSchema = z.string({ required_error: "Course image is required" })
+const imageSchema = z.string({ error: "Course image is required" })
   .trim()
   .url("Please enter a valid image URL")
   .min(1, "Course image is required");
 
-export const tagsSchema = z
+const tagsSchema = z
   .array(
     z.string()
       .trim()

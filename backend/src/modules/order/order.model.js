@@ -1,9 +1,19 @@
 import mongoose from "mongoose";
+import Enum from "#utils/enum.js";
 import Coupon from "#modules/coupon/coupon.model.js";
 
 export const ORDER_EXPIRATION = 1 * 60 * 60 * 1000;
-export const PAYMENT_METHOD_ENUM = ["momo", "vnpay", "free"];
-export const STATUS_ENUM = ["pending", "completed", "refunded", "cancelled"];
+export const PAYMENT_METHOD_ENUM = new Enum({
+  mom: "momo",
+  vnpay: "vnpay",
+  free: "free"
+});
+export const STATUS_ENUM = new Enum({
+  pending: "pending",
+  completed: "completed",
+  refunded: "refunded",
+  cancelled: "cancelled"
+});
 
 const orderSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
@@ -28,19 +38,22 @@ const orderSchema = new mongoose.Schema({
 
   paymentMethod: {
     type: String,
-    enum: PAYMENT_METHOD_ENUM,
+    enum: PAYMENT_METHOD_ENUM.values(),
     required: true,
   },
 
   status: {
     type: String,
-    enum: STATUS_ENUM,
-    default: STATUS_ENUM[0],
+    enum: STATUS_ENUM.values(),
+    default: STATUS_ENUM.pending,
   },
 
   expiresAt: { type: Date, default: () => Date.now() + ORDER_EXPIRATION },
 }, { timestamps: true });
 
+orderSchema.index({ user: 1, "courses.course": 1 });
+orderSchema.index({ user: 1, status: 1 });
+orderSchema.index({ createdAt: -1 });
 orderSchema.index(
   { expiresAt: 1 },
   { expireAfterSeconds: 0, partialFilterExpression: { status: "pending" } }

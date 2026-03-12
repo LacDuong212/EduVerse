@@ -1,10 +1,27 @@
 import mongoose from "mongoose";
+import Enum from "#utils/enum.js";
 import Category from "#modules/category/category.model.js"; // yes
+import Curriculum from "./curriculum.model.js";
 
-export const DURATION_UNIT_ENUM = ["second", "hour", "minute", "day"];
-export const LEVEL_ENUM = ["all", "beginner", "intermediate", "advanced"];
-export const STATUS_ENUM = ["draft", "pending", "live", "blocked", "rejected"];
-export const AI_DATA_STATUS = ["none", "processing", "completed", "failed"];
+export const DURATION_UNIT_ENUM = new Enum({
+  second: "second", 
+  minute: "minute",
+  hour: "hour",
+  day: "day",
+});
+export const LEVEL_ENUM = new Enum({
+  all: "all",
+  beginer: "beginner",
+  intermediate: "intermediate",
+  advanced: "advanced"
+});
+export const STATUS_ENUM = new Enum({
+  draft: "draft",
+  pending: "pending",
+  live: "live",
+  blocked: "blocked",
+  rejected: "rejected"
+});
 
 const courseSchema = new mongoose.Schema({
   title: { type: String, required: true },
@@ -27,40 +44,10 @@ const courseSchema = new mongoose.Schema({
     avatar: String
   },
 
-  level: { type: String, enum: LEVEL_ENUM },
+  level: { type: String, enum: LEVEL_ENUM.values() },
   duration: Number,
-  durationUnit: { type: String, enum: DURATION_UNIT_ENUM, default: DURATION_UNIT_ENUM[0] },
+  durationUnit: { type: String, enum: DURATION_UNIT_ENUM.values(), default: DURATION_UNIT_ENUM.second },
   lecturesCount: Number,
-
-  curriculum: [{
-    section: { type: String, required: true },
-    lectures: [{
-      title: { type: String, required: true },
-      videoUrl: String,
-      duration: Number,
-      isFree: { type: Boolean, default: false },
-      aiData: {
-        summary: String,
-        lessonNotes: {
-          keyConcepts: [{
-             term: String,
-             definition: String
-          }],
-          mainPoints: [String], 
-          practicalTips: [String] 
-        },
-        quizzes: [{
-          question: String,
-          options: [String],
-          correctAnswer: String,
-          explanation: String,
-          topic: { type: String, default: "General Knowledge" }
-        }],
-        status: { type: String, enum: AI_DATA_STATUS, default: AI_DATA_STATUS[0] }
-      }
-    }]
-  }],
-
   studentsEnrolled: { type: Number, default: 0 },
 
   rating: {
@@ -77,7 +64,7 @@ const courseSchema = new mongoose.Schema({
   discountPrice: { type: Number, min: 0, default: null },
   enableDiscount: { type: Boolean, default: false },
 
-  status: { type: String, enum: STATUS_ENUM, default: STATUS_ENUM[0] },
+  status: { type: String, enum: STATUS_ENUM.values(), default: STATUS_ENUM.draft },
 
   isPrivate: { type: Boolean, default: true },
   isDeleted: { type: Boolean, default: false }
@@ -93,5 +80,14 @@ courseSchema.index({
   weights: { title: 10, tags: 5, subtitle: 2 },
   name: "CourseSearchIndex"
 });
+
+courseSchema.virtual("curriculum", {
+  ref: "Curriculum",
+  localField: "_id",
+  foreignField: "courseId",
+  justOne: true
+});
+courseSchema.set("toJSON", { virtuals: true });
+courseSchema.set("toObject", { virtuals: true });
 
 export default mongoose.model("Course", courseSchema);

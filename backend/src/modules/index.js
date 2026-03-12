@@ -2,8 +2,8 @@ import { Router } from "express";
 import { protect, restrictTo } from "#middlewares/auth.middleware.js";
 
 import authRoute from "#modules/auth/auth.route.js";
-// import cartRoute from "#modules/cart/cart.route.js";
-// import categoryRoute from "#modules/category/category.route.js";
+import cartRoute from "#modules/cart/cart.route.js";
+import categoryRoute from "#modules/category/category.route.js";
 // import couponRoute from "#modules/coupon/coupon.route.js";
 import courseRoute from "#modules/course/course.route.js";
 // import chatbotRoute from "#modules/chatbot/chatbot.route.js";
@@ -16,14 +16,15 @@ import instructorRoute from "#modules/instructor/instructor.route.js";
 // import reviewRoute from "#modules/review/review.route.js";
 // import studentRoute from "#modules/student/student.route.js";
 // import userRoute from "#modules/user/user.route.js";
+import videoRoute from "#modules/video/video.route.js";
 // import wishlistRoute from "#modules/wishlist/wishlist.route.js";
 
 // @route /api
 const apiRouter = Router();
 
 apiRouter.use("/auth", authRoute);
-// apiRouter.use("/cart", cartRoute);
-// apiRouter.use("/category", categoryRoute);
+apiRouter.use("/cart", cartRoute);
+apiRouter.use("/categories", categoryRoute);
 // apiRouter.use("/coupons", couponRoute);
 apiRouter.use("/courses", courseRoute);
 // apiRouter.use("/chatbot", chatbotRoute);
@@ -37,6 +38,7 @@ apiRouter.use("/instructor", protect, restrictTo("instructor"), instructorRoute.
 // apiRouter.use("/reviews", reviewRoute);
 // apiRouter.use("/student", studentRoute);
 // apiRouter.use("/user", userRoute);
+apiRouter.use("/videos", videoRoute);
 // apiRouter.use("/wishlist", wishlistRoute);
 
 export default apiRouter;

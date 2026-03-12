@@ -1,17 +1,17 @@
 import asyncHandler from "#utils/asyncHandler.js";
 import { sendPaginatedResponse, sendSuccessResponse } from "#utils/response.js";
-import * as courseMapper from "./course.mapper.js";
-import * as courseService from "./course.service.js";
+import courseMapper from "./course.mapper.js";
+import courseService from "./course.service.js";
 
 // @desc  Get grouped public courses for home page
-// @route GET /courses/home
+// @route GET ../home
 export const getHomeCourses = asyncHandler(async (req, res) => {
   const data = await courseService.getHomeDashboardData();
   return sendSuccessResponse(res, 200, "Courses fetched successfully", data);
 });
 
 // @desc  Get public-course-related statistics
-// @route GET /courses/stats
+// @route GET ../stats
 export const getCourseStats = asyncHandler(async (req, res) => {
   const stats = await courseService.getGlobalCourseStats();
 
@@ -19,7 +19,7 @@ export const getCourseStats = asyncHandler(async (req, res) => {
 });
 
 // @desc  Get all public courses, paginated + filters + sort
-// @route GET /courses
+// @route GET ../
 export const getAllCourses = asyncHandler(async (req, res) => {
   const { courses, total, page, limit } = await courseService.queryCourses(req.query);
 
@@ -35,3 +35,21 @@ export const getAllCourses = asyncHandler(async (req, res) => {
     },
   );
 });
+
+// @desc  Get course public details by id
+// @route GET ../:id/
+export const getCourseDetailsById = asyncHandler(async (req, res) => {
+  const user = req.user;
+  const { id } = req.params;
+  const details = await courseService.getCoursePublicDetails(user, id);
+  sendSuccessResponse(res, 200, "Get course details successfully!", details);
+});
+
+
+export default {
+  getHomeCourses,
+  getCourseStats,
+  getAllCourses,
+  getCourseDetailsById,
+
+};

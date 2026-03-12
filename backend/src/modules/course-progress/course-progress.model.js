@@ -1,16 +1,19 @@
 import mongoose from "mongoose";
+import Enum from "#utils/enum.js";
 
-const { Schema } = mongoose;
+export const LECTURE_STATUS_ENUM = new Enum({
+  not_started: "not_started",
+  in_progress: "in_progress",
+  completed: "completed"
+});
 
-export const LECTURE_STATUS_ENUM =["not_started", "in_progress", "completed"] ;
-
-const lectureProgressSchema = new Schema(
+const lectureProgressSchema = new mongoose.Schema(
   {
     lectureId: { type: Schema.Types.ObjectId, required: true },
     status: {
       type: String,
-      enum: LECTURE_STATUS_ENUM,
-      default: LECTURE_STATUS_ENUM[0],
+      enum: LECTURE_STATUS_ENUM.values(),
+      default: LECTURE_STATUS_ENUM.not_started,
     },
     lastPositionSec: { type: Number, default: 0, min: 0 },
     durationSec: { type: Number, default: 0, min: 0 },
@@ -23,7 +26,7 @@ const lectureProgressSchema = new Schema(
   { _id: false }
 );
 
-const courseProgressSchema = new Schema(
+const courseProgressSchema = new mongoose.Schema(
   {
     user: { type: Schema.Types.ObjectId, ref: "User", required: true },
     course: { type: Schema.Types.ObjectId, ref: "Course", required: true },

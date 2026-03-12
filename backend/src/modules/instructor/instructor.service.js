@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import AppError from "#exceptions/app.error.js";
+import { countCompletedOrdersByCourseIds } from "#modules/order/order.service.js";
 import Instructor from "./instructor.model.js";
 
 export const handleBecomeInstructor = async (user) => {
@@ -38,4 +39,42 @@ export const isApprovedInstructor = async (userId) => {
   if (!userId) return false;
   const instructor = await Instructor.findOne({ user: userId }).lean();
   return instructor?.isApproved === true;
+};
+
+export const getInstructorStats = async (userId, isPrivate = false) => {
+  if (!userId) throw new AppError("Instructor not found", 400);
+
+  const instructor = await Instructor.findOne({ user: userId }).lean();
+  if (!instructor) throw new AppError("Instructor not found", 400);
+
+  const {
+    totalCourses = 0,
+    totalStudents = 0,
+    totalReviews = 0,
+    ratingSum = 0
+  } = instructor.stats || {};
+
+  const averageRating = totalReviews > 0
+    ? Number((ratingSum / totalReviews).toFixed(1))
+    : 0;
+
+  const totalOrders = isPrivate === true 
+    ? await countCompletedOrdersByCourseIds(instructor.myCourses || [])
+    : undefined;
+
+  return {
+    totalCourses,
+    totalStudents,
+    totalReviews,
+    averageRating,
+    totalOrders,
+  };
+};
+
+
+export default {
+  handleBecomeInstructor,
+  isApprovedInstructor,
+  getInstructorStats,
+
 };

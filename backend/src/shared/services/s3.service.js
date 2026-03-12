@@ -5,7 +5,8 @@ import {
   DeleteObjectsCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { UPLOAD_DURATION, VIEW_DURATION } from "#shared/constants/video.js";
+import { UPLOAD_DURATION, VIEW_DURATION } from "#constants/video.js";
+import logger from "#utils/logger.js";
 
 let s3Client = null;
 
@@ -22,7 +23,7 @@ export const getS3Client = () => {
         secretAccessKey: process.env.AWS_SECRET_KEY,
       },
     });
-    console.log("> S3 Client initialized");
+    logger.info("> S3 Client initialized");
   }
   return s3Client;
 };
@@ -39,8 +40,7 @@ export const getObject = async (key) => {
 
     return data.Body;
   } catch (error) {
-    console.error("> S3 Service [getObject] Error: ", error);
-    throw new Error(error.message);
+    logger.error("> S3 Service [getObject] Error: ", error);
   }
 };
 
@@ -54,25 +54,23 @@ export const generateStreamUrl = async (key, duration = VIEW_DURATION) => {
 
     return await getSignedUrl(s3, command, { expiresIn: duration });
   } catch (error) {
-    console.error("> S3 Service [generateStreamUrl] Error: ", error);
-    throw error;
+    logger.error("> S3 Service [generateStreamUrl] Error: ", error);
   }
 };
 
-export const generateUploadUrl = async (fileName, contentType, duration = UPLOAD_DURATION) => {
+export const generateUploadUrl = async (filePath, contentType, duration = UPLOAD_DURATION) => {
   try {
     const s3 = getS3Client();
     const command = new PutObjectCommand({
       Bucket: process.env.AWS_S3_BUCKET,
-      Key: fileName,
+      Key: filePath,
       ContentType: contentType,
     });
 
     const url = await getSignedUrl(s3, command, { expiresIn: duration });
-    return { uploadUrl: url, key: fileName };
+    return { uploadUrl: url, key: filePath };
   } catch (error) {
-    console.error("> S3 Service [generateUploadUrl] Error: ", error);
-    throw error;
+    logger.error("> S3 Service [generateUploadUrl] Error: ", error);
   }
 };
 
@@ -105,7 +103,7 @@ export const removeManyObjects = async (keys) => {
     }
 
     if (allErrors.length > 0) {
-      console.warn(`> S3 Batch Delete partial failure: ${allErrors.length} errors.`);
+      logger.warn(`> S3 Batch Delete partial failure: ${allErrors.length} errors.`);
     }
 
     return {
@@ -115,7 +113,7 @@ export const removeManyObjects = async (keys) => {
     };
 
   } catch (error) {
-    console.error("> S3 Service [removeManyObjects] Fatal Error:", error);
+    logger.error("> S3 Service [removeManyObjects] Fatal Error:", error);
     return { success: false, error: error.message, deletedCount: totalDeleted };
   }
 };

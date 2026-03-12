@@ -1,7 +1,10 @@
 import Fuse from "fuse.js";
+import AppError from "#exceptions/app.error.js";
+import { existsEnrollment } from "#modules/enrollment/enrollment.service.js";
 import { getPaginationOptions } from "#utils/pagination.js";
-import * as courseMapper from "./course.mapper.js";
+import courseMapper from "./course.mapper.js";
 import Course from "./course.model.js";
+import Curriculum from "./curriculum.model.js";
 
 const publicFilter = {
   isPrivate: false,
@@ -67,7 +70,7 @@ export const getGlobalCourseStats = async () => {
 export const queryCourses = async (filters) => {
   const { page, limit, skip } = getPaginationOptions(filters);
   const {
-    search, category, subCategory, 
+    search, category, subCategory,
     sort, price, level, language
   } = filters;
 
@@ -112,7 +115,7 @@ export const queryCourses = async (filters) => {
 const sortDocs = (docs, strategy) => {
   const strategies = {
     newest: (a, b) => b.createdAt - a.createdAt,
-    oldest: { createdAt: 1 },
+    oldest: (a, b) => a.createdAt - b.createdAt,
     priceHighToLow: (a, b) => b.price - a.price,
     priceLowToHigh: (a, b) => a.price - b.price,
     mostPopular: (a, b) => b.studentsEnrolled - a.studentsEnrolled,
@@ -121,4 +124,79 @@ const sortDocs = (docs, strategy) => {
     ratingLowToHigh: (a, b) => (a.rating?.average || 0) - (b.rating?.average || 0),
   };
   return docs.sort(strategies[strategy] || strategies.newest);
+};
+
+export const getCourseInfoForVideoId = async (videoId) => {
+  const result = await Curriculum.aggregate([
+    { $match: { "sections.lectures.videoId": videoId } },
+    { $unwind: "$sections" },
+    { $unwind: "$sections.lectures" },
+    { $match: { "sections.lectures.videoId": videoId } },
+    {
+      $lookup: {
+        from: "courses",
+        localField: "courseId",
+        foreignField: "_id",
+        as: "courseInfo"
+      }
+    },
+    { $unwind: "$courseInfo" },
+    {
+      $project: {
+        _id: 0,
+        courseId: 1,
+        insId: "$courseInfo.instructor.ref",
+        isFree: "$sections.lectures.isFree"
+      }
+    }
+  ]);
+
+  const courseInfo = result[0];
+
+  return {
+    courseId: courseInfo?.courseId || null,
+    insId: courseInfo?.insId || null,
+    isFree: courseInfo?.isFree ?? false
+  };
+};
+
+export const getCoursePublicDetails = async (user, courseId) => {
+  if (!courseId) throw new AppError("Invalid course ID format.", 400);
+
+  const details = await Course.findOne({ _id: courseId, ...publicFilter })
+    .populate([{
+      path: "category",
+      select: "name slug",
+    }, {
+      path: "curriculum",
+      select: {
+        "_id": 0,
+        "sections.lectures.aiData": 0,
+        "__v": 0
+      }
+    }]).lean();
+  if (!details && Object.keys(details).length === 0) throw new AppError("Course not found.", 404);
+
+  let isOwned = undefined;
+  if (user) {
+    const isCreator = user.role === "instructor" && user.userId === details.instructor?.ref;
+    const isBought = user.role === "student" && (await existsEnrollment(user.userId, courseId));
+
+    isOwned = !!(isCreator || isBought);
+  }
+
+  return {
+    ...courseMapper.toCourseDetailsDto(details),
+    isOwned,
+  };
+};
+
+
+export default {
+  getHomeDashboardData,
+  getGlobalCourseStats,
+  queryCourses,
+  getCourseInfoForVideoId,
+  getCoursePublicDetails,
+
 };

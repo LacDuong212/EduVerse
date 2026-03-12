@@ -11,6 +11,6 @@ const studentSchema = new mongoose.Schema({
   },
 
   address: { type: String, default: '' },
-}, { timestamps: true });
+}, { timestamps: true, _id: false });
 
 export default mongoose.model("Student", studentSchema);
