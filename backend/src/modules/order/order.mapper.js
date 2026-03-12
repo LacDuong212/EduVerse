@@ -8,7 +8,7 @@ export const toOrderDto = (order) => {
     totalAmount: order.totalAmount,
     discountAmount: order.discountAmount,
     subTotal: order.subTotal,
-    createdAt: order.createdAt?.toISOString(),
+    createdAt: order.createdAt,
     expiresAt: order.expiresAt || null,
 
     coupon: order.coupon
@@ -24,8 +24,6 @@ export const toOrderDto = (order) => {
 
       return {
         courseId: course?._id?.toString?.() || course?.toString?.(),
-        title: course?.title || null,
-        thumbnail: course?.thumbnail || null,
         pricePaid: c.pricePaid
       };
     })
