@@ -21,7 +21,7 @@ export const addToCart = async (stuId, courseId) => {
     cart = await Cart.create({ user: stuId, courses: [] });
   }
 
-  const courseExists = cart.courses.some(c => 
+  const courseExists = cart.courses.some(c =>
     c.course?.toString() === courseId);
   if (courseExists) throw new AppError("Course already in cart.", 409);
 
@@ -37,7 +37,35 @@ export const addToCart = async (stuId, courseId) => {
   return (await getCart(stuId));
 };
 
+export const bulkRemoveFromCart = async (stuId, courseIds) => {
+  if (courseIds?.length === 0)
+    throw new AppError("Please provide at least one coure to remove from cart.", 400);
+
+  let cart = await Cart.findOne({ user: stuId });
+  if (!cart) {
+    cart = await Cart.create({ user: stuId, courses: [] });
+  }
+
+  const initialCount = cart.courses.length;
+  if (initialCount === 0)
+    throw new AppError("Your cart is empty, there is nothing to remove.", 409);
+
+  const idsToRemove = new Set(courseIds);
+  cart.courses = cart.courses.filter(item =>
+    !idsToRemove.has(item.course?.toString())
+  );
+
+  const removedCount = initialCount - cart.courses.length;
+  await cart.save();
+
+  return {
+    cart: (await getCart(stuId)),
+    removedCount,
+  };
+};
+
 export default {
   getCart,
   addToCart,
+  bulkRemoveFromCart,
 };

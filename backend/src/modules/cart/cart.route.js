@@ -9,6 +9,7 @@ const cartRoute = Router();
 cartRoute.use(protect, restrictTo("student"));
 
 cartRoute.get("/", cartController.getMyCart);
-cartRoute.post("/", validate(cartSchema.addToCartSchema), cartController.addToCart);
+cartRoute.post("/items", validate(cartSchema.addToCartSchema), cartController.addToCart);
+cartRoute.delete("/items", validate(cartSchema.removeCoursesSchema), cartController.removeFromCart);
 
 export default cartRoute;
