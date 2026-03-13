@@ -10,13 +10,14 @@ const {
 } = process.env;
 
 const sortObject = (obj) => {
-    const sorted = {};
-    Object.keys(obj)
-        .sort()
-        .forEach(key => {
-            sorted[key] = obj[key];
-        });
-    return sorted;
+  const sorted = {};
+  const keys = Object.keys(obj).map(k => encodeURIComponent(k)).sort();
+
+  for (const k of keys) {
+    sorted[k] = encodeURIComponent(obj[decodeURIComponent(k)])
+      .replace(/%20/g, "+");
+  }
+  return sorted;
 };
 
 export const createPayment = (ipAddr, amount, orderId, orderInfo) => {
