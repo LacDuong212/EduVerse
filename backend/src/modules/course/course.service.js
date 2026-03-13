@@ -68,7 +68,7 @@ export const getGlobalCourseStats = async () => {
 };
 
 export const queryCourses = async (filters) => {
-  const { page, limit, skip } = getPaginationOptions(filters);
+  const { page, limit, skip } = getPaginationOptions(filters.page, filters.limit);
   const {
     search, category, subCategory,
     sort, price, level, language
@@ -191,6 +191,32 @@ export const getCoursePublicDetails = async (user, courseId) => {
   };
 };
 
+export const updateCourseRating = async (courseId, { oldRating, newRating, isNew, isDeleted }) => {
+  const update = { $inc: {} };
+
+  if (isNew) {
+    update.$inc["rating.count"] = 1;
+    update.$inc["rating.total"] = newRating;
+    update.$inc[`rating.stars.${newRating}`] = 1;
+  } 
+  else if (isDeleted) {
+    update.$inc["rating.count"] = -1;
+    update.$inc["rating.total"] = -oldRating;
+    update.$inc[`rating.stars.${oldRating}`] = -1;
+  } 
+  else {
+    const delta = newRating - oldRating;
+    if (delta === 0) return;
+    
+    update.$inc["rating.total"] = delta;
+    update.$inc[`rating.stars.${oldRating}`] = -1;
+    update.$inc[`rating.stars.${newRating}`] = 1;
+  }
+
+  return await Course.updateOne({ _id: courseId }, update);
+};
+
+
 
 export default {
   getHomeDashboardData,
@@ -198,5 +224,6 @@ export default {
   queryCourses,
   getCourseInfoForVideoId,
   getCoursePublicDetails,
+  updateCourseRating,
 
 };

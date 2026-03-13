@@ -7,7 +7,7 @@ import cartService from "./cart.service.js";
 export const getMyCart = asyncHandler(async (req, res) => {
   const user = req.user;
   const cart = await cartService.getCart(user.userId);
-  sendSuccessResponse(res, 200, "Get cart successfully!", cart);
+  return sendSuccessResponse(res, 200, "Get cart successfully!", cart);
 });
 
 // @desc  Add one course to cart
@@ -16,7 +16,7 @@ export const addToCart = asyncHandler(async (req, res) => {
   const user = req.user;
   const { courseId } = req.body;
   const cart = await cartService.addToCart(user.userId, courseId);
-  sendSuccessResponse(res, 200, "Added course to your cart!", cart);
+  return sendSuccessResponse(res, 200, "Added course to your cart!", cart);
 });
 
 // @desc  Remove a list of courses from cart
@@ -30,7 +30,7 @@ export const removeFromCart = asyncHandler(async (req, res, next) => {
     removedCount = 0 
   } = await cartService.bulkRemoveFromCart(user.userId, courseIds);
 
-  sendSuccessResponse(
+  return sendSuccessResponse(
     res, 
     200, 
     `Removed ${removedCount} course${removedCount === 1 ? "": "s"} from cart`, 

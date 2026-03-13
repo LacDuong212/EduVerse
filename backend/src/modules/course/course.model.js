@@ -4,7 +4,7 @@ import Category from "#modules/category/category.model.js"; // yes
 import Curriculum from "./curriculum.model.js";
 
 export const DURATION_UNIT_ENUM = new Enum({
-  second: "second", 
+  second: "second",
   minute: "minute",
   hour: "hour",
   day: "day",
@@ -29,10 +29,10 @@ const courseSchema = new mongoose.Schema({
   description: String,
   image: String,
 
-  category: { 
-    type: mongoose.Schema.Types.ObjectId, 
+  category: {
+    type: mongoose.Schema.Types.ObjectId,
     ref: "Category",
-    required: true 
+    required: true
   },
 
   subCategory: String,
@@ -51,9 +51,15 @@ const courseSchema = new mongoose.Schema({
   studentsEnrolled: { type: Number, default: 0 },
 
   rating: {
-    average: { type: Number, min: 0, max: 5, default: 0 },
     count: { type: Number, min: 0, default: 0 },
-    total: { type: Number, min: 0, default: 0 }
+    total: { type: Number, min: 0, default: 0 },
+    stars: {
+      1: { type: Number, default: 0 },
+      2: { type: Number, default: 0 },
+      3: { type: Number, default: 0 },
+      4: { type: Number, default: 0 },
+      5: { type: Number, default: 0 }
+    },
   },
 
   thumbnail: String,
@@ -72,10 +78,10 @@ const courseSchema = new mongoose.Schema({
   timestamps: true
 });
 
-courseSchema.index({ 
-  title: "text", 
-  subtitle: "text", 
-  tags: "text" 
+courseSchema.index({
+  title: "text",
+  subtitle: "text",
+  tags: "text"
 }, {
   weights: { title: 10, tags: 5, subtitle: 2 },
   name: "CourseSearchIndex"

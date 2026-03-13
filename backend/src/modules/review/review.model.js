@@ -8,6 +8,9 @@ const reviewSchema = new mongoose.Schema({
   isDeleted: { type: Boolean, default: false }
 }, { timestamps: true });
 
-reviewSchema.index({ course: 1, user: 1 }, { unique: true });
+reviewSchema.index(
+  { course: 1, user: 1 }, 
+  { unique: true, partialFilterExpression: { isDeleted: false } }
+);
 
 export default mongoose.model("Review", reviewSchema);

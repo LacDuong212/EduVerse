@@ -41,7 +41,7 @@ const getCourseInstructor = (instructor) => ({
 });
 
 const getCourseStats = (course) => ({
-  rating: course?.rating?.average || 0,
+  ratingTotal: course?.rating?.total || 0,
   ratingCount: course?.rating?.count || 0,
   studentsEnrolled: course?.studentsEnrolled || 0,
   lecturesCount: course?.lecturesCount || 0,
@@ -90,8 +90,6 @@ const getCourseCurriculum = (curriculum, hasAiData = false) => {
 export const toCourseCardDto = (course) => {
   if (!course) return null;
 
-  const common = getCommonCourseFields(course);
-
   return {
     ...getCourseBasicDetails(course),
 
@@ -118,14 +116,15 @@ export const toCourseDetailsDto = (details) => {
     previewVideo: details.previewVideo || null,
 
     ...getCourseInfo(details),
-    ...getCourseStats(details),
 
     tags: details.tags || [],
 
-    ...getCourseFreeCurriculum(details.curriculum?.sections),
+    stats: getCourseStats(details),
 
-    ...getCourseCatgegory(details.category),
-    ...getCourseInstructor(details.instructor),
+    curriculum: getCourseFreeCurriculum(details.curriculum?.sections),
+
+    category: getCourseCatgegory(details.category),
+    instructor: getCourseInstructor(details.instructor),
 
     updatedAt: details.updatedAt || null,
   };

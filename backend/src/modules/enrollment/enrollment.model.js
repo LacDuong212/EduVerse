@@ -4,7 +4,8 @@ import Enum from "#utils/enum.js"
 export const STATUS_ENUM = new Enum({
   active: "active",
   completed: "completed",
-  refunded: "refunded"
+  refunded: "refunded",
+  inactive: "inactive", // when course is deleted
 });
 
 const enrollmentSchema = new mongoose.Schema({
