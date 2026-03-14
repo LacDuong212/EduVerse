@@ -64,8 +64,27 @@ export const bulkRemoveFromCart = async (stuId, courseIds) => {
   };
 };
 
+export const clearCart = async (stuId) => {
+  const result = await Cart.updateOne(
+    { user: stuId },
+    { $set: { courses: [] } }
+  );
+
+  return result.matchedCount === 1;
+};
+
+export const countCartItems = async (stuId) => {
+  const cart = await Cart.findOne({ user: stuId })
+    .select({ itemCount: { $size: "$courses" } })
+    .lean();
+
+  return cart?.itemCount || 0;
+};
+
 export default {
   getCart,
   addToCart,
   bulkRemoveFromCart,
+  clearCart,
+  countCartItems,
 };
