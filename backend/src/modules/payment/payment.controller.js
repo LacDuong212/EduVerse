@@ -9,9 +9,6 @@ export const createPayment = asyncHandler(async (req, res) => {
 
   const { orderId, paymentMethod } = req.body;
 
-  if (!orderId || !paymentMethod)
-    return new AppError("Missing required fields", 400);
-
   const rawIp =
     req.headers["x-forwarded-for"] ||
     req.socket.remoteAddress ||
@@ -35,7 +32,6 @@ export const createPayment = asyncHandler(async (req, res) => {
 });
 
 export const momoIpn = asyncHandler(async (req, res) => {
-
   const { isValid, amount, resultCode } =
     momoProvider.verifySignature(req.body);
 
@@ -66,7 +62,6 @@ export const momoIpn = asyncHandler(async (req, res) => {
 });
 
 export const vnpayIpn = asyncHandler(async (req, res) => {
-
   const isValid = vnpayProvider.verifySignature(req.query);
 
   if (!isValid)

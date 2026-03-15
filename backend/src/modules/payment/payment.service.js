@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
-import Order from "#modules/order/order.model.js";
-import Course from "#modules/course/course.model.js";
-import Transaction from "./transaction.model.js";
 import AppError from "#exceptions/app.error.js";
+import { enrollsCourses } from "#modules/enrollment/enrollment.service.js";
+import Order, { PAYMENT_METHOD_ENUM, STATUS_ENUM } from "#modules/order/order.model.js";
 import * as momoProvider from "./providers/momo.provider.js";
 import * as vnpayProvider from "./providers/vnpay.provider.js";
+import Transaction from "./transaction.model.js";
 
 /**
  * Create payment URL
@@ -15,32 +15,27 @@ export const createPayment = async ({
   paymentMethod,
   ipAddr
 }) => {
+  const order = await Order.findOne({
+    _id: orderId,
+    user: userId,
+  });
 
-  if (!mongoose.Types.ObjectId.isValid(orderId))
-    throw new AppError("Invalid order ID", 400);
-
-  const order = await Order.findById(orderId);
-
-  if (!order) throw new AppError("Order not found", 404);
-  if (order.user.toString() !== userId.toString())
-    throw new AppError("Access denied", 403);
-  if (order.status !== "pending")
-    throw new AppError(`Order is already ${order.status}`, 400);
+  if (!order) throw new AppError("Order not found.", 404);
+  if (order.status !== STATUS_ENUM.pending)
+    throw new AppError(`Order is already ${order.status?.toUpperCase()}.`, 400);
   if (order.expiresAt && order.expiresAt < new Date())
-    throw new AppError("Order has expired", 400);
+    throw new AppError("Order has expired.", 400);
 
   const amount = order.totalAmount;
   const orderInfo = `Payment for order ${orderId}`;
 
-  if (paymentMethod === "momo")
+  if (paymentMethod === PAYMENT_METHOD_ENUM.momo)
     return momoProvider.createPayment(orderId, amount, orderInfo);
-
-  if (paymentMethod === "vnpay")
+  else if (paymentMethod === PAYMENT_METHOD_ENUM.vnpay)
     return vnpayProvider.createPayment(ipAddr, amount, orderId, orderInfo);
-
-  throw new AppError("Payment method not supported", 400);
+  else
+    throw new AppError("Payment method not supported.", 400);
 };
-
 
 /**
  * Handle successful payment (IPN)
@@ -57,7 +52,6 @@ export const processSuccessfulPayment = async ({
   session.startTransaction();
 
   try {
-
     // Idempotency check
     const existingTx = await Transaction
       .findOne({ transactionId })
@@ -86,12 +80,12 @@ export const processSuccessfulPayment = async ({
       rawResponse: rawData
     }], { session });
 
-    if (order.status === "pending") {
-      order.status = "completed";
+    if (order.status === STATUS_ENUM.pending) {
+      order.status = STATUS_ENUM.completed;
       order.expiresAt = null;
       await order.save({ session });
 
-      await activateCourses(order, session);
+      await enrollsCourses(order.user, order.courses.map(item => item.course), session);
     }
 
     await session.commitTransaction();
@@ -103,7 +97,6 @@ export const processSuccessfulPayment = async ({
     throw err;
   }
 };
-
 
 /**
  * Handle failed payment
@@ -119,7 +112,6 @@ export const processFailedPayment = async ({
   session.startTransaction();
 
   try {
-
     const existingTx = await Transaction
       .findOne({ transactionId })
       .session(session);
@@ -143,8 +135,8 @@ export const processFailedPayment = async ({
       rawResponse: rawData
     }], { session });
 
-    if (order.status === "pending") {
-      order.status = "cancelled";
+    if (order.status === STATUS_ENUM.pending) {
+      order.status = STATUS_ENUM.cancelled;
       order.expiresAt = null;
       await order.save({ session });
     }
@@ -159,25 +151,8 @@ export const processFailedPayment = async ({
   }
 };
 
-
-/**
- * Internal helper (not exported)
- */
-const activateCourses = async (order, session) => {
-
-  const counts = order.courses.reduce((m, c) => {
-    const id = c.course.toString();
-    m[id] = (m[id] || 0) + 1;
-    return m;
-  }, {});
-
-  const bulkOps = Object.entries(counts).map(([id, cnt]) => ({
-    updateOne: {
-      filter: { _id: new mongoose.Types.ObjectId(id) },
-      update: { $inc: { studentsEnrolled: cnt } }
-    }
-  }));
-
-  if (bulkOps.length)
-    await Course.bulkWrite(bulkOps, { session });
+export default {
+  createPayment,
+  processSuccessfulPayment,
+  processFailedPayment,
 };

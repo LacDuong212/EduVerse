@@ -4,9 +4,10 @@ import { STATUS_ENUM } from "#modules/order/order.model.js";
 import * as cartMapper from "./cart.mapper.js";
 import Cart from "./cart.model.js";
 
-export const getCart = async (stuId) => {
+export const getCart = async (stuId, session = null) => {
   let cart = await Cart.findOne({ user: stuId })
     .populate("courses.course")
+    .session(session)
     .lean()
   if (!cart) {
     cart = await Cart.create({ user: stuId, courses: [] });
@@ -34,16 +35,16 @@ export const addToCart = async (stuId, courseId) => {
   cart.courses.push({ course: courseId });
   await cart.save();
 
-  return (await getCart(stuId));
+  return cartMapper.toCartItemsDto(await cart.populate("courses.course"));
 };
 
-export const bulkRemoveFromCart = async (stuId, courseIds) => {
+export const bulkRemoveFromCart = async (stuId, courseIds, session = null) => {
   if (courseIds?.length === 0)
     throw new AppError("Please provide at least one coure to remove from cart.", 400);
 
-  let cart = await Cart.findOne({ user: stuId });
+  let cart = await Cart.findOne({ user: stuId }).session(session);
   if (!cart) {
-    cart = await Cart.create({ user: stuId, courses: [] });
+    cart = await Cart.create([{ user: stuId, courses: [] }], { session });
   }
 
   const initialCount = cart.courses.length;
@@ -56,10 +57,12 @@ export const bulkRemoveFromCart = async (stuId, courseIds) => {
   );
 
   const removedCount = initialCount - cart.courses.length;
-  await cart.save();
+  await cart.save({ session });
+
+  await cart.populate()
 
   return {
-    cart: (await getCart(stuId)),
+    cart: cartMapper.toCartItemsDto(await cart.populate("courses.course")),
     removedCount,
   };
 };

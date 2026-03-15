@@ -1,17 +1,20 @@
 import { Router } from "express";
-import * as paymentController from "./payment.controller.js";
 import authMiddleware from "#middlewares/auth.middleware.js";
+import validate from "#middlewares/zodValidator.middleware.js";
+import * as paymentController from "./payment.controller.js";
+import * as paymentSchema from "./payment.validation.js";
 
-const router = Router();
+const paymentRoute = Router();
 
-router.post(
+paymentRoute.post(
   "/",
   authMiddleware.protect,
   authMiddleware.restrictTo("student"),
+  validate(paymentSchema.createPaymentSchema),
   paymentController.createPayment
 );
 
-router.post("/momo/ipn", paymentController.momoIpn);
-router.get("/vnpay/ipn", paymentController.vnpayIpn);
+paymentRoute.post("/momo/ipn", paymentController.momoIpn);
+paymentRoute.get("/vnpay/ipn", paymentController.vnpayIpn);
 
-export default router;
+export default paymentRoute;

@@ -74,7 +74,7 @@ export const courseQuerySchema = z.object({
         if (typeof val === "string") return val.toLowerCase();
         return val;
       },
-      z.enum(LEVEL_ENUM).optional()
+      z.enum(LEVEL_ENUM.values()).optional()
     ),
 
     price: z.enum(["free", "paid", "all"]).optional().default("all"),

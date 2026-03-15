@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
-import Order from "#modules/order/order.model.js";
-import Cart from "#modules/cart/cart.model.js";
-import Coupon from "#modules/coupon/coupon.model.js";
-import Course from "#modules/course/course.model.js";
 import AppError from "#exceptions/app.error.js";
+import { bulkRemoveFromCart, getCart } from "#modules/cart/cart.service.js";
+import { updateUsedCoupon, validateCoupon } from "#modules/coupon/coupon.service.js";
+import { enrollsCourses } from "#modules/enrollment/enrollment.service.js";
+import Order, { STATUS_ENUM } from "#modules/order/order.model.js";
 
 /**
  * Get all orders of a user
@@ -19,14 +19,13 @@ export const getUserOrders = async (userId) => {
  * Get single order by ID
  */
 export const getOrderById = async (orderId, userId) => {
-  const order = await Order.findById(orderId)
-    .populate("courses.course")
+  const order = await Order.findOne({
+    _id: orderId,
+    user: userId,
+  }).populate("courses.course")
     .populate("coupon");
 
-  if (!order) throw new AppError("Order not found", 404);
-  if (order.user.toString() !== userId.toString())
-    throw new AppError("Unauthorized access", 403);
-
+  if (!order) throw new AppError("Order not found.", 404);
   return order;
 };
 
@@ -37,170 +36,119 @@ export const createOrder = async (userId, body) => {
   const { selectedCourseIds, paymentMethod, couponCode } = body;
 
   if (!selectedCourseIds || !selectedCourseIds.length)
-    throw new AppError("No courses selected", 400);
+    throw new AppError("No courses selected.", 400);
 
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
-    const cart = await Cart.findOne({ user: userId })
-      .populate("courses.course")
-      .session(session);
+    const cart = await getCart(userId, session);
 
-    if (!cart || !cart.courses.length)
-      throw new AppError("Cart is empty", 400);
+    if (!cart || !cart.length)
+      throw new AppError("There are no items in your cart to buy.", 400);
 
-    const selectedItems = cart.courses.filter(item =>
-      selectedCourseIds.includes(item.course._id.toString())
+    const selectedItems = cart.filter(item =>
+      selectedCourseIds.includes(item?.courseId)
     );
 
     if (!selectedItems.length)
-      throw new AppError("Selected courses not found in cart", 400);
+      throw new AppError("Selected courses are not found in cart.", 409);
 
-    const coursesToOrder = selectedItems.map(item => {
-      const course = item.course;
-
-      const priceToUse =
-        (course.discountPrice && course.discountPrice < course.price)
-          ? course.discountPrice
-          : course.price;
-
-      return {
-        course: course._id,
-        pricePaid: priceToUse
-      };
-    });
-
-    const subTotal = coursesToOrder.reduce(
-      (total, c) => total + c.pricePaid,
-      0
-    );
-
-    let discountAmount = 0;
-    let finalAmount = subTotal;
     let couponDoc = null;
-
     if (couponCode) {
-      couponDoc = await Coupon.findOne({
-        code: couponCode.toUpperCase(),
-        isActive: true
-      }).session(session);
-
-      if (!couponDoc)
-        throw new AppError("Invalid coupon", 400);
-
-      if (new Date() > couponDoc.expiryDate)
-        throw new AppError("Coupon expired", 400);
-
-      if (couponDoc.usersUsed.includes(userId))
-        throw new AppError("Coupon already used", 400);
-
-      discountAmount = Math.round(
-        (subTotal * couponDoc.discountPercent) / 100
-      );
-
-      finalAmount = Math.max(subTotal - discountAmount, 0);
+      couponDoc = await validateCoupon(couponCode, userId, session);
     }
 
-    let orderStatus = "pending";
+    const {
+      items, subTotal, discountAmount, totalAmount
+    } = calculateOrderTotals(selectedItems, couponDoc);
+
+    let orderStatus = STATUS_ENUM.pending;
     let finalPaymentMethod = paymentMethod;
 
     if (finalAmount === 0) {
-      orderStatus = "completed";
+      orderStatus = STATUS_ENUM.completed;
       finalPaymentMethod = "free";
     }
 
     const [order] = await Order.create([{
       user: userId,
-      courses: coursesToOrder,
+      courses: items,
       subTotal,
       coupon: couponDoc?._id,
       discountAmount,
-      totalAmount: finalAmount,
+      totalAmount,
       paymentMethod: finalPaymentMethod,
       status: orderStatus
     }], { session });
 
-    if (orderStatus === "completed") {
-      await activateCourses(order, session);
+    if (orderStatus === STATUS_ENUM.completed) {
+      await enrollsCourses(userId, selectedCourseIds, session);
     }
 
-    if (couponDoc) {
-      await Coupon.findByIdAndUpdate(
-        couponDoc._id,
-        { $addToSet: { usersUsed: userId } },
-        { session }
-      );
-    }
-
-    await Cart.updateOne(
-      { user: userId },
-      {
-        $pull: {
-          courses: {
-            course: { $in: selectedCourseIds }
-          }
-        }
-      },
-      { session }
-    );
+    if (couponDoc) await updateUsedCoupon(couponDoc._id, userId, session);
+    await bulkRemoveFromCart(userId, selectedCourseIds, session);
 
     await session.commitTransaction();
-    session.endSession();
-
     return order;
 
   } catch (error) {
     await session.abortTransaction();
-    session.endSession();
     throw error;
+  } finally {
+    session.endSession();
   }
+};
+
+const calculateOrderTotals = (selectedItems, couponDoc) => {
+  const items = selectedItems.map(course => {
+    const priceToUse = course?.enableDiscount
+      ? (course?.discountPrice ?? course?.price)
+      : course?.price;
+
+    return {
+      course: course?.courseId,
+      pricePaid: priceToUse
+    };
+  });
+
+  const subTotal = items.reduce((sum, i) => sum + i.pricePaid, 0);
+  let discountAmount = 0;
+
+  if (couponDoc) {
+    discountAmount = Math.round((subTotal * couponDoc.discountPercent) / 100);
+  }
+
+  const totalAmount = Math.max(subTotal - discountAmount, 0);
+
+  return { items, subTotal, discountAmount, totalAmount };
 };
 
 /**
  * Cancel pending order
  */
 export const cancelOrder = async (orderId, userId) => {
-  const order = await Order.findById(orderId);
+  const order = await Order.findOne({
+    _id: orderId,
+    user: userId,
+  });
 
-  if (!order) throw new AppError("Order not found", 404);
-  if (order.user.toString() !== userId.toString())
-    throw new AppError("Unauthorized", 403);
+  if (!order) throw new AppError("Order not found.", 404);
 
-  if (order.status !== "pending")
-    throw new AppError("Processed orders cannot be cancelled", 400);
+  if (order.status !== STATUS_ENUM.pending)
+    throw new AppError("Processed orders cannot be cancelled", 409);
 
-  order.status = "cancelled";
+  order.status = STATUS_ENUM.cancelled;
   await order.save();
 
   return order;
 };
 
-/**
- * Internal helper: activate courses
- */
-const activateCourses = async (order, session) => {
-  const counts = order.courses.reduce((m, c) => {
-    const id = c.course.toString();
-    m[id] = (m[id] || 0) + 1;
-    return m;
-  }, {});
-
-  const bulkOps = Object.entries(counts).map(([id, cnt]) => ({
-    updateOne: {
-      filter: { _id: new mongoose.Types.ObjectId(id) },
-      update: { $inc: { studentsEnrolled: cnt } }
-    }
-  }));
-
-  if (bulkOps.length)
-    await Course.bulkWrite(bulkOps, { session });
-};
 export const countCompletedOrdersByCourseIds = async (courseIds = []) => {
   if (!courseIds || courseIds.length === 0) return 0;
 
   const count = await Order.countDocuments({
-    status: "completed",
+    status: STATUS_ENUM.completed,
     "courses.course": { $in: courseIds }
   });
 
@@ -217,4 +165,13 @@ export const getOrderStatusByUserIdAndCourseId = async (userId, courseId) => {
 
   if (!order) return null;
   else return order.status || null;
+};
+
+export default {
+  getUserOrders,
+  getOrderById,
+  createOrder,
+  cancelOrder,
+  countCompletedOrdersByCourseIds,
+  getOrderStatusByUserIdAndCourseId,
 };

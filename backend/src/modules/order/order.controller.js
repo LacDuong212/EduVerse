@@ -5,7 +5,6 @@ import * as orderMapper from "./order.mapper.js";
 
 export const getOrders = asyncHandler(async (req, res) => {
   const orders = await orderService.getUserOrders(req.user.userId);
-
   return sendSuccessResponse(res, 200, "Orders fetched", orderMapper.toOrderDtoList(orders));
 });
 
@@ -26,3 +25,10 @@ export const cancelOrder = asyncHandler(async (req, res) => {
 
   return sendSuccessResponse(res, 200, "Order cancelled", orderMapper.toOrderDto(order));
 });
+
+export default {
+  getOrders,
+  getOrderById,
+  createOrder,
+  cancelOrder,
+};
