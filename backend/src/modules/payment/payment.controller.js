@@ -1,6 +1,5 @@
 import asyncHandler from "#shared/utils/asyncHandler.js";
 import { sendSuccessResponse } from "#utils/response.js";
-import AppError from "#exceptions/app.error.js";
 import * as paymentService from "./payment.service.js";
 import * as momoProvider from "./providers/momo.provider.js";
 import * as vnpayProvider from "./providers/vnpay.provider.js";

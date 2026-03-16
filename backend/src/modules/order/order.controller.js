@@ -25,10 +25,3 @@ export const cancelOrder = asyncHandler(async (req, res) => {
 
   return sendSuccessResponse(res, 200, "Order cancelled", orderMapper.toOrderDto(order));
 });
-
-export default {
-  getOrders,
-  getOrderById,
-  createOrder,
-  cancelOrder,
-};

@@ -137,11 +137,3 @@ export const toCourseCartItemDto = (course, addedAt) => {
     addedAt,
   }
 };
-
-export default {
-  toCourseCardDto,
-  toCourseCardDtoList,
-  toCourseDetailsDto,
-  toCourseCartItemDto,
-
-};

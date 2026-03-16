@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import AppError from "#exceptions/app.error.js";
-import { bulkRemoveFromCart, getCart } from "#modules/cart/cart.service.js";
-import { updateUsedCoupon, validateCoupon } from "#modules/coupon/coupon.service.js";
+import * as cartService from "#modules/cart/cart.service.js";
+import * as couponService from "#modules/coupon/coupon.service.js";
 import { enrollsCourses } from "#modules/enrollment/enrollment.service.js";
 import Order, { STATUS_ENUM } from "#modules/order/order.model.js";
 
@@ -42,7 +42,7 @@ export const createOrder = async (userId, body) => {
   session.startTransaction();
 
   try {
-    const cart = await getCart(userId, session);
+    const cart = await cartService.getCart(userId, session);
 
     if (!cart || !cart.length)
       throw new AppError("There are no items in your cart to buy.", 400);
@@ -56,7 +56,7 @@ export const createOrder = async (userId, body) => {
 
     let couponDoc = null;
     if (couponCode) {
-      couponDoc = await validateCoupon(couponCode, userId, session);
+      couponDoc = await couponService.validateCoupon(couponCode, userId, session);
     }
 
     const {
@@ -86,8 +86,8 @@ export const createOrder = async (userId, body) => {
       await enrollsCourses(userId, selectedCourseIds, session);
     }
 
-    if (couponDoc) await updateUsedCoupon(couponDoc._id, userId, session);
-    await bulkRemoveFromCart(userId, selectedCourseIds, session);
+    if (couponDoc) await couponService.updateUsedCoupon(couponDoc._id, userId, session);
+    await cartService.bulkRemoveFromCart(userId, selectedCourseIds, session);
 
     await session.commitTransaction();
     return order;
@@ -165,13 +165,4 @@ export const getOrderStatusByUserIdAndCourseId = async (userId, courseId) => {
 
   if (!order) return null;
   else return order.status || null;
-};
-
-export default {
-  getUserOrders,
-  getOrderById,
-  createOrder,
-  cancelOrder,
-  countCompletedOrdersByCourseIds,
-  getOrderStatusByUserIdAndCourseId,
 };

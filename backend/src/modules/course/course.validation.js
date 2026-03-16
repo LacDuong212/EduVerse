@@ -1,8 +1,16 @@
+import mongoose from "mongoose";
 import { z } from "zod";
 import * as CONSTANTS from "./course.constant.js"
 import { LEVEL_ENUM } from "./course.model.js";
 
-const hexEncodeRegex = /^[0-9a-fA-F]{24}$/;
+const idSchema = z.string({ error: "Course ID is required", })
+  .trim()
+  .min(1, "Course ID cannot be empty")
+  .pipe(
+    z.string().refine((val) => mongoose.Types.ObjectId.isValid(val), {
+      message: "Invalid course ID format",
+    })
+  );
 
 const titleSchema = z.string({ error: "Course title is required" })
   .trim()
@@ -21,9 +29,14 @@ const descriptionSchema = z.string()
   .optional()
   .or(z.literal(""));
 
-const categoryIdSchema = z.string({ error: "Category is required" })
+const categoryIdSchema = z.string({ error: "Category ID is required" })
   .trim()
-  .regex(hexEncodeRegex, "Invalid Category ID");
+  .min(1, "Category ID cannot be empty")
+  .pipe(
+    z.string().refine((val) => mongoose.Types.ObjectId.isValid(val), {
+      message: "Invalid category ID format",
+    })
+  );
 
 const languageSchema = z.string({ error: "Language is required" });
 
@@ -89,6 +102,12 @@ export const courseQuerySchema = z.object({
       "ratingHighToLow",
       "ratingLowToHigh",
     ]).optional().default("newest"),
+  })
+});
+
+export const idParamSchema = z.object({
+  params: z.object({
+    id: idSchema,
   })
 });
 

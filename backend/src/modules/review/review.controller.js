@@ -1,6 +1,6 @@
 import asyncHandler from "#utils/asyncHandler.js";
 import { sendSuccessResponse, sendUnsuccessResponse } from "#utils/response.js";
-import reviewService from "./review.service.js";
+import * as reviewService from "./review.service.js";
 
 // @desc  Create a review for a course
 // @route POST /
@@ -33,9 +33,3 @@ export const removeReview = asyncHandler(async (req, res) => {
   if (result) return sendSuccessResponse(res, 204, "Review removed successfully!");
   else return sendUnsuccessResponse(res, 500, "Remove review failed..");
 });
-
-export default {
-  createReview,
-  updateReview,
-  removeReview,
-};

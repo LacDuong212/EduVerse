@@ -150,9 +150,3 @@ export const processFailedPayment = async ({
     throw err;
   }
 };
-
-export default {
-  createPayment,
-  processSuccessfulPayment,
-  processFailedPayment,
-};

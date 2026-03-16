@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { protect, restrictTo } from "#middlewares/auth.middleware.js";
 import validate from "#middlewares/zodValidator.middleware.js";
-import reviewController from "./review.controller.js";
+import * as reviewController from "./review.controller.js";
 import * as reviewSchema from "./review.validation.js";
 
 // @route /reviews

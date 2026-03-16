@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { protect, restrictTo } from "#middlewares/auth.middleware.js";
-import instructorController from "./instructor.controller.js";
+import * as instructorController from "./instructor.controller.js";
 
 // @route /instructors
 const publicRoutes = Router();

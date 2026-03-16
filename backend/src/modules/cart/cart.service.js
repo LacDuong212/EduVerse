@@ -83,11 +83,3 @@ export const countCartItems = async (stuId) => {
 
   return cart?.itemCount || 0;
 };
-
-export default {
-  getCart,
-  addToCart,
-  bulkRemoveFromCart,
-  clearCart,
-  countCartItems,
-};

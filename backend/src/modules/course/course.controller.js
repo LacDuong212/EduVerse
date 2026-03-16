@@ -1,8 +1,8 @@
 import { getPaginatedReviewsByCourseId } from "#modules/review/review.service.js";
 import asyncHandler from "#utils/asyncHandler.js";
 import { sendPaginatedResponse, sendSuccessResponse } from "#utils/response.js";
-import courseMapper from "./course.mapper.js";
-import courseService from "./course.service.js";
+import * as courseMapper from "./course.mapper.js";
+import * as courseService from "./course.service.js";
 
 // @desc  Get grouped public courses for home page
 // @route GET /home
@@ -66,12 +66,11 @@ export const getCourseReviewsById = asyncHandler(async (req, res) => {
   );
 });
 
-
-export default {
-  getHomeCourses,
-  getCourseStats,
-  getAllCourses,
-  getCourseDetailsById,
-  getCourseReviewsById,
-
-};
+// @desc  Get Cloudinary params for uploading course image
+// @route Get /:id/image/upload
+export const getImageParams = asyncHandler(async (req, res) => {
+  const user = req.user;
+  const { id } = req.params;
+  const result = await courseService.getImageParams(id, user.userId);
+  return sendSuccessResponse(res, 200, "Get upload params successfull!", result);
+});

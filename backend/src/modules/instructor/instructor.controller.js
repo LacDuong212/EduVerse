@@ -1,6 +1,6 @@
 import asyncHandler from "#utils/asyncHandler.js";
 import { sendSuccessResponse } from "#utils/response.js";
-import instructorService from "./instructor.service.js";
+import * as instructorService from "./instructor.service.js";
 
 // @desc  Handle student's request to become an instructor
 // @route POST /instructors
@@ -25,11 +25,3 @@ export const getInstructorStats = asyncHandler(async (req, res) => {
   const stats = await instructorService.getInstructorStats(user.userId, true);
   sendSuccessResponse(res, 200, "Get instructor stats successfully.", { ...stats })  
 });
-
-
-export default {
-  becomeInstructor,
-  getInstructorPublicStats,
-  getInstructorStats,
-  
-};

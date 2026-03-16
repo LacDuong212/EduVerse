@@ -50,11 +50,3 @@ export const getVideoViewUrl = async (user, videoId) => {
 
   return viewUrl;
 };
-
-
-export default {
-  getKey,
-  getKeys,
-  getVideoViewUrl,
-
-};

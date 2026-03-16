@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { protect, restrictTo } from "#middlewares/auth.middleware.js";
 import validate from "#middlewares/zodValidator.middleware.js"
-import cartController from "./cart.controller.js";
+import * as cartController from "./cart.controller.js";
 import * as cartSchema from "./cart.validation.js";
 
 // @route /cart

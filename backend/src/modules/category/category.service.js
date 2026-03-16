@@ -20,7 +20,3 @@ export const getAllCatgeoriesWithSort = async (sort = "slugAsc") => {
     cateSlug: category.slug,
   }));
 };
-
-export default {
-  getAllCatgeoriesWithSort,
-};

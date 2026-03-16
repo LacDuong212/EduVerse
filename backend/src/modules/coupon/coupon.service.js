@@ -28,8 +28,3 @@ export const updateUsedCoupon = async (
     { session }
   ).lean();
 };
-
-export default {
-  validateCoupon,
-  updateUsedCoupon,
-};

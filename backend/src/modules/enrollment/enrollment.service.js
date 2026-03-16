@@ -46,8 +46,3 @@ export const enrollsCourses = async (stuId, courseIds, session = null) => {
 
   return { success: true, count: enrollmentData.length };
 };
-
-export default {
-  existsEnrollment,
-  enrollsCourses,
-};

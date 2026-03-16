@@ -1,6 +1,6 @@
 import asyncHandler from "#utils/asyncHandler.js";
 import { sendSuccessResponse, sendUnsuccessResponse } from "#utils/response.js";
-import cartService from "./cart.service.js";
+import * as cartService from "./cart.service.js";
 
 // @desc  Get student cart
 // @route GET /
@@ -58,11 +58,3 @@ export const countCartItems = asyncHandler(async (req, res) => {
     size
   );
 });
-
-export default {
-  getMyCart,
-  addToCart,
-  removeFromCart,
-  clearCart,
-  countCartItems,
-};

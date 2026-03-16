@@ -114,10 +114,3 @@ export const getPaginatedReviewsByCourseId = async (
     limit: limitCount,
   };
 };
-
-export default {
-  createReview,
-  updateReview,
-  softDeleteReview,
-  getPaginatedReviewsByCourseId,
-};
