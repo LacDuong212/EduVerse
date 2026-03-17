@@ -6,6 +6,7 @@ import passport from "passport";
 
 import configurePassport from "#config/passport.js";
 import { COOKIE_MAX_AGE } from "#constants/others.js";
+import AppError from "#exceptions/app.error.js";
 import errorMiddleware from "#middlewares/error.middleware.js";
 import apiRouter from "#modules/index.js";
 
@@ -56,6 +57,11 @@ app.use(passport.session());
 // routes
 app.get("/", (req, res) => res.send("EduVerse2 API is running"));
 app.use("/api", apiRouter);
+
+// catch-all route
+app.all("/*path", (req, res, next) => {
+  throw new AppError(`Can't find: ${req.method} - ${req.originalUrl}`, 404);
+});
 
 // global error handler (MUST BE LAST)
 app.use(errorMiddleware);

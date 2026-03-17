@@ -70,11 +70,3 @@ export const getInstructorStats = async (userId, isPrivate = false) => {
     totalOrders,
   };
 };
-
-
-export default {
-  handleBecomeInstructor,
-  isApprovedInstructor,
-  getInstructorStats,
-
-};

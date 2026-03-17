@@ -1,6 +1,5 @@
 import asyncHandler from "#shared/utils/asyncHandler.js";
 import { sendSuccessResponse } from "#utils/response.js";
-import AppError from "#exceptions/app.error.js";
 import * as paymentService from "./payment.service.js";
 import * as momoProvider from "./providers/momo.provider.js";
 import * as vnpayProvider from "./providers/vnpay.provider.js";
@@ -8,9 +7,6 @@ import * as vnpayProvider from "./providers/vnpay.provider.js";
 export const createPayment = asyncHandler(async (req, res) => {
 
   const { orderId, paymentMethod } = req.body;
-
-  if (!orderId || !paymentMethod)
-    return next(new AppError("Missing required fields", 400));
 
   const rawIp =
     req.headers["x-forwarded-for"] ||
@@ -35,7 +31,6 @@ export const createPayment = asyncHandler(async (req, res) => {
 });
 
 export const momoIpn = asyncHandler(async (req, res) => {
-
   const { isValid, amount, resultCode } =
     momoProvider.verifySignature(req.body);
 
@@ -66,7 +61,6 @@ export const momoIpn = asyncHandler(async (req, res) => {
 });
 
 export const vnpayIpn = asyncHandler(async (req, res) => {
-
   const isValid = vnpayProvider.verifySignature(req.query);
 
   if (!isValid)

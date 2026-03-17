@@ -4,7 +4,8 @@ import Enum from "#utils/enum.js"
 export const STATUS_ENUM = new Enum({
   active: "active",
   completed: "completed",
-  refunded: "refunded"
+  refunded: "refunded",
+  inactive: "inactive", // when course is deleted
 });
 
 const enrollmentSchema = new mongoose.Schema({
@@ -39,5 +40,6 @@ const enrollmentSchema = new mongoose.Schema({
 });
 
 enrollmentSchema.index({ student: 1, course: 1 }, { unique: true });
+enrollmentSchema.index({ instructor: 1, enrolledAt: -1 });
 
 export default mongoose.model("Enrollment", enrollmentSchema);

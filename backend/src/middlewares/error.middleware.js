@@ -9,7 +9,7 @@ const errorMiddleware = (err, req, res, next) => {
   const stack = err.stack;
   if (error.isOperational) {
     const statusCode = error.statusCode || 500;
-    const message = error.message || "Internal Server Error";
+    const message = error.message || "Internal server error.";
     const errors = error.errors || null;
 
     return sendError(res, statusCode, message, errors, stack);

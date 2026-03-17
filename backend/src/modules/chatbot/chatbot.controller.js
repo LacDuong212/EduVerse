@@ -1,10 +1,10 @@
-import { getLatestLearningProgress } from "#modules/learning/learning.controller.js";
+import { getLatestLearningProgress } from "#modules/learning/learning.service.js";
 import { sendMessageToDialogflow } from "#services/dialogflow.service.js";
 
 import { INTENT } from "./chatbot.config.js";
-import { handleCourseSearch, handleLearningProgress, handlePageNavigation } from "./chatbot.service.js";
-import { protoToJSON, getBotText } from "./chatbot.utils.js";
-
+import * as chatbotService from "./chatbot.service.js";
+import * as chatbotUtils from "./chatbot.utils.js";
+{ handleCourseSearch, handleLearningProgress, handlePageNavigation }
 /**
  * @param {*} req user's message + session (history) + language
  * @param {*} res proccessed response, from Dialogflow's raw response, base on intention
@@ -22,7 +22,7 @@ export const handleChatbotResponse = async (req, res) => {
     const response = await sendMessageToDialogflow(message, sessionId, languageCode);
 
     // get default text response
-    let botReply = getBotText(response);
+    let botReply = chatbotUtils.getBotText(response);
     let actionData = null;
 
     // process custom payload
@@ -30,16 +30,16 @@ export const handleChatbotResponse = async (req, res) => {
       const payloadMsg = response.fulfillmentMessages.find(msg => msg.payload);
 
       if (payloadMsg) {
-        const payload = protoToJSON(payloadMsg.payload);
+        const payload = chatbotUtils.protoToJSON(payloadMsg.payload);
 
         // course search intent
         if (payload.type === INTENT.COURSE_SEARCH && payload.filters) {
-          actionData = handleCourseSearch(payload.filters);
+          actionData = chatbotService.handleCourseSearch(payload.filters);
         }
 
         // page navigation intent
         else if (payload.type === INTENT.PAGE_NAVIGATION && payload.navigation) {
-          const result = handlePageNavigation(payload.navigation, userRole, languageCode);
+          const result = chatbotService.handlePageNavigation(payload.navigation, userRole, languageCode);
 
           if (result.actionData) actionData = result.actionData;
           if (result.replyOverride) botReply = result.replyOverride;  // override Dialogflow's response message
@@ -71,7 +71,7 @@ export const handleChatbotResponse = async (req, res) => {
           // valid student
           else {
             const latestProgress = await getLatestLearningProgress(userId);
-            const result = handleLearningProgress(latestProgress, languageCode);
+            const result = chatbotService.handleLearningProgress(latestProgress, languageCode);
 
             if (result.actionData) actionData = result.actionData;
             if (result.replyOverride) botReply = result.replyOverride;  // overide Dialogflow's response

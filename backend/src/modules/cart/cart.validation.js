@@ -4,13 +4,12 @@ import { z } from "zod";
 export const addToCartSchema = z.object({
   body: z.object({
     courseId: z
-      .string({
-        error: "Course ID is required",
-      }).trim()
+      .string({ error: "Course ID is required" })
+      .trim()
       .min(1, "Course ID cannot be empty")
       .pipe(
         z.string().refine((val) => mongoose.Types.ObjectId.isValid(val), {
-          message: "Invalid Course ID format",
+          message: "Invalid course ID format",
         })
       ),
   }),
@@ -22,13 +21,13 @@ export const removeCoursesSchema = z.object({
       .array(
         z.string({ error: "Course ID is required" })
           .trim()
-          .min(1, "Course ID cannot be empty.")
+          .min(1, "Course ID cannot be empty")
           .pipe(
             z.string().refine((val) => mongoose.Types.ObjectId.isValid(val), {
-              message: "Invalid Course ID format",
+              message: "Invalid course ID format",
             })
           ),
-        { error: "CourseIds must be a list of course IDs." }
+        { error: "CourseIds must be a list of course IDs" }
       )
       .min(1, "At least one course ID is required"),
   }),

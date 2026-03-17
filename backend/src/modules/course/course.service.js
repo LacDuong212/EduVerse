@@ -1,8 +1,9 @@
 import Fuse from "fuse.js";
 import AppError from "#exceptions/app.error.js";
 import { existsEnrollment } from "#modules/enrollment/enrollment.service.js";
+import { getCourseImageUploadParams } from "#modules/image/image.service.js";
 import { getPaginationOptions } from "#utils/pagination.js";
-import courseMapper from "./course.mapper.js";
+import * as courseMapper from "./course.mapper.js";
 import Course from "./course.model.js";
 import Curriculum from "./curriculum.model.js";
 
@@ -68,7 +69,7 @@ export const getGlobalCourseStats = async () => {
 };
 
 export const queryCourses = async (filters) => {
-  const { page, limit, skip } = getPaginationOptions(filters);
+  const { page, limit, skip } = getPaginationOptions(filters.page, filters.limit);
   const {
     search, category, subCategory,
     sort, price, level, language
@@ -191,12 +192,44 @@ export const getCoursePublicDetails = async (user, courseId) => {
   };
 };
 
+export const updateCourseRating = async (
+  courseId, 
+  { oldRating, newRating, isNew, isDeleted }, 
+  session = null
+) => {
+  const update = { $inc: {} };
 
-export default {
-  getHomeDashboardData,
-  getGlobalCourseStats,
-  queryCourses,
-  getCourseInfoForVideoId,
-  getCoursePublicDetails,
+  if (isNew) {
+    update.$inc["rating.count"] = 1;
+    update.$inc["rating.total"] = newRating;
+    update.$inc[`rating.stars.${newRating}`] = 1;
+  } 
+  else if (isDeleted) {
+    update.$inc["rating.count"] = -1;
+    update.$inc["rating.total"] = -oldRating;
+    update.$inc[`rating.stars.${oldRating}`] = -1;
+  } 
+  else {
+    const delta = newRating - oldRating;
+    if (delta === 0) return null;
+    
+    update.$inc["rating.total"] = delta;
+    update.$inc[`rating.stars.${oldRating}`] = -1;
+    update.$inc[`rating.stars.${newRating}`] = 1;
+  }
 
+  return await Course.updateOne({ _id: courseId }, update, { session });
+};
+
+export const getImageParams = async (courseId, insId) => {
+  const course = await Course.findOne({
+    _id: courseId,
+    isDeleted: false,
+  }).lean();
+
+  if (!course) throw new AppError("Course not found.", 404);
+  if (course.instructor?.ref?.toString() !== insId)
+    throw new AppError("You don't have access to this course.", 403);
+
+  return getCourseImageUploadParams(courseId);
 };
