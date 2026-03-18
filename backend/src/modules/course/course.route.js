@@ -7,26 +7,26 @@ import * as courseSchema from "./course.validation.js";
 // @route /courses
 const courseRoute = Router();
 
-courseRoute.get("/", validate(courseSchema.courseQuerySchema), courseController.getAllCourses);
+courseRoute.get("/", validate(courseSchema.courseQueryRequest), courseController.getAllCourses);
 courseRoute.get("/home", courseController.getHomeCourses);
 courseRoute.get("/stats", courseController.getCourseStats);
 courseRoute.get(
   "/:id", 
   checkAuth, 
-  validate(courseSchema.idParamSchema), 
+  validate(courseSchema.idParamRequest), 
   courseController.getCourseDetailsById
 );
 courseRoute.get(
   "/:id/reviews", 
   checkAuth,
-  validate(courseSchema.idParamSchema), 
+  validate(courseSchema.idParamRequest), 
   courseController.getCourseReviewsById
 );
 courseRoute.get(
   "/:id/image/upload", 
   protect, 
   restrictTo("instructor"), 
-  validate(courseSchema.idParamSchema),
+  validate(courseSchema.idParamRequest),
   courseController.getImageParams
 );
 

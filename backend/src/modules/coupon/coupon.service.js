@@ -5,7 +5,7 @@ export const getAllCoupons = async () => {
   return Coupon.find()
     .sort({ createdAt: -1 })
     .lean();
-}
+};
 
 export const applyCoupon = async (
   couponCode,

@@ -66,7 +66,7 @@ const tagsSchema = z
   .optional()
   .default([]);
 
-export const courseQuerySchema = z.object({
+export const courseQueryRequest = z.object({
   query: z.object({
     page: z.string()
       .optional()
@@ -105,13 +105,13 @@ export const courseQuerySchema = z.object({
   })
 });
 
-export const idParamSchema = z.object({
+export const idParamRequest = z.object({
   params: z.object({
     id: idSchema,
   })
 });
 
-export const step1Schema = z.object({
+export const step1Request = z.object({
   body: z.object({
     title: titleSchema,
     subtitle: subtitleSchema,

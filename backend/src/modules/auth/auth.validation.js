@@ -8,15 +8,17 @@ const emailSchema = z.string({ error: "Email is required" })
   .email("Invalid email format")
   .toLowerCase();
 
-const complexPasswordSchema = z
+export const complexPasswordSchema = z
   .string({ error: "Password is required" })
   .min(8, "Password must be at least 8 characters")
-  .regex(/[0-9]/, "Password must contain at least one number")
+  .max(100, "Password is too long")
+  .regex(/[a-z]/, "Password must contain at least one lowercase letter")
   .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-  .regex(/[!@#$%^&*]/, "Password must contain at least one special character");
+  .regex(/[0-9]/, "Password must contain at least one number")
+  .regex(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/, "Password must contain at least one special character");
 
-  
-export const registerSchema = z.object({
+
+export const registerRequest = z.object({
   body: z.object({
     name: z
       .string({ error: "Full name is required" })
@@ -26,7 +28,7 @@ export const registerSchema = z.object({
   }),
 });
 
-export const verifyEmailSchema = z.object({
+export const verifyEmailRequest = z.object({
   body: z.object({
     email: emailSchema,
     otp: z
@@ -35,23 +37,23 @@ export const verifyEmailSchema = z.object({
   }),
 });
 
-export const loginSchema = z.object({
+export const loginRequest = z.object({
   body: z.object({
     email: emailSchema,
     password: z
-    .string({ error: "Password is required" })
-    .trim()
-    .min(1, "Password must not be empty"),
+      .string({ error: "Password is required" })
+      .trim()
+      .min(1, "Password must not be empty"),
   }),
 });
 
-export const forgotPasswordSchema = z.object({
+export const forgetPasswordRequest = z.object({
   body: z.object({
     email: emailSchema,
   }),
 });
 
-export const resetPasswordSchema = z.object({
+export const resetPasswordRequest = z.object({
   body: z.object({
     email: emailSchema,
     otp: z
@@ -61,7 +63,7 @@ export const resetPasswordSchema = z.object({
   }),
 });
 
-export const resendOtpSchema = z.object({
+export const resendOtpRequest = z.object({
   body: z.object({
     email: emailSchema,
   }),

@@ -12,7 +12,7 @@ cartRoute.get("/", cartController.getMyCart);
 cartRoute.delete("/", cartController.clearCart);
 
 cartRoute.get("/items", cartController.countCartItems);
-cartRoute.post("/items", validate(cartSchema.addToCartSchema), cartController.addToCart);
-cartRoute.delete("/items", validate(cartSchema.removeCoursesSchema), cartController.removeFromCart);
+cartRoute.post("/items", validate(cartSchema.addToCartRequest), cartController.addToCart);
+cartRoute.delete("/items", validate(cartSchema.removeCoursesRequest), cartController.removeFromCart);
 
 export default cartRoute;

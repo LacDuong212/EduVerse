@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { z } from "zod";
 
-export const addToCartSchema = z.object({
+export const addToCartRequest = z.object({
   body: z.object({
     courseId: z
       .string({ error: "Course ID is required" })
@@ -15,7 +15,7 @@ export const addToCartSchema = z.object({
   }),
 });
 
-export const removeCoursesSchema = z.object({
+export const removeCoursesRequest = z.object({
   body: z.object({
     courseIds: z
       .array(
