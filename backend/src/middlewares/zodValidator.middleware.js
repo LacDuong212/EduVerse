@@ -27,7 +27,7 @@ const validate = (schema) => async (req, res, next) => {
 
     if (issues && Array.isArray(issues)) {
       const formattedErrors = issues.map(e => ({
-        field: e.path,
+        field: e.path.join('.'),
         message: e.message
       }));
 

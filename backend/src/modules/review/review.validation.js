@@ -30,7 +30,7 @@ const descSchema = z.string({ error: "Description must be a string" })
   .nullable()
   .or(z.literal(""));
 
-export const createReviewSchema = z.object({
+export const createReviewRequest = z.object({
   body: z.object({
     courseId: courseIdSchema,
     rating: ratingSchema,
@@ -38,7 +38,7 @@ export const createReviewSchema = z.object({
   }),
 });
 
-export const updateReviewSchema = z.object({
+export const updateReviewRequest = z.object({
   params: z.object({
     reviewId: reviewIdSchema,
   }),
@@ -50,7 +50,7 @@ export const updateReviewSchema = z.object({
   }),
 });
 
-export const removeReviewSchema = z.object({
+export const removeReviewRequest = z.object({
   params: z.object({
     reviewId: reviewIdSchema,
   }),

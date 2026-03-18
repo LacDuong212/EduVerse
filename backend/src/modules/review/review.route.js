@@ -9,12 +9,12 @@ const reviewRoute = Router();
 
 reviewRoute.use(protect, restrictTo("student"));
 
-reviewRoute.post("/", validate(reviewSchema.createReviewSchema), reviewController.createReview);
+reviewRoute.post("/", validate(reviewSchema.createReviewRequest), reviewController.createReview);
 reviewRoute.patch(
-  "/:reviewId", validate(reviewSchema.updateReviewSchema), reviewController.updateReview
+  "/:reviewId", validate(reviewSchema.updateReviewRequest), reviewController.updateReview
 );
 reviewRoute.delete(
-  "/:reviewId", validate(reviewSchema.removeReviewSchema), reviewController.removeReview
+  "/:reviewId", validate(reviewSchema.removeReviewRequest), reviewController.removeReview
 );
 
 export default reviewRoute;

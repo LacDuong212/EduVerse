@@ -10,13 +10,13 @@ const orderIdSchema = z.string({ error: "Order ID is required" }).trim()
     })
   );
 
-export const orderIdParamsSchema = z.object({
+export const orderIdParamsRequest = z.object({
   params: z.object({
     id: orderIdSchema,
   }),
 });
 
-export const createOrderSchema = z.object({
+export const createOrderRequest = z.object({
   body: z.object({
     selectedCourseIds: z
       .array(

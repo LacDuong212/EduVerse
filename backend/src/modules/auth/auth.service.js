@@ -11,7 +11,7 @@ import User from "#modules/user/user.model.js";
 export const registerUser = async (userData) => {
   const { name, email, password } = userData;
   const cleanEmail = email.toLowerCase().trim();
-  
+
   let user = await User.findOne({ email: cleanEmail });
 
   if (user && user.isVerified) {
@@ -41,7 +41,7 @@ export const registerUser = async (userData) => {
   }
 
   const saved = await user.save();
-  
+
   if (isNew) {
     await createNewStudent(saved._id);
   }
@@ -54,7 +54,7 @@ export const registerUser = async (userData) => {
   };
 
   await transporter.sendMail(mailOptions);
-  
+
   return toAuthUserDto(user);
 };
 
@@ -63,36 +63,40 @@ export const verifyEmail = async (email, otp) => {
   const user = await User.findOne({ email: cleanEmail });
 
   if (!user) {
-    throw new AppError("User not found", 404);
+    throw new AppError("User not found.", 404);
   }
 
   if (user.isVerified) {
-    throw new AppError("Account already verified", 400);
+    throw new AppError("Account already verified.", 400);
   }
 
   if (user.verifyOtp !== otp) {
-    throw new AppError("Invalid OTP", 400);
+    throw new AppError("Invalid OTP.", 400);
+  }
+
+  if (!user.verifyOtpExpireAt || user.verifyOtpExpireAt === 0) {
+    throw new AppError("No OTP requested for this account.", 400);
   }
 
   if (user.verifyOtpExpireAt < Date.now()) {
-    throw new AppError("OTP has expired", 400);
+    throw new AppError("OTP has expired.", 400);
   }
 
   user.isVerified = true;
   user.verifyOtp = '';
   user.verifyOtpExpireAt = 0;
-  
+
   await user.save();
   return toAuthUserDto(user);
 };
 
 export const loginUser = async (email, password) => {
   const cleanEmail = email.toLowerCase().trim();
-  
+
   const user = await User.findOne({ email: cleanEmail }).select('+password');
 
   if (!user) {
-    throw new AppError("Invalid email or password.", 401); 
+    throw new AppError("Invalid email or password.", 401);
   }
 
   if (!user.isActivated) {
@@ -130,7 +134,7 @@ export const sendPasswordResetOtp = async (email) => {
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   user.verifyOtp = otp;
   user.verifyOtpExpireAt = Date.now() + 10 * 60 * 1000;
-  
+
   await user.save();
 
   await transporter.sendMail({
@@ -145,7 +149,7 @@ export const sendPasswordResetOtp = async (email) => {
 
 export const resetPassword = async (email, otp, newPassword) => {
   const cleanEmail = email.toLowerCase().trim();
-  
+
   const user = await User.findOne({ email: cleanEmail });
 
   if (!user) {
@@ -188,7 +192,7 @@ export const resendVerificationOtp = async (email) => {
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   user.verifyOtp = otp;
   user.verifyOtpExpireAt = Date.now() + 10 * 60 * 1000;
-  
+
   await user.save();
 
   await transporter.sendMail({

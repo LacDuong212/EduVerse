@@ -33,9 +33,8 @@ const instructorSchema = new mongoose.Schema({
   education: [educationSubSchema],
 
   isApproved: { type: Boolean, default: false }
-}, {
-  timestamps: true,
-  _id: false
+}, { 
+  timestamps: true 
 });
 
 export default mongoose.model("Instructor", instructorSchema);

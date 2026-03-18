@@ -11,7 +11,7 @@ router.get("/", couponController.getAllCoupons);
 router.post(
   "/apply",
   protect,
-  validate(couponSchema.applyCouponSchema),
+  validate(couponSchema.applyCouponRequest),
   couponController.applyCoupon
 );
 

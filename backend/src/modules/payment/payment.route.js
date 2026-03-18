@@ -10,7 +10,7 @@ paymentRoute.post(
   "/",
   authMiddleware.protect,
   authMiddleware.restrictTo("student"),
-  validate(paymentSchema.createPaymentSchema),
+  validate(paymentSchema.createPaymentRequest),
   paymentController.createPayment
 );
 

@@ -9,8 +9,8 @@ const router = Router();
 router.use(authMiddleware.protect, authMiddleware.restrictTo("student"));
 
 router.get("/", orderController.getOrders);
-router.get("/:id", validate(orderSchema.orderIdParamsSchema), orderController.getOrderById);
-router.post("/", validate(orderSchema.createOrderSchema), orderController.createOrder);
-router.patch("/:id/cancel", validate(orderSchema.orderIdParamsSchema), orderController.cancelOrder);
+router.get("/:id", validate(orderSchema.orderIdParamsRequest), orderController.getOrderById);
+router.post("/", validate(orderSchema.createOrderRequest), orderController.createOrder);
+router.patch("/:id/cancel", validate(orderSchema.orderIdParamsRequest), orderController.cancelOrder);
 
 export default router;

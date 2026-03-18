@@ -9,15 +9,15 @@ import * as authSchema from "#modules/auth/auth.validation.js";
 // @route /auth
 const authRoute = express.Router();
 
-authRoute.post("/register", validate(authSchema.registerSchema), authController.register);
-authRoute.post("/verify-email", validate(authSchema.verifyEmailSchema), authController.verifyEmail);
-authRoute.post("/resend-otp", validate(authSchema.resendOtpSchema), authController.sendOTP);
+authRoute.post("/register", validate(authSchema.registerRequest), authController.register);
+authRoute.post("/verify-email", validate(authSchema.verifyEmailRequest), authController.verifyEmail);
+authRoute.post("/resend-otp", validate(authSchema.resendOtpRequest), authController.sendOTP);
 
-authRoute.post("/login", validate(authSchema.loginSchema), authController.login);
+authRoute.post("/login", validate(authSchema.loginRequest), authController.login);
 authRoute.post("/logout", protect, authController.logout);
 
-authRoute.post("/forgot-password", validate(authSchema.forgotPasswordSchema), authController.forgotPassword);
-authRoute.post("/reset-password", validate(authSchema.resetPasswordSchema), authController.resetPassword);
+authRoute.post("/forget-password", validate(authSchema.forgetPasswordRequest), authController.forgetPassword);
+authRoute.post("/reset-password", validate(authSchema.resetPasswordRequest), authController.resetPassword);
 
 authRoute.get("/status", checkAuth, authController.isAuthenticated);
 

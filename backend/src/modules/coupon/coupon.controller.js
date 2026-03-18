@@ -4,14 +4,14 @@ import * as couponService from "./coupon.service.js";
 import * as couponMapper from "./coupon.mapper.js";
 
 export const getAllCoupons = asyncHandler(async (req, res) => {
-    const coupons = await couponService.getAllCoupons();
+  const coupons = await couponService.getAllCoupons();
 
-    return sendSuccessResponse(
-        res,
-        200,
-        "Coupon fetched successfully",
-        couponMapper.toCouponDtoList(coupons)
-    )
+  return sendSuccessResponse(
+    res,
+    200,
+    "Coupon fetched successfully",
+    couponMapper.toCouponDtoList(coupons)
+  )
 });
 
 export const applyCoupon = asyncHandler(async (req, res) => {
@@ -31,4 +31,3 @@ export const applyCoupon = asyncHandler(async (req, res) => {
     result
   );
 });
-
