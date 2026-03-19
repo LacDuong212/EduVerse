@@ -1,11 +1,12 @@
-import express from "express";
+import MongoStore from "connect-mongo";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import express from "express";
 import session from "express-session";
 import passport from "passport";
 
 import configurePassport from "#config/passport.js";
-import { COOKIE_MAX_AGE } from "#constants/others.js";
+import { COOKIE_MAX_AGE, MONGO_SESSION_TTL } from "#constants/others.js";
 import AppError from "#exceptions/app.error.js";
 import errorMiddleware from "#middlewares/error.middleware.js";
 import apiRouter from "#modules/index.js";
@@ -43,6 +44,14 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   proxy: true,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGODB_URI,  // !
+    ttl: MONGO_SESSION_TTL,
+    autoRemove: "native",
+    crypto: {
+      secret: process.env.MONGO_SESSION_SECRET
+    }
+  }),
   cookie: {
     secure: process.env.NODE_ENV === "production",
     sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",

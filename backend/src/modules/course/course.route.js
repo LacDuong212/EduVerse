@@ -12,26 +12,32 @@ courseRoute.get("/home", courseController.getHomeCourses);
 courseRoute.get("/recommendations", checkAuth, courseController.getRecommendedCourses);
 courseRoute.get("/stats", courseController.getCourseStats);
 courseRoute.get(
-  "/:id", 
-  checkAuth, 
-  validate(courseSchema.idParamRequest), 
+  "/:id",
+  checkAuth,
+  validate(courseSchema.idParamRequest),
   courseController.getCourseDetailsById
 );
 courseRoute.get(
-  "/:id/related", 
-  validate(courseSchema.idParamRequest), 
+  "/:id/curriculum",
+  checkAuth,
+  validate(courseSchema.idParamRequest),
+  courseController.getCourseCurriculum
+);
+courseRoute.get(
+  "/:id/related",
+  validate(courseSchema.idParamRequest),
   courseController.getRelatedCourses
 );
 courseRoute.get(
-  "/:id/reviews", 
+  "/:id/reviews",
   checkAuth,
-  validate(courseSchema.idParamRequest), 
+  validate(courseSchema.idParamRequest),
   courseController.getCourseReviewsById
 );
 courseRoute.get(
-  "/:id/image/upload", 
-  protect, 
-  restrictTo("instructor"), 
+  "/:id/image/upload",
+  protect,
+  restrictTo("instructor"),
   validate(courseSchema.idParamRequest),
   courseController.getImageParams
 );

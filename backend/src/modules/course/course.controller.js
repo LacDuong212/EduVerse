@@ -26,9 +26,9 @@ export const getAllCourses = asyncHandler(async (req, res) => {
   const { courses, total, page, limit } = await courseService.queryCourses(req.query);
 
   return sendPaginatedResponse(
-    res, 
-    200, 
-    "Courses fetched successfully", 
+    res,
+    200,
+    "Courses fetched successfully",
     courseMapper.toCourseCardDtoList(courses),
     { page, limit, totalItems: total }
   );
@@ -82,9 +82,9 @@ export const getRecommendedCourses = asyncHandler(async (req, res) => {
   const userId = req.user?.userId;
   const result = await recommendService.getRecommendedCourses(userId);
   return sendSuccessResponse(
-    res, 
-    200, 
-    "Get recommended courses successfully!", 
+    res,
+    200,
+    "Get recommended courses successfully!",
     {
       courses: courseMapper.toCourseCardDtoList(result?.courses),
       debugSource: result?.debugSource
@@ -98,12 +98,21 @@ export const getRelatedCourses = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const result = await recommendService.getRelatedCourses(id);
   return sendSuccessResponse(
-    res, 
-    200, 
-    "Get related courses successfully!", 
+    res,
+    200,
+    "Get related courses successfully!",
     {
       courses: courseMapper.toCourseCardDtoList(result?.courses),
       debugSource: result?.debugSource
     }
   );
+});
+
+// @desc  Get course curriculum
+// @route GET /:id/curriculum
+export const getCourseCurriculum = asyncHandler(async (req, res) => {
+  const user = req.user;
+  const { id } = req.params;
+  const curriculum = await courseService.getCourseFullCurriculum(user, id);
+  return sendSuccessResponse(res, 200, "Curriculum fetched successfully", curriculum);
 });

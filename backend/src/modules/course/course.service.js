@@ -15,6 +15,15 @@ const publicFilter = {
 
 const getEffectivePrice = (c) => (c.enableDiscount ? (c.discountPrice ?? c.price) : c.price);
 
+const getCourseAccess = async (user, course) => {
+  if (!user) return { isOwner: false, isEnrolled: false };
+
+  const isOwner = user.role === "instructor" && course.instructor.ref.toString() === user.userId;
+  const isEnrolled = user.role === "student" && await existsEnrollment(user.userId, course._id);
+
+  return { isOwner, isEnrolled };
+};
+
 export const getHomeDashboardData = async () => {
   const commonPopulate = { path: "category", select: "name slug" };
 
@@ -79,7 +88,7 @@ export const queryCourses = async (filters) => {
   if (category) query.category = category;
   if (language) query.language = language;
   if (level && level !== "all") query.level = level;
-  
+
   if (tag) {
     query.tags = { $in: Array.isArray(tag) ? tag : [tag] };
   }
@@ -215,10 +224,8 @@ export const getCoursePublicDetails = async (user, courseId) => {
 
   let isOwned = undefined;
   if (user) {
-    const isCreator = user.role === "instructor" && user.userId === details.instructor?.ref;
-    const isBought = user.role === "student" && (await existsEnrollment(user.userId, courseId));
-
-    isOwned = !!(isCreator || isBought);
+    const { isOwner, isEnrolled } = await getCourseAccess(user, details);
+    isOwned = isOwner || isEnrolled;
   }
 
   return {
@@ -267,4 +274,33 @@ export const getImageParams = async (courseId, insId) => {
     throw new AppError("You don't have access to this course.", 403);
 
   return getCourseImageUploadParams(courseId);
+};
+
+export const getCourseFullCurriculum = async (user, courseId) => {
+  if (!courseId) throw new AppError("Course ID is required.", 400);
+
+  const course = await Course.findOne({ _id: courseId, isDeleted: false })
+    .populate({
+      path: "curriculum",
+      select: "sections"
+    })
+    .lean();
+
+  if (!course) throw new AppError("Course not found.", 404);
+
+  let isOwner = false;
+  let isEnrolled = false;
+
+  if (user) {
+    const access = await getCourseAccess(user, course);
+    isOwner = access.isOwner;
+    isEnrolled = access.isEnrolled;
+  }
+
+  if (!isOwner && !isEnrolled) {
+    return courseMapper.getCourseFreeCurriculum(course.curriculum?.sections || []);
+  } else {
+    const hasAiData = isOwner;
+    return courseMapper.getCourseCurriculum(course.curriculum?.sections || [], hasAiData);
+  }
 };
