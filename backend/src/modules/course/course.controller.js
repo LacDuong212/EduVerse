@@ -21,7 +21,7 @@ export const getCourseStats = asyncHandler(async (req, res) => {
 });
 
 // @desc  Get all public courses, paginated + filters + sort
-// @route GET ..?page=&limit=&search=&sort=&price=&language=&level= #TODO: tag=
+// @route GET ..?page=&limit=&search=&sort=&category=&price=&language=&level=&tag=
 export const getAllCourses = asyncHandler(async (req, res) => {
   const { courses, total, page, limit } = await courseService.queryCourses(req.query);
 

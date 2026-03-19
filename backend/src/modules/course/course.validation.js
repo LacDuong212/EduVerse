@@ -71,6 +71,7 @@ export const courseQueryRequest = z.object({
     page: z.string()
       .optional()
       .transform((val) => Math.max(parseInt(val, 10) || 1, 1)),
+
     limit: z.string()
       .optional()
       .transform((val) => {
@@ -102,6 +103,8 @@ export const courseQueryRequest = z.object({
       "ratingHighToLow",
       "ratingLowToHigh",
     ]).optional().default("newest"),
+
+    tag: z.string().trim().optional().transform((val) => val?.toLowerCase()),
   })
 });
 

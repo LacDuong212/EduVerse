@@ -13,6 +13,8 @@ const publicFilter = {
   status: STATUS_ENUM.live
 };
 
+const getEffectivePrice = (c) => (c.enableDiscount ? (c.discountPrice ?? c.price) : c.price);
+
 export const getHomeDashboardData = async () => {
   const commonPopulate = { path: "category", select: "name slug" };
 
@@ -70,61 +72,94 @@ export const getGlobalCourseStats = async () => {
 
 export const queryCourses = async (filters) => {
   const { page, limit, skip } = getPaginationOptions(filters.page, filters.limit);
-  const {
-    search, category, subCategory,
-    sort, price, level, language
-  } = filters;
+  const { search, sort, category, price, language, level, tag } = filters;
 
   const query = { ...publicFilter };
 
   if (category) query.category = category;
-  if (subCategory) query.subCategory = subCategory;
   if (language) query.language = language;
   if (level && level !== "all") query.level = level;
-  if (price === "free") query.price = 0;
-  if (price === "paid") query.price = { $gt: 0 };
+  
+  if (tag) {
+    query.tags = { $in: Array.isArray(tag) ? tag : [tag] };
+  }
 
-  let finalDocs = [];
+  if (price === "free") {
+    query.$or = [
+      { enableDiscount: true, discountPrice: 0 },
+      { enableDiscount: false, price: 0 }
+    ];
+  } else if (price === "paid") {
+    query.$or = [
+      { enableDiscount: true, discountPrice: { $gt: 0 } },
+      { enableDiscount: false, price: { $gt: 0 } }
+    ];
+  }
+
   if (search) {
     const candidates = await Course.find(query)
       .populate("category", "name slug")
-      .sort({ studentsEnrolled: -1, createdAt: -1 })  // !
-      .limit(1000)  // !
+      .sort({ studentsEnrolled: -1, createdAt: -1 })  // priority bucket
+      .limit(1000)  // yes
       .lean();
 
     const fuse = new Fuse(candidates, {
       keys: ["title", "subtitle", "category.name", "tags"],
       threshold: 0.4,
-      ignoreLocation: true,
-      minMatchCharLength: 1,
     });
 
-    finalDocs = fuse.search(search).map(r => r.item);
+    const searchResults = fuse.search(search).map(r => r.item);
+
+    const sortedDocs = sortDocs(searchResults, sort);
+    const total = sortedDocs.length;
+    const paginatedDocs = sortedDocs.slice(skip, skip + limit);
+
+    return { courses: paginatedDocs, total, page, limit };
   } else {
-    finalDocs = await Course.find(query)
-      .populate("category", "name slug")
-      .lean();
+    const dbSort = getMongoSort(sort);
+
+    const [courses, total] = await Promise.all([
+      Course.find(query)
+        .populate("category", "name slug")
+        .sort(dbSort)
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      Course.countDocuments(query)
+    ]);
+
+    return { courses, total, page, limit };
   }
-
-  const sortedDocs = sortDocs(finalDocs, sort);
-  const total = sortedDocs.length;
-  const paginatedDocs = sortedDocs.slice(skip, skip + limit);
-
-  return { courses: paginatedDocs, total, page, limit };
 };
 
 const sortDocs = (docs, strategy) => {
   const strategies = {
-    newest: (a, b) => b.createdAt - a.createdAt,
-    oldest: (a, b) => a.createdAt - b.createdAt,
-    priceHighToLow: (a, b) => b.price - a.price,
-    priceLowToHigh: (a, b) => a.price - b.price,
-    mostPopular: (a, b) => b.studentsEnrolled - a.studentsEnrolled,
-    leastPopular: (a, b) => a.studentsEnrolled - b.studentsEnrolled,
+    newest: (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+    oldest: (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
+    priceHighToLow: (a, b) => getEffectivePrice(b) - getEffectivePrice(a),
+    priceLowToHigh: (a, b) => getEffectivePrice(a) - getEffectivePrice(b),
+    mostPopular: (a, b) => (b.studentsEnrolled || 0) - (a.studentsEnrolled || 0),
+    leastPopular: (a, b) => (a.studentsEnrolled || 0) - (b.studentsEnrolled || 0),
     ratingHighToLow: (a, b) => (b.rating?.average || 0) - (a.rating?.average || 0),
     ratingLowToHigh: (a, b) => (a.rating?.average || 0) - (b.rating?.average || 0),
   };
+
   return docs.sort(strategies[strategy] || strategies.newest);
+};
+
+const getMongoSort = (strategy) => {
+  const maps = {
+    newest: { createdAt: -1 },
+    oldest: { createdAt: 1 },
+    mostPopular: { studentsEnrolled: -1 },
+    leastPopular: { studentsEnrolled: 1 },
+    priceHighToLow: { price: -1 },  // !
+    priceLowToHigh: { price: 1 },   // !
+    ratingHighToLow: { "rating.average": -1 },
+    ratingLowToHigh: { "rating.average": 1 },
+  };
+
+  return maps[strategy] || { createdAt: -1 };
 };
 
 export const getCourseInfoForVideoId = async (videoId) => {
