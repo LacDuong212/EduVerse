@@ -1,10 +1,18 @@
 import mongoose from "mongoose";
 
 const quizResultSchema = new mongoose.Schema({
-  lectureId: { type: Schema.Types.ObjectId, required: true },
-  score: { type: Number, required: true },
-  totalQuestions: { type: Number, required: true },
-  wrongAnswers: [{ question: String, topic: String }]
+  lectureId: { type: Schema.Types.ObjectId, ref: "Lecture", required: true },
+  score: { type: Number, required: true, min: 0 },
+  totalQuestions: { type: Number, required: true, min: 1 },
+  wrongAnswers: {
+    type: [
+      {
+        question: String,
+        topic: String
+      }
+    ],
+    default: []
+  }
 }, { _id: false });
 
 const quizProgressSchema = new mongoose.Schema({
