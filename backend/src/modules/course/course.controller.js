@@ -1,4 +1,5 @@
 import { getPaginatedReviewsByCourseId } from "#modules/review/review.service.js";
+import * as recommendService from "#services/recommendation.service.js";
 import asyncHandler from "#utils/asyncHandler.js";
 import { sendPaginatedResponse, sendSuccessResponse } from "#utils/response.js";
 import * as courseMapper from "./course.mapper.js";
@@ -20,7 +21,7 @@ export const getCourseStats = asyncHandler(async (req, res) => {
 });
 
 // @desc  Get all public courses, paginated + filters + sort
-// @route GET ..?page=&limit=&search=&sort=&price=&language=&level= #TODO: tag= & ?tags=?
+// @route GET ..?page=&limit=&search=&sort=&price=&language=&level= #TODO: tag=
 export const getAllCourses = asyncHandler(async (req, res) => {
   const { courses, total, page, limit } = await courseService.queryCourses(req.query);
 
@@ -73,4 +74,36 @@ export const getImageParams = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const result = await courseService.getImageParams(id, user.userId);
   return sendSuccessResponse(res, 200, "Get upload params successfull!", result);
+});
+
+// @desc  Get recommended courses for user
+// @route GET /recommendations
+export const getRecommendedCourses = asyncHandler(async (req, res) => {
+  const userId = req.user?.userId;
+  const result = await recommendService.getRecommendedCourses(userId);
+  return sendSuccessResponse(
+    res, 
+    200, 
+    "Get recommended courses successfully!", 
+    {
+      courses: courseMapper.toCourseCardDtoList(result?.courses),
+      debugSource: result?.debugSource
+    }
+  );
+});
+
+// @desc  Get related courses
+// @route GET /:id/related
+export const getRelatedCourses = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const result = await recommendService.getRelatedCourses(id);
+  return sendSuccessResponse(
+    res, 
+    200, 
+    "Get related courses successfully!", 
+    {
+      courses: courseMapper.toCourseCardDtoList(result?.courses),
+      debugSource: result?.debugSource
+    }
+  );
 });

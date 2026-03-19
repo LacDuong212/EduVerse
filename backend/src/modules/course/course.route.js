@@ -9,12 +9,18 @@ const courseRoute = Router();
 
 courseRoute.get("/", validate(courseSchema.courseQueryRequest), courseController.getAllCourses);
 courseRoute.get("/home", courseController.getHomeCourses);
+courseRoute.get("/recommendations", checkAuth, courseController.getRecommendedCourses);
 courseRoute.get("/stats", courseController.getCourseStats);
 courseRoute.get(
   "/:id", 
   checkAuth, 
   validate(courseSchema.idParamRequest), 
   courseController.getCourseDetailsById
+);
+courseRoute.get(
+  "/:id/related", 
+  validate(courseSchema.idParamRequest), 
+  courseController.getRelatedCourses
 );
 courseRoute.get(
   "/:id/reviews", 

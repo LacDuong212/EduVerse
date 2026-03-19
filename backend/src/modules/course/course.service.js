@@ -4,13 +4,13 @@ import { existsEnrollment } from "#modules/enrollment/enrollment.service.js";
 import { getCourseImageUploadParams } from "#modules/image/image.service.js";
 import { getPaginationOptions } from "#utils/pagination.js";
 import * as courseMapper from "./course.mapper.js";
-import Course from "./course.model.js";
+import Course, { STATUS_ENUM } from "./course.model.js";
 import Curriculum from "./curriculum.model.js";
 
 const publicFilter = {
   isPrivate: false,
   isDeleted: false,
-  status: "live"
+  status: STATUS_ENUM.live
 };
 
 export const getHomeDashboardData = async () => {
@@ -193,8 +193,8 @@ export const getCoursePublicDetails = async (user, courseId) => {
 };
 
 export const updateCourseRating = async (
-  courseId, 
-  { oldRating, newRating, isNew, isDeleted }, 
+  courseId,
+  { oldRating, newRating, isNew, isDeleted },
   session = null
 ) => {
   const update = { $inc: {} };
@@ -203,16 +203,16 @@ export const updateCourseRating = async (
     update.$inc["rating.count"] = 1;
     update.$inc["rating.total"] = newRating;
     update.$inc[`rating.stars.${newRating}`] = 1;
-  } 
+  }
   else if (isDeleted) {
     update.$inc["rating.count"] = -1;
     update.$inc["rating.total"] = -oldRating;
     update.$inc[`rating.stars.${oldRating}`] = -1;
-  } 
+  }
   else {
     const delta = newRating - oldRating;
     if (delta === 0) return null;
-    
+
     update.$inc["rating.total"] = delta;
     update.$inc[`rating.stars.${oldRating}`] = -1;
     update.$inc[`rating.stars.${newRating}`] = 1;
