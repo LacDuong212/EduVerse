@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { z } from "zod";
 
-const reviewIdSchema = z.string({ error: "Review ID is required" })
+const reviewIdSchema = z.string("Review ID is required")
   .trim()
   .min(1, "Review ID cannot be empty")
   .pipe(
@@ -10,7 +10,7 @@ const reviewIdSchema = z.string({ error: "Review ID is required" })
     })
   );
 
-const courseIdSchema = z.string({ error: "Course ID is required" })
+const courseIdSchema = z.string("Course ID is required")
   .trim()
   .min(1, "Course ID cannot be empty")
   .pipe(
@@ -19,11 +19,11 @@ const courseIdSchema = z.string({ error: "Course ID is required" })
     })
   );
 
-const ratingSchema = z.number({ error: "Rating is required" })
+const ratingSchema = z.number("Rating is required")
   .min(1, "Rating must be at least 1")
   .max(5, "Rating cannot be greater than 5");
 
-const descSchema = z.string({ error: "Description must be a string" })
+const descSchema = z.string("Description must be a string")
   .trim()
   .max(500, "Description cannot exceed 500 characters")
   .optional()

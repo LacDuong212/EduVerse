@@ -7,14 +7,26 @@ import * as reviewSchema from "./review.validation.js";
 // @route /reviews
 const reviewRoute = Router();
 
-reviewRoute.use(protect, restrictTo("student"));
-
-reviewRoute.post("/", validate(reviewSchema.createReviewRequest), reviewController.createReview);
+reviewRoute.post(
+  "/",
+  protect,
+  restrictTo("student"),
+  validate(reviewSchema.createReviewRequest),
+  reviewController.createReview
+);
 reviewRoute.patch(
-  "/:reviewId", validate(reviewSchema.updateReviewRequest), reviewController.updateReview
+  "/:reviewId",
+  protect,
+  restrictTo("student"),
+  validate(reviewSchema.updateReviewRequest),
+  reviewController.updateReview
 );
 reviewRoute.delete(
-  "/:reviewId", validate(reviewSchema.removeReviewRequest), reviewController.removeReview
+  "/:reviewId",
+  protect,
+  restrictTo("student"),
+  validate(reviewSchema.removeReviewRequest),
+  reviewController.removeReview
 );
 
 export default reviewRoute;

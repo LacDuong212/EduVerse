@@ -24,21 +24,26 @@ export const getAvatarParams = async (userId) => {
 export const changePassword = async (
   userId, oldPassword, newPassword
 ) => {
-  if (!oldPassword || !newPassword)
-    throw new AppError("Passwords are required.", 400);
+  return withTransaction(async (s) => {
+    if (!oldPassword || !newPassword)
+      throw new AppError("Passwords are required.", 400);
 
-  const user = await User.findOne({
-    _id: userId,
-    ...activeFilters
-  }).select("+password");
-  if (!user) throw new AppError("User not found.", 404);
+    const user = await User.findOne({
+      _id: userId,
+      ...activeFilters
+    }).select("+password")
+      .session(s);
+    if (!user) throw new AppError("User not found.", 404);
 
-  const isMatch = await bcrypt.compare(oldPassword, user.password);
-  if (!isMatch) throw new AppError("Current password is incorrect.", 401);
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) throw new AppError("Current password is incorrect.", 401);
 
-  const hashPassword = await bcrypt.hash(newPassword, 10);
-  user.password = hashPassword;
-  await user.save();
+    const hashPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashPassword;
+
+    await user.save({ session: s });
+  });
+
 };
 
 export const updateInterests = async (userId, interests) => {
@@ -64,8 +69,8 @@ export const updateProfile = async (
 
   return await withTransaction(async (s) => {
     const user = await User.findByIdAndUpdate(
-      userId, 
-      { ...changes }, 
+      userId,
+      { ...changes },
       { session: s, new: true }
     );
     if (!user) throw new AppError("User not found.", 404);

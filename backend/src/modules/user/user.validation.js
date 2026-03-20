@@ -2,7 +2,7 @@ import { z } from "zod";
 import { complexPasswordSchema } from "#modules/auth/auth.validation.js";
 
 const optionalUrlSchema = z
-  .string({ error: "Must be a valid URL string" })
+  .string("Must be a valid URL string")
   .trim()
   .url("Invalid URL format")
   .optional()
@@ -10,7 +10,7 @@ const optionalUrlSchema = z
   .or(z.literal(""));
 
 const baseSocial = z
-  .string({ error: "Link must be a string" })
+  .string("Link must be a string")
   .trim()
   .optional()
   .nullable()

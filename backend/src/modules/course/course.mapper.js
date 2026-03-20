@@ -52,8 +52,9 @@ const getCourseTime = (course) => ({
   updatedAt: course?.updatedAt || null,
 });
 
-const getCourseFreeCurriculum = (curriculum) => {
+export const getCourseFreeCurriculum = (curriculum) => {
   return (curriculum || []).map(section => ({
+    secId: section?._id || null,
     title: section?.title || null,
     lectures: (section?.lectures || []).map(lecture => {
       const publicData = {
@@ -72,7 +73,7 @@ const getCourseFreeCurriculum = (curriculum) => {
   }));
 };
 
-const getCourseCurriculum = (curriculum, hasAiData = false) => {
+export const getCourseCurriculum = (curriculum, hasAiData = false) => {
   return (curriculum || []).map(section => ({
     secId: section?._id || null,
     title: section?.title || null,

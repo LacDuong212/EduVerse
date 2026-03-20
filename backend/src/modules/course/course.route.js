@@ -9,23 +9,47 @@ const courseRoute = Router();
 
 courseRoute.get("/", validate(courseSchema.courseQueryRequest), courseController.getAllCourses);
 courseRoute.get("/home", courseController.getHomeCourses);
+courseRoute.get("/recommendations", checkAuth, courseController.getRecommendedCourses);
 courseRoute.get("/stats", courseController.getCourseStats);
 courseRoute.get(
-  "/:id", 
-  checkAuth, 
-  validate(courseSchema.idParamRequest), 
+  "/tags/popular",
+  validate(courseSchema.limitQueryRequest),
+  courseController.getPopularTags
+);
+courseRoute.get(
+  "/:id",
+  checkAuth,
+  validate(courseSchema.idParamRequest),
   courseController.getCourseDetailsById
 );
 courseRoute.get(
-  "/:id/reviews", 
+  "/:id/curriculum",
   checkAuth,
-  validate(courseSchema.idParamRequest), 
-  courseController.getCourseReviewsById
+  validate(courseSchema.idParamRequest),
+  courseController.getCourseCurriculum
 );
 courseRoute.get(
-  "/:id/image/upload", 
-  protect, 
-  restrictTo("instructor"), 
+  "/:id/related",
+  validate(courseSchema.idParamRequest),
+  courseController.getRelatedCourses
+);
+courseRoute.get(
+  "/:id/reviews",
+  checkAuth,
+  validate(courseSchema.idParamRequest),
+  courseController.getCourseReviewsById
+);
+courseRoute.patch(
+  "/:id/toggle-privacy",
+  protect,
+  restrictTo("instructor"),
+  validate(courseSchema.idParamRequest),
+  courseController.toggleCoursePrivacy
+);
+courseRoute.get(
+  "/:id/image/upload",
+  protect,
+  restrictTo("instructor"),
   validate(courseSchema.idParamRequest),
   courseController.getImageParams
 );

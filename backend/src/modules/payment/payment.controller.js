@@ -1,12 +1,12 @@
-import asyncHandler from "#shared/utils/asyncHandler.js";
+import asyncHandler from "#utils/asyncHandler.js";
 import { sendSuccessResponse } from "#utils/response.js";
 import * as paymentService from "./payment.service.js";
 import * as momoProvider from "./providers/momo.provider.js";
 import * as vnpayProvider from "./providers/vnpay.provider.js";
 
+// @route POST /
 export const createPayment = asyncHandler(async (req, res) => {
-
-  const { orderId, paymentMethod } = req.body;
+  const { orderId, paymentMethod } = req.validated?.body;
 
   const rawIp =
     req.headers["x-forwarded-for"] ||
@@ -17,7 +17,7 @@ export const createPayment = asyncHandler(async (req, res) => {
 
   const result = await paymentService.createPayment({
     orderId,
-    userId: req.user.userId,
+    userId: req.user?.userId,
     paymentMethod,
     ipAddr
   });
@@ -30,6 +30,7 @@ export const createPayment = asyncHandler(async (req, res) => {
   );
 });
 
+// @route POST /momo/ipn
 export const momoIpn = asyncHandler(async (req, res) => {
   const { isValid, amount, resultCode } =
     momoProvider.verifySignature(req.body);
@@ -60,6 +61,7 @@ export const momoIpn = asyncHandler(async (req, res) => {
   return res.status(204).send();
 });
 
+// @route GET /vnpay/ipn
 export const vnpayIpn = asyncHandler(async (req, res) => {
   const isValid = vnpayProvider.verifySignature(req.query);
 

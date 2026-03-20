@@ -3,7 +3,7 @@ import { z } from "zod";
 import * as CONSTANTS from "./course.constant.js"
 import { LEVEL_ENUM } from "./course.model.js";
 
-const idSchema = z.string({ error: "Course ID is required", })
+const idSchema = z.string("Course ID is required")
   .trim()
   .min(1, "Course ID cannot be empty")
   .pipe(
@@ -12,7 +12,7 @@ const idSchema = z.string({ error: "Course ID is required", })
     })
   );
 
-const titleSchema = z.string({ error: "Course title is required" })
+const titleSchema = z.string("Course title is required")
   .trim()
   .min(1, "Course title cannot be empty")
   .max(CONSTANTS.TITLE_MAX_LENGTH, "Course title too long.");
@@ -29,7 +29,7 @@ const descriptionSchema = z.string()
   .optional()
   .or(z.literal(""));
 
-const categoryIdSchema = z.string({ error: "Category ID is required" })
+const categoryIdSchema = z.string("Category ID is required")
   .trim()
   .min(1, "Category ID cannot be empty")
   .pipe(
@@ -38,11 +38,11 @@ const categoryIdSchema = z.string({ error: "Category ID is required" })
     })
   );
 
-const languageSchema = z.string({ error: "Language is required" });
+const languageSchema = z.string("Language is required");
 
-const levelSchema = z.string({ error: "Level is required" });
+const levelSchema = z.string("Level is required");
 
-const priceSchema = z.number({ error: "Price is required" })
+const priceSchema = z.number("Price is required")
   .min(0, "Price must be 0 or greater");
 
 const discountPriceSchema = z.number()
@@ -50,7 +50,7 @@ const discountPriceSchema = z.number()
   .optional()
   .nullable();
 
-const imageSchema = z.string({ error: "Course image is required" })
+const imageSchema = z.string("Course image is required")
   .trim()
   .url("Please enter a valid image URL")
   .min(1, "Course image is required");
@@ -71,6 +71,7 @@ export const courseQueryRequest = z.object({
     page: z.string()
       .optional()
       .transform((val) => Math.max(parseInt(val, 10) || 1, 1)),
+
     limit: z.string()
       .optional()
       .transform((val) => {
@@ -102,12 +103,23 @@ export const courseQueryRequest = z.object({
       "ratingHighToLow",
       "ratingLowToHigh",
     ]).optional().default("newest"),
+
+    tag: z.string().trim().optional().transform((val) => val?.toLowerCase()),
   })
 });
 
 export const idParamRequest = z.object({
   params: z.object({
     id: idSchema,
+  })
+});
+
+export const limitQueryRequest = z.object({
+  query: z.object({
+    limit: z.coerce
+      .number("Limit must be a number")
+      .default(20)
+      .transform((val) => Math.min(Math.max(val, 1), 100)),
   })
 });
 

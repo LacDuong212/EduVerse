@@ -6,16 +6,22 @@ const errorMiddleware = (err, req, res, next) => {
   logger.logErrorWithContext(err, req);
 
   const error = transformError(err);
-  const stack = err.stack;
-  if (error.isOperational) {
-    const statusCode = error.statusCode || 500;
-    const message = error.message || "Internal server error.";
-    const errors = error.errors || null;
+  const isDev = process.env.NODE_ENV === "development";
 
-    return sendError(res, statusCode, message, errors, stack);
-  } else {
-    return sendError(res, 500, "Something went wrong on our end. Please try again later.", stack);
+  let finalMessage = error.message;
+  if (!error.isOperational && !isDev) {
+    finalMessage = "Something went wrong on our end. Please try again later.";
   }
+
+  const statusCode = error.statusCode || 500;
+
+  return sendError(
+    res,
+    statusCode,
+    finalMessage,
+    error.errors,
+    err.stack
+  );
 };
 
 export default errorMiddleware;

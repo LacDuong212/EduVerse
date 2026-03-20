@@ -4,13 +4,14 @@ import validate from "#middlewares/zodValidator.middleware.js";
 import * as orderController from "./order.controller.js";
 import * as orderSchema from "./order.validation.js";
 
-const router = Router();
+// @route /orders
+const orderRoute = Router();
 
-router.use(authMiddleware.protect, authMiddleware.restrictTo("student"));
+orderRoute.use(authMiddleware.protect, authMiddleware.restrictTo("student"));
 
-router.get("/", orderController.getOrders);
-router.get("/:id", validate(orderSchema.orderIdParamsRequest), orderController.getOrderById);
-router.post("/", validate(orderSchema.createOrderRequest), orderController.createOrder);
-router.patch("/:id/cancel", validate(orderSchema.orderIdParamsRequest), orderController.cancelOrder);
+orderRoute.get("/", orderController.getOrders);
+orderRoute.get("/:id", validate(orderSchema.orderIdParamsRequest), orderController.getOrderById);
+orderRoute.post("/", validate(orderSchema.createOrderRequest), orderController.createOrder);
+orderRoute.patch("/:id/cancel", validate(orderSchema.orderIdParamsRequest), orderController.cancelOrder);
 
-export default router;
+export default orderRoute;

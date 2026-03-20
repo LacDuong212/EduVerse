@@ -153,19 +153,19 @@ export const resetPassword = async (email, otp, newPassword) => {
   const user = await User.findOne({ email: cleanEmail });
 
   if (!user) {
-    return false;
+    throw new AppError("Invalid OTP", 400);
   }
 
   if (!user.isVerified) {
     throw new AppError("Account not verified", 401);
   }
 
-  if (user.verifyOtp !== otp || user.verifyOtp === '') {
-    throw new AppError("Invalid OTP", 400);
-  }
-
   if (user.verifyOtpExpireAt < Date.now()) {
     throw new AppError("OTP has expired", 400);
+  }
+
+  if (user.verifyOtp !== otp || user.verifyOtp === '') {
+    throw new AppError("Invalid OTP", 400);
   }
 
   const hashedNewPassword = await bcrypt.hash(newPassword, 10);
@@ -174,7 +174,6 @@ export const resetPassword = async (email, otp, newPassword) => {
   user.verifyOtpExpireAt = 0;
 
   await user.save();
-  return true;
 };
 
 export const resendVerificationOtp = async (email) => {

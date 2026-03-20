@@ -1,9 +1,17 @@
-import express from "express";
-import { handleChatbotResponse } from "./chatbotController.js";
+import { Router } from "express";
 import { checkAuth } from "#middlewares/user.auth.js";
+import validate from "#middlewares/zodValidator.middleware.js"
+import * as chatbotController from "./chatbot.controller.js";
+import * as chatbotSchema from "./chatbot.validation.js";
 
-const router = express.Router();
+// @route /chatbot
+const chatbotRoute = Router();
 
-router.post("/message", checkAuth, handleChatbotResponse);
+chatbotRoute.post(
+  "/message",
+  checkAuth,
+  validate(chatbotSchema.chatbotRequest),
+  chatbotController.getChatbotResponse
+);
 
-export default router;
+export default chatbotRoute;
