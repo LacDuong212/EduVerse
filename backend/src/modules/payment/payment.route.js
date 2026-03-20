@@ -4,6 +4,7 @@ import validate from "#middlewares/zodValidator.middleware.js";
 import * as paymentController from "./payment.controller.js";
 import * as paymentSchema from "./payment.validation.js";
 
+// @route /payments
 const paymentRoute = Router();
 
 paymentRoute.post(

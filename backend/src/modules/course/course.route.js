@@ -12,6 +12,11 @@ courseRoute.get("/home", courseController.getHomeCourses);
 courseRoute.get("/recommendations", checkAuth, courseController.getRecommendedCourses);
 courseRoute.get("/stats", courseController.getCourseStats);
 courseRoute.get(
+  "/tags/popular",
+  validate(courseSchema.limitQueryRequest),
+  courseController.getPopularTags
+);
+courseRoute.get(
   "/:id",
   checkAuth,
   validate(courseSchema.idParamRequest),
@@ -33,6 +38,13 @@ courseRoute.get(
   checkAuth,
   validate(courseSchema.idParamRequest),
   courseController.getCourseReviewsById
+);
+courseRoute.patch(
+  "/:id/toggle-privacy",
+  protect,
+  restrictTo("instructor"),
+  validate(courseSchema.idParamRequest),
+  courseController.toggleCoursePrivacy
 );
 courseRoute.get(
   "/:id/image/upload",

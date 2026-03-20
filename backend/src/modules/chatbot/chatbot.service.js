@@ -1,36 +1,85 @@
-import { PAGE_MAP } from "./chatbot.config.js";
+import { getLatestLearningProgress } from "#modules/learning/learning.service.js";
+import { sendMessageToDialogflow } from "#services/dialogflow.service.js";
+import { INTENT, PAGE_MAP } from "./chatbot.config.js";
+import * as chatbotUtils from "./chatbot.utils.js";
 
-// helper: check if page is public
-const getPublicUrl = (pageKey) => {
-  const entry = PAGE_MAP[pageKey];
-  if (entry && entry.path) return entry.path;
-  return null;
-};
+export const handleChatbotResponse = async (
+  user,
+  { sessId, userMessage, languageCode = "en" }
+) => {
+  const isVi = languageCode === "vi";
 
-// helper: check if page is role-based
-const getRoleBasedUrl = (role, pageKey) => {
-  const entry = PAGE_MAP[pageKey];
-  if (entry && entry[role]) {
-    return entry[role];
+  const userId = user?.userId;
+  const userRole = user?.role || "guest";
+
+  // call Dialogflow
+  const response = await sendMessageToDialogflow(userMessage, sessId, languageCode);
+
+  // get default text response
+  let botReply = chatbotUtils.getBotText(response, languageCode);
+  let actionData = null;
+
+  // process custom payload
+  if (response.fulfillmentMessages) {
+    const payloadMsg = response.fulfillmentMessages.find(msg => msg.payload);
+
+    if (payloadMsg) {
+      const payload = chatbotUtils.protoToJSON(payloadMsg.payload);
+
+      // course search intent
+      if (payload.type === INTENT.COURSE_SEARCH && payload.filters) {
+        actionData = chatbotService.handleCourseSearch(payload.filters);
+      }
+
+      // page navigation intent
+      else if (payload.type === INTENT.PAGE_NAVIGATION && payload.navigation) {
+        const result = chatbotService.handlePageNavigation(
+          payload.navigation, userRole, languageCode
+        );
+
+        if (result.actionData) actionData = result.actionData;
+        if (result.replyOverride) botReply = result.replyOverride;  // override Dialogflow's response message
+      }
+
+      else if (payload.type === INTENT.LEARNING_PROGRESS) {
+        // check if user logged in
+        if (!userId) {
+          botReply = languageCode === "vi"
+            ? "Bạn cần đăng nhập để theo dõi tiến độ học tập."
+            : "You need to be logged in to track your learning progress.";
+
+          actionData = {
+            type: "redirect",
+            url: "/auth/sign-in?redirectTo=%2Fstudent%2Fcourses",
+            label: languageCode === "vi" ? "Đăng nhập" : "Sign In"
+          };
+        }
+
+        // check if user is a student
+        else if (user.role !== "student") {
+          botReply = isVi
+            ? `Tính năng này chỉ dành cho học viên. Bạn đang đăng nhập với vai trò là ${user.role}.`
+            : `This feature is only for students. You are currently logged in as a ${user.role}.`;
+
+          actionData = null;  // no action needed, just the message
+        }
+
+        // valid student
+        else {
+          const latestProgress = await getLatestLearningProgress(userId);
+          const result = chatbotService.handleLearningProgress(latestProgress, languageCode);
+
+          if (result.actionData) actionData = result.actionData;
+          if (result.replyOverride) botReply = result.replyOverride;  // overide Dialogflow's response
+        }
+      }
+    }
   }
-  return null;
-};
 
-// helper: check if page is unique to one role
-const getSoleRole = (pageEntry) => {
-  if (!pageEntry) return null;
-  // get all keys that are not 'path'
-  const roles = Object.keys(pageEntry).filter(key => key !== 'path');
-  if (roles.length === 1) {
-    return roles[0];
-  }
-  return null;
-};
-
-// helper: my-courses, my_courses -> my courses
-const toNormalText = (value) => {
-  if (!value) return '';
-  return value.replace(/[_-]+/g, ' ');
+  return {
+    reply: botReply,
+    action: actionData
+  };
 };
 
 /**
@@ -115,7 +164,7 @@ export const handlePageNavigation = (navigationPayload, userRole, languageCode =
   const isVi = languageCode === "vi";
 
   // normalize page name (my-courses, my_courses -> my courses)
-  const normalPageName = toNormalText(page);
+  const normalPageName = chatbotUtils.toNormalText(page);
 
   // normalize page key (my courses, )
   const pageKey = page ? page.toLowerCase().trim().replace(/[\s-]+/g, "_") : "";
@@ -140,9 +189,9 @@ export const handlePageNavigation = (navigationPayload, userRole, languageCode =
     };
   }
 
-  const publicUrl = getPublicUrl(pageKey);
+  const publicUrl = chatbotUtils.getPublicUrl(pageKey);
   const requestedRole = actor ? actor.toLowerCase() : null; // role, requested by guest/user
-  const impliedRole = getSoleRole(PAGE_MAP[pageKey]);       // page unique to one role
+  const impliedRole = chatbotUtils.getSoleRole(PAGE_MAP[pageKey]);  // page unique to one role
 
   // GUEST ---
   if (!userRole || userRole.toLocaleLowerCase() === "guest") {
@@ -166,11 +215,11 @@ export const handlePageNavigation = (navigationPayload, userRole, languageCode =
 
     if (requestedRole) {
       // if "Go to student cart"
-      targetRedirectUrl = getRoleBasedUrl(requestedRole, pageKey);
+      targetRedirectUrl = chatbotUtils.getRoleBasedUrl(requestedRole, pageKey);
       targetRole = requestedRole;
     } else if (impliedRole) {
       // if "Go to cart" (eg. "Cart" is unique to only one role: student)
-      targetRedirectUrl = getRoleBasedUrl(impliedRole, pageKey);
+      targetRedirectUrl = chatbotUtils.getRoleBasedUrl(impliedRole, pageKey);
       targetRole = impliedRole;
     }
 
@@ -225,7 +274,7 @@ export const handlePageNavigation = (navigationPayload, userRole, languageCode =
   }
 
   // if user didn't provide role or when actor role = user role
-  const targetUrl = getRoleBasedUrl(userRole, pageKey);
+  const targetUrl = chatbotUtils.getRoleBasedUrl(userRole, pageKey);
 
   if (targetUrl) {
     return {

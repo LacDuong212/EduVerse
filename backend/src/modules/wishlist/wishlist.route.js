@@ -4,22 +4,23 @@ import validate from "#middlewares/zodValidator.middleware.js";
 import * as wishlistController from "./wishlist.controller.js";
 import * as wishlistSchema from "./wishlist.validation.js";
 
-const router = Router();
+// @route /wishlist
+const wishlistRoute = Router();
 
-router.use(protect, restrictTo("student"));
+wishlistRoute.use(protect, restrictTo("student"));
 
-router.get("/", wishlistController.getWishlist);
-
-router.post(
+wishlistRoute.get("/", wishlistController.getWishlist);
+wishlistRoute.post(
   "/",
-  validate(wishlistSchema.addToWishlistSchema),
+  validate(wishlistSchema.courseIdRequest),
   wishlistController.addToWishlist
 );
+wishlistRoute.delete(
+  "/",
+  validate(wishlistSchema.courseIdRequest),
+  wishlistController.removeFromWishlist
+);
+wishlistRoute.get("/check", validate(wishlistSchema.courseIdQuery), wishlistController.checkWishlist);
+wishlistRoute.get("/count", wishlistController.countWishlist);
 
-router.delete("/", wishlistController.removeFromWishlist);
-
-router.get("/check", wishlistController.checkWishlist);
-
-router.get("/count", wishlistController.countWishlist);
-
-export default router;
+export default wishlistRoute;

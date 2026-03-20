@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { z } from "zod";
 import { PAYMENT_METHOD_ENUM } from "./order.model.js";
 
-const orderIdSchema = z.string({ error: "Order ID is required" }).trim()
+const orderIdSchema = z.string("Order ID is required").trim()
   .min(1, "Order ID cannot be empty")
   .pipe(
     z.string().refine((val) => mongoose.Types.ObjectId.isValid(val), {
@@ -20,7 +20,7 @@ export const createOrderRequest = z.object({
   body: z.object({
     selectedCourseIds: z
       .array(
-        z.string({ error: "Course ID is required" })
+        z.string("Course ID is required")
           .trim()
           .min(1, "Course ID cannot be empty")
           .pipe(
@@ -32,7 +32,7 @@ export const createOrderRequest = z.object({
       )
       .min(1, "You must select at least one course")
       .max(50, "You cannot checkout more than 50 courses at once"),
-    paymentMethod: z.string({ error: "Payment method is required" })
+    paymentMethod: z.string("Payment method is required")
       .trim()
       .min(1, "Payment method cannot be empty")
       .pipe(
@@ -41,7 +41,7 @@ export const createOrderRequest = z.object({
         })
       ),
     couponCode: z
-      .string({ error: "Invalid coupon code" })
+      .string("Invalid coupon code")
       .trim()
       .min(1, "Coupon code, if provided, cannot be blank")
       .max(100, "Coupon code is too long")

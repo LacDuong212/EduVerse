@@ -8,18 +8,9 @@ const validate = (schema) => async (req, res, next) => {
       params: req.params,
     });
 
-    if (validatedData.body) {
-      req.body = validatedData.body;
-    }
-
-    // !!! Express protects req.query and req.params, blocking direct assignment
-    // use Object.assign to merge validated data back into req.query and req.params
-    if (validatedData.query) {
-      Object.assign(req.query, validatedData.query);
-    }
-    if (validatedData.params) {
-      Object.assign(req.params, validatedData.params);
-    }
+    // !!! Express protects req.query and req.params
+    // so we'll store elsewhere
+    req.validated = validatedData;
 
     return next();
   } catch (error) {

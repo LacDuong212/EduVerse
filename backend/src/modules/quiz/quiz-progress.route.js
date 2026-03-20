@@ -1,11 +1,12 @@
 import { Router } from "express";
 import { protect, restrictTo } from "#middlewares/auth.middleware.js";
-import * as quizController from "./quizProgress.controller.js";
+import * as quizController from "./quiz-progress.controller.js";
 
-const router = Router();
+// @route /quizzes
+const quizRoute = Router();
 
-router.use(protect, restrictTo("student"));
+quizRoute.use(protect, restrictTo("student"));
 
-router.post("/", quizController.saveQuizResult);
+quizRoute.post("/", quizController.saveQuizResult);
 
-export default router;
+export default quizRoute;

@@ -1,7 +1,8 @@
-import quizProgress from "./quiz-progress.model";
+import QuizProgress from "./quiz-progress.model.js";
 
-export const saveQuizResult = async (userId, courseId, lectureId, score, totalQuestions, wrongAnswers) => {
-
+export const saveQuizResult = async (
+  userId, courseId, lectureId, score, totalQuestions, wrongAnswers
+) => {
   let progress = await QuizProgress.findOne({
     user: userId,
     course: courseId

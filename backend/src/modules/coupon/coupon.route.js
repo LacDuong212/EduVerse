@@ -4,6 +4,7 @@ import validate from "#middlewares/zodValidator.middleware.js";
 import * as couponController from "./coupon.controller.js";
 import * as couponSchema from "./coupon.validation.js";
 
+// @route /coupons
 const router = Router();
 
 router.get("/", couponController.getAllCoupons);

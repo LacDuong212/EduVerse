@@ -3,6 +3,7 @@ import AppError from "#exceptions/app.error.js";
 import { existsEnrollment } from "#modules/enrollment/enrollment.service.js";
 import { getCourseImageUploadParams } from "#modules/image/image.service.js";
 import { getPaginationOptions } from "#utils/pagination.js";
+import { withTransaction } from "#utils/transaction.js";
 import * as courseMapper from "./course.mapper.js";
 import Course, { STATUS_ENUM } from "./course.model.js";
 import Curriculum from "./curriculum.model.js";
@@ -14,6 +15,7 @@ const publicFilter = {
 };
 
 const getEffectivePrice = (c) => (c.enableDiscount ? (c.discountPrice ?? c.price) : c.price);
+const getAverageRating = (c) => (c.rating?.count > 0 ? c.rating?.total/c.rating?.count : 0);
 
 const getCourseAccess = async (user, course) => {
   if (!user) return { isOwner: false, isEnrolled: false };
@@ -149,8 +151,8 @@ const sortDocs = (docs, strategy) => {
     priceLowToHigh: (a, b) => getEffectivePrice(a) - getEffectivePrice(b),
     mostPopular: (a, b) => (b.studentsEnrolled || 0) - (a.studentsEnrolled || 0),
     leastPopular: (a, b) => (a.studentsEnrolled || 0) - (b.studentsEnrolled || 0),
-    ratingHighToLow: (a, b) => (b.rating?.average || 0) - (a.rating?.average || 0),
-    ratingLowToHigh: (a, b) => (a.rating?.average || 0) - (b.rating?.average || 0),
+    ratingHighToLow: (a, b) => getAverageRating(b) - getAverageRating(a),
+    ratingLowToHigh: (a, b) => getAverageRating(a) - getAverageRating(b),
   };
 
   return docs.sort(strategies[strategy] || strategies.newest);
@@ -164,8 +166,8 @@ const getMongoSort = (strategy) => {
     leastPopular: { studentsEnrolled: 1 },
     priceHighToLow: { price: -1 },  // !
     priceLowToHigh: { price: 1 },   // !
-    ratingHighToLow: { "rating.average": -1 },
-    ratingLowToHigh: { "rating.average": 1 },
+    ratingHighToLow: { "rating.total": -1 },  // !
+    ratingLowToHigh: { "rating.total": 1 },   // !
   };
 
   return maps[strategy] || { createdAt: -1 };
@@ -303,4 +305,45 @@ export const getCourseFullCurriculum = async (user, courseId) => {
     const hasAiData = isOwner;
     return courseMapper.getCourseCurriculum(course.curriculum?.sections || [], hasAiData);
   }
+};
+
+export const toggleCoursePrivacy = async (
+  courseId, insId, session = null
+) => {
+  if (!courseId) throw new AppError("Course ID is required.", 400);
+
+  return await withTransaction(async (s) => {
+    const course = await Course.findOne({
+      _id: courseId,
+      isDeleted: false,
+    });
+
+    if (!course) throw new AppError("Course not found.", 404);
+
+    if (course.instructor?.ref?.toString() !== insId)
+      throw new AppError("You cannot modify this course.", 403);
+
+    course.isPrivate = !course.isPrivate;
+    await course.save({ s });
+
+    return course.isPrivate;
+  }, session);
+};
+
+export const getTopTags = async (limit = 20) => {
+  const tags = await Course.aggregate([
+    { $match: { ...publicFilter } },
+    { $unwind: "$tags" },
+    {
+      $group: {
+        _id: { $toLower: "$tags" },
+        name: { $first: "$tags" },
+        count: { $sum: 1 }
+      }
+    },
+    { $sort: { count: -1 } },
+    { $limit: limit }
+  ]);
+
+  return tags;
 };
