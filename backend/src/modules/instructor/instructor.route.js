@@ -9,6 +9,11 @@ const publicRoutes = Router();
 
 publicRoutes.post("/", protect, instructorController.becomeInstructor);
 publicRoutes.get(
+  "/:insId",
+  validate(instructorSchema.insIdParamRequest),
+  instructorController.getPublicProfile
+);
+publicRoutes.get(
   "/:insId/stats",
   validate(instructorSchema.insIdParamRequest),
   instructorController.getInstructorPublicStats
@@ -18,6 +23,13 @@ publicRoutes.get(
 const privateRoutes = Router();
 privateRoutes.use(protect, restrictTo("instructor"));
 
+privateRoutes.get("/profile", instructorController.getProfile);
 privateRoutes.get("/stats", instructorController.getInstructorStats);
+privateRoutes.get("/charts/earning", instructorController.getCoursesMonthlyEarning);
+privateRoutes.get(
+  "/charts/top-courses",
+  validate(instructorSchema.limitQueryRequest),
+  instructorController.getTopEarningCourses
+);
 
 export default { publicRoutes, privateRoutes };

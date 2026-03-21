@@ -1,5 +1,6 @@
 import Fuse from "fuse.js";
 import AppError from "#exceptions/app.error.js";
+import Instructor from "#modules/instructor/instructor.model.js";
 import { existsEnrollment } from "#modules/enrollment/enrollment.service.js";
 import { getCourseImageUploadParams } from "#modules/image/image.service.js";
 import { getPaginationOptions } from "#utils/pagination.js";
@@ -241,28 +242,40 @@ export const updateCourseRating = async (
   { oldRating, newRating, isNew, isDeleted },
   session = null
 ) => {
-  const update = { $inc: {} };
+  const courseUpdate = { $inc: {} };
+  const instructorUpdate = { $inc: {} };
 
   if (isNew) {
-    update.$inc["rating.count"] = 1;
-    update.$inc["rating.total"] = newRating;
-    update.$inc[`rating.stars.${newRating}`] = 1;
+    courseUpdate.$inc["rating.count"] = 1;
+    courseUpdate.$inc["rating.total"] = newRating;
+    courseUpdate.$inc[`rating.stars.${newRating}`] = 1;
+
+    instructorUpdate.$inc["stats.totalReviews"] = 1;
+    instructorUpdate.$inc["stats.ratingSum"] = newRating;
   }
   else if (isDeleted) {
-    update.$inc["rating.count"] = -1;
-    update.$inc["rating.total"] = -oldRating;
-    update.$inc[`rating.stars.${oldRating}`] = -1;
+    courseUpdate.$inc["rating.count"] = -1;
+    courseUpdate.$inc["rating.total"] = -oldRating;
+    courseUpdate.$inc[`rating.stars.${oldRating}`] = -1;
+
+    instructorUpdate.$inc["stats.totalReviews"] = -1;
+    instructorUpdate.$inc["stats.ratingSum"] = -oldRating;
   }
   else {
     const delta = newRating - oldRating;
     if (delta === 0) return null;
 
-    update.$inc["rating.total"] = delta;
-    update.$inc[`rating.stars.${oldRating}`] = -1;
-    update.$inc[`rating.stars.${newRating}`] = 1;
+    courseUpdate.$inc["rating.total"] = delta;
+    courseUpdate.$inc[`rating.stars.${oldRating}`] = -1;
+    courseUpdate.$inc[`rating.stars.${newRating}`] = 1;
+
+    instructorUpdate.$inc["stats.ratingSum"] = delta;
   }
 
-  return await Course.updateOne({ _id: courseId }, update, { session });
+  await Promise.all([
+    Course.updateOne({ _id: courseId }, courseUpdate, { session }),
+    Instructor.updateOne({ myCourses: courseId }, instructorUpdate, { session })
+  ]);
 };
 
 export const getImageParams = async (courseId, insId) => {

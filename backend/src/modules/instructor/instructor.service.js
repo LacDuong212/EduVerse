@@ -70,3 +70,18 @@ export const getInstructorStats = async (userId, isPrivate = false) => {
     totalOrders,
   };
 };
+
+export const getInstructorProfile = async (userId) => {
+  if (!userId) throw new AppError("Instructor ID is required.", 400);
+
+  const instructor = await Instructor.findOne({
+    user: userId,
+    isApproved: true
+  }).populate({
+    path: "user",
+    select: "name email phonenumber pfpImg website socials"
+  }).lean();
+  if (!instructor) throw new AppError("Instructor not found.", 404);
+
+  return instructor;
+};
