@@ -1,5 +1,6 @@
 import AppError from "#exceptions/app.error.js";
 import Course from "#modules/course/course.model.js";
+import Instructor from "#modules/instructor/instructor.model.js";
 import Enrollment, { STATUS_ENUM } from "./enrollment.model.js";
 
 export const existsEnrollment = async (stuId, courseId) => {
@@ -43,6 +44,23 @@ export const enrollsCourses = async (stuId, courseIds, session = null) => {
     { $inc: { studentCount: 1 } },
     { session }
   );
+
+  const instructorIds = courses.map(c => c.instructor?.ref).filter(Boolean);
+
+  const instructorCounts = instructorIds.reduce((acc, id) => {
+    acc[id] = (acc[id] || 0) + 1;
+    return acc;
+  }, {});
+
+  const instructorUpdates = Object.entries(instructorCounts).map(([id, count]) =>
+    Instructor.updateOne(
+      { _id: id },
+      { $inc: { "stats.totalStudents": count } },
+      { session }
+    )
+  );
+
+  await Promise.all(instructorUpdates);
 
   return { success: true, count: enrollmentData.length };
 };

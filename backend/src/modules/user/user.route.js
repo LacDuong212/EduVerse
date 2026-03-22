@@ -21,11 +21,5 @@ userRoute.put(
   validate(userSchema.updateInterestsRequest), 
   userController.updateInterests
 );
-userRoute.patch(
-  "/profile",
-  protect,
-  validate(userSchema.updateProfileRequest),
-  userController.updateProfile
-);
 
 export default userRoute;

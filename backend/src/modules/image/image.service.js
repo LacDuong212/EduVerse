@@ -5,7 +5,7 @@ import logger from "#utils/logger.js";
 export const getAvatarUploadParams = (userId) => {
   if (!userId) throw new AppError("User ID is required for avatar upload.", 400);
 
-  const publicId = `u_${userId}_avatar`;
+  const publicId = `u_${userId}_avatar-${Date.now()}`;
   const folder = "avatars";
   const transformation = "w_500,h_500,c_fill,g_auto,f_auto,q_auto,d_av4_khpvlh";
 
@@ -15,7 +15,7 @@ export const getAvatarUploadParams = (userId) => {
 export const getCourseImageUploadParams = (courseId) => {
   if (!courseId) throw new AppError("Course ID is required for image upload.", 400);
 
-  const publicId = `c_${courseId}_img`;
+  const publicId = `c_${courseId}_img-${Date.now()}`;
   const folder = "courses";
   const transformation = "w_1200,h_900,c_fill,g_auto,f_auto,q_auto,d_course_default_image";
 
@@ -50,7 +50,7 @@ const createUploadParams = (public_id, folder, transformation) => {
   };
 };
 
-export const deleteFromCloudinary = async (fullPath) => {
+export const deleteImage = async (fullPath) => {
   try {
     const result = await cloudinary.uploader.destroy(fullPath, {
       invalidate: true

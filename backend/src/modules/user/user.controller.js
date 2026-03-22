@@ -27,12 +27,3 @@ export const updateInterests = asyncHandler(async (req, res) => {
   const result = await userService.updateInterests(userId, interests);
   return sendSuccessResponse(res, 200, "Interests updated successfully!", result);
 });
-
-// @desc  Patch update a user's profile
-// @route PATCH /profile
-export const updateProfile = asyncHandler(async (req, res) => {
-  const userId = req.user?.userId;
-  const changes = req.validated?.body;
-  const updated = await userService.updateProfile(userId, changes);
-  return sendSuccessResponse(res, 200, "Profile updated successfully!", updated);
-});

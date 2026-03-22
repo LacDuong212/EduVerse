@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import AppError from "#exceptions/app.error.js";
 import { countCompletedOrdersByCourseIds } from "#modules/order/order.service.js";
+import { updateProfile } from "#modules/user/user.service.js";
+import { withTransaction } from "#utils/transaction.js";
 import Instructor from "./instructor.model.js";
 
 export const handleBecomeInstructor = async (user) => {
@@ -58,7 +60,7 @@ export const getInstructorStats = async (userId, isPrivate = false) => {
     ? Number((ratingSum / totalReviews).toFixed(1))
     : 0;
 
-  const totalOrders = isPrivate === true 
+  const totalOrders = isPrivate === true
     ? await countCompletedOrdersByCourseIds(instructor.myCourses || [])
     : undefined;
 
@@ -69,4 +71,67 @@ export const getInstructorStats = async (userId, isPrivate = false) => {
     averageRating,
     totalOrders,
   };
+};
+
+export const getInstructorProfile = async (userId) => {
+  if (!userId) throw new AppError("Instructor ID is required.", 400);
+
+  const instructor = await Instructor.findOne({
+    user: userId,
+    isApproved: true
+  }).populate({
+    path: "user",
+    select: "name email phonenumber pfpImg website socials"
+  }).lean();
+  if (!instructor) throw new AppError("Instructor not found.", 404);
+
+  return instructor;
+};
+
+export const updateInstructorProfile = async (userId, changes) => {
+  if (!userId) throw new AppError("Instructor ID is required.", 400);
+
+  return await withTransaction(async (s) => {
+    const { userUpdate, insUpdate } = getUpdateData(changes);
+
+    await updateProfile(userId, userUpdate, s);
+
+    const instructor = await Instructor.findOneAndUpdate(
+      { user: userId, isApproved: true },
+      { $set: insUpdate },
+      { new: true, session: s }
+    );
+
+    if (!instructor) throw new AppError("Instructor not found.", 404);
+
+
+
+    return await instructor.populate({
+      path: "user",
+      select: "name email phonenumber pfpImg website socials"
+    });
+  });
+};
+
+const getUpdateData = (data) => {
+  const userUpdate = {};
+
+  if (data.name !== null) userUpdate.name = data.name;
+  if (data.phonenumber !== null) userUpdate.phonenumber = data.phonenumber;
+  if (data.avatar !== null) userUpdate.pfpImg = data.avatar;
+  if (data.website !== null) userUpdate.website = data.website;
+  if (data.socials?.facebook !== null) userUpdate["socials.facebook"] = data.socials.facebook;
+  if (data.socials?.instagram !== null) userUpdate["socials.instagram"] = data.socials.instagram;
+  if (data.socials?.linkedin !== null) userUpdate["socials.linkedin"] = data.socials.linkedin;
+  if (data.socials?.youtube !== null) userUpdate["socials.youtube"] = data.socials.youtube;
+
+  const insUpdate = {};
+
+  if (data.introduction !== null) insUpdate.introduction = data.introduction;
+  if (data.address !== null) insUpdate.address = data.address;
+  if (data.occupation !== null) insUpdate.occupation = data.occupation;
+  if (data.skills !== null) insUpdate.skills = data.skills;
+  if (data.education !== null) insUpdate.education = data.education;
+
+  return { userUpdate, insUpdate };
 };

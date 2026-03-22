@@ -50,8 +50,8 @@ export const updateInterests = async (userId, interests) => {
   if (!interests && !Array.isArray(interests))
     throw new AppError("Interests must be an array.", 400);
 
-  const updated = await User.findByIdAndUpdate(
-    userId,
+  const updated = await User.findOneAndUpdate(
+    { _id: userId, ...activeFilters },
     { interests: interests },
     { new: true, lean: true }
   );
@@ -64,17 +64,14 @@ export const updateProfile = async (
   changes,
   session = null
 ) => {
-  if (!changes && !Object.keys(changes).length)
-    throw new AppError("Please provide at least one field to update profile.", 400);
+  if (!changes || Object.keys(changes).length === 0) return null;
 
-  return await withTransaction(async (s) => {
-    const user = await User.findByIdAndUpdate(
-      userId,
-      { ...changes },
-      { session: s, new: true }
-    );
-    if (!user) throw new AppError("User not found.", 404);
+  const user = await User.findOneAndUpdate(
+    { _id: userId, ...activeFilters },
+    { $set: changes },
+    { session, new: true }
+  ).lean();
 
-    return userMapper.toUserDetailsDto(user);
-  }, session);
+  if (!user) throw new AppError("User not found.", 404);
+  return userMapper.toUserDetailsDto(user);
 };
