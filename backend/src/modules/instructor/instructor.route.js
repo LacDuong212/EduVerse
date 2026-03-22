@@ -23,7 +23,11 @@ publicRoutes.get(
 const privateRoutes = Router();
 privateRoutes.use(protect, restrictTo("instructor"));
 
-privateRoutes.get("/profile", instructorController.getProfile);
+privateRoutes.patch(
+  "/profile",
+  validate(instructorSchema.updateProfileRequest),
+  instructorController.updateProfile
+);
 privateRoutes.get("/stats", instructorController.getInstructorStats);
 privateRoutes.get("/charts/earning", instructorController.getCoursesMonthlyEarning);
 privateRoutes.get(

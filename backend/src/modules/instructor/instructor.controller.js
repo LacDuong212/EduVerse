@@ -70,3 +70,16 @@ export const getProfile = asyncHandler(async (req, res) => {
     instructorMapper.toInstructorDetails(result, true)
   );
 });
+
+// @desc  Patch update an instructor's profile
+// @route PATCH /profile
+export const updateProfile = asyncHandler(async (req, res) => {
+  const userId = req.user?.userId;
+  const changes = req.validated?.body;
+  const updated = await instructorService.updateInstructorProfile(userId, changes);
+  return sendSuccessResponse(
+    res,
+    200,
+    "Profile updated successfully!",
+    instructorMapper.toInstructorDetails(updated));
+});
