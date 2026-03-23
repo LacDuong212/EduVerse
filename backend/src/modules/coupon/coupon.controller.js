@@ -16,7 +16,7 @@ export const getAllCoupons = asyncHandler(async (req, res) => {
 
 // @route POST /apply
 export const applyCoupon = asyncHandler(async (req, res) => {
-  const { code, originalPrice } = req.validated?.body;
+  const { code, originalPrice } = req.validated?.body || {};
 
   const result = await couponService.applyCoupon(
     code,

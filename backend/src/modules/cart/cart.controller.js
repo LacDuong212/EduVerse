@@ -14,7 +14,7 @@ export const getMyCart = asyncHandler(async (req, res) => {
 // @route POST /items
 export const addToCart = asyncHandler(async (req, res) => {
   const userId = req.user?.userId;
-  const { courseId } = req.validated?.body;
+  const { courseId } = req.validated?.body || {};
   const cart = await cartService.addToCart(userId, courseId);
   return sendSuccessResponse(res, 200, "Added course to your cart!", cart);
 });
@@ -23,7 +23,7 @@ export const addToCart = asyncHandler(async (req, res) => {
 // @route DELETE /items
 export const removeFromCart = asyncHandler(async (req, res) => {
   const userId = req.user?.userId;
-  const { courseIds } = req.validated?.body;
+  const { courseIds } = req.validated?.body || {};
 
   const {
     cart = [],

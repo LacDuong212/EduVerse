@@ -5,7 +5,7 @@ import * as wishlistMapper from "./wishlist.mapper.js";
 
 // @route POST /
 export const addToWishlist = asyncHandler(async (req, res) => {
-  const { courseId } = req.validated?.body;
+  const { courseId } = req.validated?.body || {};
 
   const item = await wishlistService.addToWishlist(
     req.user?.userId,
@@ -22,7 +22,7 @@ export const addToWishlist = asyncHandler(async (req, res) => {
 
 // @route DELETE /
 export const removeFromWishlist = asyncHandler(async (req, res) => {
-  const { courseId } = req.validated?.body;
+  const { courseId } = req.validated?.body || {};
 
   await wishlistService.removeFromWishlist(
     req.user?.userId,
@@ -51,7 +51,7 @@ export const getWishlist = asyncHandler(async (req, res) => {
 
 // @route GET /check
 export const checkWishlist = asyncHandler(async (req, res) => {
-  const { courseId } = req.validated?.query;
+  const { courseId } = req.validated?.query || {};
 
   const exists = await wishlistService.checkWishlist(
     req.user?.userId,

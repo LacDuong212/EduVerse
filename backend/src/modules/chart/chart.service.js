@@ -1,4 +1,7 @@
+import mongoose from "mongoose";
 import AppError from "#exceptions/app.error.js";
+import Course from "#modules/course/course.model.js";
+import Enrollment, { STATUS_ENUM as ENROLL_STATUS } from "#modules/enrollment/enrollment.model.js";
 import Instructor from "#modules/instructor/instructor.model.js";
 import Order, { STATUS_ENUM as ORDER_STATUS } from "#modules/order/order.model.js";
 
@@ -26,7 +29,7 @@ const formatMonthlyData = (dbResults, startDate) => {
   return result;
 };
 
-export const getCoursesMonthlyEarningByInstructorId = async (insId) => {
+export const getAllCoursesMonthlyEarningByInstructorId = async (insId) => {
   if (!insId) throw new AppError("Instructor ID is required.", 400);
 
   const instructor = await Instructor.findOne({ user: insId, isApproved: true })
@@ -87,18 +90,21 @@ export const getTopEarningCoursesThisMonth = async (insId, limit = 5) => {
   startOfMonth.setHours(0, 0, 0, 0);
 
   const topCourses = await Order.aggregate([
-    { $match: {
+    {
+      $match: {
         status: ORDER_STATUS.completed,
         createdAt: { $gte: startOfMonth },
         "courses.course": { $in: courseIds }
       }
     },
     { $unwind: "$courses" },
-    { $match: {
+    {
+      $match: {
         "courses.course": { $in: courseIds }
       }
     },
-    { $group: {
+    {
+      $group: {
         _id: "$courses.course",
         totalEarning: { $sum: "$courses.pricePaid" },
         totalSales: { $sum: 1 }
@@ -106,7 +112,8 @@ export const getTopEarningCoursesThisMonth = async (insId, limit = 5) => {
     },
     { $sort: { totalEarning: -1 } },
     { $limit: limit },
-    { $lookup: {
+    {
+      $lookup: {
         from: "courses",
         localField: "_id",
         foreignField: "_id",
@@ -114,7 +121,8 @@ export const getTopEarningCoursesThisMonth = async (insId, limit = 5) => {
       }
     },
     { $unwind: "$courseInfo" },
-    { $project: {
+    {
+      $project: {
         _id: 0,
 
         courseId: "$courseInfo._id",
@@ -128,4 +136,86 @@ export const getTopEarningCoursesThisMonth = async (insId, limit = 5) => {
   ]);
 
   return topCourses;
+};
+
+export const getCourseMonthlyEarning = async (insId, courseId) => {
+  if (!insId) throw new AppError("Instructor ID is required.", 400);
+
+  const course = await Course.findOne({ _id: courseId, isDeleted: false })
+    .lean();
+  if (!course) throw new AppError("Course not found.", 404);
+
+  if (course.instructor?.ref?.toString() !== insId)
+    throw new AppError("You don't have access to this course.", 403);
+
+  const twelveMonthsAgo = new Date();
+  twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 11);
+  twelveMonthsAgo.setDate(1);
+  twelveMonthsAgo.setHours(0, 0, 0, 0);
+
+  const earnings = await Order.aggregate([
+    {
+      $match: {
+        status: ORDER_STATUS.completed,
+        createdAt: { $gte: twelveMonthsAgo },
+        "courses.course": new mongoose.Types.ObjectId(courseId)
+      }
+    },
+    { $unwind: "$courses" },
+    {
+      $match: {
+        "courses.course": new mongoose.Types.ObjectId(courseId)
+      }
+    },
+    {
+      $group: {
+        _id: {
+          year: { $year: "$createdAt" },
+          month: { $month: "$createdAt" }
+        },
+        totalEarnings: { $sum: "$courses.pricePaid" }
+      }
+    },
+    { $sort: { "_id.year": 1, "_id.month": 1 } }
+  ]);
+
+  return formatMonthlyData(earnings, twelveMonthsAgo);
+};
+
+export const getCourseMonthlyEnrollments = async (insId, courseId) => {
+  if (!insId) throw new AppError("Instructor ID is required.", 400);
+
+  const course = await Course.findOne({ _id: courseId, isDeleted: false })
+    .lean();
+  if (!course) throw new AppError("Course not found.", 404);
+
+  if (course.instructor?.ref?.toString() !== insId)
+    throw new AppError("You don't have access to this course.", 403);
+
+  const twelveMonthsAgo = new Date();
+  twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 11);
+  twelveMonthsAgo.setDate(1);
+  twelveMonthsAgo.setHours(0, 0, 0, 0);
+
+  const enrollmentStats = await Enrollment.aggregate([
+    {
+      $match: {
+        course: new mongoose.Types.ObjectId(courseId),
+        status: ENROLL_STATUS.active,
+        enrolledAt: { $gte: twelveMonthsAgo }
+      }
+    },
+    {
+      $group: {
+        _id: {
+          year: { $year: "$enrolledAt" },
+          month: { $month: "$enrolledAt" }
+        },
+        value: { $sum: 1 }
+      }
+    },
+    { $sort: { "_id.year": 1, "_id.month": 1 } }
+  ]);
+
+  return formatMonthlyData(enrollmentStats, twelveMonthsAgo);
 };

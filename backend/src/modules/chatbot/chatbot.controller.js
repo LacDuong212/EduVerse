@@ -6,7 +6,7 @@ import * as chatbotService from "./chatbot.service.js";
 // @route POST /message
 export const getChatbotResponse = asyncHandler(async (req, res) => {
   const user = req.user;
-  const { sessionId, message, language } = req.validated?.body;
+  const { sessionId, message, language } = req.validated?.body || {};
 
   const result = await chatbotService.handleChatbotResponse(
     user,

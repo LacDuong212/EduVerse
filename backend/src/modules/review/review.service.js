@@ -1,5 +1,6 @@
 import AppError from "#exceptions/app.error.js";
-import { updateCourseRating } from "#modules/course/course.service.js";
+import Course, { STATUS_ENUM as COURSE_STATUS } from "#modules/course/course.model.js";
+import { getCourseAccess, updateCourseRating } from "#modules/course/course.service.js";
 import { existsEnrollment } from "#modules/enrollment/enrollment.service.js";
 import { getPaginationOptions } from "#utils/pagination.js";
 import * as reviewMapper from "./review.mapper.js";
@@ -76,18 +77,34 @@ export const softDeleteReview = async (stuId, reviewId) => {
 };
 
 export const getPaginatedReviewsByCourseId = async (
-  userId = null, courseId, { page = 1, limit = 5 }
+  user = null, courseId, { page = 1, limit = 5 }
 ) => {
   const { page: pageNum, limit: limitCount, skip } = getPaginationOptions(page, limit);
 
+  const course = await Course.findOne({ _id: courseId, isDeleted: false }).lean();
+  if (!course) throw new AppError("Course not found.", 404);
+
+  let populateFields = "name pfpImg";
+
   let myReview = null;
-  if (userId) {
+  if (user?.userId) {
+    const {
+      isOwner, isEnrolled
+    } = getCourseAccess(user.role, user.userId, courseId);
+
+    if (course.isPrivate || course.status !== COURSE_STATUS.live)
+      if (!isOwner || !isEnrolled)
+        throw new AppError("Course is currently unavailable.", 403);
+
+    if (isOwner)
+      populateFields = "name email pfpImg";
+
     myReview = await Review.findOne({
       course: courseId,
-      user: userId,
+      user: user.userId,
       isDeleted: false
-    }).populate("user", "name pfpImg")
-    .lean();
+    }).populate("user", populateFields)
+      .lean();
   }
 
   const query = {
@@ -101,7 +118,7 @@ export const getPaginatedReviewsByCourseId = async (
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limitCount)
-      .populate("user", "name pfpImg")
+      .populate("user", populateFields)
       .lean(),
     Review.countDocuments(query)
   ]);

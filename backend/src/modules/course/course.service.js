@@ -18,11 +18,11 @@ const publicFilter = {
 const getEffectivePrice = (c) => (c.enableDiscount ? (c.discountPrice ?? c.price) : c.price);
 const getAverageRating = (c) => (c.rating?.count > 0 ? c.rating?.total/c.rating?.count : 0);
 
-const getCourseAccess = async (user, course) => {
-  if (!user) return { isOwner: false, isEnrolled: false };
+export const getCourseAccess = async (userRole, userId, course) => {
+  if (!userRole || !userId) return { isOwner: false, isEnrolled: false };
 
-  const isOwner = user.role === "instructor" && course.instructor.ref.toString() === user.userId;
-  const isEnrolled = user.role === "student" && await existsEnrollment(user.userId, course._id);
+  const isOwner = userRole === "instructor" && course.instructor.ref.toString() === userId;
+  const isEnrolled = userRole === "student" && await existsEnrollment(userId, course._id);
 
   return { isOwner, isEnrolled };
 };
@@ -227,7 +227,7 @@ export const getCoursePublicDetails = async (user, courseId) => {
 
   let isOwned = undefined;
   if (user) {
-    const { isOwner, isEnrolled } = await getCourseAccess(user, details);
+    const { isOwner, isEnrolled } = await getCourseAccess(user.role, user.userId, details);
     isOwned = isOwner || isEnrolled;
   }
 
@@ -307,7 +307,7 @@ export const getCourseFullCurriculum = async (user, courseId) => {
   let isEnrolled = false;
 
   if (user) {
-    const access = await getCourseAccess(user, course);
+    const access = await getCourseAccess(user.role, user.userId, course);
     isOwner = access.isOwner;
     isEnrolled = access.isEnrolled;
   }

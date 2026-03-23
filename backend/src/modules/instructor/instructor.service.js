@@ -116,22 +116,22 @@ export const updateInstructorProfile = async (userId, changes) => {
 const getUpdateData = (data) => {
   const userUpdate = {};
 
-  if (data.name !== null) userUpdate.name = data.name;
-  if (data.phonenumber !== null) userUpdate.phonenumber = data.phonenumber;
-  if (data.avatar !== null) userUpdate.pfpImg = data.avatar;
-  if (data.website !== null) userUpdate.website = data.website;
-  if (data.socials?.facebook !== null) userUpdate["socials.facebook"] = data.socials.facebook;
-  if (data.socials?.instagram !== null) userUpdate["socials.instagram"] = data.socials.instagram;
-  if (data.socials?.linkedin !== null) userUpdate["socials.linkedin"] = data.socials.linkedin;
-  if (data.socials?.youtube !== null) userUpdate["socials.youtube"] = data.socials.youtube;
+  if (data.name) userUpdate.name = data.name;
+  if (data.phone !== undefined) userUpdate.phonenumber = data.phone;
+  if (data.avatar !== undefined) userUpdate.pfpImg = data.avatar;
+  if (data.website !== undefined) userUpdate.website = data.website;
+  if (data.socials?.facebook !== undefined) userUpdate["socials.facebook"] = data.socials.facebook;
+  if (data.socials?.instagram !== undefined) userUpdate["socials.instagram"] = data.socials.instagram;
+  if (data.socials?.linkedin !== undefined) userUpdate["socials.linkedin"] = data.socials.linkedin;
+  if (data.socials?.youtube !== undefined) userUpdate["socials.youtube"] = data.socials.youtube;
 
   const insUpdate = {};
 
-  if (data.introduction !== null) insUpdate.introduction = data.introduction;
-  if (data.address !== null) insUpdate.address = data.address;
-  if (data.occupation !== null) insUpdate.occupation = data.occupation;
-  if (data.skills !== null) insUpdate.skills = data.skills;
-  if (data.education !== null) insUpdate.education = data.education;
+  if (data.introduction !== undefined) insUpdate.introduction = data.introduction;
+  if (data.address !== undefined) insUpdate.address = data.address;
+  if (data.occupation) insUpdate.occupation = data.occupation;
+  if (data.skills) insUpdate.skills = data.skills;
+  if (data.education) insUpdate.education = data.education;
 
   return { userUpdate, insUpdate };
 };

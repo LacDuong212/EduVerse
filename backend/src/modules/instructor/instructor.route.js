@@ -29,11 +29,26 @@ privateRoutes.patch(
   instructorController.updateProfile
 );
 privateRoutes.get("/stats", instructorController.getInstructorStats);
-privateRoutes.get("/charts/earning", instructorController.getCoursesMonthlyEarning);
 privateRoutes.get(
-  "/charts/top-courses",
+  "/students",
+  validate(instructorSchema.studentsQueryRequest),
+  instructorController.getStudents
+);
+privateRoutes.get("/courses/earning", instructorController.getCoursesMonthlyEarning);
+privateRoutes.get(
+  "/courses/top-courses",
   validate(instructorSchema.limitQueryRequest),
   instructorController.getTopEarningCourses
+);
+privateRoutes.get(
+  "/courses/:courseId/earning",
+  validate(instructorSchema.courseIdParamRequest),
+  instructorController.getCourseMonthlyEarning
+);
+privateRoutes.get(
+  "/courses/:courseId/enrollments",
+  validate(instructorSchema.courseIdParamRequest),
+  instructorController.getCourseMonthlyEnrollments
 );
 
 export default { publicRoutes, privateRoutes };

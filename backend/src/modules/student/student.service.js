@@ -20,14 +20,14 @@ export const updateStudentProfile = async (userId, changes) => {
 const getUpdateData = (data) => {
   const userUpdate = {};
 
-  if (data.name !== null) userUpdate.name = data.name;
-  if (data.phonenumber !== null) userUpdate.phonenumber = data.phonenumber;
-  if (data.avatar !== null) userUpdate.pfpImg = data.avatar;
-  if (data.website !== null) userUpdate.website = data.website;
-  if (data.socials?.facebook !== null) userUpdate["socials.facebook"] = data.socials.facebook;
-  if (data.socials?.instagram !== null) userUpdate["socials.instagram"] = data.socials.instagram;
-  if (data.socials?.linkedin !== null) userUpdate["socials.linkedin"] = data.socials.linkedin;
-  if (data.socials?.youtube !== null) userUpdate["socials.youtube"] = data.socials.youtube;
+  if (data.name) userUpdate.name = data.name;
+  if (data.phonenumber !== undefined) userUpdate.phonenumber = data.phonenumber;
+  if (data.avatar !== undefined) userUpdate.pfpImg = data.avatar;
+  if (data.website !== undefined) userUpdate.website = data.website;
+  if (data.socials?.facebook !== undefined) userUpdate["socials.facebook"] = data.socials.facebook;
+  if (data.socials?.instagram !== undefined) userUpdate["socials.instagram"] = data.socials.instagram;
+  if (data.socials?.linkedin !== undefined) userUpdate["socials.linkedin"] = data.socials.linkedin;
+  if (data.socials?.youtube !== undefined) userUpdate["socials.youtube"] = data.socials.youtube;
 
   return userUpdate;
 };

@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { z } from "zod";
+import { courseIdSchema } from "#modules/course/course.validation.js";
 import {
   nameSchema,
   optionalUrlSchema,
@@ -10,6 +11,7 @@ import {
   linkedinSchema,
   youtubeSchema
 } from "#modules/user/user.validation.js";
+import { pageSchema, limitSchema } from "#utils/pagination.js";
 
 const idSchema = z.string("Instructor ID is required")
   .trim()
@@ -63,10 +65,7 @@ export const insIdParamRequest = z.object({
 
 export const limitQueryRequest = z.object({
   query: z.object({
-    limit: z.coerce
-      .number("Limit must be a number")
-      .default(5)
-      .transform((val) => Math.min(Math.max(val, 1), 50)),
+    limit: limitSchema(5, 50),
   })
 });
 
@@ -93,5 +92,28 @@ export const updateProfileRequest = z.object({
     education: z.array(eduItemSchema).optional(),
   }).refine((data) => Object.keys(data).length > 0, {
     message: "At least one field must be provided for update",
+  })
+});
+
+export const courseIdParamRequest = z.object({
+  params: z.object({
+    courseId: courseIdSchema,
+  })
+});
+
+export const studentsQueryRequest = z.object({
+  query: z.object({
+    page: pageSchema,
+    limit: limitSchema(10, 50),
+
+    search: z.string().trim().optional().transform((val) => val?.toLowerCase()),
+    sort: z.enum([
+      "nameAsc",
+      "nameDesc",
+      "enrolledAsc",
+      "enrolledDesc",
+    ], "Sort option not found")
+      .optional()
+      .default("enrolledDesc"),
   })
 });

@@ -1,12 +1,23 @@
 import mongoose from "mongoose";
 import { z } from "zod";
+import { courseIdSchema } from "#modules/course/course.validation.js";
 import { PAYMENT_METHOD_ENUM } from "./order.model.js";
 
-const orderIdSchema = z.string("Order ID is required").trim()
+export const orderIdSchema = z.string("Order ID is required")
+  .trim()
   .min(1, "Order ID cannot be empty")
   .pipe(
     z.string().refine((val) => mongoose.Types.ObjectId.isValid(val), {
       message: "Invalid order ID format",
+    })
+  );
+
+export const paymentMethodSchema = z.string("Payment method is required")
+  .trim()
+  .min(1, "Payment method cannot be empty")
+  .pipe(
+    z.enum(PAYMENT_METHOD_ENUM.values(), {
+      error: "Payment method not supported"
     })
   );
 
@@ -19,27 +30,10 @@ export const orderIdParamsRequest = z.object({
 export const createOrderRequest = z.object({
   body: z.object({
     selectedCourseIds: z
-      .array(
-        z.string("Course ID is required")
-          .trim()
-          .min(1, "Course ID cannot be empty")
-          .pipe(
-            z.string().refine((val) => mongoose.Types.ObjectId.isValid(val), {
-              message: "Invalid course ID format",
-            })
-          ),
-        { error: "Selected courses must be a list" }
-      )
+      .array(courseIdSchema, "Selected courses must be a list")
       .min(1, "You must select at least one course")
       .max(50, "You cannot checkout more than 50 courses at once"),
-    paymentMethod: z.string("Payment method is required")
-      .trim()
-      .min(1, "Payment method cannot be empty")
-      .pipe(
-        z.enum(PAYMENT_METHOD_ENUM.values(), {
-          error: "Payment method not supported"
-        })
-      ),
+    paymentMethod: paymentMethodSchema,
     couponCode: z
       .string("Invalid coupon code")
       .trim()

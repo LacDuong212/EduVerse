@@ -1,9 +1,10 @@
 import mongoose from "mongoose";
 import { z } from "zod";
+import { pageSchema, limitSchema } from "#utils/pagination.js";
 import * as CONSTANTS from "./course.constant.js"
 import { LEVEL_ENUM } from "./course.model.js";
 
-const idSchema = z.string("Course ID is required")
+export const courseIdSchema = z.string("Course ID is required")
   .trim()
   .min(1, "Course ID cannot be empty")
   .pipe(
@@ -88,10 +89,13 @@ export const courseQueryRequest = z.object({
         if (typeof val === "string") return val.toLowerCase();
         return val;
       },
-      z.enum(LEVEL_ENUM.values()).optional()
+      z.enum(LEVEL_ENUM.values(), "Level option not found")
+        .optional()
     ),
 
-    price: z.enum(["free", "paid", "all"]).optional().default("all"),
+    price: z.enum(["free", "paid", "all"], "Price option not found")
+      .optional()
+      .default("all"),
 
     sort: z.enum([
       "newest",
@@ -102,7 +106,9 @@ export const courseQueryRequest = z.object({
       "leastPopular",
       "ratingHighToLow",
       "ratingLowToHigh",
-    ]).optional().default("newest"),
+    ], "Sort option not found")
+      .optional()
+      .default("newest"),
 
     tag: z.string().trim().optional().transform((val) => val?.toLowerCase()),
   })
@@ -110,16 +116,23 @@ export const courseQueryRequest = z.object({
 
 export const idParamRequest = z.object({
   params: z.object({
-    id: idSchema,
+    id: courseIdSchema,
+  })
+});
+
+export const courseReviewsRequest = z.object({
+  params: z.object({
+    id: courseIdSchema,
+  }),
+  query: z.object({
+    page: pageSchema,
+    limit: limitSchema(5, 50),
   })
 });
 
 export const limitQueryRequest = z.object({
   query: z.object({
-    limit: z.coerce
-      .number("Limit must be a number")
-      .default(20)
-      .transform((val) => Math.min(Math.max(val, 1), 100)),
+    limit: limitSchema(20, 100),
   })
 });
 

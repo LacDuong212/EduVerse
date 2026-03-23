@@ -16,6 +16,7 @@ export const toCourseReviewDto = (review) => {
   return {
     userId: review.user?._id,
     userName: review.user?.name || null,
+    userEmail: review.user?.email || null,
     userAvatar: review.user?.pfpImg || null,
 
     reviewId: review._id?.toString(),
