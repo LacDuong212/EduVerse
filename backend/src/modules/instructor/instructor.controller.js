@@ -1,7 +1,8 @@
 import * as chartService from "#modules/chart/chart.service.js";
+import * as courseService from "#modules/course/course.service.js";
 import * as enrollmentService from "#modules/enrollment/enrollment.service.js";
 import asyncHandler from "#utils/asyncHandler.js";
-import { sendSuccessResponse, sendPaginatedResponse } from "#utils/response.js";
+import { sendPaginatedResponse, sendSuccessResponse, sendUnsuccessResponse } from "#utils/response.js";
 import * as instructorMapper from "./instructor.mapper.js";
 import * as instructorService from "./instructor.service.js";
 
@@ -108,8 +109,8 @@ export const getCourseMonthlyEnrollments = asyncHandler(async (req, res) => {
 export const getStudents = asyncHandler(async (req, res) => {
   const userId = req.user?.userId;
   const query = req.validated?.query || {};
-  const { 
-    students, total, page, limit 
+  const {
+    students, total, page, limit
   } = await enrollmentService.getPaginatedStudentsByInstructorId(userId, query);
 
   return sendPaginatedResponse(
@@ -119,4 +120,119 @@ export const getStudents = asyncHandler(async (req, res) => {
     students,
     { page, limit, totalItems: total }
   );
+});
+
+// @desc  Get instructor's courses
+// @route GET instructor/courses?page=&limit=&search=&sort=
+export const getCourses = asyncHandler(async (req, res) => {
+  const userId = req.user?.userId;
+  const query = req.validated?.query || {};
+  const {
+    courses, total, page, limit
+  } = await courseService.getPaginatedInstructorCourses(userId, query);
+
+  return sendPaginatedResponse(
+    res,
+    200,
+    "Get courses successfully!",
+    courses,
+    { page, limit, totalItems: total }
+  );
+});
+
+// @desc  Get current user's instructor profile if exists
+// @route GET instructors/me
+export const getCurrentInstructor = asyncHandler(async (req, res) => {
+  const userId = req.user?.userId;
+  const instructor = await instructorService.getCurrentInstructor(userId);
+  if (instructor)
+    return sendSuccessResponse(res, 200, "Instructor profile found!", instructor);
+  else
+    return sendUnsuccessResponse(res, 200, "You don't have an instructor profile.");
+});
+
+// @desc  Get instructor course detail by id
+// @route GET instructor/courses/:courseId/details
+export const getCourseDetails = asyncHandler(async (req, res) => {
+  const userId = req.user?.userId;
+  const { courseId } = req.validated?.params || {};
+  const course = await courseService.getInstructorCourseDetails(userId, courseId);
+  return sendSuccessResponse(res, 200, "Get course details successfully!", course);
+});
+
+// @desc  Get instructor monthly (12 months) earning and total earning
+// @route GET instructor/earning
+export const getInstructorEarning = asyncHandler(async (req, res) => {
+  const userId = req.user?.userId;
+  const result = await chartService.getInstructorEarnings(userId);
+  return sendSuccessResponse(res, 200, "Get instructor earning successfully!", result);
+});
+
+// @desc  Get instructor's public courses (infinite scroll)
+// @route GET instructors/:insId/courses?limit=&skip=
+export const getInstructorPublicCourses = asyncHandler(async (req, res) => {
+  const { insId } = req.validated?.params || {};
+  const { limit, skip } = req.validated?.query || {};
+  const result = await courseService.getPublicInstructorCourses(
+    insId, limit, skip
+  );
+  return sendSuccessResponse(
+    res,
+    200,
+    "Get instructor's public courses successfully!",
+    result
+  );
+});
+
+// @desc Create a new course (draft)
+// @route POST instructor/courses
+export const createCourse = asyncHandler(async (req, res) => {
+  const userId = req.user?.userId;
+  const course = await courseService.createDraftCourse(userId);
+  return sendSuccessResponse(res, 201, "Course created successfully!", course);
+});
+
+// @desc Update course
+// @route PATCH instructor/courses/:courseId
+export const updateCourse = asyncHandler(async (req, res) => {
+  const userId = req.user?.userId;
+  const { courseId } = req.validated?.params || {};
+  const changes = req.validated?.body || {};
+  const result = await courseService.updateCourse(userId, courseId, changes);
+  return sendSuccessResponse(res, 200, "Update course successfully!", result);
+});
+
+// @desc Submit course for review
+// @route POST instructor/courses/:courseId/submit
+export const submitCourse = asyncHandler(async (req, res) => {
+  const userId = req.user?.userId;
+  const { courseId } = req.validated?.params || {};
+  const changes = req.validated?.body || {};
+  const result = await courseService.submitCourse(userId, courseId, changes);
+  return sendSuccessResponse(res, 200, "Submit course successfully!", result);
+});
+
+// @desc Clear pending changes of a course
+// @route DELETE instructor/courses/:courseId/changes
+export const clearCourseChanges = asyncHandler(async (req, res) => {
+  const userId = req.user?.userId;
+  const { courseId } = req.validated?.params || {};
+  const result = await courseService.clearPendingChanges(userId, courseId);
+  return sendSuccessResponse(res, 200, "Clear course changes successfully!", result);
+});
+
+// @desc Get course for edit (merged with pending changes if exists)
+// @route GET instructor/courses/:courseId
+export const getCourseForEdit = asyncHandler(async (req, res) => {
+  const userId = req.user?.userId;
+  const { courseId } = req.validated?.params || {};
+  const course = await courseService.getCourseForEdit(userId, courseId);
+  return sendSuccessResponse(res, 200, "Get course successfully!", course);
+});
+
+// #TODO: REMOVE!!
+export const approveCourse = asyncHandler(async (req, res) => {
+  const { courseId } = req.validated?.params || {};
+  const result = await courseService.approveCourseUpdate(courseId);
+  return sendSuccessResponse(res, 200, "Unauthorized approve of course success!!");
 });

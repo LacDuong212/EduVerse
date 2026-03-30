@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import Enum from "#utils/enum.js";
-import Category from "#modules/category/category.model.js"; // yes
+import Category from "#modules/category/category.model.js";
 import Curriculum from "./curriculum.model.js";
 
 export const DURATION_UNIT_ENUM = new Enum({
@@ -22,21 +22,51 @@ export const STATUS_ENUM = new Enum({
   blocked: "blocked",
   rejected: "rejected"
 });
+export const UPDATE_STATUS_ENUM = new Enum({
+  none: "none",
+  pending: "pending",
+  rejected: "rejected"
+});
 
 const courseSchema = new mongoose.Schema({
   title: { type: String, required: true },
-  subtitle: String,
-  description: String,
-  image: String,
+  subtitle: { type: String, default: null },
+  description: { type: String, default: null },
+  image: { type: String, default: null },
+  tags: { type: [String], default: [] },
 
-  category: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Category",
-    required: true
+  price: { type: Number, min: 0, default: null },
+  discountPrice: { type: Number, min: 0, default: null },
+  enableDiscount: { type: Boolean, default: false },
+
+  language: { type: String },  // !
+  level: { type: String, enum: LEVEL_ENUM.values(), default: LEVEL_ENUM.all },
+  duration: { type: Number, min: 0, default: 0 },
+  durationUnit: { type: String, enum: DURATION_UNIT_ENUM.values(), default: DURATION_UNIT_ENUM.second },
+
+  sectionsCount: { type: Number, min: 0, default: 0 },
+  lecturesCount: { type: Number, min: 0, default: 0 },
+  studentsEnrolled: { type: Number, min: 0, default: 0 },
+
+  thumbnail: { type: String, default: null },
+  previewVideo: { type: String, default: null },
+
+  status: { type: String, enum: STATUS_ENUM.values(), default: STATUS_ENUM.draft },
+
+  category: { type: mongoose.Schema.Types.ObjectId, ref: "Category", default: null },
+  subCategory: { type: String, default: null },
+
+  rating: {
+    count: { type: Number, min: 0, default: 0 },
+    total: { type: Number, min: 0, default: 0 },
+    stars: {
+      1: { type: Number, min: 0, default: 0 },
+      2: { type: Number, min: 0, default: 0 },
+      3: { type: Number, min: 0, default: 0 },
+      4: { type: Number, min: 0, default: 0 },
+      5: { type: Number, min: 0, default: 0 }
+    },
   },
-
-  subCategory: String,
-  language: String,
 
   instructor: {
     ref: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
@@ -44,36 +74,18 @@ const courseSchema = new mongoose.Schema({
     avatar: String
   },
 
-  level: { type: String, enum: LEVEL_ENUM.values() },
-  duration: Number,
-  durationUnit: { type: String, enum: DURATION_UNIT_ENUM.values(), default: DURATION_UNIT_ENUM.second },
-  lecturesCount: Number,
-  studentsEnrolled: { type: Number, default: 0 },
-
-  rating: {
-    count: { type: Number, min: 0, default: 0 },
-    total: { type: Number, min: 0, default: 0 },
-    stars: {
-      1: { type: Number, default: 0 },
-      2: { type: Number, default: 0 },
-      3: { type: Number, default: 0 },
-      4: { type: Number, default: 0 },
-      5: { type: Number, default: 0 }
-    },
+  pendingUpdate: {
+    data: { type: mongoose.Schema.Types.Mixed, default: null },
+    submittedAt: { type: Date, default: null },
+    status: {
+      type: String,
+      enum: UPDATE_STATUS_ENUM.values(),
+      default: UPDATE_STATUS_ENUM.none
+    }
   },
 
-  thumbnail: String,
-  previewVideo: String,
-  tags: [String],
-
-  price: { type: Number, required: true, min: 0 },
-  discountPrice: { type: Number, min: 0, default: null },
-  enableDiscount: { type: Boolean, default: false },
-
-  status: { type: String, enum: STATUS_ENUM.values(), default: STATUS_ENUM.draft },
-
   isPrivate: { type: Boolean, default: true },
-  isDeleted: { type: Boolean, default: false }
+  isDeleted: { type: Boolean, default: false },
 }, {
   timestamps: true
 });

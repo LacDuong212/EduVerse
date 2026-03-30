@@ -8,7 +8,12 @@ export const pageSchema = z.coerce
 export const limitSchema = (defaultLimit = 10, maxLimit = 100) => z.coerce
   .number("Limit must be a number")
   .default(defaultLimit)
-  .transform((val) => Math.min(Math.max(val, 1), maxLimit));
+  .transform((val) => Math.min(Math.max(val, 0), maxLimit));
+
+export const skipSchema = (defaultSkip = 0, maxSkip = 100) => z.coerce
+  .number("Skip must be a number")
+  .default(defaultSkip)
+  .transform((val) => Math.min(Math.max(val, 0), maxSkip));
 
 export const getPaginationOptions = (pageReq = 1, limitReq = 10, maxLimit = 100) => {
   const page = Math.max(1, parseInt(pageReq) || 1);

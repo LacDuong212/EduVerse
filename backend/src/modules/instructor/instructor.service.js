@@ -135,3 +135,25 @@ const getUpdateData = (data) => {
 
   return { userUpdate, insUpdate };
 };
+
+export const getCurrentInstructor = async (userId, session = null) => {
+  if (!userId) return null;
+
+  const instructor = await Instructor.findOne({ user: userId })
+    .populate("user", "name pfpImg")
+    .lean()
+    .session(session);
+  if (!instructor) return null;
+
+  return {
+    insId: instructor?.user?._id || instructor.user,
+    name: instructor.user?.name,
+    avatar: instructor.user?.pfpImg,
+    occupation: instructor.occupation || null,
+    courses: instructor.myCourses?.length ?? 0,
+    skills: instructor.skills?.length ?? 0,
+    education: instructor.education?.length ?? 0,
+    isApproved: instructor.isApproved ?? false,
+    createdAt: instructor.createdAt || null,
+  };
+};

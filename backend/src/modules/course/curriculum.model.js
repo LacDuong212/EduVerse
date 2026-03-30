@@ -8,6 +8,11 @@ export const AI_DATA_STATUS = new Enum({
   completed: "completed",
   failed: "failed"
 });
+export const UPDATE_STATUS_ENUM = new Enum({
+  none: "none",
+  pending: "pending",
+  rejected: "rejected"
+});
 
 const curriculumSchema = new mongoose.Schema({
   courseId: {
@@ -21,7 +26,7 @@ const curriculumSchema = new mongoose.Schema({
     lectures: [{
       title: { type: String, required: true },
       videoId: { type: String, required: true },
-      duration: Number,
+      duration: { type: Number, required: true },
       isFree: { type: Boolean, default: false },
       aiData: {
         summary: String,
@@ -43,7 +48,16 @@ const curriculumSchema = new mongoose.Schema({
         status: { type: String, enum: AI_DATA_STATUS.values(), default: AI_DATA_STATUS.none }
       }
     }]
-  }]
+  }],
+  pendingUpdate: {
+    data: { type: mongoose.Schema.Types.Mixed, default: null },
+    submittedAt: { type: Date, default: null },
+    status: {
+      type: String,
+      enum: UPDATE_STATUS_ENUM.values(),
+      default: UPDATE_STATUS_ENUM.none
+    }
+  },
 }, { timestamps: true });
 
 curriculumSchema.index({ "sections.lectures.videoId": 1 });

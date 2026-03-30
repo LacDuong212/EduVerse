@@ -5,6 +5,8 @@ import Enrollment, { STATUS_ENUM as ENROLL_STATUS } from "#modules/enrollment/en
 import Instructor from "#modules/instructor/instructor.model.js";
 import Order, { STATUS_ENUM as ORDER_STATUS } from "#modules/order/order.model.js";
 
+const INSTRUCTOR_NET_PROFIT = 0.8;
+
 const formatMonthlyData = (dbResults, startDate) => {
   const result = [];
   const current = new Date(startDate);
@@ -218,4 +220,72 @@ export const getCourseMonthlyEnrollments = async (insId, courseId) => {
   ]);
 
   return formatMonthlyData(enrollmentStats, twelveMonthsAgo);
+};
+
+export const getInstructorEarnings = async (insId) => {
+  if (!insId) throw new AppError("Instructor ID is required", 400);
+
+  const instructor = await Instructor.findOne({ user: insId, isApproved: true })
+    .select("myCourses")
+    .lean();
+
+  if (!instructor) throw new AppError("Instructor not found.", 404);
+
+  const courseIds = instructor.myCourses || [];
+  if (courseIds.length === 0) {
+    return { earnings: [], totalEarning: 0 };
+  }
+
+  const twelveMonthsAgo = new Date();
+  twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 11);
+  twelveMonthsAgo.setDate(1);
+  twelveMonthsAgo.setHours(0, 0, 0, 0);
+
+  const [monthlyData, lifetimeData] = await Promise.all([
+    Order.aggregate([
+      {
+        $match: {
+          status: ORDER_STATUS.completed,
+          createdAt: { $gte: twelveMonthsAgo },
+          "courses.course": { $in: courseIds }
+        }
+      },
+      { $unwind: "$courses" },
+      { $match: { "courses.course": { $in: courseIds } } },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$createdAt" },
+            month: { $month: "$createdAt" }
+          },
+          totalEarnings: {
+            $sum: { $multiply: ["$courses.pricePaid", INSTRUCTOR_NET_PROFIT] }
+          }
+        }
+      },
+      { $sort: { "_id.year": 1, "_id.month": 1 } }
+    ]),
+
+    Order.aggregate([
+      {
+        $match: {
+          status: ORDER_STATUS.completed,
+          "courses.course": { $in: courseIds }
+        }
+      },
+      { $unwind: "$courses" },
+      { $match: { "courses.course": { $in: courseIds } } },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: { $multiply: ["$courses.pricePaid", INSTRUCTOR_NET_PROFIT] } }
+        }
+      }
+    ])
+  ]);
+
+  return {
+    earnings: formatMonthlyData(monthlyData, twelveMonthsAgo),
+    totalEarning: lifetimeData[0]?.total || 0
+  };
 };
