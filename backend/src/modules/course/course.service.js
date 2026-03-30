@@ -11,6 +11,7 @@ import * as courseMapper from "./course.mapper.js";
 import Course, { STATUS_ENUM, UPDATE_STATUS_ENUM } from "./course.model.js";
 import { courseSchema } from "./course.validation.js";
 import Curriculum from "./curriculum.model.js";
+import { th } from "zod/v4/locales";
 
 const publicFilter = {
   isDeleted: false,
@@ -221,7 +222,7 @@ export const getCourseInfoForVideoId = async (videoId) => {
 export const getCoursePublicDetails = async (user, courseId) => {
   if (!courseId) throw new AppError("Invalid course ID format.", 400);
 
-  const details = await Course.findOne({ _id: courseId, ...publicFilter })
+  const details = await Course.findOne({ _id: courseId, isDeleted: false })
     .populate([{
       path: "category",
       select: "name slug",
@@ -236,14 +237,20 @@ export const getCoursePublicDetails = async (user, courseId) => {
         "__v": 0
       }
     }]).lean();
-  if (!details && Object.keys(details).length === 0)
+  if (!details || Object.keys(details).length === 0)
     throw new AppError("Course not found.", 404);
+
+  if (details.status !== STATUS_ENUM.live)
+    throw new AppError("Course is currently unavailable, please try again later.", 400);
 
   let isOwned = undefined;
   if (user) {
     const { isOwner, isEnrolled } = await getCourseAccess(user.role, user.userId, details);
     isOwned = isOwner || isEnrolled;
   }
+
+  if (!isOwned && details.isPrivate)
+    throw new AppError("Course is currently unavailable, please try again later.", 400);
 
   return {
     ...courseMapper.toCourseDetailsDto(details),
