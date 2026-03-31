@@ -9,6 +9,7 @@ import {
   linkedinSchema,
   youtubeSchema
 } from "#modules/user/user.validation.js";
+import { limitSchema, pageSchema } from "#utils/pagination.js";
 
 const interestsSchema = z.array(
   z.string("An interest cannot be null")
@@ -40,5 +41,24 @@ export const updateProfileRequest = z.object({
 export const updateInterestsRequest = z.object({
   body: z.object({
     interests: interestsSchema,
+  })
+});
+
+export const coursesQueryRequest = z.object({
+  query: z.object({
+    page: pageSchema,
+    limit: limitSchema(6, 50),
+
+    search: z.string().trim().optional().transform((val) => val?.toLowerCase()),
+    sort: z.enum([
+      "enrolledAsc",
+      "enrolledDesc",
+      "activityAsc",
+      "activityDesc",
+      "titleAsc",
+      "titleDesc",
+    ], "Sort option not found")
+      .optional()
+      .default("activityDesc"),
   })
 });

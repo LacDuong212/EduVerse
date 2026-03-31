@@ -1,5 +1,5 @@
 import Fuse from "fuse.js";
-import mongoose, { get } from "mongoose";
+import mongoose from "mongoose";
 import AppError from "#exceptions/app.error.js";
 import { existsEnrollment } from "#modules/enrollment/enrollment.service.js";
 import Instructor from "#modules/instructor/instructor.model.js";
@@ -122,7 +122,7 @@ export const queryCourses = async (filters) => {
     const candidates = await Course.find(query)
       .populate("category", "name slug")
       .sort({ studentsEnrolled: -1, createdAt: -1 })  // priority bucket
-      .limit(1000)  // yes
+      .limit(1000)  // !!
       .lean();
 
     const fuse = new Fuse(candidates, {
@@ -400,7 +400,7 @@ export const getPaginatedInstructorCourses = async (userId, filters) => {
   if (search) {
     const candidates = await Course.find(query)
       .populate("category", "name slug")
-      .limit(1000)
+      .limit(1000)  // !!
       .lean();
 
     const fuse = new Fuse(candidates, {
