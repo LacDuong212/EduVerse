@@ -65,15 +65,3 @@ export const changePasswordRequest = z.object({
     path: ["newPassword"],
   }),
 });
-
-export const updateInterestsRequest = z.object({
-  body: z.object({
-    interests: z.array(
-      z.string("An interest cannot be null")
-        .trim()
-        .min(1, "An interest cannot be empty")
-        .max(100, "This interest is too long"),
-      "Interests is required"
-    ),
-  })
-});

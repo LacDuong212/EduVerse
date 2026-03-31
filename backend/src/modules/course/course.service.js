@@ -11,7 +11,6 @@ import * as courseMapper from "./course.mapper.js";
 import Course, { STATUS_ENUM, UPDATE_STATUS_ENUM } from "./course.model.js";
 import { courseSchema } from "./course.validation.js";
 import Curriculum from "./curriculum.model.js";
-import { th } from "zod/v4/locales";
 
 const publicFilter = {
   isDeleted: false,
@@ -752,6 +751,25 @@ export const getCourseForEdit = async (insId, courseId) => {
   return courseMapper.toEditCourseDto(mergedCourse, mergedCurr);
 };
 
+export const updateCoursesInstructorInfo = async (insId, name, avatar, session = null) => {
+  if (!insId) throw new AppError("Instructor ID is required.", 400);
+  
+  return await withTransaction(async (s) => {
+    const updateData = {};
+
+    if (name !== undefined) updateData["instructor.name"] = name;
+    if (avatar !== undefined) updateData["instructor.avatar"] = avatar;
+
+    if (Object.keys(updateData).length === 0) return;
+
+    await Course.updateMany(
+      { "instructor.ref": insId },
+      { $set: updateData },
+      { session: s }
+    );
+  }, session);
+};
+
 // #TODO: REMOVE!!
 export const approveCourseUpdate = async (courseId, session = null) => {
   return await withTransaction(async (s) => {
@@ -765,28 +783,25 @@ export const approveCourseUpdate = async (courseId, session = null) => {
       || course.pendingUpdate?.status === UPDATE_STATUS_ENUM.pending;
     if (!isPendingCourse) throw new AppError("Course is not pending review.", 400);
 
-    if (course.pendingUpdate?.data) {
-      const updates = getPlainPendingData(course.pendingUpdate);
-      Object.keys(updates).forEach((key) => {
-        course.set(key, updates[key]);
-      });
-      course.pendingUpdate = { data: null, submittedAt: null, status: UPDATE_STATUS_ENUM.none };
-    }
-
     if (curriculum?.pendingUpdate?.data?.sections) {
       const pendingSections = getPlainPendingData(curriculum.pendingUpdate).sections;
 
       const currentVideoIds = (curriculum.sections || [])
-        .flatMap(s => s.lectures || [])
+        .flatMap(sec => sec.lectures || [])
         .map(l => l.videoId)
         .filter(Boolean);
 
-      const newVideoIds = new Set(
-        pendingSections
-          .flatMap(s => s.lectures || [])
-          .map(l => l.videoId)
-          .filter(Boolean)
-      );
+      let newTotalDuration = 0;
+      const newVideoIds = new Set();
+
+      pendingSections.forEach(section => {
+        (section.lectures || []).forEach(lecture => {
+          if (lecture.videoId) newVideoIds.add(lecture.videoId);
+          newTotalDuration += Number(lecture.duration || 0);
+        });
+      });
+
+      course.duration = newTotalDuration;
 
       oldVideoIds = currentVideoIds.filter(id => !newVideoIds.has(id));
 
@@ -795,6 +810,14 @@ export const approveCourseUpdate = async (courseId, session = null) => {
 
       curriculum.markModified("sections");
       await curriculum.save({ session: s });
+    }
+
+    if (course.pendingUpdate?.data) {
+      const updates = getPlainPendingData(course.pendingUpdate);
+      Object.keys(updates).forEach((key) => {
+        course.set(key, updates[key]);
+      });
+      course.pendingUpdate = { data: null, submittedAt: null, status: UPDATE_STATUS_ENUM.none };
     }
 
     course.status = STATUS_ENUM.live;

@@ -10,6 +10,14 @@ import {
   youtubeSchema
 } from "#modules/user/user.validation.js";
 
+const interestsSchema = z.array(
+  z.string("An interest cannot be null")
+    .trim()
+    .min(1, "An interest cannot be empty")
+    .max(100, "An interest cannot be too long"),
+  "Interests are required"
+);
+
 export const updateProfileRequest = z.object({
   body: z.object({
     name: nameSchema.optional(),
@@ -23,7 +31,14 @@ export const updateProfileRequest = z.object({
       linkedin: linkedinSchema,
       youtube: youtubeSchema,
     }).optional(),
+    interests: interestsSchema.optional(),
   }).refine((data) => Object.keys(data).length > 0, {
     message: "At least one field must be provided for update",
+  })
+});
+
+export const updateInterestsRequest = z.object({
+  body: z.object({
+    interests: interestsSchema,
   })
 });

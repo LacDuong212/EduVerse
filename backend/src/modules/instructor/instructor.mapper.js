@@ -14,16 +14,16 @@ export const toInstructorDetails = (instructor, timestamp = false) => {
   })).filter(Boolean);
 
   return {
-    insId: instructor.user?._id,
+    // insId: (instructor.user?._id || instructor.user)?.toString(),
 
-    name: instructor.user?.name || null,
-    email: instructor.user?.email || null,
+    name: instructor.user?.name,
+    email: instructor.user?.email,
     phonenumber: instructor.user?.phonenumber,
-    avatar: instructor.user?.pfpImg || null,
+    avatar: instructor.user?.pfpImg,
     address: instructor.address,
-    occupation: instructor.occupation || null,
+    occupation: instructor.occupation,
     
-    website: instructor.user?.website || null,
+    website: instructor.user?.website,
     socials: {
       facebook: instructor.user?.socials?.facebook,
       instagram: instructor.user?.socials?.instagram,

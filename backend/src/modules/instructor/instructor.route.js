@@ -36,6 +36,7 @@ privateRoutes.get(
 );
 privateRoutes.post("/courses", instructorController.createCourse);
 privateRoutes.get("/earning", instructorController.getInstructorEarning);
+privateRoutes.get("/profile", instructorController.getProfile);
 privateRoutes.patch(
   "/profile",
   validate(instructorSchema.updateProfileRequest),
