@@ -1,6 +1,9 @@
 import mongoose from "mongoose";
 import { z } from "zod";
 import {
+  courseIdSchema, updateCourseSchema, submitCourseSchema
+} from "#modules/course/course.validation.js";
+import {
   nameSchema,
   optionalUrlSchema,
   phoneSchema,
@@ -10,6 +13,7 @@ import {
   linkedinSchema,
   youtubeSchema
 } from "#modules/user/user.validation.js";
+import { pageSchema, limitSchema, skipSchema } from "#utils/pagination.js";
 
 const idSchema = z.string("Instructor ID is required")
   .trim()
@@ -63,16 +67,13 @@ export const insIdParamRequest = z.object({
 
 export const limitQueryRequest = z.object({
   query: z.object({
-    limit: z.coerce
-      .number("Limit must be a number")
-      .default(5)
-      .transform((val) => Math.min(Math.max(val, 1), 50)),
+    limit: limitSchema(5, 50),
   })
 });
 
 export const updateProfileRequest = z.object({
   body: z.object({
-    // user part
+    // user
     name: nameSchema.optional(),
     avatar: optionalUrlSchema,
     phone: phoneSchema,
@@ -85,7 +86,7 @@ export const updateProfileRequest = z.object({
       youtube: youtubeSchema,
     }).optional(),
 
-    // instructor part
+    // instructor
     occupation: occupationSchema.optional(),
     introduction: introductionSchema,
     address: addressSchema,
@@ -94,4 +95,67 @@ export const updateProfileRequest = z.object({
   }).refine((data) => Object.keys(data).length > 0, {
     message: "At least one field must be provided for update",
   })
+});
+
+export const courseIdParamRequest = z.object({
+  params: z.object({
+    courseId: courseIdSchema,
+  })
+});
+
+export const studentsQueryRequest = z.object({
+  query: z.object({
+    page: pageSchema,
+    limit: limitSchema(10, 50),
+
+    search: z.string().trim().optional().transform((val) => val?.toLowerCase()),
+    sort: z.enum([
+      "nameAsc",
+      "nameDesc",
+      "enrolledAsc",
+      "enrolledDesc",
+    ], "Sort option not found")
+      .optional()
+      .default("enrolledDesc"),
+  })
+});
+
+export const coursesQueryRequest = z.object({
+  query: z.object({
+    page: pageSchema,
+    limit: limitSchema(5, 50),
+
+    search: z.string().trim().optional().transform((val) => val?.toLowerCase()),
+    sort: z.enum([
+      "recentUpdate",
+      "newest",
+      "oldest",
+      "mostPopular",
+      "leastPopular",
+      "highestRating",
+      "lowestRating",
+    ], "Sort option not found")
+      .optional()
+      .default("recentUpdate"),
+  })
+});
+
+export const publicCoursesRequest = z.object({
+  params: z.object({
+    insId: idSchema
+  }),
+  query: z.object({
+    limit: limitSchema(6, 50),
+    skip: skipSchema(0)
+  })
+});
+
+export const updateCourseRequest = z.object({
+  params: z.object({ courseId: courseIdSchema }),
+  body: updateCourseSchema
+});
+
+export const submitCourseRequest = z.object({
+  params: z.object({ courseId: courseIdSchema }),
+  body: submitCourseSchema
 });

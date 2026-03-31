@@ -6,7 +6,7 @@ import * as vnpayProvider from "./providers/vnpay.provider.js";
 
 // @route POST /
 export const createPayment = asyncHandler(async (req, res) => {
-  const { orderId, paymentMethod } = req.validated?.body;
+  const { orderId, paymentMethod } = req.validated?.body || {};
 
   const rawIp =
     req.headers["x-forwarded-for"] ||

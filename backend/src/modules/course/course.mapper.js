@@ -37,13 +37,14 @@ const getCourseCatgegory = (category) => ({
 const getCourseInstructor = (instructor) => ({
   insId: instructor?.ref?.toString() || null,
   insName: instructor?.name || null,
-  insAvatar: instructor?.avatar || null,
+  insAvatar: instructor?.pfpImg || instructor?.avatar || null,
 });
 
 const getCourseStats = (course) => ({
   ratingTotal: course?.rating?.total || 0,
   ratingCount: course?.rating?.count || 0,
   studentsEnrolled: course?.studentsEnrolled || 0,
+  sectionsCount: course?.sectionsCount || 0,
   lecturesCount: course?.lecturesCount || 0,
 });
 
@@ -83,9 +84,40 @@ export const getCourseCurriculum = (curriculum, hasAiData = false) => {
       duration: lecture?.duration || 0,
       videoId: lecture?.videoId || null,
       isFree: lecture?.isFree ?? false,
-      ...(hasAiData && { aiData: lecture?.aiData })
+      ...(hasAiData && { aiData: getAiData(lecture?.aiData) })
     }))
   }));
+};
+
+const getAiData = (aiData) => {
+  aiData = aiData?.toJSON();
+  if (!aiData || Object.keys(aiData).length === 0) return null;
+
+  const keyConcepts = (aiData.lessonNotes?.keyConcepts || []).map((kc) => ({
+    term: kc.term,
+    definition: kc.definition
+  }));
+  const mainPoints = aiData.lessonNotes?.mainPoints || [];
+  const practicalTips = aiData.lessonNotes?.practicalTips || [];
+  const quizzes = (aiData.quizzes || []).map((q) => ({
+    questId: q._id?.toString(),
+    question: q.question,
+    options: q.options,
+    correctAnswer: q.correctAnswer,
+    explanation: q.explanation,
+    topic: q.topic
+  }));
+
+  return {
+    summary: aiData.summary,
+    lessonNotes: {
+      keyConcepts,
+      mainPoints,
+      practicalTips
+    },
+    quizzes,
+    status: aiData.status,
+  };
 };
 
 export const toCourseCardDto = (course) => {
@@ -137,4 +169,79 @@ export const toCourseCartItemDto = (course, addedAt) => {
     ...getCourseBasicDetails(course),
     addedAt,
   }
+};
+
+export const toCourseRowItemDto = (course) => {
+  if (!course) return null;
+
+  return {
+    ...getCourseBasicDetails(course),
+
+    status: course.status || null,
+
+    ...getCourseStats(course),
+
+    isPrivate: course.isPrivate ?? true,
+
+    ...getCourseTime(course),
+  };
+};
+
+export const toCourseRowItemDtoList = (courses) => {
+  if (!Array.isArray(courses)) return [];
+  return courses.map(course => toCourseRowItemDto(course));
+};
+
+export const toInstructorCourseDto = (course) => {
+  if (!course) return null;
+
+  return {
+    ...getCourseBasicDetails(course),
+    description: course.description || null,
+    status: course.status || null,
+    ...getCourseInfo(course),
+    ...getCourseStats(course),
+    tags: course.tags || [],
+    ...getCourseCatgegory(course.category),
+    ...getCourseTime(course)
+  };
+};
+
+export const toSimpleCourse = (course) => {
+  if (!course) return null;
+
+  return {
+    courseId: course._id?.toString(),
+    title: course.title || null,
+    status: course.status || null,
+    isPrivate: course.isPrivate ?? true,
+  };
+};
+
+export const toEditCourseDto = (course, curriculum) => {
+  if (!course) return null;
+
+ return {
+    courseId: course._id?.toString() || null,
+    title: course.title || null,
+    subtitle: course.subtitle || null,
+    description: course.description || null,
+    image: course.image || null,
+    tags: course.tags || null,
+    price: course.price || null,
+    discountPrice: course.discountPrice || null,
+    enableDiscount: course.enableDiscount ?? false,
+    ...getCourseInfo(course),
+    thumbnail: course.thumbnail || null,
+    previewVideo: course.previewVideo || null,
+    status: course.status || null,
+    categoryId: (course.category?._id || course.category)?.toString() || null,
+    isPrivate: course.isPrivate ?? true,
+    hasPendingChanges: !!course.hasPendingChanges, 
+    
+    curriculum: {
+      sections: getCourseCurriculum(curriculum?.sections, true) || null,
+      hasPendingChanges: !!curriculum?.hasPendingChanges,
+    },
+  };
 };

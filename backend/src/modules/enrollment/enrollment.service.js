@@ -1,6 +1,9 @@
+import Fuse from "fuse.js";
 import AppError from "#exceptions/app.error.js";
 import Course from "#modules/course/course.model.js";
 import Instructor from "#modules/instructor/instructor.model.js";
+import { getPaginationOptions } from "#utils/pagination.js";
+import * as enrollmentMapper from "./enrollment.mapper.js";
 import Enrollment, { STATUS_ENUM } from "./enrollment.model.js";
 
 export const existsEnrollment = async (stuId, courseId) => {
@@ -63,4 +66,76 @@ export const enrollsCourses = async (stuId, courseIds, session = null) => {
   await Promise.all(instructorUpdates);
 
   return { success: true, count: enrollmentData.length };
+};
+
+export const getPaginatedStudentsByInstructorId = async (
+  insId, filters
+) => {
+  if (!insId) throw new AppError("Instructor ID is required.", 400);
+
+  const { page, limit, skip } = getPaginationOptions(filters.page, filters.limit);
+  const { search, sort } = filters;
+
+  const match = {
+    instructor: insId,
+    status: STATUS_ENUM.active,
+  };
+
+  const searchCondition = search
+    ? {
+      $or: [
+        { "student.name": { $regex: search, $options: "i" } },
+        { "student.email": { $regex: search, $options: "i" } }
+      ]
+    }
+    : null;
+
+  const sortMap = {
+    nameAsc: { name: 1 },
+    nameDesc: { name: -1 },
+    enrolledAsc: { enrolledAt: 1 },
+    enrolledDesc: { enrolledAt: -1 }
+  };
+
+  const [result] = await Enrollment.aggregate([
+    { $match: match },
+    {
+      $lookup: {
+        from: "users",
+        localField: "student",
+        foreignField: "_id",
+        as: "student"
+      }
+    },
+    { $unwind: "$student" },
+    ...(searchCondition ? [{ $match: searchCondition }] : []),
+    {
+      $group: {
+        _id: "$student._id",
+        name: { $first: "$student.name" },
+        email: { $first: "$student.email" },
+        pfpImg: { $first: "$student.pfpImg" },
+        isActivated: { $first: "$student.isActivated" },
+        enrolledAt: { $max: "$enrolledAt" },
+        coursesCount: { $sum: 1 }
+      }
+    },
+    { $sort: sortMap[sort] || { enrolledAt: -1 } },
+    {
+      $facet: {
+        metadata: [{ $count: "total" }],
+        data: [{ $skip: skip }, { $limit: limit }]
+      }
+    }
+  ]);
+
+  const total = result.metadata?.[0]?.total || 0;
+  const students = enrollmentMapper.toEnrolledStudentDtoList(result.data || []);
+
+  return {
+    students,
+    total,
+    page,
+    limit
+  };
 };

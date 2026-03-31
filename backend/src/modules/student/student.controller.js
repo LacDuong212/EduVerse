@@ -6,7 +6,7 @@ import * as studentService from "./student.service.js";
 // @route PATCH /profile
 export const updateProfile = asyncHandler(async (req, res) => {
   const userId = req.user?.userId;
-  const changes = req.validated?.body;
+  const changes = req.validated?.body || {};
   const updated = await studentService.updateStudentProfile(userId, changes);
   return sendSuccessResponse(res, 200, "Profile updated successfully!", updated);
 });

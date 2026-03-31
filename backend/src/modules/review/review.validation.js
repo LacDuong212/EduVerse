@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { z } from "zod";
+import { courseIdSchema } from "#modules/course/course.validation.js";
 
 const reviewIdSchema = z.string("Review ID is required")
   .trim()
@@ -7,15 +8,6 @@ const reviewIdSchema = z.string("Review ID is required")
   .pipe(
     z.string().refine((val) => mongoose.Types.ObjectId.isValid(val), {
       message: "Invalid review ID format",
-    })
-  );
-
-const courseIdSchema = z.string("Course ID is required")
-  .trim()
-  .min(1, "Course ID cannot be empty")
-  .pipe(
-    z.string().refine((val) => mongoose.Types.ObjectId.isValid(val), {
-      message: "Invalid course ID format",
     })
   );
 
