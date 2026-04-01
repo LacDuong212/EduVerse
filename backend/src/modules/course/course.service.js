@@ -1,17 +1,17 @@
 import Fuse from "fuse.js";
-import mongoose, { get } from "mongoose";
+import mongoose from "mongoose";
 import AppError from "#exceptions/app.error.js";
 import { existsEnrollment } from "#modules/enrollment/enrollment.service.js";
 import Instructor from "#modules/instructor/instructor.model.js";
 import { getCurrentInstructor } from "#modules/instructor/instructor.service.js";
 import { getCourseImageUploadParams } from "#modules/image/image.service.js";
+import { expireOrphanVideos } from "#modules/video/video.service.js";
 import { getPaginationOptions } from "#utils/pagination.js";
 import { withTransaction } from "#utils/transaction.js";
 import * as courseMapper from "./course.mapper.js";
 import Course, { STATUS_ENUM, UPDATE_STATUS_ENUM } from "./course.model.js";
 import { courseSchema } from "./course.validation.js";
 import Curriculum from "./curriculum.model.js";
-import { th } from "zod/v4/locales";
 
 const publicFilter = {
   isDeleted: false,
@@ -123,7 +123,7 @@ export const queryCourses = async (filters) => {
     const candidates = await Course.find(query)
       .populate("category", "name slug")
       .sort({ studentsEnrolled: -1, createdAt: -1 })  // priority bucket
-      .limit(1000)  // yes
+      .limit(1000)  // !!
       .lean();
 
     const fuse = new Fuse(candidates, {
@@ -401,7 +401,7 @@ export const getPaginatedInstructorCourses = async (userId, filters) => {
   if (search) {
     const candidates = await Course.find(query)
       .populate("category", "name slug")
-      .limit(1000)
+      .limit(1000)  // !!
       .lean();
 
     const fuse = new Fuse(candidates, {
@@ -710,6 +710,15 @@ export const clearPendingChanges = async (insId, courseId, session = null) => {
     if (!hasCourseChanges && !hasCurriculumChanges)
       throw new AppError("There are no changes to clear.", 400);
 
+    let videosToRemove = [];
+    if (hasCurriculumChanges) {
+      const pendingData = getPlainPendingData(curriculumDoc.pendingUpdate);
+      videosToRemove = (pendingData.sections || [])
+        .flatMap(sec => sec.lectures || [])
+        .map(l => l.videoId)
+        .filter(Boolean);
+    }
+
     course.pendingUpdate = {
       data: null,
       submittedAt: null,
@@ -727,6 +736,8 @@ export const clearPendingChanges = async (insId, courseId, session = null) => {
       curriculumDoc.markModified("pendingUpdate");
       await curriculumDoc.save({ session: s });
     }
+
+    if (videosToRemove.length > 0) await expireOrphanVideos(videosToRemove, s);
 
     const {
       course: mergedCourse, curriculum: mergedCurr
@@ -752,6 +763,25 @@ export const getCourseForEdit = async (insId, courseId) => {
   return courseMapper.toEditCourseDto(mergedCourse, mergedCurr);
 };
 
+export const updateCoursesInstructorInfo = async (insId, name, avatar, session = null) => {
+  if (!insId) throw new AppError("Instructor ID is required.", 400);
+  
+  return await withTransaction(async (s) => {
+    const updateData = {};
+
+    if (name !== undefined) updateData["instructor.name"] = name;
+    if (avatar !== undefined) updateData["instructor.avatar"] = avatar;
+
+    if (Object.keys(updateData).length === 0) return;
+
+    await Course.updateMany(
+      { "instructor.ref": insId },
+      { $set: updateData },
+      { session: s }
+    );
+  }, session);
+};
+
 // #TODO: REMOVE!!
 export const approveCourseUpdate = async (courseId, session = null) => {
   return await withTransaction(async (s) => {
@@ -765,28 +795,25 @@ export const approveCourseUpdate = async (courseId, session = null) => {
       || course.pendingUpdate?.status === UPDATE_STATUS_ENUM.pending;
     if (!isPendingCourse) throw new AppError("Course is not pending review.", 400);
 
-    if (course.pendingUpdate?.data) {
-      const updates = getPlainPendingData(course.pendingUpdate);
-      Object.keys(updates).forEach((key) => {
-        course.set(key, updates[key]);
-      });
-      course.pendingUpdate = { data: null, submittedAt: null, status: UPDATE_STATUS_ENUM.none };
-    }
-
     if (curriculum?.pendingUpdate?.data?.sections) {
       const pendingSections = getPlainPendingData(curriculum.pendingUpdate).sections;
 
       const currentVideoIds = (curriculum.sections || [])
-        .flatMap(s => s.lectures || [])
+        .flatMap(sec => sec.lectures || [])
         .map(l => l.videoId)
         .filter(Boolean);
 
-      const newVideoIds = new Set(
-        pendingSections
-          .flatMap(s => s.lectures || [])
-          .map(l => l.videoId)
-          .filter(Boolean)
-      );
+      let newTotalDuration = 0;
+      const newVideoIds = new Set();
+
+      pendingSections.forEach(section => {
+        (section.lectures || []).forEach(lecture => {
+          if (lecture.videoId) newVideoIds.add(lecture.videoId);
+          newTotalDuration += Number(lecture.duration || 0);
+        });
+      });
+
+      course.duration = newTotalDuration;
 
       oldVideoIds = currentVideoIds.filter(id => !newVideoIds.has(id));
 
@@ -797,11 +824,19 @@ export const approveCourseUpdate = async (courseId, session = null) => {
       await curriculum.save({ session: s });
     }
 
+    if (course.pendingUpdate?.data) {
+      const updates = getPlainPendingData(course.pendingUpdate);
+      Object.keys(updates).forEach((key) => {
+        course.set(key, updates[key]);
+      });
+      course.pendingUpdate = { data: null, submittedAt: null, status: UPDATE_STATUS_ENUM.none };
+    }
+
     course.status = STATUS_ENUM.live;
     await course.save({ session: s });
 
     if (oldVideoIds.length > 0) {
-      // #TODO: await expireOldVideos(oldVideoIds);
+      await expireOrphanVideos(oldVideoIds, s);
     }
 
     return oldVideoIds;

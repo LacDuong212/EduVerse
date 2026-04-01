@@ -9,6 +9,15 @@ import {
   linkedinSchema,
   youtubeSchema
 } from "#modules/user/user.validation.js";
+import { limitSchema, pageSchema } from "#utils/pagination.js";
+
+const interestsSchema = z.array(
+  z.string("An interest cannot be null")
+    .trim()
+    .min(1, "An interest cannot be empty")
+    .max(100, "An interest cannot be too long"),
+  "Interests are required"
+);
 
 export const updateProfileRequest = z.object({
   body: z.object({
@@ -23,7 +32,33 @@ export const updateProfileRequest = z.object({
       linkedin: linkedinSchema,
       youtube: youtubeSchema,
     }).optional(),
+    interests: interestsSchema.optional(),
   }).refine((data) => Object.keys(data).length > 0, {
     message: "At least one field must be provided for update",
+  })
+});
+
+export const updateInterestsRequest = z.object({
+  body: z.object({
+    interests: interestsSchema,
+  })
+});
+
+export const coursesQueryRequest = z.object({
+  query: z.object({
+    page: pageSchema,
+    limit: limitSchema(6, 50),
+
+    search: z.string().trim().optional().transform((val) => val?.toLowerCase()),
+    sort: z.enum([
+      "enrolledAsc",
+      "enrolledDesc",
+      "activityAsc",
+      "activityDesc",
+      "titleAsc",
+      "titleDesc",
+    ], "Sort option not found")
+      .optional()
+      .default("activityDesc"),
   })
 });

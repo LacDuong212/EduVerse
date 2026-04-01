@@ -81,7 +81,7 @@ export const getInstructorProfile = async (userId) => {
     isApproved: true
   }).populate({
     path: "user",
-    select: "name email phonenumber pfpImg website socials"
+    select: "name email phonenumber pfpImg website socials isActivated"
   }).lean();
   if (!instructor) throw new AppError("Instructor not found.", 404);
 
@@ -92,24 +92,28 @@ export const updateInstructorProfile = async (userId, changes) => {
   if (!userId) throw new AppError("Instructor ID is required.", 400);
 
   return await withTransaction(async (s) => {
+    const instructor = await Instructor.findOne({ user: userId }).session(s);
+    if (!instructor) throw new AppError("Instructor not found.", 404);
+    if (!instructor.isApproved) 
+      throw new AppError("Instructor profile not approved.", 403);
+
     const { userUpdate, insUpdate } = getUpdateData(changes);
 
-    await updateProfile(userId, userUpdate, s);
+    Object.keys(insUpdate).forEach((key) => {
+      instructor.set(key, insUpdate[key]);
+    });
 
-    const instructor = await Instructor.findOneAndUpdate(
-      { user: userId, isApproved: true },
-      { $set: insUpdate },
-      { new: true, session: s }
-    );
+    if (userUpdate && Object.keys(userUpdate).length > 0)
+      await updateProfile(userId, userUpdate, s);
 
-    if (!instructor) throw new AppError("Instructor not found.", 404);
+    await instructor.save({ session: s });
 
-
-
-    return await instructor.populate({
+    const result = await instructor.populate({
       path: "user",
       select: "name email phonenumber pfpImg website socials"
     });
+
+    return result.toObject();
   });
 };
 

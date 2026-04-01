@@ -8,6 +8,17 @@ import * as studentSchema from "./student.validation.js";
 const studentRoute = Router();
 studentRoute.use(protect, restrictTo("student"));
 
+studentRoute.get(
+  "/courses",
+  validate(studentSchema.coursesQueryRequest),
+  studentController.getEnrolledCourses
+);
+studentRoute.put(
+  "/interests", 
+  validate(studentSchema.updateInterestsRequest), 
+  studentController.updateInterests
+);
+studentRoute.get("/profile", studentController.getProfile);
 studentRoute.patch(
   "/profile",
   validate(studentSchema.updateProfileRequest),

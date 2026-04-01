@@ -18,12 +18,3 @@ export const changePassword = asyncHandler(async (req, res) => {
   await userService.changePassword(userId, oldPassword, newPassword);
   return sendSuccessResponse(res, 200, "Password changed successfully!");
 });
-
-// @desc  Update user's interests
-// @route PUT /interests
-export const updateInterests = asyncHandler(async (req, res) => {
-  const userId = req.user?.userId;
-  const { interests } = req.validated?.body || {};
-  const result = await userService.updateInterests(userId, interests);
-  return sendSuccessResponse(res, 200, "Interests updated successfully!", result);
-});

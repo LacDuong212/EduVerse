@@ -10,7 +10,7 @@ const studentSchema = new mongoose.Schema({
     completedLessons: { type: Number, default: 0 },
   },
 
-  address: { type: String, default: '' },
+  interests: [{ type: String }],
 }, { timestamps: true });
 
 export default mongoose.model("Student", studentSchema);

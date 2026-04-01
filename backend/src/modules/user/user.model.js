@@ -24,7 +24,6 @@ const userSchema = new mongoose.Schema({
   verifyOtpExpireAt: { type: Number, default: 0 },
   isVerified: { type: Boolean, default: false },
   isActivated: { type: Boolean, default: true },
-  interests: [{ type: String }],
   role: { type: String, enum: ROLE_ENUM.values(), default: ROLE_ENUM.student },
   googleId: { type: String, unique: true, sparse: true }
 }, { timestamps: true });

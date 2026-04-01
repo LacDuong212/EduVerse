@@ -15,11 +15,5 @@ userRoute.post(
   validate(userSchema.changePasswordRequest), 
   userController.changePassword
 );
-userRoute.put(
-  "/interests", 
-  protect, 
-  validate(userSchema.updateInterestsRequest), 
-  userController.updateInterests
-);
 
 export default userRoute;

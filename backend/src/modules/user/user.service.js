@@ -1,9 +1,9 @@
 import bcrypt from "bcryptjs";
 import AppError from "#exceptions/app.error.js";
-import { getAvatarUploadParams } from "#modules/image/image.service.js";
+import { updateCoursesInstructorInfo } from "#modules/course/course.service.js";
+import { deleteImage, getAvatarUploadParams } from "#modules/image/image.service.js";
 import { withTransaction } from "#utils/transaction.js";
-import * as userMapper from "./user.mapper.js";
-import User from "./user.model.js";
+import User, { ROLE_ENUM } from "./user.model.js";
 
 const activeFilters = {
   isVerified: true,
@@ -46,32 +46,34 @@ export const changePassword = async (
 
 };
 
-export const updateInterests = async (userId, interests) => {
-  if (!interests && !Array.isArray(interests))
-    throw new AppError("Interests must be an array.", 400);
-
-  const updated = await User.findOneAndUpdate(
-    { _id: userId, ...activeFilters },
-    { interests: interests },
-    { new: true, lean: true }
-  );
-
-  return updated.interests;
-};
-
-export const updateProfile = async (
-  userId,
-  changes,
-  session = null
-) => {
+export const updateProfile = async (userId, changes, session = null) => {
   if (!changes || Object.keys(changes).length === 0) return null;
 
-  const user = await User.findOneAndUpdate(
-    { _id: userId, ...activeFilters },
-    { $set: changes },
-    { session, new: true }
-  ).lean();
+  let imageToDelete = null; 
+  let updatedUser = null;
 
-  if (!user) throw new AppError("User not found.", 404);
-  return userMapper.toUserDetailsDto(user);
+  await withTransaction(async (s) => {
+    const userDoc = await User.findOne({ _id: userId, ...activeFilters }).session(s);
+    if (!userDoc) throw new AppError("User not found.", 404);
+
+    const oldPfp = userDoc.pfpImg;
+    const oldName = userDoc.name;
+
+    Object.keys(changes).forEach((key) => {
+      userDoc.set(key, changes[key]);
+    });
+
+    if (changes.pfpImg && changes.pfpImg !== oldPfp && oldPfp) imageToDelete = oldPfp;
+
+    if (userDoc.role === ROLE_ENUM.instructor)
+      if (changes.name !== oldName || imageToDelete)
+        await updateCoursesInstructorInfo(userId, userDoc.name, userDoc.pfpImg, s);
+
+    await userDoc.save({ session: s });
+    updatedUser = userDoc.toObject();
+  }, session);
+
+  if (imageToDelete) await deleteImage(imageToDelete);
+
+  return updatedUser;
 };
