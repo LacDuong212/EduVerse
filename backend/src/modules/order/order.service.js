@@ -66,7 +66,7 @@ export const createOrder = async (userId, body) => {
     let orderStatus = STATUS_ENUM.pending;
     let finalPaymentMethod = paymentMethod;
 
-    if (finalAmount === 0) {
+    if (totalAmount === 0) {
       orderStatus = STATUS_ENUM.completed;
       finalPaymentMethod = "free";
     }
