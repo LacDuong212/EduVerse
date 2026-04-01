@@ -711,12 +711,25 @@ export const clearPendingChanges = async (insId, courseId, session = null) => {
       throw new AppError("There are no changes to clear.", 400);
 
     let videosToRemove = [];
+
     if (hasCurriculumChanges) {
-      const pendingData = getPlainPendingData(curriculumDoc.pendingUpdate);
-      videosToRemove = (pendingData.sections || [])
+      const pendingCurrData = getPlainPendingData(curriculumDoc.pendingUpdate);
+      const lectureVideos = (pendingCurrData.sections || [])
         .flatMap(sec => sec.lectures || [])
         .map(l => l.videoId)
         .filter(Boolean);
+      
+      videosToRemove.push(...lectureVideos);
+    }
+
+    if (hasCurriculumChanges) {
+      const pendingCurrData = getPlainPendingData(curriculumDoc.pendingUpdate);
+      const lectureVideos = (pendingCurrData.sections || [])
+        .flatMap(sec => sec.lectures || [])
+        .map(l => l.videoId)
+        .filter(Boolean);
+      
+      videosToRemove.push(...lectureVideos);
     }
 
     course.pendingUpdate = {
@@ -815,7 +828,8 @@ export const approveCourseUpdate = async (courseId, session = null) => {
 
       course.duration = newTotalDuration;
 
-      oldVideoIds = currentVideoIds.filter(id => !newVideoIds.has(id));
+      const videosToRemove = currentVideoIds.filter(id => !newVideoIds.has(id));
+      oldVideoIds.push(...videosToRemove);
 
       curriculum.sections = pendingSections;
       curriculum.pendingUpdate = { data: null, submittedAt: null, status: UPDATE_STATUS_ENUM.none };
@@ -826,9 +840,15 @@ export const approveCourseUpdate = async (courseId, session = null) => {
 
     if (course.pendingUpdate?.data) {
       const updates = getPlainPendingData(course.pendingUpdate);
+
+      if (updates.previewVideo && course.previewVideo && updates.previewVideo !== course.previewVideo) {
+        oldVideoIds.push(course.previewVideo);
+      }
+
       Object.keys(updates).forEach((key) => {
         course.set(key, updates[key]);
       });
+
       course.pendingUpdate = { data: null, submittedAt: null, status: UPDATE_STATUS_ENUM.none };
     }
 
