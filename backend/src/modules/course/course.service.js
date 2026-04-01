@@ -5,6 +5,7 @@ import { existsEnrollment } from "#modules/enrollment/enrollment.service.js";
 import Instructor from "#modules/instructor/instructor.model.js";
 import { getCurrentInstructor } from "#modules/instructor/instructor.service.js";
 import { getCourseImageUploadParams } from "#modules/image/image.service.js";
+import { expireOrphanVideos } from "#modules/video/video.service.js";
 import { getPaginationOptions } from "#utils/pagination.js";
 import { withTransaction } from "#utils/transaction.js";
 import * as courseMapper from "./course.mapper.js";
@@ -709,6 +710,15 @@ export const clearPendingChanges = async (insId, courseId, session = null) => {
     if (!hasCourseChanges && !hasCurriculumChanges)
       throw new AppError("There are no changes to clear.", 400);
 
+    let videosToRemove = [];
+    if (hasCurriculumChanges) {
+      const pendingData = getPlainPendingData(curriculumDoc.pendingUpdate);
+      videosToRemove = (pendingData.sections || [])
+        .flatMap(sec => sec.lectures || [])
+        .map(l => l.videoId)
+        .filter(Boolean);
+    }
+
     course.pendingUpdate = {
       data: null,
       submittedAt: null,
@@ -726,6 +736,8 @@ export const clearPendingChanges = async (insId, courseId, session = null) => {
       curriculumDoc.markModified("pendingUpdate");
       await curriculumDoc.save({ session: s });
     }
+
+    if (videosToRemove.length > 0) await expireOrphanVideos(videosToRemove, s);
 
     const {
       course: mergedCourse, curriculum: mergedCurr
@@ -824,7 +836,7 @@ export const approveCourseUpdate = async (courseId, session = null) => {
     await course.save({ session: s });
 
     if (oldVideoIds.length > 0) {
-      // #TODO: await expireOldVideos(oldVideoIds);
+      await expireOrphanVideos(oldVideoIds, s);
     }
 
     return oldVideoIds;

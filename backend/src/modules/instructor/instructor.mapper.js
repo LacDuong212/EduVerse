@@ -1,6 +1,6 @@
 
 export const toInstructorDetails = (instructor, timestamp = false) => {
-  if(!instructor) return null;
+  if (!instructor) return null;
 
   const skills = (instructor.skills || []).map(s => ({
     name: s.name,
@@ -22,7 +22,7 @@ export const toInstructorDetails = (instructor, timestamp = false) => {
     avatar: instructor.user?.pfpImg,
     address: instructor.address,
     occupation: instructor.occupation,
-    
+
     website: instructor.user?.website,
     socials: {
       facebook: instructor.user?.socials?.facebook,
@@ -35,9 +35,11 @@ export const toInstructorDetails = (instructor, timestamp = false) => {
     skills: skills,
     education: education,
 
-    ...(timestamp && { 
-      createdAt: instructor.createdAt, 
-      updatedAt: instructor.updatedAt 
-    })
+    ...(timestamp && {
+      createdAt: instructor.createdAt,
+      updatedAt: instructor.updatedAt,
+    }),
+
+    isActive: instructor.user?.isActivated,
   };
 };

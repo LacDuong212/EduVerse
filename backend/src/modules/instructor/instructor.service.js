@@ -81,7 +81,7 @@ export const getInstructorProfile = async (userId) => {
     isApproved: true
   }).populate({
     path: "user",
-    select: "name email phonenumber pfpImg website socials"
+    select: "name email phonenumber pfpImg website socials isActivated"
   }).lean();
   if (!instructor) throw new AppError("Instructor not found.", 404);
 

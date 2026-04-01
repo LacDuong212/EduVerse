@@ -3,6 +3,7 @@ import http from "http";
 import app from "./app.js";
 import connectDB from "#config/database.js";
 import { initSocket } from "#config/socket.js";
+import "#services/cron.service.js";
 import logger from "#utils/logger.js";
 import { startAllTasks } from "#utils/scheduler.js";
 

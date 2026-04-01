@@ -1,4 +1,5 @@
 import cron from "node-cron";
+import logger from "#utils/logger.js";
 
 // PER SERVER CRON SCHEDULER
 
@@ -10,19 +11,19 @@ export const registerTask = (name, schedule, fn) => {
     try {
       await fn();
     } catch (err) {
-      console.error(`> Error in task [${name}]:`, err.message);
+      logger.error(`> Error in task [${name}]:`, err.message);
     }
   });
 
   tasks.push({ name, schedule, task });
-  //console.log(`> Registered task: ${name} (${schedule})`);
+  //logger.debug(`> Registered task: ${name} (${schedule})`);
 };
 
 // start all tasks
 export const startAllTasks = () => {
   tasks.forEach(({ name, task }) => {
     task.start();
-    console.log(`> Started task: ${name}`);
+    logger.debug(`> Started task: ${name}`);
   });
 };
 
@@ -30,6 +31,6 @@ export const startAllTasks = () => {
 export const stopAllTasks = () => {
   tasks.forEach(({ name, task }) => {
     task.stop();
-    console.log(`> Stopped task: ${name}`);
+    logger.debug(`> Stopped task: ${name}`);
   });
 };

@@ -5,8 +5,10 @@ import {
   DeleteObjectsCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { UPLOAD_DURATION, VIEW_DURATION } from "#constants/video.js";
 import logger from "#utils/logger.js";
+
+const UPLOAD_DURATION = 3 * 60 * 60;
+const VIEW_DURATION = 3 * 60 * 60;
 
 let s3Client = null;
 
@@ -23,7 +25,7 @@ export const getS3Client = () => {
         secretAccessKey: process.env.AWS_SECRET_KEY,
       },
     });
-    logger.info("> S3 Client initialized");
+    logger.debug("> S3 Client initialized");
   }
   return s3Client;
 };
@@ -79,7 +81,7 @@ export const removeManyObjects = async (keys) => {
 
   const s3 = getS3Client();
   const bucket = process.env.AWS_S3_BUCKET;
-  
+
   const BATCH_SIZE = 1000;
   let totalDeleted = 0;
   let allErrors = [];
@@ -87,7 +89,7 @@ export const removeManyObjects = async (keys) => {
   try {
     for (let i = 0; i < keys.length; i += BATCH_SIZE) {
       const chunk = keys.slice(i, i + BATCH_SIZE);
-      
+
       const command = new DeleteObjectsCommand({
         Bucket: bucket,
         Delete: {
@@ -97,7 +99,7 @@ export const removeManyObjects = async (keys) => {
       });
 
       const { Deleted, Errors } = await s3.send(command);
-      
+
       totalDeleted += Deleted?.length || 0;
       if (Errors?.length) allErrors.push(...Errors);
     }

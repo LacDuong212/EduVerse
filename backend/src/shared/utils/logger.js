@@ -1,5 +1,11 @@
 
 const logger = {
+  debug: (msg, meta = {}) => {
+    // if (process.env.NODE_ENV === "development" || process.env.LOG_LEVEL === "debug") {
+      const timestamp = new Date().toISOString();
+      console.log(`\x1b[2m[DEBUG] [${timestamp}] ${msg}\x1b[0m`, Object.keys(meta).length ? meta : '');
+    // }
+  },
   info: (msg, meta = {}) => {
     console.log(`\x1b[32m[INFO]\x1b[0m [${new Date().toISOString()}] ${msg}`, Object.keys(meta).length ? meta : '');
   },
