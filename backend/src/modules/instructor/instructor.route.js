@@ -54,6 +54,7 @@ privateRoutes.get(
   validate(instructorSchema.limitQueryRequest),
   instructorController.getTopEarningCourses
 );
+privateRoutes.get("/courses/stats", instructorController.getCoursesStats);
 privateRoutes.get(
   "/courses/:courseId",
   validate(instructorSchema.courseIdParamRequest),

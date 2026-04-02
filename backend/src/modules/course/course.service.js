@@ -862,3 +862,41 @@ export const approveCourseUpdate = async (courseId, session = null) => {
     return oldVideoIds;
   }, session);
 };
+
+export const getInstructorCoursesStats = async (insId) => {
+  if (!insId) throw new AppError("Instructor ID is required", 400);
+
+  const stats = await Course.aggregate([
+    { 
+      $match: { 
+        "instructor.ref": new mongoose.Types.ObjectId(insId),
+        isDeleted: false 
+      } 
+    },
+    { 
+      $group: { 
+        _id: "$status", 
+        count: { $sum: 1 } 
+      } 
+    }
+  ]);
+
+  const result = {
+    totalCourses: 0
+  };
+
+  STATUS_ENUM.values().forEach(status => {
+    const fieldName = `total${status.charAt(0).toUpperCase() + status.slice(1)}`;
+    result[fieldName] = 0;
+  });
+
+  stats.forEach(stat => {
+    const fieldName = `total${stat._id.charAt(0).toUpperCase() + stat._id.slice(1)}`;
+    if (result.hasOwnProperty(fieldName)) {
+      result[fieldName] = stat.count;
+      result.totalCourses += stat.count;
+    }
+  });
+
+  return result;
+};

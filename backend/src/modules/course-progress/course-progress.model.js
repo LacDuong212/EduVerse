@@ -9,7 +9,7 @@ export const LECTURE_STATUS_ENUM = new Enum({
 
 const lectureProgressSchema = new mongoose.Schema(
   {
-    lectureId: { type: Schema.Types.ObjectId, required: true },
+    lectureId: { type: mongoose.Schema.Types.ObjectId, required: true },
     status: {
       type: String,
       enum: LECTURE_STATUS_ENUM.values(),
@@ -28,12 +28,12 @@ const lectureProgressSchema = new mongoose.Schema(
 
 const courseProgressSchema = new mongoose.Schema(
   {
-    user: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    course: { type: Schema.Types.ObjectId, ref: "Course", required: true },
+    user: { type: mongoose.SchemaTypes.ObjectId, ref: "User", required: true },
+    course: { type: mongoose.SchemaTypes.ObjectId, ref: "Course", required: true },
     totalLectures: { type: Number, default: 0, min: 0 },
     completedLecturesCount: { type: Number, default: 0, min: 0 },
     totalTimeSpentSec: { type: Number, default: 0, min: 0 },
-    lastLectureId: { type: Schema.Types.ObjectId },
+    lastLectureId: { type: mongoose.SchemaTypes.ObjectId },
     lastPositionSec: { type: Number, default: 0, min: 0 },
     lectures: [lectureProgressSchema],
     firstStartedAt: Date,

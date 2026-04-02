@@ -236,3 +236,11 @@ export const approveCourse = asyncHandler(async (req, res) => {
   const result = await courseService.approveCourseUpdate(courseId);
   return sendSuccessResponse(res, 200, "Unauthorized approve of course success!!");
 });
+
+// @desc Get instructor's courses stats
+// @route GET instructor/courses/stats
+export const getCoursesStats = asyncHandler(async (req, res) => {
+  const userId = req.user?.userId;
+  const result = await courseService.getInstructorCoursesStats(userId);
+  return sendSuccessResponse(res, 200, "Get my courses stats successfully", result);
+});

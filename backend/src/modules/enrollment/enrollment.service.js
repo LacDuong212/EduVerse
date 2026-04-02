@@ -2,7 +2,9 @@ import Fuse from "fuse.js";
 import AppError from "#exceptions/app.error.js";
 import Course from "#modules/course/course.model.js";
 import Instructor from "#modules/instructor/instructor.model.js";
+import Student from "#modules/student/student.model.js";
 import { getPaginationOptions } from "#utils/pagination.js";
+import { withTransaction } from "#utils/transaction.js";
 import * as enrollmentMapper from "./enrollment.mapper.js";
 import Enrollment, { STATUS_ENUM } from "./enrollment.model.js";
 
@@ -20,52 +22,72 @@ export const existsEnrollment = async (stuId, courseId) => {
 };
 
 export const enrollsCourses = async (stuId, courseIds, session = null) => {
-  const courses = await Course.find({ _id: { $in: courseIds } }).session(session);
+  return await withTransaction(async (s) => {
+    const existingEnrollments = await Enrollment.find({
+      student: stuId,
+      course: { $in: courseIds }
+    }).session(s);
 
-  if (courses.length !== courseIds.length) {
-    throw new AppError("One or more courses not found for enrollment.", 404);
-  }
+    const existingCourseIds = existingEnrollments.map(e => e.course.toString());
 
-  const existing = await Enrollment.findOne({
-    student: stuId,
-    course: { $in: courseIds }
-  }).session(session);
+    const newCourseIds = courseIds.filter(id => !existingCourseIds.includes(id.toString()));
 
-  if (existing)
-    throw new AppError("Student is already enrolled in one of these courses", 400);
+    if (newCourseIds.length === 0)
+      return { success: true, enrolledCount: 0, skippedCount: existingCourseIds.length };
 
-  const enrollmentData = courses.map(course => ({
-    student: stuId,
-    course: course._id,
-    instructor: course.instructor?.ref,
-  }));
+    const courses = await Course.find({ _id: { $in: newCourseIds } }).session(s);
 
-  await Enrollment.insertMany(enrollmentData, { session });
+    if (courses.length !== newCourseIds.length)
+      throw new AppError("Some selected courses no longer exist.", 404);
 
-  await Course.updateMany(
-    { _id: { $in: courseIds } },
-    { $inc: { studentCount: 1 } },
-    { session }
-  );
+    const enrollmentData = courses.map(course => ({
+      student: stuId,
+      course: course._id,
+      instructor: course.instructor?.ref,
+    }));
 
-  const instructorIds = courses.map(c => c.instructor?.ref).filter(Boolean);
+    await Enrollment.insertMany(enrollmentData, { session: s });
 
-  const instructorCounts = instructorIds.reduce((acc, id) => {
-    acc[id] = (acc[id] || 0) + 1;
-    return acc;
-  }, {});
+    const totalNewLectures = courses.reduce((acc, course) => acc + (course.lecturesCount || 0), 0);
+    await Student.updateOne(
+      { user: stuId },
+      {
+        $inc: {
+          "stats.totalCourses": courses.length,
+          "stats.totalLectures": totalNewLectures
+        }
+      },
+      { session: s }
+    );
 
-  const instructorUpdates = Object.entries(instructorCounts).map(([id, count]) =>
-    Instructor.updateOne(
-      { _id: id },
-      { $inc: { "stats.totalStudents": count } },
-      { session }
-    )
-  );
+    await Course.updateMany(
+      { _id: { $in: courseIds } },
+      { $inc: { studentCount: 1 } },
+      { session: s }
+    );
 
-  await Promise.all(instructorUpdates);
+    const instructorIds = courses.map(c => c.instructor?.ref).filter(Boolean);
 
-  return { success: true, count: enrollmentData.length };
+    const instructorCounts = instructorIds.reduce((acc, id) => {
+      acc[id] = (acc[id] || 0) + 1;
+      return acc;
+    }, {});
+
+    const instructorUpdates = Object.entries(instructorCounts).map(([id, count]) =>
+      Instructor.updateOne(
+        { _id: id },
+        { $inc: { "stats.totalStudents": count } },
+        { session: s }
+      )
+    );
+
+    await Promise.all(instructorUpdates);
+
+    return {
+      enrolledCount: courses.length,
+      skippedCount: existingCourseIds.length
+    };
+  }, session);
 };
 
 export const getPaginatedStudentsByInstructorId = async (insId, filters) => {
@@ -215,15 +237,15 @@ export const getPaginatedStudentCourses = async (stuId, filters) => {
           from: "courseprogresses",
           let: { userId: "$user", courseId: "$course._id" },
           pipeline: [
-            { 
-              $match: { 
-                $expr: { 
+            {
+              $match: {
+                $expr: {
                   $and: [
                     { $eq: ["$user", "$$userId"] },
                     { $eq: ["$course", "$$courseId"] }
                   ]
-                } 
-              } 
+                }
+              }
             }
           ],
           as: "progress"
@@ -249,7 +271,7 @@ export const getPaginatedStudentCourses = async (stuId, filters) => {
   };
 
   if (search) {
-    const candidates = await Enrollment.aggregate(getBasePipeline(500)); 
+    const candidates = await Enrollment.aggregate(getBasePipeline(500));
 
     const fuse = new Fuse(candidates, {
       keys: ["title"],

@@ -57,3 +57,19 @@ export const getEnrolledCourses = asyncHandler(async (req, res) => {
       { page, limit, totalItems: total }
     );
 });
+
+// @desc Get student's courses stats
+// @route GET /courses/stats
+export const getCoursesStats = asyncHandler(async (req, res) => {
+  const userId = req.user?.userId;
+  const result = await studentService.getStudentCoursesStats(userId);
+  return sendSuccessResponse(res, 200, "Get my courses stats successfully!", result);
+});
+
+// @desc  Get student's stats
+// @route GET /stats
+export const getStats = asyncHandler(async (req, res) => {
+  const userId = req.user?.userId;
+  const result = await studentService.getStudentStats(userId);
+  return sendSuccessResponse(res, 200, "Get student stats successfully!", result);
+});
