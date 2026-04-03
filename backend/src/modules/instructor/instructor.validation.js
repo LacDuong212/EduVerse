@@ -159,3 +159,27 @@ export const submitCourseRequest = z.object({
   params: z.object({ courseId: courseIdSchema }),
   body: submitCourseSchema
 });
+
+export const courseStudentsRequest = z.object({
+  params: z.object({
+    courseId: courseIdSchema
+  }),
+  query: z.object({
+    page: pageSchema,
+    limit: limitSchema(5, 50),
+
+    search: z.string().trim().optional().transform((val) => val?.toLowerCase()),
+    sort: z.enum([
+      "enrolledAsc",
+      "enrolledDesc",
+      "progressAsc",
+      "progressDesc",
+      "nameAsc",
+      "nameDesc",
+      "ratingAsc",
+      "ratingDesc",
+    ], "Sort option not found")
+      .optional()
+      .default("enrolledDesc"),
+  })
+});

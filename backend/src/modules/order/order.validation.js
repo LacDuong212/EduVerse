@@ -41,5 +41,5 @@ export const createOrderRequest = z.object({
       .max(100, "Coupon code is too long")
       .optional()
       .nullable(),
-  }),
+  }, "Please provide enough data to create an order"),
 });

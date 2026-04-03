@@ -1,4 +1,5 @@
 import Fuse from "fuse.js";
+import mongoose from "mongoose";
 import AppError from "#exceptions/app.error.js";
 import Course from "#modules/course/course.model.js";
 import Instructor from "#modules/instructor/instructor.model.js";
@@ -326,3 +327,149 @@ const getStudentCourseSort = (strategy) => ({
   titleAsc: { title: 1 },
   titleDesc: { title: -1 },
 })[strategy] || { lastActivityAt: -1 };
+
+export const getCourseStudentsReport = async (insId, courseId, filters = {}) => {
+  const { page, limit, skip } = getPaginationOptions(filters.page, filters.limit);
+  const { search, sort } = filters;
+  const courseObjectId = new mongoose.Types.ObjectId(courseId);
+
+  const existing = await Course.findOne({ _id: courseId, isDeleted: false }).lean();
+  if (!existing) throw new AppError("Course not found.", 404);
+  if (existing.instructor?.ref?.toString() !== insId)
+    throw new AppError("You don't have access to this course.", 403);
+
+  const getBasePipeline = (safetyLimit = null) => {
+    const pipeline = [
+      { $match: { course: courseObjectId, status: STATUS_ENUM.active } },
+
+      {
+        $lookup: {
+          from: "users",
+          localField: "student",
+          foreignField: "_id",
+          as: "user"
+        }
+      },
+      { $unwind: "$user" },
+
+      {
+        $lookup: {
+          from: "courseprogresses",
+          let: { stuId: "$student", cId: "$course" },
+          pipeline: [
+            { $match: { $expr: { $and: [{ $eq: ["$user", "$$stuId"] }, { $eq: ["$course", "$$cId"] }] } } }
+          ],
+          as: "progress"
+        }
+      },
+      { $unwind: { path: "$progress", preserveNullAndEmptyArrays: true } },
+
+      {
+        $lookup: {
+          from: "reviews",
+          let: { stuId: "$student", cId: "$course" },
+          pipeline: [
+            { $match: { $expr: { $and: [{ $eq: ["$user", "$$stuId"] }, { $eq: ["$course", "$$cId"] }, { $eq: ["$isDeleted", false] }] } } }
+          ],
+          as: "review"
+        }
+      },
+      { $unwind: { path: "$review", preserveNullAndEmptyArrays: true } },
+
+      {
+        $project: {
+          _id: 0,
+          enrolledAt: 1,
+          name: "$user.name",
+          email: "$user.email",
+          isActivated: "$user.isActivated",
+          avatar: "$user.pfpImg",
+          progress: {
+            completedLectures: { $ifNull: ["$progress.completedLecturesCount", 0] },
+            totalLectures: { $ifNull: ["$progress.totalLectures", 0] },
+            lastActivityAt: { $ifNull: ["$progress.lastActivityAt", "$enrolledAt"] },
+            percentage: {
+              $cond: [
+                { $gt: ["$progress.totalLectures", 0] },
+                { $round: [{ $multiply: [{ $divide: ["$progress.completedLecturesCount", "$progress.totalLectures"] }, 100] }, 0] },
+                0
+              ]
+            }
+          },
+          review: {
+            rating: { $ifNull: ["$review.rating", null] },
+            description: "$review.description",
+            updatedAt: "$review.updatedAt"
+          }
+        }
+      }
+    ];
+
+    if (safetyLimit) pipeline.push({ $limit: safetyLimit });
+    return pipeline;
+  };
+
+  if (search) {
+    const allStudents = await Enrollment.aggregate(getBasePipeline(1000));  // !!
+
+    const fuse = new Fuse(allStudents, {
+      keys: ["name", "email"],
+      threshold: 0.3,
+    });
+
+    const searchResults = fuse.search(search).map((r) => r.item);
+    const sortedResults = sortStudentReport(searchResults, sort);
+
+    return {
+      students: sortedResults.slice(skip, skip + limit),
+      total: sortedResults.length,
+      page,
+      limit,
+    };
+  }
+
+  const dbSort = getStudentReportSort(sort);
+  const [result] = await Enrollment.aggregate([
+    ...getBasePipeline(),
+    { $sort: dbSort },
+    {
+      $facet: {
+        metadata: [{ $count: "total" }],
+        data: [{ $skip: skip }, { $limit: limit }]
+      }
+    }
+  ]);
+
+  const total = result.metadata?.[0]?.total || 0;
+  return {
+    students: result.data || [],
+    total,
+    page,
+    limit
+  };
+};
+
+const sortStudentReport = (docs, strategy) => {
+  const strategies = {
+    enrolledAsc: (a, b) => new Date(a.enrolledAt) - new Date(b.enrolledAt),
+    enrolledDesc: (a, b) => new Date(b.enrolledAt) - new Date(a.enrolledAt),
+    progressAsc: (a, b) => a.progress.percentage - b.progress.percentage,
+    progressDesc: (a, b) => b.progress.percentage - a.progress.percentage,
+    nameAsc: (a, b) => a.name.localeCompare(b.name),
+    nameDesc: (a, b) => b.name.localeCompare(a.name),
+    ratingAsc: (a, b) => (a.review.rating || 0) - (b.review.rating || 0),
+    ratingDesc: (a, b) => (b.review.rating || 0) - (a.review.rating || 0),
+  };
+  return docs.sort(strategies[strategy] || strategies.enrolledDesc);
+};
+
+const getStudentReportSort = (strategy) => ({
+  enrolledAsc: { enrolledAt: 1 },
+  enrolledDesc: { enrolledAt: -1 },
+  progressAsc: { "progress.percentage": 1 },
+  progressDesc: { "progress.percentage": -1 },
+  nameAsc: { name: 1 },
+  nameDesc: { name: -1 },
+  ratingAsc: { "review.rating": 1 },
+  ratingDesc: { "review.rating": -1 },
+})[strategy] || { enrolledAt: -1 };

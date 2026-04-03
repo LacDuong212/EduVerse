@@ -244,3 +244,21 @@ export const getCoursesStats = asyncHandler(async (req, res) => {
   const result = await courseService.getInstructorCoursesStats(userId);
   return sendSuccessResponse(res, 200, "Get my courses stats successfully", result);
 });
+
+// @desc Get course students by courseId
+// @route GET instructor/courses/:courseId/students
+export const getCourseStudents = asyncHandler(async (req, res) => {
+  const userId = req.user?.userId;
+  const { courseId } = req.validated?.params || {};
+  const query = req.validated?.query || {};
+  const {
+    students, total, page, limit
+  } = await enrollmentService.getCourseStudentsReport(userId, courseId, query);
+  return sendPaginatedResponse(
+    res,
+    200,
+    "Get course's students successfully!",
+    students,
+    { page, limit, totalItems: total }
+  );
+});
