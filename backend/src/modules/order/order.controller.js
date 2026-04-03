@@ -1,3 +1,4 @@
+import * as checkoutService from "#modules/checkout/checkout.service.js";
 import asyncHandler from "#utils/asyncHandler.js";
 import { sendSuccessResponse } from "#utils/response.js";
 import * as orderService from "./order.service.js";
@@ -18,7 +19,7 @@ export const getOrderById = asyncHandler(async (req, res) => {
 // @route POST /
 export const createOrder = asyncHandler(async (req, res) => {
   const body = req.validated?.body || {};
-  const order = await orderService.createOrder(req.user?.userId, body);
+  const order = await checkoutService.placeOrder(req.user?.userId, body);
   return sendSuccessResponse(res, 201, "Order created", orderMapper.toOrderDto(order));
 });
 

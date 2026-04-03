@@ -30,65 +30,78 @@ export const enrollsCourses = async (stuId, courseIds, session = null) => {
     }).session(s);
 
     const existingCourseIds = existingEnrollments.map(e => e.course.toString());
-
     const newCourseIds = courseIds.filter(id => !existingCourseIds.includes(id.toString()));
 
-    if (newCourseIds.length === 0)
+    if (newCourseIds.length === 0) {
       return { success: true, enrolledCount: 0, skippedCount: existingCourseIds.length };
+    }
 
     const courses = await Course.find({ _id: { $in: newCourseIds } }).session(s);
-
-    if (courses.length !== newCourseIds.length)
+    if (courses.length !== newCourseIds.length) {
       throw new AppError("Some selected courses no longer exist.", 404);
+    }
 
-    const enrollmentData = courses.map(course => ({
-      student: stuId,
-      course: course._id,
-      instructor: course.instructor?.ref,
-    }));
-
-    await Enrollment.insertMany(enrollmentData, { session: s });
-
-    const totalNewLectures = courses.reduce((acc, course) => acc + (course.lecturesCount || 0), 0);
-    await Student.updateOne(
-      { user: stuId },
-      {
-        $inc: {
-          "stats.totalCourses": courses.length,
-          "stats.totalLectures": totalNewLectures
-        }
-      },
-      { session: s }
-    );
-
-    await Course.updateMany(
-      { _id: { $in: courseIds } },
-      { $inc: { studentCount: 1 } },
-      { session: s }
-    );
-
-    const instructorIds = courses.map(c => c.instructor?.ref).filter(Boolean);
-
-    const instructorCounts = instructorIds.reduce((acc, id) => {
-      acc[id] = (acc[id] || 0) + 1;
-      return acc;
-    }, {});
-
-    const instructorUpdates = Object.entries(instructorCounts).map(([id, count]) =>
-      Instructor.updateOne(
-        { _id: id },
-        { $inc: { "stats.totalStudents": count } },
-        { session: s }
-      )
-    );
-
-    await Promise.all(instructorUpdates);
+    await createEnrollmentRecords(stuId, courses, s);
+    await updateStudentLearningStats(stuId, courses, s);
+    await updateCoursePopularityStats(newCourseIds, s);
+    await updateInstructorsTotalStudents(courses, s);
 
     return {
       enrolledCount: courses.length,
       skippedCount: existingCourseIds.length
     };
   }, session);
+};
+
+const createEnrollmentRecords = async (stuId, courses, session) => {
+  const enrollmentData = courses.map(course => ({
+    student: stuId,
+    course: course._id,
+    instructor: course.instructor?.ref,
+  }));
+  await Enrollment.insertMany(enrollmentData, { session });
+};
+
+const updateStudentLearningStats = async (stuId, courses, session) => {
+  const totalNewLectures = courses.reduce((acc, course) => acc + (course.lecturesCount || 0), 0);
+  await Student.updateOne(
+    { user: stuId },
+    {
+      $inc: {
+        "stats.totalCourses": courses.length,
+        "stats.totalLectures": totalNewLectures
+      }
+    },
+    { session }
+  );
+};
+
+const updateCoursePopularityStats = async (courseIds, session) => {
+  await Course.updateMany(
+    { _id: { $in: courseIds } },
+    { $inc: { studentCount: 1 } },
+    { session }
+  );
+};
+
+const updateInstructorsTotalStudents = async (courses, session) => {
+  const instructorIds = courses.map(c => c.instructor?.ref).filter(Boolean);
+  
+  // Group by ID to minimize DB calls if one instructor owns multiple courses in the batch
+  const instructorCounts = instructorIds.reduce((acc, id) => {
+    acc[id] = (acc[id] || 0) + 1;
+    return acc;
+  }, {});
+
+  const updates = Object.entries(instructorCounts).map(([id, count]) =>
+    Instructor.updateOne(
+      { _id: id },
+      { $inc: { "stats.totalStudents": count } },
+      { session }
+    )
+  );
+
+  await Promise.all(updates);
 };
 
 export const getPaginatedStudentsByInstructorId = async (insId, filters) => {

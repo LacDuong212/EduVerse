@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const learningStreakSchema = new mongoose.Schema({
+const streakSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
@@ -27,7 +27,7 @@ function addDays(dateStr, days) {
   return formatYMD(d);
 }
 
-learningStreakSchema.statics.registerActivity = async function (user, dateInput) {
+streakSchema.statics.registerActivity = async function (user, dateInput) {
   const LearningStreak = this;
 
   const todayStr =
@@ -50,7 +50,7 @@ learningStreakSchema.statics.registerActivity = async function (user, dateInput)
 
   const nextDayOfLast = addDays(streak.lastActiveDate, 1);
 
-  if (nextDayOfLast === todayStr) { streak.currentStreak += 1; } 
+  if (nextDayOfLast === todayStr) { streak.currentStreak += 1; }
   else if (todayStr > streak.lastActiveDate) { streak.currentStreak = 1; }
 
   streak.lastActiveDate = todayStr;
@@ -65,11 +65,13 @@ learningStreakSchema.statics.registerActivity = async function (user, dateInput)
   return streak;
 };
 
-learningStreakSchema.statics.getUserStreak = async function (user) {
+streakSchema.statics.getUserStreak = async function (user) {
   const LearningStreak = this;
   const streak = await LearningStreak.findOne({ user });
 
   const todayStr = formatYMD(new Date());
+  const yesterdayStr = addDays(todayStr, -1);
+  const isStreakBroken = streak.lastActiveDate < yesterdayStr;
 
   if (!streak) {
     return {
@@ -83,11 +85,11 @@ learningStreakSchema.statics.getUserStreak = async function (user) {
   const todayDone = streak.lastActiveDate === todayStr;
 
   return {
-    currentStreak: streak.currentStreak,
+    currentStreak: isStreakBroken ? 0 : streak.currentStreak,
     longestStreak: streak.longestStreak,
     todayDone,
     activeDates: streak.activeDates,
   };
 };
 
-export default mongoose.model("LearningStreak", learningStreakSchema);
+export default mongoose.model("Streak", streakSchema);
