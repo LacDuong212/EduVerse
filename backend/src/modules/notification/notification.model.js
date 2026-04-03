@@ -11,11 +11,12 @@ export const TYPE_ENUM = new Enum({
 });
 
 const notificationSchema = new mongoose.Schema({
-  user: { type: String, required: true }, 
+  user: { type: mongoose.Schema.Types.ObjectId, ref: "User", unique: true, required: true },
   type: { type: String, enum: TYPE_ENUM.values(), default: TYPE_ENUM.info },
   message: { type: String, required: true },
   isRead: { type: Boolean, default: false },
-  createdAt: { type: Date, default: Date.now },
-});
+}, { timestamps: true });
+
+notificationSchema.index({ user: 1, isRead: 1 });
 
 export default mongoose.model("Notification", notificationSchema);

@@ -1,4 +1,5 @@
 import AppError from "#exceptions/app.error.js";
+import { countInProgressCourses } from "#modules/course-progress/course-progress.service.js";
 import { updateProfile } from "#modules/user/user.service.js";
 import { withTransaction } from "#utils/transaction.js";
 import Student from "./student.model.js"
@@ -79,4 +80,41 @@ export const updateStudentInterests = async (userId, interests) => {
   );
 
   return updated.interests;
+};
+
+export const getStudentCoursesStats = async (userId) => {
+  if (!userId) throw new AppError("Student ID is required", 400);
+
+  const student = await Student.findOne({ user: userId })
+    .select("stats.totalCourses stats.completedCourses")
+    .lean();
+  if (!student) throw new AppError("Student not found", 404);
+
+  const total = student?.stats?.totalCourses || 0;
+  const completed = student?.stats?.completedCourses || 0;
+  const inProgress = await countInProgressCourses(userId);
+  const totalNotStarted = Math.max(0, total - completed - inProgress);
+
+  return {
+    totalCourses: total,
+    totalCompleted: completed,
+    totalInProgress: inProgress,
+    totalNotStarted,
+  };
+};
+
+export const getStudentStats = async (userId) => {
+  if (!userId) throw new AppError("Student ID is required", 400);
+
+  const student = await Student.findOne({ user: userId })
+    .select("stats")
+    .lean();
+  if (!student) throw new AppError("Student not found", 404);
+
+  return {
+    totalCourses: student.stats?.totalCourses || 0,
+    completedCourses: student.stats?.completedCourses || 0,
+    totalLectures: student.stats?.totalLectures || 0,
+    completedLectures: student.stats?.completedLectures || 0,
+  };
 };

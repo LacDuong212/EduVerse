@@ -6,5 +6,5 @@ export const createPaymentRequest = z.object({
   body: z.object({
     orderId: orderIdSchema,
     paymentMethod: paymentMethodSchema,
-  }),
+  }, "Order info is equired to set up payment"),
 });

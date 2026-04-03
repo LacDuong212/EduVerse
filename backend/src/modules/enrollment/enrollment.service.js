@@ -1,8 +1,11 @@
 import Fuse from "fuse.js";
+import mongoose from "mongoose";
 import AppError from "#exceptions/app.error.js";
 import Course from "#modules/course/course.model.js";
 import Instructor from "#modules/instructor/instructor.model.js";
+import Student from "#modules/student/student.model.js";
 import { getPaginationOptions } from "#utils/pagination.js";
+import { withTransaction } from "#utils/transaction.js";
 import * as enrollmentMapper from "./enrollment.mapper.js";
 import Enrollment, { STATUS_ENUM } from "./enrollment.model.js";
 
@@ -20,42 +23,77 @@ export const existsEnrollment = async (stuId, courseId) => {
 };
 
 export const enrollsCourses = async (stuId, courseIds, session = null) => {
-  const courses = await Course.find({ _id: { $in: courseIds } }).session(session);
+  return await withTransaction(async (s) => {
+    const existingEnrollments = await Enrollment.find({
+      student: stuId,
+      course: { $in: courseIds }
+    }).session(s);
 
-  if (courses.length !== courseIds.length) {
-    throw new AppError("One or more courses not found for enrollment.", 404);
-  }
+    const existingCourseIds = existingEnrollments.map(e => e.course.toString());
+    const newCourseIds = courseIds.filter(id => !existingCourseIds.includes(id.toString()));
 
-  const existing = await Enrollment.findOne({
-    student: stuId,
-    course: { $in: courseIds }
-  }).session(session);
+    if (newCourseIds.length === 0) {
+      return { success: true, enrolledCount: 0, skippedCount: existingCourseIds.length };
+    }
 
-  if (existing)
-    throw new AppError("Student is already enrolled in one of these courses", 400);
+    const courses = await Course.find({ _id: { $in: newCourseIds } }).session(s);
+    if (courses.length !== newCourseIds.length) {
+      throw new AppError("Some selected courses no longer exist.", 404);
+    }
 
+    await createEnrollmentRecords(stuId, courses, s);
+    await updateStudentLearningStats(stuId, courses, s);
+    await updateCoursePopularityStats(newCourseIds, s);
+    await updateInstructorsTotalStudents(courses, s);
+
+    return {
+      enrolledCount: courses.length,
+      skippedCount: existingCourseIds.length
+    };
+  }, session);
+};
+
+const createEnrollmentRecords = async (stuId, courses, session) => {
   const enrollmentData = courses.map(course => ({
     student: stuId,
     course: course._id,
     instructor: course.instructor?.ref,
   }));
-
   await Enrollment.insertMany(enrollmentData, { session });
+};
 
+const updateStudentLearningStats = async (stuId, courses, session) => {
+  const totalNewLectures = courses.reduce((acc, course) => acc + (course.lecturesCount || 0), 0);
+  await Student.updateOne(
+    { user: stuId },
+    {
+      $inc: {
+        "stats.totalCourses": courses.length,
+        "stats.totalLectures": totalNewLectures
+      }
+    },
+    { session }
+  );
+};
+
+const updateCoursePopularityStats = async (courseIds, session) => {
   await Course.updateMany(
     { _id: { $in: courseIds } },
     { $inc: { studentCount: 1 } },
     { session }
   );
+};
 
+const updateInstructorsTotalStudents = async (courses, session) => {
   const instructorIds = courses.map(c => c.instructor?.ref).filter(Boolean);
-
+  
+  // Group by ID to minimize DB calls if one instructor owns multiple courses in the batch
   const instructorCounts = instructorIds.reduce((acc, id) => {
     acc[id] = (acc[id] || 0) + 1;
     return acc;
   }, {});
 
-  const instructorUpdates = Object.entries(instructorCounts).map(([id, count]) =>
+  const updates = Object.entries(instructorCounts).map(([id, count]) =>
     Instructor.updateOne(
       { _id: id },
       { $inc: { "stats.totalStudents": count } },
@@ -63,9 +101,7 @@ export const enrollsCourses = async (stuId, courseIds, session = null) => {
     )
   );
 
-  await Promise.all(instructorUpdates);
-
-  return { success: true, count: enrollmentData.length };
+  await Promise.all(updates);
 };
 
 export const getPaginatedStudentsByInstructorId = async (insId, filters) => {
@@ -215,15 +251,15 @@ export const getPaginatedStudentCourses = async (stuId, filters) => {
           from: "courseprogresses",
           let: { userId: "$user", courseId: "$course._id" },
           pipeline: [
-            { 
-              $match: { 
-                $expr: { 
+            {
+              $match: {
+                $expr: {
                   $and: [
                     { $eq: ["$user", "$$userId"] },
                     { $eq: ["$course", "$$courseId"] }
                   ]
-                } 
-              } 
+                }
+              }
             }
           ],
           as: "progress"
@@ -249,7 +285,7 @@ export const getPaginatedStudentCourses = async (stuId, filters) => {
   };
 
   if (search) {
-    const candidates = await Enrollment.aggregate(getBasePipeline(500)); 
+    const candidates = await Enrollment.aggregate(getBasePipeline(500));
 
     const fuse = new Fuse(candidates, {
       keys: ["title"],
@@ -304,3 +340,149 @@ const getStudentCourseSort = (strategy) => ({
   titleAsc: { title: 1 },
   titleDesc: { title: -1 },
 })[strategy] || { lastActivityAt: -1 };
+
+export const getCourseStudentsReport = async (insId, courseId, filters = {}) => {
+  const { page, limit, skip } = getPaginationOptions(filters.page, filters.limit);
+  const { search, sort } = filters;
+  const courseObjectId = new mongoose.Types.ObjectId(courseId);
+
+  const existing = await Course.findOne({ _id: courseId, isDeleted: false }).lean();
+  if (!existing) throw new AppError("Course not found.", 404);
+  if (existing.instructor?.ref?.toString() !== insId)
+    throw new AppError("You don't have access to this course.", 403);
+
+  const getBasePipeline = (safetyLimit = null) => {
+    const pipeline = [
+      { $match: { course: courseObjectId, status: STATUS_ENUM.active } },
+
+      {
+        $lookup: {
+          from: "users",
+          localField: "student",
+          foreignField: "_id",
+          as: "user"
+        }
+      },
+      { $unwind: "$user" },
+
+      {
+        $lookup: {
+          from: "courseprogresses",
+          let: { stuId: "$student", cId: "$course" },
+          pipeline: [
+            { $match: { $expr: { $and: [{ $eq: ["$user", "$$stuId"] }, { $eq: ["$course", "$$cId"] }] } } }
+          ],
+          as: "progress"
+        }
+      },
+      { $unwind: { path: "$progress", preserveNullAndEmptyArrays: true } },
+
+      {
+        $lookup: {
+          from: "reviews",
+          let: { stuId: "$student", cId: "$course" },
+          pipeline: [
+            { $match: { $expr: { $and: [{ $eq: ["$user", "$$stuId"] }, { $eq: ["$course", "$$cId"] }, { $eq: ["$isDeleted", false] }] } } }
+          ],
+          as: "review"
+        }
+      },
+      { $unwind: { path: "$review", preserveNullAndEmptyArrays: true } },
+
+      {
+        $project: {
+          _id: 0,
+          enrolledAt: 1,
+          name: "$user.name",
+          email: "$user.email",
+          isActivated: "$user.isActivated",
+          avatar: "$user.pfpImg",
+          progress: {
+            completedLectures: { $ifNull: ["$progress.completedLecturesCount", 0] },
+            totalLectures: { $ifNull: ["$progress.totalLectures", 0] },
+            lastActivityAt: { $ifNull: ["$progress.lastActivityAt", "$enrolledAt"] },
+            percentage: {
+              $cond: [
+                { $gt: ["$progress.totalLectures", 0] },
+                { $round: [{ $multiply: [{ $divide: ["$progress.completedLecturesCount", "$progress.totalLectures"] }, 100] }, 0] },
+                0
+              ]
+            }
+          },
+          review: {
+            rating: { $ifNull: ["$review.rating", null] },
+            description: "$review.description",
+            updatedAt: "$review.updatedAt"
+          }
+        }
+      }
+    ];
+
+    if (safetyLimit) pipeline.push({ $limit: safetyLimit });
+    return pipeline;
+  };
+
+  if (search) {
+    const allStudents = await Enrollment.aggregate(getBasePipeline(1000));  // !!
+
+    const fuse = new Fuse(allStudents, {
+      keys: ["name", "email"],
+      threshold: 0.3,
+    });
+
+    const searchResults = fuse.search(search).map((r) => r.item);
+    const sortedResults = sortStudentReport(searchResults, sort);
+
+    return {
+      students: sortedResults.slice(skip, skip + limit),
+      total: sortedResults.length,
+      page,
+      limit,
+    };
+  }
+
+  const dbSort = getStudentReportSort(sort);
+  const [result] = await Enrollment.aggregate([
+    ...getBasePipeline(),
+    { $sort: dbSort },
+    {
+      $facet: {
+        metadata: [{ $count: "total" }],
+        data: [{ $skip: skip }, { $limit: limit }]
+      }
+    }
+  ]);
+
+  const total = result.metadata?.[0]?.total || 0;
+  return {
+    students: result.data || [],
+    total,
+    page,
+    limit
+  };
+};
+
+const sortStudentReport = (docs, strategy) => {
+  const strategies = {
+    enrolledAsc: (a, b) => new Date(a.enrolledAt) - new Date(b.enrolledAt),
+    enrolledDesc: (a, b) => new Date(b.enrolledAt) - new Date(a.enrolledAt),
+    progressAsc: (a, b) => a.progress.percentage - b.progress.percentage,
+    progressDesc: (a, b) => b.progress.percentage - a.progress.percentage,
+    nameAsc: (a, b) => a.name.localeCompare(b.name),
+    nameDesc: (a, b) => b.name.localeCompare(a.name),
+    ratingAsc: (a, b) => (a.review.rating || 0) - (b.review.rating || 0),
+    ratingDesc: (a, b) => (b.review.rating || 0) - (a.review.rating || 0),
+  };
+  return docs.sort(strategies[strategy] || strategies.enrolledDesc);
+};
+
+const getStudentReportSort = (strategy) => ({
+  enrolledAsc: { enrolledAt: 1 },
+  enrolledDesc: { enrolledAt: -1 },
+  progressAsc: { "progress.percentage": 1 },
+  progressDesc: { "progress.percentage": -1 },
+  nameAsc: { name: 1 },
+  nameDesc: { name: -1 },
+  ratingAsc: { "review.rating": 1 },
+  ratingDesc: { "review.rating": -1 },
+})[strategy] || { enrolledAt: -1 };

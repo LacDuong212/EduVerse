@@ -1,75 +1,44 @@
-import mongoose from "mongoose";
 import AppError from "#exceptions/app.error.js";
 import { enrollsCourses } from "#modules/enrollment/enrollment.service.js";
 import Order, { PAYMENT_METHOD_ENUM, STATUS_ENUM } from "#modules/order/order.model.js";
+import { withTransaction } from "#utils/transaction.js";
 import * as momoProvider from "./providers/momo.provider.js";
 import * as vnpayProvider from "./providers/vnpay.provider.js";
 import Transaction from "./transaction.model.js";
 
-/**
- * Create payment URL
- */
-export const createPayment = async ({
-  orderId,
-  userId,
-  paymentMethod,
-  ipAddr
-}) => {
-  const order = await Order.findOne({
-    _id: orderId,
-    user: userId,
-  });
+export const createPayment = async ({ orderId, userId, paymentMethod, ipAddr }) => {
+  const order = await Order.findOne({ _id: orderId, user: userId });
 
   if (!order) throw new AppError("Order not found.", 404);
   if (order.status !== STATUS_ENUM.pending)
-    throw new AppError(`Order is already ${order.status?.toUpperCase()}.`, 400);
+    throw new AppError("Order is not pending.", 400);
   if (order.expiresAt && order.expiresAt < new Date())
-    throw new AppError("Order has expired.", 400);
+    throw new AppError("Order expired.", 400);
 
-  const amount = order.totalAmount;
-  const orderInfo = `Payment for order ${orderId}`;
+  const orderInfo = `Payment for EduVerse Order ${orderId}`;
 
-  if (paymentMethod === PAYMENT_METHOD_ENUM.momo)
-    return momoProvider.createPayment(orderId, amount, orderInfo);
-  else if (paymentMethod === PAYMENT_METHOD_ENUM.vnpay)
-    return vnpayProvider.createPayment(ipAddr, amount, orderId, orderInfo);
-  else
-    throw new AppError("Payment method not supported.", 400);
+  const providers = {
+    [PAYMENT_METHOD_ENUM.momo]: () =>
+      momoProvider.createPayment(orderId, order.totalAmount, orderInfo),
+    [PAYMENT_METHOD_ENUM.vnpay]: () =>
+      vnpayProvider.createPayment(ipAddr, order.totalAmount, orderId, orderInfo),
+  };
+
+  if (!providers[paymentMethod]) throw new AppError("Payment method not supported.", 400);
+  return providers[paymentMethod]();
 };
 
-/**
- * Handle successful payment (IPN)
- */
 export const processSuccessfulPayment = async ({
-  orderId,
-  amount,
-  gateway,
-  transactionId,
-  rawData
+  orderId, amount, gateway, transactionId, rawData
 }) => {
-
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
-  try {
-    // Idempotency check
-    const existingTx = await Transaction
-      .findOne({ transactionId })
-      .session(session);
-
-    if (existingTx) {
-      await session.abortTransaction();
-      session.endSession();
-      return;
-    }
+  return await withTransaction(async (session) => {
+    const existingTx = await Transaction.findOne({ transactionId }).session(session);
+    if (existingTx) return;
 
     const order = await Order.findById(orderId).session(session);
-
     if (!order) throw new AppError("Order not found", 404);
-    if (order.totalAmount !== amount)
-      throw new AppError("Invalid amount", 400);
+    if (order.totalAmount !== amount) throw new AppError("Amount mismatch", 400);
 
-    // Save transaction
     await Transaction.create([{
       orderId: order._id,
       userId: order.user,
@@ -85,42 +54,19 @@ export const processSuccessfulPayment = async ({
       order.expiresAt = null;
       await order.save({ session });
 
-      await enrollsCourses(order.user, order.courses.map(item => item.course), session);
+      const courseIds = order.courses.map(item => item.course);
+
+      await enrollsCourses(order.user, courseIds, session);
+
+      await cartService.bulkRemoveFromCart(order.user, courseIds, session);
     }
-
-    await session.commitTransaction();
-    session.endSession();
-
-  } catch (err) {
-    await session.abortTransaction();
-    session.endSession();
-    throw err;
-  }
+  });
 };
 
-/**
- * Handle failed payment
- */
-export const processFailedPayment = async ({
-  orderId,
-  gateway,
-  transactionId,
-  rawData
-}) => {
-
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
-  try {
-    const existingTx = await Transaction
-      .findOne({ transactionId })
-      .session(session);
-
-    if (existingTx) {
-      await session.abortTransaction();
-      session.endSession();
-      return;
-    }
+export const processFailedPayment = async ({ orderId, gateway, transactionId, rawData }) => {
+  return await withTransaction(async (session) => {
+    const existingTx = await Transaction.findOne({ transactionId }).session(session);
+    if (existingTx) return;
 
     const order = await Order.findById(orderId).session(session);
     if (!order) throw new AppError("Order not found", 404);
@@ -140,13 +86,5 @@ export const processFailedPayment = async ({
       order.expiresAt = null;
       await order.save({ session });
     }
-
-    await session.commitTransaction();
-    session.endSession();
-
-  } catch (err) {
-    await session.abortTransaction();
-    session.endSession();
-    throw err;
-  }
+  });
 };

@@ -1,4 +1,4 @@
-import { getLatestLearningProgress } from "#modules/learning/learning.service.js";
+import { getLastLearningProgress } from "#modules/learning/learning.service.js";
 import { sendMessageToDialogflow } from "#services/dialogflow.service.js";
 import { INTENT, PAGE_MAP } from "./chatbot.config.js";
 import * as chatbotUtils from "./chatbot.utils.js";
@@ -66,7 +66,7 @@ export const handleChatbotResponse = async (
 
         // valid student
         else {
-          const latestProgress = await getLatestLearningProgress(userId);
+          const latestProgress = await getLastLearningProgress(userId);
           const result = chatbotService.handleLearningProgress(latestProgress, languageCode);
 
           if (result.actionData) actionData = result.actionData;

@@ -24,5 +24,7 @@ studentRoute.patch(
   validate(studentSchema.updateProfileRequest),
   studentController.updateProfile
 );
+studentRoute.get("/stats", studentController.getStats);
+studentRoute.get("/courses/stats", studentController.getCoursesStats);
 
 export default studentRoute;

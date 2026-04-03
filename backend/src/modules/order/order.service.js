@@ -1,13 +1,6 @@
-import mongoose from "mongoose";
 import AppError from "#exceptions/app.error.js";
-import * as cartService from "#modules/cart/cart.service.js";
-import * as couponService from "#modules/coupon/coupon.service.js";
-import { enrollsCourses } from "#modules/enrollment/enrollment.service.js";
 import Order, { STATUS_ENUM } from "#modules/order/order.model.js";
 
-/**
- * Get all orders of a user
- */
 export const getUserOrders = async (userId) => {
   return Order.find({ user: userId })
     .populate("courses.course")
@@ -15,9 +8,6 @@ export const getUserOrders = async (userId) => {
     .sort({ createdAt: -1 });
 };
 
-/**
- * Get single order by ID
- */
 export const getOrderById = async (orderId, userId) => {
   const order = await Order.findOne({
     _id: orderId,
@@ -29,104 +19,6 @@ export const getOrderById = async (orderId, userId) => {
   return order;
 };
 
-/**
- * Create new order
- */
-export const createOrder = async (userId, body) => {
-  const { selectedCourseIds, paymentMethod, couponCode } = body;
-
-  if (!selectedCourseIds || !selectedCourseIds.length)
-    throw new AppError("No courses selected.", 400);
-
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
-  try {
-    const cart = await cartService.getCart(userId, session);
-
-    if (!cart || !cart.length)
-      throw new AppError("There are no items in your cart to buy.", 400);
-
-    const selectedItems = cart.filter(item =>
-      selectedCourseIds.includes(item?.courseId)
-    );
-
-    if (!selectedItems.length)
-      throw new AppError("Selected courses are not found in cart.", 409);
-
-    let couponDoc = null;
-    if (couponCode) {
-      couponDoc = await couponService.validateCoupon(couponCode, userId, session);
-    }
-
-    const {
-      items, subTotal, discountAmount, totalAmount
-    } = calculateOrderTotals(selectedItems, couponDoc);
-
-    let orderStatus = STATUS_ENUM.pending;
-    let finalPaymentMethod = paymentMethod;
-
-    if (totalAmount === 0) {
-      orderStatus = STATUS_ENUM.completed;
-      finalPaymentMethod = "free";
-    }
-
-    const [order] = await Order.create([{
-      user: userId,
-      courses: items,
-      subTotal,
-      coupon: couponDoc?._id,
-      discountAmount,
-      totalAmount,
-      paymentMethod: finalPaymentMethod,
-      status: orderStatus
-    }], { session });
-
-    if (orderStatus === STATUS_ENUM.completed) {
-      await enrollsCourses(userId, selectedCourseIds, session);
-    }
-
-    if (couponDoc) await couponService.updateUsedCoupon(couponDoc._id, userId, session);
-    await cartService.bulkRemoveFromCart(userId, selectedCourseIds, session);
-
-    await session.commitTransaction();
-    return order;
-
-  } catch (error) {
-    await session.abortTransaction();
-    throw error;
-  } finally {
-    session.endSession();
-  }
-};
-
-const calculateOrderTotals = (selectedItems, couponDoc) => {
-  const items = selectedItems.map(course => {
-    const priceToUse = course?.enableDiscount
-      ? (course?.discountPrice ?? course?.price)
-      : course?.price;
-
-    return {
-      course: course?.courseId,
-      pricePaid: priceToUse
-    };
-  });
-
-  const subTotal = items.reduce((sum, i) => sum + i.pricePaid, 0);
-  let discountAmount = 0;
-
-  if (couponDoc) {
-    discountAmount = Math.round((subTotal * couponDoc.discountPercent) / 100);
-  }
-
-  const totalAmount = Math.max(subTotal - discountAmount, 0);
-
-  return { items, subTotal, discountAmount, totalAmount };
-};
-
-/**
- * Cancel pending order
- */
 export const cancelOrder = async (orderId, userId) => {
   const order = await Order.findOne({
     _id: orderId,

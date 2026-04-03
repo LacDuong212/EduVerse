@@ -54,6 +54,7 @@ privateRoutes.get(
   validate(instructorSchema.limitQueryRequest),
   instructorController.getTopEarningCourses
 );
+privateRoutes.get("/courses/stats", instructorController.getCoursesStats);
 privateRoutes.get(
   "/courses/:courseId",
   validate(instructorSchema.courseIdParamRequest),
@@ -94,6 +95,11 @@ privateRoutes.get(
   "/courses/:courseId/approve",
   validate(instructorSchema.courseIdParamRequest),
   instructorController.approveCourse
+);
+privateRoutes.get(
+  "/courses/:courseId/students",
+  validate(instructorSchema.courseStudentsRequest),
+  instructorController.getCourseStudents
 );
 
 export default { publicRoutes, privateRoutes };

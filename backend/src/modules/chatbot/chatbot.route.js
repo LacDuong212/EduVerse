@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { checkAuth } from "#middlewares/user.auth.js";
+import { checkAuth } from "#middlewares/auth.middleware.js";
 import validate from "#middlewares/zodValidator.middleware.js"
 import * as chatbotController from "./chatbot.controller.js";
 import * as chatbotSchema from "./chatbot.validation.js";
