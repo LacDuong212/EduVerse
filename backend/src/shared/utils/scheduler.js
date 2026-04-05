@@ -23,14 +23,18 @@ export const registerTask = (name, schedule, fn) => {
 export const startAllTasks = () => {
   tasks.forEach(({ name, task }) => {
     task.start();
-    logger.debug(`> Started task: ${name}`);
+    // logger.debug(`> Started task: ${name}`);
   });
+  const taskNames = tasks.map(t => `[${t.name}]`).join(', ');
+  logger.debug(`> Started tasks: ${taskNames}`);
 };
 
 // stop all tasks
 export const stopAllTasks = () => {
   tasks.forEach(({ name, task }) => {
     task.stop();
-    logger.debug(`> Stopped task: ${name}`);
+    // logger.debug(`> Stopped task: ${name}`);
   });
+  const taskNames = tasks.map(t => `[${t.name}]`).join(', ');
+  logger.debug(`> Stopped tasks: ${taskNames}`);
 };

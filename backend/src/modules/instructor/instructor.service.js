@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import AppError from "#exceptions/app.error.js";
 import { countCompletedOrdersByCourseIds } from "#modules/order/order.service.js";
 import { updateProfile } from "#modules/user/user.service.js";
@@ -6,35 +5,31 @@ import { withTransaction } from "#utils/transaction.js";
 import Instructor from "./instructor.model.js";
 
 export const handleBecomeInstructor = async (user) => {
-  if (!user) {
-    throw new AppError("Cannot get your info. Please try again!", 400);
-  }
+  if (!user) throw new AppError("Cannot get your info. Please try again later.", 400);
 
-  const session = await mongoose.startSession();
-  try {
-    await session.withTransaction(async () => {
-      const existingRequest = await Instructor.findOne({ user: user?.userId }).session(session);
+  return await withTransaction(async (session) => {
+    const existingRequest = await Instructor.findOne({ user: user.userId })
+      .session(session);
 
-      if (existingRequest) {
-        if (existingRequest.isApproved) {
-          throw new AppError("You are already an instructor!", 409);
-        } else if (user.role === "student") {
-          throw new AppError("Your request is currently pending approval.", 409);
-        } else if (user.role === "instructor") {
-          throw new AppError("Your have been blocked.", 403);
-        }
-      }
+    if (existingRequest) {
+      if (existingRequest.isApproved)
+        throw new AppError("You are already an instructor!", 409);
 
-      const newInstructor = new Instructor({
-        user: user.userId,
-        isApproved: false
-      });
+      if (user.role === "student")
+        throw new AppError("Your request is currently pending approval.", 409);
 
-      await newInstructor.save({ session });
+      if (user.role === "instructor")
+        throw new AppError("Your acccount is blocked.", 403);
+    }
+
+    const newInstructor = new Instructor({
+      user: user.userId,
+      isApproved: false
     });
-  } finally {
-    await session.endSession();
-  }
+
+    await newInstructor.save({ session });
+    return newInstructor;
+  });
 };
 
 export const isApprovedInstructor = async (userId) => {
@@ -94,7 +89,7 @@ export const updateInstructorProfile = async (userId, changes) => {
   return await withTransaction(async (s) => {
     const instructor = await Instructor.findOne({ user: userId }).session(s);
     if (!instructor) throw new AppError("Instructor not found.", 404);
-    if (!instructor.isApproved) 
+    if (!instructor.isApproved)
       throw new AppError("Instructor profile not approved.", 403);
 
     const { userUpdate, insUpdate } = getUpdateData(changes);

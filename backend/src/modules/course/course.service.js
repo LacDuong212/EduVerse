@@ -5,13 +5,16 @@ import { existsEnrollment } from "#modules/enrollment/enrollment.service.js";
 import Instructor from "#modules/instructor/instructor.model.js";
 import { getCurrentInstructor } from "#modules/instructor/instructor.service.js";
 import { getCourseImageUploadParams } from "#modules/image/image.service.js";
+import { TYPE_ENUM as NOTIF_TYPE } from "#modules/notification/notification.model.js";
+import { sendNotification } from "#modules/notification/notification.service.js";
 import { expireOrphanVideos } from "#modules/video/video.service.js";
+import { processVideoWithGemini } from "#services/ai.service.js";
 import { getPaginationOptions } from "#utils/pagination.js";
 import { withTransaction } from "#utils/transaction.js";
 import * as courseMapper from "./course.mapper.js";
 import Course, { STATUS_ENUM, UPDATE_STATUS_ENUM } from "./course.model.js";
 import { courseSchema } from "./course.validation.js";
-import Curriculum from "./curriculum.model.js";
+import Curriculum, { AI_DATA_STATUS } from "./curriculum.model.js";
 
 const publicFilter = {
   isDeleted: false,
@@ -513,7 +516,7 @@ export const getPublicInstructorCourses = async (
 export const createDraftCourse = async (insId) => {
   if (!insId) throw new AppError("Instructor ID is required.", 400);
 
-  return withTransaction(async (session) => {
+  return await withTransaction(async (session) => {
     const instructor = await getCurrentInstructor(insId, session);
     if (!instructor) throw new AppError("Instructor not found.", 404);
 
@@ -592,14 +595,12 @@ const getProcessedCurriculum = (incomingSections, curriculumDoc) => {
 
 export const updateCourse = async (insId, courseId, changes, session = null) => {
   return await withTransaction(async (s) => {
-    const course = await Course.findById(courseId).session(s);
+    const course = await Course.findOne({ _id: courseId, isDeleted: false }).session(s);
     if (!course || course.instructor?.ref?.toString() !== insId)
       throw new AppError("Course not found or unauthorized access.", 403);
 
     let curriculumDoc = await Curriculum.findOne({ courseId }).session(s);
-    if (!curriculumDoc) {
-      curriculumDoc = new Curriculum({ courseId });
-    }
+    if (!curriculumDoc) curriculumDoc = new Curriculum({ courseId });
 
     const { curriculum, categoryId, ...courseData } = changes;
     if (categoryId) courseData.category = new mongoose.Types.ObjectId(categoryId);
@@ -640,16 +641,14 @@ export const updateCourse = async (insId, courseId, changes, session = null) => 
 
 export const submitCourse = async (insId, courseId, changes = null, session = null) => {
   return await withTransaction(async (s) => {
-    if (changes && Object.keys(changes).length > 0) {
+    if (changes && Object.keys(changes).length > 0)
       await updateCourse(insId, courseId, changes, s);
-    }
 
-    const courseDoc = await Course.findById(courseId).session(s);
+    const courseDoc = await Course.findOne({ _id: courseId, isDeleted: false }).session(s);
+    if (!courseDoc || courseDoc.instructor?.ref?.toString() !== insId)
+      throw new AppError("Course not found or unauthorized access.", 403);
+
     const curriculumDoc = await Curriculum.findOne({ courseId }).session(s);
-
-    if (!courseDoc || courseDoc.instructor?.ref?.toString() !== insId) {
-      throw new AppError("Course not found or unauthorized.", 403);
-    }
 
     const {
       course: mergedCourse, curriculum: mergedCurr
@@ -718,7 +717,7 @@ export const clearPendingChanges = async (insId, courseId, session = null) => {
         .flatMap(sec => sec.lectures || [])
         .map(l => l.videoId)
         .filter(Boolean);
-      
+
       videosToRemove.push(...lectureVideos);
     }
 
@@ -728,7 +727,7 @@ export const clearPendingChanges = async (insId, courseId, session = null) => {
         .flatMap(sec => sec.lectures || [])
         .map(l => l.videoId)
         .filter(Boolean);
-      
+
       videosToRemove.push(...lectureVideos);
     }
 
@@ -778,7 +777,7 @@ export const getCourseForEdit = async (insId, courseId) => {
 
 export const updateCoursesInstructorInfo = async (insId, name, avatar, session = null) => {
   if (!insId) throw new AppError("Instructor ID is required.", 400);
-  
+
   return await withTransaction(async (s) => {
     const updateData = {};
 
@@ -867,17 +866,17 @@ export const getInstructorCoursesStats = async (insId) => {
   if (!insId) throw new AppError("Instructor ID is required", 400);
 
   const stats = await Course.aggregate([
-    { 
-      $match: { 
+    {
+      $match: {
         "instructor.ref": new mongoose.Types.ObjectId(insId),
-        isDeleted: false 
-      } 
+        isDeleted: false
+      }
     },
-    { 
-      $group: { 
-        _id: "$status", 
-        count: { $sum: 1 } 
-      } 
+    {
+      $group: {
+        _id: "$status",
+        count: { $sum: 1 }
+      }
     }
   ]);
 
@@ -899,4 +898,63 @@ export const getInstructorCoursesStats = async (insId) => {
   });
 
   return result;
+};
+
+export const handleLectureGenerateAi = async (insId, courseId, lecId) => {
+  const [course, curriculum] = await Promise.all([
+    Course.findById(courseId).lean(),
+    Curriculum.findOne({ courseId }).select("sections").lean()
+  ]);
+
+  if (!course || course.instructor?.ref?.toString() !== insId)
+    throw new AppError("Course not found or unauthorized access.", 403);
+
+  if (!curriculum) throw new AppError("Course's curriculum is empty.", 409);
+
+  const lecture = curriculum.sections
+    .flatMap(section => section.lectures)
+    .find(lec => lec._id.toString() === lecId.toString());
+
+  if (!lecture?.videoId)
+    throw new AppError("Lecture or video not found in curriculum.", 404);
+
+  try {
+    const aiGeneratedData = await processVideoWithGemini(lecture.videoId);
+
+    return await withTransaction(async (s) => {
+      const currentCurriculum = await Curriculum.findOne({ courseId }).session(s);
+
+      const targetSection = currentCurriculum.sections.find(sec =>
+        sec.lectures.some(l => l._id.toString() === lecId.toString())
+      );
+
+      const targetLecture = targetSection?.lectures.id(lecId);
+      if (!targetLecture) throw new AppError("Lecture disappeared during processing.", 404);
+
+      targetLecture.aiData = {
+        ...aiGeneratedData,
+        status: AI_DATA_STATUS.completed
+      };
+
+      await currentCurriculum.save({ session: s });
+
+      await sendNotification(
+        insId,
+        NOTIF_TYPE.succeeded,
+        `AI Processing Completed: Summary and quizzes for "${targetLecture?.title}" are ready.`,
+        s
+      );
+
+      return targetLecture.aiData;
+    });
+
+  } catch (error) {
+    await sendNotification(
+      insId,
+      NOTIF_TYPE.failed,
+      `AI Processing Failed: Could not process video for "${lecture?.title}". Please try again.`
+    );
+
+    throw error;
+  }
 };

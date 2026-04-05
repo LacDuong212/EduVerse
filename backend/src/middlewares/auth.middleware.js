@@ -7,7 +7,7 @@ export const protect = asyncHandler(async (req, res, next) => {
   if (!token) return next(new AppError("You are not logged in. Please log in first.", 401));
 
   const user = await authService.getUserFromToken(token);
-  if (!user) return next(new AppError("User not found.", 401));
+  if (!user) return next(new AppError("User not found.", 404));
 
   req.user = user;
   next();

@@ -24,7 +24,7 @@ export const getAvatarParams = async (userId) => {
 export const changePassword = async (
   userId, oldPassword, newPassword
 ) => {
-  return withTransaction(async (s) => {
+  return await withTransaction(async (s) => {
     if (!oldPassword || !newPassword)
       throw new AppError("Passwords are required.", 400);
 
