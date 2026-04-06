@@ -231,3 +231,10 @@ export const limitQueryRequest = z.object({
     limit: limitSchema(20, 100),
   })
 });
+
+export const generateAiParams = z.object({
+  params: z.object({
+    id: courseIdSchema,
+    lecId:  objectIdSchema("Lecture"),
+  })
+});

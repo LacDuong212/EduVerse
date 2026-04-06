@@ -1,4 +1,5 @@
 import { getPaginatedReviewsByCourseId } from "#modules/review/review.service.js";
+import { generateAssessmentService } from "#services/ai.service.js";
 import * as recommendService from "#services/recommendation.service.js";
 import asyncHandler from "#utils/asyncHandler.js";
 import { sendPaginatedResponse, sendSuccessResponse } from "#utils/response.js";
@@ -145,4 +146,22 @@ export const getPopularTags = asyncHandler(async (req, res) => {
     "Get popular tags successfully!", 
     tags.map(t => t?.name).filter(Boolean)
   );
+});
+
+// @desc Generate course assessment for student
+// @route GET /:id/assessment
+export const generateFinalAssessment = asyncHandler(async (req, res) => {
+  const userId = req.user?.userId;
+  const { id } = req.validated?.params || {};
+  const result = await generateAssessmentService(userId, id);
+  return sendSuccessResponse(res, 200, "Course assessment generated!", result);
+});
+
+// @desc Generate AI content for lecture
+// @route GET /:id/lectures/:lecId/generate-ai
+export const generateAiDataForLecture = asyncHandler(async (req, res) => {
+  const userId = req.user?.userId;
+  const { id, lecId } = req.validated?.params || {};
+  const result = await courseService.handleLectureGenerateAi(userId, id, lecId);
+  return sendSuccessResponse(res, 200, "Lecture AI content generated!", result);
 });

@@ -2,8 +2,8 @@
 const logger = {
   debug: (msg, meta = {}) => {
     // if (process.env.NODE_ENV === "development" || process.env.LOG_LEVEL === "debug") {
-      const timestamp = new Date().toISOString();
-      console.log(`\x1b[2m[DEBUG] [${timestamp}] ${msg}\x1b[0m`, Object.keys(meta).length ? meta : '');
+    const timestamp = new Date().toISOString();
+    console.log(`\x1b[2m[DEBUG] [${timestamp}] ${msg}\x1b[0m`, Object.keys(meta).length ? meta : '');
     // }
   },
   info: (msg, meta = {}) => {
@@ -16,16 +16,27 @@ const logger = {
     console.error(`\x1b[31m[ERROR]\x1b[0m [${new Date().toISOString()}] ${msg}`, error.stack || error);
   },
   logErrorWithContext: (err, req) => {
-    const { method, originalUrl, statusCode, ip } = req;
-    
-    console.error("\x1b[31m%s\x1b[0m %s\x1b[31m %s\x1b[0m", "[EXCEPTION]", `[${new Date().toISOString()}]`, "------------------");
+    const { statusCode } = err;
+    const { method, originalUrl, ip } = req;
+    const timestamp = new Date().toISOString();
+
+    console.error("\x1b[31m%s\x1b[0m", `[EXCEPTION] [${timestamp}] -----------------------`);
     console.error(`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`);
+
     console.error(`Message: ${err.message}`);
-    
-    if (process.env.NODE_ENV === "development" && err.stack) {
+
+    if (err.cause) {
+      console.error("\x1b[35mCause:\x1b[0m %s", err.cause.message || err.cause);
+
+      if (process.env.NODE_ENV === "development" && err.cause.stack) {
+        console.error("\x1b[2m%s\x1b[0m", err.cause.stack);
+        console.error("\x1b[35m%s\x1b[0m", "^^^ Internal Error Stack Above ^^^");
+      }
+    } else if (process.env.NODE_ENV === "development" && err.stack) {
       console.error("\x1b[2m%s\x1b[0m", err.stack);
     }
-    console.error("\x1b[31m%s\x1b[0m", "---------------------------------------------------------");
+
+    console.error("\x1b[31m%s\x1b[0m", "--------------------------------------------------------------");
   }
 };
 

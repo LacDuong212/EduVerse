@@ -8,13 +8,13 @@ import logger from "#utils/logger.js";
 registerTask("Cleanup Draft Videos", "0 * * * *", async () => {
   const now = new Date();
 
-  const expiredDrafts = await DraftVideo.find({ 
-    expireAt: { $lte: now } 
+  const expiredDrafts = await DraftVideo.find({
+    expireAt: { $lte: now }
   }).limit(100);
 
   if (expiredDrafts.length === 0) return;
 
-  logger.debug(`> Cleanup Draft Videos: Found ${expiredDrafts.length} expired videos, starting cleanup...`);
+  logger.debug(`>> Cleanup Draft Videos: Found ${expiredDrafts.length} expired videos, starting cleanup...`);
 
   const s3Keys = expiredDrafts.map(doc => doc.key);
   const docIds = expiredDrafts.map(doc => doc._id);
@@ -23,9 +23,9 @@ registerTask("Cleanup Draft Videos", "0 * * * *", async () => {
 
   if (s3Result.success || s3Result.deletedCount > 0) {
     const dbResult = await DraftVideo.deleteMany({ _id: { $in: docIds } });
-    logger.debug(`> Cleanup Draft Videos: Removed ${dbResult.deletedCount} records from DB.`);
+    logger.debug(`>> Cleanup Draft Videos: Removed ${dbResult.deletedCount} records from DB.`);
   } else {
-    logger.error(`> Cleanup Draft Videos: S3 deletion failed, skipping DB delete to retry later.`);
+    logger.error(`>> Cleanup Draft Videos: S3 deletion failed, skipping DB delete to retry later.`);
   }
 });
 
@@ -37,7 +37,7 @@ registerTask("Expire Orders", "* * * * *", async () => {
     status: "pending",
     expiresAt: { $lte: now }
   }).select('_id')
-  .limit(50);
+    .limit(50);
 
   if (expiredOrders.length === 0) return;
 
@@ -54,10 +54,10 @@ registerTask("Expire Orders", "* * * * *", async () => {
     );
 
     if (result.modifiedCount > 0) {
-      logger.debug(`> Expire Orders: Expired ${result.modifiedCount} orders: [${orderIds.join(", ")}]`);
+      logger.debug(`>> Expire Orders: Expired ${result.modifiedCount} orders: [${orderIds.join(", ")}]`);
     }
 
   } catch (error) {
-    logger.error("> Expire Orders: Error expiring orders: ", error);
+    logger.error(">> Expire Orders: Error expiring orders: ", error);
   }
 });

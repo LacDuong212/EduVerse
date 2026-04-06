@@ -23,10 +23,24 @@ courseRoute.get(
   courseController.getCourseDetailsById
 );
 courseRoute.get(
+  "/:id/assessment", 
+  protect,
+  restrictTo("student"), 
+  validate(courseSchema.idParamRequest),
+  courseController.generateFinalAssessment
+);
+courseRoute.get(
   "/:id/curriculum",
   checkAuth,
   validate(courseSchema.idParamRequest),
   courseController.getCourseCurriculum
+);
+courseRoute.post(
+  "/:id/lectures/:lecId/generate-ai", 
+  protect,
+  restrictTo("instructor"), 
+  validate(courseSchema.generateAiParams),
+  courseController.generateAiDataForLecture
 );
 courseRoute.get(
   "/:id/related",
