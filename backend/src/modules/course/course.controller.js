@@ -24,9 +24,9 @@ export const getCourseStats = asyncHandler(async (req, res) => {
 // @route GET ..?page=&limit=&search=&sort=&category=&price=&language=&level=&tag=
 export const getAllCourses = asyncHandler(async (req, res) => {
   const query = req.validated?.query || {};
-  
-  const { 
-    courses, total, page, limit 
+
+  const {
+    courses, total, page, limit
   } = await courseService.queryCourses(query);
 
   return sendPaginatedResponse(
@@ -141,9 +141,9 @@ export const getPopularTags = asyncHandler(async (req, res) => {
   const { limit } = req.validated?.query || {};
   const tags = await courseService.getTopTags(limit);
   return sendSuccessResponse(
-    res, 
-    200, 
-    "Get popular tags successfully!", 
+    res,
+    200,
+    "Get popular tags successfully!",
     tags.map(t => t?.name).filter(Boolean)
   );
 });

@@ -77,8 +77,10 @@ const aiDataSchema = z.object({
   status: z.string().optional(),
 });
 
+export const lectureIdSchema = objectIdSchema("Lecture");
+
 const lectureSchema = z.object({
-  lecId: objectIdSchema("Lecture").nullish(),
+  lecId: lectureIdSchema.nullish(),
   _id: objectIdSchema("Lecture").nullish(),
   title: z.string().trim().min(1, "Lecture title is required"),
   videoId: z.string("Lecture video is required")
@@ -150,7 +152,7 @@ export const courseSchema = z.object({
   categoryId: categoryIdSchema,
 
   image: imageSchema,
-  
+
   curriculum: curriculumSchema,
 }).superRefine(discountValidation);
 
@@ -235,6 +237,6 @@ export const limitQueryRequest = z.object({
 export const generateAiParams = z.object({
   params: z.object({
     id: courseIdSchema,
-    lecId:  objectIdSchema("Lecture"),
+    lecId: lectureIdSchema,
   })
 });

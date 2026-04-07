@@ -1,6 +1,8 @@
-import asyncHandler from "#utils/asyncHandler.js";
-import { sendPaginatedResponse, sendSuccessResponse } from "#utils/response.js";
 import { getPaginatedStudentCourses } from "#modules/enrollment/enrollment.service.js";
+import { getCourseProgress } from "#modules/learning/learning.service.js";
+import * as streakService from "#modules/streak/streak.service.js";
+import { sendPaginatedResponse, sendSuccessResponse } from "#utils/response.js";
+import asyncHandler from "#utils/asyncHandler.js";
 import * as studentMapper from "./student.mapper.js";
 import * as studentService from "./student.service.js";
 
@@ -44,18 +46,18 @@ export const updateInterests = asyncHandler(async (req, res) => {
 // @route GET /courses?page=&limit=&search=&sort=
 export const getEnrolledCourses = asyncHandler(async (req, res) => {
   const userId = req.user?.userId;
-    const query = req.validated?.query || {};
-    const {
-      courses, total, page, limit
-    } = await getPaginatedStudentCourses(userId, query);
-  
-    return sendPaginatedResponse(
-      res,
-      200,
-      "Get courses successfully!",
-      courses,
-      { page, limit, totalItems: total }
-    );
+  const query = req.validated?.query || {};
+  const {
+    courses, total, page, limit
+  } = await getPaginatedStudentCourses(userId, query);
+
+  return sendPaginatedResponse(
+    res,
+    200,
+    "Get courses successfully!",
+    courses,
+    { page, limit, totalItems: total }
+  );
 });
 
 // @desc Get student's courses stats
@@ -72,4 +74,39 @@ export const getStats = asyncHandler(async (req, res) => {
   const userId = req.user?.userId;
   const result = await studentService.getStudentStats(userId);
   return sendSuccessResponse(res, 200, "Get student stats successfully!", result);
+});
+
+// @desc Get course current learning progress by course ID
+// @route GET /courses/:courseId/progress
+export const getCourseLearningProgress = asyncHandler(async (req, res) => {
+  const userId = req.user?.userId;
+  const { courseId } = req.validated?.params || {};
+  const progress = await getCourseProgress(userId, courseId);
+  return sendSuccessResponse(res, 200, "Get course's progress successfully!", progress);
+});
+
+// @desc Update lecture progress and handle completion
+// @route POST /courses/:courseId/lectures/:lecId/progress
+export const updateLectureProgress = asyncHandler(async (req, res) => {
+  const userId = req.user?.userId;
+  const { courseId, lecId } = req.validated?.params || {};
+  const body = req.validated?.body || {};
+  const updated = await studentService.handleUpdateLectureProgress(userId, courseId, lecId, body);
+  return sendSuccessResponse(res, 200, "Update lecture progress successfully!", updated);
+});
+
+// @desc  Get student's learning streak data
+// @route GET /streak
+export const getMyStreak = asyncHandler(async (req, res) => {
+  const userId = req.user?.userId;
+  const result = await streakService.getStreak(userId);
+  return sendSuccessResponse(res, 200, "Get student streak successfully!", result);
+});
+
+// @desc Update student's streak
+// @route POST /streak
+export const updateMyStreak = asyncHandler(async (req, res) => {
+  const userId = req.user?.userId;
+  const result = await streakService.updateStreak(userId);
+  return sendSuccessResponse(res, 200, "Streak updated successfully!", result);
 });

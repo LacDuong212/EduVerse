@@ -2,9 +2,9 @@ import Fuse from "fuse.js";
 import mongoose from "mongoose";
 import AppError from "#exceptions/app.error.js";
 import { existsEnrollment } from "#modules/enrollment/enrollment.service.js";
+import { getCourseImageUploadParams } from "#modules/image/image.service.js";
 import Instructor from "#modules/instructor/instructor.model.js";
 import { getCurrentInstructor } from "#modules/instructor/instructor.service.js";
-import { getCourseImageUploadParams } from "#modules/image/image.service.js";
 import { TYPE_ENUM as NOTIF_TYPE } from "#modules/notification/notification.model.js";
 import { sendNotification } from "#modules/notification/notification.service.js";
 import { expireOrphanVideos } from "#modules/video/video.service.js";
@@ -834,7 +834,12 @@ export const approveCourseUpdate = async (courseId, session = null) => {
       curriculum.pendingUpdate = { data: null, submittedAt: null, status: UPDATE_STATUS_ENUM.none };
 
       curriculum.markModified("sections");
-      await curriculum.save({ session: s });
+      const updatedCurr = await curriculum.save({ session: s });
+      course.sectionsCount = updatedCurr.sections?.length;
+      course.lecturesCount = updatedCurr.sections?.reduce(
+        (acc, section) => acc + (section.lectures ? section.lectures.length : 0),
+        0
+      );
     }
 
     if (course.pendingUpdate?.data) {

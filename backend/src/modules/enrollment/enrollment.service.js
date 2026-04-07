@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import AppError from "#exceptions/app.error.js";
 import Course from "#modules/course/course.model.js";
 import Instructor from "#modules/instructor/instructor.model.js";
+import CourseProgress from "#modules/learning/course-progress.model.js";
 import Student from "#modules/student/student.model.js";
 import { getPaginationOptions } from "#utils/pagination.js";
 import { withTransaction } from "#utils/transaction.js";
@@ -32,16 +33,15 @@ export const enrollsCourses = async (stuId, courseIds, session = null) => {
     const existingCourseIds = existingEnrollments.map(e => e.course.toString());
     const newCourseIds = courseIds.filter(id => !existingCourseIds.includes(id.toString()));
 
-    if (newCourseIds.length === 0) {
+    if (newCourseIds.length === 0)
       return { success: true, enrolledCount: 0, skippedCount: existingCourseIds.length };
-    }
 
     const courses = await Course.find({ _id: { $in: newCourseIds } }).session(s);
-    if (courses.length !== newCourseIds.length) {
+    if (courses.length !== newCourseIds.length)
       throw new AppError("Some selected courses no longer exist.", 404);
-    }
 
     await createEnrollmentRecords(stuId, courses, s);
+    await initCoursesProgress(stuId, courses, s);
     await updateStudentLearningStats(stuId, courses, s);
     await updateCoursePopularityStats(newCourseIds, s);
     await updateInstructorsTotalStudents(courses, s);
@@ -60,6 +60,19 @@ const createEnrollmentRecords = async (stuId, courses, session) => {
     instructor: course.instructor?.ref,
   }));
   await Enrollment.insertMany(enrollmentData, { session });
+};
+
+const initCoursesProgress = async (stuId, courses, session) => {
+  const progressDocs = courses.map(course => ({
+    user: stuId,
+    course: course._id,
+    totalLectures: course.lecturesCount || 0,
+    completedLecturesCount: 0,
+    lectures: [],
+    isCompleted: false
+  }));
+
+  await CourseProgress.insertMany(progressDocs, { session });
 };
 
 const updateStudentLearningStats = async (stuId, courses, session) => {
@@ -86,8 +99,7 @@ const updateCoursePopularityStats = async (courseIds, session) => {
 
 const updateInstructorsTotalStudents = async (courses, session) => {
   const instructorIds = courses.map(c => c.instructor?.ref).filter(Boolean);
-  
-  // Group by ID to minimize DB calls if one instructor owns multiple courses in the batch
+
   const instructorCounts = instructorIds.reduce((acc, id) => {
     acc[id] = (acc[id] || 0) + 1;
     return acc;

@@ -5,7 +5,7 @@ import path from "path";
 import { pipeline } from "stream/promises";
 import AppError from "#exceptions/app.error.js";
 import Curriculum from "#modules/course/curriculum.model.js"
-import CourseProgress from "#modules/course-progress/course-progress.model.js";
+import CourseProgress from "#modules/learning/course-progress.model.js";
 import QuizProgress from "#modules/quiz/quiz-progress.model.js";
 import DraftVideo from "#modules/video/draft-video.model.js";
 import { getObject } from "#services/s3.service.js";
