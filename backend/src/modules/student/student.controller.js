@@ -1,3 +1,4 @@
+import { getStudentSkillsRadar } from "#modules/chart/chart.service.js";
 import { getPaginatedStudentCourses } from "#modules/enrollment/enrollment.service.js";
 import { getCourseProgress } from "#modules/learning/learning.service.js";
 import * as streakService from "#modules/streak/streak.service.js";
@@ -109,4 +110,12 @@ export const updateMyStreak = asyncHandler(async (req, res) => {
   const userId = req.user?.userId;
   const result = await streakService.updateStreak(userId);
   return sendSuccessResponse(res, 200, "Streak updated successfully!", result);
+});
+
+// @desc Get student's skill radar
+// @route GET /skill-radar
+export const getMySkillRadar = asyncHandler(async (req, res) => {
+  const userId = req.user?.userId;
+  const result = await getStudentSkillsRadar(userId);
+  return sendSuccessResponse(res, 200, "Get skill radar successfully!", result);
 });

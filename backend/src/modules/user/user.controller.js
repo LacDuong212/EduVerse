@@ -18,3 +18,20 @@ export const changePassword = asyncHandler(async (req, res) => {
   await userService.changePassword(userId, oldPassword, newPassword);
   return sendSuccessResponse(res, 200, "Password changed successfully!");
 });
+
+// @desc  Deactivate account
+// @route POST /deactivate
+export const deactivate = asyncHandler(async (req, res) => {
+  const userId = req.user?.userId;
+
+  await userService.deactivateAccount(userId);
+
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+    path: '/'
+  });
+  
+  return sendSuccessResponse(res, 200, "Account have been deactivated.");
+});

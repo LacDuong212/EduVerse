@@ -9,6 +9,7 @@ const courseRoute = Router();
 
 courseRoute.get("/", validate(courseSchema.courseQueryRequest), courseController.getAllCourses);
 courseRoute.get("/home", courseController.getHomeCourses);
+courseRoute.get("/filters", courseController.getFilters);
 courseRoute.get("/recommendations", checkAuth, courseController.getRecommendedCourses);
 courseRoute.get("/stats", courseController.getCourseStats);
 courseRoute.get(

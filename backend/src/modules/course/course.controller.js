@@ -165,3 +165,10 @@ export const generateAiDataForLecture = asyncHandler(async (req, res) => {
   const result = await courseService.handleLectureGenerateAi(userId, id, lecId);
   return sendSuccessResponse(res, 200, "Lecture AI content generated!", result);
 });
+
+// @desc Get filters for courses search
+// @route GET /filters
+export const getFilters = asyncHandler(async (req, res) => {
+  const filters = await courseService.getCoursesFilters();
+  return sendSuccessResponse(res, 200, "Get filters successfully!", filters);
+});

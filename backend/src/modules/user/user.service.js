@@ -49,7 +49,7 @@ export const changePassword = async (
 export const updateProfile = async (userId, changes, session = null) => {
   if (!changes || Object.keys(changes).length === 0) return null;
 
-  let imageToDelete = null; 
+  let imageToDelete = null;
   let updatedUser = null;
 
   await withTransaction(async (s) => {
@@ -76,4 +76,16 @@ export const updateProfile = async (userId, changes, session = null) => {
   if (imageToDelete) await deleteImage(imageToDelete);
 
   return updatedUser;
+};
+
+export const deactivateAccount = async (userId) => {
+  if (!userId) throw new AppError("User ID is required.", 400);
+
+  const user = await User.findOneAndUpdate(
+    { _id: userId, ...activeFilters },
+    { $set: { isActivated: false } },
+    { new: true }
+  );
+  
+  if (!user) throw new AppError("User not found or already deactivated.", 404);
 };

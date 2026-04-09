@@ -10,14 +10,17 @@ import * as authSchema from "#modules/auth/auth.validation.js";
 const authRoute = express.Router();
 
 authRoute.post("/register", validate(authSchema.registerRequest), authController.register);
-authRoute.post("/verify-email", validate(authSchema.verifyEmailRequest), authController.verifyEmail);
-authRoute.post("/resend-otp", validate(authSchema.resendOtpRequest), authController.sendOTP);
 
 authRoute.post("/login", validate(authSchema.loginRequest), authController.login);
 authRoute.post("/logout", protect, authController.logout);
 
 authRoute.post("/forget-password", validate(authSchema.forgetPasswordRequest), authController.forgetPassword);
+authRoute.post("/reactivate", validate(authSchema.verifyEmailRequest), authController.reactivateAccount);
 authRoute.post("/reset-password", validate(authSchema.resetPasswordRequest), authController.resetPassword);
+
+authRoute.post("/verify-email", validate(authSchema.verifyEmailRequest), authController.verifyEmail);
+authRoute.post("/resend-otp", validate(authSchema.resendOtpRequest), authController.sendOTP);
+authRoute.post("/reactivate/send-otp", validate(authSchema.resendOtpRequest), authController.requestReactivation);
 
 authRoute.get("/status", checkAuth, authController.isAuthenticated);
 

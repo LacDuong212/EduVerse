@@ -8,12 +8,13 @@ import * as userSchema from "./user.validation.js";
 const userRoute = Router();
 userRoute.use(protect);
 
-userRoute.get("/avatar/upload", userController.getAvatarParams);
 userRoute.post(
   "/change-password", 
   protect, 
   validate(userSchema.changePasswordRequest), 
   userController.changePassword
 );
+userRoute.post("/deactivate", userController.deactivate);
+userRoute.get("/avatar/upload", userController.getAvatarParams);
 
 export default userRoute;

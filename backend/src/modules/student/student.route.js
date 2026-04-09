@@ -24,6 +24,7 @@ studentRoute.patch(
   validate(studentSchema.updateProfileRequest),
   studentController.updateProfile
 );
+studentRoute.get("/skill-radar", studentController.getMySkillRadar);
 studentRoute.get("/stats", studentController.getStats);
 studentRoute.get("/streak", studentController.getMyStreak);
 studentRoute.post("/streak", studentController.updateMyStreak);

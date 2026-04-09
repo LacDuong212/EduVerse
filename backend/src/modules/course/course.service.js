@@ -1,6 +1,7 @@
 import Fuse from "fuse.js";
 import mongoose from "mongoose";
 import AppError from "#exceptions/app.error.js";
+import { getAllCatgeoriesWithSort } from "#modules/category/category.service.js";
 import { existsEnrollment } from "#modules/enrollment/enrollment.service.js";
 import { getCourseImageUploadParams } from "#modules/image/image.service.js";
 import Instructor from "#modules/instructor/instructor.model.js";
@@ -12,8 +13,8 @@ import { processVideoWithGemini } from "#services/ai.service.js";
 import { getPaginationOptions } from "#utils/pagination.js";
 import { withTransaction } from "#utils/transaction.js";
 import * as courseMapper from "./course.mapper.js";
-import Course, { STATUS_ENUM, UPDATE_STATUS_ENUM } from "./course.model.js";
-import { courseSchema } from "./course.validation.js";
+import Course, { LEVEL_ENUM, STATUS_ENUM, UPDATE_STATUS_ENUM } from "./course.model.js";
+import { courseSchema, priceFilterEnum, sortFilterEnum } from "./course.validation.js";
 import Curriculum, { AI_DATA_STATUS } from "./curriculum.model.js";
 
 const publicFilter = {
@@ -961,5 +962,24 @@ export const handleLectureGenerateAi = async (insId, courseId, lecId) => {
     );
 
     throw error;
+  }
+};
+
+export const getCoursesFilters = async () => {
+  const [categories, languages] = await Promise.all([
+    getAllCatgeoriesWithSort("slugAsc"),
+    Course.distinct("language", publicFilter)
+  ]);
+
+  const levels = LEVEL_ENUM.values();
+  const prices = priceFilterEnum;
+  const sorts = sortFilterEnum;
+
+  return {
+    categories,
+    languages: languages?.filter(Boolean),
+    levels,
+    prices,
+    sorts,
   }
 };

@@ -165,6 +165,18 @@ export const updateCourseSchema = z.object(baseCourseFields)
 
 export const submitCourseSchema = z.object(baseCourseFields).partial();
 
+export const priceFilterEnum = ["free", "paid", "all"];
+export const sortFilterEnum = [
+  "newest",
+  "oldest",
+  "priceHighToLow",
+  "priceLowToHigh",
+  "mostPopular",
+  "leastPopular",
+  "ratingHighToLow",
+  "ratingLowToHigh",
+];
+
 export const courseQueryRequest = z.object({
   query: z.object({
     page: z.string()
@@ -191,22 +203,13 @@ export const courseQueryRequest = z.object({
         .optional()
     ),
 
-    price: z.enum(["free", "paid", "all"], "Price option not found")
+    price: z.enum(priceFilterEnum, "Price option not found")
       .optional()
-      .default("all"),
+      .default(LEVEL_ENUM.all),
 
-    sort: z.enum([
-      "newest",
-      "oldest",
-      "priceHighToLow",
-      "priceLowToHigh",
-      "mostPopular",
-      "leastPopular",
-      "ratingHighToLow",
-      "ratingLowToHigh",
-    ], "Sort option not found")
+    sort: z.enum(sortFilterEnum, "Sort option not found")
       .optional()
-      .default("newest"),
+      .default(sortFilterEnum[0]),
 
     tag: z.string().trim().optional().transform((val) => val?.toLowerCase()),
   })

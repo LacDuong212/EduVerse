@@ -5,9 +5,15 @@ import { updateProfile } from "#modules/user/user.service.js";
 import { withTransaction } from "#utils/transaction.js";
 import Student from "./student.model.js"
 
-export const createNewStudent = async (userId) => {
+export const createNewStudent = async (userId, session = null) => {
   if (!userId) throw new AppError("User ID is required", 400);
-  const student = await Student.create({ user: userId });
+
+  const student = await Student.findOneAndUpdate(
+    { user: userId },
+    { $setOnInsert: { user: userId } },
+    { upsert: true, new: true, runValidators: true, session }
+  );
+  
   return student;
 };
 

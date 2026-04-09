@@ -17,7 +17,7 @@ export const login = asyncHandler(async (req, res) => {
   const { email, password } = req.validated?.body || {};
   const user = await authService.loginUser(email, password);
   setTokenCookie(res, user.userId);
-  return sendSuccessResponse(res, 200, "Login successful", user);
+  return sendSuccessResponse(res, 200, "Login successful!", user);
 });
 
 // @desc  Logout user
@@ -45,8 +45,8 @@ export const verifyEmail = asyncHandler(async (req, res) => {
 // @route POST /forget-password
 export const forgetPassword = asyncHandler(async (req, res) => {
   const { email } = req.validated?.body || {};
-  await authService.sendPasswordResetOtp(email);
-  return sendSuccessResponse(res, 200, "New OTP have been sent to your email!");
+  await authService.sendResetOtp(email);
+  return sendSuccessResponse(res, 200, "OTP sent. Please check your email!");
 });
 
 // @desc  Reset password using OTP
@@ -54,15 +54,31 @@ export const forgetPassword = asyncHandler(async (req, res) => {
 export const resetPassword = asyncHandler(async (req, res) => {
   const { email, otp, newPassword } = req.validated?.body || {};
   await authService.resetPassword(email, otp, newPassword);
-  return sendSuccessResponse(res, 200, "Password reset successfully");
+  return sendSuccessResponse(res, 200, "Password reset successfully!");
 });
 
 // @desc  Resend OTP for email verification
 // @route POST /resend-otp
 export const sendOTP = asyncHandler(async (req, res) => {
   const { email } = req.validated?.body || {};
-  await authService.resendVerificationOtp(email);
+  await authService.sendVerificationOtp(email);
   return sendSuccessResponse(res, 200, "OTP sent. Please check your email!");
+});
+
+// @desc  Send OTP for account reactivation
+// @route POST /reactivate/send-otp
+export const requestReactivation = asyncHandler(async (req, res) => {
+  const { email } = req.validated?.body || {};
+  await authService.sendReactivationOtp(email);
+  return sendSuccessResponse(res, 200, "OTP sent. Please check your email!");
+});
+
+// @desc  Reactivation account
+// @route POST /reactivate
+export const reactivateAccount = asyncHandler(async (req, res) => {
+  const { email, otp } = req.validated?.body || {};
+  await authService.reactivateAccount(email, otp);
+  return sendSuccessResponse(res, 200, "Account reactivated successfully!");
 });
 
 // @desc  Check if user is authenticated
