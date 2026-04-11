@@ -21,7 +21,7 @@ const formatMonthlyData = (dbResults, startDate) => {
     const dbMatch = dbResults.find(r => r._id.month === month && r._id.year === year);
 
     const formattedMonth = month.toString().padStart(2, '0');
-    const formattedYear = year.toString().slice(-2);
+    const formattedYear = year.toString();
 
     result.push({
       period: `${formattedMonth}-${formattedYear}`,

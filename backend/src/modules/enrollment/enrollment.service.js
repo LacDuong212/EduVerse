@@ -498,3 +498,52 @@ const getStudentReportSort = (strategy) => ({
   ratingAsc: { "review.rating": 1 },
   ratingDesc: { "review.rating": -1 },
 })[strategy] || { enrolledAt: -1 };
+
+export const getInstructorStudentsStats = async (insId) => {
+  if (!insId) throw new AppError("Instructor ID is required.", 400);
+
+  const stats = await Enrollment.aggregate([
+    { $match: { instructor: new mongoose.Types.ObjectId(insId) } },
+    {
+      $lookup: {
+        from: "users",
+        localField: "student",
+        foreignField: "_id",
+        as: "studentDetails"
+      }
+    },
+    { $unwind: "$studentDetails" },
+    {
+      $group: {
+        _id: "$student",
+        isActivated: { $first: "$studentDetails.isActivated" }
+      }
+    },
+    {
+      $group: {
+        _id: null,
+        totalStudents: { $sum: 1 },
+        totalActive: {
+          $sum: { $cond: [{ $eq: ["$isActivated", true] }, 1, 0] }
+        },
+        totalInactive: {
+          $sum: { $cond: [{ $eq: ["$isActivated", false] }, 1, 0] }
+        }
+      }
+    }
+  ]);
+
+  if (stats.length === 0) {
+    return {
+      totalStudents: 0,
+      totalActive: 0,
+      totalInactive: 0
+    };
+  }
+
+  return {
+    totalStudents: stats[0].totalStudents,
+    totalActive: stats[0].totalActive,
+    totalInactive: stats[0].totalInactive
+  };
+};

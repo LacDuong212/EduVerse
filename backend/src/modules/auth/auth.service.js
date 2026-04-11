@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 import AppError from "#exceptions/app.error.js";
 import { isApprovedInstructor } from "#modules/instructor/instructor.service.js";
-import { createNewStudent } from "#modules/student/student.service.js";
+import { createNewStudent, getStudentInterests } from "#modules/student/student.service.js";
 import { toAuthUserDto } from "#modules/user/user.mapper.js"
 import User, { ROLE_ENUM as USER_ROLE } from "#modules/user/user.model.js";
 import * as mailService from "#services/mail.service.js";
@@ -155,8 +155,10 @@ export const reactivateAccount = async (email, otp) => {
 };
 
 // #TODO:
-export const checkValidUser = (user) => {
+export const checkValidUser = async (user) => {
   const isValid = !!(user?.userId && mongoose.Types.ObjectId.isValid(user.userId));
+  if (user && user.role === USER_ROLE.student)
+    user.interests = await getStudentInterests(user.userId);
   return { isValid, user: isValid ? user : null };
 };
 

@@ -1,20 +1,19 @@
 import dialogflow from "@google-cloud/dialogflow";
 import { GoogleAuth } from "google-auth-library";
 import path from "path";
-import { fileURLToPath } from "url";
 import { v4 as uuid } from "uuid";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const keyPath = path.join(process.cwd(), "src", "config", "keys", process.env.KEY_FILENAME);
+const projectId = process.env.PROJECT_ID;
 
 const auth = new GoogleAuth({
-  keyFile: path.join(__dirname, "src", "config", "keys", process.env.KEY_FILENAME),
+  keyFile: keyPath,
   scopes: "https://www.googleapis.com/auth/cloud-platform",
 });
 
 const sessionClient = new dialogflow.SessionsClient({
   auth: auth,
-  projectId: process.env.PROJECT_ID,
+  projectId: projectId,
 });
 
 export async function sendMessageToDialogflow(message, sessionId = uuid(), languageCode) {

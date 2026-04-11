@@ -188,7 +188,7 @@ export const getInstructorPublicCourses = asyncHandler(async (req, res) => {
 // @route POST instructor/courses
 export const createCourse = asyncHandler(async (req, res) => {
   const userId = req.user?.userId;
-  const course = await courseService.createDraftCourse(userId);
+  const course = await instructorService.createNewCourse(userId);
   return sendSuccessResponse(res, 201, "Course created successfully!", course);
 });
 
@@ -261,4 +261,12 @@ export const getCourseStudents = asyncHandler(async (req, res) => {
     students,
     { page, limit, totalItems: total }
   );
+});
+
+// @desc Get instructor's students stats
+// @route GET instructor/students/stats
+export const getStudentsStats = asyncHandler(async (req, res) => {
+  const userId = req.user?.userId;
+  const result = await enrollmentService.getInstructorStudentsStats(userId);
+  return sendSuccessResponse(res, 200, "Get my students stats successfully", result);
 });

@@ -83,8 +83,8 @@ export const reactivateAccount = asyncHandler(async (req, res) => {
 
 // @desc  Check if user is authenticated
 // @route GET /status
-export const isAuthenticated = (req, res) => {
-  const { isValid, user } = authService.checkValidUser(req.user);
+export const isAuthenticated = async (req, res) => {
+  const { isValid, user } = await authService.checkValidUser(req.user);
   if (isValid) return sendSuccessResponse(res, 200, "User is authenticated.", user);
   return sendUnsuccessResponse(res, 200, "Guest user.", null);
 };

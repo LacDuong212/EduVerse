@@ -148,3 +148,9 @@ export const handleUpdateLectureProgress = async (stuId, courseId, lecId, data) 
 
   return progress;
 };
+
+export const getStudentInterests = async (userId) => {
+  if (!userId) return [];
+  const student = await Student.findOne({ user: userId }).select("interests").lean();
+  return student.interests || [];
+};

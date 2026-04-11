@@ -41,7 +41,7 @@ export const getHomeDashboardData = async () => {
   const commonPopulate = [
     { path: "category", select: "name slug" },
     {
-      path: "instructor", select: "name pfpImg"
+      path: "instructor.ref", select: "name pfpImg"
     }
   ];
 
@@ -514,16 +514,11 @@ export const getPublicInstructorCourses = async (
   };
 };
 
-export const createDraftCourse = async (insId) => {
-  if (!insId) throw new AppError("Instructor ID is required.", 400);
-
-  return await withTransaction(async (session) => {
-    const instructor = await getCurrentInstructor(insId, session);
-    if (!instructor) throw new AppError("Instructor not found.", 404);
-
+export const createDraftCourse = async (instructor, session = null) => {
+  return await withTransaction(async (s) => {
     const [course] = await Course.create([{
       title: "New draft course",
-      "instructor.ref": new mongoose.Types.ObjectId(insId),
+      "instructor.ref": instructor._id,
       "instructor.name": instructor.name,
       "instructor.avatar": instructor.avatar,
       category: null,
@@ -532,15 +527,15 @@ export const createDraftCourse = async (insId) => {
       status: STATUS_ENUM.draft,
       isPrivate: true,
       isDeleted: false
-    }], { session });
+    }], { session: s });
 
     await Curriculum.create([{
       courseId: course._id,
       sections: [],
-    }], { session });
+    }], { session: s });
 
     return courseMapper.toSimpleCourse(course);
-  });
+  }, session);
 };
 
 const getPlainPendingData = (pendingUpdate) => {

@@ -35,3 +35,5 @@ export const deactivate = asyncHandler(async (req, res) => {
   
   return sendSuccessResponse(res, 200, "Account have been deactivated.");
 });
+
+// @desc 

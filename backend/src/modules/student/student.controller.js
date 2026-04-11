@@ -39,7 +39,7 @@ export const getProfile = asyncHandler(async (req, res) => {
 export const updateInterests = asyncHandler(async (req, res) => {
   const userId = req.user?.userId;
   const { interests } = req.validated?.body || {};
-  const result = await userService.updateInterests(userId, interests);
+  const result = await studentService.updateStudentInterests(userId, interests);
   return sendSuccessResponse(res, 200, "Interests updated successfully!", result);
 });
 

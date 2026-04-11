@@ -1,7 +1,9 @@
 import AppError from "#exceptions/app.error.js";
+import { createDraftCourse } from "#modules/course/course.service.js";
 import { countCompletedOrdersByCourseIds } from "#modules/order/order.service.js";
 import { updateProfile } from "#modules/user/user.service.js";
 import { withTransaction } from "#utils/transaction.js";
+import mongoose from "mongoose";
 import Instructor from "./instructor.model.js";
 
 export const handleBecomeInstructor = async (user) => {
@@ -155,4 +157,23 @@ export const getCurrentInstructor = async (userId, session = null) => {
     isApproved: instructor.isApproved ?? false,
     createdAt: instructor.createdAt || null,
   };
+};
+
+export const createNewCourse = async (userId) => {
+  if (!userId) throw new AppError("Instructor ID is required.", 400);
+
+  return await withTransaction(async (session) => {
+    const instructor = await Instructor.findOne({ user: userId, isApproved: true })
+      .session(session);
+    if (!instructor) throw new AppError("Instructor not found or unapproved.", 404);
+
+    const course = await createDraftCourse(instructor, session);
+
+    instructor.myCourses.push(new mongoose.Types.ObjectId(course.courseId));
+    instructor.stats.totalCourses += 1;
+
+    await instructor.save({ session });
+
+    return course;
+  });
 };
