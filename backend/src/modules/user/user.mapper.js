@@ -12,7 +12,6 @@ export const toAuthUserDto = (user) => {
   return {
     ...getUserBasicInfo(user),
     role: user.role || "guest",
-    interests: user.interests,
   };
 };
 
@@ -30,7 +29,6 @@ export const toUserDetailsDto = (user) => {
     ...getUserBasicInfo(user),
     phonenumber: user.phonenumber || null, 
     bio: user.bio || null,
-    interests: user.interests || [], 
     website: user.website || null, 
     socials: user.socials || socials,
     createdAt: user.createdAt,

@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { Container, Row, Col, Button } from 'react-bootstrap';
+import { useState } from "react";
+import { Container, Row, Col, Button } from "react-bootstrap";
+import { FaCheck } from "react-icons/fa";
 
 const CouponActionBox = () => {
   const [isCopied, setIsCopied] = useState(false);
@@ -7,7 +8,7 @@ const CouponActionBox = () => {
 
   const handleCopyClick = () => {
     navigator.clipboard.writeText(couponCode);
-    
+
     setIsCopied(true);
 
     setTimeout(() => {
@@ -29,7 +30,7 @@ const CouponActionBox = () => {
 
         <Row>
           <Col xs={12}>
-            <div className="bg-purple p-4 p-sm-5 rounded-3">
+            <div className="bg-purple bg-opacity-75 p-4 p-sm-5 rounded-3">
               <Row className="position-relative">
                 {/* SVG Decoration Left */}
                 <figure className="fill-white opacity-1 position-absolute top-50 start-0 translate-middle-y">
@@ -43,24 +44,24 @@ const CouponActionBox = () => {
                     {/* Text Section */}
                     <Col lg={7}>
                       <h3 className="text-white">Special Welcome Offer!</h3>
-                      <p className="text-white mb-3 mb-lg-0">
-                        Start your learning journey with a huge discount. 
-                        Use code <span className="text-warning h5">{couponCode} </span>
+                      <p className="text-white mb-3 mb-lg-0 h5 fw-light">
+                        Start your learning journey with a huge discount.
+                        Use code <span className="text-warning h4">{couponCode} </span>
                         at checkout to get 50% off all courses. Don't miss out!
                       </p>
                     </Col>
 
                     {/* Button Section */}
                     <Col lg={5} className="text-lg-end">
-                      <Button 
-                        variant={isCopied ? "success" : "outline-warning"} 
-                        className="mb-0" 
+                      <Button
+                        variant={isCopied ? "purple" : "outline-warning"}
+                        className="mb-0"
                         onClick={handleCopyClick}
                         disabled={isCopied}
                       >
                         {isCopied ? (
-                          <span>
-                            <i className="bi bi-check-circle me-2"></i> Copied!
+                          <span className="text-white">
+                            <FaCheck className="mb-1 me-1" />Copied
                           </span>
                         ) : (
                           <span>

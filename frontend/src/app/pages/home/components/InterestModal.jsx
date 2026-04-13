@@ -1,14 +1,14 @@
-import { useState, useEffect } from 'react';
-import { Modal, Button } from 'react-bootstrap';
-import { useDispatch, useSelector } from 'react-redux';
-import axios from 'axios';
-import { toast } from 'react-toastify';
-import { setUserData } from '@/redux/authSlice'; 
-import { setRecommendedCourses } from '@/redux/coursesSlice'; 
+import axios from "axios";
+import { useState, useEffect } from "react";
+import { Modal, Button } from "react-bootstrap";
+import { useDispatch, useSelector } from "react-redux";
+import { toast } from "react-toastify";
+import { setUserData } from "@/redux/authSlice";
+import { setRecommendedCourses } from "@/redux/coursesSlice";
 
 const InterestModal = () => {
   const dispatch = useDispatch();
-  const { userData } = useSelector((state) => state.auth); 
+  const { userData } = useSelector((state) => state.auth);
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   const [loading, setLoading] = useState(false);
@@ -16,18 +16,18 @@ const InterestModal = () => {
   const [topics, setTopics] = useState([]);
   const [selectedTopics, setSelectedTopics] = useState([]);
 
-  const showModal = 
+  const showModal =
     userData &&
-    userData.role === 'student' &&
+    userData.role === "student" &&
     (!userData.interests || userData.interests.length === 0);
 
   useEffect(() => {
     if (showModal && backendUrl) {
       const fetchTags = async () => {
         try {
-          const { data } = await axios.get(`${backendUrl}/api/courses/tags`);
-          if (data.success && data.tags.length > 0) {
-            setTopics(data.tags);
+          const { data } = await axios.get(`${backendUrl}/api/courses/tags/popular`);
+          if (data.success && data.result.length > 0) {
+            setTopics(data.result);
           } else {
             setTopics(["Web Development", "JavaScript", "Python", "Design", "Business"]);
           }
@@ -63,15 +63,15 @@ const InterestModal = () => {
     setLoading(true);
     try {
       const { data } = await axios.put(
-        `${backendUrl}/api/user/interests`,
+        `${backendUrl}/api/student/interests`,
         { interests: selectedTopics },
         { withCredentials: true }
       );
 
       if (data.success) {
         toast.success("Your preferences have been saved! The system will recommend courses for you.");
-        
-        dispatch(setUserData(data.user)); 
+
+        dispatch(setUserData(data.user));
 
         dispatch(setRecommendedCourses([]));
       }
@@ -111,11 +111,10 @@ const InterestModal = () => {
                   <button
                     key={topic}
                     onClick={() => toggleTopic(topic)}
-                    className={`btn rounded-pill px-3 py-2 fw-medium border ${
-                      isSelected 
+                    className={`btn rounded-pill px-3 py-2 fw-medium border ${isSelected
                         ? "btn-primary-soft"
                         : "btn-outline-body"
-                    }`}
+                      }`}
                     style={{ transition: "all 0.2s" }}
                   >
                     {isSelected && <i className="bi bi-check2 me-1"></i>}
@@ -125,7 +124,7 @@ const InterestModal = () => {
               })}
             </div>
             <div className="text-center mt-3">
-              <span className={`badge p-2 fs-6 ${selectedTopics.length > 0 ? 'bg-success' : 'bg-secondary'}`}>
+              <span className={`badge p-2 fs-6 ${selectedTopics.length > 0 ? "bg-success" : "bg-secondary"}`}>
                 Selected: {selectedTopics.length}/5
               </span>
             </div>
@@ -134,9 +133,9 @@ const InterestModal = () => {
       </Modal.Body>
 
       <Modal.Footer className="justify-content-center border-0 pb-4">
-        <Button 
-          variant="primary" 
-          size="lg" 
+        <Button
+          variant="primary"
+          size="lg"
           className="px-5 rounded-pill shadow-sm"
           onClick={handleSave}
           disabled={loading || selectedTopics.length === 0}

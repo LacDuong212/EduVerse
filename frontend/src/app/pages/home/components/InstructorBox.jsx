@@ -1,9 +1,10 @@
-import { useNavigate } from 'react-router-dom';
-import { Button, Col, Container, Row } from 'react-bootstrap';
-const ActionBox = () => {
-  const navigate = useNavigate();
+import { useNavigate } from "react-router-dom";
+import { Button, Col, Container, Row } from "react-bootstrap";
 
-  return <section className="pt-0">
+const InstructorActionBox = () => {
+  const navigate = useNavigate();
+  return (
+    <section className="pt-0">
       <Container className="position-relative">
         <figure className="position-absolute top-50 start-50 translate-middle ms-2">
           <svg>
@@ -15,7 +16,7 @@ const ActionBox = () => {
         </figure>
         <Row>
           <Col xs={12}>
-            <div className="bg-primary p-4 p-sm-5 rounded-3">
+            <div className="bg-primary bg-opacity-75 p-4 p-sm-5 rounded-3">
               <Row className="position-relative">
                 <figure className="fill-white opacity-1 position-absolute top-50 start-0 translate-middle-y">
                   <svg width="141px" height="141px">
@@ -26,9 +27,9 @@ const ActionBox = () => {
                   <Row className="align-items-center">
                     <Col lg={7}>
                       <h3 className="text-white">Become an Instructor!</h3>
-                      <p className="text-white mb-3 mb-lg-0">
-                        Inspire the next generation and shape the future of education. 
-                        Share your unique knowledge with millions of students worldwide to help them achieve their goals. 
+                      <p className="text-white mb-3 mb-lg-0 h5 fw-light">
+                        Inspire the next generation and shape the future of education.
+                        Share your unique knowledge with millions of students worldwide to help them achieve their goals.
                         Make a lasting impact on the global community.
                       </p>
                     </Col>
@@ -44,6 +45,8 @@ const ActionBox = () => {
           </Col>
         </Row>
       </Container>
-    </section>;
+    </section>
+  );
 };
-export default ActionBox;
+
+export default InstructorActionBox;

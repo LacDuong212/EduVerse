@@ -1,7 +1,6 @@
-import { useSelector } from 'react-redux';
-import { Container, Row, Col, Badge } from 'react-bootstrap';
-import CourseCard from '@/components/CourseCard';
-
+import { useSelector } from "react-redux";
+import { Container, Row, Col, Badge } from "react-bootstrap";
+import CourseCard from "@/components/CourseCard";
 
 const RecommendedCourses = () => {
   const user = useSelector((state) => state.auth.userData);
@@ -27,7 +26,7 @@ const RecommendedCourses = () => {
 
         <Row className="g-4">
           {recommendedCourses.map((course) => (
-            <Col sm={6} lg={4} xl={3} key={course._id}>
+            <Col sm={6} lg={4} xl={3} key={course.courseId}>
               <div className="position-relative h-100">
                 <CourseCard course={course} />
 

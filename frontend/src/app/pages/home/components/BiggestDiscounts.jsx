@@ -1,22 +1,20 @@
 import { Container, Row } from "react-bootstrap";
 import CommonCourseSlider from "./CommonCourseSlider";
 
-const TopRatedSection = () => {
-  return <section className="py-0">
+const BiggestDiscounts = () => {
+  return <section className="pt-0">
     <Container>
       <Row className="mb-4 mx-auto text-center">
-        <h2 className="fs-1">Top Rated Courses</h2>
-        <p className="mb-0">
-          Explore our most popular courses loved by thousands of learners worldwide.
-        </p>
+        <h2 className="fs-1">Biggest Discounts</h2>
+        <p className="mb-0">Grab our best deals and save big on top-rated courses!</p>
       </Row>
       <Row>
         <div className="tiny-slider arrow-round arrow-blur arrow-hover">
-          <CommonCourseSlider source="topRated" />
+          <CommonCourseSlider source="biggestDiscounts" />
         </div>
       </Row>
     </Container>
   </section>;
 };
 
-export default TopRatedSection;
+export default BiggestDiscounts;

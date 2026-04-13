@@ -165,7 +165,7 @@ export const createNewCourse = async (userId) => {
   return await withTransaction(async (session) => {
     const instructor = await Instructor.findOne({ user: userId, isApproved: true })
       .session(session);
-    if (!instructor) throw new AppError("Instructor not found or unapproved.", 404);
+    if (!instructor) throw new AppError("Instructor not found or unapproved.", 403);
 
     const course = await createDraftCourse(instructor, session);
 

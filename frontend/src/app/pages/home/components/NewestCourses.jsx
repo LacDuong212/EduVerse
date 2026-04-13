@@ -1,12 +1,12 @@
-import { useSelector } from 'react-redux';
-import { Container, Row, Col } from 'react-bootstrap';
-import CourseCard from '@/components/CourseCard';
+import { useSelector } from "react-redux";
+import { Container, Row, Col } from "react-bootstrap";
+import CourseCard from "@/components/CourseCard";
 
 const NewestCourses = () => {
   const newestCourses = useSelector((s) => s.courses?.newest || []);
 
   return (
-    <section className='pt-0'>
+    <section className="pt-0">
       <Container>
         <Row className="mb-4">
           <Col lg={8} className="mx-auto text-center">
@@ -18,12 +18,17 @@ const NewestCourses = () => {
         </Row>
 
         <Row className="g-4">
-          {newestCourses.map((course) => (
-            <Col sm={6} lg={4} xl={3} key={course._id}>
-              <CourseCard course={course} />
-            </Col>
-          ))}
+          {newestCourses?.length === 0 ? (
+            <p className="text-center text-muted">No courses found.</p>
+          ) : (
+            newestCourses.map((course) => (
+              <Col sm={6} lg={4} xl={3} key={course.courseId}>
+                <CourseCard course={course} />
+              </Col>
+            ))
+          )}
         </Row>
+
       </Container>
     </section>
   );

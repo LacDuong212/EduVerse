@@ -14,7 +14,7 @@ export const toCourseReviewDto = (review) => {
   if (!review) return null;
 
   return {
-    userId: review.user?._id,
+    userId: review.user?._id?.toString() || review.user?.toString(),
     userName: review.user?.name || null,
     userEmail: review.user?.email || null,
     userAvatar: review.user?.pfpImg || null,

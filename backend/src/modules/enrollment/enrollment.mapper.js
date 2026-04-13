@@ -1,6 +1,10 @@
+import mongoose from "mongoose";
+
+const isPopulated = (val) => val instanceof mongoose.Model || (val && typeof val === "object" && val._id);
+const getStringId = (id) => isPopulated(id) ? id._id?.toString() : id?.toString();
 
 export const toEnrolledStudentDto = (student) => ({
-  stuId: student?._id,
+  stuId: getStringId(student),
   name: student?.name || null,
   email: student?.email || null,
   avatar: student?.pfpImg || null,
@@ -22,7 +26,7 @@ export const toEnrolledCourseRowDto = (course) => {
     : 0;
 
   return {
-    courseId: course._id?.toString(),
+    courseId: getStringId(course),
     title: course.title,
     image: course.image,
     thumbnail: course.thumbnail,

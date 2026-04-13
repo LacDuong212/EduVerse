@@ -154,7 +154,6 @@ export const reactivateAccount = async (email, otp) => {
   return toAuthUserDto(user);
 };
 
-// #TODO:
 export const checkValidUser = async (user) => {
   const isValid = !!(user?.userId && mongoose.Types.ObjectId.isValid(user.userId));
   if (user && user.role === USER_ROLE.student)

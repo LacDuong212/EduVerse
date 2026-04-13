@@ -74,7 +74,7 @@ export const getProfile = asyncHandler(async (req, res) => {
 });
 
 // @desc  Patch update an instructor's profile
-// @route PATCH /profile
+// @route PATCH instructor/profile
 export const updateProfile = asyncHandler(async (req, res) => {
   const userId = req.user?.userId;
   const changes = req.validated?.body || {};

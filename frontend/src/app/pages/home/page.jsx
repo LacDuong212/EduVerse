@@ -1,15 +1,16 @@
 import PageMetaData from '@/components/PageMetaData';
-import ActionBox from './components/ActionBox';
+import InstructorActionBox from './components/InstructorBox';
+import BestSellers from './components/BestSellers';
+import BiggestDiscounts from './components/BiggestDiscounts';
 import Counter from './components/Counter';
-import CouponActionBox from './components/CouponActionBox';
+import CouponActionBox from './components/CouponBox';
 import Hero from './components/Hero';
-import NewestCourses from './components/NewestCourses';
-import useHomeCourses from './useHomeCourses';
-import TrendingCourses from './components/TrendingCourses';
-import BestSellersSection from './components/BestSellers';
-import RecommendedCourses from "./components/RecommendedCourses";
 import InterestModal from "./components/InterestModal";
+import NewestCourses from './components/NewestCourses';
+import RecommendedCourses from "./components/RecommendedCourses";
 import TopRatedSection from './components/TopRated';
+import useHomeCourses from './useHomeCourses';
+
 const HomePage = () => {
   useHomeCourses();
 
@@ -23,12 +24,13 @@ const HomePage = () => {
         <RecommendedCourses />
         <CouponActionBox />
         <NewestCourses />
-        <ActionBox />
-        <TrendingCourses />
-        <BestSellersSection />
+        <InstructorActionBox />
+        <BiggestDiscounts />
+        <BestSellers />
         <TopRatedSection />
       </main>
      
     </>;
 };
+
 export default HomePage;
