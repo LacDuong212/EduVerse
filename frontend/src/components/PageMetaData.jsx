@@ -1,4 +1,4 @@
-import { DEFAULT_PAGE_TITLE } from '@/context/constants';
+import { DEFAULT_PAGE_TITLE } from '@/contexts/constants';
 
 const PageMetaData = ({ title }) => {
   const defaultTitle = DEFAULT_PAGE_TITLE;

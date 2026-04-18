@@ -1,7 +1,11 @@
 import { Container, Row } from "react-bootstrap";
-import CommonCourseSlider from "./CommonCourseSlider";
+import { useSelector } from "react-redux";
+import CommonCourseSlider from "@/components/CommonCourseSlider";
 
 const BiggestDiscounts = () => {
+  const coursesState = useSelector((s) => s.courses || {});
+  const list = Array.isArray(coursesState["biggestDiscounts"]) ? coursesState["biggestDiscounts"] : [];
+
   return <section className="pt-0">
     <Container>
       <Row className="mb-4 mx-auto text-center">
@@ -10,7 +14,7 @@ const BiggestDiscounts = () => {
       </Row>
       <Row>
         <div className="tiny-slider arrow-round arrow-blur arrow-hover">
-          <CommonCourseSlider source="biggestDiscounts" />
+          <CommonCourseSlider courses={list} />
         </div>
       </Row>
     </Container>

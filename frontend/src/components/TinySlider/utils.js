@@ -1,4 +1,5 @@
 import React from 'react';
+
 export const objectsEqual = (val1, val2) => {
   return JSON.stringify({
     a: val1
@@ -6,6 +7,7 @@ export const objectsEqual = (val1, val2) => {
     a: val2
   });
 };
+
 export const childrenEqual = (val1, val2) => {
   const keys1 = React.Children.map(val1, child => child.key);
   const keys2 = React.Children.map(val2, child => child.key);

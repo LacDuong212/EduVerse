@@ -105,7 +105,7 @@ export const queryCourses = async (filters) => {
 
   if (category) query.category = category;
   if (language) query.language = language;
-  if (level && level !== "all") query.level = level;
+  if (level) query.level = level;
 
   if (tag) {
     query.tags = { $in: Array.isArray(tag) ? tag : [tag] };

@@ -1,38 +1,36 @@
-import IconTextFormInput from '@/components/form/IconTextFormInput';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { useForm } from 'react-hook-form';
-import { BsEnvelopeFill } from 'react-icons/bs';
-import * as yup from 'yup';
-import useForgotPassword from '@/app/auth/forgot-password/useForgotPassword';
+import { BsEnvelopeFill } from "react-icons/bs";
+import IconTextFormInput from "@/components/form/IconTextFormInput";
+import useForgotPassword from "../useForgotPassword";
 
 const ForgotPasswordForm = ({ onForgotSuccess }) => {
-  const editEmailFormSchema = yup.object({
-    email: yup.string().email('Please enter valid email').required('Please enter your Email')
-  });
+  const { loading, forgotPassword, control, errors } = useForgotPassword(onForgotSuccess);
 
-  const { control, handleSubmit } = useForm({
-    resolver: yupResolver(editEmailFormSchema),
-    defaultValues: { email: '' }
-  });
-
-  const { loading, forgotPassword } = useForgotPassword(onForgotSuccess);
-
-  const onSubmit = (data) => {
-    forgotPassword(data.email);
-  };
-
-  return <form onSubmit={handleSubmit(onSubmit)}>
+  return (
+    <form onSubmit={forgotPassword}>
       <div className="mb-4">
-        <IconTextFormInput control={control} icon={BsEnvelopeFill} placeholder="E-mail" label="Email address *" name="email" />
+        <IconTextFormInput 
+          control={control} 
+          icon={BsEnvelopeFill} 
+          placeholder="E-mail" 
+          label="Email Address" 
+          name="email" 
+          disabled={loading}
+          error={errors.email}
+          required
+        />
+        <div className="form-text mt-2">
+          Enter the email address associated with your account and we'll send you an OTP to reset your password.
+        </div>
       </div>
       <div className="align-items-center">
         <div className="d-grid">
           <button className="btn btn-primary mb-0" type="submit" disabled={loading}>
-            {loading ? 'Sending...' : 'Reset password'}
+            {loading ? "Sending OTP..." : "Reset Password"}
           </button>
         </div>
       </div>
-    </form>;
+    </form>
+  );
 };
 
 export default ForgotPasswordForm;

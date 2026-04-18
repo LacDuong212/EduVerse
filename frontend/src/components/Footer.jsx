@@ -11,7 +11,7 @@ import googlePlay from '@/assets/images/client/google-play.svg';
 import grFlag from '@/assets/images/flags/gr.svg';
 import spFlag from '@/assets/images/flags/sp.svg';
 import ukFlag from '@/assets/images/flags/uk.svg';
-import { currentYear, OUR_GROUP_NAME } from '../context/constants';
+import { currentYear, TEAM_NAME } from '../contexts/constants';
 
 
 const Footer = ({
@@ -73,7 +73,7 @@ const Footer = ({
               <span className="d-block small">(9:AM to 6:PM UTC)</span>
             </p>
             <p className="mb-0">
-              Email:<span className="h6 fw-light ms-2">example{OUR_GROUP_NAME}.com</span>
+              Email:<span className="h6 fw-light ms-2">example{TEAM_NAME}.com</span>
             </p>
             <Row className="g-2 mt-2">
               <Col xs={6} sm={4} md={3} lg={6}>
@@ -99,7 +99,7 @@ const Footer = ({
 
                 Copyrights ©{currentYear} EduVerse. Modified by{" "}
                 <Link target="_blank" className="text-body">
-                  {OUR_GROUP_NAME}
+                  {TEAM_NAME}
                 </Link>
               </div>
               <div className="justify-content-center mt-3 mt-lg-0">

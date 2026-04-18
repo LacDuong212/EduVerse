@@ -1,19 +1,17 @@
-import { STUDENT_MENU_ITEMS } from '../assets/data/menu-items';
-import useProfile from '../hooks/useProfile';
-import useToggle from '../hooks/useToggle';
-import useViewPort from '../hooks/useViewPort';
+import clsx from "clsx";
+import { lazy, Suspense } from "react";
+import { Col, Container, Offcanvas, OffcanvasBody, OffcanvasHeader, OffcanvasTitle, Row } from "react-bootstrap";
+import { FaSignOutAlt } from "react-icons/fa";
+import { Link, useLocation } from "react-router-dom";
+import { STUDENT_MENU_ITEMS } from "@/assets/data/menu-items";
+import useProfile from "@/hooks/useProfile";
+import useToggle from "@/hooks/useToggle";
+import useViewPort from "@/hooks/useViewPort";
 
-import clsx from 'clsx';
-import { lazy, Suspense } from 'react';
-import { Col, Container, Offcanvas, OffcanvasBody, OffcanvasHeader, OffcanvasTitle, Row } from 'react-bootstrap';
-import { FaSignOutAlt } from 'react-icons/fa';
-import { Link, useLocation } from 'react-router-dom';
-
-const Banner = lazy(() => import('../components/StudentLayoutComponents/Banner'));
-const Footer = lazy(() => import('../components/Footer'));
-const Preloader = lazy(() => import('../components/preloader'));
-const TopNavigationBar = lazy(() => import('../components/StudentLayoutComponents/TopNavigationBar'));
-
+const Footer = lazy(() => import("@/components/Footer"));
+const Preloader = lazy(() => import("@/components/Preloader"));
+const Banner = lazy(() => import("@/components/studentLayoutComponents/Banner"));
+const TopNavigationBar = lazy(() => import("@/components/studentLayoutComponents/TopNavigationBar"));
 
 const VerticalMenu = () => {
   const { pathname } = useLocation();
@@ -28,9 +26,9 @@ const VerticalMenu = () => {
           icon
         }, idx) => {
           const Icon = icon;
-          return <Link className={clsx('list-group-item icons-center', {
+          return <Link className={clsx("list-group-item icons-center", {
             active: pathname === url
-          })} to={url || ''} key={idx}>
+          })} to={url || ""} key={idx}>
             {Icon && <Icon className="me-2" />}
             {label}
           </Link>;
@@ -45,17 +43,15 @@ const VerticalMenu = () => {
 };
 
 const StudentLayout = ({ children, isNested = false }) => {
-  const { user } = useProfile();
-  const { width } = useViewPort();
-  const { isTrue: isOffCanvasMenuOpen, toggle: toggleOffCanvasMenu } = useToggle();
   const { pathname } = useLocation();
+  const { user } = useProfile();
+  const { isTrue: isOffCanvasMenuOpen, toggle: toggleOffCanvasMenu } = useToggle();
+  const { width } = useViewPort();
 
-  // Điều kiện full screen cho trang player
   const isFullscreen =
-    pathname === '/student/video-player' ||
+    pathname === "/student/video-player" ||
     /^\/courses\/[^/]+\/watch(\/[^/]+)?$/.test(pathname);
 
-  // Nếu full screen: bỏ toàn bộ chrome, render thẳng nội dung
   if (isFullscreen) {
     return (
       <main className="bg-dark min-vh-100">

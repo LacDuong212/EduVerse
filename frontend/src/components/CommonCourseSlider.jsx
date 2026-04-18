@@ -1,12 +1,10 @@
-import { useSelector } from "react-redux";
 import { renderToString } from "react-dom/server";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import TinySlider from "@/components/TinySlider";
-import CommonCourseCard from "./CommonCourseCard";
+import CommonCourseCard from "@/components/CommonCourseCard";
 
-const CommonCourseSlider = ({ source }) => {
-  const coursesState = useSelector((s) => s.courses || {});
-  const list = Array.isArray(coursesState[source]) ? coursesState[source] : [];
+const CommonCourseSlider = ({ courses }) => {
+  const list = Array.isArray(courses) ? courses : [];
 
   const courseSliderSettings = {
     arrowKeys: true,

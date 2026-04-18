@@ -1,111 +1,94 @@
 import { useState } from "react";
-import IconTextFormInput from '@/components/form/IconTextFormInput';
-import { Controller, useForm } from "react-hook-form";
 import { BsEnvelopeFill } from "react-icons/bs";
 import { FaLock, FaUser, FaEye, FaEyeSlash } from "react-icons/fa";
-import { yupResolver } from "@hookform/resolvers/yup";
+import { Controller } from "react-hook-form";
+import { Link } from "react-router-dom";
+import IconTextFormInput from "@/components/form/IconTextFormInput";
 import useSignUp from "../useSignUp";
 
-import { signUpSchema } from '../signUpSchema';
-import { useSearchParams } from "react-router-dom";
-
 export default function SignUpForm({ onSignUpSuccess }) {
-  const [searchParams] = useSearchParams();
-  const emailFromUrl = searchParams.get("email") || "";
-
-  const { control, handleSubmit, formState: { errors } } = useForm({
-    resolver: yupResolver(signUpSchema),
-    defaultValues: {
-      name: "",
-      email: emailFromUrl,
-      password: "",
-      confirmPassword: "",
-      terms: false,
-    },
-  });
-
-  const { loading, signUp } = useSignUp(onSignUpSuccess);
+  const { loading, signUp, control, errors } = useSignUp(onSignUpSuccess);
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  const onSubmit = (data) => {
-    const { confirmPassword, terms, ...payload } = data;
-    signUp(payload);
-  };
-
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      {/* Name */}
+    <form onSubmit={signUp}>
       <div className="mb-4">
         <IconTextFormInput
           control={control}
           icon={FaUser}
           placeholder="Full Name"
-          label="Full Name *"
+          label="Full Name"
           name="name"
+          disabled={loading}
+          error={errors.name}
+          required
         />
       </div>
 
-      {/* Email */}
       <div className="mb-4">
         <IconTextFormInput
           control={control}
           icon={BsEnvelopeFill}
           placeholder="E-mail"
-          label="Email address *"
+          label="Email Address"
           name="email"
+          disabled={loading}
+          error={errors.email}
+          required
         />
       </div>
 
-      {/* Password */}
       <div className="mb-4 position-relative">
         <IconTextFormInput
           control={control}
-          type={showPassword ? 'text' : 'password'}
+          type={showPassword ? "text" : "password"}
           icon={FaLock}
           placeholder="Password"
-          label="Password *"
+          label="Password"
           name="password"
           disabled={loading}
+          error={errors.password}
+          required
         />
 
         <button
-            type="button" 
-            onClick={() => setShowPassword(!showPassword)}
-            className="position-absolute end-0 top-50 mt-3 translate-middle-y me-3 border-0 bg-transparent text-secondary"
-            style={{ zIndex: 5 }} 
-            disabled={loading}
+          type="button"
+          onClick={() => setShowPassword(!showPassword)}
+          className="position-absolute end-0 top-50 mt-3 me-3 translate-middle-y border-0 bg-transparent text-secondary"
+          style={{ zIndex: 5 }}
+          disabled={loading}
         >
-            {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+          {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
         </button>
       </div>
 
-      {/* Confirm Password */}
       <div className="mb-4 position-relative">
         <IconTextFormInput
           control={control}
-          type={showConfirm ? 'text' : 'password'}
+          type={showConfirm ? "text" : "password"}
           icon={FaLock}
           placeholder="Confirm Password"
-          label="Confirm Password *"
+          label="Confirm Password"
           name="confirmPassword"
           disabled={loading}
+          error={errors.confirmPassword}
+          required
         />
 
         <button
-            type="button" 
-            onClick={() => setShowConfirm(!showConfirm)}
-            className="position-absolute end-0 top-50 mt-3 translate-middle-y me-3 border-0 bg-transparent text-secondary"
-            style={{ zIndex: 5 }} 
-            disabled={loading}
+          type="button"
+          onClick={() => setShowConfirm(!showConfirm)}
+          className="position-absolute end-0 top-50 mt-3 translate-middle-y me-3 border-0 bg-transparent text-secondary"
+          style={{ zIndex: 5 }}
+          disabled={loading}
         >
-            {showConfirm ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+          {showConfirm ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
         </button>
       </div>
 
-      {/* Terms checkbox */}
-      <div className="mb-4">
+      <div className="mb-2">
         <Controller
           name="terms"
           control={control}
@@ -113,26 +96,24 @@ export default function SignUpForm({ onSignUpSuccess }) {
             <div className="form-check">
               <input
                 type="checkbox"
-                className={`form-check-input ${errors.terms ? 'is-invalid' : ''}`}
-                id="checkbox-1"
+                className={`form-check-input ${errors.terms ? "is-invalid" : ""}`}
+                id="terms-check"
                 checked={field.value}
                 onChange={field.onChange}
+                disabled={loading}
               />
-              <label className="form-check-label" htmlFor="checkbox-1">
-                By signing up, you agree to the <a href="#">terms of service</a>
+              <label className="form-check-label small" htmlFor="terms-check">
+                By signing up, you agree to the <Link to="/terms">terms of service</Link>
               </label>
             </div>
           )}
         />
         {errors.terms && (
-          <div className="invalid-feedback d-block">
-            {errors.terms.message}
-          </div>
+          <div className="invalid-feedback">{errors.terms.message}</div>
         )}
-      </div>  
+      </div>
 
-      {/* Submit button */}
-      <div className="align-items-center mt-0">
+      <div className="align-items-center">
         <div className="d-grid">
           <button className="btn btn-primary mb-0" type="submit" disabled={loading}>
             {loading ? "Signing Up..." : "Sign Up"}

@@ -1,99 +1,85 @@
-import { useEffect, useState, useMemo } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
-
-import { fetchCart, removeFromCart as removeFromCartAction, clearCart } from "@/redux/cartSlice";
-
-function getId(item) {
-  return item?.courseId || item?._id || item?.id;
-}
+import { fetchCart, removeFromCart, clearCart } from "@/redux/cartSlice";
 
 export default function useCartDetail(initialSelectedIds = []) {
   const dispatch = useDispatch();
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   const { items = [], status } = useSelector((state) => state.cart);
-
   const [selected, setSelected] = useState(initialSelectedIds);
-
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
 
-  const isSelecting = selected.length > 0;
-
   useEffect(() => {
-    if (items.length === 0) {
-        dispatch(fetchCart());
+    if (status === "idle") {
+      dispatch(fetchCart());
     }
-  }, [dispatch, items.length]);
+  }, [dispatch, status]);
 
   useEffect(() => {
     if (items.length > 0) {
-        setSelected(prev => prev.filter(id => items.find(i => getId(i) === id)));
+      setSelected((prev) => prev.filter((id) => items.some((item) => item.courseId === id)));
+    } else {
+      setSelected([]);
     }
   }, [items]);
 
-  const toggleSelect = (id) => {
-    setSelected((prev) =>
-      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
-    );
-  };
+  const isSelecting = selected.length > 0;
 
-  const toggleSelectAll = () => {
-    if (selected.length === items.length) setSelected([]);
-    else setSelected(items.map((i) => getId(i)));
-  };
+  const handleReloadCart = useCallback(() => {
+    dispatch(fetchCart());
+  }, [dispatch]);
 
   const displayedCourses = useMemo(() => {
-      if (selected.length > 0) {
-          return items.filter((c) => selected.includes(getId(c)));
-      }
-      return items; 
+    return items.filter((c) => selected.includes(c.courseId));
   }, [items, selected]);
 
-   const displayedSubTotal = useMemo(() => {
-      return displayedCourses.reduce(
-        (sum, c) => sum + (Number(c?.discountPrice ?? c?.price ?? 0) || 0),
-        0
-      );
+  const displayedSubTotal = useMemo(() => {
+    return displayedCourses.reduce(
+      (sum, c) => sum + (Number((c?.enableDiscount ? c?.discountPrice : c?.price) || 0) || 0),
+      0
+    );
   }, [displayedCourses]);
 
-  const displayedCount = displayedCourses.length;
-
-  const couponDiscountAmount = appliedCoupon
-    ? (displayedSubTotal * appliedCoupon.discountPercent) / 100
-    : 0;
+  const couponDiscountAmount = useMemo(() => {
+    return appliedCoupon ? (displayedSubTotal * appliedCoupon.discountPercent) / 100 : 0;
+  }, [appliedCoupon, displayedSubTotal]);
 
   const finalTotal = Math.max(0, displayedSubTotal - couponDiscountAmount);
 
+  const toggleSelect = useCallback((id) => {
+    setSelected((prev) =>
+      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
+    );
+  }, []);
+
+  const toggleSelectAll = useCallback(() => {
+    if (selected.length === items.length) setSelected([]);
+    else setSelected(items.map((i) => i.courseId));
+  }, [items, selected.length]);
+
   const handleApplyCoupon = async (codeOverride = null) => {
     const codeToUse = codeOverride || couponCode;
-
-    if (!codeToUse.trim()) {
-      toast.info("Please enter a coupon code");
-      return;
-    }
+    if (!codeToUse.trim()) return toast.info("Please enter a coupon code.");
 
     setIsApplyingCoupon(true);
     try {
       const { data } = await axios.post(
         `${backendUrl}/api/coupons/apply`,
-        {
-          code: couponCode,
-          originalPrice: displayedSubTotal
-        },
+        { code: codeToUse, originalPrice: displayedSubTotal },
         { withCredentials: true }
       );
 
       if (data.success) {
-        setAppliedCoupon(data.data);
-        toast.success(`Coupon ${data.data.couponCode} applied!`);
+        setAppliedCoupon(data.result);
+        toast.success(`Coupon ${data.result.couponCode} applied!`);
       }
     } catch (error) {
-      console.error(error);
-      const msg = error.response?.data?.message || "Invalid coupon code";
+      const msg = error.response?.data?.message || "Invalid coupon code..";
       toast.error(msg);
       setAppliedCoupon(null);
     } finally {
@@ -101,116 +87,74 @@ export default function useCartDetail(initialSelectedIds = []) {
     }
   };
 
-  const handleRemoveCoupon = () => {
-    setAppliedCoupon(null);
-    setCouponCode("");
-    toast.info("Coupon removed");
-  };
-
-  const removeFromCart = async (courseIds = selected) => {
+  const handleRemoveFromCart = async (courseIds = selected) => {
     if (!courseIds || courseIds.length === 0) {
-      toast.info("Please select a course to delete!");
-      return;
+      return toast.info("Please select items to remove!");
     }
-    try {
-      await Promise.all(
-        courseIds.map((id) =>
-          dispatch(removeFromCartAction({ courseId: id })).unwrap()
-        )
-      );
 
-      toast.success("Courses removed from cart");
+    try {
+      await dispatch(removeFromCart({ courseIds })).unwrap();
+
+      toast.success("Items removed from cart.");
       setSelected([]);
-      if (appliedCoupon) {
-        setAppliedCoupon(null);
-        toast.info("Cart updated, please re-apply coupon if needed.");
-      }
+      if (appliedCoupon) setAppliedCoupon(null);
     } catch (error) {
-      console.error(error);
-      toast.error("Error removing items");
+      toast.error(error || "Error removing items..");
     }
   };
 
   const handleClearCart = async () => {
-    if (!items || items.length === 0) {
-      toast.info("Your shopping cart is empty.");
-      return;
-    }
-
-    const isConfirmed = window.confirm("Are you sure you want to delete the entire cart?");
-    if (!isConfirmed) return;
+    if (items.length === 0) return toast.info("Your cart is already empty.");
+    if (!window.confirm("Are you sure you want to clear your entire cart?")) return;
 
     try {
       await dispatch(clearCart()).unwrap();
-
       setSelected([]);
       setAppliedCoupon(null);
       setCouponCode("");
-
       toast.success("Cart cleared!");
     } catch (error) {
-      console.error("Clear cart error:", error);
-      const message = error?.message || "An error occurred while deleting the cart.";
-      toast.error(message);
+      toast.error(error || "An error occurred..");
     }
   };
 
   const handleCheckout = async (paymentMethod) => {
-    const coursesToCheckout = displayedCourses; 
-
-    if (!coursesToCheckout.length) {
-      toast.error('Your shopping cart is empty or no items selected.');
+    if (!displayedCourses.length) {
+      toast.error("No items selected for checkout.");
       return null;
     }
 
     try {
       const payload = {
-        cart: {
-          courses: coursesToCheckout.map(c => ({ courseId: getId(c) }))
-        },
+        selectedCourseIds: displayedCourses.map(c => c.courseId),
         paymentMethod,
         couponCode: appliedCoupon?.couponCode || null
       };
 
       const { data: orderData } = await axios.post(
-        `${backendUrl}/api/orders/create`,
+        `${backendUrl}/api/orders`,
         payload,
         { withCredentials: true }
       );
 
-      if (!orderData.success || !orderData.order?._id) {
-        toast.error(orderData.message || 'Unable to create order.');
-        return null;
+      const order = orderData.result;
+
+      if (order.totalAmount === 0) {
+        toast.success("Course(s) enrolled successfully!");
+        return { type: "redirect_internal", url: `/student/courses` };
       }
 
-      if (orderData.order.totalAmount === 0) {
-        toast.success("Order created successfully!");
-        return { type: 'redirect_internal', url: `/student/courses` };
-      }
-
-      const orderId = orderData.order._id;
-      toast.info('Creating payment request...');
-
+      toast.info("Creating payment...");
       const { data: paymentData } = await axios.post(
-        `${backendUrl}/api/payments/create`,
-        {
-          orderId,
-          paymentMethod,
-        },
+        `${backendUrl}/api/payments`,
+        { orderId: order._id, paymentMethod },
         { withCredentials: true }
       );
 
-      if (!paymentData.payUrl) {
-        toast.error(paymentData.message || 'Unable to generate payment link.');
-        return null;
-      }
-
-      return { type: 'redirect_external', url: paymentData.payUrl };
+      return { type: "redirect_external", url: paymentData.result.payUrl };
 
     } catch (error) {
-      console.error("Error during checkout:", error);
-      const message = error.response?.data?.message || "An error occurred during checkout.";
-      toast.error(message);
+      toast.error(error.response?.data?.message || "Checkout failed..");
       return false;
     }
   };
@@ -221,22 +165,21 @@ export default function useCartDetail(initialSelectedIds = []) {
     isSelecting,
     displayedCourses,
     displayedSubTotal,
-    displayedCount,
+    displayedCount: displayedCourses.length,
     couponCode,
     setCouponCode,
     appliedCoupon,
     handleApplyCoupon,
-    handleRemoveCoupon,
+    handleRemoveCoupon: () => { setAppliedCoupon(null); setCouponCode(""); },
     isApplyingCoupon,
     couponDiscountAmount,
     finalTotal,
-
     toggleSelect,
     toggleSelectAll,
-    removeFromCart,
+    handleReloadCart,
+    handleRemoveFromCart,
     handleClearCart,
     handleCheckout,
-    reloadCart: () => dispatch(fetchCart()),
-    loading: status === 'loading'
+    loading: status === "loading"
   };
 }

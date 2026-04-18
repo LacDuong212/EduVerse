@@ -1,18 +1,19 @@
-import Preloader from '../preloader';
-import { LayoutProvider } from '@/context/useLayoutContext';
-import { NotificationProvider } from '@/context/useNotificationContext';
-import { SocketContextProvider } from '@/context/SocketContext';
-
-import Aos from 'aos';
-import { Suspense, useEffect, useState } from 'react';
+import Aos from "aos";
+import axios from "axios";
+import { Suspense, useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import { useDispatch, useSelector } from 'react-redux';
-import axios from 'axios';
-import { setLogin, setLogout } from '@/redux/authSlice';
-import { fetchWishlist } from '@/redux/wishlistSlice';
-import { fetchCartCount } from '@/redux/cartSlice';
+import Preloader from "@/components/Preloader";
+import GlobalPreloader from "@/components/GlobalPreloader";
+import { PreloaderProvider } from "@/contexts/PreloaderContext";
+import { SocketContextProvider } from "@/contexts/SocketContext";
+import { LayoutProvider } from "@/contexts/useLayoutContext";
+import { NotificationProvider } from "@/contexts/useNotificationContext";
+import { setLogin, setLogout } from "@/redux/authSlice";
+import { fetchCart } from "@/redux/cartSlice";
+import { fetchWishlist } from "@/redux/wishlistSlice";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -22,19 +23,19 @@ const AppProvidersWrapper = ({ children }) => {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   const { userData } = useSelector((state) => state.auth);
-  const { status: wishlistStatus } = useSelector((state) => state.wishlist);
   const { status: cartStatus } = useSelector((state) => state.cart);
+  const { status: wishlistStatus } = useSelector((state) => state.wishlist);
 
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        const response = await axios.get(
-          `${backendUrl}/api/auth/is-auth`,
+        const { data } = await axios.get(
+          `${backendUrl}/api/auth/status`,
           { withCredentials: true }
         );
 
-        if (response.data.success) {
-          dispatch(setLogin(response.data.user));
+        if (data.success) {
+          dispatch(setLogin(data.result));
         } else {
           dispatch(setLogout());
         }
@@ -51,13 +52,13 @@ const AppProvidersWrapper = ({ children }) => {
   useEffect(() => {
     if (isCheckingAuth) return;
 
-    if (userData?._id) {
-      if (wishlistStatus === 'idle') {
-        dispatch(fetchWishlist(userData._id));
+    if (userData?.userId) {
+      if (cartStatus === "idle") {
+        dispatch(fetchCart());
       }
 
-      if (cartStatus === 'idle') {
-        dispatch(fetchCartCount());
+      if (wishlistStatus === "idle") {
+        dispatch(fetchWishlist());
       }
     }
   }, [userData, wishlistStatus, cartStatus, dispatch, isCheckingAuth]);
@@ -66,38 +67,41 @@ const AppProvidersWrapper = ({ children }) => {
     Aos.init();
 
     if (document) {
-      const e = document.querySelector('#__next_splash');
+      const e = document.querySelector("#__next_splash");
 
       if (e?.hasChildNodes()) {
-        document.querySelector('#splash-screen')?.classList.add('remove');
+        document.querySelector("#splash-screen")?.classList.add("remove");
       }
 
-      e?.addEventListener('DOMNodeInserted', () => {
-        document.querySelector('#splash-screen')?.classList.add('remove');
+      e?.addEventListener("DOMNodeInserted", () => {
+        document.querySelector("#splash-screen")?.classList.add("remove");
       });
     }
   }, []);
 
   return (
-    <LayoutProvider>
-      <NotificationProvider>
-        <SocketContextProvider>
-          <Suspense fallback={<Preloader />}>{children}</Suspense>
-        </SocketContextProvider>
-      </NotificationProvider>
+    <PreloaderProvider>
+      <GlobalPreloader />
+      <LayoutProvider>
+        <NotificationProvider>
+          <SocketContextProvider>
+            <Suspense fallback={<Preloader />}>{children}</Suspense>
+          </SocketContextProvider>
+        </NotificationProvider>
 
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop
-        closeOnClick
-        pauseOnHover
-        draggable
-        theme="colored"
-        style={{ pointerEvents: 'auto' }}
-      />
-    </LayoutProvider>
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          pauseOnHover
+          draggable
+          theme="colored"
+          style={{ pointerEvents: "auto" }}
+        />
+      </LayoutProvider>
+    </PreloaderProvider>
   );
 };
 

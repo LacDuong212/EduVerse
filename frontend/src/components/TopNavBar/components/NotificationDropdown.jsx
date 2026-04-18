@@ -5,7 +5,7 @@ import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 
-import { useSocketContext } from '@/context/SocketContext';
+import { useSocketContext } from '@/contexts/SocketContext';
 
 // URL Backend
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;

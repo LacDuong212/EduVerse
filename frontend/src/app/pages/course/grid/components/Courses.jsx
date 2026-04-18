@@ -1,137 +1,74 @@
-import ChoicesFormInput from '@/components/form/ChoicesFormInput';
-import { Button, Col, Container, Offcanvas, OffcanvasBody, OffcanvasHeader, Row } from 'react-bootstrap';
-import { FaSearch, FaSlidersH } from 'react-icons/fa';
-import { useSearchParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import Pagination from './Pagination';
-import CourseFilter from './CourseFilter';
-import useToggle from '@/hooks/useToggle';
-import useViewPort from '@/hooks/useViewPort';
+import { useEffect, useState } from "react";
+import {
+  Button, Col, Container, Offcanvas, OffcanvasBody, OffcanvasHeader, Row
+} from "react-bootstrap";
+import { FaSearch, FaSlidersH } from "react-icons/fa";
 import CourseCard from "@/components/CourseCard";
-
-import useCourseList from '../useCourseList';
+import ChoicesFormInput from "@/components/form/ChoicesFormInput";
+import useToggle from "@/hooks/useToggle";
+import useViewPort from "@/hooks/useViewPort";
+import useCourseList from "../useCourseList";
+import CourseFilter from "./CourseFilter";
+import Pagination from "./Pagination";
 
 const Courses = () => {
   const { isTrue, toggle } = useToggle();
   const { width } = useViewPort();
 
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [isInitialized, setIsInitialized] = useState(false);
-
   const {
-    allCourses,
-    total,
-    page,
-    setPage,
-    limit,
-    search,
-    setSearch,
-    category,
-    setCategory,
-    sort,
-    setSort,
     loading,
-    price,
-    setPrice,
-    level,
-    setLevel,
-    language,
-    setLanguage,
+    allCourses, total,
+    page, setPage,
+    limit,
+    search, setSearch,
+    category, setCategory,
+    sort, setSort,
+    price, setPrice,
+    level, setLevel,
+    language, setLanguage,
     clearFilters,
   } = useCourseList();
 
-  // local debounced search input
   const [searchInput, setSearchInput] = useState(search);
 
-  // sync local input when global search changes
   useEffect(() => {
     setSearchInput(search);
   }, [search]);
 
-  // debounce committing the value to search
   useEffect(() => {
     const handler = setTimeout(() => {
-      const q = searchInput?.trim() || '';
-      if (q !== (search || '')) {
+      const q = searchInput?.trim() || "";
+      if (q !== (search || "")) {
         setSearch(q);
-        setPage(1);
       }
-    }, 1000);
-
+    }, 800);
     return () => clearTimeout(handler);
-  }, [searchInput, search, setSearch, setPage]);
-
-  // hydrate state from URL
-  useEffect(() => {
-    // read all values from URL
-    const paramSearch = searchParams.get("search") || "";
-    const paramCategory = searchParams.get("category") || "";
-    const paramSort = searchParams.get("sort") || "newest";
-    const paramLevel = searchParams.get("level") || "";
-    const paramPrice = searchParams.get("price") || "";
-    const paramLanguage = searchParams.get("language") || "";
-
-    // batch update the state (if exists in URL)
-    if (paramSearch) setSearch(paramSearch);
-    if (paramCategory) setCategory(paramCategory);
-    if (paramSort) setSort(paramSort);
-    if (paramLevel) setLevel(paramLevel === 'All' ? '' : paramLevel);
-    if (paramPrice) setPrice(paramPrice);
-    if (paramLanguage) setLanguage(paramLanguage);
-
-    // if any filter exists, reset to page 1
-    setPage(1);
-
-    // mark init from URL done
-    setIsInitialized(true);
-  }, [searchParams]);
-
-  // update URL when filters change
-  useEffect(() => {
-    // no changing URL if not done initing
-    if (!isInitialized) return;
-
-    const params = {};
-    if (search?.trim()) params.search = search.trim();
-    if (category) params.category = category;
-    if (sort && sort !== 'newest') params.sort = sort;
-    if (level) params.level = level;
-    if (price) params.price = price;
-    if (language) params.language = language;
-
-    // use "replace: true" to not create unnecessary history entries while searching
-    setSearchParams(params, { replace: true });
-
-  }, [search, category, sort, level, price, language, isInitialized, setSearchParams]);
+  }, [searchInput, search, setSearch]);
 
   const onSearchClick = (e) => {
     e.preventDefault();
-    const q = searchInput?.trim() || '';
-    if (q !== (search || '')) {
-      setSearch(q);
-      setPage(1);
-    }
+    setSearch(searchInput?.trim() || "");
   };
 
-  const showingFrom = total ? (page - 1) * limit + (allCourses.length ? 1 : 0) : 0;
-  const showingTo = (page - 1) * limit + allCourses.length;
-  const totalResult = total;
+  const showingFrom = total ? (page - 1) * limit + 1 : 0;
+  const showingTo = Math.min(page * limit, total);
   const hasFilter = category || search || price || level || language || sort !== "newest";
+
+  const props = {
+    category, setCategory,
+    price, setPrice,
+    level, setLevel,
+    language, setLanguage,
+  };
 
   return (
     <section className="py-5">
       <Container>
         <Row>
           <Col lg={8} xl={9}>
-            <Row className="mb-4 align-items-center">
+            <Row className="align-items-center">
               <Col xl={6}>
-                <form
-                  className="border rounded p-2"
-                  onSubmit={(e) => {
-                    e.preventDefault(); // blocks page reload
-                    onSearchClick(e);   // triggers search logic
-                  }}
-                >
+                <form className="border rounded p-2" onSubmit={onSearchClick}>
                   <div className="input-group input-borderless">
                     <input
                       className="form-control me-1"
@@ -140,11 +77,7 @@ const Courses = () => {
                       value={searchInput}
                       onChange={(e) => setSearchInput(e.target.value)}
                     />
-                    <button
-                      type="button"
-                      className="btn btn-primary mb-0 rounded z-index-1"
-                      onClick={onSearchClick}
-                    >
+                    <button type="submit" className="btn btn-primary mb-0 rounded z-index-1">
                       <FaSearch />
                     </button>
                   </div>
@@ -157,58 +90,61 @@ const Courses = () => {
                     className="form-select form-select-sm js-choice border-0"
                     aria-label=".form-select-sm"
                     value={sort}
-                    onChange={(value) => {
-                      setSort(value);
-                      setPage(1);
-                    }}
+                    onChange={(value) => setSort(value)}
                   >
                     <option value="newest">Newest</option>
                     <option value="oldest">Oldest</option>
-                    <option value="mostPopular">Most Popular</option>
-                    <option value="ratingHighToLow">Rating: High to Low</option>
                     <option value="priceHighToLow">Price: High to Low</option>
                     <option value="priceLowToHigh">Price: Low to High</option>
+                    <option value="mostPopular">Most Popular</option>
+                    <option value="leastPopular">Least Popular</option>
+                    <option value="ratingHighToLow">Rating: High to Low</option>
+                    <option value="ratingLowToHigh">Rating: Low to High</option>
                   </ChoicesFormInput>
                 </form>
               </Col>
 
-              <Col
-                xs={12}
-                xl={3}
-                className="d-flex justify-content-between align-items-center mt-3 mt-xl-0"
-              >
-                <Button
+              <Col xs={12} xl={3} className="d-flex justify-content-between align-items-center mt-3 mt-xl-0">
+                <Button data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar" aria-controls="offcanvasSidebar"
                   variant="primary"
-                  onClick={toggle}
                   className="mb-0 d-lg-none"
-                  type="button"
-                  data-bs-toggle="offcanvas"
-                  data-bs-target="#offcanvasSidebar"
-                  aria-controls="offcanvasSidebar"
+                  onClick={toggle}
                 >
-                  <FaSlidersH className="me-1" /> Show filter
+                  <FaSlidersH className="me-1" /> Show Filters
                 </Button>
                 <p className="mb-0 text-end">
-                  Showing {showingFrom}-{showingTo} of {totalResult} result
+                  Showing {showingFrom}–{showingTo} of {total} results
                 </p>
               </Col>
             </Row>
 
+            <Col xs={12} className="my-3">
+              <Pagination
+                page={page}
+                limit={limit}
+                total={total}
+                onChangePage={setPage}
+              />
+            </Col>
+
             <Row className="g-4">
-              {loading && <Col xs={12}><p>Loading courses...</p></Col>}
-              {!loading && allCourses.length === 0 && (
-                <Col xs={12}>
-                  <p>No courses found matching your criteria.</p>
+              {loading ? (
+                <Col xs={12} className="text-center py-5">
+                  <div className="spinner-border text-primary" role="status"></div>
                 </Col>
-              )}
-              {!loading && allCourses?.map((course, idx) => (
-                <Col sm={6} xl={4} key={course._id || idx}>
+              ) : allCourses.length === 0 ? (
+                <Col xs={12} className="text-center py-5">
+                  <h4>No courses found.</h4>
+                  <p>Try adjusting your filters or search terms.</p>
+                </Col>
+              ) : allCourses?.map((course, idx) => (
+                <Col sm={6} xl={4} key={course.courseId || idx}>
                   <CourseCard course={course} />
                 </Col>
               ))}
             </Row>
 
-            <Col xs={12}>
+            <Col xs={12} className="mt-3">
               <Pagination
                 page={page}
                 limit={limit}
@@ -221,16 +157,7 @@ const Courses = () => {
           <Col lg={4} xl={3}>
             {width >= 992 ? (
               <>
-                <CourseFilter
-                  category={category}
-                  setCategory={setCategory}
-                  price={price}
-                  setPrice={setPrice}
-                  level={level}
-                  setLevel={setLevel}
-                  language={language}
-                  setLanguage={setLanguage}
-                />
+                <CourseFilter props={props} />
                 <div className="d-grid p-2 p-lg-0 text-center">
                   {hasFilter && (
                     <Button variant="primary" className="mb-0" onClick={clearFilters}>
@@ -254,16 +181,7 @@ const Courses = () => {
                   </h5>
                 </OffcanvasHeader>
                 <OffcanvasBody className="p-3 p-lg-0">
-                  <CourseFilter
-                    category={category}
-                    setCategory={setCategory}
-                    price={price}
-                    setPrice={setPrice}
-                    level={level}
-                    setLevel={setLevel}
-                    language={language}
-                    setLanguage={setLanguage}
-                  />
+                  <CourseFilter props={props} />
                 </OffcanvasBody>
                 <div className="d-grid p-2 p-lg-0 text-center">
                   {hasFilter && (

@@ -1,12 +1,11 @@
-import patternImg from '@/assets/images/pattern/04.png';
-import useInstructor from '@/app/instructor/useInstructor';
-import useProfile from '@/hooks/useProfile';
-
-import { useEffect, useState } from 'react';
-import { Card, Col, Container, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
-import { BsPatchCheckFill } from 'react-icons/bs';
-import { FaBook, FaSlidersH, FaStar, FaUserGraduate } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import { Card, Col, Container, OverlayTrigger, Row, Tooltip } from "react-bootstrap";
+import { BsPatchCheckFill } from "react-icons/bs";
+import { FaBook, FaSlidersH, FaStar, FaUserGraduate } from "react-icons/fa";
+import { Link } from "react-router-dom";
+import patternImg from "@/assets/images/pattern/04.png";
+import useInstructor from "@/app/instructor/useInstructor";
+import useProfile from "@/hooks/useProfile";
 
 const Banner = ({ toggleOffCanvas }) => { 
   const { user } = useProfile(); 
@@ -29,7 +28,7 @@ const Banner = ({ toggleOffCanvas }) => {
         <div className="bg-blue h-100px h-md-200px rounded-0"
           style={{
             background: `url(${patternImg}) no-repeat center center`,
-            backgroundSize: 'cover'
+            backgroundSize: "cover"
           }}></div>
       </Container>
 
@@ -39,7 +38,7 @@ const Banner = ({ toggleOffCanvas }) => {
           <Col xs={12}>
             <Card className="bg-transparent card-body p-0">
               <Row className="d-flex justify-content-between">
-                <Col xs={'auto'} className="mt-4 mt-md-0">
+                <Col xs={"auto"} className="mt-4 mt-md-0">
                   <div className="avatar avatar-xxl mt-n3">
                     {accountData?.pfpImg ? (
                       <img

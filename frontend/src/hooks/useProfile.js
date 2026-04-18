@@ -1,9 +1,8 @@
-import { setLogout } from '@/redux/authSlice';
-
-import axios from 'axios';
-import { useCallback, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { toast } from 'react-toastify';
+import axios from "axios";
+import { useCallback, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { toast } from "react-toastify";
+import { setLogout } from "@/redux/authSlice";
 
 export default function useProfile() {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -41,8 +40,8 @@ export default function useProfile() {
       console.error("Error when calling logout API:", error);
     } finally {
       dispatch(setLogout());
-      window.location.href = '/';
-      toast.success('Log out successfully');
+      window.location.href = "/";
+      toast.success("Log out successfully");
     }
   };
   
@@ -63,14 +62,14 @@ export default function useProfile() {
       const { signature, timestamp, folder, public_id, transformation, apiKey, cloudName } = response.data.uploadData;
 
       const formData = new FormData();
-      formData.append('file', file);
-      formData.append('api_key', apiKey);
-      formData.append('timestamp', timestamp);
-      formData.append('signature', signature);
-      formData.append('folder', folder);
-      formData.append('public_id', public_id);
+      formData.append("file", file);
+      formData.append("api_key", apiKey);
+      formData.append("timestamp", timestamp);
+      formData.append("signature", signature);
+      formData.append("folder", folder);
+      formData.append("public_id", public_id);
       formData.append("overwrite", "true");
-      formData.append('transformation', transformation);
+      formData.append("transformation", transformation);
 
       const cloudinaryRes = await axios.post(
         `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { tns } from 'tiny-slider';
 import { objectsEqual, childrenEqual } from './utils';
+
 const TinySlider = ({
   settings,
   onClick,
@@ -88,7 +89,7 @@ const TinySlider = ({
     onClick(slideClicked, info, event);
   };
   return <div ref={ref} onClick={onClickHandler} className={className} style={style}>
-      {children}
-    </div>;
+    {children}
+  </div>;
 };
 export default TinySlider;

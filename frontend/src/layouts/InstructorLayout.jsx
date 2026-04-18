@@ -1,16 +1,16 @@
-import { INSTRUCTOR_MENU_ITEMS } from '../assets/data/menu-items';
-import Banner from '../components/instructorLayoutComponents/Banner';
-import Footer from '../components/instructorLayoutComponents/Footer';
-import TopNavigationBar from '../components/instructorLayoutComponents/TopNavigationBar';
-import useProfile from '../hooks/useProfile';
-import useToggle from '../hooks/useToggle';
-import useViewPort from '../hooks/useViewPort';
-
-import clsx from 'clsx';
-import { Col, Container, Offcanvas, OffcanvasBody, OffcanvasHeader, OffcanvasTitle, Row } from 'react-bootstrap';
-import { FaSignOutAlt } from 'react-icons/fa';
-import { Link, useLocation } from 'react-router-dom';
-
+import clsx from "clsx";
+import {
+  Col, Container, Offcanvas, OffcanvasBody, OffcanvasHeader, OffcanvasTitle, Row
+} from "react-bootstrap";
+import { FaSignOutAlt } from "react-icons/fa";
+import { Link, useLocation } from "react-router-dom";
+import { INSTRUCTOR_MENU_ITEMS } from "@/assets/data/menu-items";
+import Banner from "@/components/instructorLayoutComponents/Banner";
+import Footer from "@/components/instructorLayoutComponents/Footer";
+import TopNavigationBar from "@/components/instructorLayoutComponents/TopNavigationBar";
+import useProfile from "@/hooks/useProfile";
+import useToggle from "@/hooks/useToggle";
+import useViewPort from "@/hooks/useViewPort";
 
 const VerticalMenu = () => {
   const { pathname } = useLocation();
@@ -23,9 +23,9 @@ const VerticalMenu = () => {
           ({ label, url, icon }, idx) => {
             const Icon = icon;
             return (
-              <Link className={clsx('list-group-item icons-center', { active: pathname === url })} to={url || ''} key={idx}>
+              <Link className={clsx("list-group-item icons-center", { active: pathname === url })} to={url || ""} key={idx}>
                 {Icon && <Icon size={18} className="flex-shrink-0 me-2" />}
-                <span style={{ position: 'relative', top: '2px' }}>{label}</span>
+                <span style={{ position: "relative", top: "2px" }}>{label}</span>
               </Link>
             );
           }
@@ -33,7 +33,7 @@ const VerticalMenu = () => {
 
         <Link className="list-group-item text-danger bg-danger-soft-hover" onClick={logout} to="/">
           <FaSignOutAlt className="flex-shrink-0 ms-1 me-2" />
-          <span style={{ position: 'relative', top: '2px' }}>Sign Out</span>
+          <span style={{ position: "relative", top: "2px" }}>Sign Out</span>
         </Link>
       </div>
     </div>

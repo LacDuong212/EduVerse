@@ -29,11 +29,11 @@ const InterestModal = () => {
           if (data.success && data.result.length > 0) {
             setTopics(data.result);
           } else {
-            setTopics(["Web Development", "JavaScript", "Python", "Design", "Business"]);
+            setTopics(["webdev", "javascript", "python", "design", "business"]);
           }
         } catch (error) {
           console.error("Error fetching tags:", error);
-          setTopics(["Web Development", "ReactJS", "NodeJS", "Marketing"]);
+          setTopics(["webdev", "reactjs", "nodejs", "marketing"]);
         } finally {
           setLoadingTags(false);
         }
@@ -71,7 +71,7 @@ const InterestModal = () => {
       if (data.success) {
         toast.success("Your preferences have been saved! The system will recommend courses for you.");
 
-        dispatch(setUserData(data.user));
+        dispatch(setUserData({...userData, interests: data.result}));
 
         dispatch(setRecommendedCourses([]));
       }
@@ -112,8 +112,8 @@ const InterestModal = () => {
                     key={topic}
                     onClick={() => toggleTopic(topic)}
                     className={`btn rounded-pill px-3 py-2 fw-medium border ${isSelected
-                        ? "btn-primary-soft"
-                        : "btn-outline-body"
+                      ? "btn-primary-soft"
+                      : "btn-outline-body"
                       }`}
                     style={{ transition: "all 0.2s" }}
                   >

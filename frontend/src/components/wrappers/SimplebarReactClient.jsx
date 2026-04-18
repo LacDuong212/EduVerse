@@ -1,4 +1,4 @@
-import SimpleBar from 'simplebar-react';
+import SimpleBar from "simplebar-react";
 
 const SimplebarReactClient = ({
   children,

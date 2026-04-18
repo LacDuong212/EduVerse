@@ -1,4 +1,4 @@
-import { useLayoutContext } from '@/context/useLayoutContext';
+import { useLayoutContext } from '@/contexts/useLayoutContext';
 import useProfile from '@/hooks/useProfile';
 import { toSentenceCase } from '@/utils/change-casing';
 
@@ -47,10 +47,10 @@ const ProfileDropdown = ({ className, dropdownItems }) => {
         overlay={<Tooltip>Account</Tooltip>}
       >
         <DropdownToggle as="a" className="avatar avatar-sm p-0 arrow-none" id="profileDropdown" role="button" data-bs-auto-close="outside" data-bs-display="static" data-bs-toggle="dropdown" aria-expanded="false">
-          {user?.pfpImg ? (
+          {user?.avatar ? (
             <img
               className="avatar-img rounded-circle shadow "
-              src={user.pfpImg}
+              src={user.avatar}
               alt="User Avatar" />
           ) : (
             <div className="avatar-img rounded-circle border border-white border-1 shadow d-flex align-items-center justify-content-center bg-light text-dark fw-bold fs-5">
@@ -65,10 +65,10 @@ const ProfileDropdown = ({ className, dropdownItems }) => {
         <li className="px-3">
           <div className="d-flex align-items-center">
             <div className="avatar me-3">
-              {user?.pfpImg ? (
+              {user?.avatar ? (
                 <img
                   className="avatar-img rounded-circle border border-body border-2 shadow"
-                  src={user.pfpImg}
+                  src={user.avatar}
                   alt="User Avatar" />
               ) : (
                 <div className="avatar-img rounded-circle border border-body border-1 shadow d-flex align-items-center justify-content-center bg-light text-dark fw-bold fs-4">

@@ -1,7 +1,11 @@
 import { Container, Row } from "react-bootstrap";
-import CommonCourseSlider from "./CommonCourseSlider";
+import { useSelector } from "react-redux";
+import CommonCourseSlider from "@/components/CommonCourseSlider";
 
 const TopRatedSection = () => {
+  const coursesState = useSelector((s) => s.courses || {});
+  const list = Array.isArray(coursesState["topRated"]) ? coursesState["topRated"] : [];
+
   return <section className="py-0">
     <Container>
       <Row className="mb-4 mx-auto text-center">
@@ -12,7 +16,7 @@ const TopRatedSection = () => {
       </Row>
       <Row>
         <div className="tiny-slider arrow-round arrow-blur arrow-hover">
-          <CommonCourseSlider source="topRated" />
+          <CommonCourseSlider courses={list} />
         </div>
       </Row>
     </Container>

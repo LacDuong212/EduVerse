@@ -1,58 +1,53 @@
-import axios from 'axios';
-import { useState, useEffect } from 'react';
+import axios from "axios";
+import { useCallback, useEffect, useState } from "react";
 
-const URL_REGEX = /^(https|http):\/\/[^\s$.?#].[^\s]*$/;
-
-export const useVideoStream = (courseId, videoSource) => {
+export const useVideoStream = (videoId) => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  
   const [streamUrl, setStreamUrl] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [statusCode, setStatusCode] = useState(null);
+
+  const fetchStreamUrl = useCallback(async () => {
+    if (!videoId) return;
+
+    setLoading(true);
+    setError(null);
+    setStatusCode(null);
+
+    try {
+      const { data } = await axios.get(`${backendUrl}/api/videos/${videoId}`, {
+        withCredentials: true,
+      });
+
+      if (data.success) {
+        setStreamUrl(data.result);
+      }
+    } catch (err) {
+      const status = err.response?.status;
+      const msg = err.response?.data?.message || "Failed to load video.";
+
+      setStatusCode(status);
+      setError(msg);
+
+      if (![403, 404].includes(status)) {
+        toast.error(msg);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [videoId, backendUrl]);
 
   useEffect(() => {
-    // reset state when video changes
-    setStreamUrl(null);
-    setError(null);
-    setLoading(true);
+    fetchStreamUrl();
+  }, [fetchStreamUrl]);
 
-    if (!videoSource) {
-      setLoading(false);
-      return;
-    }
-
-    // check if it's already an external URL (YouTube/Vimeo,..)
-    if (URL_REGEX.test(videoSource)) {
-      setStreamUrl(videoSource);
-      setLoading(false);
-      return;
-    }
-
-    // if it's an S3 key
-    const fetchSignedUrl = async () => {
-      try {
-        // encode videoSource, for safety
-        const encodedKey = encodeURIComponent(videoSource);
-
-        const { data } = await axios.get(
-          `${backendUrl}/api/courses/${courseId}/videos/${encodedKey}`,
-          { withCredentials: true }
-        );
-
-        if (data.success) {
-          setStreamUrl(data.streamUrl);
-        } else {
-          setError(data.message || "Failed to load video");
-        }
-      } catch (err) {
-        console.error("Video fetch error:", err);
-        setError(err.response?.data?.message || "Error loading video");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSignedUrl();
-  }, [courseId, videoSource]);
-
-  return { streamUrl, loading, error };
+  return { 
+    streamUrl, 
+    loading, 
+    error, 
+    statusCode, 
+    refetch: fetchStreamUrl 
+  };
 };

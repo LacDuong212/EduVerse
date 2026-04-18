@@ -1,5 +1,5 @@
-import { useSelector } from "react-redux";
 import { Container, Row, Col, Badge } from "react-bootstrap";
+import { useSelector } from "react-redux";
 import CourseCard from "@/components/CourseCard";
 
 const RecommendedCourses = () => {
@@ -16,7 +16,7 @@ const RecommendedCourses = () => {
         <Row className="mb-4">
           <Col lg={8} className="mx-auto text-center">
             <h2 className="fs-1">
-              Recommended for You <i className="bi bi-stars text-warning"></i>
+              Recommended for You
             </h2>
             <p className="mb-0 text-muted">
               Based on your learning history and interests, we think you'll love these.
@@ -30,10 +30,9 @@ const RecommendedCourses = () => {
               <div className="position-relative h-100">
                 <CourseCard course={course} />
 
-                <Badge bg="info" className="position-absolute top-0 start-0 m-2 shadow-sm">
+                <Badge bg="purple" className="border border-2 border-light bg-blur bg-opacity-50 position-absolute top-0 end-0 m-2 shadow-sm">
                   AI Pick
                 </Badge>
-
               </div>
             </Col>
           ))}

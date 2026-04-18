@@ -11,6 +11,7 @@ export const toAuthUserDto = (user) => {
 
   return {
     ...getUserBasicInfo(user),
+    interests: user.interests,
     role: user.role || "guest",
   };
 };

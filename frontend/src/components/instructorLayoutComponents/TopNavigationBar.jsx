@@ -1,14 +1,13 @@
+import { Container, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 import { INSTRUCTOR_APP_MENU_ITEMS, INSTRUCTOR_ACCOUNT_DROPDOWN_ITEMS } from '@/assets/data/menu-items.js';
+import { useLayoutContext } from '@/contexts/useLayoutContext';
 import LogoBox from '../LogoBox';
 import TopNavbar from '../TopNavBar';
 import NotificationDropdown from '../TopNavBar/components/NotificationDropdown'
 import ProfileDropdown from '../TopNavBar/components/ProfileDropdown';
 import SimpleAppMenu from '../TopNavBar/components/SimpleAppMenu';
 import TopbarMenuToggler from '../TopNavBar/components/TopbarMenuToggler';
-import { useLayoutContext } from '@/context/useLayoutContext';
-import { Container, OverlayTrigger, Tooltip } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
-
 
 const TopNavigationBar = () => {
   const { appMenuControl } = useLayoutContext();

@@ -7,7 +7,7 @@ const ForgotPassword = lazy(() => import('@/app/auth/forgot-password/page'));
 const ResetPassword = lazy(() => import('@/app/auth/reset-password/page'));
 
 // INSTRUCTOR
-import InstructorAccount from "../app/instructor/account";
+import InstructorAccount from "../app/instructor/profile";
 import InstructorCourseDetail from "../app/instructor/course-detail";
 import InstructorDashboard from "../app/instructor/dashboard";
 import InstructorEarnings from '../app/instructor/earnings';
@@ -37,7 +37,7 @@ import BecomeInstructorPage from '../app/student/become-instructor';
 import CourseDetails from "../app/pages/course/detail/page";
 import InstructorDetailsPage from "../app/pages/instructors/detail";
 import VideoPlayer from "../app/pages/course/video-player/page";
-import NotFoundPage from '../app/not-found';
+import NotFoundPage from '../components/not-found';
 
 
 export const publicRoutes = [{

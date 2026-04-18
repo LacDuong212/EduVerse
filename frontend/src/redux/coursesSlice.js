@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  currency: import.meta.env.VITE_CURRENCY || "USD",
+  currency: import.meta.env.VITE_CURRENCY || "$",
   newest: [],
   bestSellers: [],
   topRated: [],

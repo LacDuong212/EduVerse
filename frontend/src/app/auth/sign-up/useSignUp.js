@@ -1,61 +1,104 @@
-import { useState } from "react";
 import axios from "axios";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { useSelector } from "react-redux";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { signUpSchema } from "./signUpSchema";
 
 export default function useSignUp(onSignUpSuccess) {
-  const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const navigate = useNavigate();
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
+  const { isLoggedIn, userData } = useSelector((state) => state.auth);
+
+  const [searchParams] = useSearchParams();
+  const emailFromUrl = searchParams.get("email") || "";
+
   const [loading, setLoading] = useState(false);
 
-  const signUp = async ({ name, email, password }) => {
+  const {
+    control,
+    handleSubmit,
+    setError,
+    formState: { errors }
+  } = useForm({
+    resolver: zodResolver(signUpSchema),
+    defaultValues: {
+      name: "",
+      email: emailFromUrl,
+      password: "",
+      confirmPassword: ""
+    }
+  });
+
+  useEffect(() => {
+    if (isLoggedIn && userData) {
+      const roleRedirect = userData.role === "student" ? "/" : "/instructor/dashboard";
+      navigate(roleRedirect, { replace: true });
+    }
+  }, [isLoggedIn, userData, navigate]);
+
+  const signUp = handleSubmit(async (data) => {
     if (loading) return;
     setLoading(true);
 
     const payload = {
-      name,
-      email: email.trim(),
-      password
+      name: data.name.trim(),
+      email: data.email.toLowerCase().trim(),
+      password: data.password
     };
 
     try {
-      axios.defaults.withCredentials = true;
-      const { data } = await axios.post(`${backendUrl}/api/auth/register`, payload);
+      const { data: resData } = await axios.post(
+        `${backendUrl}/api/auth/register`,
+        payload,
+        { withCredentials: true }
+      );
 
-      if (data.success) {
-        toast.success("Registration successful! Please verify your email.");
+      if (resData.success) {
+        toast.success("Account created! Please check your email for the OTP.");
 
-        // open verify email modal
         if (onSignUpSuccess) {
           onSignUpSuccess(payload.email);
         } else {
-          // fallback: redirect to verify page and pass email
           navigate(`/auth/verify-email?email=${encodeURIComponent(payload.email)}`);
         }
-      } else {
-        toast.error(data.message || "Registration failed");
       }
-
     } catch (error) {
-      if (error.response) {
-        const { status, data } = error.response;
+      console.error("Registration Error:", error);
 
-        // if account already exists
+      if (error.response) {
+        const { status, data: errData } = error.response;
+
+        if (status === 400 && errData.errors) {
+          errData.errors.forEach((err) => {
+            const fieldName = err.field.split(".").pop();
+            setError(fieldName, { type: "server", message: err.message });
+          });
+          return;
+        }
+
         if (status === 409) {
-          toast.info("Account already exists. Please log in.");
-          // redirect to sign in page and pass email
+          toast.info("Account already exists. Redirecting to login...");
           navigate(`/auth/sign-in?email=${encodeURIComponent(payload.email)}`);
           return;
         }
 
-        toast.error(data.message || "Registration failed");
+        toast.error(errData.message || "Registration failed");
       } else {
-        toast.error("Network error. Please try again.");
+        toast.error("Network error. Please check your connection.");
       }
     } finally {
       setLoading(false);
     }
-  };
+  });
 
-  return { loading, signUp };
+  return {
+    loading,
+    signUp,
+    control,
+    errors
+  };
 }
