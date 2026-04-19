@@ -15,7 +15,13 @@ export const addToWishlist = async (userId, courseId) => {
     course: courseId
   });
 
-  return item.populate("course");
+  return item.populate({
+    path: "course",
+    populate: {
+      path: "category",
+      select: "name slug"
+    }
+  });
 }
 
 export const removeFromWishlist = async (userId, courseId) => {
@@ -33,7 +39,13 @@ export const removeFromWishlist = async (userId, courseId) => {
 export const getWishlist = async (userId) => {
 
   const list = await Wishlist.find({ user: userId })
-    .populate("course")
+    .populate({
+      path: "course",
+      populate: {
+        path: "category",
+        select: "name slug"
+      }
+    })
     .sort({ createdAt: -1 })
     .lean();
 

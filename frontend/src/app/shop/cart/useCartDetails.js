@@ -147,7 +147,7 @@ export default function useCartDetail(initialSelectedIds = []) {
       toast.info("Creating payment...");
       const { data: paymentData } = await axios.post(
         `${backendUrl}/api/payments`,
-        { orderId: order._id, paymentMethod },
+        { orderId: order.orderId, paymentMethod },
         { withCredentials: true }
       );
 

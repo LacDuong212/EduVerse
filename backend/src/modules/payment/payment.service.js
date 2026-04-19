@@ -6,6 +6,7 @@ import { withTransaction } from "#utils/transaction.js";
 import * as momoProvider from "./providers/momo.provider.js";
 import * as vnpayProvider from "./providers/vnpay.provider.js";
 import Transaction from "./transaction.model.js";
+import * as cartService from "#modules/cart/cart.service.js";
 
 export const createPayment = async ({ orderId, userId, paymentMethod, ipAddr }) => {
   const order = await Order.findOne({ _id: orderId, user: userId });

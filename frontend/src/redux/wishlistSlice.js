@@ -32,7 +32,7 @@ export const addToWishlist = createAsyncThunk(
   async ({ courseId }, { rejectWithValue }) => {
     try {
       const response = await axios.post(
-        `${API_URL}/add`,
+        `${API_URL}/`,
         { courseId },
         { withCredentials: true }
       );

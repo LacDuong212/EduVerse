@@ -1,3 +1,9 @@
+const getCourseCatgegory = (category) => ({
+  cateId: getStringId(category) || null,
+  cateName: category?.name || null,
+  cateSlug: category?.slug || null,
+});
+
 export const toWishlistDto = (course) => {
   if (!course) return null;
 
@@ -11,11 +17,10 @@ export const toWishlistDto = (course) => {
 
   const isFree = effectivePrice === 0;
 
+  const categoryName = course?.category?.name || null;
+
   const ratingTotal = course?.rating?.total || 0;
   const ratingCount = course?.rating?.count || 0;
-  const ratingAvg = ratingCount
-    ? Number((ratingTotal / ratingCount).toFixed(1))
-    : 0;
 
   return {
     courseId: course?._id?.toString() || null,
@@ -24,6 +29,9 @@ export const toWishlistDto = (course) => {
     subtitle: course?.subtitle || null,
     image: course?.image || null,
     thumnail: course?.thumnail || null,
+    duration: course?.duration || null,
+    lecturesCount: course?.lecturesCount || null,
+
 
     price,
     discountPrice,
@@ -31,7 +39,14 @@ export const toWishlistDto = (course) => {
     isFree,
 
     level: course?.level || null,
-    ratingAvg,
+    category:{
+      name: categoryName
+    },
+
+    rating: {
+      total: ratingTotal,
+      count: ratingCount
+    },
     lectureCount: course?.lectureCount || 0
   }
 }
