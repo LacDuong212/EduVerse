@@ -1,3 +1,4 @@
+import { DEFAULT_COURSE_IMG } from '@/contexts/constants';
 import { formatCurrency } from '@/utils/currency';
 import { secondsToDurationHM } from '@/utils/duration';
 import { Alert, Card, CardBody, CardHeader, Col, Row } from 'react-bootstrap';
@@ -31,7 +32,7 @@ const CourseInfo = ({ col = 6, courseData }) => {
       <Col xxl={col}>
         <Card className="bg-transparent border rounded-3 h-100">
           <CardHeader className="bg-light border-bottom">
-            <h5 className="card-header-title">{courseData?.title || '(No title)'}</h5>
+            <h5 className="card-header-title">Course Info</h5>
           </CardHeader>
           <CardBody className="p-3 pb-2">
             <Row>
@@ -44,7 +45,7 @@ const CourseInfo = ({ col = 6, courseData }) => {
                     src={
                       courseData?.image ||
                       courseData?.thumbnail ||
-                      "https://res.cloudinary.com/dw1fjzfom/image/upload/v1757337425/av4_khpvlh.png"
+                      DEFAULT_COURSE_IMG
                     }
                     alt={courseData?.title || "Course Image"}
                     className="rounded w-100 h-100 object-fit-cover"

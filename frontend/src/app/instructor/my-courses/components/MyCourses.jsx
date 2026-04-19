@@ -1,4 +1,5 @@
 import ChoicesFormInput from "@/components/form/ChoicesFormInput";
+import { DEFAULT_COURSE_IMG } from "@/contexts/constants";
 import { formatCurrency } from "@/utils/currency";
 import { useState } from "react";
 import { Button, Card, CardBody, CardFooter, CardHeader, Col, OverlayTrigger, Row, Tooltip } from "react-bootstrap";
@@ -156,7 +157,7 @@ const MyCourses = ({
                     <div className="d-flex align-items-center">
                       <div className="flex-shrink-0 rounded overflow-hidden" style={{ width: "80px", height: "80px" }}>
                         <img
-                          src={course.image || "https://res.cloudinary.com/dw1fjzfom/image/upload/v1757337425/av4_khpvlh.png"}
+                          src={course.image || DEFAULT_COURSE_IMG}
                           alt={course.title || "Course Image"}
                           className="img-fluid h-100 w-100 object-fit-cover"
                         />
