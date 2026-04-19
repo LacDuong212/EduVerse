@@ -1,19 +1,14 @@
+import { Fragment } from "react";
 import {
-  Accordion,
-  AccordionBody,
-  AccordionHeader,
-  AccordionItem,
+  Accordion, AccordionBody, AccordionHeader, AccordionItem,
   Button,
   Col,
-  Modal,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
+  Modal, ModalBody, ModalFooter, ModalHeader,
   Row,
   Spinner
 } from "react-bootstrap";
 import clsx from "clsx";
-import { Fragment } from "react";
+import { BsPatchCheckFill } from "react-icons/bs";
 import {
   FaFacebookF,
   FaHeadset,
@@ -22,74 +17,63 @@ import {
   FaLock,
   FaPlay,
   FaRegEnvelope,
-  FaTwitter,
 } from "react-icons/fa";
-import { BsPatchCheckFill } from "react-icons/bs";
+import { MdError } from "react-icons/md";
+import { toast } from "react-toastify";
 import element1 from "@/assets/images/element/01.svg";
-import { formatCurrency } from "@/utils/currency";
-import { secondsToDuration } from "@/utils/duration";
+import GlightBox from "@/components/GlightBox";
 import { useVideoStream } from "@/hooks/useStreamUrl";
 import useToggle from "@/hooks/useToggle";
-import useCourseDetail from "../useCourseDetail";
-import { useNavigate } from "react-router-dom";
-import GlightBox from "@/components/GlightBox";
+import { formatCurrency } from "@/utils/currency";
+import { secondsToDuration } from "@/utils/duration";
 
+const LecturePlayButton = ({ idx, lecId, title, videoId }) => {
+  const { streamUrl, loading, error } = useVideoStream(videoId);
 
-const LecturePlayButton = ({ courseId, lecture, sectionId }) => {
-  const { streamUrl, loading } = useVideoStream(courseId, lecture.videoUrl);
-
-  // if video is loading
   if (loading) {
     return (
-      <div className="btn-round mb-0 stretched-link position-static flex-centered btn btn-sm btn-light">
-        <Spinner animation="border" size="sm" style={{ width: "10px", height: "10px" }} />
+      <div className="btn btn-sm btn-round btn-light mb-0 position-static flex-centered">
+        <Spinner animation="border" size="sm" style={{ width: "15px", height: "15px" }} />
       </div>
     );
   }
 
-  // if video is loaded, render the GlightBox
+  const lectureName = title || `#${idx + 1}`;
+
+  if (error) {
+    return (
+      <Button
+        variant="danger"
+        size="sm"
+        className="btn-round mb-0 position-static flex-centered"
+        onClick={() => toast.error(`Unable to play lecture: ${lectureName}`)}
+      >
+        <MdError size={18} />
+      </Button>
+    );
+  }
+
   return (
     <GlightBox
       data-glightbox
-      data-gallery={`section-${sectionId}`}
+      data-gallery={`lecture-${lecId || idx}`}
       href={streamUrl}
-      className="btn-round mb-0 stretched-link position-static flex-centered btn btn-sm btn-danger-soft"
+      className="btn btn-sm btn-round btn-orange-soft mb-0 position-static flex-centered"
     >
-      <FaPlay className="me-0" size={11} />
+      <FaPlay className="me-0" size={14} />
     </GlightBox>
   );
 };
 
-const Curriculum = ({ coursePrice, premiumAction }) => {
-  const { course, loading, error } = useCourseDetail();
+const CurriculumTab = ({ curriculum, price, action }) => {
   const { isTrue: isOpen, toggle } = useToggle();
-  const navigate = useNavigate();
 
-  // UI loading/error
-  if (loading)
-    return (
-      <div className="text-center py-5">
-        <Spinner animation="border" />
-      </div>
-    );
-  if (error)
-    return (
-      <div className="text-center py-5 text-danger">
-        Failed to load course.
-      </div>
-    );
-  if (!course || !Array.isArray(course.curriculum))
+  if (!curriculum || !Array.isArray(curriculum))
     return (
       <div className="text-center py-5 text-muted">
         No curriculum available.
       </div>
     );
-
-  const handlePlay = (lecture) => {
-    if (!lecture?.isFree) {
-      return toggle();
-    }
-  };
 
   return (
     <>
@@ -98,62 +82,59 @@ const Curriculum = ({ coursePrice, premiumAction }) => {
         className="accordion-icon accordion-bg-light"
         id="accordionExample2"
       >
-        {course.curriculum.map((section, idx) => (
+        {curriculum.map((section, idx) => (
           <AccordionItem
-            key={section._id || idx}
+            key={section.secId || idx}
             eventKey={`${idx}`}
-            className={clsx({ "mb-3": course.curriculum.length - 1 !== idx, })}
+            className={clsx({ "mb-3": curriculum.length - 1 !== idx })}
           >
             <AccordionHeader as="h6" className="font-base">
               <div className="fw-bold rounded d-sm-flex d-inline-block collapsed">
-                {section.section || `Section ${idx + 1}`}
-                <span className="small ms-0 ms-sm-2">
-                  {(section.lectures || []).length} Lectures
+                {section.title || `Section ${idx + 1}`}
+                <span className="small fw-light ms-1">
+                  ({(section.lectures || []).length} lectures)
                 </span>
               </div>
             </AccordionHeader>
 
             <AccordionBody className="mt-3">
               {(section.lectures || []).map((lecture, i) => (
-                <Fragment key={lecture._id || i}>
+                <Fragment key={lecture.lecId || i}>
                   <div className="d-flex justify-content-between align-items-center">
                     <div className="position-relative d-flex align-items-center">
                       {lecture.isFree ? (
                         <LecturePlayButton
-                          courseId={course._id}
-                          lecture={lecture}
-                          sectionId={section._id || idx}
+                          idx={i}
+                          lecId={lecture.lecId}
+                          title={lecture.title}
+                          videoId={lecture.videoId}
                         />
                       ) : (
                         <Button
                           variant="light"
                           size="sm"
-                          className="btn-round mb-0 stretched-link position-static flex-centered"
+                          className="btn-round mb-0 position-static"
                           onClick={toggle}
                         >
-                          <FaPlay className="me-0" size={11} />
+                          <FaPlay className="me-0" size={14} />
                         </Button>
                       )}
-                      <Row className="g-sm-0 align-items-center">
-                        <Col sm="auto">
-                          <span className="d-inline-block text-truncate ms-2 mb-0 h6 fw-light w-200px w-md-400px">
-                            {lecture.title || "Untitled Lecture"}
-                          </span>
-                        </Col>
-                        {!lecture.isFree && (
-                          <Col sm="auto">
-                            <span className="badge text-bg-orange ms-2 ms-md-0">
-                              <FaLock className="fa-fw me-1" />
-                              Premium
-                            </span>
-                          </Col>
-                        )}
-                      </Row>
+                      <span className="d-inline-block text-wrap ms-2 mb-0 h6 fw-light">
+                        {lecture.title || "Untitled Lecture"}
+                      </span>
                     </div>
 
-                    <p className="mb-0 small">
-                      {(lecture.duration ? `${secondsToDuration(lecture.duration || 0)}` : "--")}
-                    </p>
+                    <div className="d-flex justify-content-between align-items-center">
+                      {!lecture.isFree && (
+                        <span className="badge text-bg-orange">
+                          <FaLock className="fa-fw me-1" />
+                          Premium
+                        </span>
+                      )}
+                      <p className="mb-0 small w-80px text-end">
+                        {(lecture.duration ? `${secondsToDuration(lecture.duration || 0)}` : "-m -s")}
+                      </p>
+                    </div>
                   </div>
 
                   {section.lectures.length - 1 !== i && <hr />}
@@ -174,55 +155,54 @@ const Curriculum = ({ coursePrice, premiumAction }) => {
         tabIndex={-1}
         aria-hidden="true"
       >
-        <ModalHeader className="border-0 bg-transparent" closeButton />
+        <ModalHeader className="border-0 bg-warning" closeButton />
         <ModalBody className="px-5 pb-5 position-relative overflow-hidden">
           <figure className="position-absolute bottom-0 end-0 mb-n4 me-n4 d-none d-sm-block">
             <img src={element1} alt="element" />
           </figure>
-          <h3>
-            Get Course now for the price of
-            <span className="h1 ms-1 text-success"> {formatCurrency(coursePrice)}</span>
+          <h3 className="d-flex align-items-center">
+            Get course NOW for the PRICE of
+            <span className="h2 border border-3 border-primary rounded bg-primary bg-opacity-10 text-primary ms-2 py-1 px-2">{formatCurrency(price)}</span>
           </h3>
           <p>
-            Unlock full access to all lectures, materials and exclusive
-            instructor support.
+            Unlock full access to all lectures and materials in this course.
           </p>
 
           <Row className="mb-3 item-collapse">
             <Col sm={6}>
               <ul className="list-group list-group-borderless">
                 <li className="list-group-item text-body">
-                  <BsPatchCheckFill className="text-success" />
-                  High quality Curriculum
+                  <BsPatchCheckFill className="text-success me-1" />
+                  Full Curriculum
                 </li>
                 <li className="list-group-item text-body">
-                  <BsPatchCheckFill className="text-success" />
-                  Tuition Assistance
+                  <BsPatchCheckFill className="text-success me-1" />
+                  Lecture Summary and Key Concepts
                 </li>
               </ul>
             </Col>
             <Col sm={6}>
               <ul className="list-group list-group-borderless">
                 <li className="list-group-item text-body">
-                  <BsPatchCheckFill className="text-success" />
-                  Leveled courses for you
+                  <BsPatchCheckFill className="text-success me-1" />
+                  Quizzes
                 </li>
                 <li className="list-group-item text-body">
-                  <BsPatchCheckFill className="text-success" />
-                  Over 10+ online courses
+                  <BsPatchCheckFill className="text-success me-1" />
+                  Final evaluation
                 </li>
               </ul>
             </Col>
           </Row>
 
-          <Button variant="orange-soft" size="lg" onClick={premiumAction}>
+          <Button variant="orange-soft" size="lg" className="mb-0" onClick={action}>
             Purchase Course
           </Button>
         </ModalBody>
         <ModalFooter className="d-block bg-info">
           <div className="d-sm-flex justify-content-sm-between align-items-center text-center text-sm-start">
             <ul className="list-inline mb-0 social-media-btn mb-2 mb-sm-0">
-              {[FaFacebookF, FaInstagram, FaTwitter, FaLinkedinIn].map(
+              {[FaFacebookF, FaInstagram, FaLinkedinIn].map(
                 (Icon, i) => (
                   <li className="list-inline-item" key={i}>
                     <a className="btn btn-white btn-sm shadow px-2 mb-0" href="#">
@@ -253,4 +233,4 @@ const Curriculum = ({ coursePrice, premiumAction }) => {
   );
 };
 
-export default Curriculum;
+export default CurriculumTab;

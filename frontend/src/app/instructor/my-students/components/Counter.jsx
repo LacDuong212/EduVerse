@@ -1,9 +1,9 @@
-import { Col, Row } from 'react-bootstrap';
-import CountUp from 'react-countup';
+import { Col, Row } from "react-bootstrap";
+import CountUp from "react-countup";
 import { BsLightningCharge, BsPauseCircle } from "react-icons/bs";
 import { FaUserGraduate } from "react-icons/fa";
 
-const Counter = ({ totalStudents = 0 , activeStudents = 0 , inactiveStudents = 0 }) => {
+const Counter = ({ stats = {} }) => {
   return (
     <Row className="justify-content-center text-center">
       <Col>
@@ -14,7 +14,7 @@ const Counter = ({ totalStudents = 0 , activeStudents = 0 , inactiveStudents = 0
             </div>
             <div className="ms-3 text-start">
               <h4 className="purecounter fw-bold mb-0">
-                <CountUp end={totalStudents} delay={1} />
+                <CountUp end={stats?.totalStudents || 0} delay={1} />
               </h4>
               <div>Total Students</div>
             </div>
@@ -26,7 +26,7 @@ const Counter = ({ totalStudents = 0 , activeStudents = 0 , inactiveStudents = 0
             </div>
             <div className="ms-3 text-start">
               <h4 className="purecounter fw-bold mb-0">
-                <CountUp end={activeStudents} delay={1} />
+                <CountUp end={stats?.totalActive || 0} delay={1} />
               </h4>
               <div>Active Students</div>
             </div>
@@ -38,7 +38,7 @@ const Counter = ({ totalStudents = 0 , activeStudents = 0 , inactiveStudents = 0
             </div>
             <div className="ms-3 text-start">
               <h4 className="purecounter fw-bold mb-0">
-                <CountUp end={inactiveStudents} delay={1} />
+                <CountUp end={stats?.totalInactive || 0} delay={1} />
               </h4>
               <div>Inactive Students</div>
             </div>

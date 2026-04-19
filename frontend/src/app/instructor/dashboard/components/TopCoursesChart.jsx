@@ -1,15 +1,14 @@
-import { currency } from '@/context/constants';
-import { formatCurrency } from '@/utils/currency';
-import ReactApexChart from 'react-apexcharts';
-import { Button, Card, CardBody, CardHeader, Col, Row } from 'react-bootstrap';
-import { FaCircle } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
-
+import { currency } from "@/contexts/constants";
+import { formatCurrency } from "@/utils/currency";
+import ReactApexChart from "react-apexcharts";
+import { Button, Card, CardBody, CardHeader, Col, Row } from "react-bootstrap";
+import { FaCircle } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 const TopCoursesChart = ({ col = 6, topCoursesData = [] }) => {
-  const variants = ['danger', 'success', 'warning', 'primary', 'secondary'];
+  const variants = ["danger", "warning", "success", "primary", "purple"];
 
-  const series = topCoursesData.map(course => course.totalEarnings);
+  const series = topCoursesData.map(course => course.totalEarning);
   const labels = topCoursesData.map(course => course.title);
 
   const topEarning = {
@@ -18,22 +17,21 @@ const TopCoursesChart = ({ col = 6, topCoursesData = [] }) => {
     chart: {
       height: 300,
       width: 300,
-      offsetX: 50,
-      type: 'donut',
+      type: "donut",
       sparkline: { enabled: true }
     },
     colors: variants.map(variant =>
       getComputedStyle(document.documentElement).getPropertyValue(`--bs-${variant}`).trim()
     ),
     tooltip: {
-      theme: 'dark',
+      theme: "dark",
       y: { formatter: (val) => formatCurrency(val) }
     },
     responsive: [{
       breakpoint: 480,
       options: {
         chart: { width: 200, height: 200 },
-        legend: { position: 'bottom' }
+        legend: { position: "bottom" }
       }
     }]
   };
@@ -41,23 +39,8 @@ const TopCoursesChart = ({ col = 6, topCoursesData = [] }) => {
   return (
     <Col xs={12} lg={col}>
       <Card className="bg-transparent border rounded-3">
-        <CardHeader className="bg-transparent border-bottom">
-          <Row className="align-items-center g-2">
-            <Col sm={8} md={7} lg={8}>
-              <h5 className="mb-0">Top Earning Courses This Month</h5>
-            </Col>
-            <Col sm={4} md={5} lg={4} className="d-flex justify-content-end">
-              <Button
-                as={Link}
-                to="/instructor/courses"
-                variant="primary-soft"
-                size="sm"
-                className="mb-0"
-              >
-                View Courses
-              </Button>
-            </Col>
-          </Row>
+        <CardHeader className="bg-light border-bottom">
+          <h5 className="mb-0">Top Earning Courses This Month</h5>
         </CardHeader>
         <CardBody>
           <Row className="gy-4 align-items-center">
@@ -67,19 +50,29 @@ const TopCoursesChart = ({ col = 6, topCoursesData = [] }) => {
                 <ul className="list-group list-group-borderless">
                   {topCoursesData.map((course, index) => (
                     <li
-                      key={course.courseId || index}
+                      key={course.id || index}
                       className="list-group-item d-flex align-items-center"
                     >
                       <FaCircle
                         className={`text-${variants[index % variants.length]} me-2 flex-shrink-0`}
                       />
-                      <span>{course.title} - {course.totalEarnings || 0}{currency}</span>
+                      <div className="d-flex flex-column">
+                        <span>
+                          <Link 
+                            to={`/instructor/courses/${course?.id || ''}`}
+                            className={`text-${variants[index % variants.length]}`}
+                          >
+                            {course?.title}
+                          </Link> - {course?.totalEarning || 0}{currency}
+                        </span>
+                        (Purchase: {course?.totalSales || 0})
+                      </div>
                     </li>
                   ))}
                 </ul>
               </div>
             </Col>
-            <Col md={6} className="ps-0 pe-7 pe-md-6">
+            <Col md={6} className="">
               <ReactApexChart
                 height={300}
                 series={topEarning.series}

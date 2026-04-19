@@ -1,4 +1,5 @@
 import AppError from "#exceptions/app.error.js";
+import { bulkRemoveFromCart } from "#modules/cart/cart.service.js";
 import { enrollsCourses } from "#modules/enrollment/enrollment.service.js";
 import Order, { PAYMENT_METHOD_ENUM, STATUS_ENUM } from "#modules/order/order.model.js";
 import { withTransaction } from "#utils/transaction.js";
@@ -54,11 +55,11 @@ export const processSuccessfulPayment = async ({
       order.expiresAt = null;
       await order.save({ session });
 
-      const courseIds = order.courses.map(item => item.course);
+      const courseIds = order.courses.map(item => item?.course?.toString());
 
       await enrollsCourses(order.user, courseIds, session);
 
-      await cartService.bulkRemoveFromCart(order.user, courseIds, session);
+      await bulkRemoveFromCart(order.user, courseIds, session);
     }
   });
 };

@@ -1,5 +1,5 @@
 import PageMetaData from '@/components/PageMetaData';
-import { CREATE_COURSE_DRAFT_STORAGE_KEY } from '@/context/constants';
+import { CREATE_COURSE_DRAFT_STORAGE_KEY } from '@/contexts/constants';
 import useBSStepper from '@/hooks/useBSStepper';
 
 import Step1 from './Step1';

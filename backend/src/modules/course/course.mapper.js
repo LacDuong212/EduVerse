@@ -52,6 +52,18 @@ const getCourseStats = (course) => ({
   lecturesCount: course?.lecturesCount || 0,
 });
 
+const getCourseRating = (course) => ({
+  total: course?.rating?.total || 0,
+  count: course?.rating?.count || 0,
+  stars: {
+    1: course?.rating?.stars?.["1"] || 0,
+    2: course?.rating?.stars?.["2"] || 0,
+    3: course?.rating?.stars?.["3"] || 0,
+    4: course?.rating?.stars?.["4"] || 0,
+    5: course?.rating?.stars?.["5"] || 0,
+  },
+});
+
 const getCourseTime = (course) => ({
   createdAt: course?.createdAt || null,
   updatedAt: course?.updatedAt || null,
@@ -171,9 +183,13 @@ export const toCourseDetailsDto = (details) => {
 
     ...getCourseInfo(details),
 
+    studentsEnrolled: details?.studentsEnrolled || 0,
+    sectionsCount: details?.sectionsCount || 0,
+    lecturesCount: details?.lecturesCount || 0,
+
     tags: details.tags || [],
 
-    stats: getCourseStats(details),
+    rating: getCourseRating(details),
 
     curriculum: getCourseFreeCurriculum(details.curriculum?.sections),
 

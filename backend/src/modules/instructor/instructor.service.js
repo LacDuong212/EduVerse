@@ -1,5 +1,5 @@
 import AppError from "#exceptions/app.error.js";
-import { createDraftCourse } from "#modules/course/course.service.js";
+import { countInstructorLiveCourses, createDraftCourse } from "#modules/course/course.service.js";
 import { countCompletedOrdersByCourseIds } from "#modules/order/order.service.js";
 import { updateProfile } from "#modules/user/user.service.js";
 import { withTransaction } from "#utils/transaction.js";
@@ -47,11 +47,14 @@ export const getInstructorStats = async (userId, isPrivate = false) => {
   if (!instructor) throw new AppError("Instructor not found", 400);
 
   const {
-    totalCourses = 0,
     totalStudents = 0,
     totalReviews = 0,
     ratingSum = 0
   } = instructor.stats || {};
+
+  const totalCourses = isPrivate === true
+    ? instructor.stats?.totalCourses || 0
+    : (await countInstructorLiveCourses(userId));
 
   const averageRating = totalReviews > 0
     ? Number((ratingSum / totalReviews).toFixed(1))

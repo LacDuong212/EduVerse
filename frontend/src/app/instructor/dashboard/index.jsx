@@ -1,51 +1,62 @@
 import PageMetaData from "@/components/PageMetaData";
-import useInstructor from "../useInstructor";
 import useInstructorDashboard from "./useInstructorDashboard";
 import DashboardCounter from "./components/DashboardCounter";
 import EarningsChart from "./components/EarningsChart";
 import TopCoursesChart from "./components/TopCoursesChart";
 import WelcomeBack from "./components/WelcomeBack";
-import { useEffect, useState } from "react";
 import { Container, Row } from "react-bootstrap";
 import { useSelector } from "react-redux";
-
+import { toast } from "react-toastify";
 
 const InstructorDashboard = () => {
   const instructorName = useSelector(state => state.auth.userData.name);
-  const { fetchInstructorCounters } = useInstructor();
-  const { fetchDashboardData } = useInstructorDashboard();
+  const {
+    stats,
+    earningChart,
+    topCourses,
+    loading,
+    error,
+    refetch
+  } = useInstructorDashboard();
 
-  const [counterData, setCounterData] = useState(null);
-  const [earningsData, setEarningsData] = useState([]);
-  const [topCoursesData, setTopCoursesData] = useState([]);
+  // if (error) {
+  //   toast.error(error);
 
-  useEffect(() => {
-    const load = async () => {
-      setCounterData(await fetchInstructorCounters());
-
-      const { earningsData, topCoursesData } = await fetchDashboardData();
-      setEarningsData(earningsData);
-      setTopCoursesData(topCoursesData);
-    };
-    load();
-  }, []);
+  //   return (
+  //     <Container className="d-flex flex-column align-items-center justify-content-center mt-5">
+  //       <h3>Error loading page</h3>
+  //       <button onClick={refetch} className="btn btn-primary">Retry</button>
+  //     </Container>
+  //   );
+  // }
 
   return (
-    <Container className="pb-5">
+    <>
       <PageMetaData title="Dashboard" />
       <WelcomeBack instructorName={instructorName} />
-      <DashboardCounter counterData={counterData} />
-      <Row className="mt-3 g-4">
-        {(topCoursesData && topCoursesData.length > 0) ? (
-          <>
-            <EarningsChart col={7} earningsData={earningsData} />
-            <TopCoursesChart col={5} topCoursesData={topCoursesData} />
-          </>
-        ) : (
-          <EarningsChart col={12} earningsData={earningsData} />
-        )}
-      </Row>
-    </Container>
+      <Container className="pt-3 pb-5">
+        <DashboardCounter counterData={stats} />
+        <Row className="mt-3 g-4">
+          {topCourses && topCourses.length > 0 ? (
+            <>
+              <EarningsChart
+                col={7}
+                earningsData={earningChart}
+              />
+              <TopCoursesChart
+                col={5}
+                topCoursesData={topCourses}
+              />
+            </>
+          ) : (
+            <EarningsChart
+              col={12}
+              earningsData={earningChart}
+            />
+          )}
+        </Row>
+      </Container>
+    </>
   );
 };
 

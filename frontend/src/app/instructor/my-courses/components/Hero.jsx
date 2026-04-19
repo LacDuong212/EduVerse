@@ -1,54 +1,53 @@
-import Counter from './Counter';
-import { Col, Container, Row } from 'react-bootstrap';
+import Counter from "./Counter";
+import { Col, Container, Row } from "react-bootstrap";
 import { BsTriangleFill } from "react-icons/bs";
 import { FaCircle } from "react-icons/fa";
 import { TfiLineDashed } from "react-icons/tfi";
 
-
-const MyCoursesHero = ({ totalCourses, activeCourses, inactiveCourses }) => {
+const MyCoursesHero = ({ stats }) => {
   const styles = {
     wrapper: {
-      overflow: 'hidden', // keeps shapes inside the rounded corners
-      border: 'none',
+      overflow: "hidden", // keeps shapes inside the rounded corners
+      border: "none",
     },
     shape1: {
-      position: 'absolute',
-      top: '-100px',
-      left: '-280px',
-      fontSize: '1rem',
-      transform: 'rotate(-20deg)',
+      position: "absolute",
+      top: "-100px",
+      left: "-280px",
+      fontSize: "1rem",
+      transform: "rotate(-20deg)",
       zIndex: 0
     },
     shape2: {
-      position: 'absolute',
-      top: '20%',
-      right: '30%',
-      fontSize: '3rem',
-      transform: 'rotate(-15deg)',
+      position: "absolute",
+      top: "20%",
+      right: "30%",
+      fontSize: "3rem",
+      transform: "rotate(-15deg)",
       opacity: "0.3",
       zIndex: 0
     },
     shape3: {
-      position: 'absolute',
-      top: '65px',
-      right: '5%',
-      transform: 'rotate(45deg)',
+      position: "absolute",
+      top: "65px",
+      right: "5%",
+      transform: "rotate(45deg)",
       zIndex: 0
     },
     shape4: {
-      position: 'absolute',
-      bottom: '5%',
-      left: '25%',
-      fontSize: '3rem',
+      position: "absolute",
+      bottom: "5%",
+      left: "25%",
+      fontSize: "3rem",
       opacity: "0.3",
       zIndex: 0
     },
     shape5: {
-      position: 'absolute',
-      top: '-10%',
-      right: '0%',
-      fontSize: '6rem',
-      transform: 'rotate(45deg)',
+      position: "absolute",
+      top: "-10%",
+      right: "0%",
+      fontSize: "6rem",
+      transform: "rotate(45deg)",
       opacity: "0.5",
       zIndex: 0
     }
@@ -78,7 +77,7 @@ const MyCoursesHero = ({ totalCourses, activeCourses, inactiveCourses }) => {
               </svg>
             </figure>
             <h2>My Courses</h2>
-            <p className="mb-3 mx-auto" style={{ maxWidth: '400px' }}>
+            <p className="mb-3 mx-auto" style={{ maxWidth: "400px" }}>
               Manage your course participants. Track progress, enrollments, and statuses all in one place.
             </p>
           </Col>
@@ -86,9 +85,7 @@ const MyCoursesHero = ({ totalCourses, activeCourses, inactiveCourses }) => {
       </Container>
       <Container>
       <Counter
-        totalCourses={totalCourses}
-        activeCourses={activeCourses}
-        inactiveCourses={inactiveCourses}
+        stats={stats}
       />
       </Container>
       <figure style={styles.shape3}>

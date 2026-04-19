@@ -6,13 +6,13 @@ import { Link } from 'react-router-dom';
 
 const CourseInfo = ({ col = 6, courseData }) => {
   const statusBadge =
-    courseData?.status === "Live"
+    courseData?.status === "live"
       ? "success"
-      : courseData?.status === "Pending"
+      : courseData?.status === "pending"
         ? "warning"
-        : courseData?.status === "Rejected"
+        : courseData?.status === "rejected"
           ? "orange"
-          : courseData?.status === "Blocked"
+          : courseData?.status === "blocked"
             ? "danger"
             : "secondary";
 

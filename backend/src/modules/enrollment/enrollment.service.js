@@ -92,7 +92,7 @@ const updateStudentLearningStats = async (stuId, courses, session) => {
 const updateCoursePopularityStats = async (courseIds, session) => {
   await Course.updateMany(
     { _id: { $in: courseIds } },
-    { $inc: { studentCount: 1 } },
+    { $inc: { studentsEnrolled: 1 } },
     { session }
   );
 };

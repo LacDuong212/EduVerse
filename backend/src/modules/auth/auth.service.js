@@ -54,7 +54,8 @@ export const loginUser = async (email, password) => {
   if (user.role === USER_ROLE.instructor && !(await isApprovedInstructor(user._id)))
     throw new AppError("Account is blocked.", 403);
 
-  user.interests = await getStudentInterests(user._id);
+  if (user.role === USER_ROLE.student)
+    user.interests = await getStudentInterests(user._id);
 
   return toAuthUserDto(user);
 };

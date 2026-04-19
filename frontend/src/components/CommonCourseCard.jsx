@@ -1,10 +1,9 @@
 import { Card, CardBody, CardFooter, CardTitle } from "react-bootstrap";
 import { FaBook, FaRegClock, FaStar, FaUserGraduate } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import { DEFAULT_COURSE_IMG } from "@/contexts/constants";
 import { formatCurrency } from "@/utils/currency";
 import { secondsToHours } from "@/utils/duration";
-
-const DEFAULT_COURSE_IMG = "https://res.cloudinary.com/dw1fjzfom/image/upload/v1764427835/course_default_image_pwqnyo.jpg";
 
 const CommonCourseCard = ({ course }) => {
   const {

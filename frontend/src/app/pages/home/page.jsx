@@ -17,7 +17,7 @@ const HomePage = () => {
   return <>
       <PageMetaData title="Home" />
   
-      <main>
+      <section>
         <InterestModal />
         <Hero />
         <Counter />
@@ -28,7 +28,7 @@ const HomePage = () => {
         <BiggestDiscounts />
         <BestSellers />
         <TopRatedSection />
-      </main>
+      </section>
      
     </>;
 };

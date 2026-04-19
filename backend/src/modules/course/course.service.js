@@ -31,7 +31,7 @@ const getAverageRating = (c) =>
 export const getCourseAccess = async (userRole, userId, course) => {
   if (!userRole || !userId) return { isOwner: false, isEnrolled: false };
 
-  const isOwner = userRole === "instructor" && course.instructor.ref.toString() === userId;
+  const isOwner = userRole === "instructor" && course?.instructor?.ref?.toString() === userId;
   const isEnrolled = userRole === "student" && await existsEnrollment(userId, course._id);
 
   return { isOwner, isEnrolled };
@@ -190,36 +190,55 @@ const getMongoSort = (strategy) => {
 };
 
 export const getCourseInfoForVideoId = async (videoId) => {
-  const result = await Curriculum.aggregate([
-    { $match: { "sections.lectures.videoId": videoId } },
-    { $unwind: "$sections" },
-    { $unwind: "$sections.lectures" },
-    { $match: { "sections.lectures.videoId": videoId } },
+  if (!videoId) return null;
+
+  const result = await Course.aggregate([
     {
       $lookup: {
-        from: "courses",
-        localField: "courseId",
-        foreignField: "_id",
-        as: "courseInfo"
+        from: "curriculums",
+        localField: "_id",
+        foreignField: "courseId",
+        as: "curriculum"
       }
     },
-    { $unwind: "$courseInfo" },
+    { $unwind: "$curriculum" },
+    {
+      $match: {
+        $or: [
+          { previewVideo: videoId },
+          { "curriculum.sections.lectures.videoId": videoId }
+        ]
+      }
+    },
     {
       $project: {
         _id: 0,
-        courseId: 1,
-        insId: "$courseInfo.instructor.ref",
-        isFree: "$sections.lectures.isFree"
+        courseId: "$_id",
+        insId: "$instructor.ref",
+        previewVideo: 1,
+        sections: "$curriculum.sections"
       }
     }
   ]);
 
-  const courseInfo = result[0];
+  if (!result.length) return null;
+
+  const course = result[0];
+
+  let isFree = false;
+
+  if (course.previewVideo === videoId) {
+    isFree = true;
+  } else {
+    const allLectures = course.sections.flatMap(s => s.lectures);
+    const targetLecture = allLectures.find(l => l.videoId === videoId);
+    isFree = targetLecture?.isFree ?? false;
+  }
 
   return {
-    courseId: courseInfo?.courseId || null,
-    insId: courseInfo?.insId || null,
-    isFree: courseInfo?.isFree ?? false
+    courseId: course.courseId || null,
+    insId: course.insId || null,
+    isFree: isFree
   };
 };
 
@@ -518,7 +537,7 @@ export const createDraftCourse = async (instructor, session = null) => {
   return await withTransaction(async (s) => {
     const [course] = await Course.create([{
       title: "New draft course",
-      "instructor.ref": instructor._id,
+      "instructor.ref": instructor.user._id || instructor.user,
       "instructor.name": instructor.name,
       "instructor.avatar": instructor.avatar,
       category: null,
@@ -977,4 +996,16 @@ export const getCoursesFilters = async () => {
     prices,
     sorts,
   }
+};
+
+export const countInstructorLiveCourses = async (insId) => {
+  if (!insId) throw new AppError("Instructor ID is required", 400);
+
+  const count = await Course.countDocuments({
+    "instructor.ref": new mongoose.Types.ObjectId(insId),
+    status: STATUS_ENUM.live,
+    isDeleted: false
+  });
+
+  return count;
 };

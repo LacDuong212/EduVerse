@@ -5,6 +5,7 @@ export const currentYear = new Date().getFullYear();
 export const TEAM_NAME = "@d2v-team";
 
 export const DEFAULT_PAGE_TITLE = "EduVerse";
+export const DEFAULT_COURSE_IMG = "https://res.cloudinary.com/dw1fjzfom/image/upload/q_auto/f_auto/v1764427835/course_default_image_pwqnyo.jpg";
 export const CREATE_COURSE_DRAFT_STORAGE_KEY = "EDV_draft_createCourse";
 export const EDIT_COURSE_DRAFT_STORAGE_KEY = "EDV_draft_editCourse";
 

@@ -2,10 +2,9 @@ import { Button, Card, Col, Container, Form, Row, Spinner } from "react-bootstra
 import { FaSyncAlt, FaTimes } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import EmptyCartPage from "@/app/shop/empty-cart/page";
+import { DEFAULT_COURSE_IMG } from "@/contexts/constants";
 import { formatCurrency } from "@/utils/currency";
 import useCartDetail from "../useCartDetails";
-
-const DEFAULT_COURSE_IMG = "https://res.cloudinary.com/dw1fjzfom/image/upload/v1764427835/course_default_image_pwqnyo.jpg";
 
 const CartCard = ({ item, isSelected, onSelect, onRemove }) => {
   const hasDiscount = item.enableDiscount ?? false;

@@ -1,11 +1,9 @@
-import { Container, Row, Col } from 'react-bootstrap';
-import useCourseDetail from '../useCourseDetail';
-import CommonCourseSlider from './CommonCourseSlider';
+import { Container, Row, Col } from "react-bootstrap";
+import CommonCourseSlider from "@/components/CommonCourseSlider";
 
-const ListedCourses = () => {
-  const { relatedCourses } = useCourseDetail();
-
-  if (!relatedCourses || relatedCourses.length === 0) return null;
+const RelatedCourses = ({ relatedCourses = [] }) => {
+  if (!relatedCourses || (Array.isArray(relatedCourses) && relatedCourses.length === 0)) return null;
+  console.log(relatedCourses)
 
   return (
     <section className="pt-0">
@@ -27,4 +25,4 @@ const ListedCourses = () => {
   );
 };
 
-export default ListedCourses;
+export default RelatedCourses;

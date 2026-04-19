@@ -33,21 +33,21 @@ const InstructorCourseDetail = () => {
           <div className="d-flex align-items-center">
             <h1 className="h3 mb-2 mb-sm-0">Course Details</h1>
             <Link 
-              to={`/instructor/courses/edit/${course?._id}`} 
+              to={`/instructor/courses/edit/${course?.courseId}`} 
               className="ms-3 btn btn-primary-soft rounded-circle p-2"
             >
               <FaRegEdit className="fs-4 p-1" />
             </Link>
           </div>
-          {(course?.status?.toLowerCase() === 'live') && <Link className="fw-bold" to={course?._id ? `/courses/${course._id}` : "/courses"}>
+          {(course?.status?.toLowerCase() === 'live') && <Link className="fw-bold" to={course?.courseId ? `/courses/${course._id}` : "/courses"}>
             View Public Details<span className="fs-5"><FaAngleRight /></span>
           </Link>}
         </Col>
       </Row>
       <Row className="g-4">
         <CourseInfo col={7} courseData={course} />
-        <CourseStats col={5} courseId={course?._id} />
-        <CourseStudentList col={12} courseId={course?._id} />
+        <CourseStats col={5} courseId={course?.courseId} />
+        <CourseStudentList col={12} courseId={course?.courseId} />
       </Row>
     </Container>
   );

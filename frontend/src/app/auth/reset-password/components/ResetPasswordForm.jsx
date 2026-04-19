@@ -42,7 +42,7 @@ export default function ResetPasswordForm({ email }) {
         <button
           type="button"
           onClick={() => setShowPassword(!showPassword)}
-          className="position-absolute end-0 top-50 mt-3 me-5 translate-middle-y me-3 border-0 bg-transparent text-secondary"
+          className="position-absolute end-0 top-50 mt-3 translate-middle-y me-3 border-0 bg-transparent text-secondary"
           style={{ zIndex: 5 }}
         >
           {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
@@ -67,7 +67,7 @@ export default function ResetPasswordForm({ email }) {
           className="position-absolute end-0 top-50 mt-3 translate-middle-y me-3 border-0 bg-transparent text-secondary"
           style={{ zIndex: 5 }}
         >
-          {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+          {showConfirm ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
         </button>
       </div>
 

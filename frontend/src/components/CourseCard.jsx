@@ -1,13 +1,12 @@
 import { Card, CardBody, CardFooter, CardTitle } from "react-bootstrap";
-import { FaRegClock, FaRegHeart, FaRegStar, FaHeart, FaStar, FaStarHalfAlt, FaTable } from "react-icons/fa";
+import { FaBook, FaRegClock, FaRegHeart, FaRegStar, FaHeart, FaStar, FaStarHalfAlt } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
+import { DEFAULT_COURSE_IMG } from "@/contexts/constants";
 import { addToWishlist, removeFromWishlist } from "@/redux/wishlistSlice";
 import { formatCurrency } from "@/utils/currency";
 import { secondsToHours } from "@/utils/duration";
-
-const DEFAULT_COURSE_IMG = "https://res.cloudinary.com/dw1fjzfom/image/upload/v1764427835/course_default_image_pwqnyo.jpg";
 
 const clamp = (n, min, max) => Math.max(min, Math.min(max, n ?? 0));
 
@@ -183,11 +182,11 @@ const CourseCard = ({ course }) => {
         <hr />
         <div className="d-flex justify-content-between">
           <span className="h6 fw-light mb-0">
-            <FaRegClock className="text-danger me-2" />
+            <FaRegClock className="text-danger me-2 mb-1" />
             {durationText}
           </span>
           <span className="h6 fw-light mb-0">
-            <FaTable className="text-orange me-2" />
+            <FaBook className="text-orange me-2 mb-1" />
             {lectures} lectures
           </span>
         </div>
@@ -195,6 +194,5 @@ const CourseCard = ({ course }) => {
     </Card>
   );
 };
-
 
 export default CourseCard;
