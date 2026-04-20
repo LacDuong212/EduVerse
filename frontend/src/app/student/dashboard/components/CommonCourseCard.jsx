@@ -5,9 +5,8 @@ import {
   FaRegClock,
   FaTable,
 } from 'react-icons/fa';
+import { DEFAULT_COURSE_IMG } from '@/contexts/constants';
 import { formatCurrency } from '@/utils/currency';
-
-const DEFAULT_COURSE_IMG = "https://res.cloudinary.com/dw1fjzfom/image/upload/v1764427835/course_default_image_pwqnyo.jpg";
 
 const CommonCourseCard = ({ course }) => {
   const {

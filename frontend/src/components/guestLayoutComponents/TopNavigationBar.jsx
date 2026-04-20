@@ -4,7 +4,7 @@ import LogoBox from '@/components/LogoBox';
 import TopNavbar from '@/components/TopNavBar';
 import SimpleAppMenu from '@/components/TopNavBar/components/SimpleAppMenu';
 import TopbarMenuToggler from '@/components/TopNavBar/components/TopbarMenuToggler';
-import { useLayoutContext } from '@/context/useLayoutContext';
+import { useLayoutContext } from '@/contexts/useLayoutContext';
 import { Container, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from 'react-bootstrap';

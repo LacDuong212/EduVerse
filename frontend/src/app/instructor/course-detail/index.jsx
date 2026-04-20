@@ -28,26 +28,30 @@ const InstructorCourseDetail = () => {
 
   return (
     <Container className="mt-3 mb-5">
-      <Row className="mb-3">
-        <Col xs={12} className="d-flex justify-content-between align-items-center">
+      <Row className="mb-3 align-items-center">
+        <Col xs={12} sm={8} md={9} className="">
           <div className="d-flex align-items-center">
-            <h1 className="h3 mb-2 mb-sm-0">Course Details</h1>
-            <Link 
-              to={`/instructor/courses/edit/${course?._id}`} 
-              className="ms-3 btn btn-primary-soft rounded-circle p-2"
+            <h1 className="h3 mb-0 text-wrap">{course?.title || '(No title)'}</h1>
+            <Link
+              to={`/instructor/courses/edit/${course?.courseId}`}
+              className="ms-xs-0 ms-sm-3 mb-0 btn btn-primary-soft rounded-circle p-2 flex-shrink-0"
             >
               <FaRegEdit className="fs-4 p-1" />
             </Link>
           </div>
-          {(course?.status?.toLowerCase() === 'live') && <Link className="fw-bold" to={course?._id ? `/courses/${course._id}` : "/courses"}>
-            View Public Details<span className="fs-5"><FaAngleRight /></span>
-          </Link>}
+        </Col>
+        <Col xs={12} sm={4} md={3} className="text-end">
+          {(course?.status?.toLowerCase() === 'live') && (
+            <Link className="fw-bold" to={course?.courseId ? `/courses/${course.courseId}` : "/courses"}>
+              View Public Details<FaAngleRight className="fs-5 mb-1" />
+            </Link>
+          )}
         </Col>
       </Row>
       <Row className="g-4">
         <CourseInfo col={7} courseData={course} />
-        <CourseStats col={5} courseId={course?._id} />
-        <CourseStudentList col={12} courseId={course?._id} />
+        <CourseStats col={5} courseId={course?.courseId} />
+        <CourseStudentList col={12} courseId={course?.courseId} />
       </Row>
     </Container>
   );

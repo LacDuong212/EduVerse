@@ -1,7 +1,12 @@
-import CourseProgress from "#modules/course-progress/course-progress.model.js";
-import Student from "#modules/student/student.model.js";
+import mongoose from "mongoose";
+import AppError from "#exceptions/app.error.js";
+import { STATUS_ENUM as COURSE_STATUS } from "#modules/course/course.model.js";
+import { existsEnrollment } from "#modules/enrollment/enrollment.service.js";
 import Streak from "#modules/streak/streak.model.js";
+import Student from "#modules/student/student.model.js";
 import { withTransaction } from "#utils/transaction.js";
+import CourseProgress, { LECTURE_STATUS_ENUM as LECTURE_STATUS } from "./course-progress.model.js";
+import { toCourseProgressDto } from "./progress.mapper.js";
 
 export const getLastLearningProgress = async (userId) => {
   const progress = await CourseProgress.findOne({ userId })
@@ -20,7 +25,34 @@ export const getLastLearningProgress = async (userId) => {
     lastLectureId: progress.lastLectureId,
     completedCount: progress.completedLecturesCount,
   };
-}
+};
+
+export const countInProgressCourses = async (userId) => {
+  return await CourseProgress.countDocuments({
+    user: userId,
+    isCompleted: false,
+    completedLecturesCount: { $gt: 0 }
+  });
+};
+
+export const getCourseProgress = async (stuId, courseId) => {
+  if (!stuId) throw new AppError("Student ID is required.", 400);
+
+  const isEnrolled = await existsEnrollment(stuId, courseId);
+  if (!isEnrolled)
+    throw new AppError("You haven't enrolled this course yet!", 403);
+
+  const progress = await CourseProgress.findOne({ user: stuId, course: courseId })
+    .populate("course", "status");
+
+  if (!progress || !progress.course)
+    throw new AppError("Course not found or no progress saved.", 404);
+
+  if (progress.course?.status !== COURSE_STATUS.live)
+    throw new AppError("Course is currently unvailable. Please try again later!", 404);
+
+  return toCourseProgressDto(progress);
+};
 
 export const completeLecture = async (userId, courseId, lecId) => {
   return await withTransaction(async (s) => {
@@ -30,8 +62,8 @@ export const completeLecture = async (userId, courseId, lecId) => {
     const lecture = progress.lectures.find(l => l.lectureId.toString() === lecId);
     if (!lecture) throw new AppError("Lecture not found.", 404);
 
-    if (lecture.status !== LECTURE_STATUS_ENUM.completed) {
-      lecture.status = LECTURE_STATUS_ENUM.completed;
+    if (lecture.status !== LECTURE_STATUS.completed) {
+      lecture.status = LECTURE_STATUS.completed;
       lecture.completedAt = new Date();
       progress.completedLecturesCount += 1;
 
@@ -57,6 +89,65 @@ export const completeLecture = async (userId, courseId, lecId) => {
 
     await progress.save({ session: s });
 
-    return progress;
+    return toCourseProgressDto(progress);
   });
+};
+
+export const syncLectureProgress = async (userId, courseId, lecId, data) => {
+  const { currentTimeSec, durationSec, deltaTimeSec, isNewSession } = data;
+
+  const now = new Date();
+
+  let progress = await CourseProgress.findOneAndUpdate(
+    { user: userId, course: courseId, "lectures.lectureId": lecId },
+    {
+      $set: {
+        "lectures.$.lastPositionSec": currentTimeSec,
+        "lectures.$.durationSec": durationSec || 0,
+        "lectures.$.lastActivityAt": now,
+        "lectures.$.status": LECTURE_STATUS.in_progress,
+        lastLectureId: new mongoose.Types.ObjectId(lecId),
+        lastPositionSec: currentTimeSec,
+        lastActivityAt: now
+      },
+      $inc: {
+        "lectures.$.totalTimeSpentSec": Math.max(0, deltaTimeSec),
+        "lectures.$.viewCount": isNewSession ? 1 : 0,
+        totalTimeSpentSec: Math.max(0, deltaTimeSec)
+      }
+    },
+    { new: true }
+  );
+
+  if (!progress) {
+    progress = await CourseProgress.findOneAndUpdate(
+      { user: userId, course: courseId },
+      {
+        $push: {
+          lectures: {
+            lectureId: new mongoose.Types.ObjectId(lecId),
+            status: LECTURE_STATUS.in_progress,
+            lastPositionSec: currentTimeSec,
+            durationSec: durationSec || 0,
+            viewCount: 1,
+            totalTimeSpentSec: Math.max(0, deltaTimeSec),
+            lastActivityAt: now
+          }
+        },
+        $set: {
+          lastLectureId: new mongoose.Types.ObjectId(lecId),
+          lastPositionSec: currentTimeSec,
+          lastActivityAt: now,
+          firstStartedAt: now
+        },
+        $inc: { totalTimeSpentSec: Math.max(0, deltaTimeSec) }
+      },
+      { new: true }
+    );
+  }
+
+  if (isNewSession)
+    await Streak.registerActivity(userId);
+
+  return toCourseProgressDto(progress);
 };

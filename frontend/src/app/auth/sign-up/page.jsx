@@ -1,17 +1,17 @@
 import { useState } from "react";
-import PageMetaData from '@/components/PageMetaData';
-import { Col, Row } from 'react-bootstrap';
+import { Col, Row } from "react-bootstrap";
 import { FaChevronLeft } from "react-icons/fa";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import AuthLayout from "@/app/auth/components/AuthLayout";
-import SignUpForm from "@/app/auth/sign-up/components/SignUpForm";
-import EmailVerifyModal from "@/app/auth/email-verify/EmailVerifyModal";
+import PageMetaData from "@/components/PageMetaData";
+import AuthLayout from "../components/AuthLayout";
+import EmailVerifyModal from "../email-verify/EmailVerifyModal";
+import SignUpForm from "./components/SignUpForm";
 
 export default function SignUpPage() {
-  const [showVerifyModal, setShowVerifyModal] = useState(false);
-  const [registeredEmail, setRegisteredEmail] = useState("");
   const location = useLocation();
   const navigate = useNavigate();
+  const [showVerifyModal, setShowVerifyModal] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState("");
 
   return <>
     <PageMetaData title="Sign-Up" />
@@ -19,8 +19,8 @@ export default function SignUpPage() {
       <Col xs={12} lg={6} className="m-auto">
         <Row className="my-5">
           <Col sm={10} xl={8} className="m-auto position-relative">
-            <div className='mb-2'>
-              <FaChevronLeft className='mb-1 text-primary' />
+            <div className="mb-2">
+              <FaChevronLeft className="mb-1 text-primary" />
               <Link
                 to="/"
                 className="ms-1 fw-semibold text-decoration-none"
@@ -29,7 +29,7 @@ export default function SignUpPage() {
               </Link>
             </div>
             <h2>Sign up for your account!</h2>
-            <p className="lead mb-2">Nice to see you! Please Sign up with your account.</p>
+            <p className="lead mb-4">Nice to see you! Please Sign up with your account.</p>
             <SignUpForm
               onSignUpSuccess={(email) => {
                 setRegisteredEmail(email);

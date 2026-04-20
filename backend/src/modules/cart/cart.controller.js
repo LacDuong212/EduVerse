@@ -30,6 +30,9 @@ export const removeFromCart = asyncHandler(async (req, res) => {
     removedCount = 0
   } = await cartService.bulkRemoveFromCart(userId, courseIds);
 
+  if (removedCount === 0) 
+    return sendUnsuccessResponse(res, 500, "Failed to remove course(s) from cart.");
+
   return sendSuccessResponse(
     res,
     200,

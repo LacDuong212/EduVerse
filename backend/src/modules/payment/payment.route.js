@@ -16,6 +16,9 @@ paymentRoute.post(
 );
 
 paymentRoute.post("/momo/ipn", paymentController.momoIpn);
+paymentRoute.get("/momo/return", paymentController.momoReturn);
+
 paymentRoute.get("/vnpay/ipn", paymentController.vnpayIpn);
+paymentRoute.get("/vnpay/return", paymentController.vnpayReturn);
 
 export default paymentRoute;

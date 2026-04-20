@@ -1,4 +1,3 @@
-import AppError from "#exceptions/app.error.js";
 
 const validate = (schema) => async (req, res, next) => {
   try {

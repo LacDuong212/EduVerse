@@ -1,15 +1,9 @@
-// src/components/Counter.jsx
-import { useMemo } from 'react';
-import { useSelector } from 'react-redux';
-import { Col, Container, Row } from 'react-bootstrap';
-import CountUp from 'react-countup';
-import {
-  FaBookOpen,
-  FaUserGraduate,
-  FaClock,
-  FaChalkboardTeacher
-} from 'react-icons/fa';
-import { secondsToHours } from '@/utils/duration'
+import { useMemo } from "react";
+import { Col, Container, Row } from "react-bootstrap";
+import CountUp from "react-countup";
+import { FaBookOpen, FaUserGraduate, FaClock, FaChalkboardTeacher } from "react-icons/fa";
+import { useSelector } from "react-redux";
+import { secondsToHours } from "@/utils/duration";
 
 const Counter = () => {
   const coursesState = useSelector((s) => s?.courses) || {};
@@ -59,10 +53,10 @@ const Counter = () => {
   }, [courses]);
 
   const counterData = [
-    { icon: FaBookOpen,          variant: 'primary', count: metrics.totalCourses,     suffix: '',  title: 'Courses', decimals: 0 },
-    { icon: FaUserGraduate,      variant: 'success', count: metrics.totalLearners,    suffix: '',  title: 'Learners', decimals: 0 },
-    { icon: FaClock,             variant: 'warning', count: metrics.totalHours,       suffix: 'h', title: 'Total Hours', decimals: 2 },
-    { icon: FaChalkboardTeacher, variant: 'info',    count: metrics.totalInstructors, suffix: '',  title: 'Instructors', decimals: 0 },
+    { icon: FaBookOpen, variant: "primary", count: metrics.totalCourses, suffix: "", title: "Courses", decimals: 0 },
+    { icon: FaUserGraduate, variant: "success", count: metrics.totalLearners, suffix: "", title: "Learners", decimals: 0 },
+    { icon: FaClock, variant: "warning", count: metrics.totalHours, suffix: "h", title: "Total Hours", decimals: 2 },
+    { icon: FaChalkboardTeacher, variant: "info", count: metrics.totalInstructors, suffix: "", title: "Instructors", decimals: 0 },
   ];
 
   return (
@@ -73,7 +67,7 @@ const Counter = () => {
             const Icon = item.icon;
             return (
               <Col sm={6} xl={3} key={idx}>
-                <div className={`d-flex justify-content-center align-items-center p-4 bg-${item.variant} bg-opacity-10 rounded-3`}>
+                <div className={`d-flex justify-content-center align-items-center p-4 bg-${item.variant} bg-opacity-25 rounded-3`}>
                   <span className={`display-6 lh-1 text-${item.variant} mb-0`} aria-hidden>
                     <Icon />
                   </span>

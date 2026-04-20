@@ -65,6 +65,7 @@ privateRoutes.patch(
   validate(instructorSchema.updateCourseRequest),
   instructorController.updateCourse
 );
+privateRoutes.get("/students/stats", instructorController.getStudentsStats);
 privateRoutes.delete(
   "/courses/:courseId/changes",
   validate(instructorSchema.courseIdParamRequest),

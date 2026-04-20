@@ -1,7 +1,9 @@
 import AppError from "#exceptions/app.error.js";
+import { countInstructorLiveCourses, createDraftCourse } from "#modules/course/course.service.js";
 import { countCompletedOrdersByCourseIds } from "#modules/order/order.service.js";
 import { updateProfile } from "#modules/user/user.service.js";
 import { withTransaction } from "#utils/transaction.js";
+import mongoose from "mongoose";
 import Instructor from "./instructor.model.js";
 
 export const handleBecomeInstructor = async (user) => {
@@ -45,11 +47,14 @@ export const getInstructorStats = async (userId, isPrivate = false) => {
   if (!instructor) throw new AppError("Instructor not found", 400);
 
   const {
-    totalCourses = 0,
     totalStudents = 0,
     totalReviews = 0,
     ratingSum = 0
   } = instructor.stats || {};
+
+  const totalCourses = isPrivate === true
+    ? instructor.stats?.totalCourses || 0
+    : (await countInstructorLiveCourses(userId));
 
   const averageRating = totalReviews > 0
     ? Number((ratingSum / totalReviews).toFixed(1))
@@ -155,4 +160,23 @@ export const getCurrentInstructor = async (userId, session = null) => {
     isApproved: instructor.isApproved ?? false,
     createdAt: instructor.createdAt || null,
   };
+};
+
+export const createNewCourse = async (userId) => {
+  if (!userId) throw new AppError("Instructor ID is required.", 400);
+
+  return await withTransaction(async (session) => {
+    const instructor = await Instructor.findOne({ user: userId, isApproved: true })
+      .session(session);
+    if (!instructor) throw new AppError("Instructor not found or unapproved.", 403);
+
+    const course = await createDraftCourse(instructor, session);
+
+    instructor.myCourses.push(new mongoose.Types.ObjectId(course.courseId));
+    instructor.stats.totalCourses += 1;
+
+    await instructor.save({ session });
+
+    return course;
+  });
 };

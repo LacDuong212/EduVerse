@@ -1,8 +1,8 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense } from "react";
 
-const TopNavigationBar = lazy(() => import('../components/guestLayoutComponents/TopNavigationBar'));
-const Footer = lazy(() => import('../components/Footer'));
-const Preloader = lazy(() => import('../components/preloader'));
+const Footer = lazy(() => import("@/components/Footer"));
+const TopNavigationBar = lazy(() => import("@/components/guestLayoutComponents/TopNavigationBar"));
+const Preloader = lazy(() => import("@/components/Preloader"));
 
 const GuestLayout = ({ children }) => {
   return (

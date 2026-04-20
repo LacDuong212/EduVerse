@@ -1,21 +1,21 @@
-import ChoicesFormInput from '@/components/form/ChoicesFormInput';
-import { Card, CardBody, CardFooter, CardHeader, Col, OverlayTrigger, ProgressBar, Row, Tooltip } from 'react-bootstrap';
-import { FaAngleLeft, FaAngleRight, FaRegEnvelope, FaSearch } from 'react-icons/fa';
+import ChoicesFormInput from "@/components/form/ChoicesFormInput";
+import { useState } from "react";
+import { Card, CardBody, CardFooter, CardHeader, Col, OverlayTrigger, Row, Tooltip } from "react-bootstrap";
+import { FaAngleLeft, FaAngleRight, FaRegEnvelope, FaSearch } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 
 const StudentRow = ({ studentData = {} }) => {
-  const id = studentData?._id || studentData?.id;
   return (
     <tr>
       <td className="ps-3">
         <div className="d-flex align-items-center position-relative">
           <div className="avatar avatar-md flex-shrink-0">
-            {studentData?.pfpImg ? (
+            {studentData?.avatar ? (
               <img
-                src={studentData?.pfpImg}
+                src={studentData?.avatar}
                 className="rounded-circle"
-                alt={'avatar'}
+                alt={"avatar"}
               />
             ) : (
               <div className="avatar-img rounded-circle border-white border-3 shadow d-flex align-items-center justify-content-center bg-light text-dark fw-bold fs-4">
@@ -31,14 +31,14 @@ const StudentRow = ({ studentData = {} }) => {
         </div>
       </td>
       <td className="text-center d-none d-md-table-cell">
-        {studentData?.coursesJoined || "-"}
+        {studentData?.coursesCount || "-"}
       </td>
       <td className="text-center">
-        {studentData?.isActivated === null ? (
+        {studentData?.isActive === null ? (
           <div className="badge bg-secondary bg-opacity-10 text-secondary">
             -
           </div>
-        ) : studentData?.isActivated ? (
+        ) : studentData?.isActive ? (
           <div className="badge bg-success bg-opacity-10 text-success">
             Active
           </div>
@@ -51,7 +51,7 @@ const StudentRow = ({ studentData = {} }) => {
       <td className="text-center">
         <OverlayTrigger
           placement="top"
-          overlay={<Tooltip id={`tooltip-message-${studentData?._id}`}>Copy Email</Tooltip>}
+          overlay={<Tooltip id={`tooltip-message-${studentData?.stuId}`}>Copy Email</Tooltip>}
         >
           <button
             type="button"
@@ -62,7 +62,7 @@ const StudentRow = ({ studentData = {} }) => {
                 navigator.clipboard.writeText(email);
                 toast.success("Email copied!");
               } else {
-                toast.error("No email found");
+                toast.error("No email found.");
               }
             }}
           >
@@ -76,30 +76,34 @@ const StudentRow = ({ studentData = {} }) => {
 
 const MyStudentsList = ({
   col = 12,
+
   students = [],
   totalStudents = 0,
   page = 1,
   limit = 5,
   totalPages = 0,
   loading = false,
+
   onPageChange,
-  searchTerm = '',
-  setSearchTerm,
-  sort,
-  setSort,
+
+  onSearch,
+  onSortChange,
 }) => {
   const NUMBER_OF_COLUMNS = 4;
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sort, setSort] = useState("");
   const start = (page - 1) * limit + 1;
   const end = Math.min(start + students.length - 1, totalStudents);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    onPageChange(1);
+    onSearch(searchTerm);
   };
 
   const handleSortChange = (value) => {
     setSort(value);
-    onPageChange(1);
+    onSortChange(value);
   };
 
   const goToPage = (pageNum) => {
@@ -139,9 +143,9 @@ const MyStudentsList = ({
                   value={sort}
                   onChange={handleSortChange}
                 >
-                  <option value="">Options</option>
-                  <option value="nameAsc">A - Z</option>
-                  <option value="nameDesc">Z - A</option>
+                  <option value="">Sort by</option>
+                  <option value="nameAsc">Name Ascending</option>
+                  <option value="nameDesc">Name Descending</option>
                 </ChoicesFormInput>
               </form>
             </Col>
@@ -157,7 +161,7 @@ const MyStudentsList = ({
                     Student Name
                   </th>
                   <th scope="col" className="border-0 text-center d-none d-md-table-cell">
-                    Courses Joined
+                    Courses Enrolled
                   </th>
                   <th scope="col" className="border-0 text-center">
                     Status

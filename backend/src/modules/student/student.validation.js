@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { courseIdSchema, lectureIdSchema } from "#modules/course/course.validation.js";
 import {
   nameSchema,
   optionalUrlSchema,
@@ -61,4 +62,40 @@ export const coursesQueryRequest = z.object({
       .optional()
       .default("activityDesc"),
   })
+});
+
+export const courseIdParam = z.object({
+  params: z.object({
+    courseId: courseIdSchema,
+  })
+});
+
+export const updateLectureProgressRequest = z.object({
+  params: z.object({
+    courseId: courseIdSchema,
+    lecId: lectureIdSchema
+  }),
+  body: z.object({
+    currentTimeSec: z.coerce.number({ error: "Current time must be a number" })
+      .min(0, "Current time cannot be negative")
+      .default(0),
+    durationSec: z.coerce.number({ error: "Duration must be a number" })
+      .min(0, "Duration cannot be negative")
+      .default(0),
+    isCompleted: z.boolean().default(false),
+    deltaTimeSec: z.coerce.number()
+      .min(0)
+      .max(60, "Delta time seems suspiciously high")
+      .default(0),
+    isNewSession: z.boolean().default(false),
+  }, "Request body is needed")
+    .superRefine((data, ctx) => {
+      if (data.currentTimeSec > data.durationSec && data.durationSec > 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Current time cannot exceed lecture duration",
+          path: ["currentTimeSec"],
+        });
+      }
+    })
 });

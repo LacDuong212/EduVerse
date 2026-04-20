@@ -1,4 +1,4 @@
-import { currency } from '@/context/constants';
+import { currency } from '@/contexts/constants';
 
 export const formatCurrency = (value) => {
   const n = Number(value);

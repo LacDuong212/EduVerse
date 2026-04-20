@@ -77,8 +77,10 @@ const aiDataSchema = z.object({
   status: z.string().optional(),
 });
 
+export const lectureIdSchema = objectIdSchema("Lecture");
+
 const lectureSchema = z.object({
-  lecId: objectIdSchema("Lecture").nullish(),
+  lecId: lectureIdSchema.nullish(),
   _id: objectIdSchema("Lecture").nullish(),
   title: z.string().trim().min(1, "Lecture title is required"),
   videoId: z.string("Lecture video is required")
@@ -150,7 +152,7 @@ export const courseSchema = z.object({
   categoryId: categoryIdSchema,
 
   image: imageSchema,
-  
+
   curriculum: curriculumSchema,
 }).superRefine(discountValidation);
 
@@ -162,6 +164,18 @@ export const updateCourseSchema = z.object(baseCourseFields)
   .superRefine(discountValidation);
 
 export const submitCourseSchema = z.object(baseCourseFields).partial();
+
+export const priceFilterEnum = ["free", "paid", "all"];
+export const sortFilterEnum = [
+  "newest",
+  "oldest",
+  "priceHighToLow",
+  "priceLowToHigh",
+  "mostPopular",
+  "leastPopular",
+  "ratingHighToLow",
+  "ratingLowToHigh",
+];
 
 export const courseQueryRequest = z.object({
   query: z.object({
@@ -189,22 +203,13 @@ export const courseQueryRequest = z.object({
         .optional()
     ),
 
-    price: z.enum(["free", "paid", "all"], "Price option not found")
+    price: z.enum(priceFilterEnum, "Price option not found")
       .optional()
-      .default("all"),
+      .default(LEVEL_ENUM.all),
 
-    sort: z.enum([
-      "newest",
-      "oldest",
-      "priceHighToLow",
-      "priceLowToHigh",
-      "mostPopular",
-      "leastPopular",
-      "ratingHighToLow",
-      "ratingLowToHigh",
-    ], "Sort option not found")
+    sort: z.enum(sortFilterEnum, "Sort option not found")
       .optional()
-      .default("newest"),
+      .default(sortFilterEnum[0]),
 
     tag: z.string().trim().optional().transform((val) => val?.toLowerCase()),
   })
@@ -235,6 +240,6 @@ export const limitQueryRequest = z.object({
 export const generateAiParams = z.object({
   params: z.object({
     id: courseIdSchema,
-    lecId:  objectIdSchema("Lecture"),
+    lecId: lectureIdSchema,
   })
 });

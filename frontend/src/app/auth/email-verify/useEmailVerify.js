@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from "react";
 import axios from "axios";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 
 export default function useEmailVerify(initialEmail = "", onVerifySuccess) {
@@ -11,78 +11,85 @@ export default function useEmailVerify(initialEmail = "", onVerifySuccess) {
   const inputRefs = useRef([]);
 
   useEffect(() => {
-    if (initialEmail) {
-      setUserEmail(initialEmail);
-    }
+    if (initialEmail) setUserEmail(initialEmail);
   }, [initialEmail]);
 
   const handleChange = (e, index) => {
     const val = e.target.value.replace(/[^0-9]/g, "");
+
     const newOtp = [...otp];
-    newOtp[index] = val;
+    newOtp[index] = val.substring(val.length - 1);
+
     setOtp(newOtp);
-    if (val && index < inputRefs.current.length - 1)
+
+    if (val && index < inputRefs.current.length - 1) {
       inputRefs.current[index + 1].focus();
+    }
   };
 
   const handleKeyDown = (e, index) => {
-    if (e.key === "Backspace" && otp[index] === "" && index > 0) {
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
       inputRefs.current[index - 1].focus();
     }
   };
 
   const handlePaste = (e) => {
+    e.preventDefault();
+
     const paste = e.clipboardData.getData("text").replace(/[^0-9]/g, "");
     const pasteArray = paste.split("").slice(0, 6);
+
     const newOtp = [...otp];
     pasteArray.forEach((char, i) => {
       newOtp[i] = char;
-      if (inputRefs.current[i]) inputRefs.current[i].value = char;
     });
+
     setOtp(newOtp);
-    const nextIndex = pasteArray.length >= 6 ? 5 : pasteArray.length;
-    inputRefs.current[nextIndex].focus();
+
+    const nextIndex = Math.min(pasteArray.length, 5);
+    inputRefs.current[nextIndex]?.focus();
   };
 
   const onSubmit = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
+
     const otpCode = otp.join("");
     if (otpCode.length !== 6) {
-      toast.error("Please enter 6-digit OTP");
-      return;
+      return toast.info("Please enter the full 6-digit code");
     }
 
+    setLoading(true);
     try {
-      setLoading(true);
-      axios.defaults.withCredentials = true;
-      
-      const endpoint = `${backendUrl}/api/auth/verify-email`;
-      const payload = { email: userEmail, otp: otpCode };
+      const { data } = await axios.post(
+        `${backendUrl}/api/auth/verify-email`,
+        { email: userEmail.toLowerCase().trim(), otp: otpCode },
+        { withCredentials: true }
+      );
 
-      const { data } = await axios.post(endpoint, payload);
+      if (data.success) {
+        toast.success(data.message || "Email verified! You can now log in.");
 
-      if (!data.success) {
-        toast.error(data.message || "Invalid OTP");
-        setOtp(new Array(6).fill(""));
-        inputRefs.current[0].focus();
-        return;
+        if (onVerifySuccess) {
+          onVerifySuccess(userEmail);
+        }
       }
-
-      toast.success(data.message || "Email verified successfully!");
-
-      if (onVerifySuccess) onVerifySuccess(userEmail);
-
     } catch (error) {
+      console.error("Verification Error:", error);
+
       if (error.response) {
-        const { data } = error.response;
-        toast.error(data?.message || "Verification Error");
-      } else if (error.request) {
-        // if network error (server is down or unreachable)
-        toast.error("Unable to connect to server. Please try again later.");
+        const { status, data: errData } = error.response;
+
+        if (status === 400 && errData.errors) {
+          const mainError = errData.errors[0]?.message || "Invalid input";
+          toast.error(mainError);
+        } else {
+          toast.error(errData.message || "Verification failed");
+        }
+
+        setOtp(new Array(6).fill(""));
+        inputRefs.current[0]?.focus();
       } else {
-        // if unknown error
-        console.log("Verify email error: ", error)
-        toast.error("An unexpected error occurred.");
+        toast.error("Network error. Please try again.");
       }
     } finally {
       setLoading(false);

@@ -1,12 +1,19 @@
 import AppError from "#exceptions/app.error.js";
-import { countInProgressCourses } from "#modules/course-progress/course-progress.service.js";
+import { existsEnrollment } from "#modules/enrollment/enrollment.service.js";
+import * as learningService from "#modules/learning/learning.service.js";
 import { updateProfile } from "#modules/user/user.service.js";
 import { withTransaction } from "#utils/transaction.js";
 import Student from "./student.model.js"
 
-export const createNewStudent = async (userId) => {
+export const createNewStudent = async (userId, session = null) => {
   if (!userId) throw new AppError("User ID is required", 400);
-  const student = await Student.create({ user: userId });
+
+  const student = await Student.findOneAndUpdate(
+    { user: userId },
+    { $setOnInsert: { user: userId } },
+    { upsert: true, new: true, runValidators: true, session }
+  );
+  
   return student;
 };
 
@@ -92,7 +99,7 @@ export const getStudentCoursesStats = async (userId) => {
 
   const total = student?.stats?.totalCourses || 0;
   const completed = student?.stats?.completedCourses || 0;
-  const inProgress = await countInProgressCourses(userId);
+  const inProgress = await learningService.countInProgressCourses(userId);
   const totalNotStarted = Math.max(0, total - completed - inProgress);
 
   return {
@@ -117,4 +124,33 @@ export const getStudentStats = async (userId) => {
     totalLectures: student.stats?.totalLectures || 0,
     completedLectures: student.stats?.completedLectures || 0,
   };
+};
+
+export const handleUpdateLectureProgress = async (stuId, courseId, lecId, data) => {
+  if (!stuId) throw new AppError("Student ID is required", 400);
+
+  const isEnrolled = await existsEnrollment(stuId, courseId);
+  if (!isEnrolled)
+    throw new AppError("You haven't enrolled this course yet!", 403);
+
+  const {
+    currentTimeSec, deltaTimeSec, isCompleted, isNewSession
+  } = data;
+
+  let progress = await learningService.syncLectureProgress(stuId, courseId, lecId, {
+    currentTimeSec,
+    deltaTimeSec,
+    isNewSession
+  });
+
+  if (isCompleted)
+    progress = await learningService.completeLecture(stuId, courseId, lecId);
+
+  return progress;
+};
+
+export const getStudentInterests = async (userId) => {
+  if (!userId) return [];
+  const student = await Student.findOne({ user: userId }).select("interests").lean();
+  return student.interests || [];
 };

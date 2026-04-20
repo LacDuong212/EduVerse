@@ -1,37 +1,17 @@
-import { useState, useEffect } from 'react';
 import { Container, Row, Col, Alert, Spinner } from 'react-bootstrap';
 import { FaCaretLeft, FaCaretRight } from "react-icons/fa";
-import { useSelector } from 'react-redux';
 import CourseCard from '@/components/CourseCard';
-
-const ITEMS_PER_PAGE = 12;
+import useWishlist from '../useWishlist';
 
 const WishlistCard = () => {
-  const { items, status } = useSelector((state) => state.wishlist);
-
-  const [currentPage, setCurrentPage] = useState(1);
-
-  const validItems = Array.isArray(items)
-    ? items.filter(item => item.courseId && typeof item.courseId === 'object')
-    : [];
-
-  const totalItems = validItems?.length || 0;
-  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
-
-  useEffect(() => {
-    if (currentPage > totalPages && totalPages > 0) {
-      setCurrentPage(totalPages);
-    }
-  }, [totalItems, totalPages, currentPage]);
-
-  const indexOfLastItem = currentPage * ITEMS_PER_PAGE;
-  const indexOfFirstItem = indexOfLastItem - ITEMS_PER_PAGE;
-  const currentItems = validItems.slice(indexOfFirstItem, indexOfLastItem);
-
-  const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  const {
+    currentItems,
+    currentPage,
+    totalItems,
+    totalPages,
+    status,
+    handlePageChange,
+  } = useWishlist();
 
   if (status === 'loading' && totalItems === 0) {
     return (
@@ -55,8 +35,8 @@ const WishlistCard = () => {
             <Row className="g-4 mb-5">
               {currentItems.map((item) => {
                 return (
-                  <Col sm={6} lg={4} xl={3} key={item._id}>
-                    <CourseCard course={item.courseId} />
+                  <Col sm={6} lg={4} xl={3} key={item.courseId}>
+                    <CourseCard course={item} />
                   </Col>
                 );
               })}

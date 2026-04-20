@@ -5,7 +5,7 @@ import NotificationDropdown from '@/components/TopNavBar/components/Notification
 import ProfileDropdown from '@/components/TopNavBar/components/ProfileDropdown';
 import SimpleAppMenu from '@/components/TopNavBar/components/SimpleAppMenu';
 import TopbarMenuToggler from '@/components/TopNavBar/components/TopbarMenuToggler';
-import { useLayoutContext } from '@/context/useLayoutContext';
+import { useLayoutContext } from '@/contexts/useLayoutContext';
 
 import { Container, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { useSelector } from 'react-redux';
@@ -16,7 +16,7 @@ import { BsCart3 } from 'react-icons/bs';
 const TopNavigationBar = () => {
   const { appMenuControl } = useLayoutContext();
 
-  const cartCount = useSelector((state) => state.cart?.totalItem || 0);
+  const cartCount = useSelector((state) => (state.cart?.items || []).length);
   const wishlistCount = useSelector((state) => (state.wishlist?.items || []).length);
 
   return (
@@ -37,7 +37,7 @@ const TopNavigationBar = () => {
         <SimpleAppMenu mobileMenuOpen={appMenuControl.open} menuClassName="mx-auto" topMenuItems={STUDENT_APP_MENU_ITEMS} />
 
         <ul className="nav flex-row align-items-center justify-content-end gap-2 gap-md-3 list-unstyled">
-          
+
           <NotificationDropdown />
 
           <li className="nav-item position-relative" style={{ cursor: 'pointer' }}>
@@ -58,7 +58,7 @@ const TopNavigationBar = () => {
               </span>
             )}
           </li>
-          
+
           <li className="nav-item position-relative" style={{ cursor: 'pointer' }}>
             <OverlayTrigger
               placement="bottom"

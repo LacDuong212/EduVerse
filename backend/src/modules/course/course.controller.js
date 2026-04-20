@@ -24,9 +24,9 @@ export const getCourseStats = asyncHandler(async (req, res) => {
 // @route GET ..?page=&limit=&search=&sort=&category=&price=&language=&level=&tag=
 export const getAllCourses = asyncHandler(async (req, res) => {
   const query = req.validated?.query || {};
-  
-  const { 
-    courses, total, page, limit 
+
+  const {
+    courses, total, page, limit
   } = await courseService.queryCourses(query);
 
   return sendPaginatedResponse(
@@ -141,9 +141,9 @@ export const getPopularTags = asyncHandler(async (req, res) => {
   const { limit } = req.validated?.query || {};
   const tags = await courseService.getTopTags(limit);
   return sendSuccessResponse(
-    res, 
-    200, 
-    "Get popular tags successfully!", 
+    res,
+    200,
+    "Get popular tags successfully!",
     tags.map(t => t?.name).filter(Boolean)
   );
 });
@@ -164,4 +164,11 @@ export const generateAiDataForLecture = asyncHandler(async (req, res) => {
   const { id, lecId } = req.validated?.params || {};
   const result = await courseService.handleLectureGenerateAi(userId, id, lecId);
   return sendSuccessResponse(res, 200, "Lecture AI content generated!", result);
+});
+
+// @desc Get filters for courses search
+// @route GET /filters
+export const getFilters = asyncHandler(async (req, res) => {
+  const filters = await courseService.getCoursesFilters();
+  return sendSuccessResponse(res, 200, "Get filters successfully!", filters);
 });

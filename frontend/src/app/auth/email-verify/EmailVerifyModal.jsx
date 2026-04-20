@@ -5,20 +5,25 @@ export default function EmailVerifyModal({ show, onHide, email, onVerifySuccess 
   const emailVerify = useEmailVerify(email, onVerifySuccess);
 
   return (
-    <Modal show={show} onHide={onHide} centered onEntered={() => emailVerify.inputRefs.current[0]?.focus()}>
+    <Modal
+      show={show}
+      onHide={onHide}
+      centered onEntered={() => emailVerify.inputRefs.current[0]?.focus()}
+      backdrop="static"
+    >
       <Form onSubmit={emailVerify.onSubmit} onPaste={emailVerify.handlePaste}>
         <Modal.Header className="border-0 position-relative">
-      <Modal.Title className="w-100 text-center m-0">
-        Verify Your Email
-      </Modal.Title>
-      <button
-        type="button"
-        className="btn-close position-absolute end-0 top-50 translate-middle-y me-3"
-        onClick={onHide}
-      />
-    </Modal.Header>
-    <hr className="my-0 mx-0 w-100" style={{ borderTop: "2px solid #777" }} />
-    
+          <Modal.Title className="w-100 text-center m-0">
+            Verify Your Email
+          </Modal.Title>
+          <button
+            type="button"
+            className="btn-close position-absolute end-0 top-50 translate-middle-y me-3"
+            onClick={onHide}
+          />
+        </Modal.Header>
+        <hr className="my-0 mx-0 w-100" style={{ borderTop: "2px solid #777" }} />
+
         <Modal.Body>
           <p className="text-center">
             Enter the 6-digit code sent to<br />

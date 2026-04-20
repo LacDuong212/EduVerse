@@ -1,9 +1,8 @@
-import logoLight from '@/assets/images/logo/logo_light.svg';
-import { OUR_GROUP_NAME } from '@/context/constants';
-import { Col, Container, Row } from 'react-bootstrap';
-import { FaFacebook, FaInstagram, FaLinkedinIn, FaTwitter } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
-
+import { Col, Container, Row } from "react-bootstrap";
+import { FaFacebook, FaInstagram, FaLinkedinIn, FaTwitter } from "react-icons/fa";
+import { Link } from "react-router-dom";
+import logoLight from "@/assets/images/logo/logo_light.svg";
+import { TEAM_NAME } from "@/contexts/constants";
 
 const Footer = () => {
   return (
@@ -17,7 +16,7 @@ const Footer = () => {
           </Col>
           <Col md={4} className="mb-3 mb-md-0">
             <div className="text-center text-white text-primary-hover">
-              Copyrights ©2025 EduVerse. Modified by {OUR_GROUP_NAME}. {/*Originally Eduport, built by StackBros*/}
+              Copyrights ©2026 EduVerse. Modified by {TEAM_NAME}. {/*Originally Eduport, built by StackBros*/}
             </div>
           </Col>
           <Col md={4}>

@@ -1,3 +1,7 @@
+import mongoose from "mongoose";
+
+const isPopulated = (val) => val instanceof mongoose.Model || (val && typeof val === "object" && val._id);
+const getStringId = (id) => isPopulated(id) ? id._id?.toString() : id?.toString();
 
 const getCourseBasicDetails = (course) => {
   const price = course?.price ?? null;
@@ -29,15 +33,15 @@ const getCourseInfo = (course) => ({
 });
 
 const getCourseCatgegory = (category) => ({
-  cateId: category?.id?.toString() || category?._id?.toString() || null,
+  cateId: getStringId(category) || null,
   cateName: category?.name || null,
   cateSlug: category?.slug || null,
 });
 
 const getCourseInstructor = (instructor) => ({
-  insId: instructor?.ref?.toString() || null,
-  insName: instructor?.name || null,
-  insAvatar: instructor?.pfpImg || instructor?.avatar || null,
+  insId: getStringId(instructor?.ref) || null,
+  insName: instructor?.ref?.name || instructor?.name || null,
+  insAvatar: instructor?.ref?.pfpImg || instructor?.avatar || null,
 });
 
 const getCourseStats = (course) => ({
@@ -46,6 +50,18 @@ const getCourseStats = (course) => ({
   studentsEnrolled: course?.studentsEnrolled || 0,
   sectionsCount: course?.sectionsCount || 0,
   lecturesCount: course?.lecturesCount || 0,
+});
+
+const getCourseRating = (course) => ({
+  total: course?.rating?.total || 0,
+  count: course?.rating?.count || 0,
+  stars: {
+    1: course?.rating?.stars?.["1"] || 0,
+    2: course?.rating?.stars?.["2"] || 0,
+    3: course?.rating?.stars?.["3"] || 0,
+    4: course?.rating?.stars?.["4"] || 0,
+    5: course?.rating?.stars?.["5"] || 0,
+  },
 });
 
 const getCourseTime = (course) => ({
@@ -124,14 +140,31 @@ const getAiData = (aiData) => {
 export const toCourseCardDto = (course) => {
   if (!course) return null;
 
+  const category = course.category || null;
+  const instructor = course.instructor || null;
+
   return {
     ...getCourseBasicDetails(course),
 
     level: course.level,
     duration: course.duration,
+    lecturesCount: course.lecturesCount || 0,
+    studentsEnrolled: course.studentsEnrolled || 0,
+    rating: {
+      total: course?.rating?.total || 0,
+      count: course?.rating?.count || 0,
+    },
 
-    ...getCourseCatgegory(course.category),
-    ...getCourseInstructor(course.instructor),
+    category: {
+      cateId: getStringId(category) || null,
+      name: course.category?.name || null,
+      slug: course.category?.slug || null,
+    },
+    instructor: {
+      insId: getStringId(instructor?.ref) || null,
+      name: course.instructor?.ref?.name || course.instructor?.name || null,
+      avatar: course.instructor?.ref?.pfpImg || course.instructor?.avatar || null,
+    },
   };
 };
 
@@ -151,9 +184,13 @@ export const toCourseDetailsDto = (details) => {
 
     ...getCourseInfo(details),
 
+    studentsEnrolled: details?.studentsEnrolled || 0,
+    sectionsCount: details?.sectionsCount || 0,
+    lecturesCount: details?.lecturesCount || 0,
+
     tags: details.tags || [],
 
-    stats: getCourseStats(details),
+    rating: getCourseRating(details),
 
     curriculum: getCourseFreeCurriculum(details.curriculum?.sections),
 
@@ -222,7 +259,7 @@ export const toSimpleCourse = (course) => {
 export const toEditCourseDto = (course, curriculum) => {
   if (!course) return null;
 
- return {
+  return {
     courseId: course._id?.toString() || null,
     title: course.title || null,
     subtitle: course.subtitle || null,
@@ -238,8 +275,8 @@ export const toEditCourseDto = (course, curriculum) => {
     status: course.status || null,
     categoryId: (course.category?._id || course.category)?.toString() || null,
     isPrivate: course.isPrivate ?? true,
-    hasPendingChanges: !!course.hasPendingChanges, 
-    
+    hasPendingChanges: !!course.hasPendingChanges,
+
     curriculum: {
       sections: getCourseCurriculum(curriculum?.sections, true) || null,
       hasPendingChanges: !!curriculum?.hasPendingChanges,

@@ -27,41 +27,39 @@ function addDays(dateStr, days) {
   return formatYMD(d);
 }
 
-streakSchema.statics.registerActivity = async function (user, dateInput) {
+streakSchema.statics.registerActivity = async function (user, dateInput = null, session = null) {
   const LearningStreak = this;
 
   const todayStr =
     typeof dateInput === "string" ? dateInput : formatYMD(dateInput || new Date());
 
-  let streak = await LearningStreak.findOne({ user });
+  let streak = await LearningStreak.findOne({ user }).session(session);
 
   if (!streak) {
-    streak = await LearningStreak.create({
-      user,
-      currentStreak: 1,
-      longestStreak: 1,
-      lastActiveDate: todayStr,
-      activeDates: [todayStr],
-    });
-    return streak;
+    const [newStreak] = await LearningStreak.create(
+      [{
+        user,
+        currentStreak: 1,
+        longestStreak: 1,
+        lastActiveDate: todayStr,
+        activeDates: [todayStr],
+      }],
+      { session }
+    );
+    return newStreak;
   }
 
-  if (streak.lastActiveDate === todayStr) { return streak; }
+  if (streak.lastActiveDate === todayStr) return streak;
 
   const nextDayOfLast = addDays(streak.lastActiveDate, 1);
-
-  if (nextDayOfLast === todayStr) { streak.currentStreak += 1; }
-  else if (todayStr > streak.lastActiveDate) { streak.currentStreak = 1; }
+  if (nextDayOfLast === todayStr) streak.currentStreak += 1;
+  else if (todayStr > streak.lastActiveDate) streak.currentStreak = 1;
 
   streak.lastActiveDate = todayStr;
+  if (!streak.activeDates.includes(todayStr)) streak.activeDates.push(todayStr);
+  if (streak.currentStreak > streak.longestStreak) streak.longestStreak = streak.currentStreak;
 
-  if (!streak.activeDates.includes(todayStr)) { streak.activeDates.push(todayStr); }
-
-  if (streak.currentStreak > streak.longestStreak) {
-    streak.longestStreak = streak.currentStreak;
-  }
-
-  await streak.save();
+  await streak.save({ session });
   return streak;
 };
 
@@ -71,7 +69,6 @@ streakSchema.statics.getUserStreak = async function (user) {
 
   const todayStr = formatYMD(new Date());
   const yesterdayStr = addDays(todayStr, -1);
-  const isStreakBroken = streak.lastActiveDate < yesterdayStr;
 
   if (!streak) {
     return {
@@ -82,6 +79,7 @@ streakSchema.statics.getUserStreak = async function (user) {
     };
   }
 
+  const isStreakBroken = streak.lastActiveDate < yesterdayStr;
   const todayDone = streak.lastActiveDate === todayStr;
 
   return {

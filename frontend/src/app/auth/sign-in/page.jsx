@@ -4,8 +4,8 @@ import { Col, Row } from 'react-bootstrap';
 import { FaChevronLeft, FaGoogle } from "react-icons/fa";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import AuthLayout from "@/app/auth/components/AuthLayout";
-import SignInForm from "@/app/auth/sign-in/components/SignInForm";
 import EmailVerifyModal from "@/app/auth/email-verify/EmailVerifyModal";
+import SignInForm from "./components/SignInForm";
 
 export default function SignInPage() {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -31,19 +31,18 @@ export default function SignInPage() {
             </div>
             <h1 className="fs-2">Login into EduVerse!</h1>
             <p className="lead mb-4">Nice to see you! Please log in with your account.</p>
-            <SignInForm 
+            <SignInForm
               onSignUpSuccess={(email) => {
                 setRegisteredEmail(email);
                 setShowVerifyModal(true);
               }}
             />
             <Row>
-              <div className="position-relative my-4">
-                <hr />
-                <p className="small position-absolute top-50 start-50 translate-middle bg-body px-5">Or</p>
+              <div className="position-relative my-3 px-5">
+                <hr /><p className="small position-absolute top-50 start-50 translate-middle bg-body px-2">or</p>
               </div>
               <Col xxl={12} className="d-grid">
-                <a href={`${backendUrl}/api/auth/google${location.search}`} className="btn bg-google mb-2 mb-xxl-0">
+                <a href={`${backendUrl}/api/auth/google${location.search}`} className="btn bg-google mb-0">
                   <FaGoogle className="text-white me-2" />
                   Sign in with Google
                 </a>

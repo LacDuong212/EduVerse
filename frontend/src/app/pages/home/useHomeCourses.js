@@ -4,100 +4,118 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { setHomeCourses, setAllCourses, setRecommendedCourses } from "@/redux/coursesSlice";
 
-export default function useHomeCourses() {
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
+export const useHomeCourses = () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.userData);
-  const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   const [loading, setLoading] = useState(false);
-  const [recLoading, setRecLoading] = useState(false); 
+  const [recLoading, setRecLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const publicDataFetchedRef = useRef(false);
+  const hasFetchedPublic = useRef(false);
 
-  const fetchPublicData = useCallback(async () => {
-    if (publicDataFetchedRef.current) return;
-    
-    publicDataFetchedRef.current = true;
-    
-    setLoading(true);
+  const fetchHomeSections = useCallback(async () => {
     try {
-      const resHome = await axios.get(`${backendUrl}/api/courses/home`, {
-        withCredentials: true,
-      });
-      const home = resHome?.data || {};
-      dispatch(setHomeCourses({
-           newest: home.newest || [],
-           bestSellers: home.bestSellers || [],
-           topRated: home.topRated || [],
-           biggestDiscounts: home.biggestDiscounts || [],
-      }));
+      const res = await axios.get(`${backendUrl}/api/courses/home`, { withCredentials: true });
+      const { result, success } = res.data;
 
-      let page = 1;
-      const merged = [];
-      while (true) {
-        const res = await axios.get(`${backendUrl}/api/courses?page=${page}`, {
-           withCredentials: true,
-           timeout: 15000,
-        });
-        const chunk = Array.isArray(res?.data?.data) ? res.data.data : [];
-        merged.push(...chunk);
-        
-        const pg = res?.data?.pagination || {};
-        if (!pg?.totalPages || page >= Number(pg.totalPages)) break;
-        page += 1;
+      if (success && result) {
+        dispatch(setHomeCourses({
+          newest: result.newest || [],
+          bestSellers: result.bestSellers || [],
+          topRated: result.topRated || [],
+          biggestDiscounts: result.biggestDiscounts || [],
+        }));
       }
-      dispatch(setAllCourses(merged));
-
     } catch (err) {
-      console.error("Public fetch error:", err);
-      toast.error("Could not load some courses");
-    } finally {
-      setLoading(false);
+      console.error("Home sections error:", err);
+      setError(err.response?.data?.message || "Failed to load featured courses");
     }
-  }, [backendUrl, dispatch]);
+  }, [dispatch]);
 
+  const fetchAllPaginated = useCallback(async () => {
+    let currentPage = 1;
+    let totalPages = 1;
+    const allCourses = [];
+
+    try {
+      do {
+        const res = await axios.get(`${backendUrl}/api/courses?page=${currentPage}`, {
+          withCredentials: true,
+          timeout: 15000,
+        });
+
+        const { result, pagination } = res.data;
+        
+        if (Array.isArray(result)) {
+          allCourses.push(...result);
+        }
+
+        totalPages = pagination?.totalPages || 1;
+        currentPage++;
+      } while (currentPage <= totalPages);
+
+      dispatch(setAllCourses(allCourses));
+    } catch (err) {
+      console.error("Pagination fetch error:", err);
+      toast.error(err.response?.data?.message || "Error syncing full catalog");
+    }
+  }, [dispatch]);
 
   const fetchRecommendations = useCallback(async () => {
     if (!user || user.role !== 'student') {
-        dispatch(setRecommendedCourses([]));
-        return;
+      dispatch(setRecommendedCourses([]));
+      return;
     }
 
     setRecLoading(true);
     try {
-        const resRec = await axios.get(`${backendUrl}/api/courses/recommendations`, {
-            withCredentials: true,
-        });
-        
-        if (resRec.data.success) {
-            dispatch(setRecommendedCourses(resRec.data.courses));
-        }
-    } catch (recErr) {
-        console.warn("Failed to fetch recommendations:", recErr);
-        dispatch(setRecommendedCourses([]));
+      const res = await axios.get(`${backendUrl}/api/courses/recommendations`, {
+        withCredentials: true,
+      });
+
+      if (res.data.success) {
+        dispatch(setRecommendedCourses(res.data.result.courses || []));
+      }
+    } catch (err) {
+      console.warn("Recommendations skipped:", err.response?.data?.message);
+      dispatch(setRecommendedCourses([]));
     } finally {
-        setRecLoading(false);
+      setRecLoading(false);
     }
-  }, [backendUrl, dispatch, user]);
+  }, [dispatch, user]);
+
+  const initData = useCallback(async () => {
+    if (hasFetchedPublic.current) return;
+    hasFetchedPublic.current = true;
+
+    setLoading(true);
+    setError(null);
+    
+    await Promise.all([fetchHomeSections(), fetchAllPaginated()]);
+    setLoading(false);
+  }, [fetchHomeSections, fetchAllPaginated]);
 
   useEffect(() => {
-    if (backendUrl) {
-        fetchPublicData();
-    }
-  }, [fetchPublicData, backendUrl]);
+    initData();
+  }, [initData]);
 
   useEffect(() => {
-    if (backendUrl) {
-        fetchRecommendations();
-    }
-  }, [fetchRecommendations, backendUrl]);
-
-  const refetch = useCallback(() => {
-    publicDataFetchedRef.current = false;
-    fetchPublicData();
     fetchRecommendations();
-  }, [fetchPublicData, fetchRecommendations]);
+  }, [fetchRecommendations]);
 
-  return { loading: loading || recLoading, error, refetch };
-}
+  const refetch = () => {
+    hasFetchedPublic.current = false;
+    initData();
+    fetchRecommendations();
+  };
+
+  return { 
+    loading: loading || recLoading, 
+    error, 
+    refetch 
+  };
+};
+
+export default useHomeCourses;

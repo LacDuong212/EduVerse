@@ -1,6 +1,7 @@
 import AppError from "#exceptions/app.error.js";
 import { getOrderStatusByUserIdAndCourseId } from "#modules/order/order.service.js";
 import { STATUS_ENUM } from "#modules/order/order.model.js";
+import { withTransaction } from "#utils/transaction.js";
 import * as cartMapper from "./cart.mapper.js";
 import Cart from "./cart.model.js";
 
@@ -42,29 +43,29 @@ export const bulkRemoveFromCart = async (stuId, courseIds, session = null) => {
   if (courseIds?.length === 0)
     throw new AppError("Please provide at least one coure to remove from cart.", 400);
 
-  let cart = await Cart.findOne({ user: stuId }).session(session);
-  if (!cart) {
-    cart = await Cart.create([{ user: stuId, courses: [] }], { session });
-  }
+  return await withTransaction(async (s) => {
+    let cart = await Cart.findOne({ user: stuId }).session(s);
+    if (!cart) {
+      cart = await Cart.create([{ user: stuId, courses: [] }], { session: s });
+    }
 
-  const initialCount = cart.courses.length;
-  if (initialCount === 0)
-    throw new AppError("Your cart is empty, there is nothing to remove.", 409);
+    const initialCount = cart.courses.length;
+    if (initialCount === 0)
+      throw new AppError("Your cart is empty, there is nothing to remove.", 409);
 
-  const idsToRemove = new Set(courseIds);
-  cart.courses = cart.courses.filter(item =>
-    !idsToRemove.has(item.course?.toString())
-  );
+    const idsToRemove = new Set(courseIds);
+    cart.courses = cart.courses.filter(item =>
+      !idsToRemove.has(item.course?.toString())
+    );
 
-  const removedCount = initialCount - cart.courses.length;
-  await cart.save({ session });
+    const removedCount = initialCount - cart.courses.length;
+    await cart.save({ session: s });
 
-  await cart.populate()
-
-  return {
-    cart: cartMapper.toCartItemsDto(await cart.populate("courses.course")),
-    removedCount,
-  };
+    return {
+      cart: cartMapper.toCartItemsDto(await cart.populate("courses.course")),
+      removedCount,
+    };
+  }, session);
 };
 
 export const clearCart = async (stuId) => {

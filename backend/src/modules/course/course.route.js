@@ -9,13 +9,9 @@ const courseRoute = Router();
 
 courseRoute.get("/", validate(courseSchema.courseQueryRequest), courseController.getAllCourses);
 courseRoute.get("/home", courseController.getHomeCourses);
+courseRoute.get("/filters", courseController.getFilters);
 courseRoute.get("/recommendations", checkAuth, courseController.getRecommendedCourses);
 courseRoute.get("/stats", courseController.getCourseStats);
-courseRoute.get(
-  "/tags/popular",
-  validate(courseSchema.limitQueryRequest),
-  courseController.getPopularTags
-);
 courseRoute.get(
   "/:id",
   checkAuth,
@@ -23,9 +19,14 @@ courseRoute.get(
   courseController.getCourseDetailsById
 );
 courseRoute.get(
-  "/:id/assessment", 
+  "/tags/popular",
+  validate(courseSchema.limitQueryRequest),
+  courseController.getPopularTags
+);
+courseRoute.get(
+  "/:id/assessment",
   protect,
-  restrictTo("student"), 
+  restrictTo("student"),
   validate(courseSchema.idParamRequest),
   courseController.generateFinalAssessment
 );
@@ -34,13 +35,6 @@ courseRoute.get(
   checkAuth,
   validate(courseSchema.idParamRequest),
   courseController.getCourseCurriculum
-);
-courseRoute.post(
-  "/:id/lectures/:lecId/generate-ai", 
-  protect,
-  restrictTo("instructor"), 
-  validate(courseSchema.generateAiParams),
-  courseController.generateAiDataForLecture
 );
 courseRoute.get(
   "/:id/related",
@@ -66,6 +60,13 @@ courseRoute.get(
   restrictTo("instructor"),
   validate(courseSchema.idParamRequest),
   courseController.getImageParams
+);
+courseRoute.post(
+  "/:id/lectures/:lecId/generate-ai",
+  protect,
+  restrictTo("instructor"),
+  validate(courseSchema.generateAiParams),
+  courseController.generateAiDataForLecture
 );
 
 export default courseRoute;

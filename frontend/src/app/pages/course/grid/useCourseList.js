@@ -1,113 +1,105 @@
-import { useEffect, useState, useCallback } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
-
 import { setAllCourses } from "@/redux/coursesSlice";
 
 export default function useCourseList() {
-  const dispatch = useDispatch();
-
-  const { allCourses } = useSelector(
-    (state) => state.courses || { allCourses: [] }
-  );
-
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
-
-  const [page, setPage] = useState(1);
-  const [limit] = useState(9);
-  const [total, setTotal] = useState(0);
-
-  const [category, setCategory] = useState("");
-  const [search, setSearch] = useState("");
-  const [sort, setSort] = useState("newest");
-
-  const [price, setPrice] = useState("");
-  const [level, setLevel] = useState("");
-  const [language, setLanguage] = useState("");
+  const dispatch = useDispatch();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [loading, setLoading] = useState(false);
+  const [total, setTotal] = useState(0);
 
-  const parseCoursesResponse = (res) => {
-    const d = res?.data || {};
+  const { allCourses = [] } = useSelector((state) => state.courses || {});
 
-    if (Array.isArray(d.data) && d.pagination) {
-      return {
-        list: d.data,
-        total: Number(d.pagination.total || 0),
-      };
-    }
+  const getParam = (key, defaultValue = "") => searchParams.get(key) || defaultValue;
 
-    return {
-      list: Array.isArray(d.courses) ? d.courses : [],
-      total: Number(d.total || 0),
-    };
+  const filters = {
+    page: parseInt(getParam("page", "1"), 10),
+    limit: parseInt(getParam("limit", "9"), 10),
+    category: getParam("category"),
+    search: getParam("search"),
+    sort: getParam("sort", "newest"),
+    price: getParam("price"),
+    level: getParam("level"),
+    language: getParam("language"),
+  };
+
+  const updateFilters = (newFilters) => {
+    setSearchParams((prev) => {
+      const params = new URLSearchParams(prev);
+      Object.entries(newFilters).forEach(([key, value]) => {
+        if (value) {
+          params.set(key, value);
+        } else {
+          params.delete(key);
+        }
+      });
+
+      if (!newFilters.page) params.set("page", "1");
+      return params;
+    });
   };
 
   const fetchCourses = useCallback(async () => {
-    if (page <= 0) return;
-
     try {
       setLoading(true);
 
-      const params = {
-        page,
-        limit,
-        ...(category && { category }),
-        ...(search && { search }),
-        ...(sort && { sort }),
-        ...(price && { price }),
-        ...(level && { level }),
-        ...(language && { language }),
-      };
+      const cleanParams = Object.fromEntries(
+        Object.entries(filters).filter(([_, v]) => v !== "" && v !== null)
+      );
 
-      const res = await axios.get(`${backendUrl}/api/courses`, { params });
-      const parsed = parseCoursesResponse(res);
+      const { data } = await axios.get(`${backendUrl}/api/courses`, {
+        params: cleanParams
+      });
 
-      dispatch(setAllCourses(parsed.list));
-      setTotal(parsed.total);
+      if (data.success) {
+        dispatch(setAllCourses(data.result));
+        setTotal(data.pagination?.totalItems || 0);
+      }
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Error fetching courses");
+      console.error("Fetch Courses Error:", error);
+
+      const errRes = error.response?.data;
+      if (errRes?.errors) {
+        const firstError = errRes.errors[0];
+        const field = firstError.field.split('.').pop();
+        toast.error(`${field}: ${firstError.message}`);
+      } else {
+        toast.error(errRes?.message || "Error fetching courses");
+      }
+
       dispatch(setAllCourses([]));
       setTotal(0);
     } finally {
       setLoading(false);
     }
-  }, [backendUrl, category, dispatch, limit, page, search, sort, price, level, language]);
+  }, [backendUrl, dispatch, JSON.stringify(filters)]);
 
   useEffect(() => {
     fetchCourses();
-  }, [page, fetchCourses]);
+  }, [fetchCourses]);
 
   const clearFilters = () => {
-    setCategory("");
-    setSearch("");
-    setSort("newest");
-    setPrice("");
-    setLevel("");
-    setLanguage("");
-    setPage(1);
+    setSearchParams({});
   };
 
   return {
     allCourses,
-    page,
-    limit,
-    total,
-    category,
-    setCategory,
-    search,
-    setSearch,
     loading,
-    setPage,
-    sort,
-    setSort,
-    price,
-    setPrice,
-    level,
-    setLevel,
-    language,
-    setLanguage,
+    total,
+    ...filters,
+
+    setPage: (p) => updateFilters({ page: p }),
+    setCategory: (c) => updateFilters({ category: c }),
+    setSearch: (s) => updateFilters({ search: s }),
+    setSort: (s) => updateFilters({ sort: s }),
+    setPrice: (p) => updateFilters({ price: p }),
+    setLevel: (l) => updateFilters({ level: l }),
+    setLanguage: (l) => updateFilters({ language: l }),
     clearFilters,
   };
 }

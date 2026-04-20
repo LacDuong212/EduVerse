@@ -1,5 +1,5 @@
 import { useCourseEarnings, useCourseEnrollments } from '../useMyCourseDetail';
-import { currency } from '@/context/constants';
+import { currency } from '@/contexts/constants';
 import { formatCurrency } from '@/utils/currency';
 import { useMemo } from 'react';
 import ReactApexChart from 'react-apexcharts';
@@ -102,7 +102,7 @@ const CourseStats = ({ col = 6, courseId = '' }) => {
 
     // map 'name' (2024-11) to 'MM/yy' (11/24) for X-axis
     const categories = earningsData.map(item => {
-      const [year, month] = item.name.split('-');
+      const [year, month] = item.period.split('-');
       return `${month}/${year}`;
     });
 
@@ -116,7 +116,7 @@ const CourseStats = ({ col = 6, courseId = '' }) => {
     const values = enrollmentsData.map(item => item.value);
 
     const categories = enrollmentsData.map(item => {
-      const [year, month] = item.name.split('-');
+      const [year, month] = item.period.split('-');
       return `${month}/${year}`;
     });
 

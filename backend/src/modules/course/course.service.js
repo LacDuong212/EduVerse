@@ -1,10 +1,11 @@
 import Fuse from "fuse.js";
 import mongoose from "mongoose";
 import AppError from "#exceptions/app.error.js";
+import { getAllCatgeoriesWithSort } from "#modules/category/category.service.js";
 import { existsEnrollment } from "#modules/enrollment/enrollment.service.js";
+import { getCourseImageUploadParams } from "#modules/image/image.service.js";
 import Instructor from "#modules/instructor/instructor.model.js";
 import { getCurrentInstructor } from "#modules/instructor/instructor.service.js";
-import { getCourseImageUploadParams } from "#modules/image/image.service.js";
 import { TYPE_ENUM as NOTIF_TYPE } from "#modules/notification/notification.model.js";
 import { sendNotification } from "#modules/notification/notification.service.js";
 import { expireOrphanVideos } from "#modules/video/video.service.js";
@@ -12,8 +13,8 @@ import { processVideoWithGemini } from "#services/ai.service.js";
 import { getPaginationOptions } from "#utils/pagination.js";
 import { withTransaction } from "#utils/transaction.js";
 import * as courseMapper from "./course.mapper.js";
-import Course, { STATUS_ENUM, UPDATE_STATUS_ENUM } from "./course.model.js";
-import { courseSchema } from "./course.validation.js";
+import Course, { LEVEL_ENUM, STATUS_ENUM, UPDATE_STATUS_ENUM } from "./course.model.js";
+import { courseSchema, priceFilterEnum, sortFilterEnum } from "./course.validation.js";
 import Curriculum, { AI_DATA_STATUS } from "./curriculum.model.js";
 
 const publicFilter = {
@@ -30,7 +31,7 @@ const getAverageRating = (c) =>
 export const getCourseAccess = async (userRole, userId, course) => {
   if (!userRole || !userId) return { isOwner: false, isEnrolled: false };
 
-  const isOwner = userRole === "instructor" && course.instructor.ref.toString() === userId;
+  const isOwner = userRole === "instructor" && course?.instructor?.ref?.toString() === userId;
   const isEnrolled = userRole === "student" && await existsEnrollment(userId, course._id);
 
   return { isOwner, isEnrolled };
@@ -40,7 +41,7 @@ export const getHomeDashboardData = async () => {
   const commonPopulate = [
     { path: "category", select: "name slug" },
     {
-      path: "instructor", select: "name pfpImg"
+      path: "instructor.ref", select: "name pfpImg"
     }
   ];
 
@@ -105,7 +106,7 @@ export const queryCourses = async (filters) => {
 
   if (category) query.category = category;
   if (language) query.language = language;
-  if (level && level !== "all") query.level = level;
+  if (level) query.level = level;
 
   if (tag) {
     query.tags = { $in: Array.isArray(tag) ? tag : [tag] };
@@ -190,36 +191,55 @@ const getMongoSort = (strategy) => {
 };
 
 export const getCourseInfoForVideoId = async (videoId) => {
-  const result = await Curriculum.aggregate([
-    { $match: { "sections.lectures.videoId": videoId } },
-    { $unwind: "$sections" },
-    { $unwind: "$sections.lectures" },
-    { $match: { "sections.lectures.videoId": videoId } },
+  if (!videoId) return null;
+
+  const result = await Course.aggregate([
     {
       $lookup: {
-        from: "courses",
-        localField: "courseId",
-        foreignField: "_id",
-        as: "courseInfo"
+        from: "curriculums",
+        localField: "_id",
+        foreignField: "courseId",
+        as: "curriculum"
       }
     },
-    { $unwind: "$courseInfo" },
+    { $unwind: "$curriculum" },
+    {
+      $match: {
+        $or: [
+          { previewVideo: videoId },
+          { "curriculum.sections.lectures.videoId": videoId }
+        ]
+      }
+    },
     {
       $project: {
         _id: 0,
-        courseId: 1,
-        insId: "$courseInfo.instructor.ref",
-        isFree: "$sections.lectures.isFree"
+        courseId: "$_id",
+        insId: "$instructor.ref",
+        previewVideo: 1,
+        sections: "$curriculum.sections"
       }
     }
   ]);
 
-  const courseInfo = result[0];
+  if (!result.length) return null;
+
+  const course = result[0];
+
+  let isFree = false;
+
+  if (course.previewVideo === videoId) {
+    isFree = true;
+  } else {
+    const allLectures = course.sections.flatMap(s => s.lectures);
+    const targetLecture = allLectures.find(l => l.videoId === videoId);
+    isFree = targetLecture?.isFree ?? false;
+  }
 
   return {
-    courseId: courseInfo?.courseId || null,
-    insId: courseInfo?.insId || null,
-    isFree: courseInfo?.isFree ?? false
+    courseId: course.courseId || null,
+    insId: course.insId || null,
+    isFree: isFree
   };
 };
 
@@ -514,16 +534,11 @@ export const getPublicInstructorCourses = async (
   };
 };
 
-export const createDraftCourse = async (insId) => {
-  if (!insId) throw new AppError("Instructor ID is required.", 400);
-
-  return await withTransaction(async (session) => {
-    const instructor = await getCurrentInstructor(insId, session);
-    if (!instructor) throw new AppError("Instructor not found.", 404);
-
+export const createDraftCourse = async (instructor, session = null) => {
+  return await withTransaction(async (s) => {
     const [course] = await Course.create([{
       title: "New draft course",
-      "instructor.ref": new mongoose.Types.ObjectId(insId),
+      "instructor.ref": instructor.user._id || instructor.user,
       "instructor.name": instructor.name,
       "instructor.avatar": instructor.avatar,
       category: null,
@@ -532,15 +547,15 @@ export const createDraftCourse = async (insId) => {
       status: STATUS_ENUM.draft,
       isPrivate: true,
       isDeleted: false
-    }], { session });
+    }], { session: s });
 
     await Curriculum.create([{
       courseId: course._id,
       sections: [],
-    }], { session });
+    }], { session: s });
 
     return courseMapper.toSimpleCourse(course);
-  });
+  }, session);
 };
 
 const getPlainPendingData = (pendingUpdate) => {
@@ -835,7 +850,12 @@ export const approveCourseUpdate = async (courseId, session = null) => {
       curriculum.pendingUpdate = { data: null, submittedAt: null, status: UPDATE_STATUS_ENUM.none };
 
       curriculum.markModified("sections");
-      await curriculum.save({ session: s });
+      const updatedCurr = await curriculum.save({ session: s });
+      course.sectionsCount = updatedCurr.sections?.length;
+      course.lecturesCount = updatedCurr.sections?.reduce(
+        (acc, section) => acc + (section.lectures ? section.lectures.length : 0),
+        0
+      );
     }
 
     if (course.pendingUpdate?.data) {
@@ -958,4 +978,35 @@ export const handleLectureGenerateAi = async (insId, courseId, lecId) => {
 
     throw error;
   }
+};
+
+export const getCoursesFilters = async () => {
+  const [categories, languages] = await Promise.all([
+    getAllCatgeoriesWithSort("slugAsc"),
+    Course.distinct("language", publicFilter)
+  ]);
+
+  const levels = LEVEL_ENUM.values();
+  const prices = priceFilterEnum;
+  const sorts = sortFilterEnum;
+
+  return {
+    categories,
+    languages: languages?.filter(Boolean),
+    levels,
+    prices,
+    sorts,
+  }
+};
+
+export const countInstructorLiveCourses = async (insId) => {
+  if (!insId) throw new AppError("Instructor ID is required", 400);
+
+  const count = await Course.countDocuments({
+    "instructor.ref": new mongoose.Types.ObjectId(insId),
+    status: STATUS_ENUM.live,
+    isDeleted: false
+  });
+
+  return count;
 };

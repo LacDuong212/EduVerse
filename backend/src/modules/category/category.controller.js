@@ -3,7 +3,7 @@ import { sendSuccessResponse } from "#utils/response.js";
 import * as categoryService from "./category.service.js";
 
 // @desc  Get all categories with sort
-// @route ..?sort=
+// @route categories?sort=
 export const getAllCategoriesWithSort = asyncHandler(async (req, res) => {
   const { sort } = req.query;
   const categories = await categoryService.getAllCatgeoriesWithSort(sort);

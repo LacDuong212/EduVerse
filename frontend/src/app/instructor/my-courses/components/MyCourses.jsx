@@ -1,10 +1,13 @@
-import ChoicesFormInput from '@/components/form/ChoicesFormInput';
-import { formatCurrency } from '@/utils/currency';
-import { Button, Card, CardBody, CardFooter, CardHeader, Col, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
-import { BsPersonFill } from 'react-icons/bs';
-import { FaAngleLeft, FaAngleRight, FaFile, FaFolder, FaGlobe, FaLock, FaPlus, FaRegEdit, FaSearch, FaStar } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
+import ChoicesFormInput from "@/components/form/ChoicesFormInput";
+import { DEFAULT_COURSE_IMG } from "@/contexts/constants";
+import { formatCurrency } from "@/utils/currency";
+import { useState } from "react";
+import { Button, Card, CardBody, CardFooter, CardHeader, Col, OverlayTrigger, Row, Tooltip } from "react-bootstrap";
+import { BsPersonFill } from "react-icons/bs";
+import { FaAngleLeft, FaAngleRight, FaFile, FaFolder, FaGlobe, FaLock, FaPlus, FaRegEdit, FaSearch, FaStar } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
+// #TODO: url params for pagination, search, sort
 const MyCourses = ({
   courses,
   totalCourses,
@@ -12,35 +15,40 @@ const MyCourses = ({
   limit,
   totalPages,
   loading,
+
   onPageChange,
   onTogglePrivacy,
-  searchTerm,
-  setSearchTerm,
-  sort,
-  setSort
+
+  onSearch,
+  onSortChange,
 }) => {
   const NUMBER_OF_COLUMNS = 5;
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sort, setSort] = useState("");
+
   const statusBadge = (status) => {
-    return status === "Live"
+    return status === "live"
       ? "success"
-      : status === "Pending"
+      : status === "pending"
         ? "warning"
-        : status === "Rejected"
-          ? "orange"
-          : status === "Blocked"
-            ? "danger"
-            : "secondary";
+        : status === "draft"
+          ? "info"
+          : status === "rejected"
+            ? "orange"
+            : status === "blocked"
+              ? "danger"
+              : "secondary";
   }
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    onPageChange(1);
+    onSearch(searchTerm);
   };
 
   const handleSortChange = (value) => {
-    setSort(value);   // cus ChoicesFormInput accepts value directly, not an event (e.target.value)
-    onPageChange(1);
+    setSort(value);
+    onSortChange(value);
   };
 
   const goToPage = (pageNum) => {
@@ -144,13 +152,13 @@ const MyCourses = ({
                   </td>
                 </tr>
               ) : (courses.map((course) => (
-                <tr key={course._id}>
+                <tr key={course.courseId}>
                   <td className="ps-3">
                     <div className="d-flex align-items-center">
                       <div className="flex-shrink-0 rounded overflow-hidden" style={{ width: "80px", height: "80px" }}>
                         <img
-                          src={course.image || course.thumbnail || "https://res.cloudinary.com/dw1fjzfom/image/upload/v1757337425/av4_khpvlh.png"}
-                          alt={course.title || 'Course Image'}
+                          src={course.image || DEFAULT_COURSE_IMG}
+                          alt={course.title || "Course Image"}
                           className="img-fluid h-100 w-100 object-fit-cover"
                         />
                       </div>
@@ -158,7 +166,7 @@ const MyCourses = ({
                         <div className="mb-1">
                           <h6 className="mb-0">
                             <Link
-                              to={`${course._id}`}
+                              to={`${course.courseId || ''}`}
                               className="text-decoration-none d-inline-block"
                             >
                               {course.title}
@@ -169,21 +177,23 @@ const MyCourses = ({
                           </div>
                         </div>
                         <div className="small">
-                          <div className="row gx-2">
-                            <div className="col-md-6 col-lg-4 col-xl-5 d-flex align-items-center">
-                              <FaStar className="text-warning mb-1 me-1" />
-                              {course.rating?.average || 0} Rating
-                            </div>
+                          {course?.status !== "draft" && (
+                            <div className="row gx-2">
+                              <div className="col-md-6 col-lg-4 col-xl-5 d-flex align-items-center">
+                                <FaStar className="text-warning mb-1 me-1" />
+                                {course.averageRating || 0} Rating
+                              </div>
 
-                            <div className="col-md-6 col-lg-4 col-xl-5 d-flex align-items-center">
-                              <BsPersonFill className="text-info mb-1 me-1" />
-                              {course.studentsEnrolled || 0} Enrolled
+                              <div className="col-md-6 col-lg-4 col-xl-5 d-flex align-items-center">
+                                <BsPersonFill className="text-info mb-1 me-1" />
+                                {course.studentsEnrolled || 0} Enrolled
+                              </div>
                             </div>
-                          </div>
+                          )}
                           <div className="row gx-2">
                             <div className="col-md-6 col-lg-4 col-xl-5 d-flex align-items-center">
                               <FaFolder className="me-1" />
-                              {course.curriculum?.length || 0} Sections
+                              {course.sectionsCount || 0} Sections
                             </div>
                             <div className="col-md-6 col-lg-4 col-xl-5 d-flex align-items-center">
                               <FaFile className="me-1" />
@@ -209,15 +219,13 @@ const MyCourses = ({
                     <div
                       className={`badge bg-${statusBadge(course?.status)} bg-opacity-10 text-${statusBadge(course?.status)}`}
                     >
-                      {course.status || "N/A"}
+                      {course.status?.toUpperCase() || "N/A"}
                     </div>
                   </td>
                   <td className="d-none d-md-table-cell">
-                    {course.price === 0 ? (
-                      <div className="d-flex justify-content-center">
-                        <div className="badge bg-success bg-opacity-10 text-success">
-                          Free
-                        </div>
+                    {!Number.isFinite(course.price) ? (
+                      <div className="text-center">
+                        -
                       </div>
                     ) : course.enableDiscount ? (
                       <div className="text-end">
@@ -232,46 +240,48 @@ const MyCourses = ({
                       </div>
                     )}
                   </td>
-                  <td className="text-center">
-                    <OverlayTrigger
-                      placement="top"
-                      overlay={<Tooltip id={`tooltip-edit-${course._id}`}>Edit Course</Tooltip>}
-                    >
-                      <Button
-                        variant="primary-soft"
-                        size="sm"
-                        className="btn-round me-1"
-                        as={Link}
-                        to={`/instructor/courses/edit/${course._id}`}
-                      >
-                        <FaRegEdit className="fa-fw" />
-                      </Button>
-                    </OverlayTrigger>
-                    {course.isPrivate ? (
+                  <td>
+                    <div className="d-flex flex-column flex-lg-row align-items-center justify-content-center gap-2">
                       <OverlayTrigger
                         placement="top"
-                        overlay={<Tooltip id={`tooltip-public-${course._id}`}>Make course public</Tooltip>}
+                        overlay={<Tooltip id={`tooltip-edit-${course.courseId}`}>Edit Course</Tooltip>}
                       >
-                        <button
-                          className="btn btn-sm btn-success-soft btn-round"
-                          onClick={() => onTogglePrivacy(course._id, course.isPrivate)}
+                        <Button
+                          variant="primary-soft"
+                          size="sm"
+                          className="btn-round mb-0"
+                          as={Link}
+                          to={`/instructor/courses/${course.courseId || ''}/edit`}
                         >
-                          <FaGlobe className="fa-fw" />
-                        </button>
+                          <FaRegEdit className="fa-fw" />
+                        </Button>
                       </OverlayTrigger>
-                    ) : (
-                      <OverlayTrigger
-                        placement="top"
-                        overlay={<Tooltip id={`tooltip-private-${course._id}`}>Make course private</Tooltip>}
-                      >
-                        <button
-                          className="btn btn-sm btn-danger-soft btn-round"
-                          onClick={() => onTogglePrivacy(course._id, course.isPrivate)}
+                      {course.isPrivate ? (
+                        <OverlayTrigger
+                          placement="top"
+                          overlay={<Tooltip id={`tooltip-public-${course.courseId}`}>Make course public</Tooltip>}
                         >
-                          <FaLock className="fa-fw" />
-                        </button>
-                      </OverlayTrigger>
-                    )}
+                          <button
+                            className="btn btn-sm btn-success-soft btn-round mb-0"
+                            onClick={() => onTogglePrivacy(course.courseId || '', !course.isPrivate)}
+                          >
+                            <FaGlobe className="fa-fw" />
+                          </button>
+                        </OverlayTrigger>
+                      ) : (
+                        <OverlayTrigger
+                          placement="top"
+                          overlay={<Tooltip id={`tooltip-private-${course.courseId}`}>Make course private</Tooltip>}
+                        >
+                          <button
+                            className="btn btn-sm btn-danger-soft btn-round mb-0"
+                            onClick={() => onTogglePrivacy(course.courseId || '', !course.isPrivate)}
+                          >
+                            <FaLock className="fa-fw" />
+                          </button>
+                        </OverlayTrigger>
+                      )}
+                    </div>
                   </td>
                 </tr>
               )))}

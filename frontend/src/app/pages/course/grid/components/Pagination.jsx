@@ -28,7 +28,7 @@ const Pagination = ({ page, limit, total, onChangePage }) => {
   const visiblePages = getVisiblePages();
 
   return (
-    <nav className="mt-4 d-flex justify-content-center" aria-label="navigation">
+    <nav className="d-flex justify-content-center" aria-label="navigation">
       <ul className="pagination pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
 
         <li className={`page-item mb-0 ${page === 1 ? "disabled" : ""}`}>

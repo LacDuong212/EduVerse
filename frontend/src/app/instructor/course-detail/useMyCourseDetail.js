@@ -4,25 +4,25 @@ import axios from 'axios';
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-const useCourseAnalytics = (courseId, period, endpoint, totalKey) => {
+const useCourseAnalytics = (courseId, endpoint, totalKey) => {
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!courseId || !period) return;
+    if (!courseId) return;
 
     const fetchData = async () => {
       setLoading(true);
       setError(null);
-      const url = `${backendUrl}/api/instructor/courses/${courseId}/${endpoint}?period=${period}`;
+      const url = `${backendUrl}/api/instructor/courses/${courseId}/${endpoint}`;
 
       try {
         const response = await axios.get(url, { withCredentials: true });
         if (response.data.success) {
-          setData(response.data.data);
-          setTotal(response.data[totalKey]);
+          setData(response.data.result);
+          setTotal(0);
         } else {
           setError('Failed to fetch data');
         }
@@ -34,21 +34,21 @@ const useCourseAnalytics = (courseId, period, endpoint, totalKey) => {
     };
 
     fetchData();
-  }, [courseId, period, endpoint, totalKey]);
+  }, [courseId, endpoint, totalKey]);
 
   return { data, total, loading, error };
 };
 
-export const useCourseEarnings = (courseId, period) => {
-  return useCourseAnalytics(courseId, period, 'earnings', 'totalEarnings');
+export const useCourseEarnings = (courseId) => {
+  return useCourseAnalytics(courseId, 'earning', 'totalEarnings');
 };
 
-export const useCourseEnrollments = (courseId, period) => {
-  return useCourseAnalytics(courseId, period, 'enrollments', 'totalEnrolled');
+export const useCourseEnrollments = (courseId) => {
+  return useCourseAnalytics(courseId, 'enrollments', 'totalEnrolled');
 };
 
 export default function useMyCourseDetail() {
-  const { id } = useParams(); // get ID from URL
+  const { id } = useParams();
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -61,7 +61,7 @@ export default function useMyCourseDetail() {
         `${backendUrl}/api/instructor/courses/${id}/details`,
         { withCredentials: true },
       );
-      if (data && data.success) setCourse(data.course);
+      if (data && data.success) setCourse(data.result);
     } catch (err) {
       setError(err);
     } finally {
@@ -93,8 +93,8 @@ export const useCourseStudentList = (courseId, page = 1, limit = 10, search = ''
       });
 
       if (data.success) {
-        setStudents(data.students);
-        setTotal(data.pagination.total);
+        setStudents(data.result);
+        setTotal(data.pagination.totalItems);
         setTotalPages(data.pagination.totalPages);
       } else {
         setError('Failed to fetch students');
