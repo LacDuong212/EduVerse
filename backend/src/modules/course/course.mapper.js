@@ -90,7 +90,8 @@ export const getCourseCurriculum = (curriculum, hasAiData = false) => {
 };
 
 const getAiData = (aiData) => {
-  aiData = aiData?.toJSON();
+  // Handle both Mongoose subdocuments (have .toJSON) and plain lean objects
+  aiData = typeof aiData?.toJSON === "function" ? aiData.toJSON() : aiData;
   if (!aiData || Object.keys(aiData).length === 0) return null;
 
   const keyConcepts = (aiData.lessonNotes?.keyConcepts || []).map((kc) => ({

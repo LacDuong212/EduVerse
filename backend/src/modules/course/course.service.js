@@ -60,7 +60,8 @@ export const getHomeDashboardData = async () => {
     ])
   ]);
 
-  await Course.populate(biggestDiscounts, commonPopulate);
+  // instructor is already denormalized in the embedded subdoc — only populate category
+  await Course.populate(biggestDiscounts, [{ path: "category", select: "name slug" }]);
 
   return {
     newest: courseMapper.toCourseCardDtoList(newest),
