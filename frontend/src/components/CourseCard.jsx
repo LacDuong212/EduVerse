@@ -63,9 +63,9 @@ const CourseCard = ({ course }) => {
   const subtitle = course.subtitle || null;
   const image = course.image || course.thumbnail || DEFAULT_COURSE_IMG;
 
-  const averageRating = course.rating && course.rating.count === 0
-    ? 0
-    : (course.rating.total / course.rating.count).toFixed(1);
+  const averageRating = course.ratingTotal && course.ratingCount !== 0
+    ? (course.ratingTotal / course.ratingCount).toFixed(1)
+    : 0;
   const avgRatingNum = Number(averageRating);
   const star = Number.isFinite(avgRatingNum) ? clamp(avgRatingNum, 0, 5) : 0;
 

@@ -1,29 +1,37 @@
+import axios from "axios";
 import { useEffect, useState } from "react";
 import { Card, Col, Container, OverlayTrigger, Row, Tooltip } from "react-bootstrap";
 import { BsPatchCheckFill } from "react-icons/bs";
 import { FaBook, FaSlidersH, FaStar, FaUserGraduate } from "react-icons/fa";
+import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
 import patternImg from "@/assets/images/pattern/04.png";
-import useInstructor from "@/app/instructor/useInstructor";
-import useProfile from "@/hooks/useProfile";
 
-const Banner = ({ toggleOffCanvas }) => { 
-  const { user } = useProfile(); 
-  const { fetchInstructorCounters } = useInstructor();
+const Banner = ({ toggleOffCanvas }) => {
+  const { userData } = useSelector((state) => state.auth);
 
-  const [accountData, setAccountData] = useState(null);
+  const [stats, setStats] = useState(null);
 
   useEffect(() => {
-    const load = async () => {
-      const counterData = await fetchInstructorCounters();
-      setAccountData({...user, ...counterData});
+    const fetchStats = async () => {
+      try {
+        const { data } = await axios.get(
+          `${import.meta.env.VITE_BACKEND_URL}/api/instructor/stats`,
+          { withCredentials: true }
+        );
+
+        if (data.success) setStats(data.result);
+      } catch (err) {
+        toast.error(err.response?.data?.message || "Failed to fetch your stats..");
+      }
     };
-    load();
+
+    fetchStats();
   }, []);
 
   return (
     <section className="py-0 mb-2 mb-xl-5">
-      {/* Banner Background */}
       <Container fluid className="px-0">
         <div className="bg-blue h-100px h-md-200px rounded-0"
           style={{
@@ -32,7 +40,6 @@ const Banner = ({ toggleOffCanvas }) => {
           }}></div>
       </Container>
 
-      {/* Banner Content */}
       <Container className="mt-n4">
         <Row>
           <Col xs={12}>
@@ -40,14 +47,14 @@ const Banner = ({ toggleOffCanvas }) => {
               <Row className="d-flex justify-content-between">
                 <Col xs={"auto"} className="mt-4 mt-md-0">
                   <div className="avatar avatar-xxl mt-n3">
-                    {accountData?.pfpImg ? (
+                    {userData?.avatar ? (
                       <img
                         className="avatar-img rounded-circle border border-light border-3 shadow"
-                        src={accountData.pfpImg}
+                        src={userData.avatar}
                         alt="Instructor Avatar" />
                     ) : (
                       <div className="avatar-img rounded-circle border border-light border-3 shadow d-flex align-items-center justify-content-center bg-light text-dark fw-bold fs-1">
-                        {(accountData?.name?.[0] || "I").toUpperCase()}
+                        {(userData?.name?.[0] || "I").toUpperCase()}
                       </div>
                     )}
                   </div>
@@ -55,7 +62,7 @@ const Banner = ({ toggleOffCanvas }) => {
                 <Col className="d-md-flex justify-content-between align-items-center mt-4">
                   <div>
                     <h1 className="fs-4 mt-2 d-flex align-items-center gap-2">
-                      {accountData?.name} <BsPatchCheckFill className="text-info small" />
+                      {userData?.name} <BsPatchCheckFill className="text-info small" />
                     </h1>
                     <ul className="list-inline mb-0">
                       <OverlayTrigger
@@ -64,7 +71,7 @@ const Banner = ({ toggleOffCanvas }) => {
                       >
                         <li className="list-inline-item h6 fw-light me-3 mb-1 mb-sm-0">
                           <FaStar className="text-warning mb-1 me-1" />
-                          {parseFloat(accountData?.averageRating).toFixed(1)}
+                          {parseFloat(stats?.averageRating).toFixed(1)}
                         </li>
                       </OverlayTrigger>
                       <OverlayTrigger
@@ -73,7 +80,7 @@ const Banner = ({ toggleOffCanvas }) => {
                       >
                         <li className="list-inline-item h6 fw-light me-3 mb-1 mb-sm-0">
                           <FaBook className="text-orange mb-1 me-1" />
-                          {accountData?.totalCourses}
+                          {stats?.totalCourses}
                         </li>
                       </OverlayTrigger>
                       <OverlayTrigger
@@ -82,7 +89,7 @@ const Banner = ({ toggleOffCanvas }) => {
                       >
                         <li className="list-inline-item h6 fw-light me-3 mb-1 mb-sm-0">
                           <FaUserGraduate className="text-success mb-1 me-1" />
-                          {accountData?.totalStudents}
+                          {stats?.totalStudents}
                         </li>
                       </OverlayTrigger>
                     </ul>

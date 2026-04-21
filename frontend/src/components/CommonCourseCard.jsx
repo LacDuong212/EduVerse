@@ -9,7 +9,7 @@ const CommonCourseCard = ({ course }) => {
   const {
     courseId,
     thumbnail,
-    rating,
+    ratingCount = 0,
     studentsEnrolled: students,
     lecturesCount,
     instructor,
@@ -18,9 +18,9 @@ const CommonCourseCard = ({ course }) => {
   const title = course.title || "Untitled";
   const subtitle = course.subtitle;
 
-  const averageRating = course.rating && course.rating.count === 0
-    ? 0
-    : (course.rating.total / course.rating.count).toFixed(1);
+  const averageRating = course.ratingTotal && course.ratingCount !== 0
+    ? (course.ratingTotal / course.ratingCount).toFixed(1)
+    : 0;
 
   const price = Number(course.price ?? null);
   const hasDiscount = course.enableDiscount ?? false;
@@ -35,8 +35,7 @@ const CommonCourseCard = ({ course }) => {
   const hoursText = hoursValue.toString().replace(".", ",");
   const durationText = hoursValue > 0
     ? `${hoursText} hour${hoursValue === 1 ? "" : "s"}`
-    : "—";
-
+    : "-";
 
   const levelBadge = {
     class: "bg-info",
@@ -96,7 +95,7 @@ const CommonCourseCard = ({ course }) => {
         <div className="d-flex justify-content-between align-items-center mb-2">
           <span className="h6 fw-light mb-0">
             <FaStar className="text-warning mb-1 me-2" />
-            {`${averageRating} (${rating.count} ${rating.count === 1 ? "rating" : "ratings"})`}
+            {`${averageRating} (${ratingCount} ${ratingCount === 1 ? "rating" : "ratings"})`}
           </span>
           <span className="h6 fw-light mb-0">
             <FaUserGraduate className="text-success mb-1 me-2" />

@@ -1,9 +1,9 @@
-import { currency } from "@/contexts/constants";
-import { formatCurrency } from "@/utils/currency";
 import ReactApexChart from "react-apexcharts";
 import { Button, Card, CardBody, CardHeader, Col, Row } from "react-bootstrap";
 import { FaCircle } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import { currency } from "@/contexts/constants";
+import { formatCurrency } from "@/utils/currency";
 
 const TopCoursesChart = ({ col = 6, topCoursesData = [] }) => {
   const variants = ["danger", "warning", "success", "primary", "purple"];
@@ -11,7 +11,7 @@ const TopCoursesChart = ({ col = 6, topCoursesData = [] }) => {
   const series = topCoursesData.map(course => course.totalEarning);
   const labels = topCoursesData.map(course => course.title);
 
-  const topEarning = {
+  const topRevenue = {
     series,
     labels,
     chart: {
@@ -75,9 +75,9 @@ const TopCoursesChart = ({ col = 6, topCoursesData = [] }) => {
             <Col md={6} className="">
               <ReactApexChart
                 height={300}
-                series={topEarning.series}
+                series={topRevenue.series}
                 type="donut"
-                options={topEarning}
+                options={topRevenue}
               />
             </Col>
           </Row>

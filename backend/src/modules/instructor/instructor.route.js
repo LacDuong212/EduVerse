@@ -35,7 +35,7 @@ privateRoutes.get(
   instructorController.getCourses
 );
 privateRoutes.post("/courses", instructorController.createCourse);
-privateRoutes.get("/earning", instructorController.getInstructorEarning);
+privateRoutes.get("/earning", instructorController.getInstructorMonthlyEarning);
 privateRoutes.get("/profile", instructorController.getProfile);
 privateRoutes.patch(
   "/profile",
@@ -48,11 +48,11 @@ privateRoutes.get(
   validate(instructorSchema.studentsQueryRequest),
   instructorController.getStudents
 );
-privateRoutes.get("/courses/earning", instructorController.getCoursesMonthlyEarning);
+privateRoutes.get("/courses/revenue", instructorController.getCoursesMonthlyRevenue);
 privateRoutes.get(
   "/courses/top-courses",
   validate(instructorSchema.limitQueryRequest),
-  instructorController.getTopEarningCourses
+  instructorController.getTopRevenueCourses
 );
 privateRoutes.get("/courses/stats", instructorController.getCoursesStats);
 privateRoutes.get(
@@ -77,14 +77,14 @@ privateRoutes.get(
   instructorController.getCourseDetails
 );
 privateRoutes.get(
-  "/courses/:courseId/earning",
-  validate(instructorSchema.courseIdParamRequest),
-  instructorController.getCourseMonthlyEarning
-);
-privateRoutes.get(
   "/courses/:courseId/enrollments",
   validate(instructorSchema.courseIdParamRequest),
   instructorController.getCourseMonthlyEnrollments
+);
+privateRoutes.get(
+  "/courses/:courseId/revenue",
+  validate(instructorSchema.courseIdParamRequest),
+  instructorController.getCourseMonthlyRevenue
 );
 privateRoutes.post(
   "/courses/:courseId/submit",

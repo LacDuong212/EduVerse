@@ -1,21 +1,18 @@
 import { Container } from "react-bootstrap";
 import PageMetaData from "@/components/PageMetaData";
-import useInstructorMyCourses from "./useInstructorMyCourses";
 import MyCoursesHero from "./components/Hero";
 import MyCourses from "./components/MyCourses";
+import useInstructorMyCourses from "./useInstructorMyCourses";
 
 const InstructorMyCourses = () => {
   const {
     courses,
-    pagination,
     stats,
-    statsLoading,
-    coursesLoading,
-
-    setPage,
-    setSearch,
-    setSort,
-    updateCoursePrivacy,
+    loading,
+    search, setSearch,
+    sort, setSort,
+    pagination, setPage,
+    togglePrivacy,
   } = useInstructorMyCourses();
 
   return (
@@ -25,15 +22,17 @@ const InstructorMyCourses = () => {
       <Container className="py-5">
         <MyCourses
           courses={courses}
-          totalCourses={pagination.totalItems}
+          loading={loading}
           page={pagination.page}
           limit={pagination.limit}
+          totalCourses={pagination.totalItems}
           totalPages={pagination.totalPages}
-          loading={coursesLoading}
-          onPageChange={setPage}
-          onTogglePrivacy={updateCoursePrivacy}
+          currentSearch={search}
+          currentSort={sort}
           onSearch={setSearch}
           onSortChange={setSort}
+          onPageChange={setPage}
+          onTogglePrivacy={togglePrivacy}
         />
       </Container>
     </>

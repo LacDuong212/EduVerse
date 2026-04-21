@@ -53,7 +53,7 @@ export const getInstructorStats = async (userId, isPrivate = false) => {
   } = instructor.stats || {};
 
   const totalCourses = isPrivate === true
-    ? instructor.stats?.totalCourses || 0
+    ? (instructor.myCourses || [])?.length || 0
     : (await countInstructorLiveCourses(userId));
 
   const averageRating = totalReviews > 0

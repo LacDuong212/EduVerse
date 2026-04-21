@@ -5,7 +5,7 @@ export default function useInstructorDashboard() {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   const [stats, setStats] = useState(null);
-  const [earningChart, setEarningChart] = useState([]);
+  const [revenueChart, setRevenueChart] = useState([]);
   const [topCourses, setTopCourses] = useState([]);
 
   const [loading, setLoading] = useState(false);
@@ -20,7 +20,7 @@ export default function useInstructorDashboard() {
         axios.get(`${backendUrl}/api/instructor/stats`, {
           withCredentials: true,
         }),
-        axios.get(`${backendUrl}/api/instructor/courses/earning`, {
+        axios.get(`${backendUrl}/api/instructor/courses/revenue`, {
           withCredentials: true,
         }),
         axios.get(`${backendUrl}/api/instructor/courses/top-courses?limit=5`, {
@@ -29,7 +29,7 @@ export default function useInstructorDashboard() {
       ]);
 
       setStats(statsRes.data.result);
-      setEarningChart(earningRes.data.result);
+      setRevenueChart(earningRes.data.result.series);
       setTopCourses(topCoursesRes.data.result);
     } catch (err) {
       setError(err);
@@ -45,7 +45,7 @@ export default function useInstructorDashboard() {
 
   return {
     stats,
-    earningChart,
+    revenueChart,
     topCourses,
     loading,
     error,

@@ -25,7 +25,7 @@ const formatMonthlyData = (dbResults, startDate) => {
 
     result.push({
       period: `${formattedMonth}-${formattedYear}`,
-      value: dbMatch ? dbMatch.totalEarnings : 0
+      value: dbMatch ? dbMatch.value : 0
     });
 
     current.setMonth(current.getMonth() + 1);
@@ -33,7 +33,7 @@ const formatMonthlyData = (dbResults, startDate) => {
   return result;
 };
 
-export const getAllCoursesMonthlyEarningByInstructorId = async (insId) => {
+export const getAllCoursesMonthlyRevenueByInstructorId = async (insId) => {
   if (!insId) throw new AppError("Instructor ID is required.", 400);
 
   const instructor = await Instructor.findOne({ user: insId, isApproved: true })
@@ -49,36 +49,44 @@ export const getAllCoursesMonthlyEarningByInstructorId = async (insId) => {
   twelveMonthsAgo.setDate(1);
   twelveMonthsAgo.setHours(0, 0, 0, 0);
 
-  const earnings = await Order.aggregate([
+  const [result] = await Order.aggregate([
     {
       $match: {
         status: ORDER_STATUS.completed,
-        createdAt: { $gte: twelveMonthsAgo },
         "courses.course": { $in: courseIds }
       }
     },
     { $unwind: "$courses" },
+    { $match: { "courses.course": { $in: courseIds } } },
     {
-      $match: {
-        "courses.course": { $in: courseIds }
+      $facet: {
+        monthly: [
+          { $match: { createdAt: { $gte: twelveMonthsAgo } } },
+          {
+            $group: {
+              _id: {
+                year: { $year: "$createdAt" },
+                month: { $month: "$createdAt" }
+              },
+              value: { $sum: "$courses.pricePaid" }
+            }
+          },
+          { $sort: { "_id.year": 1, "_id.month": 1 } }
+        ],
+        total: [
+          { $group: { _id: null, sum: { $sum: "$courses.pricePaid" } } }
+        ]
       }
-    },
-    {
-      $group: {
-        _id: {
-          year: { $year: "$createdAt" },
-          month: { $month: "$createdAt" }
-        },
-        totalEarnings: { $sum: "$courses.pricePaid" }
-      }
-    },
-    { $sort: { "_id.year": 1, "_id.month": 1 } }
+    }
   ]);
 
-  return formatMonthlyData(earnings, twelveMonthsAgo);
+  return {
+    series: formatMonthlyData(result.monthly || [], twelveMonthsAgo),
+    total: result.total[0]?.sum || 0
+  };
 };
 
-export const getTopEarningCoursesThisMonth = async (insId, limit = 5) => {
+export const getTopRevenueCoursesThisMonth = async (insId, limit = 5) => {
   if (!insId) throw new AppError("Instructor ID is required.", 400);
 
   const instructor = await Instructor.findOne({ user: insId })
@@ -110,11 +118,11 @@ export const getTopEarningCoursesThisMonth = async (insId, limit = 5) => {
     {
       $group: {
         _id: "$courses.course",
-        totalEarning: { $sum: "$courses.pricePaid" },
+        totalRevenue: { $sum: "$courses.pricePaid" },
         totalSales: { $sum: 1 }
       }
     },
-    { $sort: { totalEarning: -1 } },
+    { $sort: { totalRevenue: -1 } },
     { $limit: limit },
     {
       $lookup: {
@@ -133,7 +141,7 @@ export const getTopEarningCoursesThisMonth = async (insId, limit = 5) => {
         title: "$courseInfo.title",
         image: "$courseInfo.image",
 
-        totalEarning: 1,
+        totalRevenue: 1,
         totalSales: 1,
       }
     }
@@ -142,89 +150,105 @@ export const getTopEarningCoursesThisMonth = async (insId, limit = 5) => {
   return topCourses;
 };
 
-export const getCourseMonthlyEarning = async (insId, courseId) => {
+export const getCourseMonthlyRevenue = async (insId, courseId) => {
   if (!insId) throw new AppError("Instructor ID is required.", 400);
 
-  const course = await Course.findOne({ _id: courseId, isDeleted: false })
-    .lean();
-  if (!course) throw new AppError("Course not found.", 404);
-
-  if (course.instructor?.ref?.toString() !== insId)
-    throw new AppError("You don't have access to this course.", 403);
+  const course = await Course.findOne({ _id: courseId, isDeleted: false }).lean();
+  if (!course || course.instructor?.ref?.toString() !== insId)
+    throw new AppError("Course not found or access denied.", 404);
 
   const twelveMonthsAgo = new Date();
   twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 11);
   twelveMonthsAgo.setDate(1);
   twelveMonthsAgo.setHours(0, 0, 0, 0);
 
-  const earnings = await Order.aggregate([
+  const [result] = await Order.aggregate([
     {
       $match: {
         status: ORDER_STATUS.completed,
-        createdAt: { $gte: twelveMonthsAgo },
         "courses.course": new mongoose.Types.ObjectId(courseId)
       }
     },
     { $unwind: "$courses" },
     {
-      $match: {
-        "courses.course": new mongoose.Types.ObjectId(courseId)
-      }
+      $match: { "courses.course": new mongoose.Types.ObjectId(courseId) }
     },
     {
-      $group: {
-        _id: {
-          year: { $year: "$createdAt" },
-          month: { $month: "$createdAt" }
-        },
-        totalEarnings: { $sum: "$courses.pricePaid" }
+      $facet: {
+        monthly: [
+          { $match: { createdAt: { $gte: twelveMonthsAgo } } },
+          {
+            $group: {
+              _id: {
+                year: { $year: "$createdAt" },
+                month: { $month: "$createdAt" }
+              },
+              value: { $sum: "$courses.pricePaid" }
+            }
+          },
+          { $sort: { "_id.year": 1, "_id.month": 1 } }
+        ],
+        total: [
+          { $group: { _id: null, sum: { $sum: "$courses.pricePaid" } } }
+        ]
       }
-    },
-    { $sort: { "_id.year": 1, "_id.month": 1 } }
+    }
   ]);
 
-  return formatMonthlyData(earnings, twelveMonthsAgo);
+  return {
+    series: formatMonthlyData(result.monthly || [], twelveMonthsAgo),
+    total: result.total[0]?.sum || 0
+  };
 };
 
 export const getCourseMonthlyEnrollments = async (insId, courseId) => {
   if (!insId) throw new AppError("Instructor ID is required.", 400);
 
-  const course = await Course.findOne({ _id: courseId, isDeleted: false })
-    .lean();
-  if (!course) throw new AppError("Course not found.", 404);
-
-  if (course.instructor?.ref?.toString() !== insId)
-    throw new AppError("You don't have access to this course.", 403);
+  const course = await Course.findOne({ _id: courseId, isDeleted: false }).lean();
+  if (!course || course.instructor?.ref?.toString() !== insId)
+    throw new AppError("Course not found or access denied.", 404);
 
   const twelveMonthsAgo = new Date();
   twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 11);
   twelveMonthsAgo.setDate(1);
   twelveMonthsAgo.setHours(0, 0, 0, 0);
 
-  const enrollmentStats = await Enrollment.aggregate([
+  const [result] = await Enrollment.aggregate([
     {
       $match: {
         course: new mongoose.Types.ObjectId(courseId),
-        status: ENROLL_STATUS.active,
-        enrolledAt: { $gte: twelveMonthsAgo }
+        status: ENROLL_STATUS.active
       }
     },
     {
-      $group: {
-        _id: {
-          year: { $year: "$enrolledAt" },
-          month: { $month: "$enrolledAt" }
-        },
-        value: { $sum: 1 }
+      $facet: {
+        monthly: [
+          { $match: { enrolledAt: { $gte: twelveMonthsAgo } } },
+          {
+            $group: {
+              _id: {
+                year: { $year: "$enrolledAt" },
+                month: { $month: "$enrolledAt" }
+              },
+              value: { $sum: 1 }
+            }
+          },
+          { $sort: { "_id.year": 1, "_id.month": 1 } }
+        ],
+        total: [
+          { $count: "count" }
+        ]
       }
-    },
-    { $sort: { "_id.year": 1, "_id.month": 1 } }
+    }
   ]);
 
-  return formatMonthlyData(enrollmentStats, twelveMonthsAgo);
+  return {
+    series: formatMonthlyData(result.monthly || [], twelveMonthsAgo),
+    total: result.total[0]?.count || 0
+  };
 };
 
-export const getInstructorEarnings = async (insId) => {
+export const getInstructorMonthlyEarnings = async (insId) => {
   if (!insId) throw new AppError("Instructor ID is required", 400);
 
   const instructor = await Instructor.findOne({ user: insId, isApproved: true })
@@ -234,61 +258,54 @@ export const getInstructorEarnings = async (insId) => {
   if (!instructor) throw new AppError("Instructor not found.", 404);
 
   const courseIds = instructor.myCourses || [];
-  if (courseIds.length === 0) {
-    return { earnings: [], totalEarning: 0 };
-  }
+  if (courseIds.length === 0) return { series: [], total: 0 };
 
   const twelveMonthsAgo = new Date();
   twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 11);
   twelveMonthsAgo.setDate(1);
   twelveMonthsAgo.setHours(0, 0, 0, 0);
 
-  const [monthlyData, lifetimeData] = await Promise.all([
-    Order.aggregate([
-      {
-        $match: {
-          status: ORDER_STATUS.completed,
-          createdAt: { $gte: twelveMonthsAgo },
-          "courses.course": { $in: courseIds }
-        }
-      },
-      { $unwind: "$courses" },
-      { $match: { "courses.course": { $in: courseIds } } },
-      {
-        $group: {
-          _id: {
-            year: { $year: "$createdAt" },
-            month: { $month: "$createdAt" }
-          },
-          totalEarnings: {
-            $sum: { $multiply: ["$courses.pricePaid", INSTRUCTOR_NET_PROFIT] }
-          }
-        }
-      },
-      { $sort: { "_id.year": 1, "_id.month": 1 } }
-    ]),
-
-    Order.aggregate([
-      {
-        $match: {
-          status: ORDER_STATUS.completed,
-          "courses.course": { $in: courseIds }
-        }
-      },
-      { $unwind: "$courses" },
-      { $match: { "courses.course": { $in: courseIds } } },
-      {
-        $group: {
-          _id: null,
-          total: { $sum: { $multiply: ["$courses.pricePaid", INSTRUCTOR_NET_PROFIT] } }
-        }
+  const [result] = await Order.aggregate([
+    {
+      $match: {
+        status: ORDER_STATUS.completed,
+        "courses.course": { $in: courseIds }
       }
-    ])
+    },
+    { $unwind: "$courses" },
+    { $match: { "courses.course": { $in: courseIds } } },
+    {
+      $facet: {
+        monthly: [
+          { $match: { createdAt: { $gte: twelveMonthsAgo } } },
+          {
+            $group: {
+              _id: {
+                year: { $year: "$createdAt" },
+                month: { $month: "$createdAt" }
+              },
+              value: { 
+                $sum: { $multiply: ["$courses.pricePaid", INSTRUCTOR_NET_PROFIT] } 
+              }
+            }
+          },
+          { $sort: { "_id.year": 1, "_id.month": 1 } }
+        ],
+        total: [
+          { 
+            $group: { 
+              _id: null, 
+              sum: { $sum: { $multiply: ["$courses.pricePaid", INSTRUCTOR_NET_PROFIT] } } 
+            } 
+          }
+        ]
+      }
+    }
   ]);
 
   return {
-    earnings: formatMonthlyData(monthlyData, twelveMonthsAgo),
-    totalEarning: lifetimeData[0]?.total || 0
+    series: formatMonthlyData(result.monthly || [], twelveMonthsAgo),
+    total: result.total[0]?.sum || 0
   };
 };
 

@@ -242,7 +242,7 @@ export const getPaginatedStudentCourses = async (stuId, filters) => {
   const { search, sort } = filters;
 
   const match = {
-    user: stuId,
+    student: new mongoose.Types.ObjectId(stuId),
     status: STATUS_ENUM.active,
   };
 
@@ -261,13 +261,13 @@ export const getPaginatedStudentCourses = async (stuId, filters) => {
       {
         $lookup: {
           from: "courseprogresses",
-          let: { userId: "$user", courseId: "$course._id" },
+          let: { studentId: "$student", courseId: "$course._id" },
           pipeline: [
             {
               $match: {
                 $expr: {
                   $and: [
-                    { $eq: ["$user", "$$userId"] },
+                    { $eq: ["$user", "$$studentId"] },
                     { $eq: ["$course", "$$courseId"] }
                   ]
                 }
@@ -285,7 +285,7 @@ export const getPaginatedStudentCourses = async (stuId, filters) => {
           image: "$course.image",
           thumbnail: "$course.thumbnail",
           enrolledAt: 1,
-          totalLectures: { $ifNull: ["$progress.totalLectures", 0] },
+          totalLectures: { $ifNull: ["$progress.totalLectures", "$course.lecturesCount"] },
           completedLectures: { $ifNull: ["$progress.completedLecturesCount", 0] },
           lastActivityAt: { $ifNull: ["$progress.lastActivityAt", "$enrolledAt"] },
         }
@@ -314,6 +314,7 @@ export const getPaginatedStudentCourses = async (stuId, filters) => {
       limit,
     };
   }
+
   const dbSort = getStudentCourseSort(sort);
   const [result] = await Enrollment.aggregate([
     ...getBasePipeline(),
@@ -404,7 +405,7 @@ export const getCourseStudentsReport = async (insId, courseId, filters = {}) => 
       {
         $project: {
           _id: 0,
-          enrolledAt: 1,
+          stuId: "$user._id",
           name: "$user.name",
           email: "$user.email",
           isActivated: "$user.isActivated",
@@ -421,6 +422,7 @@ export const getCourseStudentsReport = async (insId, courseId, filters = {}) => 
               ]
             }
           },
+          enrolledAt: 1,
           review: {
             rating: { $ifNull: ["$review.rating", null] },
             description: "$review.description",

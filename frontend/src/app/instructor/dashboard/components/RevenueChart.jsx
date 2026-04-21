@@ -1,19 +1,19 @@
-import { formatCurrency } from "@/utils/currency";
 import ReactApexChart from "react-apexcharts";
 import { Card, CardHeader, CardBody, Col, Row } from "react-bootstrap";
 import { BsArrowUp, BsArrowDown, BsDash } from "react-icons/bs";
+import { formatCurrency } from "@/utils/currency";
 
-const EarningsChart = ({ col = 6, earningsData = [] }) => {
-  const values = earningsData.map(item => item.value);
+const RevenueChart = ({ col = 6, revenueData = [] }) => {
+  const values = revenueData.map(item => item.value);
 
-  const categories = earningsData.map(item => {
+  const categories = revenueData.map(item => {
     const [year, month] = item.period.split('-');
     return `${month}/${year}`;
   });
 
   const chartOptions = {
     series: [{
-      name: "Earnings",
+      name: "Revenue",
       data: values
     }],
     chart: {
@@ -64,7 +64,7 @@ const EarningsChart = ({ col = 6, earningsData = [] }) => {
     }
   }
 
-  const avgEarnings = earningsData.map(item => item.value).reduce((a, b) => a + b, 0) / (earningsData.length || 1);
+  const avgRevenue = revenueData.map(item => item.value).reduce((a, b) => a + b, 0) / (revenueData.length || 1);
 
   const getChangeDisplay = (value1, value2) => {
     const diff = value1 - value2;
@@ -90,8 +90,8 @@ const EarningsChart = ({ col = 6, earningsData = [] }) => {
     }
   };
 
-  const thisMonthValue = earningsData.length > 0 ? earningsData[earningsData.length - 1].value : 0;
-  const lastMonthValue = earningsData.length > 1 ? earningsData[earningsData.length - 2].value : 0;
+  const thisMonthValue = revenueData.length > 0 ? revenueData[revenueData.length - 1].value : 0;
+  const lastMonthValue = revenueData.length > 1 ? revenueData[revenueData.length - 2].value : 0;
 
   return (
     <Col md={12} lg={col}>
@@ -110,8 +110,8 @@ const EarningsChart = ({ col = 6, earningsData = [] }) => {
             </Col>
             <Col sm={6} md={4}>
               <span className="badge text-bg-dark">On Average</span>
-              <h4 className="my-2">{formatCurrency(avgEarnings)}</h4>
-              <p className="mb-0">{getChangeDisplay(avgEarnings, thisMonthValue)} vs. this month</p>
+              <h4 className="my-2">{formatCurrency(avgRevenue)}</h4>
+              <p className="mb-0">{getChangeDisplay(avgRevenue, thisMonthValue)} vs. this month</p>
             </Col>
           </Row>
           <ReactApexChart options={chartOptions} series={chartOptions.series} type="area" height={300} />
@@ -121,4 +121,4 @@ const EarningsChart = ({ col = 6, earningsData = [] }) => {
   );
 };
 
-export default EarningsChart;
+export default RevenueChart;
