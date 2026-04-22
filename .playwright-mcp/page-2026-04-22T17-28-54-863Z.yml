@@ -1,0 +1,42 @@
+- generic [ref=e8]:
+  - generic [ref=e10]:
+    - generic [ref=e15] [cursor=pointer]: Back
+    - link "En" [ref=e18] [cursor=pointer]:
+      - /url: /paymentv2/Transaction/PaymentMethod.html?token=aecff1751f1142fb8fb87e9df6d20c15&vnp_Locale=vi-VN
+      - generic [ref=e21]: En
+  - generic [ref=e24]:
+    - generic [ref=e33]:
+      - img "Bank logo" [ref=e35]
+      - img "VNPAY" [ref=e38]
+    - generic [ref=e42]:
+      - generic [ref=e43]: Select Payment Method (Test)
+      - generic [ref=e44]:
+        - button "Banking Apps and E-wallets ( VN PAY QR )" [ref=e46] [cursor=pointer]:
+          - generic [ref=e49]:
+            - text: Banking Apps and E-wallets (
+            - generic [ref=e50]:
+              - generic [ref=e51]: VN
+              - generic [ref=e52]: PAY
+              - superscript [ref=e53]: QR
+            - text: )
+        - generic [ref=e60] [cursor=pointer]: Domestic card and bank account
+        - generic [ref=e67] [cursor=pointer]: International payment cards
+        - button "VN PAY App" [ref=e71] [cursor=pointer]:
+          - generic [ref=e74]:
+            - generic [ref=e75]:
+              - generic [ref=e76]: VN
+              - generic [ref=e77]: PAY
+            - text: App
+    - generic [ref=e83]:
+      - link "hotrovnpay@vnpay.vn" [ref=e87] [cursor=pointer]:
+        - /url: mailto:hotrovnpay@vnpay.vn
+        - generic [ref=e90]: hotrovnpay@vnpay.vn
+      - generic [ref=e92]:
+        - link [ref=e94] [cursor=pointer]:
+          - /url: https://profile.globalsign.com/SiteSeal/siteSeal/profile/profile.do?p1=e797f6ab&p2=a06dada7520ada559537452c666a510c95706240fc2dfde64d4c864bf735462b7a370908847a6060a26daeac4f549d0bc8&p3=7b58e9c169b0b0ff3eb932a37330cc91d466b871
+          - img [ref=e95]
+        - link [ref=e97] [cursor=pointer]:
+          - /url: https://seal.controlcase.com/index.php?page=showCert&cId=3865876849
+          - img [ref=e98]
+  - contentinfo [ref=e99]:
+    - generic [ref=e100]: Developed by VNPAY © 2026

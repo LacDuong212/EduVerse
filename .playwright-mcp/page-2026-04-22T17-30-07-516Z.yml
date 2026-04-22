@@ -1,0 +1,64 @@
+- generic [ref=e8]:
+  - link "En" [ref=e13] [cursor=pointer]:
+    - /url: /paymentv2/Ncb/Transaction/Confirm.html?token=aecff1751f1142fb8fb87e9df6d20c15&vnp_Locale=vi-VN
+    - generic [ref=e16]: En
+  - generic [ref=e19]:
+    - generic [ref=e23]:
+      - generic [ref=e28]:
+        - img "Bank logo" [ref=e30]
+        - img "VNPAY" [ref=e33]
+      - generic [ref=e36]:
+        - generic [ref=e37]: Remaining time
+        - generic [ref=e40]:
+          - generic [ref=e42]: "--"
+          - generic [ref=e43]: ":"
+          - generic [ref=e45]: "--"
+    - generic [ref=e49]:
+      - generic [ref=e51]:
+        - generic [ref=e52]: Order information (Test)
+        - generic [ref=e55]:
+          - generic [ref=e57]:
+            - generic [ref=e59]: Payment amount
+            - generic [ref=e63]:
+              - text: 399,000
+              - superscript [ref=e64]: VND
+          - generic [ref=e66]:
+            - generic [ref=e68]: Order amount
+            - generic [ref=e72]:
+              - text: 399,000
+              - superscript [ref=e73]: VND
+          - generic [ref=e75]:
+            - generic [ref=e77]: Transaction fee
+            - generic [ref=e81]:
+              - text: "0"
+              - superscript [ref=e82]: VND
+          - generic [ref=e84]:
+            - generic [ref=e86]: Order ID
+            - generic [ref=e88]: 69e9054cd4d880a79df142cb
+          - generic [ref=e90]:
+            - generic [ref=e92]: Provider
+            - generic [ref=e94]: https://vnshop.vn/
+      - generic [ref=e96]:
+        - generic [ref=e97]: OTP Confirm
+        - generic [ref=e100]:
+          - generic [ref=e102]:
+            - textbox [ref=e107]:
+              - /placeholder: Enter OTP
+            - generic [ref=e114]: OTP has been sent to the registered phone number. Please enter OTP to complete the payment
+          - generic [ref=e116]:
+            - generic [ref=e120] [cursor=pointer]: Cancel
+            - button "Confirm" [ref=e122] [cursor=pointer]:
+              - generic [ref=e124]: Confirm
+    - generic [ref=e128]:
+      - link "hotrovnpay@vnpay.vn" [ref=e132] [cursor=pointer]:
+        - /url: mailto:hotrovnpay@vnpay.vn
+        - generic [ref=e135]: hotrovnpay@vnpay.vn
+      - generic [ref=e137]:
+        - link [ref=e139] [cursor=pointer]:
+          - /url: https://profile.globalsign.com/SiteSeal/siteSeal/profile/profile.do?p1=e797f6ab&p2=a06dada7520ada559537452c666a510c95706240fc2dfde64d4c864bf735462b7a370908847a6060a26daeac4f549d0bc8&p3=7b58e9c169b0b0ff3eb932a37330cc91d466b871
+          - img [ref=e140]
+        - link [ref=e142] [cursor=pointer]:
+          - /url: https://seal.controlcase.com/index.php?page=showCert&cId=3865876849
+          - img [ref=e143]
+  - contentinfo [ref=e144]:
+    - generic [ref=e145]: Developed by VNPAY © 2026
