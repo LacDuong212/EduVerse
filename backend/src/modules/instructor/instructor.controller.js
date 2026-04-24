@@ -160,11 +160,11 @@ export const getCourseDetails = asyncHandler(async (req, res) => {
   return sendSuccessResponse(res, 200, "Get course details successfully!", course);
 });
 
-// @desc  Get instructor monthly (12 months) earning and total earning
-// @route GET instructor/earning
-export const getInstructorMonthlyEarning = asyncHandler(async (req, res) => {
+// @desc  Get instructor earning analytics
+// @route GET instructor/earnings
+export const getInstructorEarnings = asyncHandler(async (req, res) => {
   const userId = req.user?.userId;
-  const result = await chartService.getInstructorMonthlyEarnings(userId);
+  const result = await chartService.getInstructorEarnings(userId);
   return sendSuccessResponse(res, 200, "Get instructor monthly earning successfully!", result);
 });
 

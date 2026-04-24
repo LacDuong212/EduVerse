@@ -28,7 +28,7 @@ export const enrollsCourses = async (stuId, courseIds, session = null) => {
     const existingEnrollments = await Enrollment.find({
       student: stuId,
       course: { $in: courseIds }
-    }).session(s);
+    }).select("course").lean().session(s);
 
     const existingCourseIds = existingEnrollments.map(e => e.course.toString());
     const newCourseIds = courseIds.filter(id => !existingCourseIds.includes(id.toString()));
@@ -40,11 +40,16 @@ export const enrollsCourses = async (stuId, courseIds, session = null) => {
     if (courses.length !== newCourseIds.length)
       throw new AppError("Some selected courses no longer exist.", 404);
 
-    await createEnrollmentRecords(stuId, courses, s);
-    await initCoursesProgress(stuId, courses, s);
-    await updateStudentLearningStats(stuId, courses, s);
-    await updateCoursePopularityStats(newCourseIds, s);
-    await updateInstructorsTotalStudents(courses, s);
+    await Promise.all([
+      createEnrollmentRecords(stuId, courses, s),
+      initCoursesProgress(stuId, courses, s)
+    ]);
+
+    await Promise.all([
+      updateStudentLearningStats(stuId, courses, s),
+      updateCoursePopularityStats(newCourseIds, s),
+      updateInstructorsTotalStudents(stuId, courses, s)
+    ]);
 
     return {
       enrolledCount: courses.length,
@@ -97,23 +102,31 @@ const updateCoursePopularityStats = async (courseIds, session) => {
   );
 };
 
-const updateInstructorsTotalStudents = async (courses, session) => {
-  const instructorIds = courses.map(c => c.instructor?.ref).filter(Boolean);
+const updateInstructorsTotalStudents = async (stuId, courses, session) => {
+  const currentInstIdStrings = [...new Set(courses.map(c => c.instructor?.ref?.toString()).filter(Boolean))];
+  const currentInstObjectIds = currentInstIdStrings.map(id => new mongoose.Types.ObjectId(id));
 
-  const instructorCounts = instructorIds.reduce((acc, id) => {
-    acc[id] = (acc[id] || 0) + 1;
-    return acc;
-  }, {});
+  const previousEnrollments = await Enrollment.find({
+    student: stuId,
+    instructor: { $in: currentInstObjectIds },
+    course: { $nin: courses.map(c => c._id) }
+  }).select("instructor")
+    .lean()
+    .session(session);
 
-  const updates = Object.entries(instructorCounts).map(([id, count]) =>
-    Instructor.updateOne(
-      { _id: id },
-      { $inc: { "stats.totalStudents": count } },
+  const alreadyKnownInstructorIds = new Set(previousEnrollments.map(e => e.instructor.toString()));
+
+  const newInstructorIdsForStudent = currentInstIdStrings
+    .filter(id => !alreadyKnownInstructorIds.has(id))
+    .map(id => new mongoose.Types.ObjectId(id));
+
+  if (newInstructorIdsForStudent.length > 0) {
+    await Instructor.updateMany(
+      { user: { $in: newInstructorIdsForStudent } },
+      { $inc: { "stats.totalStudents": 1 } },
       { session }
-    )
-  );
-
-  await Promise.all(updates);
+    );
+  }
 };
 
 export const getPaginatedStudentsByInstructorId = async (insId, filters) => {
@@ -123,7 +136,7 @@ export const getPaginatedStudentsByInstructorId = async (insId, filters) => {
   const { search, sort } = filters;
 
   const match = {
-    instructor: insId,
+    instructor: new mongoose.Types.ObjectId(insId),
     status: STATUS_ENUM.active,
   };
 

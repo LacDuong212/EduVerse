@@ -1,9 +1,7 @@
-import axios from "axios";
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
-import { toast } from "react-toastify";
-
-const backendUrl = import.meta.env.VITE_BACKEND_URL;
+import { handleRequest } from "@/utils/request";
+import { authApi } from "@/utils/api";
 
 const useCourseAnalytics = (endpoint) => {
   const { id: courseId } = useParams();
@@ -15,20 +13,17 @@ const useCourseAnalytics = (endpoint) => {
   const fetchAnalytics = useCallback(async () => {
     if (!courseId) return;
     setLoading(true);
-    try {
-      const { data: res } = await axios.get(
-        `${backendUrl}/api/instructor/courses/${courseId}/${endpoint}`,
-        { withCredentials: true }
-      );
-      if (res.success) {
-        setData(res.result.series);
-        setTotal(res.result.total);
-      }
-    } catch (err) {
-      setError(err.response?.data?.message || "Failed to load analytics..");
-    } finally {
-      setLoading(false);
+    setError(null);
+    const res = await handleRequest(authApi.get(`/instructor/courses/${courseId}/${endpoint}`));
+
+    if (res.success) {
+      setData(res.result.series || []);
+      setTotal(res.result.total || 0);
+    } else {
+      setError(res.message);
     }
+
+    setLoading(false);
   }, [courseId, endpoint]);
 
   useEffect(() => {
@@ -74,21 +69,17 @@ export const useCourseStudentList = () => {
   const fetchStudents = useCallback(async () => {
     if (!courseId) return;
     setLoading(true);
-    try {
-      const { data: res } = await axios.get(
-        `${backendUrl}/api/instructor/courses/${courseId}/students`,
-        { params: filters, withCredentials: true }
-      );
 
-      if (res.success) {
-        setStudents(res.result);
-        setPagination(res.pagination);
-      }
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to fetch student list..");
-    } finally {
-      setLoading(false);
+    const res = await handleRequest(authApi.get(`/instructor/courses/${courseId}/students`, {
+      params: filters,
+    }));
+
+    if (res.success) {
+      setStudents(res.result || []);
+      if (res.pagination) setPagination(res.pagination);
     }
+
+    setLoading(false);
   }, [courseId, JSON.stringify(filters)]);
 
   useEffect(() => {
@@ -107,7 +98,7 @@ export const useCourseStudentList = () => {
   };
 };
 
-export default function useMyCourseDetail() {
+export default function useCourseDetails() {
   const { id: courseId } = useParams();
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -116,17 +107,17 @@ export default function useMyCourseDetail() {
   const fetchCourse = useCallback(async () => {
     if (!courseId) return;
     setLoading(true);
-    try {
-      const { data: res } = await axios.get(
-        `${backendUrl}/api/instructor/courses/${courseId}/details`,
-        { withCredentials: true }
-      );
-      if (res.success) setCourse(res.result);
-    } catch (err) {
-      setError(err.response?.data?.message || "Course details unavailable..");
-    } finally {
-      setLoading(false);
+    setError(null);
+
+    const res = await handleRequest(authApi.get(`/instructor/courses/${courseId}/details`));
+
+    if (res.success) {
+      setCourse(res.result);
+    } else {
+      setError(res.message);
     }
+
+    setLoading(false);
   }, [courseId]);
 
   useEffect(() => {

@@ -1,5 +1,5 @@
 import ReactApexChart from "react-apexcharts";
-import { Button, Card, CardBody, CardHeader, Col, Row } from "react-bootstrap";
+import { Card, CardBody, CardHeader, Col, Row } from "react-bootstrap";
 import { FaCircle } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { currency } from "@/contexts/constants";
@@ -8,7 +8,7 @@ import { formatCurrency } from "@/utils/currency";
 const TopCoursesChart = ({ col = 6, topCoursesData = [] }) => {
   const variants = ["danger", "warning", "success", "primary", "purple"];
 
-  const series = topCoursesData.map(course => course.totalEarning);
+  const series = topCoursesData.map(course => course.totalRevenue);
   const labels = topCoursesData.map(course => course.title);
 
   const topRevenue = {
@@ -50,7 +50,7 @@ const TopCoursesChart = ({ col = 6, topCoursesData = [] }) => {
                 <ul className="list-group list-group-borderless">
                   {topCoursesData.map((course, index) => (
                     <li
-                      key={course.id || index}
+                      key={course.courseId || index}
                       className="list-group-item d-flex align-items-center"
                     >
                       <FaCircle
@@ -59,11 +59,11 @@ const TopCoursesChart = ({ col = 6, topCoursesData = [] }) => {
                       <div className="d-flex flex-column">
                         <span>
                           <Link 
-                            to={`/instructor/courses/${course?.id || ''}`}
+                            to={`/instructor/courses/${course?.courseId || ''}`}
                             className={`text-${variants[index % variants.length]}`}
                           >
                             {course?.title}
-                          </Link> - {course?.totalEarning || 0}{currency}
+                          </Link> {course?.totalRevenue || 0}{currency}
                         </span>
                         (Purchase: {course?.totalSales || 0})
                       </div>

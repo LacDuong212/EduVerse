@@ -12,7 +12,7 @@ import { FaAngleLeft, FaAngleRight, FaRegEnvelope, FaRegStar, FaSearch, FaStar, 
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import ChoicesFormInput from "@/components/form/ChoicesFormInput";
-import { useCourseStudentList } from "../useMyCourseDetail";
+import { useCourseStudentList } from "../useCourseDetails";
 
 const CourseStudentRow = ({ idx, student = {} }) => {
   const {
@@ -80,7 +80,7 @@ const CourseStudentRow = ({ idx, student = {} }) => {
                   </li>
                 ))}
               </ul><span className="small">
-                {new Date(review.updatedAt).toLocaleDateString("en-GB")}
+                {review.updatedAt ? new Date(review.updatedAt).toLocaleDateString("en-GB") : ""}
               </span>
             </div>
             <p title={review.description || ""} className="mb-0">

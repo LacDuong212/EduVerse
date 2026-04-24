@@ -1,10 +1,10 @@
-import axios from "axios";
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import { authApi } from "@/utils/api";
+import { handleRequest } from "@/utils/request";
 
 export default function useInstructorMyStudents() {
-  const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [students, setStudents] = useState([]);
@@ -45,10 +45,7 @@ export default function useInstructorMyStudents() {
   const fetchStudents = useCallback(async () => {
     setLoading(true);
     try {
-      const { data: res } = await axios.get(`${backendUrl}/api/instructor/students`, {
-        params: filters,
-        withCredentials: true,
-      });
+      const res = await handleRequest(authApi.get("/instructor/students", { params: filters }));
 
       if (res.success) {
         setStudents(res.result || []);
@@ -58,29 +55,31 @@ export default function useInstructorMyStudents() {
             totalPages: res.pagination.totalPages,
           });
         }
+      } else {
+        toast.error(res.message || "Failed to load student list");
       }
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to load student list");
     } finally {
       setLoading(false);
     }
-  }, [backendUrl, JSON.stringify(filters)]);
+  }, [JSON.stringify(filters)]);
 
   const fetchStats = useCallback(async () => {
     setStatsLoading(true);
     try {
-      const { data: res } = await axios.get(`${backendUrl}/api/instructor/students/stats`, {
-        withCredentials: true,
-      });
+      const res = await handleRequest(authApi.get("/instructor/students/stats"));
       if (res.success) {
         setStats(res.result);
+      } else {
+        console.error("Failed to fetch student stats..", res.message);
       }
     } catch (err) {
       console.error("Failed to fetch student stats..", err);
     } finally {
       setStatsLoading(false);
     }
-  }, [backendUrl]);
+  }, []);
 
   useEffect(() => {
     fetchStudents();

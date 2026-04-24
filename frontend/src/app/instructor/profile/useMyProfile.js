@@ -3,8 +3,8 @@ import { useEffect, useState } from "react";
 import { FaFacebook, FaLinkedinIn } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import { toast } from "react-toastify";
-import useProfile from "@/hooks/useProfile";
-import { api } from "@/utils/api";
+import useImageUpload from "@/hooks/useImageUpload";
+import { authApi } from "@/utils/api";
 import { handleRequest } from "@/utils/request";
 
 export const linkedAccount = [{
@@ -27,23 +27,23 @@ export const linkedAccount = [{
   variant: "text-facebook"
 }];
 
-export const useMyProfile = () => {
-  const { uploadAvatar, isAvatarUploading } = useProfile();
+export default function useMyProfile() {
+  const { uploadAvatar, isUploading: avatarUploading } = useImageUpload();
 
   const INITIAL_STATE = {
     insId: null,
-    name: null,
-    email: null,
-    phonenumber: null,
+    name: "",
+    email: "",
+    phonenumber: "",
     avatar: null,
-    address: null,
-    occupation: null,
-    website: null,
+    address: "",
+    occupation: "",
+    website: "",
     socials: {
-      facebook: null,
-      instagram: null,
-      linkedin: null,
-      youtube: null,
+      facebook: "",
+      instagram: "",
+      linkedin: "",
+      youtube: "",
     },
     introduction: "",
     skills: [],
@@ -54,18 +54,24 @@ export const useMyProfile = () => {
   const [serverSnapshot, setServerSnapshot] = useState(INITIAL_STATE);
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewAvatar, setPreviewAvatar] = useState(null);
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState([]);
+
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     const load = async () => {
+      setLoading(true);
       try {
-        const res = await handleRequest(api.get("/instructor/profile", { withCredentials: true }));
+        const res = await handleRequest(authApi.get("/instructor/profile"));
         if (res.success) {
           setInstructor(res.result);
           setServerSnapshot(res.result);
         }
       } catch (e) {
         setErrors(e);
+      } finally {
+        setLoading(false);
       }
     };
     load();
@@ -74,6 +80,11 @@ export const useMyProfile = () => {
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (previewAvatar && previewAvatar.startsWith("blob:")) {
+      URL.revokeObjectURL(previewAvatar);
+    }
+
     setSelectedFile(file);
     const localUrl = URL.createObjectURL(file);
     setPreviewAvatar(localUrl);
@@ -83,14 +94,14 @@ export const useMyProfile = () => {
     currentSrc: previewAvatar === "" ? null : (previewAvatar || instructor?.avatar || ""),
     hasSavedAvatar: !!instructor?.avatar,
     remove: () => {
-        setPreviewAvatar("");
-        setSelectedFile(null);
+      setPreviewAvatar("");
+      setSelectedFile(null);
     },
     undo: () => {
-        setPreviewAvatar(null);
-        setSelectedFile(null);
+      setPreviewAvatar(null);
+      setSelectedFile(null);
     },
-    isUploading: isAvatarUploading
+    isUploading: avatarUploading || submitting
   };
 
   const updateField = (path, value) => {
@@ -112,40 +123,53 @@ export const useMyProfile = () => {
   };
 
   const submitProfile = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
+
+    setSubmitting(true);
     setErrors({});
-    
-    let finalAvatar = instructor.avatar;
-    if (selectedFile) {
-      finalAvatar = await uploadAvatar(selectedFile);
-    } else if (previewAvatar === "") {
-      finalAvatar = null;
-    }
-
-    const currentData = { 
-        ...instructor, 
-        avatar: finalAvatar 
-    };
-
-    const payload = _.pickBy(currentData, (value, key) => {
-      return !_.isEqual(value, serverSnapshot[key]);
-    });
-
-    if (_.isEmpty(payload)) {
-      return toast.info("No changes to save.");
-    }
 
     try {
-      const res = await handleRequest(api.patch("/instructor/profile", payload, { withCredentials: true }));
+      let finalAvatar = instructor.avatar;
+
+      if (selectedFile) {
+        finalAvatar = await uploadAvatar(selectedFile);
+      } else if (previewAvatar === "") {
+        finalAvatar = null;
+      }
+
+      const currentData = {
+        ...instructor,
+        avatar: finalAvatar
+      };
+
+      const payload = _.pickBy(currentData, (value, key) => {
+        return !_.isEqual(value, serverSnapshot[key]);
+      });
+
+      if (_.isEmpty(payload)) {
+        toast.info("No changes to save.");
+        setSubmitting(false);
+        return;
+      }
+
+      const res = await handleRequest(authApi.patch("/instructor/profile", payload));
+
       if (res.success) {
         toast.success("Profile updated!");
-        setInstructor(res.result);
-        setServerSnapshot(res.result);
+
+        const normalizedData = _.merge({}, INITIAL_STATE, res.result);
+        setInstructor(normalizedData);
+        setServerSnapshot(normalizedData);
+
         setPreviewAvatar(null);
         setSelectedFile(null);
+      } else {
+        setErrors(res.errors);
       }
     } catch (err) {
-      toast.error("Update failed..");
+      toast.error(err.response?.data?.message || "Update failed..");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -156,6 +180,9 @@ export const useMyProfile = () => {
     avatarLogic,
     listActions,
     handleFileChange,
-    submitProfile
+    submitProfile,
+    loading,
+    submitting,
+    isDirty: !_.isEqual(instructor, serverSnapshot) || !!selectedFile || previewAvatar === ""
   };
-};
+}

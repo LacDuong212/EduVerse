@@ -48,13 +48,15 @@ const ProfileDropdown = ({ className, dropdownItems }) => {
         <DropdownToggle as="a" className="avatar avatar-sm p-0 arrow-none" id="profileDropdown" role="button" data-bs-auto-close="outside" data-bs-display="static" data-bs-toggle="dropdown" aria-expanded="false">
           {user?.avatar ? (
             <img
-              className="avatar-img rounded-circle shadow "
+              className="avatar-img rounded-circle border border-light border-1 shadow "
               src={user.avatar}
               alt="Avatar"
-              onError={DEFAULT_AVATAR_IMG}
+              onError={(e) => {
+                e.currentTarget.src = DEFAULT_AVATAR_IMG;
+              }}
             />
           ) : (
-            <div className="avatar-img rounded-circle border border-white border-1 shadow d-flex align-items-center justify-content-center bg-light text-dark fw-bold fs-5">
+            <div className="avatar-img rounded-circle border border-light border-1 shadow d-flex align-items-center justify-content-center bg-light text-dark fw-bold fs-5">
               {(user?.name?.[0] || "U").toUpperCase()}
             </div>
           )}
@@ -68,11 +70,11 @@ const ProfileDropdown = ({ className, dropdownItems }) => {
             <div className="avatar me-3">
               {user?.avatar ? (
                 <img
-                  className="avatar-img rounded-circle border border-body border-2 shadow"
+                  className="avatar-img rounded-circle border border-light border-1 shadow"
                   src={user.avatar}
                   alt="User Avatar" />
               ) : (
-                <div className="avatar-img rounded-circle border border-body border-1 shadow d-flex align-items-center justify-content-center bg-light text-dark fw-bold fs-4">
+                <div className="avatar-img rounded-circle border border-light border-1 shadow d-flex align-items-center justify-content-center bg-light text-dark fw-bold fs-4">
                   {(user?.name?.[0] || "U").toUpperCase()}
                 </div>
               )}

@@ -1,44 +1,43 @@
-import { currency } from '@/contexts/constants';
-import { formatCurrency } from '@/utils/currency';
-import ReactApexChart from 'react-apexcharts';
-import { Card, CardHeader, CardBody, Col, Row } from 'react-bootstrap';
-import { BsArrowUp, BsArrowDown, BsDash } from 'react-icons/bs';
+import ReactApexChart from "react-apexcharts";
+import { Card, CardHeader, CardBody, Col, Row } from "react-bootstrap";
+import { BsArrowUp, BsArrowDown, BsDash } from "react-icons/bs";
+import { currency } from "@/contexts/constants";
+import { formatCurrency } from "@/utils/currency";
 
-
-const EarningsChart = ({ col = 6, earningsData = [] }) => {
+const EarningChart = ({ col = 6, earningsData = [] }) => {
   const values = earningsData.map(item => item.value);
 
   const categories = earningsData.map(item => {
-    const [year, month] = item.name.split('-');
+    const [year, month] = item.period.split("-");
     return `${month}/${year}`;
   });
 
   const chartOptions = {
     series: [{
-      name: 'Earnings',
+      name: "Earnings",
       data: values
     }],
     chart: {
       height: 300,
-      type: 'area',
+      type: "area",
       toolbar: {
         show: false
       },
     },
     dataLabels: { enabled: true },
-    stroke: { curve: 'smooth', width: 2 },
+    stroke: { curve: "smooth", width: 2 },
     colors: [
-      getComputedStyle(document.documentElement).getPropertyValue('--bs-primary').trim()
+      getComputedStyle(document.documentElement).getPropertyValue("--bs-primary").trim()
     ],
     fill: {
-      type: 'gradient',
+      type: "gradient",
       gradient: {
         opacityFrom: 0.5,
         opacityTo: 0.1,
       }
     },
     xaxis: {
-      type: 'category',
+      type: "category",
       categories: categories,
       axisBorder: {
         show: false
@@ -60,7 +59,7 @@ const EarningsChart = ({ col = 6, earningsData = [] }) => {
       x: { show: true },
       y: {
         formatter: (val) => `${val}${currency}`,
-        title: { formatter: () => '' }
+        title: { formatter: () => "" }
       },
       marker: { show: false }
     }
@@ -123,4 +122,4 @@ const EarningsChart = ({ col = 6, earningsData = [] }) => {
   );
 };
 
-export default EarningsChart;
+export default EarningChart;

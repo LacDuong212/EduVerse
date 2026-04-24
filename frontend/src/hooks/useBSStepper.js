@@ -1,7 +1,6 @@
-import Stepper from 'bs-stepper';
-import { useEffect, useState } from 'react';
-import 'bs-stepper/dist/css/bs-stepper.min.css';
-
+import Stepper from "bs-stepper";
+import { useEffect, useState } from "react";
+import "bs-stepper/dist/css/bs-stepper.min.css";
 
 const useBSStepper = (stepperRef, isReady = true) => {
   const [stepperInstance, setStepperInstance] = useState(null);

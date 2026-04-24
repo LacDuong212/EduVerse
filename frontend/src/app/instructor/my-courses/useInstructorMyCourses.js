@@ -1,10 +1,10 @@
-import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import { authApi } from "@/utils/api";
+import { handleRequest } from "@/utils/request";
 
 export default function useInstructorMyCourses() {
-  const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [courses, setCourses] = useState([]);
@@ -42,52 +42,48 @@ export default function useInstructorMyCourses() {
   const fetchCourses = useCallback(async () => {
     setLoading(true);
     try {
-      const { data } = await axios.get(`${backendUrl}/api/instructor/courses`, {
-        params: filters,
-        withCredentials: true,
-      });
+      const res = await handleRequest(authApi.get("/instructor/courses", { params: filters }));
 
-      if (data.success) {
-        setCourses(data.result || []);
-        if (data.pagination) setPagination(data.pagination);
+      if (res.success) {
+        setCourses(res.result || []);
+        if (res.pagination) setPagination(res.pagination);
+      } else {
+        toast.error(res.message || "Failed to load courses..");
       }
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to load courses..");
     } finally {
       setLoading(false);
     }
-  }, [backendUrl, JSON.stringify(filters)]);
+  }, [JSON.stringify(filters)]);
 
   const fetchStats = useCallback(async () => {
     setStatsLoading(true);
     try {
-      const { data } = await axios.get(`${backendUrl}/api/instructor/courses/stats`, {
-        withCredentials: true,
-      });
-      if (data.success) setStats(data.result);
+      const res = await handleRequest(authApi.get("/instructor/courses/stats"));
+      if (res.success) setStats(res.result);
+      else toast.error(res.message || "Failed to fetch courses stats..");
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to fetch courses stats..");
     } finally {
       setStatsLoading(false);
     }
-  }, [backendUrl]);
+  }, []);
 
   const togglePrivacy = async (courseId) => {
     setUpdatingId(courseId);
     try {
-      const { data } = await axios.patch(
-        `${backendUrl}/api/courses/${courseId}/toggle-privacy`,
-        {},
-        { withCredentials: true }
-      );
+      const res = await handleRequest(authApi.patch(`/courses/${courseId}/toggle-privacy`));
 
-      if (data.success) {
-        toast.success(data.message);
+      if (res.success) {
+        toast.success(res.message);
         setCourses((prev) =>
           prev.map((c) =>
-            c.courseId === courseId ? { ...c, isPrivate: data.result } : c
+            c.courseId === courseId ? { ...c, isPrivate: res.result } : c
           )
         );
+      } else {
+        toast.error(res.message || "Failed to change course's privacy..");
       }
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to change course's privacy..");

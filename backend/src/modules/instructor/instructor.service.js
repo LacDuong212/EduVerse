@@ -121,7 +121,7 @@ const getUpdateData = (data) => {
   const userUpdate = {};
 
   if (data.name) userUpdate.name = data.name;
-  if (data.phone !== undefined) userUpdate.phonenumber = data.phone;
+  if (data.phonenumber !== undefined) userUpdate.phonenumber = data.phonenumber;
   if (data.avatar !== undefined) userUpdate.pfpImg = data.avatar;
   if (data.website !== undefined) userUpdate.website = data.website;
   if (data.socials?.facebook !== undefined) userUpdate["socials.facebook"] = data.socials.facebook;

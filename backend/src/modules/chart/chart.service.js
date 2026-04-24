@@ -248,22 +248,24 @@ export const getCourseMonthlyEnrollments = async (insId, courseId) => {
   };
 };
 
-export const getInstructorMonthlyEarnings = async (insId) => {
+export const getInstructorEarnings = async (insId) => {
   if (!insId) throw new AppError("Instructor ID is required", 400);
 
   const instructor = await Instructor.findOne({ user: insId, isApproved: true })
     .select("myCourses")
     .lean();
-
   if (!instructor) throw new AppError("Instructor not found.", 404);
 
   const courseIds = instructor.myCourses || [];
-  if (courseIds.length === 0) return { series: [], total: 0 };
 
-  const twelveMonthsAgo = new Date();
+  if (courseIds.length === 0)
+    return { series: [], thisMonthRevenue: 0, toBePaid: 0, totalEarning: 0 };
+
+  const now = new Date();
+  const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+
+  const twelveMonthsAgo = new Date(startOfThisMonth);
   twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 11);
-  twelveMonthsAgo.setDate(1);
-  twelveMonthsAgo.setHours(0, 0, 0, 0);
 
   const [result] = await Order.aggregate([
     {
@@ -276,7 +278,7 @@ export const getInstructorMonthlyEarnings = async (insId) => {
     { $match: { "courses.course": { $in: courseIds } } },
     {
       $facet: {
-        monthly: [
+        monthlyChart: [
           { $match: { createdAt: { $gte: twelveMonthsAgo } } },
           {
             $group: {
@@ -284,19 +286,27 @@ export const getInstructorMonthlyEarnings = async (insId) => {
                 year: { $year: "$createdAt" },
                 month: { $month: "$createdAt" }
               },
-              value: { 
-                $sum: { $multiply: ["$courses.pricePaid", INSTRUCTOR_NET_PROFIT] } 
-              }
+              value: { $sum: { $multiply: ["$courses.pricePaid", INSTRUCTOR_NET_PROFIT] } }
             }
           },
           { $sort: { "_id.year": 1, "_id.month": 1 } }
         ],
-        total: [
-          { 
-            $group: { 
-              _id: null, 
-              sum: { $sum: { $multiply: ["$courses.pricePaid", INSTRUCTOR_NET_PROFIT] } } 
-            } 
+        currentMonth: [
+          { $match: { createdAt: { $gte: startOfThisMonth } } },
+          {
+            $group: {
+              _id: null,
+              revenue: { $sum: "$courses.pricePaid" },
+              net: { $sum: { $multiply: ["$courses.pricePaid", INSTRUCTOR_NET_PROFIT] } }
+            }
+          }
+        ],
+        lifetime: [
+          {
+            $group: {
+              _id: null,
+              total: { $sum: { $multiply: ["$courses.pricePaid", INSTRUCTOR_NET_PROFIT] } }
+            }
           }
         ]
       }
@@ -304,8 +314,10 @@ export const getInstructorMonthlyEarnings = async (insId) => {
   ]);
 
   return {
-    series: formatMonthlyData(result.monthly || [], twelveMonthsAgo),
-    total: result.total[0]?.sum || 0
+    series: formatMonthlyData(result.monthlyChart || [], twelveMonthsAgo),
+    thisMonthRevenue: result.currentMonth[0]?.revenue || 0,
+    toBePaid: result.currentMonth[0]?.net || 0,
+    totalEarning: result.lifetime[0]?.total || 0,
   };
 };
 

@@ -1,13 +1,13 @@
-import useMyCourseDetail from "./useMyCourseDetail";
-import CourseStats from "./components/CourseStats";
-import CourseInfo from "./components/CourseInfo";
-import CourseStudents from "./components/CourseStudentList";
 import { Col, Container, Row, Spinner } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { FaAngleRight, FaRegEdit } from "react-icons/fa";
+import CourseStats from "./components/CourseStats";
+import CourseInfo from "./components/CourseInfo";
+import CourseStudents from "./components/CourseStudentList";
+import useCourseDetails from "./useCourseDetails";
 
 const InstructorCourseDetail = () => {
-  const { course, loading, error, refetch } = useMyCourseDetail();
+  const { course, loading, error, refetch } = useCourseDetails();
 
   if (loading) {
     return (

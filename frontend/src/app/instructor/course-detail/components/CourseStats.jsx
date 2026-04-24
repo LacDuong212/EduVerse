@@ -4,7 +4,7 @@ import { Card, CardBody, CardHeader, Col, Row } from "react-bootstrap";
 import { BsArrowUp, BsArrowDown } from "react-icons/bs";
 import { currency } from "@/contexts/constants";
 import { formatCurrency } from "@/utils/currency";
-import { useCourseEnrollments, useCourseRevenue  } from "../useMyCourseDetail";
+import { useCourseEnrollments, useCourseRevenue  } from "../useCourseDetails";
 
 const getCSSVar = (variable) => {
   return getComputedStyle(document.documentElement).getPropertyValue(variable).trim();
@@ -58,13 +58,13 @@ const getChangeDisplay = (dataArray, isCurrency = false) => {
   if (diff > 0) {
     return (
       <>
-        <span className="text-success me-1">+{isCurrency ? formatCurrency(diff) : diff} <BsArrowUp /></span> vs. last month
+        <span className="text-success">+{isCurrency ? formatCurrency(diff) : diff} <BsArrowUp /></span> vs. last month
       </>
     );
   } else if (diff < 0) {
     return (
       <>
-        <span className="text-danger me-1">{isCurrency ? formatCurrency(diff) : diff} <BsArrowDown /></span> vs. last month
+        <span className="text-danger">{isCurrency ? formatCurrency(diff) : diff} <BsArrowDown /></span> vs. last month
       </>
     );
   } else {
@@ -82,13 +82,13 @@ const CourseStats = ({ col = 6, courseId = "" }) => {
     data: revenueData,
     total: totalRevenue = 0,
     loading: revenueLoading
-  } = useCourseRevenue(courseId, "month");
+  } = useCourseRevenue();
 
   const {
     data: enrollmentsData,
     total: totalEnrollments = 0,
     loading: enrollmentsLoading
-  } = useCourseEnrollments(courseId, "month");
+  } = useCourseEnrollments();
 
   // process revenue data --
   const revenueChartConfig = useMemo(() => {
@@ -141,7 +141,7 @@ const CourseStats = ({ col = 6, courseId = "" }) => {
             </CardHeader>
             <CardBody className="p-0">
               <div className="d-sm-flex justify-content-between p-3">
-                <h4 className="mb-0 me-3">
+                <h4 className="mb-0">
                   {revenueLoading ? "Loading..." : formatCurrency(latestRevenueValue)}
                 </h4>
                 <p className="mb-0">{getChangeDisplay(revenueData, true)}</p>
