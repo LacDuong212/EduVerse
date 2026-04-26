@@ -23,6 +23,9 @@
     "test:cart": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --testPathPatterns=cart --forceExit",
     "test:order": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --testPathPatterns=order --forceExit",
     "test:payment": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --testPathPatterns=payment --forceExit",
+    "test:review": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --testPathPatterns=review --forceExit",
+    "test:coupon": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --testPathPatterns=coupon --forceExit",
+    "test:student": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --testPathPatterns=student --forceExit",
     "server": "nodemon ./src/server.js",
     "start": "node ./src/server.js"
   },
