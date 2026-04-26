@@ -31,7 +31,7 @@ const occupationSchema = z.string("Occupation cannot be null")
 
 const introductionSchema = z.string()
   .trim()
-  .max(1000, "Introduction is too long")
+  .max(2000, "Introduction is too long")
   .optional()
   .or(z.literal(""));
 
@@ -55,7 +55,9 @@ const eduItemSchema = z.object({
   institution: z.string("Institution is required")
     .trim()
     .min(1, "Institution cannot be empty"),
-  degree: z.string().trim().default(""),
+  fieldOfStudy: z.string("Field of study is required")
+    .trim()
+    .min(1, "Field of study cannot be empty"),
   addedAt: z.coerce.date().default(() => new Date()),
 });
 
@@ -76,7 +78,7 @@ export const updateProfileRequest = z.object({
     // user
     name: nameSchema.optional(),
     avatar: optionalUrlSchema,
-    phone: phoneSchema,
+    phonenumber: phoneSchema,
     bio: bioSchema,
     website: optionalUrlSchema,
     socials: z.object({

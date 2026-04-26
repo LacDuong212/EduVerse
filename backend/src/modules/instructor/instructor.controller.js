@@ -30,21 +30,21 @@ export const getInstructorStats = asyncHandler(async (req, res) => {
   sendSuccessResponse(res, 200, "Get instructor stats successfully.", { ...stats })
 });
 
-// @desc  Get all courses monthly earning (12 months)
-// @route GET instructor/courses/earning
-export const getCoursesMonthlyEarning = asyncHandler(async (req, res) => {
+// @desc  Get sum of all courses monthly revenue (12 months)
+// @route GET instructor/courses/revenue
+export const getCoursesMonthlyRevenue = asyncHandler(async (req, res) => {
   const userId = req.user?.userId;
-  const result = await chartService.getAllCoursesMonthlyEarningByInstructorId(userId);
-  sendSuccessResponse(res, 200, "Get courses monthly earning successfully!", result);
+  const result = await chartService.getAllCoursesMonthlyRevenueByInstructorId(userId);
+  sendSuccessResponse(res, 200, "Get courses monthly revenue successfully!", result);
 });
 
-// @desc  Get instructor top earning courses this month
+// @desc  Get instructor top revenue courses this month
 // @route GET instructor/courses/top-courses
-export const getTopEarningCourses = asyncHandler(async (req, res) => {
+export const getTopRevenueCourses = asyncHandler(async (req, res) => {
   const userId = req.user?.userId;
   const { limit } = req.validated?.query || {};
-  const result = await chartService.getTopEarningCoursesThisMonth(userId, limit);
-  sendSuccessResponse(res, 200, "Get top earning courses successfully!", result);
+  const result = await chartService.getTopRevenueCoursesThisMonth(userId, limit);
+  sendSuccessResponse(res, 200, "Get top revenue courses successfully!", result);
 });
 
 // @desc  Get instructor's public profile
@@ -86,13 +86,13 @@ export const updateProfile = asyncHandler(async (req, res) => {
     instructorMapper.toInstructorDetails(updated));
 });
 
-// @desc  Get course monthly earning (12 months) by id
-// @route GET instructor/courses/:courseId/earning
-export const getCourseMonthlyEarning = asyncHandler(async (req, res) => {
+// @desc  Get course monthly revenue (12 months) by id
+// @route GET instructor/courses/:courseId/revenue
+export const getCourseMonthlyRevenue = asyncHandler(async (req, res) => {
   const userId = req.user?.userId;
   const { courseId } = req.validated?.params || {};
-  const result = await chartService.getCourseMonthlyEarning(userId, courseId);
-  sendSuccessResponse(res, 200, "Get course monthly earning successfully!", result);
+  const result = await chartService.getCourseMonthlyRevenue(userId, courseId);
+  sendSuccessResponse(res, 200, "Get course monthly revenue successfully!", result);
 });
 
 // @desc  Get course monthly enrollments (12 months) by id
@@ -160,12 +160,12 @@ export const getCourseDetails = asyncHandler(async (req, res) => {
   return sendSuccessResponse(res, 200, "Get course details successfully!", course);
 });
 
-// @desc  Get instructor monthly (12 months) earning and total earning
-// @route GET instructor/earning
-export const getInstructorEarning = asyncHandler(async (req, res) => {
+// @desc  Get instructor earning analytics
+// @route GET instructor/earnings
+export const getInstructorEarnings = asyncHandler(async (req, res) => {
   const userId = req.user?.userId;
   const result = await chartService.getInstructorEarnings(userId);
-  return sendSuccessResponse(res, 200, "Get instructor earning successfully!", result);
+  return sendSuccessResponse(res, 200, "Get instructor monthly earning successfully!", result);
 });
 
 // @desc  Get instructor's public courses (infinite scroll)

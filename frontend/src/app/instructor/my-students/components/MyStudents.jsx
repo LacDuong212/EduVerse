@@ -1,68 +1,62 @@
-import ChoicesFormInput from "@/components/form/ChoicesFormInput";
-import { useState } from "react";
-import { Card, CardBody, CardFooter, CardHeader, Col, OverlayTrigger, Row, Tooltip } from "react-bootstrap";
+import { useEffect, useState } from "react";
+import {
+  Button,
+  Card, CardBody, CardFooter, CardHeader,
+  Col,
+  OverlayTrigger,
+  Row,
+  Tooltip
+} from "react-bootstrap";
 import { FaAngleLeft, FaAngleRight, FaRegEnvelope, FaSearch } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
+import ChoicesFormInput from "@/components/form/ChoicesFormInput";
 
-const StudentRow = ({ studentData = {} }) => {
+const StudentRow = ({ idx, studentData = {} }) => {
+  const { stuId, name, avatar, coursesCount, isActive, email } = studentData;
   return (
     <tr>
       <td className="ps-3">
         <div className="d-flex align-items-center position-relative">
           <div className="avatar avatar-md flex-shrink-0">
-            {studentData?.avatar ? (
-              <img
-                src={studentData?.avatar}
-                className="rounded-circle"
-                alt={"avatar"}
-              />
+            {avatar ? (
+              <img src={avatar} className="rounded-circle" alt="avatar" />
             ) : (
-              <div className="avatar-img rounded-circle border-white border-3 shadow d-flex align-items-center justify-content-center bg-light text-dark fw-bold fs-4">
-                {(studentData?.name?.[0] || "S").toUpperCase()}
+              <div className="avatar-img rounded-circle border-light border-2 shadow d-flex align-items-center justify-content-center bg-light text-dark fw-bold fs-4">
+                {(name?.[0] || "S").toUpperCase()}
               </div>
             )}
           </div>
           <div className="mb-0 ms-2">
             <h6 className="mb-0">
-              <Link to={null}>{studentData?.name}</Link>
+              {/* #TODO?: student details page */}
+              <Link to={null}>{name}</Link>
             </h6>
           </div>
         </div>
       </td>
       <td className="text-center d-none d-md-table-cell">
-        {studentData?.coursesCount || "-"}
+        {coursesCount || "-"}
       </td>
       <td className="text-center">
-        {studentData?.isActive === null ? (
-          <div className="badge bg-secondary bg-opacity-10 text-secondary">
-            -
-          </div>
-        ) : studentData?.isActive ? (
-          <div className="badge bg-success bg-opacity-10 text-success">
-            Active
-          </div>
+        {isActive ? (
+          <div className="badge bg-success bg-opacity-10 text-success">Active</div>
         ) : (
-          <div className="badge bg-warning bg-opacity-10 text-warning">
-            Inactive
-          </div>
+          <div className="badge bg-danger bg-opacity-10 text-danger">Inactive</div>
         )}
       </td>
       <td className="text-center">
         <OverlayTrigger
           placement="top"
-          overlay={<Tooltip id={`tooltip-message-${studentData?.stuId}`}>Copy Email</Tooltip>}
+          overlay={<Tooltip id={`tooltip-message-${stuId || idx}`}>Copy Email</Tooltip>}
         >
           <button
             type="button"
             className="btn btn-success-soft btn-round me-2 mb-0 flex-centered"
             onClick={() => {
-              const email = studentData?.email;
               if (email) {
                 navigator.clipboard.writeText(email);
                 toast.success("Email copied!");
-              } else {
-                toast.error("No email found.");
               }
             }}
           >
@@ -76,35 +70,33 @@ const StudentRow = ({ studentData = {} }) => {
 
 const MyStudentsList = ({
   col = 12,
-
   students = [],
   totalStudents = 0,
-  page = 1,
-  limit = 5,
   totalPages = 0,
   loading = false,
-
+  currentSearch = "",
+  currentSort = "enrolledDesc",
   onPageChange,
-
   onSearch,
   onSortChange,
 }) => {
   const NUMBER_OF_COLUMNS = 4;
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [sort, setSort] = useState("");
-  const start = (page - 1) * limit + 1;
-  const end = Math.min(start + students.length - 1, totalStudents);
+  const [searchTerm, setSearchTerm] = useState(currentSearch);
+
+  useEffect(() => {
+    setSearchTerm(currentSearch);
+  }, [currentSearch]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     onSearch(searchTerm);
   };
 
-  const handleSortChange = (value) => {
-    setSort(value);
-    onSortChange(value);
-  };
+  const page = parseInt(new URLSearchParams(window.location.search).get("page") || "1");
+  const limit = 10;
+  const start = totalStudents === 0 ? 0 : (page - 1) * limit + 1;
+  const end = Math.min(page * limit, totalStudents);
 
   const goToPage = (pageNum) => {
     if (pageNum > 0 && pageNum <= totalPages) {
@@ -115,12 +107,12 @@ const MyStudentsList = ({
   return (
     <Col xs={col}>
       <Card className="bg-transparent border">
-        <CardHeader className="bg-transparent border-bottom">
+        <CardHeader className="bg-light border-bottom">
           <Row className="align-items-center justify-content-between g-2">
-            <Col md={8}>
+            <Col xs={6} sm={7} md={8}>
               <form className="rounded position-relative" onSubmit={handleSearchSubmit}>
                 <input
-                  className="form-control pe-5 bg-transparent"
+                  className="form-control pe-5"
                   type="search"
                   placeholder="Search students"
                   aria-label="Search"
@@ -128,24 +120,25 @@ const MyStudentsList = ({
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
                 <button
-                  className="bg-transparent p-2 position-absolute top-50 end-0 translate-middle-y border-0 text-primary-hover text-reset"
+                  className="bg-transparent p-2 me-1 position-absolute top-50 end-0 translate-middle-y border-0 text-primary-hover text-reset"
                   type="submit"
                 >
-                  <FaSearch className="fas fa-search fs-6 " />
+                  <FaSearch className="fs-6" />
                 </button>
               </form>
             </Col>
-            <Col md={4}>
+            <Col xs={6} sm={5} md={4}>
               <form>
                 <ChoicesFormInput
                   className="form-select js-choice border-0 z-index-9 bg-transparent"
                   aria-label=".form-select-sm"
-                  value={sort}
-                  onChange={handleSortChange}
+                  value={currentSort}
+                  onChange={(val) => onSortChange(val)}
                 >
-                  <option value="">Sort by</option>
-                  <option value="nameAsc">Name Ascending</option>
-                  <option value="nameDesc">Name Descending</option>
+                  <option value="nameAsc">Name A-Z</option>
+                  <option value="nameDesc">Name Z-A</option>
+                  <option value="enrolledDesc">Newest Enroll</option>
+                  <option value="enrolledAsc">Oldest Enroll</option>
                 </ChoicesFormInput>
               </form>
             </Col>
@@ -157,36 +150,28 @@ const MyStudentsList = ({
             <table className="table table-dark-gray align-middle table-hover mb-0">
               <thead>
                 <tr>
-                  <th scope="col" className="border-0 ps-3">
-                    Student Name
-                  </th>
-                  <th scope="col" className="border-0 text-center d-none d-md-table-cell">
-                    Courses Enrolled
-                  </th>
-                  <th scope="col" className="border-0 text-center">
-                    Status
-                  </th>
-                  <th scope="col" className="border-0 text-center">
-                    Action
-                  </th>
+                  <th scope="col" className="border-0 ps-3">Student Name</th>
+                  <th scope="col" className="border-0 text-center d-none d-md-table-cell">Courses Enrolled</th>
+                  <th scope="col" className="border-0 text-center">Status</th>
+                  <th scope="col" className="border-0 text-center">Action</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={NUMBER_OF_COLUMNS} className="text-center">
-                      <p className="my-5">Loading students...</p>
+                    <td colSpan={NUMBER_OF_COLUMNS} className="text-center py-5">
+                      <div className="spinner-border text-primary" role="status" />
                     </td>
                   </tr>
                 ) : students.length === 0 ? (
                   <tr>
-                    <td colSpan={NUMBER_OF_COLUMNS} className="text-center">
-                      <p className="my-5">No students found.</p>
+                    <td colSpan={NUMBER_OF_COLUMNS} className="text-center py-5">
+                      <p className="mb-0">No students found.</p>
                     </td>
                   </tr>
                 ) : (
                   students.map((student, idx) => (
-                    <StudentRow key={idx} studentData={student} />
+                    <StudentRow key={idx} idx={idx} studentData={student} />
                   ))
                 )}
               </tbody>
@@ -194,10 +179,10 @@ const MyStudentsList = ({
           </div>
         </CardBody>
 
-        <CardFooter className="bg-transparent p-2">
+        <CardFooter className="bg-light p-2">
           <div className="d-sm-flex justify-content-sm-between align-items-sm-center">
             <p className="mb-0 text-center text-sm-start ps-2">
-              Showing {totalStudents === 0 ? 0 : start} to {end} of {totalStudents} students
+              Showing {start} to {end} of {totalStudents} students
             </p>
             <nav
               className="d-flex justify-content-center mb-0"
@@ -205,12 +190,12 @@ const MyStudentsList = ({
             >
               <ul className="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
                 <li
-                  className={`page-item ${page === 1 ? "disabled" : ""}`}
+                  className={`page-item ${page <= 1 ? "disabled" : ""}`}
                   onClick={() => goToPage(page - 1)}
                 >
-                  <a className="page-link" href="#!" tabIndex={-1}>
+                  <Button className="page-link mb-0" tabIndex={-1}>
                     <FaAngleLeft />
-                  </a>
+                  </Button>
                 </li>
                 {[...Array(totalPages)].map((_, idx) => (
                   <li
@@ -218,18 +203,18 @@ const MyStudentsList = ({
                     className={`page-item ${page === idx + 1 ? "active" : ""}`}
                     onClick={() => goToPage(idx + 1)}
                   >
-                    <a className="page-link" href="#!">
+                    <Button className="page-link mb-0">
                       {idx + 1}
-                    </a>
+                    </Button>
                   </li>
                 ))}
                 <li
-                  className={`page-item ${page === totalPages ? "disabled" : ""}`}
+                  className={`page-item ${page >= totalPages ? "disabled" : ""}`}
                   onClick={() => goToPage(page + 1)}
                 >
-                  <a className="page-link" href="#!">
+                  <Button className="page-link mb-0">
                     <FaAngleRight />
-                  </a>
+                  </Button>
                 </li>
               </ul>
             </nav>

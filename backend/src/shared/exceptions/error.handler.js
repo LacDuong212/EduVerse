@@ -1,12 +1,12 @@
 import AppError from "./app.error.js";
 
-const handleJWTError = () => 
+const handleJWTError = () =>
   new AppError("Invalid token. Please log in again.", 401);
 
-const handleJWTExpiredError = () => 
+const handleJWTExpiredError = () =>
   new AppError("Your session has expired. Please log in again.", 401);
 
-const handleCastErrorDB = () => 
+const handleCastErrorDB = () =>
   new AppError("The resource you are looking for has an invalid ID format.", 400);
 
 const handleDuplicateFieldsDB = (err) => {
@@ -14,7 +14,7 @@ const handleDuplicateFieldsDB = (err) => {
   return new AppError(`This ${field} is already in use. Please try another one!`, 400);
 };
 
-const handleJSONSyntaxError = () => 
+const handleJSONSyntaxError = () =>
   new AppError("Invalid JSON format. Please check your request body syntax!", 400);
 
 const handleValidationErrorDB = (err) => {
@@ -36,12 +36,19 @@ const handleValidationErrorDB = (err) => {
 };
 
 const handleZodError = (err) => {
-  const formattedErrors = err.issues.map((issue) => ({
-    field: issue.path.join('.'),
-    message: issue.message,
-  }));
+  return new AppError("Validation Failed", 400, err.issues.map(issue => {
+    const [root, ...rest] = issue.path;
 
-  return new AppError("Validation Failed", 400, formattedErrors);
+    if (root === "body") {
+      return { field: rest.join("."), message: issue.message };
+    }
+
+    const prefix = root === "params" ? 'p' : root === "query" ? 'q' : 'g';
+    return {
+      field: rest.length > 0 ? `${prefix}.${rest.join('.')}` : "general",
+      message: issue.message
+    };
+  }));
 };
 
 export const transformError = (err) => {
@@ -53,6 +60,6 @@ export const transformError = (err) => {
   if (err.name === "JsonWebTokenError") return handleJWTError();
   if (err.name === "TokenExpiredError") return handleJWTExpiredError();
   if (err.name === "ValidationError") return handleValidationErrorDB(err);
-  
+
   return err;
 };

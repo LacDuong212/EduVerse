@@ -1,45 +1,48 @@
-import ChoicesFormInput from "@/components/form/ChoicesFormInput";
-import { DEFAULT_COURSE_IMG } from "@/contexts/constants";
-import { formatCurrency } from "@/utils/currency";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Card, CardBody, CardFooter, CardHeader, Col, OverlayTrigger, Row, Tooltip } from "react-bootstrap";
 import { BsPersonFill } from "react-icons/bs";
 import { FaAngleLeft, FaAngleRight, FaFile, FaFolder, FaGlobe, FaLock, FaPlus, FaRegEdit, FaSearch, FaStar } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import ChoicesFormInput from "@/components/form/ChoicesFormInput";
+import { DEFAULT_COURSE_IMG } from "@/contexts/constants";
+import { formatCurrency } from "@/utils/currency";
 
-// #TODO: url params for pagination, search, sort
 const MyCourses = ({
   courses,
-  totalCourses,
+  loading,
   page,
   limit,
+  totalCourses,
   totalPages,
-  loading,
-
-  onPageChange,
-  onTogglePrivacy,
-
+  currentSearch,
+  currentSort,
   onSearch,
   onSortChange,
+  onPageChange,
+  onTogglePrivacy
 }) => {
   const NUMBER_OF_COLUMNS = 5;
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [sort, setSort] = useState("");
+  const [searchTerm, setSearchTerm] = useState(currentSearch);
+  const [sortValue, setSortValue] = useState(currentSort);
+
+  useEffect(() => {
+    setSearchTerm(currentSearch);
+  }, [currentSearch]);
+
+  useEffect(() => {
+    setSortValue(currentSort);
+  }, [currentSort]);
 
   const statusBadge = (status) => {
-    return status === "live"
-      ? "success"
-      : status === "pending"
-        ? "warning"
-        : status === "draft"
-          ? "info"
-          : status === "rejected"
-            ? "orange"
-            : status === "blocked"
-              ? "danger"
-              : "secondary";
-  }
+    const s = status?.toLowerCase();
+    if (s === "live") return "success";
+    if (s === "pending") return "warning";
+    if (s === "draft") return "info";
+    if (s === "rejected") return "orange";
+    if (s === "blocked") return "danger";
+    return "secondary";
+  };
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -47,7 +50,7 @@ const MyCourses = ({
   };
 
   const handleSortChange = (value) => {
-    setSort(value);
+    setSortValue(value);
     onSortChange(value);
   };
 
@@ -59,13 +62,13 @@ const MyCourses = ({
 
   return (
     <Card className="border bg-transparent rounded-3">
-      <CardHeader className="bg-transparent border-bottom">
-        <Row className="align-items-center justify-content-between g-2 g-md-4">
+      <CardHeader className="bg-light border-bottom">
+        <Row className="align-items-center justify-content-between g-2">
           {/* SEARCH */}
-          <Col md={6}>
+          <Col xs={12} lg={7}>
             <form className="rounded position-relative" onSubmit={handleSearchSubmit}>
               <input
-                className="form-control pe-5 bg-transparent"
+                className="form-control pe-5"
                 type="search"
                 placeholder="Search courses"
                 aria-label="Search"
@@ -73,45 +76,49 @@ const MyCourses = ({
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
               <button
-                className="bg-transparent p-2 position-absolute top-50 end-0 translate-middle-y border-0 text-primary-hover text-reset"
+                className="bg-transparent p-2 me-1 position-absolute top-50 end-0 translate-middle-y border-0 text-primary-hover text-reset"
                 type="submit"
               >
-                <FaSearch className="fas fa-search fs-6 " />
+                <FaSearch className="fs-6" />
               </button>
             </form>
           </Col>
 
           {/* ACTIONS (Sort + Create Button) */}
-          <Col md={6}>
-            <div className="d-flex align-items-center justify-content-end gap-2">
+          <Col xs={12} lg={5}>
+            <Row className="d-flex align-items-center justify-content-end g-2">
               {/* Sort Dropdown */}
-              <form className="flex-grow-1">
-                <ChoicesFormInput
-                  className="form-select js-choice border-0 z-index-9 bg-transparent"
-                  aria-label=".form-select-sm"
-                  value={sort}
-                  onChange={handleSortChange}
-                >
-                  <option value="">Sort by</option>
-                  <option value="newest">Newest</option>
-                  <option value="oldest">Oldest</option>
-                  <option value="mostPopular">Most Popular</option>
-                  <option value="leastPopular">Least Popular</option>
-                  <option value="highestRating">Highest Rating</option>
-                  <option value="lowestRating">Lowest Rating</option>
-                </ChoicesFormInput>
-              </form>
+              <Col xs={12} md={7} lg={8}>
+                <form>
+                  <ChoicesFormInput
+                    className="form-select js-choice border-0 z-index-9 bg-transparent"
+                    aria-label=".form-select-sm"
+                    value={sortValue}
+                    onChange={handleSortChange}
+                  >
+                    <option value="recentUpdate">Recently Updated</option>
+                    <option value="newest">Newest</option>
+                    <option value="oldest">Oldest</option>
+                    <option value="mostPopular">Most Popular</option>
+                    <option value="leastPopular">Least Popular</option>
+                    <option value="highestRating">Highest Rating</option>
+                    <option value="lowestRating">Lowest Rating</option>
+                  </ChoicesFormInput>
+                </form>
+              </Col>
               {/* Create Button */}
-              <Button
-                variant="primary"
-                as={Link}
-                to="/instructor/courses/create"
-                className="btn-sm d-flex align-items-center justify-content-center mb-0"
-              >
-                <FaPlus className="me-0 my-1 me-sm-1" /> {/* Margin only on larger screens */}
-                <span className="d-none d-sm-block">Create Course</span> {/* Text hidden on mobile */}
-              </Button>
-            </div>
+              <Col xs={12} md={5} lg={4}>
+                <Button
+                  variant="primary"
+                  as={Link}
+                  to="/instructor/courses/create"
+                  className="btn-sm d-flex align-items-center justify-content-center mb-0"
+                >
+                  <FaPlus className="me-0 me-sm-1" />
+                  <span className="d-none d-sm-block">Create Course</span>
+                </Button>
+              </Col>
+            </Row>
           </Col>
         </Row>
       </CardHeader>
@@ -121,41 +128,31 @@ const MyCourses = ({
           <table className="table table-dark-gray align-middle mb-0 table-hover">
             <thead>
               <tr>
-                <th scope="col" className="border-0 ps-3">
-                  Course
-                </th>
-                <th scope="col" className="border-0 text-center d-none d-md-table-cell">
-                  Updated At
-                </th>
-                <th scope="col" className="border-0 text-center">
-                  Status
-                </th>
-                <th scope="col" className="border-0 text-center d-none d-md-table-cell">
-                  Price
-                </th>
-                <th scope="col" className="border-0 text-center">
-                  Action
-                </th>
+                <th scope="col" className="border-0 ps-3">Course</th>
+                <th scope="col" className="border-0 text-center d-none d-md-table-cell">Updated At</th>
+                <th scope="col" className="border-0 text-center">Status</th>
+                <th scope="col" className="border-0 text-center d-none d-md-table-cell">Price</th>
+                <th scope="col" className="border-0 text-center">Action</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={NUMBER_OF_COLUMNS} className="text-center">
-                    <p className="my-5">Loading courses...</p>
+                  <td colSpan={NUMBER_OF_COLUMNS} className="text-center py-5">
+                    <div className="spinner-border text-primary" role="status"></div>
                   </td>
                 </tr>
               ) : courses.length === 0 ? (
                 <tr>
-                  <td colSpan={NUMBER_OF_COLUMNS} className="text-center">
-                    <p className="my-5">No courses found.</p>
+                  <td colSpan={NUMBER_OF_COLUMNS} className="text-center py-5">
+                    <p className="mb-0">No courses found.</p>
                   </td>
                 </tr>
-              ) : (courses.map((course) => (
+              ) : (courses.map((course, idx) => (
                 <tr key={course.courseId}>
                   <td className="ps-3">
                     <div className="d-flex align-items-center">
-                      <div className="flex-shrink-0 rounded overflow-hidden" style={{ width: "80px", height: "80px" }}>
+                      <div className="flex-shrink-0 rounded border border-2 border-light overflow-hidden" style={{ width: "80px", height: "80px" }}>
                         <img
                           src={course.image || DEFAULT_COURSE_IMG}
                           alt={course.title || "Course Image"}
@@ -166,7 +163,7 @@ const MyCourses = ({
                         <div className="mb-1">
                           <h6 className="mb-0">
                             <Link
-                              to={`${course.courseId || ''}`}
+                              to={`${course.courseId || ""}`}
                               className="text-decoration-none d-inline-block"
                             >
                               {course.title}
@@ -229,9 +226,11 @@ const MyCourses = ({
                       </div>
                     ) : course.enableDiscount ? (
                       <div className="text-end">
-                        {formatCurrency(course.discountPrice)}
                         <div className="text-decoration-line-through small">
                           {formatCurrency(course.price)}
+                        </div>
+                        <div>
+                          {formatCurrency(course.discountPrice)}
                         </div>
                       </div>
                     ) : (
@@ -251,7 +250,7 @@ const MyCourses = ({
                           size="sm"
                           className="btn-round mb-0"
                           as={Link}
-                          to={`/instructor/courses/${course.courseId || ''}/edit`}
+                          to={`/instructor/courses/${course.courseId || ""}/edit`}
                         >
                           <FaRegEdit className="fa-fw" />
                         </Button>
@@ -259,11 +258,11 @@ const MyCourses = ({
                       {course.isPrivate ? (
                         <OverlayTrigger
                           placement="top"
-                          overlay={<Tooltip id={`tooltip-public-${course.courseId}`}>Make course public</Tooltip>}
+                          overlay={<Tooltip id={`tooltip-public-${course.courseId || idx}`}>Make course public</Tooltip>}
                         >
                           <button
                             className="btn btn-sm btn-success-soft btn-round mb-0"
-                            onClick={() => onTogglePrivacy(course.courseId || '', !course.isPrivate)}
+                            onClick={() => onTogglePrivacy(course.courseId || "")}
                           >
                             <FaGlobe className="fa-fw" />
                           </button>
@@ -271,11 +270,11 @@ const MyCourses = ({
                       ) : (
                         <OverlayTrigger
                           placement="top"
-                          overlay={<Tooltip id={`tooltip-private-${course.courseId}`}>Make course private</Tooltip>}
+                          overlay={<Tooltip id={`tooltip-private-${course.courseId || idx}`}>Make course private</Tooltip>}
                         >
                           <button
                             className="btn btn-sm btn-danger-soft btn-round mb-0"
-                            onClick={() => onTogglePrivacy(course.courseId || '', !course.isPrivate)}
+                            onClick={() => onTogglePrivacy(course.courseId || "")}
                           >
                             <FaLock className="fa-fw" />
                           </button>
@@ -290,7 +289,7 @@ const MyCourses = ({
         </div>
       </CardBody>
 
-      <CardFooter className="bg-transparent p-2">
+      <CardFooter className="bg-light p-2">
         <div className="d-sm-flex justify-content-sm-between align-items-sm-center">
           <p className="mb-0 text-center text-sm-start ps-2">
             Showing {totalCourses === 0 ? 0 : (page - 1) * limit + 1} to{" "}
@@ -302,12 +301,12 @@ const MyCourses = ({
           >
             <ul className="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
               <li
-                className={`page-item ${page === 1 ? "disabled" : ""}`}
+                className={`page-item ${page <= 1 ? "disabled" : ""}`}
                 onClick={() => goToPage(page - 1)}
               >
-                <a className="page-link" href="#!" tabIndex={-1}>
+                <Button className="page-link mb-0" tabIndex={-1}>
                   <FaAngleLeft />
-                </a>
+                </Button>
               </li>
               {[...Array(totalPages)].map((_, idx) => (
                 <li
@@ -315,18 +314,18 @@ const MyCourses = ({
                   className={`page-item ${page === idx + 1 ? "active" : ""}`}
                   onClick={() => goToPage(idx + 1)}
                 >
-                  <a className="page-link" href="#!">
+                  <Button className="page-link mb-0">
                     {idx + 1}
-                  </a>
+                  </Button>
                 </li>
               ))}
               <li
-                className={`page-item ${page === totalPages ? "disabled" : ""}`}
+                className={`page-item ${page >= totalPages ? "disabled" : ""}`}
                 onClick={() => goToPage(page + 1)}
               >
-                <a className="page-link" href="#!">
+                <Button className="page-link mb-0">
                   <FaAngleRight />
-                </a>
+                </Button>
               </li>
             </ul>
           </nav>

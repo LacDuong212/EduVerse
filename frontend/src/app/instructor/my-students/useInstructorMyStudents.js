@@ -1,102 +1,110 @@
-import axios from "axios";
-import { useCallback, useEffect, useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
+import { toast } from "react-toastify";
+import { authApi } from "@/utils/api";
+import { handleRequest } from "@/utils/request";
 
-export default function useInstructorMyStudents(initialParams = {}) {
-  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+export default function useInstructorMyStudents() {
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [students, setStudents] = useState([]);
+  const [stats, setStats] = useState({
+    totalStudents: 0,
+    totalActive: 0,
+    totalInactive: 0,
+  });
+
   const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 10,
     totalItems: 0,
     totalPages: 1,
   });
 
-  const [stats, setStats] = useState(null);
-
-  const [params, setParams] = useState({
-    ...initialParams,
-  });
-
+  const [loading, setLoading] = useState(false);
   const [statsLoading, setStatsLoading] = useState(false);
-  const [studentsLoading, setStudentsLoading] = useState(false);
-  const [error, setError] = useState(null);
 
-  const fetchStudents = useCallback(
-    async (overrideParams = {}) => {
-      const finalParams = { ...params, ...overrideParams };
+  const filters = {
+    page: parseInt(searchParams.get("page") || "1", 10),
+    limit: parseInt(searchParams.get("limit") || "10", 10),
+    search: searchParams.get("search") || "",
+    sort: searchParams.get("sort") || "enrolledDesc",
+  };
 
-      setStudentsLoading(true);
-      setError(null);
+  const updateFilters = (newFilters) => {
+    setSearchParams((prev) => {
+      const params = new URLSearchParams(prev);
+      Object.entries(newFilters).forEach(([key, value]) => {
+        if (value) params.set(key, value);
+        else params.delete(key);
+      });
 
-      try {
-        const res = await axios.get(
-          `${backendUrl}/api/instructor/students`,
-          {
-            params: finalParams,
-            withCredentials: true,
-          }
-        );
+      if (!newFilters.page) params.set("page", "1");
+      return params;
+    });
+  };
 
-        const { result = [], pagination } = res.data;
+  const fetchStudents = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await handleRequest(authApi.get("/instructor/students", { params: filters }));
 
-        setStudents(result);
-        setPagination(pagination);
-        setParams(finalParams);
-      } catch (err) {
-        setError(err);
-        throw err;
-      } finally {
-        setStudentsLoading(false);
+      if (res.success) {
+        setStudents(res.result || []);
+        if (res.pagination) {
+          setPagination({
+            totalItems: res.pagination.totalItems,
+            totalPages: res.pagination.totalPages,
+          });
+        }
+      } else {
+        toast.error(res.message || "Failed to load student list");
       }
-    },
-    [backendUrl, params]
-  );
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to load student list");
+    } finally {
+      setLoading(false);
+    }
+  }, [JSON.stringify(filters)]);
 
   const fetchStats = useCallback(async () => {
     setStatsLoading(true);
-    setError(null);
-
     try {
-      const { data } = await axios.get(
-        `${backendUrl}/api/instructor/students/stats`,
-        { withCredentials: true }
-      );
-
-      if (data.success)
-        setStats(data.result);
-      else setError(data.message);
+      const res = await handleRequest(authApi.get("/instructor/students/stats"));
+      if (res.success) {
+        setStats(res.result);
+      } else {
+        console.error("Failed to fetch student stats..", res.message);
+      }
     } catch (err) {
-      setError(err);
-      throw err;
+      console.error("Failed to fetch student stats..", err);
     } finally {
       setStatsLoading(false);
     }
-  }, [backendUrl]);
+  }, []);
 
   useEffect(() => {
     fetchStudents();
+  }, [fetchStudents]);
+
+  useEffect(() => {
     fetchStats();
-  }, []); // load once on page mount
+  }, [fetchStats]);
 
   return {
-    // data
     students,
-    pagination,
     stats,
+    pagination,
 
-    // ui state
+    ...filters,
+
+    loading,
     statsLoading,
-    studentsLoading,
-    error,
 
-    // list controls
-    setPage: (page) => fetchStudents({ page }),
-    setSearch: (search) => fetchStudents({ page: 1, search }),
-    setSort: (sort) => fetchStudents({ page: 1, sort }),
-    refetchList: fetchStudents,
-
-    // stats
-    refetchStats: fetchStats,
+    setPage: (page) => updateFilters({ page }),
+    setSearch: (search) => updateFilters({ search }),
+    setSort: (sort) => updateFilters({ sort }),
+    refresh: () => {
+      fetchStudents();
+      fetchStats();
+    },
   };
 }

@@ -1,9 +1,9 @@
-import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import { authApi } from "@/utils/api";
+import { handleRequest } from "@/utils/request";
 
 export const useVideoStream = (videoId) => {
-  const backendUrl = import.meta.env.VITE_BACKEND_URL;
-  
   const [streamUrl, setStreamUrl] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -17,37 +17,38 @@ export const useVideoStream = (videoId) => {
     setStatusCode(null);
 
     try {
-      const { data } = await axios.get(`${backendUrl}/api/videos/${videoId}`, {
-        withCredentials: true,
-      });
+      const res = await handleRequest(authApi.get(`/videos/${videoId}`));
 
-      if (data.success) {
-        setStreamUrl(data.result);
+      if (res.success) {
+        setStreamUrl(res.result);
+      } else {
+        setStatusCode(res.statusCode);
+        setError(res.message || "Failed to load video.");
+
+        if (![403, 404].includes(res.statusCode)) {
+          toast.error(res.message || "Failed to load video.");
+        }
       }
     } catch (err) {
       const status = err.response?.status;
       const msg = err.response?.data?.message || "Failed to load video.";
-
       setStatusCode(status);
       setError(msg);
-
-      if (![403, 404].includes(status)) {
-        toast.error(msg);
-      }
+      if (![403, 404].includes(status)) toast.error(msg);
     } finally {
       setLoading(false);
     }
-  }, [videoId, backendUrl]);
+  }, [videoId]);
 
   useEffect(() => {
     fetchStreamUrl();
   }, [fetchStreamUrl]);
 
-  return { 
-    streamUrl, 
-    loading, 
-    error, 
-    statusCode, 
-    refetch: fetchStreamUrl 
+  return {
+    streamUrl,
+    loading,
+    error,
+    statusCode,
+    refetch: fetchStreamUrl,
   };
 };

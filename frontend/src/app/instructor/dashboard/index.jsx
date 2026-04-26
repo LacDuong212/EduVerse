@@ -1,34 +1,43 @@
 import PageMetaData from "@/components/PageMetaData";
 import useInstructorDashboard from "./useInstructorDashboard";
 import DashboardCounter from "./components/DashboardCounter";
-import EarningsChart from "./components/EarningsChart";
+import RevenueChart from "./components/RevenueChart";
 import TopCoursesChart from "./components/TopCoursesChart";
 import WelcomeBack from "./components/WelcomeBack";
-import { Container, Row } from "react-bootstrap";
+import { Container, Row, Spinner } from "react-bootstrap";
 import { useSelector } from "react-redux";
-import { toast } from "react-toastify";
 
 const InstructorDashboard = () => {
   const instructorName = useSelector(state => state.auth.userData.name);
   const {
     stats,
-    earningChart,
+    revenueChart,
     topCourses,
     loading,
     error,
     refetch
   } = useInstructorDashboard();
 
-  // if (error) {
-  //   toast.error(error);
+  if (loading) {
+    return (
+      <div className="position-absolute top-50 start-50 translate-middle">
+        <Spinner
+          animation="border"
+          variant="primary"
+          style={{ width: "30px", height: "30px" }}
+        />
+      </div>
+    );
+  }
 
-  //   return (
-  //     <Container className="d-flex flex-column align-items-center justify-content-center mt-5">
-  //       <h3>Error loading page</h3>
-  //       <button onClick={refetch} className="btn btn-primary">Retry</button>
-  //     </Container>
-  //   );
-  // }
+  if (error) {
+    return (
+      <Container className="position-absolute top-50 start-50 translate-middle d-flex flex-column align-items-center justify-content-center">
+        <h3>Error loading Dashboard..</h3>
+        <button onClick={refetch} className="btn btn-primary-soft">Retry</button>
+      </Container>
+    );
+  }
 
   return (
     <>
@@ -39,9 +48,9 @@ const InstructorDashboard = () => {
         <Row className="mt-3 g-4">
           {topCourses && topCourses.length > 0 ? (
             <>
-              <EarningsChart
+              <RevenueChart
                 col={7}
-                earningsData={earningChart}
+                revenueData={revenueChart}
               />
               <TopCoursesChart
                 col={5}
@@ -49,9 +58,9 @@ const InstructorDashboard = () => {
               />
             </>
           ) : (
-            <EarningsChart
+            <RevenueChart
               col={12}
-              earningsData={earningChart}
+              revenueData={revenueChart}
             />
           )}
         </Row>

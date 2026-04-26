@@ -1,8 +1,8 @@
-import Counter from "./Counter";
 import { Col, Container, Row } from "react-bootstrap";
 import { BsTriangleFill } from "react-icons/bs";
 import { FaCircle } from "react-icons/fa";
 import { TfiLineDashed } from "react-icons/tfi";
+import Counter from "./Counter";
 
 const MyCoursesHero = ({ stats }) => {
   const styles = {

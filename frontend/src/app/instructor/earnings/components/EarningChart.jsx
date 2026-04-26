@@ -1,13 +1,14 @@
-import { formatCurrency } from "@/utils/currency";
 import ReactApexChart from "react-apexcharts";
 import { Card, CardHeader, CardBody, Col, Row } from "react-bootstrap";
 import { BsArrowUp, BsArrowDown, BsDash } from "react-icons/bs";
+import { currency } from "@/contexts/constants";
+import { formatCurrency } from "@/utils/currency";
 
-const EarningsChart = ({ col = 6, earningsData = [] }) => {
+const EarningChart = ({ col = 6, earningsData = [] }) => {
   const values = earningsData.map(item => item.value);
 
   const categories = earningsData.map(item => {
-    const [year, month] = item.period.split('-');
+    const [year, month] = item.period.split("-");
     return `${month}/${year}`;
   });
 
@@ -57,8 +58,8 @@ const EarningsChart = ({ col = 6, earningsData = [] }) => {
       fixed: { enabled: false },
       x: { show: true },
       y: {
-        formatter: (val) => formatCurrency(val),
-        title: { formatter: () => '' }
+        formatter: (val) => `${val}${currency}`,
+        title: { formatter: () => "" }
       },
       marker: { show: false }
     }
@@ -84,7 +85,7 @@ const EarningsChart = ({ col = 6, earningsData = [] }) => {
     } else {
       return (
         <>
-          <span className="text-info"><BsDash /></span>
+          <span className="text-secondary me-1"><BsDash /></span>
         </>
       );
     }
@@ -95,9 +96,9 @@ const EarningsChart = ({ col = 6, earningsData = [] }) => {
 
   return (
     <Col md={12} lg={col}>
-      <Card className="bg-transparent border rounded-3 h-100">
-        <CardHeader className="bg-light border-bottom">
-          <h5 className="mb-0">Revenue Overview</h5>
+      <Card className="bg-transparent border rounded-3">
+        <CardHeader className="bg-transparent border-bottom">
+          <h3 className="mb-0">Earnings Overview</h3>
         </CardHeader>
         <CardBody>
           <Row className="g-4">
@@ -121,4 +122,4 @@ const EarningsChart = ({ col = 6, earningsData = [] }) => {
   );
 };
 
-export default EarningsChart;
+export default EarningChart;

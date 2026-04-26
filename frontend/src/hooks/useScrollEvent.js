@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 const useScrollEvent = () => {
   const [scrollPassed, setScrollPassed] = useState(0);
@@ -11,13 +11,13 @@ const useScrollEvent = () => {
   };
 
   useEffect(() => {
-    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener("scroll", handleScroll, { passive: true });
     
     setScrollY(window.scrollY);
     setScrollHeight(document.body.offsetHeight);
 
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 

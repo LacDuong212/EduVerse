@@ -1,9 +1,10 @@
+import { DEFAULT_AVATAR_IMG } from "@/contexts/constants";
 import { Card, Col, OverlayTrigger, Row, Tooltip } from "react-bootstrap";
 import { FaBook, FaCommentDots, FaStar, FaUserGraduate } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 const InstructorTab = ({ instructor = {} }) => {
-  const avatar = instructor?.insAvatar || "https://res.cloudinary.com/dw1fjzfom/image/upload/v1757337425/av4_khpvlh.png";
+  const avatar = instructor?.avatar || DEFAULT_AVATAR_IMG;
 
   const stats = {
     averageRating: (instructor?.stats?.averageRating || 0).toFixed(1),
@@ -29,7 +30,7 @@ const InstructorTab = ({ instructor = {} }) => {
         </Col>
         <Col xs={12} md>
           <Link to={`/instructors/${instructor.insId || ""}`} className="fs-3 fw-bold">
-            {instructor?.insName || "Instructor"}
+            {instructor?.name || "Instructor"}
           </Link>
           <ul className="list-inline mt-2 mb-0">
             <li className="list-inline-item">

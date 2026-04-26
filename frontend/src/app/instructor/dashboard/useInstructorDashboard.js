@@ -1,11 +1,10 @@
-import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
+import { authApi } from "@/utils/api";
+import { handleRequest } from "@/utils/request";
 
 export default function useInstructorDashboard() {
-  const backendUrl = import.meta.env.VITE_BACKEND_URL;
-
   const [stats, setStats] = useState(null);
-  const [earningChart, setEarningChart] = useState([]);
+  const [revenueChart, setRevenueChart] = useState([]);
   const [topCourses, setTopCourses] = useState([]);
 
   const [loading, setLoading] = useState(false);
@@ -16,28 +15,23 @@ export default function useInstructorDashboard() {
     setError(null);
 
     try {
-      const [statsRes, earningRes, topCoursesRes] = await Promise.all([
-        axios.get(`${backendUrl}/api/instructor/stats`, {
-          withCredentials: true,
-        }),
-        axios.get(`${backendUrl}/api/instructor/courses/earning`, {
-          withCredentials: true,
-        }),
-        axios.get(`${backendUrl}/api/instructor/courses/top-courses?limit=5`, {
-          withCredentials: true,
-        }),
-      ]);
+      const statsRes = await handleRequest(authApi.get("/instructor/stats"));
+      const earningRes = await handleRequest(authApi.get("/instructor/courses/revenue"));
+      const topCoursesRes = await handleRequest(authApi.get("/instructor/courses/top-courses?limit=5"));
 
-      setStats(statsRes.data.result);
-      setEarningChart(earningRes.data.result);
-      setTopCourses(topCoursesRes.data.result);
+      if (statsRes.success) setStats(statsRes.result);
+      if (earningRes.success) setRevenueChart(earningRes.result?.series || []);
+      if (topCoursesRes.success) setTopCourses(topCoursesRes.result || []);
+
+      const failed = [statsRes, earningRes, topCoursesRes].find((r) => !r.success);
+      if (failed) setError(failed.message);
     } catch (err) {
       setError(err);
       throw err;
     } finally {
       setLoading(false);
     }
-  }, [backendUrl]);
+  }, []);
 
   useEffect(() => {
     fetchDashboardData();
@@ -45,10 +39,10 @@ export default function useInstructorDashboard() {
 
   return {
     stats,
-    earningChart,
+    revenueChart,
     topCourses,
     loading,
     error,
     refetch: fetchDashboardData,
   };
-};
+}

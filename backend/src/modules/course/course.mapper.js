@@ -34,14 +34,14 @@ const getCourseInfo = (course) => ({
 
 const getCourseCatgegory = (category) => ({
   cateId: getStringId(category) || null,
-  cateName: category?.name || null,
-  cateSlug: category?.slug || null,
+  name: category?.name || null,
+  slug: category?.slug || null,
 });
 
 const getCourseInstructor = (instructor) => ({
   insId: getStringId(instructor?.ref) || null,
-  insName: instructor?.ref?.name || instructor?.name || null,
-  insAvatar: instructor?.ref?.pfpImg || instructor?.avatar || null,
+  name: instructor?.ref?.name || instructor?.name || null,
+  avatar: instructor?.ref?.pfpImg || instructor?.avatar || null,
 });
 
 const getCourseStats = (course) => ({
@@ -52,15 +52,15 @@ const getCourseStats = (course) => ({
   lecturesCount: course?.lecturesCount || 0,
 });
 
-const getCourseRating = (course) => ({
-  total: course?.rating?.total || 0,
-  count: course?.rating?.count || 0,
+const getCourseRating = (rating) => ({
+  total: rating?.total || 0,
+  count: rating?.count || 0,
   stars: {
-    1: course?.rating?.stars?.["1"] || 0,
-    2: course?.rating?.stars?.["2"] || 0,
-    3: course?.rating?.stars?.["3"] || 0,
-    4: course?.rating?.stars?.["4"] || 0,
-    5: course?.rating?.stars?.["5"] || 0,
+    1: rating?.stars?.["1"] || 0,
+    2: rating?.stars?.["2"] || 0,
+    3: rating?.stars?.["3"] || 0,
+    4: rating?.stars?.["4"] || 0,
+    5: rating?.stars?.["5"] || 0,
   },
 });
 
@@ -148,23 +148,10 @@ export const toCourseCardDto = (course) => {
 
     level: course.level,
     duration: course.duration,
-    lecturesCount: course.lecturesCount || 0,
-    studentsEnrolled: course.studentsEnrolled || 0,
-    rating: {
-      total: course?.rating?.total || 0,
-      count: course?.rating?.count || 0,
-    },
+    ...getCourseStats(course),
 
-    category: {
-      cateId: getStringId(category) || null,
-      name: course.category?.name || null,
-      slug: course.category?.slug || null,
-    },
-    instructor: {
-      insId: getStringId(instructor?.ref) || null,
-      name: course.instructor?.ref?.name || course.instructor?.name || null,
-      avatar: course.instructor?.ref?.pfpImg || course.instructor?.avatar || null,
-    },
+    category: getCourseCatgegory(course.category),
+    instructor: getCourseInstructor(course.instructor),
   };
 };
 
@@ -190,7 +177,7 @@ export const toCourseDetailsDto = (details) => {
 
     tags: details.tags || [],
 
-    rating: getCourseRating(details),
+    rating: getCourseRating(details.rating),
 
     curriculum: getCourseFreeCurriculum(details.curriculum?.sections),
 
@@ -214,13 +201,9 @@ export const toCourseRowItemDto = (course) => {
 
   return {
     ...getCourseBasicDetails(course),
-
     status: course.status || null,
-
     ...getCourseStats(course),
-
     isPrivate: course.isPrivate ?? true,
-
     ...getCourseTime(course),
   };
 };
@@ -240,8 +223,10 @@ export const toInstructorCourseDto = (course) => {
     ...getCourseInfo(course),
     ...getCourseStats(course),
     tags: course.tags || [],
-    ...getCourseCatgegory(course.category),
-    ...getCourseTime(course)
+    isPrivate: course.isPrivate ?? true,
+    cateId: getStringId(course?.category) || null,
+    cateName: course?.category?.name || null,
+    ...getCourseTime(course),
   };
 };
 
