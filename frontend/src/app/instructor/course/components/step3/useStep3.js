@@ -3,7 +3,6 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { useCourseEditor } from "../../CourseEditorContext";
 
-
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 export const useStep3 = (stepperInstance) => {
@@ -35,13 +34,13 @@ export const useStep3 = (stepperInstance) => {
 
   // initialize curriculum
   useEffect(() => {
-    if (course?.curriculum) {
-      setCurriculum(course.curriculum.map(s => ({
+    if (course?.curriculum?.sections) {
+      setCurriculum(course.curriculum.sections.map(s => ({
         ...s,
         lectures: s.lectures || []
       })));
     }
-  }, [course?.id]);
+  }, [course?.courseId]);
 
   // helper: calculate total lectures
   const calculateTotalLectures = (curr) => {

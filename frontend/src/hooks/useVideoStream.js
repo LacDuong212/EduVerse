@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 import { authApi } from "@/utils/api";
 import { handleRequest } from "@/utils/request";
 
-export const useVideoStream = (videoId) => {
+export default function useVideoStream(videoId) {
   const [streamUrl, setStreamUrl] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -51,4 +51,4 @@ export const useVideoStream = (videoId) => {
     statusCode,
     refetch: fetchStreamUrl,
   };
-};
+}

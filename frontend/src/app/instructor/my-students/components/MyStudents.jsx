@@ -130,10 +130,11 @@ const MyStudentsList = ({
             <Col xs={6} sm={5} md={4}>
               <form>
                 <ChoicesFormInput
+                  name="currentSort"
                   className="form-select js-choice border-0 z-index-9 bg-transparent"
                   aria-label=".form-select-sm"
                   value={currentSort}
-                  onChange={(val) => onSortChange(val)}
+                  onChange={(e) => onSortChange(e?.target?.value || "")}
                 >
                   <option value="nameAsc">Name A-Z</option>
                   <option value="nameDesc">Name Z-A</option>

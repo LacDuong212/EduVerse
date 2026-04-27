@@ -1,229 +1,152 @@
-import axios from "axios";
 import _ from "lodash";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import { COURSE_DRAFT_KEY } from "@/contexts/constants";
-import { hasMeaningfulDraftData, validateFullCourse, handleAxiosError } from "../components/formUtils";
+import { authApi } from "@/utils/api";
+import { mapResponseErrors } from "@/utils/mapper";
+import { handleRequest } from "@/utils/request";
+import { validateCourse } from "../schemas";
 
-const backendUrl = import.meta.env.VITE_BACKEND_URL;
-
-const useEditCourse = () => {
+export default function useEditCourse() {
   const navigate = useNavigate();
-  const { id } = useParams();
-  const draftKey = `${COURSE_DRAFT_KEY}_${id}`;
-
-  const [isLoading, setIsLoading] = useState(false);
-  const [isDirty, setIsDirty] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { id: courseId } = useParams();
 
   const [course, setCourse] = useState(null);
-  const [courseDraft, setCourseDraft] = useState({});
+  const courseRef = useRef(course);
+  const [changes, setChanges] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState({});
 
-  // merged draft
-  const currentCourse = useMemo(() => _.merge({}, course, courseDraft), [course, courseDraft]);
-
-  // init data
   useEffect(() => {
-    const init = async () => {
-      if (!id) return navigate("/instructor/courses");
-
+    const fetchCourse = async () => {
+      if (!courseId) return navigate("/instructor/courses");
       setIsLoading(true);
-      try {
-        const { data } = await axios.get(
-          `${backendUrl}/api/instructor/courses/${id}`,
-          { withCredentials: true }
-        );
 
-        if (data.success && data.result) {
-          setCourse(data.result);
-        } else {
-          throw new Error(data.message);
-        }
-      } catch (error) {
-        toast.error(handleAxiosError(error, "Failed to load course"));
+      const response = await handleRequest(
+        authApi.get(`/instructor/courses/${courseId}`)
+      );
+
+      if (response.success) {
+        setCourse(response.result);
+      } else {
         navigate("/instructor/courses");
-      } finally {
-        setIsLoading(false);
       }
+      setIsLoading(false);
     };
+    fetchCourse();
+  }, [courseId, navigate]);
 
-    const draft = sessionStorage.getItem(draftKey);
-    if (draft && hasMeaningfulDraftData(JSON.parse(draft))) {
-      setCourseDraft(JSON.parse(draft));
-    }
-
-    init();
-  }, [id, draftKey, navigate]);
-
-  // guard if draft exists
   useEffect(() => {
-    const handleBeforeUnload = (e) => {
-      if (isDirty) {
-        e.preventDefault();
-        e.returnValue = '';
-      }
-    };
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [courseDraft]);
+    courseRef.current = course;
+  }, [course]);
 
-  // update draft
-  const updateField = async (pathOrObject, newValue) => {
-    setCourseDraft((prevDraft) => {
-      const nextDraft = { ...prevDraft };
-
-      // bulk update
-      if (typeof pathOrObject === "object" && pathOrObject !== null) {
-        Object.entries(pathOrObject).forEach(([path, value]) => {
-          const originalValue = _.get(course, path);
-          if (!_.isEqual(value, originalValue)) {
-            _.set(nextDraft, path, value);
-          } else {
-            _.unset(nextDraft, path);
-            cleanEmptyParents(nextDraft, path);
-          }
-        });
-      }
-      // single update
-      else {
-        const path = pathOrObject;
-        const originalValue = _.get(course, path);
-        if (_.isEqual(newValue, originalValue)) {
-          _.unset(nextDraft, path);
-          cleanEmptyParents(nextDraft, path);
-        } else {
-          _.set(nextDraft, path, newValue);
-        }
-      }
-
-      return nextDraft;
-    });
-  };
-
-  // if is DRAFT course, auto-save to db
-  const onSaveDraft = useCallback(async (changes = null) => {
+  const currentCourse = useMemo(() => {
     if (!course) return null;
+    return _.mergeWith({}, course, changes, (objValue, srcValue) => {
+      if (_.isArray(srcValue)) return srcValue;
+    });
+  }, [course, changes]);
 
-    if (course?.status?.toUpperCase() !== "DRAFT") {
-      return toast.warn("Only DRAFT courses can be auto-saved.");
-    }
+  const isDirty = useMemo(() => Object.keys(changes).length > 0, [changes]);
 
-    const dataToSave = changes || courseDraft;
+  const updateField = useCallback((path, value) => {
+    setChanges((prev) => {
+      const nextChanges = { ...prev };
+      const originalValue = _.get(courseRef.current, path);
 
-    if (!hasMeaningfulDraftData(dataToSave)) {
-      return toast.info("No changes to save.");
-    }
-
-    try {
-      const { data } = await axios.patch(
-        `${backendUrl}/api/instructor/courses/${id}/draft`,
-        dataToSave,
-        { withCredentials: true }
-      );
-
-      if (data.success) {
-        setCourse((prev) => ({ ...prev, ...data.result }));
-
-        if (changes) {
-          const keysToRemove = Object.keys(changes);
-          setCourseDraft((prevDraft) => _.omit(prevDraft, keysToRemove));
-        } else {
-          setCourseDraft({});
-        }
+      if (_.isEqual(value, originalValue)) {
+        _.unset(nextChanges, path);
+        cleanEmptyParents(nextChanges, path);
       } else {
-        throw new Error(data.message);
+        _.set(nextChanges, path, value);
       }
-    } catch (error) {
-      toast.error(handleAxiosError(error, "Save draft failed"));
-      throw error;
-    }
-  }, [isDirty, id, course, courseDraft]);
 
-  // helper: clean up empty parent objects/arrays
-  const cleanEmptyParents = (obj, path) => {
-    const pathParts = path.split('.');
+      return { ...nextChanges };
+    });
+  }, []);
 
-    while (pathParts.length > 0) {
-      pathParts.pop();
-      const parentPath = pathParts.join('.');
+  const onUpdate = async (specificChanges = null) => {
+    const payload = specificChanges || changes;
+    if (Object.keys(payload).length === 0) return true;
 
-      if (!parentPath) break;
+    setErrors({});
+    const response = await handleRequest(
+      authApi.patch(`/instructor/courses/${courseId}`, payload)
+    );
 
-      const parentValue = _.get(obj, parentPath);
-
-      if (_.isObject(parentValue) && _.isEmpty(parentValue)) {
-        _.unset(obj, parentPath);
-      } else {
-        break;
-      }
+    if (response.success) {
+      setCourse(response.result);
+      setChanges({});
+      setErrors({});
+      return true;
+    } else {
+      if (response.errors) setErrors(mapResponseErrors(response.errors));
+      return false;
     }
   };
 
-  // auto-save draft to session storage
-  useEffect(() => {
-    if (hasMeaningfulDraftData(courseDraft)) {
-      sessionStorage.setItem(draftKey, JSON.stringify(courseDraft));
-      setIsDirty(true);
-    } else {
-      sessionStorage.removeItem(draftKey);
-      setIsDirty(false);
-    }
-  }, [courseDraft, draftKey]);
-
-  const handleSubmit = async () => {
-    if (isSubmitting) return;
-
-    const error = validateFullCourse(currentCourse);
-    if (error) { toast.error(error); return; }
-
-    if (!window.confirm("Submit course? Draft changes will be cleared.")) return;
-
+  const onSubmit = async () => {
     setIsSubmitting(true);
-    try {
-      const payload = {
-        ...courseDraft,
-        isPublish: true,
-      };
+    setErrors({});
 
-      const { data } = await axios.patch(
-        `${backendUrl}/api/instructor/courses/${id}`,
-        payload,
-        { withCredentials: true }
-      );
+    const response = await handleRequest(
+      authApi.post(`/instructor/courses/${courseId}/submit`, changes)
+    );
 
-      if (data.success) {
-        const isNewPublish = course?.status?.toUpperCase() === "DRAFT";
-        toast.success(isNewPublish ? "Course published!" : "Course updated!");
-        sessionStorage.removeItem(draftKey);
-        navigate("/instructor/courses");
-      }
-    } catch (error) {
-      console.error("Submission failed", error);
-      toast.error(handleAxiosError(error, "Submission failed"));
-    } finally {
-      setIsSubmitting(false);
+    if (response.success) {
+      toast.success("Course submitted for review!");
+      navigate("/instructor/courses");
+    } else {
+      if (response.errors) setErrors(mapResponseErrors(response.errors));
+    }
+    setIsSubmitting(false);
+  };
+
+  const onDiscardChanges = async () => {
+    if (!course?.hasPendingChanges && !course?.curriculum?.hasPendingChanges)
+      toast.info("No server-saved changes to clear.");
+
+    if (!window.confirm("Are you sure? This will revert all unsubmitted changes and revert any video updated.")) return;
+
+    setIsLoading(true);
+    const response = await handleRequest(
+      authApi.delete(`/instructor/courses/${courseId}/changes`)
+    );
+
+    if (response.success) {
+      setCourse(response.result);
+      setChanges({});
+      setErrors({});
+      toast.success("Changes discarded.");
+    }
+    setIsLoading(false);
+  };
+
+  const cleanEmptyParents = (obj, path) => {
+    const parts = path.split(".");
+    while (parts.length > 1) {
+      parts.pop();
+      const parentPath = parts.join(".");
+      const parentVal = _.get(obj, parentPath);
+      if (_.isObject(parentVal) && _.isEmpty(parentVal)) {
+        _.unset(obj, parentPath);
+      } else break;
     }
   };
 
   return {
     course,
-    setCourse,
-
-    courseDraft,
-    setCourseDraft,
-
+    changes,
     currentCourse,
-
     updateField,
-    onSaveDraft,
-
-    isLoading,
+    onUpdate,
+    onSubmit,
+    onDiscardChanges,
     isDirty,
-
+    isLoading,
     isSubmitting,
-    handleSubmit,
+    errors,
+    setErrors,
   };
-};
-
-export default useEditCourse;
+}

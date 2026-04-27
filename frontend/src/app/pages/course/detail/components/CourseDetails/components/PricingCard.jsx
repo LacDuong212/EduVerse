@@ -4,7 +4,7 @@ import { MdError } from "react-icons/md";
 import { toast } from "react-toastify";
 import GlightBox from "@/components/GlightBox";
 import { DEFAULT_COURSE_IMG } from "@/contexts/constants";
-import { useVideoStream } from "@/hooks/useStreamUrl";
+import useVideoStream from "@/hooks/useVideoStream";
 import { formatCurrency } from "@/utils/currency";
 
 const VideoPlayButton = ({ videoId }) => {

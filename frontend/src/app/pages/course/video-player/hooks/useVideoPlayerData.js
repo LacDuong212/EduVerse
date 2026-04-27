@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useVideoStream } from "@/hooks/useStreamUrl";
+import useVideoStream from "@/hooks/useVideoStream";
 import { toPlyrSource, parseYouTubeId } from "@/utils/plyrSource";
 import useCourseProgress from "@/hooks/useCourseProgress";
 

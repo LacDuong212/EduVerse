@@ -1,27 +1,24 @@
 import { useState, useEffect } from "react";
 
-const useSection = (show, initialSection, onSave) => {
-  const [title, setTitle] = useState('');
+export default function useSection(show, initialSection, onSave) {
+  const [title, setTitle] = useState("");
 
-  // init
-  // when modal is shown/hidden or check if edit mode
   useEffect(() => {
     if (show) {
       if (initialSection) {
-        setTitle(initialSection.title || ''); // edit mode: populate
+        setTitle(initialSection.title || "");
       } else {
-        setTitle(''); // add mode: clear
+        setTitle("");
       }
     }
   }, [show, initialSection]);
 
-  // --- Handlers ---
   const handleSave = () => {
     if (!title.trim()) return;
     
     onSave(title.trim());
     
-    setTitle(''); // optional
+    setTitle("");
   };
 
   const handleChange = (e) => {
@@ -35,6 +32,4 @@ const useSection = (show, initialSection, onSave) => {
     handleChange,
     isEditMode: !!initialSection 
   };
-};
-
-export default useSection;
+}

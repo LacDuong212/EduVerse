@@ -16,7 +16,7 @@ const Step3 = ({ stepperInstance }) => {
   const renderAIButton = (secIdx, lecIdx, lecture) => {
     if (!courseId || !lecture?.id) return null;
     if (course?.status !== "Live" && course?.status !== "Pending") return null;
-    
+
     const status = lecture.aiData?.status || "None";
 
     let btnVariant = "purple-soft";
@@ -25,19 +25,19 @@ const Step3 = ({ stepperInstance }) => {
     let badge = null;
 
     if (status === "Processing") {
-       return (
+      return (
         <Button variant="purple-soft" size="sm" className="btn-round mb-0 me-2 d-flex" onClick={() => handlers.openAIModal(secIdx, lecIdx)}>
-           <Spinner animation="border" size="sm" />
+          <Spinner animation="border" size="sm" />
         </Button>
-       );
-    } 
+      );
+    }
     else if (status === "Completed") {
-       tooltip = "View AI Content";
-       badge = <FaCheckCircle className="position-absolute top-0 start-100 translate-middle text-success bg-white rounded-circle" fontSize={16} />;
-    } 
+      tooltip = "View AI Content";
+      badge = <FaCheckCircle className="position-absolute top-0 start-100 translate-middle text-success bg-white rounded-circle" fontSize={16} />;
+    }
     else if (status === "Failed") {
-       tooltip = "Generation Failed";
-       badge = <FaExclamationCircle className="position-absolute top-0 start-100 translate-middle text-danger bg-white rounded-circle" fontSize={16} />;
+      tooltip = "Generation Failed";
+      badge = <FaExclamationCircle className="position-absolute top-0 start-100 translate-middle text-danger bg-white rounded-circle" fontSize={16} />;
     }
 
     return (
@@ -60,16 +60,13 @@ const Step3 = ({ stepperInstance }) => {
   return (
     <>
       <form id="step-3" className="content fade" onSubmit={handlers.handleSubmit}>
-        <h4>
-          Curriculum <span className="text-danger">* </span>
-          <span className="fw-normal fs-5">(Sections: {stats.totalSections}, Lectures: {stats.totalLectures})</span>
-        </h4>
-        <hr />
-
         <Row>
           {/* Header & Add Section Button */}
           <div className="d-sm-flex justify-content-sm-between align-items-center">
-            <h5 className="mb-2 mb-sm-0">Sections <span className="text-danger">*</span></h5>
+            <div>
+              <h5 className="mb-2 mb-sm-0">Sections <span className="text-danger">*</span></h5>
+              <span className="fs-6">(Total Sections: {stats.totalSections}, Total Lectures: {stats.totalLectures})</span>
+            </div>
             <Button variant="info-soft" size="sm" className="mb-0" onClick={handlers.openAddSection}>
               <FaPlus className="me-1" /> Add Section
             </Button>
@@ -89,24 +86,24 @@ const Step3 = ({ stepperInstance }) => {
               <AccordionItem eventKey={String(i)} key={i} className="mt-3 border rounded overflow-hidden">
                 <AccordionHeader as="h6" className="font-base">
                   <div className="fw-bold text-break me-2">{section.section}</div>
-                  
+
                   {/* Section Controls (Edit/Delete) */}
                   <div className="ms-auto d-flex align-items-center me-4" onClick={e => e.stopPropagation()}>
-                    <span 
-                        role="button" 
-                        className="btn btn-sm btn-primary-soft btn-round me-1 mb-0" 
-                        onClick={() => handlers.openEditSection(i, section)}
-                        title="Edit Section Name"
+                    <span
+                      role="button"
+                      className="btn btn-sm btn-primary-soft btn-round me-1 mb-0"
+                      onClick={() => handlers.openEditSection(i, section)}
+                      title="Edit Section Name"
                     >
-                       <FaEdit size={12}/>
+                      <FaEdit size={12} />
                     </span>
-                    <span 
-                        role="button" 
-                        className="btn btn-sm btn-danger-soft btn-round mb-0" 
-                        onClick={() => handlers.handleRemoveSection(i)}
-                        title="Remove Section"
+                    <span
+                      role="button"
+                      className="btn btn-sm btn-danger-soft btn-round mb-0"
+                      onClick={() => handlers.handleRemoveSection(i)}
+                      title="Remove Section"
                     >
-                       <FaTimes size={13}/>
+                      <FaTimes size={13} />
                     </span>
                   </div>
                 </AccordionHeader>
@@ -168,13 +165,13 @@ const Step3 = ({ stepperInstance }) => {
       </form>
 
       {/* --- MODALS --- */}
-      
+
       {/* Add/Edit Section Modal */}
       <Section
         show={modals.section.show}
         onClose={modals.section.close}
         onSave={handlers.handleSaveSection}
-        initialSection={modals.section.data} 
+        initialSection={modals.section.data}
       />
 
       {/* Add/Edit Lecture Modal */}
@@ -187,7 +184,7 @@ const Step3 = ({ stepperInstance }) => {
       />
 
       {/* AI Data Modal */}
-      <AiData 
+      <AiData
         show={modals.ai.show}
         onClose={modals.ai.close}
         lecture={modals.ai.data}

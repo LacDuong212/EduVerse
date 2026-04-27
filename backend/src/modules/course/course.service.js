@@ -561,18 +561,17 @@ const getPlainPendingData = (pendingUpdate) => {
   return pendingUpdate?.data || {};
 };
 
-const getMergedCourseState = (courseDoc, curriculumDoc) => {
+const getMergedState = (courseDoc, curriculumDoc) => {
   const pendingCourse = courseDoc.pendingUpdate?.data || {};
   const pendingCurr = curriculumDoc?.pendingUpdate?.data || {};
 
   return {
     course: {
       ...courseDoc.toObject(),
-      ...pendingCourse, // Overwrites live fields with pending ones
+      ...pendingCourse,
       hasPendingChanges: Object.keys(pendingCourse).length > 0
     },
     curriculum: {
-      // Use pending sections if they exist, otherwise live
       sections: pendingCurr.sections || curriculumDoc?.sections || [],
       hasPendingChanges: !!pendingCurr.sections?.length
     }
@@ -648,7 +647,7 @@ export const updateCourse = async (insId, courseId, changes, session = null) => 
 
     const {
       course: mergedCourse, curriculum: mergedCurr
-    } = getMergedCourseState(course, curriculumDoc);
+    } = getMergedState(course, curriculumDoc);
 
     return courseMapper.toEditCourseDto(mergedCourse, mergedCurr);
   }, session);
@@ -667,7 +666,7 @@ export const submitCourse = async (insId, courseId, changes = null, session = nu
 
     const {
       course: mergedCourse, curriculum: mergedCurr
-    } = getMergedCourseState(courseDoc, curriculumDoc);
+    } = getMergedState(courseDoc, curriculumDoc);
 
     const categoryId = (mergedCourse.category?._id || mergedCourse.category)?.toString() || null;
 
@@ -736,16 +735,6 @@ export const clearPendingChanges = async (insId, courseId, session = null) => {
       videosToRemove.push(...lectureVideos);
     }
 
-    if (hasCurriculumChanges) {
-      const pendingCurrData = getPlainPendingData(curriculumDoc.pendingUpdate);
-      const lectureVideos = (pendingCurrData.sections || [])
-        .flatMap(sec => sec.lectures || [])
-        .map(l => l.videoId)
-        .filter(Boolean);
-
-      videosToRemove.push(...lectureVideos);
-    }
-
     course.pendingUpdate = {
       data: null,
       submittedAt: null,
@@ -768,7 +757,7 @@ export const clearPendingChanges = async (insId, courseId, session = null) => {
 
     const {
       course: mergedCourse, curriculum: mergedCurr
-    } = getMergedCourseState(course, curriculumDoc);
+    } = getMergedState(course, curriculumDoc);
 
     return courseMapper.toEditCourseDto(mergedCourse, mergedCurr);
   }, session);
@@ -785,7 +774,7 @@ export const getCourseForEdit = async (insId, courseId) => {
   const {
     course: mergedCourse,
     curriculum: mergedCurr
-  } = getMergedCourseState(courseDoc, courseDoc.curriculum);
+  } = getMergedState(courseDoc, courseDoc.curriculum);
 
   return courseMapper.toEditCourseDto(mergedCourse, mergedCurr);
 };

@@ -1,36 +1,52 @@
 import _ from "lodash";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { useCategories } from "@/hooks/useCategories";
+import { api } from "@/utils/api";
+import { parseCurrency, toCurrency } from "@/utils/currency";
+import { handleRequest } from "@/utils/request";
 import { useCourseEditor } from "../../CourseEditorContext";
+import { step1Fields, validateStep1 } from "../../schemas";
 
-export const useStep1 = (stepperInstance) => {
-  const [errors, setErrors] = useState({});
-  const { categories, loading: categoriesLoading } = useCategories();
+export default function useStep1(stepperInstance) {
+  const [options, setOptions] = useState({
+    categories: [],
+    languages: ["english", "vietnamese", "others"],
+    levels: ["all", "beginner", "intermedidate", "advanced"],
+  });
+  const [optionLoading, setOptionLoading] = useState(true);
+
   const {
     currentCourse: course,
-    courseDraft: draft,
+    changes,
     updateField: onUpdateField,
-    onSaveDraft
+    onUpdate,
+    errors: serverErrors,
+    setErrors,
   } = useCourseEditor();
 
-  // utils
-  const formatCurrency = (val) => {
-    if (val === 0) return '0';
-    if (!val) return '';
-    const num = String(val).replace(/[^0-9.-]/g, '');
-    return new Intl.NumberFormat("en-US").format(Number(num));
-  };
+  useEffect(() => {
+    const fetchFilterData = async () => {
+      setOptionLoading(true);
 
-  const parseCurrency = (str) => {
-    const digits = String(str || '').replace(/[^0-9.-]/g, '');
-    return digits === '' ? 0 : Number(digits);
-  };
+      const response = await handleRequest(api.get("/courses/filters"));
+      if (response.success && response.result) {
+        setOptions(prev => ({
+          ...prev,
+          categories: response.result.categories || [],
+          // languages: response.result.languages || [],
+          levels: response.result.levels || [],
+        }));
+      }
+
+      setOptionLoading(false);
+    };
+    fetchFilterData();
+  }, []);
 
   const displayData = {
     ...course,
-    price: formatCurrency(course?.price),
-    discountPrice: formatCurrency(course?.discountPrice),
+    price: toCurrency(course?.price),
+    discountPrice: toCurrency(course?.discountPrice),
   };
 
   const handleChange = (e) => {
@@ -43,83 +59,52 @@ export const useStep1 = (stepperInstance) => {
 
     onUpdateField(name, finalValue);
 
-    if (errors[name]) setErrors(prev => ({ ...prev, [name]: null }));
+    if (serverErrors[name]) setErrors(prev => ({ ...prev, [name]: null }));
   };
 
   const handleCustomChange = (name, value) => {
     if (name === "description") {
-      // check if the HTML contains any real text or images
-      const plainText = value.replace(/<(.|\n)*?>/g, '').trim();
-      if (plainText.length === 0 && !value.includes('<img')) {
+      const plainText = value.replace(/<(.|\n)*?>/g, "").trim();
+      if (plainText.length === 0 && !value.includes("<img")) {
         value = "";
       }
     }
 
     onUpdateField(name, value);
-    if (errors[name]) setErrors(prev => ({ ...prev, [name]: null }));
-  };
-
-  const validate = () => {
-    const errs = {};
-    const p = course?.price || 0;
-    const d = course?.discountPrice || 0;
-
-    if (!course.title?.trim()) errs.title = "Title is required";
-    if (!course.categoryId) errs.categoryId = "Category is required";
-    if (!course.level) errs.level = "Level is required";
-    if (!course.language) errs.language = "Language is required";
-    if (p < 0) errs.price = "Valid price is required";
-
-    if (course?.enableDiscount) {
-      if (d <= 0) errs.discountPrice = "Valid discount required";
-      else if (d >= p) errs.discountPrice = "Must be less than price";
-    }
-
-    setErrors(errs);
-    return Object.keys(errs).length === 0;
+    if (serverErrors[name]) setErrors(prev => ({ ...prev, [name]: null }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validate()) return toast.error("Please recheck the form for errors");
 
-    if (course?.status?.toUpperCase() === "DRAFT") {
-      try {
-        const step1Fields = [
-          "title", "subtitle",
-          "categoryId",
-          "level", "language",
-          "price", "discountPrice", "enableDiscount",
-          "description",
-          "isPrivate",
-        ];
+    const { success: validateSuccess, errors: newErrors } = validateStep1(course);
 
-        // pick only existing step1 fields
-        const step1Data = _.pick(draft, step1Fields);
-
-        if (!_.isEmpty(step1Data)) {
-          await onSaveDraft(step1Data);
-          toast.success("Course details saved!");
-        }
-      } catch (err) {
-        console.error("Save course details error:", err);
-        toast.error(err?.message || "Failed to save course details");
-        return;
-      }
-    } else {
-      toast.info("Details updated locally.");
+    if (!validateSuccess) {
+      setErrors(prev => {
+        const cleanedErrors = _.omit(prev, step1Fields);
+        return { ...cleanedErrors, ...newErrors };
+      });
     }
 
-    stepperInstance?.next();
+    const step1Changes = _.pick(changes, step1Fields);
+
+    if (_.isEmpty(step1Changes)) return stepperInstance?.next();
+
+    const success = await onUpdate(step1Changes);
+
+    if (success) {
+      toast.success("Progress saved!");
+      stepperInstance?.next();
+    }
   };
 
   return {
+    ...options,
+    optionLoading,
     formData: displayData,
-    errors,
-    categories,
-    categoriesLoading,
+    errors: serverErrors,
     handleChange,
     handleCustomChange,
-    handleSubmit
+    handleSubmit,
   };
-};
+}

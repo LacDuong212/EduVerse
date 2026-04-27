@@ -3,9 +3,9 @@ import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { useDropzone } from "react-dropzone";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import { useImageUpload } from "@/hooks/useImageUpload";
-import { useVideoStream } from "@/hooks/useVideoStream";
-import { useVideoUpload } from "@/hooks/useVideoUpload";
+import useImageUpload from "@/hooks/useImageUpload";
+import useVideoStream from "@/hooks/useVideoStream";
+import useVideoUpload from "@/hooks/useVideoUpload";
 import { useCourseEditor } from "../../CourseEditorContext";
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB

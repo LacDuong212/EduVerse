@@ -13,14 +13,11 @@ const Step4 = ({ stepperInstance }) => {
       onSubmit={handlers.handleSubmit}
       onKeyDown={(e) => e.key === "Enter" && e.preventDefault()} // prevent accidental submit on Enter
     >
-      <h4>Additional Information (Optional)</h4>
-      <hr />
-
       <Row className="g-4">
         <Col xs={12}>
           <div className="bg-light border rounded p-4">
             <h5 className="mb-0">
-              Tags <span>({state.tagsInput?.split(',').filter(t => t.trim()).length} / 14)</span>
+              Tags <span>({state.tagsInput?.split(',').filter(t => t.trim()).length} / 14) (Optional)</span>
             </h5>
             <div className="mt-3">
               <input

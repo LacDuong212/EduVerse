@@ -166,10 +166,11 @@ const CourseStudents = ({ col = 12 }) => {
             <Col xs={6} sm={5} md={4}>
               <form className="flex-grow-1">
                 <ChoicesFormInput
+                  name="sort"
                   className="form-select js-choice border-0 z-index-9 bg-transparent"
                   aria-label=".form-select-sm"
                   value={sort}
-                  onChange={(val) => setSort(val)}
+                  onChange={(e) => setSort(e?.target?.value || "")}
                 >
                   <option value="nameAsc">Name A-Z</option>
                   <option value="nameDesc">Name Z-A</option>

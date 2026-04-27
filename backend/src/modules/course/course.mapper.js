@@ -244,25 +244,25 @@ export const toEditCourseDto = (course, curriculum) => {
   if (!course) return null;
 
   return {
-    courseId: course._id?.toString() || null,
-    title: course.title || null,
-    subtitle: course.subtitle || null,
-    description: course.description || null,
-    image: course.image || null,
-    tags: course.tags || null,
-    price: course.price || null,
-    discountPrice: course.discountPrice || null,
+    courseId: course._id?.toString() ?? null,
+    title: course.title ?? null,
+    subtitle: course.subtitle ?? null,
+    description: course.description ?? null,
+    image: course.image ?? null,
+    tags: course.tags ?? null,
+    price: course.price ?? null,
+    discountPrice: course.discountPrice ?? null,
     enableDiscount: course.enableDiscount ?? false,
     ...getCourseInfo(course),
-    thumbnail: course.thumbnail || null,
-    previewVideo: course.previewVideo || null,
-    status: course.status || null,
-    categoryId: (course.category?._id || course.category)?.toString() || null,
+    thumbnail: course.thumbnail ?? null,
+    previewVideo: course.previewVideo ?? null,
+    status: course.status ?? null,
+    categoryId: (course.category?._id ?? course.category)?.toString() ?? null,
     isPrivate: course.isPrivate ?? true,
     hasPendingChanges: !!course.hasPendingChanges,
 
     curriculum: {
-      sections: getCourseCurriculum(curriculum?.sections, true) || null,
+      sections: getCourseCurriculum(curriculum?.sections, true) ?? null,
       hasPendingChanges: !!curriculum?.hasPendingChanges,
     },
   };

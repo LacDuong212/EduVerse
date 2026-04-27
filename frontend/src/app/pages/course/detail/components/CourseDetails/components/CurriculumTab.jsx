@@ -22,7 +22,7 @@ import { MdError } from "react-icons/md";
 import { toast } from "react-toastify";
 import element1 from "@/assets/images/element/01.svg";
 import GlightBox from "@/components/GlightBox";
-import { useVideoStream } from "@/hooks/useStreamUrl";
+import useVideoStream from "@/hooks/useVideoStream";
 import useToggle from "@/hooks/useToggle";
 import { formatCurrency } from "@/utils/currency";
 import { secondsToDuration } from "@/utils/duration";
