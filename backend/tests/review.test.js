@@ -122,9 +122,45 @@ describe("EDV-193 | POST /api/reviews", () => {
     expect(res.body.success).toBe(true);
     expect(res.body.message).toBe("Review created successfully!");
     expect(res.body.result).toHaveProperty("reviewId");
+    expect(res.body.result.reviewId).toMatch(/^[0-9a-f]{24}$/);
     expect(res.body.result.rating).toBe(4);
+    expect(res.body.result.description).toBe("Great course!");
+    // Leakage guards
+    expect(res.body.result).not.toHaveProperty("isDeleted");
+    expect(res.body.result).not.toHaveProperty("__v");
+    expect(res.body).not.toHaveProperty("stack");
 
     createdReviewId = res.body.result.reviewId;
+  });
+
+  it("✅ DB verify: Review document created in database → 201", async () => {
+    const doc = await Review.findById(createdReviewId).lean();
+    expect(doc).not.toBeNull();
+    expect(doc.course.toString()).toBe(ENROLLED_COURSE);
+    expect(doc.user.toString()).toBe("694d32d7ebe694fc49e59a67");
+    expect(doc.rating).toBe(4);
+    expect(doc.description).toBe("Great course!");
+    expect(doc.isDeleted).toBe(false);
+  });
+
+  it("❌ Missing courseId: no courseId in body → 400", async () => {
+    const res = await request(app)
+      .post(BASE)
+      .set("Cookie", studentCookie)
+      .send({ rating: 4 });
+
+    expect(res.status).toBe(400);
+    expect(res.body.success).toBe(false);
+  });
+
+  it("❌ Missing Rating: no rating in body → 400", async () => {
+    const res = await request(app)
+      .post(BASE)
+      .set("Cookie", studentCookie)
+      .send({ courseId: ENROLLED_COURSE });
+
+    expect(res.status).toBe(400);
+    expect(res.body.success).toBe(false);
   });
 
   it("❌ Already Reviewed: same student, same course → 409", async () => {
@@ -143,6 +179,25 @@ describe("EDV-193 | POST /api/reviews", () => {
 // EDV-195 | PATCH /api/reviews/:reviewId
 // =============================================================================
 describe("EDV-195 | PATCH /api/reviews/:reviewId", () => {
+  it("❌ Not Authenticated: no cookie → 401", async () => {
+    const res = await request(app)
+      .patch(`${BASE}/${NONEXISTENT_ID}`)
+      .send({ rating: 3 });
+
+    expect(res.status).toBe(401);
+    expect(res.body.success).toBe(false);
+  });
+
+  it("❌ Role Restriction: instructor → 403", async () => {
+    const res = await request(app)
+      .patch(`${BASE}/${NONEXISTENT_ID}`)
+      .set("Cookie", instructorCookie)
+      .send({ rating: 3 });
+
+    expect(res.status).toBe(403);
+    expect(res.body.success).toBe(false);
+  });
+
   it("❌ Invalid ID: malformed reviewId → 400", async () => {
     const res = await request(app)
       .patch(`${BASE}/${INVALID_ID}`)
@@ -200,12 +255,49 @@ describe("EDV-195 | PATCH /api/reviews/:reviewId", () => {
     expect(res.body.result.rating).toBe(5);
     expect(res.body.result.description).toBe("Changed description only");
   });
+
+  it("✅ DB verify: changes persisted in database", async () => {
+    const doc = await Review.findById(createdReviewId).lean();
+    expect(doc).not.toBeNull();
+    expect(doc.rating).toBe(5);
+    expect(doc.description).toBe("Changed description only");
+    expect(doc.isDeleted).toBe(false);
+  });
+
+  it("✅ No leakage on update response", async () => {
+    const res = await request(app)
+      .patch(`${BASE}/${createdReviewId}`)
+      .set("Cookie", studentCookie)
+      .send({ rating: 5 });
+
+    expect(res.status).toBe(200);
+    expect(res.body.result).not.toHaveProperty("isDeleted");
+    expect(res.body.result).not.toHaveProperty("__v");
+    expect(res.body).not.toHaveProperty("stack");
+  });
 });
 
 // =============================================================================
 // EDV-196 | DELETE /api/reviews/:reviewId
 // =============================================================================
 describe("EDV-196 | DELETE /api/reviews/:reviewId", () => {
+  it("❌ Not Authenticated: no cookie → 401", async () => {
+    const res = await request(app)
+      .delete(`${BASE}/${NONEXISTENT_ID}`);
+
+    expect(res.status).toBe(401);
+    expect(res.body.success).toBe(false);
+  });
+
+  it("❌ Role Restriction: instructor → 403", async () => {
+    const res = await request(app)
+      .delete(`${BASE}/${NONEXISTENT_ID}`)
+      .set("Cookie", instructorCookie);
+
+    expect(res.status).toBe(403);
+    expect(res.body.success).toBe(false);
+  });
+
   it("❌ Malformed ID: invalid ObjectId in URL → 400", async () => {
     const res = await request(app)
       .delete(`${BASE}/${INVALID_ID}`)
@@ -231,6 +323,12 @@ describe("EDV-196 | DELETE /api/reviews/:reviewId", () => {
       .set("Cookie", studentCookie);
 
     expect(res.status).toBe(204);
+  });
+
+  it("✅ DB verify: document still exists with isDeleted=true", async () => {
+    const doc = await Review.findById(createdReviewId).lean();
+    expect(doc).not.toBeNull();
+    expect(doc.isDeleted).toBe(true);
   });
 
   it("❌ Already Deleted: hit same endpoint twice → 404", async () => {
