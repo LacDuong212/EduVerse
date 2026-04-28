@@ -31,13 +31,13 @@ const Pagination = ({ page, limit, total, onChangePage }) => {
     <nav className="d-flex justify-content-center" aria-label="navigation">
       <ul className="pagination pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
 
-        <li className={`page-item mb-0 ${page === 1 ? "disabled" : ""}`}>
+        <li className={`page-item mb-0 ${page <= 1 ? "disabled" : ""}`}>
           <button className="page-link" onClick={() => goToPage(1)}>
             <FaFastBackward />
           </button>
         </li>
 
-        <li className={`page-item mb-0 ${page === 1 ? "disabled" : ""}`}>
+        <li className={`page-item mb-0 ${page <= 1 ? "disabled" : ""}`}>
           <button className="page-link" onClick={() => goToPage(page - 1)}>
             <FaCaretLeft />
           </button>
@@ -60,13 +60,13 @@ const Pagination = ({ page, limit, total, onChangePage }) => {
           )
         )}
 
-        <li className={`page-item mb-0 ${page === totalPages ? "disabled" : ""}`}>
+        <li className={`page-item mb-0 ${page >= totalPages ? "disabled" : ""}`}>
           <button className="page-link" onClick={() => goToPage(page + 1)}>
             <FaCaretRight />
           </button>
         </li>
 
-        <li className={`page-item mb-0 ${page === totalPages ? "disabled" : ""}`}>
+        <li className={`page-item mb-0 ${page >= totalPages ? "disabled" : ""}`}>
           <button className="page-link" onClick={() => goToPage(totalPages)}>
             <FaFastForward />
           </button>

@@ -1,7 +1,7 @@
 import PageMetaData from "@/components/PageMetaData";
 import MyProfile from "./components/MyProfile";
 
-const InstructorAccount = () => {
+const InstructorProfile = () => {
   return (
     <div className="pb-5">
       <PageMetaData title="My Profile" />
@@ -10,4 +10,4 @@ const InstructorAccount = () => {
   );
 };
 
-export default InstructorAccount;
+export default InstructorProfile;

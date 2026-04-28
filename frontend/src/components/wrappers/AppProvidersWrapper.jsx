@@ -52,7 +52,7 @@ const AppProvidersWrapper = ({ children }) => {
   useEffect(() => {
     if (isCheckingAuth) return;
 
-    if (userData?.userId) {
+    if (userData?.userId && userData?.role === "student") {
       if (cartStatus === "idle") {
         dispatch(fetchCart());
       }

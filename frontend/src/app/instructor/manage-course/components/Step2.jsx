@@ -1,7 +1,7 @@
 import galleryImg from '@/assets/images/element/gallery.svg';
 import GlightBox from '@/components/GlightBox';
-import { useVideoStream } from "@/hooks/useStreamUrl";
-import { useImageUpload } from '../useImageUpload';
+import useVideoStream from "@/hooks/useVideoStream";
+import useImageUpload from '@/hooks/useImageUpload';
 import { useVideoUpload } from "../useVideoUpload";
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Col, Nav, ProgressBar, Row, Tab } from 'react-bootstrap';

@@ -3,7 +3,7 @@ import { Button, Col, Modal, ModalBody, ModalFooter, ModalHeader } from "react-b
 import { BsXLg, BsPlayCircleFill } from "react-icons/bs";
 import { useVideoUpload } from "../useVideoUpload";
 import GlightBox from "@/components/GlightBox";
-import { useVideoStream } from "@/hooks/useStreamUrl";
+import useVideoStream from "@/hooks/useVideoStream";
 
 
 // constants ---

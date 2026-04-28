@@ -13,7 +13,7 @@ export const createNewStudent = async (userId, session = null) => {
     { $setOnInsert: { user: userId } },
     { upsert: true, new: true, runValidators: true, session }
   );
-  
+
   return student;
 };
 

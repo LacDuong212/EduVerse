@@ -15,9 +15,7 @@ const Step2 = ({ stepperInstance }) => {
       aria-labelledby="steppertrigger2"
       onSubmit={methods.handleSubmit}
     >
-      <h4>Course Media <span className="text-danger">*</span></h4>
       {state.error && <Alert variant="danger">{state.error}</Alert>}
-      <hr />
 
       <Row>
         {/* IMAGE SECTION */}
@@ -87,8 +85,8 @@ const Step2 = ({ stepperInstance }) => {
                 </div>
               </>
             ) : !state.isImgLoading && (
-              <div className="p-5 border border-dashed rounded-3">
-                <img src={galleryImg} style={{ maxHeight: "100px" }} alt="placeholder" />
+              <div className="border border-dashed rounded-3">
+                {/* <img src={galleryImg} style={{ maxHeight: "100px" }} className="m-3" alt="placeholder" /> */}
               </div>
             )}
           </div>
@@ -143,7 +141,7 @@ const Step2 = ({ stepperInstance }) => {
               <div className="bg-dark rounded-3 overflow-hidden shadow mt-3">
                 {state.streamLoading ? (
                   <div className="d-flex align-items-center justify-content-center p-5 text-white">
-                    <Spinner animation="grow" size="sm" className="me-2" /> Loading Stream...
+                    <Spinner animation="grow" size="sm" />
                   </div>
                 ) : (
                   <video
@@ -181,7 +179,7 @@ const Step2 = ({ stepperInstance }) => {
         <Col xs={12} className="d-flex justify-content-between mt-4">
           <button
             type="button"
-            className="btn btn-outline-secondary border mb-0"
+            className="btn btn-outline-secondary mb-0"
             onClick={() => stepperInstance?.previous()}
             disabled={state.isBusy}
           >

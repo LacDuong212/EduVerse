@@ -1,3 +1,4 @@
+import { DEFAULT_AVATAR_IMG } from '@/contexts/constants';
 import { Card, CardBody } from 'react-bootstrap';
 import { FaFacebookF, FaInstagram, FaRegStar, FaStar, FaStarHalfAlt, FaTwitter, FaYoutube } from 'react-icons/fa';
 import { FaLinkedinIn } from 'react-icons/fa6';
@@ -23,7 +24,7 @@ const InstructorAvatarCard = ({ avatar = "", averageRating = 0.0, socials = {} }
     <Card className="shadow p-4 mb-4 text-center">
       <div className="rounded-3 border border-3">
         <img
-          src={avatar || "https://res.cloudinary.com/dw1fjzfom/image/upload/v1757337425/av4_khpvlh.png"}
+          src={avatar || DEFAULT_AVATAR_IMG}
           alt="Instructor Avatar"
           className="rounded-2"
         />

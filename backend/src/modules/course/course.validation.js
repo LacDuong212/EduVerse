@@ -19,15 +19,15 @@ export const courseIdSchema = objectIdSchema("Course");
 const titleSchema = z.string("Course title is required")
   .trim()
   .min(1, "Course title cannot be empty")
-  .max(CONSTANTS.TITLE_MAX_LENGTH, "Course title is too long.");
+  .max(CONSTANTS.TITLE_MAX_LENGTH, "Course title is too long");
 
 const subtitleSchema = z.string()
   .trim()
-  .max(CONSTANTS.SUBTITLE_MAX_LENGTH, "Course subtitle is too long")
+  .max(CONSTANTS.SUBTITLE_MAX_LENGTH, "Course subtitle is too long");
 
 const descriptionSchema = z.string()
   .trim()
-  .max(CONSTANTS.DESCRIPTION_MAX_LENGTH, "Course description is too long")
+  .max(CONSTANTS.DESCRIPTION_MAX_LENGTH, "Course description is too long");
 
 const categoryIdSchema = z.string("Category ID is required")
   .trim()
@@ -82,7 +82,7 @@ export const lectureIdSchema = objectIdSchema("Lecture");
 const lectureSchema = z.object({
   lecId: lectureIdSchema.nullish(),
   _id: objectIdSchema("Lecture").nullish(),
-  title: z.string().trim().min(1, "Lecture title is required"),
+  title: z.string().trim().min(1, "Lecture title is required").max(100, "Lecture title is too long"),
   videoId: z.string("Lecture video is required")
     .trim()
     .min(1, "Lecture video cannot be empty"),
@@ -93,7 +93,7 @@ const lectureSchema = z.object({
 const sectionSchema = z.object({
   secId: objectIdSchema("Section").nullish(),
   _id: objectIdSchema("Section").nullish(),
-  title: z.string().trim().min(1, "Section title is required"),
+  title: z.string().trim().min(1, "Section title is required").max(100, "Section title is too long"),
   lectures: z.array(lectureSchema).min(1, "Section must have at least one lecture"),
 });
 

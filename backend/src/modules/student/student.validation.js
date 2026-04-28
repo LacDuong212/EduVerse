@@ -24,7 +24,7 @@ export const updateProfileRequest = z.object({
   body: z.object({
     name: nameSchema.optional(),
     avatar: optionalUrlSchema,
-    phone: phoneSchema,
+    phonenumber: phoneSchema,
     bio: bioSchema,
     website: optionalUrlSchema,
     socials: z.object({

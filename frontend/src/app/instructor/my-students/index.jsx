@@ -7,11 +7,11 @@ import useInstructorMyStudents from "./useInstructorMyStudents";
 const InstructorMyStudents = () => {
   const {
     students,
-    pagination,
     stats,
-    statsLoading,
-    studentsLoading,
-
+    pagination,
+    loading,
+    search,
+    sort,
     setPage,
     setSearch,
     setSort,
@@ -25,10 +25,12 @@ const InstructorMyStudents = () => {
         <MyStudentsList
           students={students}
           totalStudents={pagination.totalItems}
-          page={pagination.page}
-          limit={pagination.limit}
           totalPages={pagination.totalPages}
-          loading={studentsLoading}
+          page={pagination.page || 1}
+          limit={10}
+          loading={loading}
+          currentSearch={search}
+          currentSort={sort}
           onPageChange={setPage}
           onSearch={setSearch}
           onSortChange={setSort}

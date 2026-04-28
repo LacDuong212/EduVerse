@@ -1,31 +1,44 @@
+import { Spinner } from "react-bootstrap";
 import PageMetaData from "@/components/PageMetaData";
-import EarningsCards from "./components/EarningsCards";
-import EarningsChart from "./components/EarningsChart";
-import useInstructor from "../useInstructor";
-import { useEffect, useState } from "react";
+import EarningCards from "./components/EarningCards";
+import EarningChart from "./components/EarningChart";
+import useInstructorEarnings from "./useInstructorEarnings";
 
 const InstructorEarnings = () => {
-  const { fetchInstructorEarnings } = useInstructor();
+  const {
+    thisMonthRevenue,
+    toBePaid,
+    totalEarning,
 
-  const [data, setData] = useState({});
+    series,
 
-  useEffect(() => {
-    const load = async () => {
-      setData(await fetchInstructorEarnings());
-    };
-    load();
-  }, []);
+    loading,
+    error,
+    refresh,
+  } = useInstructorEarnings();
+
+  if (loading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center w-100 h-75">
+        <Spinner
+          animation="border"
+          variant="primary"
+          style={{ width: "30px", height: "30px" }}
+        />
+      </div>
+    );
+  }
 
   return (
     <>
       <PageMetaData title="Dashboard" />
       <div className="pb-5 d-flex flex-column gap-4">
-        <EarningsCards
-          thisMonthEarnings={data.thisMonthEarnings}
-          toBePaid={data.toBePaid}
-          lifeTimeEarnings={data.lifeTimeEarnings}
+        <EarningCards
+          thisMonthRevenue={thisMonthRevenue}
+          toBePaid={toBePaid}
+          totalEarning={totalEarning}
         />
-        <EarningsChart col={12} earningsData={data.earningsData} />
+        <EarningChart col={12} earningsData={series} />
       </div>
     </>
   );

@@ -1,10 +1,14 @@
-import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { toast } from "react-toastify";
+import { authApi } from "@/utils/api";
+import { handleRequest } from "@/utils/request";
 
-export default function useInstructorMyCourses(initialParams = {}) {
-  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+export default function useInstructorMyCourses() {
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [courses, setCourses] = useState([]);
+  const [stats, setStats] = useState(null);
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 5,
@@ -12,118 +16,108 @@ export default function useInstructorMyCourses(initialParams = {}) {
     totalPages: 1,
   });
 
-  const [stats, setStats] = useState(null);
-
-  const [params, setParams] = useState({
-    ...initialParams,
-  });
-
+  const [loading, setLoading] = useState(false);
   const [statsLoading, setStatsLoading] = useState(false);
-  const [coursesLoading, setCoursesLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [updatingId, setUpdatingId] = useState(null);
 
-  const fetchCourses = useCallback(
-    async (overrideParams = {}) => {
-      const finalParams = { ...params, ...overrideParams };
+  const filters = {
+    page: parseInt(searchParams.get("page") || "1", 10),
+    limit: parseInt(searchParams.get("limit") || "5", 10),
+    search: searchParams.get("search") || "",
+    sort: searchParams.get("sort") || "recentUpdate",
+  };
 
-      setCoursesLoading(true);
-      setError(null);
+  const updateFilters = (newFilters) => {
+    setSearchParams((prev) => {
+      const params = new URLSearchParams(prev);
+      Object.entries(newFilters).forEach(([key, value]) => {
+        if (value) params.set(key, value);
+        else params.delete(key);
+      });
+      if (!newFilters.page) params.set("page", "1");
+      return params;
+    });
+  };
 
-      try {
-        const res = await axios.get(
-          `${backendUrl}/api/instructor/courses`,
-          {
-            params: finalParams,
-            withCredentials: true,
-          }
-        );
+  const fetchCourses = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await handleRequest(authApi.get("/instructor/courses", { params: filters }));
 
-        const result = res.data.result;
-        const pagination = res.data.pagination;
-
-        setCourses(result);
-        setPagination(pagination);
-        setParams(finalParams);
-      } catch (err) {
-        setError(err);
-        throw err;
-      } finally {
-        setCoursesLoading(false);
+      if (res.success) {
+        setCourses(res.result || []);
+        if (res.pagination) setPagination(res.pagination);
+      } else {
+        toast.error(res.message || "Failed to load courses..");
       }
-    },
-    [backendUrl, params]
-  );
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to load courses..");
+    } finally {
+      setLoading(false);
+    }
+  }, [JSON.stringify(filters)]);
 
   const fetchStats = useCallback(async () => {
     setStatsLoading(true);
-    setError(null);
-
     try {
-      const { data } = await axios.get(
-        `${backendUrl}/api/instructor/courses/stats`,
-        { withCredentials: true }
-      );
-
-      if (data.success)
-        setStats(data.result);
-      else setError(data.message);
+      const res = await handleRequest(authApi.get("/instructor/courses/stats"));
+      if (res.success) setStats(res.result);
+      else toast.error(res.message || "Failed to fetch courses stats..");
     } catch (err) {
-      setError(err);
-      throw err;
+      toast.error(err.response?.data?.message || "Failed to fetch courses stats..");
     } finally {
       setStatsLoading(false);
     }
-  }, [backendUrl]);
+  }, []);
 
-  const updateCoursePrivacy = useCallback(
-    async (courseId, isPrivate) => {
-      try {
-        await axios.patch(
-          `${backendUrl}/api/instructor/courses/${courseId}/privacy`,
-          { privacy: isPrivate },
-          { withCredentials: true }
-        );
+  const togglePrivacy = async (courseId) => {
+    setUpdatingId(courseId);
+    try {
+      const res = await handleRequest(authApi.patch(`/courses/${courseId}/toggle-privacy`));
 
-        // optimistic update
+      if (res.success) {
+        toast.success(res.message);
         setCourses((prev) =>
           prev.map((c) =>
-            c.id === courseId ? { ...c, isPrivate } : c
+            c.courseId === courseId ? { ...c, isPrivate: res.result } : c
           )
         );
-      } catch (err) {
-        setError(err);
-        throw err;
+      } else {
+        toast.error(res.message || "Failed to change course's privacy..");
       }
-    },
-    [backendUrl]
-  );
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to change course's privacy..");
+    } finally {
+      setUpdatingId(null);
+    }
+  };
 
   useEffect(() => {
     fetchCourses();
+  }, [fetchCourses]);
+
+  useEffect(() => {
     fetchStats();
-  }, []); // load once on page mount
+  }, [fetchStats]);
 
   return {
-    // data
     courses,
-    pagination,
     stats,
+    pagination,
 
-    // ui state
+    ...filters,
+
+    loading,
     statsLoading,
-    coursesLoading,
-    error,
+    updatingId,
 
-    // list controls
-    setPage: (page) => fetchCourses({ page }),
-    setSearch: (search) => fetchCourses({ page: 1, search }),
-    setSort: (sort) => fetchCourses({ page: 1, sort }),
-    refetchList: fetchCourses,
-
-    // stats
-    refetchStats: fetchStats,
-
-    // actions
-    updateCoursePrivacy,
+    setPage: (page) => updateFilters({ page }),
+    setSearch: (search) => updateFilters({ search }),
+    setSort: (sort) => updateFilters({ sort }),
+    togglePrivacy,
+    refresh: () => {
+      fetchCourses();
+      fetchStats();
+    },
   };
 }

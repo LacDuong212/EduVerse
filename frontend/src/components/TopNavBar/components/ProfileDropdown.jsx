@@ -1,12 +1,11 @@
-import { useLayoutContext } from '@/contexts/useLayoutContext';
-import useProfile from '@/hooks/useProfile';
-import { toSentenceCase } from '@/utils/change-casing';
-
-import clsx from 'clsx';
-import { Dropdown, DropdownDivider, DropdownItem, DropdownMenu, DropdownToggle, OverlayTrigger, Tooltip } from 'react-bootstrap';
-import { BsPower } from 'react-icons/bs';
-import { Link } from 'react-router-dom';
-
+import clsx from "clsx";
+import { Dropdown, DropdownDivider, DropdownItem, DropdownMenu, DropdownToggle, OverlayTrigger, Tooltip } from "react-bootstrap";
+import { BsPower } from "react-icons/bs";
+import { Link } from "react-router-dom";
+import { DEFAULT_AVATAR_IMG } from "@/contexts/constants";
+import { useLayoutContext } from "@/contexts/useLayoutContext";
+import useProfile from "@/hooks/useProfile";
+import { toSentenceCase } from "@/utils/change-casing";
 
 const ProfileDropdown = ({ className, dropdownItems }) => {
   const { changeTheme, theme } = useLayoutContext();
@@ -19,7 +18,7 @@ const ProfileDropdown = ({ className, dropdownItems }) => {
         <use href="#" />
       </svg>
     ),
-    theme: 'light'
+    theme: "light"
   }, {
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" width={16} height={16} fill="currentColor" className="bi bi-moon-stars fa-fw mode-switch" viewBox="0 0 16 16">
@@ -28,7 +27,7 @@ const ProfileDropdown = ({ className, dropdownItems }) => {
         <use href="#" />
       </svg>
     ),
-    theme: 'dark'
+    theme: "dark"
   }, {
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" width={16} height={16} fill="currentColor" className="bi bi-circle-half fa-fw mode-switch" viewBox="0 0 16 16">
@@ -36,7 +35,7 @@ const ProfileDropdown = ({ className, dropdownItems }) => {
         <use href="#" />
       </svg>
     ),
-    theme: 'auto'
+    theme: "auto"
   }];
 
   return (
@@ -49,11 +48,15 @@ const ProfileDropdown = ({ className, dropdownItems }) => {
         <DropdownToggle as="a" className="avatar avatar-sm p-0 arrow-none" id="profileDropdown" role="button" data-bs-auto-close="outside" data-bs-display="static" data-bs-toggle="dropdown" aria-expanded="false">
           {user?.avatar ? (
             <img
-              className="avatar-img rounded-circle shadow "
+              className="avatar-img rounded-circle border border-light border-1 shadow "
               src={user.avatar}
-              alt="User Avatar" />
+              alt="Avatar"
+              onError={(e) => {
+                e.currentTarget.src = DEFAULT_AVATAR_IMG;
+              }}
+            />
           ) : (
-            <div className="avatar-img rounded-circle border border-white border-1 shadow d-flex align-items-center justify-content-center bg-light text-dark fw-bold fs-5">
+            <div className="avatar-img rounded-circle border border-light border-1 shadow d-flex align-items-center justify-content-center bg-light text-dark fw-bold fs-5">
               {(user?.name?.[0] || "U").toUpperCase()}
             </div>
           )}
@@ -67,11 +70,11 @@ const ProfileDropdown = ({ className, dropdownItems }) => {
             <div className="avatar me-3">
               {user?.avatar ? (
                 <img
-                  className="avatar-img rounded-circle border border-body border-2 shadow"
+                  className="avatar-img rounded-circle border border-light border-1 shadow"
                   src={user.avatar}
                   alt="User Avatar" />
               ) : (
-                <div className="avatar-img rounded-circle border border-body border-1 shadow d-flex align-items-center justify-content-center bg-light text-dark fw-bold fs-4">
+                <div className="avatar-img rounded-circle border border-light border-1 shadow d-flex align-items-center justify-content-center bg-light text-dark fw-bold fs-4">
                   {(user?.name?.[0] || "U").toUpperCase()}
                 </div>
               )}
@@ -112,7 +115,7 @@ const ProfileDropdown = ({ className, dropdownItems }) => {
                 data-bs-theme-value={mode.theme}
                 type="button"
                 className={clsx(
-                  'btn btn-sm mb-0 flex-fill text-truncate d-flex align-items-center justify-content-center gap-2', 
+                  "btn btn-sm mb-0 flex-fill text-truncate d-flex align-items-center justify-content-center gap-2",
                   { active: theme === mode.theme }
                 )}
                 key={mode.theme + idx}

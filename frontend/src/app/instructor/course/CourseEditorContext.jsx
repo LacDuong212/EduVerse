@@ -13,7 +13,7 @@ export const CourseEditorProvider = ({ children }) => {
   );
 };
 
-// custom helper hook so to not import useContext everywhere
+// helper: check hook usage
 export const useCourseEditor = () => {
   const context = useContext(CourseEditorContext);
   if (!context) throw new Error("useCourseEditor must be used within CourseEditorProvider");
