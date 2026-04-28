@@ -11,41 +11,29 @@ const Step2 = ({ stepperInstance }) => {
       id="step-2"
       role="tabpanel"
       onKeyDown={(e) => e.key === "Enter" && e.preventDefault()}
-      className="content fade"
+      className="bs-stepper-pane fade"
       aria-labelledby="steppertrigger2"
       onSubmit={methods.handleSubmit}
     >
-      {state.error && <Alert variant="danger">{state.error}</Alert>}
-
       <Row>
         {/* IMAGE SECTION */}
         <Col xs={12}>
-          <h5>Course Image <span className="text-danger">*</span></h5>
+          <h5 className="mb-0">Course Image <span className="text-danger">*</span></h5>
           <Tab.Container
             activeKey={state.imageState.tab}
             onSelect={(t) => methods.setImageState(p => ({ ...p, tab: t }))}
           >
             <Nav variant="tabs" className="nav-tabs-line mt-3">
-              <Nav.Item><Nav.Link eventKey="url">Image URL</Nav.Link></Nav.Item>
               <Nav.Item><Nav.Link eventKey="upload">Upload Image</Nav.Link></Nav.Item>
+              <Nav.Item><Nav.Link eventKey="url">Image URL</Nav.Link></Nav.Item>
             </Nav>
 
             <Tab.Content className="pt-3">
-              <Tab.Pane eventKey="url">
-                <input
-                  type="url"
-                  className={`form-control ${state.fieldErrors?.image ? "is-invalid" : ''}`}
-                  placeholder="eg. https://..."
-                  value={state.imageState.url}
-                  onChange={(e) => methods.setImageState(p => ({ ...p, url: e.target.value, file: null }))}
-                />
-                {state.fieldErrors?.image && <div className="invalid-feedback">{state.fieldErrors.image}</div>}
-              </Tab.Pane>
               <Tab.Pane eventKey="upload">
                 <div
                   {...dropzone.getRootProps()}
                   className={`text-center p-4 border border-2 border-dashed rounded-3 ${state.fieldErrors?.image ? "border-danger bg-light-danger" :
-                    dropzone.isDragActive ? "border-primary bg-light" : ''
+                    dropzone.isDragActive ? "border-primary bg-light" : ""
                     }`}
                   style={{ cursor: "pointer" }}
                 >
@@ -72,6 +60,16 @@ const Step2 = ({ stepperInstance }) => {
                 </div>
                 {state.fieldErrors?.image && <div className="text-danger small mt-2">{state.fieldErrors.image}</div>}
               </Tab.Pane>
+              <Tab.Pane eventKey="url">
+                <input
+                  type="url"
+                  className={`form-control ${state.fieldErrors?.image ? "is-invalid" : ""}`}
+                  placeholder="Paste image URL here..."
+                  value={state.imageState.url}
+                  onChange={(e) => methods.setImageState(p => ({ ...p, url: e.target.value, file: null }))}
+                />
+                {state.fieldErrors?.image && <div className="invalid-feedback">{state.fieldErrors.image}</div>}
+              </Tab.Pane>
             </Tab.Content>
           </Tab.Container>
 
@@ -81,13 +79,21 @@ const Step2 = ({ stepperInstance }) => {
               <>
                 <img src={previews.previewImage} className="img-fluid rounded-3 border" alt="Preview" style={{ maxHeight: "300px" }} />
                 <div className="mt-2">
-                  <button type="button" className="btn btn-sm btn-danger-soft" onClick={methods.handleRemoveImage}>Remove</button>
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-danger-soft"
+                    onClick={() => methods.handleRemoveMedia("image")}
+                  >
+                    Remove
+                  </button>
                 </div>
               </>
-            ) : !state.isImgLoading && (
+            ) : !state.isImgLoading ? (
               <div className="border border-dashed rounded-3">
                 {/* <img src={galleryImg} style={{ maxHeight: "100px" }} className="m-3" alt="placeholder" /> */}
               </div>
+            ) : (
+              <div className="placeholder-glow"><div className="placeholder rounded shadow-sm" style={{ width: "100%", height: "200px" }}></div></div>
             )}
           </div>
         </Col>
@@ -95,33 +101,18 @@ const Step2 = ({ stepperInstance }) => {
         {/* VIDEO SECTION */}
         <Col xs={12} className="mt-4">
           <h5 className="mb-0">Course Preview Video</h5>
-          <p className="small">Provide a video ID (LEC format or legacy) or upload a file.</p>
+          <p className="small">Upload a short preview to engage students. Max size: 2GB.</p>
 
           <div className="mb-3">
-            <label className="form-label">Video ID / Key</label>
-            <input
-              className={`form-control ${state.fieldErrors?.videoId ? "is-invalid" : ''}`}
-              type="text"
-              value={state.videoState.videoId}
-              onChange={(e) => methods.setVideoState({ videoId: e.target.value, file: null })}
-              placeholder="eg. LECxxxx..."
-            />
-            {state.fieldErrors?.videoId && <div className="invalid-feedback">{state.fieldErrors.videoId}</div>}
-          </div>
-
-          <div className="position-relative my-3 px-3">
-            <hr /><p className="small position-absolute top-50 start-50 translate-middle bg-body px-2">or</p>
-          </div>
-
-          <div>
             <input
               ref={refs.videoInputRef}
               type="file"
-              className="form-control"
-              accept="video/mp4, video/quicktime, video/x-msvideo, video/x-matroska, .mkv, .avi, .mov, .mp4"
+              className={`form-control ${state.fieldErrors?.videoId ? "is-invalid" : ""}`}
+              accept="video/mp4, video/mov, video/mkv"
               disabled={state.isVidLoading}
               onChange={methods.handleVideoFileChange}
             />
+            {state.fieldErrors?.videoId && <div className="invalid-feedback">{state.fieldErrors.videoId}</div>}
           </div>
 
           {state.isVidLoading && (
@@ -135,44 +126,48 @@ const Step2 = ({ stepperInstance }) => {
           )}
 
           {/* Video Player Area */}
-          <div>
-            {/* S3 Streaming (Legacy or New) */}
-            {state.isS3Reference && !state.videoState.file && (
-              <div className="bg-dark rounded-3 overflow-hidden shadow mt-3">
-                {state.streamLoading ? (
-                  <div className="d-flex align-items-center justify-content-center p-5 text-white">
-                    <Spinner animation="grow" size="sm" />
-                  </div>
-                ) : (
-                  <video
-                    controls
-                    controlsList="nodownload"
-                    width="100%"
-                    className="d-block"
-                    src={previews.s3StreamUrl}
-                    style={{ maxHeight: "400px" }}
-                  />
-                )}
+          {(state.videoState.file || (state.isS3Reference && !state.videoState.file)) && !state.isVidLoading && (
+            <div className="bg-dark rounded-3 overflow-hidden shadow-lg mt-3">
+              <div className="px-3 py-2 text-white small d-flex justify-content-between align-items-center">
+                <span>
+                  <FaVideo className="mb-1 me-2" />
+                  {state.videoState.file ? `Local Preview: ${state.videoState.file.name}` : "Saved Preview Video"}
+                </span>
+                <button
+                  type="button"
+                  title="Remove Video"
+                  className="btn btn-link text-danger p-0 border-0"
+                  onClick={() => methods.handleRemoveMedia("video")}
+                >
+                  <FaTrash />
+                </button>
               </div>
-            )}
 
-            {/* Local File Preview */}
-            {state.videoState.file && previews.videoObjectUrl && !state.isVidLoading && (
-              <div className="bg-dark rounded-3 overflow-hidden shadow mt-3">
-                <div className="p-2 bg-secondary text-white small d-flex justify-content-between align-items-center">
-                  <span><FaVideo className="mb-1 me-2" /> Local Preview: {state.videoState.file.name}</span>
-                  <button title="Remove" className="btn text-danger btn-sm mb-0 p-0" onClick={methods.handleRemoveVideo}><FaTrash /></button>
-                </div>
+              {state.videoState.file ? (
                 <video
+                  key={previews.videoObjectUrl}
                   controls
                   width="100%"
-                  className="d-block"
+                  className="d-block w-100"
                   src={previews.videoObjectUrl}
                   style={{ maxHeight: "400px" }}
                 />
-              </div>
-            )}
-          </div>
+              ) : state.streamLoading ? (
+                <div className="d-flex align-items-center justify-content-center p-5 text-light">
+                  <Spinner animation="border" />
+                </div>
+              ) : (
+                <video
+                  controls
+                  controlsList="nodownload"
+                  width="100%"
+                  className="d-block"
+                  src={previews.s3StreamUrl}
+                  style={{ maxHeight: "350px" }}
+                />
+              )}
+            </div>
+          )}
         </Col>
 
         {/* STEPPER NAVIGATION */}

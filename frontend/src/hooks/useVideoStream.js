@@ -23,7 +23,9 @@ export default function useVideoStream(videoId) {
         setStreamUrl(res.result);
       } else {
         setStatusCode(res.statusCode);
-        setError(res.message || "Failed to load video.");
+        setError("Failed to load video.");
+
+        console.log(res.message);
 
         if (![403, 404].includes(res.statusCode)) {
           toast.error(res.message || "Failed to load video.");
@@ -33,6 +35,7 @@ export default function useVideoStream(videoId) {
       const status = err.response?.status;
       const msg = err.response?.data?.message || "Failed to load video.";
       setStatusCode(status);
+      console.log(err);
       setError(msg);
       if (![403, 404].includes(status)) toast.error(msg);
     } finally {

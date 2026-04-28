@@ -26,34 +26,19 @@ export default function useVideoUpload() {
     setProgress(0);
     setError(null);
 
-    const toastId = toast.loading("Requesting upload permission...");
+    const toastId = toast.loading("Uploading video...");
 
     try {
-      const res = await handleRequest(
-        authApi.post("/instructor/videos", {
-          contentType: file.type
-        }),
-        false
-      );
+      const res = await handleRequest(authApi.post("/videos", { contentType: file.type }));
 
-      if (!res.success) {
+      if (!res.success)
         throw new Error(res.message || "Failed to get upload permission..");
-      }
 
       const { uploadUrl, videoId } = res.result;
 
-      toast.update(toastId, {
-        render: "Uploading to storage...",
-        type: "info",
-        isLoading: true
-      });
-
       await axios.put(uploadUrl, file, {
         headers: { "Content-Type": file.type },
-        onUploadProgress: (progressEvent) => {
-          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          setProgress(percent);
-        },
+        onUploadProgress: (e) => setProgress(Math.round((e.loaded * 100) / e.total)),
       });
 
       toast.update(toastId, {

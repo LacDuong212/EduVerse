@@ -23,7 +23,7 @@ export const toWishlistDto = (course) => {
     title: course?.title || null,
     subtitle: course?.subtitle || null,
     image: course?.image || null,
-    thumnail: course?.thumnail || null,
+    thumbnail: course?.thumbnail || null,
 
     price,
     discountPrice,
@@ -32,7 +32,7 @@ export const toWishlistDto = (course) => {
 
     level: course?.level || null,
     ratingAvg,
-    lectureCount: course?.lectureCount || 0
+    lecturesCount: course?.lecturesCount || 0
   }
 }
 

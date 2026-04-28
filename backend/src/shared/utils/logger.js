@@ -6,21 +6,24 @@ const logger = {
     console.log(`\x1b[2m[DEBUG] [${timestamp}] ${msg}\x1b[0m`, Object.keys(meta).length ? meta : '');
     // }
   },
+
   info: (msg, meta = {}) => {
-    console.log(`\x1b[32m[INFO]\x1b[0m [${new Date().toISOString()}] ${msg}`, Object.keys(meta).length ? meta : '');
+    console.log(`\x1b[36m[INFO]\x1b[0m [${new Date().toISOString()}] ${msg}`, Object.keys(meta).length ? meta : '');
   },
+
   warn: (msg, meta = {}) => {
-    console.warn(`\x1b[33m[WARN]\x1b[0m [${new Date().toISOString()}] ${msg}`, meta);
+    console.warn(`\x1b[33m[WARN]\x1b[0m [${new Date().toISOString()}] ${msg}`, Object.keys(meta).length ? meta : '');
   },
   error: (msg, error = {}) => {
     console.error(`\x1b[31m[ERROR]\x1b[0m [${new Date().toISOString()}] ${msg}`, error.stack || error);
   },
+
   logErrorWithContext: (err, req) => {
     const { statusCode } = err;
     const { method, originalUrl, ip } = req;
     const timestamp = new Date().toISOString();
 
-    console.error("\x1b[31m%s\x1b[0m", `[EXCEPTION] [${timestamp}] -----------------------`);
+    console.error("\x1b[38;5;208m%s\x1b[0m", `[EXCEPTION] [${timestamp}] -----------------------`);
     console.error(`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`);
 
     console.error(`Message: ${err.message}`);
@@ -36,7 +39,7 @@ const logger = {
       console.error("\x1b[2m%s\x1b[0m", err.stack);
     }
 
-    console.error("\x1b[31m%s\x1b[0m", "--------------------------------------------------------------");
+    console.error("\x1b[38;5;208m%s\x1b[0m", "--------------------------------------------------------------");
   }
 };
 
