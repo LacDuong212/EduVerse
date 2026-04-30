@@ -76,14 +76,21 @@ describe("EDV-238: Get My Notifications", () => {
     firstNotifId = res.body.result[0].notifId;
   });
 
-  test("Success: Notification has expected DTO fields", async () => {
+  test("Success: Notification DTO fields and types", async () => {
     const res = await request(app).get(BASE).set("Cookie", studentToken);
     const item = res.body.result[0];
-    expect(item).toHaveProperty("notifId");
-    expect(item).toHaveProperty("type");
-    expect(item).toHaveProperty("message");
-    expect(item).toHaveProperty("isRead");
-    expect(typeof item.isRead).toBe("boolean");
+    expect(item).toMatchObject({
+      notifId: expect.stringMatching(/^[0-9a-f]{24}$/),
+      type:    expect.any(String),
+      message: expect.any(String),
+      isRead:  expect.any(Boolean),
+    });
+    // Leakage guards: internal fields must NOT be exposed
+    expect(item).not.toHaveProperty("_id");
+    expect(item).not.toHaveProperty("user");
+    expect(item).not.toHaveProperty("__v");
+    expect(item).not.toHaveProperty("createdAt");
+    expect(item).not.toHaveProperty("updatedAt");
   });
 
   test("Success: Chronology → newest first", async () => {
@@ -101,9 +108,69 @@ describe("EDV-238: Get My Notifications", () => {
     expect(res.body.result).toEqual([]);
   });
 
+  test.failing("EDV-269: GET ?limit=2 should cap results to 2 (currently ignored)", async () => {
+    // BUG: controller calls getUserNotifications(userId) without forwarding req.validated.query.limit
+    // Expected: result.length <= 2.  Actual: all 5 returned (limit silently ignored)
+    const res = await request(app).get(`${BASE}?limit=2`).set("Cookie", studentToken);
+    expect(res.status).toBe(200);
+    expect(res.body.result.length).toBeLessThanOrEqual(2);
+  });
+
   test("Error: Unauthorized → 401", async () => {
     const res = await request(app).get(BASE);
     expect(res.status).toBe(401);
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  GET /api/notifications/count
+// ═══════════════════════════════════════════════════════════════════════════════
+describe("GET /count: Get All Notification Count", () => {
+  test("Success: student with 5 seeded notifications → 200, result = 5", async () => {
+    const res = await request(app).get(`${BASE}/count`).set("Cookie", studentToken);
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.result).toBe(5);
+    expect(typeof res.body.result).toBe("number");
+  });
+
+  test("Success: instructor with 0 notifications → 200, result = 0", async () => {
+    const res = await request(app).get(`${BASE}/count`).set("Cookie", instructorToken);
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.result).toBe(0);
+  });
+
+  test("Error: Unauthorized → 401", async () => {
+    const res = await request(app).get(`${BASE}/count`);
+    expect(res.status).toBe(401);
+    expect(res.body.success).toBe(false);
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  GET /api/notifications/unread/count
+// ═══════════════════════════════════════════════════════════════════════════════
+describe("GET /unread/count: Get Unread Notification Count", () => {
+  test("Success: all 5 seeded unread → 200, result = 5", async () => {
+    const res = await request(app).get(`${BASE}/unread/count`).set("Cookie", studentToken);
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.result).toBe(5);
+    expect(typeof res.body.result).toBe("number");
+  });
+
+  test("Success: instructor with 0 unread → 200, result = 0", async () => {
+    const res = await request(app).get(`${BASE}/unread/count`).set("Cookie", instructorToken);
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.result).toBe(0);
+  });
+
+  test("Error: Unauthorized → 401", async () => {
+    const res = await request(app).get(`${BASE}/unread/count`);
+    expect(res.status).toBe(401);
+    expect(res.body.success).toBe(false);
   });
 });
 
@@ -119,6 +186,17 @@ describe("EDV-241: Mark Notification as Read by ID", () => {
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
     expect(res.body.message).toContain("Marked");
+  });
+
+  test.failing("EDV-268: result should be a number (count), not a raw Mongoose document", async () => {
+    // BUG: markOneAsRead service returns the Notification document.
+    // Controller passes it as `markedCount` → coerces to string in message, leaks doc in result.
+    // Expected: typeof result === "number" (= 1).  Actual: result is a full Mongoose document.
+    const res = await request(app)
+      .put(`${BASE}/${seededIds[1]}/read`)
+      .set("Cookie", studentToken);
+    expect(res.status).toBe(200);
+    expect(typeof res.body.result).toBe("number");
   });
 
   test("Success: Already read → 200 (idempotent)", async () => {
@@ -241,6 +319,13 @@ describe("EDV-239: Delete All Notifications", () => {
     const res = await request(app).get(BASE).set("Cookie", studentToken);
     expect(res.status).toBe(200);
     expect(res.body.result).toEqual([]);
+  });
+
+  test("DB cross-check: countDocuments = 0 after delete all", async () => {
+    const count = await Notification.countDocuments({
+      user: new mongoose.Types.ObjectId(STUDENT_ID),
+    });
+    expect(count).toBe(0);
   });
 
   test("Error: Unauthorized → 401", async () => {

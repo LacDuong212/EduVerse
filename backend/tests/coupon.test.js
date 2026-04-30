@@ -2,14 +2,19 @@
  * COUPON API Tests
  * Jira: EDV-216 (Apply Coupon), EDV-217 (Get All Coupons)
  *
- * Fixtures:
+ * Fixtures (DB eduverse2):
  *   - STUDENT: lacduongldg212@gmail.com (userId: 694d32d7ebe694fc49e59a67)
- *   - SUMMER2025 : active, 20% off, valid Apr 2025–Jun 2026, student NOT in usersUsed
- *   - SORRY_ERROR: active=true but expiryDate Dec 2025 → triggers "Coupon has expired"
+ *   - SUMMER2025    : active, 20% off, valid Apr 2025–Jun 2026, student NOT in usersUsed
+ *   - WELCOME50     : active, valid Dec 2025–Dec 2026, student NOT in usersUsed
+ *   - SORRY_ERROR   : active=true but expiryDate 2025-12-13 → triggers "Coupon has expired"
+ *
+ * Bugs documented:
+ *   - EDV-266: usersUsed.includes(userId) — ObjectId vs string, always false (no DB fixture to demo)
+ *   - EDV-267: validateCoupon skips startDate check (no future-startDate coupon in DB to demo)
  *
  * Note: "Not Active Yet" & "Already Used" tests are .todo() because:
- *   - No coupon with future startDate exists in DB
- *   - applyCoupon is read-only (doesn't persist), so 409 cannot be triggered in sequence
+ *   - No coupon with future startDate exists in DB (EDV-267)
+ *   - No coupon has student in usersUsed (EDV-266 bug means check never fires anyway)
  */
 import request from "supertest";
 import app from "../src/app.js";
@@ -54,6 +59,26 @@ describe("EDV-217 | GET /api/coupons", () => {
     expect(res.body.message).toBe("Coupon fetched successfully.");
     expect(Array.isArray(res.body.result)).toBe(true);
     expect(res.body.result.length).toBeGreaterThan(0);
+    // Item shape + type assertions
+    const first = res.body.result[0];
+    expect(first).toMatchObject({
+      couponId:        expect.stringMatching(/^[0-9a-f]{24}$/),
+      code:            expect.any(String),
+      discountPercent: expect.any(Number),
+      startDate:       expect.any(String),
+      expiryDate:      expect.any(String),
+      isActive:        expect.any(Boolean),
+    });
+    // Leakage guard — usersUsed must NOT appear in response
+    expect(first).not.toHaveProperty("usersUsed");
+    expect(first).not.toHaveProperty("__v");
+    expect(res.body).not.toHaveProperty("stack");
+  });
+
+  it("✅ Get All Coupons: authenticated user also gets 200 (public endpoint)", async () => {
+    const res = await request(app).get(BASE).set("Cookie", studentCookie);
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
   });
 });
 
@@ -132,7 +157,7 @@ describe("EDV-216 | POST /api/coupons/apply", () => {
     expect(res.body.message).toBe("Coupon has expired");
   });
 
-  it("✅ Success: valid coupon, student chưa dùng → 200, discount data", async () => {
+  it("✅ Success: valid coupon, student chưa dùng → 200, discount data với correct math", async () => {
     const originalPrice = 500000;
     const res = await request(app)
       .post(`${BASE}/apply`)
@@ -142,13 +167,39 @@ describe("EDV-216 | POST /api/coupons/apply", () => {
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
     expect(res.body.message).toBe("Coupon applied successfully.");
-    expect(res.body.result).toHaveProperty("couponCode", VALID_COUPON);
-    expect(res.body.result).toHaveProperty("discountPercent", 20);
-    expect(res.body.result.discountAmount).toBe(100000); // 20% of 500000
-    expect(res.body.result.newPrice).toBe(400000);       // 500000 - 100000
+    expect(res.body.result).toMatchObject({
+      couponCode:      VALID_COUPON,
+      discountPercent: 20,
+      discountAmount:  100000, // 20% of 500000
+      newPrice:        400000, // 500000 - 100000
+    });
+    // Leakage guard
+    expect(res.body.result).not.toHaveProperty("usersUsed");
+    expect(res.body.result).not.toHaveProperty("_id");
+    expect(res.body.result).not.toHaveProperty("__v");
+    expect(res.body).not.toHaveProperty("stack");
   });
 
-  it.todo("❌ Coupon Not Active Yet: startDate in future → 400 (no fixture in DB)");
+  it("✅ Instructor can apply coupon: route has protect only, no restrictTo → 200", async () => {
+    const res = await request(app)
+      .post(`${BASE}/apply`)
+      .set("Cookie", instructorCookie)
+      .send({ code: VALID_COUPON, originalPrice: 200000 });
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+  });
 
-  it.todo("❌ Coupon Already Used: user already in usersUsed → 409 (applyCoupon is read-only, needs DB pre-seeding)");
+  it("✅ Zero originalPrice: 0 → 200, discountAmount=0, newPrice=0", async () => {
+    const res = await request(app)
+      .post(`${BASE}/apply`)
+      .set("Cookie", studentCookie)
+      .send({ code: VALID_COUPON, originalPrice: 0 });
+    expect(res.status).toBe(200);
+    expect(res.body.result.discountAmount).toBe(0);
+    expect(res.body.result.newPrice).toBe(0);
+  });
+
+  it.todo("❌ Coupon Not Active Yet: startDate in future → 400 (EDV-267: validateCoupon also missing this check; no fixture in DB)");
+
+  it.todo("❌ [EDV-266] Coupon Already Used: usersUsed.includes(userId) always false (ObjectId vs string) — guard never fires; no fixture with student in usersUsed");
 });

@@ -13,6 +13,7 @@
  */
 import request from "supertest";
 import app from "../src/app.js";
+import Cart from "../src/modules/cart/cart.model.js";
 import "../tests/setup.js";
 
 const BASE = "/api/cart";
@@ -21,10 +22,12 @@ const BASE = "/api/cart";
 const ENROLLED_STUDENT = { email: "lacduongldg212@gmail.com",         password: "Abc@12345" };
 const INSTRUCTOR       = { email: "22110304@student.hcmute.edu.vn",   password: "Abc@12345" };
 
-const OWNED_COURSE_ID = "694e8e85ed8f2ec45dc0d4ec"; // Docker Essentials Advanced (student enrolled)
-const COURSE_A        = "694d046addf90206a887c535"; // Crash Course CS (not owned)
-const COURSE_B        = "694e9d90ed8f2ec45dc0e653"; // Crash Course Data Science (not owned)
-const INVALID_ID      = "not-a-valid-id";
+const OWNED_COURSE_ID  = "694e8e85ed8f2ec45dc0d4ec"; // Docker Essentials Advanced (student enrolled)
+const COURSE_A         = "694d046addf90206a887c535"; // Crash Course CS (cancelled order — addable)
+const COURSE_B         = "69501b5ed27dbaf7e24adb7e"; // Networking & Security Crash Course (not owned, no order)
+const INVALID_ID       = "not-a-valid-id";
+const NONEXISTENT_ID   = "000000000000000000000001"; // valid ObjectId, no Course record
+const STUDENT_USER_ID  = "694d32d7ebe694fc49e59a67";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 async function loginAndGetCookie(email, password) {
@@ -69,21 +72,34 @@ describe("EDV-188 | GET /api/cart", () => {
     const res = await request(app).get(BASE).set("Cookie", studentCookie);
 
     expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
     expect(res.body.result).toHaveLength(1);
-    expect(res.body.result[0]).toHaveProperty("title");
-    expect(res.body.result[0]).toHaveProperty("price");
+    const item = res.body.result[0];
+    expect(item).toHaveProperty("courseId");
+    expect(item.courseId).toMatch(/^[0-9a-f]{24}$/);
+    expect(item).toHaveProperty("title");
+    expect(item).toHaveProperty("price");
+    expect(item).toHaveProperty("addedAt");
+    // Leakage guards
+    expect(item).not.toHaveProperty("_id");
+    expect(item).not.toHaveProperty("__v");
+    expect(item).not.toHaveProperty("user");
+    expect(item).not.toHaveProperty("courses");
+    expect(res.body).not.toHaveProperty("stack");
   });
 
   it("❌ Role Restriction: instructor → 403", async () => {
     const res = await request(app).get(BASE).set("Cookie", instructorCookie);
 
     expect(res.status).toBe(403);
+    expect(res.body.success).toBe(false);
   });
 
   it("❌ Unauthorized: không đăng nhập → 401", async () => {
     const res = await request(app).get(BASE);
 
     expect(res.status).toBe(401);
+    expect(res.body.success).toBe(false);
   });
 });
 
@@ -102,6 +118,30 @@ describe("EDV-190 | POST /api/cart/items", () => {
     expect(res.body.message).toMatch(/added course/i);
     expect(Array.isArray(res.body.result)).toBe(true);
     expect(res.body.result).toHaveLength(1);
+  });
+
+  it("✅ DB verify: course added to Cart document in database", async () => {
+    await request(app)
+      .post(`${BASE}/items`)
+      .set("Cookie", studentCookie)
+      .send({ courseId: COURSE_A });
+
+    const cart = await Cart.findOne({ user: STUDENT_USER_ID }).lean();
+    expect(cart).not.toBeNull();
+    const courseInCart = cart.courses.some(c => c.course.toString() === COURSE_A);
+    expect(courseInCart).toBe(true);
+  });
+
+  it("❌ [EDV-262] Non-existent course: valid ObjectId but no Course record → expected 404, actual 200 (intentional fail)", async () => {
+    const res = await request(app)
+      .post(`${BASE}/items`)
+      .set("Cookie", studentCookie)
+      .send({ courseId: NONEXISTENT_ID });
+
+    // BUG EDV-262: service does not validate course existence
+    // Expected: 404 "Course not found."
+    // Actual:   200 with result: [null]
+    expect(res.status).toBe(404);
   });
 
   it("❌ Duplicate: add cùng course 2 lần → 409 'Course already in cart'", async () => {
@@ -136,6 +176,7 @@ describe("EDV-190 | POST /api/cart/items", () => {
       .send({ courseId: INVALID_ID });
 
     expect(res.status).toBe(400);
+    expect(res.body.success).toBe(false);
   });
 
   it("❌ Role Restriction: instructor → 403", async () => {
@@ -145,6 +186,7 @@ describe("EDV-190 | POST /api/cart/items", () => {
       .send({ courseId: COURSE_A });
 
     expect(res.status).toBe(403);
+    expect(res.body.success).toBe(false);
   });
 
   it("❌ Unauthorized: không đăng nhập → 401", async () => {
@@ -153,6 +195,7 @@ describe("EDV-190 | POST /api/cart/items", () => {
       .send({ courseId: COURSE_A });
 
     expect(res.status).toBe(401);
+    expect(res.body.success).toBe(false);
   });
 });
 
@@ -160,6 +203,25 @@ describe("EDV-190 | POST /api/cart/items", () => {
 // EDV-191 | DELETE /api/cart/items
 // =============================================================================
 describe("EDV-191 | DELETE /api/cart/items", () => {
+  it("❌ Unauthorized: không đăng nhập → 401", async () => {
+    const res = await request(app)
+      .delete(`${BASE}/items`)
+      .send({ courseIds: [COURSE_A] });
+
+    expect(res.status).toBe(401);
+    expect(res.body.success).toBe(false);
+  });
+
+  it("❌ Role Restriction: instructor → 403", async () => {
+    const res = await request(app)
+      .delete(`${BASE}/items`)
+      .set("Cookie", instructorCookie)
+      .send({ courseIds: [COURSE_A] });
+
+    expect(res.status).toBe(403);
+    expect(res.body.success).toBe(false);
+  });
+
   it("✅ Remove Single: xoá 1 course → 200, 'Removed 1 course from cart'", async () => {
     await request(app)
       .post(`${BASE}/items`)
@@ -172,15 +234,31 @@ describe("EDV-191 | DELETE /api/cart/items", () => {
       .send({ courseIds: [COURSE_A] });
 
     expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
     expect(res.body.message).toMatch(/removed 1 course from cart/i);
     expect(res.body.result).toHaveLength(0);
   });
 
+  it("✅ DB verify: course removed from Cart document in database", async () => {
+    await request(app)
+      .post(`${BASE}/items`)
+      .set("Cookie", studentCookie)
+      .send({ courseId: COURSE_A });
+    await request(app)
+      .delete(`${BASE}/items`)
+      .set("Cookie", studentCookie)
+      .send({ courseIds: [COURSE_A] });
+
+    const cart = await Cart.findOne({ user: STUDENT_USER_ID }).lean();
+    expect(cart).not.toBeNull();
+    const courseStillInCart = cart.courses.some(c => c.course.toString() === COURSE_A);
+    expect(courseStillInCart).toBe(false);
+  });
+
   it("✅ Remove Bulk: xoá 2 courses → 200, 'Removed 2 courses from cart'", async () => {
-    await Promise.all([
-      request(app).post(`${BASE}/items`).set("Cookie", studentCookie).send({ courseId: COURSE_A }),
-      request(app).post(`${BASE}/items`).set("Cookie", studentCookie).send({ courseId: COURSE_B }),
-    ]);
+    // Sequential adds to avoid race condition (EDV-264: concurrent addToCart can lose updates)
+    await request(app).post(`${BASE}/items`).set("Cookie", studentCookie).send({ courseId: COURSE_A });
+    await request(app).post(`${BASE}/items`).set("Cookie", studentCookie).send({ courseId: COURSE_B });
 
     const res = await request(app)
       .delete(`${BASE}/items`)
@@ -249,7 +327,20 @@ describe("EDV-198 | DELETE /api/cart", () => {
     const res = await request(app).delete(BASE).set("Cookie", studentCookie);
 
     expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
     expect(res.body.message).toMatch(/cart cleared successfully/i);
+  });
+
+  it("✅ DB verify: cart.courses is empty after clearCart", async () => {
+    await request(app)
+      .post(`${BASE}/items`)
+      .set("Cookie", studentCookie)
+      .send({ courseId: COURSE_A });
+    await request(app).delete(BASE).set("Cookie", studentCookie);
+
+    const cart = await Cart.findOne({ user: STUDENT_USER_ID }).lean();
+    expect(cart).not.toBeNull();
+    expect(cart.courses).toHaveLength(0);
   });
 
   it("✅ Clear Already Empty: cart đã rỗng → vẫn 200 'Cart cleared successfully!'", async () => {
@@ -298,6 +389,7 @@ describe("EDV-199 | GET /api/cart/items", () => {
   });
 
   it("✅ Plural: 2 items → result = 2, message 'You have 2 items in cart.'", async () => {
+    // Sequential adds to avoid race condition (EDV-264: concurrent addToCart can lose updates)
     await request(app).post(`${BASE}/items`).set("Cookie", studentCookie).send({ courseId: COURSE_A });
     await request(app).post(`${BASE}/items`).set("Cookie", studentCookie).send({ courseId: COURSE_B });
 
