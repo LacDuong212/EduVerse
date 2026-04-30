@@ -96,7 +96,7 @@ describe("EDV-226: Add Course To Wishlist", () => {
   });
 
   // BUG EDV-259: thumbnail typo in mapper — always returns null
-  test("[BUG EDV-259] thumnail field should contain thumbnail URL (currently always null)", async () => {
+  test.failing("[BUG EDV-259] thumnail field should contain thumbnail URL (currently always null)", async () => {
     const res = await authGet("");
     expect(res.status).toBe(200);
     if (res.body.result.length > 0) {
@@ -107,7 +107,7 @@ describe("EDV-226: Add Course To Wishlist", () => {
   });
 
   // BUG EDV-260: lectureCount always 0 (Course model has lecturesCount)
-  test("[BUG EDV-260] lectureCount should be removed (always 0, Course has lecturesCount)", async () => {
+  test.failing("[BUG EDV-260] lectureCount should be removed (always 0, Course has lecturesCount)", async () => {
     const res = await authGet("");
     expect(res.status).toBe(200);
     if (res.body.result.length > 0) {

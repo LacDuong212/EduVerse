@@ -370,6 +370,16 @@ describe("EDV-183 Â· Update Instructor Profile", () => {
       // NOTE: isActive is not included in PATCH response (populate does not select isActivated)
     });
 
+    // [BUG EDV-272] isActive should be in PATCH response but populate omits isActivated
+    it.failing("PATCH profile response should include isActive (EDV-272)", async () => {
+      const res = await request(app)
+        .patch(`${PRI}/profile`)
+        .set("Cookie", insACookie)
+        .send({ occupation: "[TEST] isActive check" });
+      expect(res.status).toBe(200);
+      expect(res.body.result).toHaveProperty("isActive");
+    });
+
     it("response does NOT leak password, __v, passwordResetToken", async () => {
       const res = await request(app)
         .patch(`${PRI}/profile`)

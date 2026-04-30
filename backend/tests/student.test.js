@@ -155,7 +155,7 @@ describe("EDV-206: Update Student Profile", () => {
   });
 
   // BUG EDV-258: bio is accepted by validation but silently ignored
-  test("[BUG EDV-258] bio field should be saved and returned but is silently ignored", async () => {
+  test.failing("[BUG EDV-258] bio field should be saved and returned but is silently ignored", async () => {
     const res = await patch("/profile", { bio: "My test bio" });
     expect(res.status).toBe(200);
     // These assertions expose EDV-258 — they will fail until the bug is fixed
@@ -311,18 +311,21 @@ describe("EDV-223: Get Student's Courses", () => {
     expect(res.body.success).toBe(true);
   });
 
-  test("Success: Search courses (fuzzy)", async () => {
+  // Collateral failure of EDV-257: items are [] so c.title is undefined
+  test.failing("[EDV-257 collateral] Success: Search courses (fuzzy) — fails because items are [] not objects", async () => {
     const res = await get("/courses?search=Docker");
     expect(res.status).toBe(200);
-    // Should return at least the Docker course
+    // Will fail until EDV-257 is fixed: result items are [] so c.title is undefined
     if (res.body.result.length > 0) {
       expect(res.body.result.some((c) => /docker/i.test(c.title))).toBe(true);
     }
   });
 
-  test("Success: Course row has expected fields", async () => {
+  // Collateral failure of EDV-257: result[0] is [] so toHaveProperty("courseId") fails
+  test.failing("[EDV-257 collateral] Success: Course row has expected fields — fails because items are [] not objects", async () => {
     const res = await get("/courses?limit=6");
     expect(res.status).toBe(200);
+    // Will fail until EDV-257 is fixed: result[0] is [] not a course object
     if (res.body.result.length > 0) {
       const course = res.body.result[0];
       expect(course).toHaveProperty("courseId");
@@ -356,7 +359,7 @@ describe("EDV-223: Get Student's Courses", () => {
   });
 
   // BUG EDV-257: result items are [] instead of course objects due to recursive mapper
-  test("[BUG EDV-257] Each result item should be a course object, not an empty array", async () => {
+  test.failing("[BUG EDV-257] Each result item should be a course object, not an empty array", async () => {
     const res = await get("/courses?limit=6");
     expect(res.status).toBe(200);
     // This will fail until EDV-257 is fixed

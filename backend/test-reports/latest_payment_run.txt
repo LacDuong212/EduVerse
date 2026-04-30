@@ -1,19 +1,19 @@
 ﻿
-> backend@1.0.0 test:wishlist
-> cross-env NODE_OPTIONS=--experimental-vm-modules jest --testPathPatterns=wishlist --forceExit
+> backend@1.0.0 test:payment
+> cross-env NODE_OPTIONS=--experimental-vm-modules jest --testPathPatterns=payment --forceExit
 
-node.exe : (node:26288) ExperimentalWarning: VM Modules is an experimental 
+node.exe : (node:8124) ExperimentalWarning: VM Modules is an experimental 
 feature and might change at any time
 At line:1 char:1
 + & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
 + ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: ((node:26288) Ex...nge at any time 
+    + CategoryInfo          : NotSpecified: ((node:8124) Exp...nge at any time 
    :String) [], RemoteException
     + FullyQualifiedErrorId : NativeCommandError
  
 (Use `node --trace-warnings ...` to show where the warning was created)
   console.error
-    [31m[EXCEPTION] [2026-04-30T15:17:30.144Z] -----------------------[0m
+    [31m[EXCEPTION] [2026-04-30T16:28:33.456Z] -----------------------[0m
 
     [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 22 |[39m
@@ -29,11 +29,94 @@ At line:1 char:1
       at trimPrefix (node_modules/router/index.js:340:13)
       at node_modules/router/index.js:297:9
       at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at next (node_modules/router/lib/route.js:155:13)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at next (node_modules/router/lib/route.js:155:13)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at next (node_modules/router/lib/route.js:155:13)
+      at src/middlewares/auth.middleware.js:7:22
+      at src/shared/utils/asyncHandler.js:6:19
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at router.handle (node_modules/router/index.js:186:3)
+      at router (node_modules/router/index.js:60:12)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at router.handle (node_modules/router/index.js:186:3)
+      at router (node_modules/router/index.js:60:12)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at SessionStrategy.strategy.pass (node_modules/passport/lib/middleware/authenticate.js:355:9)
+      at SessionStrategy.authenticate (node_modules/passport/lib/strategies/session.js:126:10)
+      at attempt (node_modules/passport/lib/middleware/authenticate.js:378:16)
+      at authenticate (node_modules/passport/lib/middleware/authenticate.js:379:7)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at initialize (node_modules/passport/lib/middleware/initialize.js:98:5)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at session (node_modules/express-session/index.js:487:7)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at cors (node_modules/cors/lib/index.js:188:7)
+      at node_modules/cors/lib/index.js:224:17
+      at originCallback (node_modules/cors/lib/index.js:214:15)
+      at node_modules/cors/lib/index.js:219:13
+      at optionsCallback (node_modules/cors/lib/index.js:199:9)
+      at corsMiddleware (node_modules/cors/lib/index.js:204:7)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at cookieParser (node_modules/cookie-parser/index.js:57:14)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at read (node_modules/body-parser/lib/read.js:42:5)
+      at urlencodedParser (node_modules/body-parser/lib/types/urlencoded.js:57:5)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/body-parser/lib/read.js:171:5
+      at invokeCallback (node_modules/raw-body/index.js:238:16)
+      at done (node_modules/raw-body/index.js:227:7)
+      at IncomingMessage.onEnd (node_modules/raw-body/index.js:287:7)
 
   console.error
-    Method: POST | URL: /api/wishlist | Code: 409 | IP: ::ffff:127.0.0.1
+    Method: POST | URL: /api/payments | Code: 401 | IP: ::ffff:127.0.0.1
 
     [0m [90m 22 |[39m
      [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
@@ -49,11 +132,94 @@ At line:1 char:1
       at trimPrefix (node_modules/router/index.js:340:13)
       at node_modules/router/index.js:297:9
       at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at next (node_modules/router/lib/route.js:155:13)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at next (node_modules/router/lib/route.js:155:13)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at next (node_modules/router/lib/route.js:155:13)
+      at src/middlewares/auth.middleware.js:7:22
+      at src/shared/utils/asyncHandler.js:6:19
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at router.handle (node_modules/router/index.js:186:3)
+      at router (node_modules/router/index.js:60:12)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at router.handle (node_modules/router/index.js:186:3)
+      at router (node_modules/router/index.js:60:12)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at SessionStrategy.strategy.pass (node_modules/passport/lib/middleware/authenticate.js:355:9)
+      at SessionStrategy.authenticate (node_modules/passport/lib/strategies/session.js:126:10)
+      at attempt (node_modules/passport/lib/middleware/authenticate.js:378:16)
+      at authenticate (node_modules/passport/lib/middleware/authenticate.js:379:7)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at initialize (node_modules/passport/lib/middleware/initialize.js:98:5)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at session (node_modules/express-session/index.js:487:7)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at cors (node_modules/cors/lib/index.js:188:7)
+      at node_modules/cors/lib/index.js:224:17
+      at originCallback (node_modules/cors/lib/index.js:214:15)
+      at node_modules/cors/lib/index.js:219:13
+      at optionsCallback (node_modules/cors/lib/index.js:199:9)
+      at corsMiddleware (node_modules/cors/lib/index.js:204:7)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at cookieParser (node_modules/cookie-parser/index.js:57:14)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at read (node_modules/body-parser/lib/read.js:42:5)
+      at urlencodedParser (node_modules/body-parser/lib/types/urlencoded.js:57:5)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/body-parser/lib/read.js:171:5
+      at invokeCallback (node_modules/raw-body/index.js:238:16)
+      at done (node_modules/raw-body/index.js:227:7)
+      at IncomingMessage.onEnd (node_modules/raw-body/index.js:287:7)
 
   console.error
-    Message: Course already in wishlist
+    Message: You are not logged in. Please log in first.
 
     [0m [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
      [90m 25 |[39m
@@ -69,8 +235,91 @@ At line:1 char:1
       at trimPrefix (node_modules/router/index.js:340:13)
       at node_modules/router/index.js:297:9
       at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at next (node_modules/router/lib/route.js:155:13)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at next (node_modules/router/lib/route.js:155:13)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at next (node_modules/router/lib/route.js:155:13)
+      at src/middlewares/auth.middleware.js:7:22
+      at src/shared/utils/asyncHandler.js:6:19
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at router.handle (node_modules/router/index.js:186:3)
+      at router (node_modules/router/index.js:60:12)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at router.handle (node_modules/router/index.js:186:3)
+      at router (node_modules/router/index.js:60:12)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at SessionStrategy.strategy.pass (node_modules/passport/lib/middleware/authenticate.js:355:9)
+      at SessionStrategy.authenticate (node_modules/passport/lib/strategies/session.js:126:10)
+      at attempt (node_modules/passport/lib/middleware/authenticate.js:378:16)
+      at authenticate (node_modules/passport/lib/middleware/authenticate.js:379:7)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at initialize (node_modules/passport/lib/middleware/initialize.js:98:5)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at session (node_modules/express-session/index.js:487:7)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at cors (node_modules/cors/lib/index.js:188:7)
+      at node_modules/cors/lib/index.js:224:17
+      at originCallback (node_modules/cors/lib/index.js:214:15)
+      at node_modules/cors/lib/index.js:219:13
+      at optionsCallback (node_modules/cors/lib/index.js:199:9)
+      at corsMiddleware (node_modules/cors/lib/index.js:204:7)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at cookieParser (node_modules/cookie-parser/index.js:57:14)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at read (node_modules/body-parser/lib/read.js:42:5)
+      at urlencodedParser (node_modules/body-parser/lib/types/urlencoded.js:57:5)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/body-parser/lib/read.js:171:5
+      at invokeCallback (node_modules/raw-body/index.js:238:16)
+      at done (node_modules/raw-body/index.js:227:7)
+      at IncomingMessage.onEnd (node_modules/raw-body/index.js:287:7)
 
   console.error
     [31m--------------------------------------------------------------[0m
@@ -89,11 +338,94 @@ At line:1 char:1
       at trimPrefix (node_modules/router/index.js:340:13)
       at node_modules/router/index.js:297:9
       at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at next (node_modules/router/lib/route.js:155:13)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at next (node_modules/router/lib/route.js:155:13)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at next (node_modules/router/lib/route.js:155:13)
+      at src/middlewares/auth.middleware.js:7:22
+      at src/shared/utils/asyncHandler.js:6:19
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at router.handle (node_modules/router/index.js:186:3)
+      at router (node_modules/router/index.js:60:12)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at router.handle (node_modules/router/index.js:186:3)
+      at router (node_modules/router/index.js:60:12)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at SessionStrategy.strategy.pass (node_modules/passport/lib/middleware/authenticate.js:355:9)
+      at SessionStrategy.authenticate (node_modules/passport/lib/strategies/session.js:126:10)
+      at attempt (node_modules/passport/lib/middleware/authenticate.js:378:16)
+      at authenticate (node_modules/passport/lib/middleware/authenticate.js:379:7)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at initialize (node_modules/passport/lib/middleware/initialize.js:98:5)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at session (node_modules/express-session/index.js:487:7)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at cors (node_modules/cors/lib/index.js:188:7)
+      at node_modules/cors/lib/index.js:224:17
+      at originCallback (node_modules/cors/lib/index.js:214:15)
+      at node_modules/cors/lib/index.js:219:13
+      at optionsCallback (node_modules/cors/lib/index.js:199:9)
+      at corsMiddleware (node_modules/cors/lib/index.js:204:7)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at cookieParser (node_modules/cookie-parser/index.js:57:14)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at read (node_modules/body-parser/lib/read.js:42:5)
+      at urlencodedParser (node_modules/body-parser/lib/types/urlencoded.js:57:5)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/body-parser/lib/read.js:171:5
+      at invokeCallback (node_modules/raw-body/index.js:238:16)
+      at done (node_modules/raw-body/index.js:227:7)
+      at IncomingMessage.onEnd (node_modules/raw-body/index.js:287:7)
 
   console.error
-    [31m[EXCEPTION] [2026-04-30T15:17:30.234Z] -----------------------[0m
+    [31m[EXCEPTION] [2026-04-30T16:28:34.295Z] -----------------------[0m
 
     [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 22 |[39m
@@ -109,11 +441,23 @@ At line:1 char:1
       at trimPrefix (node_modules/router/index.js:340:13)
       at node_modules/router/index.js:297:9
       at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at next (node_modules/router/lib/route.js:155:13)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at next (node_modules/router/lib/route.js:155:13)
+      at src/middlewares/auth.middleware.js:21:48
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at src/middlewares/auth.middleware.js:13:3
 
   console.error
-    Method: POST | URL: /api/wishlist | Code: 500 | IP: ::ffff:127.0.0.1
+    Method: POST | URL: /api/payments | Code: 403 | IP: ::ffff:127.0.0.1
 
     [0m [90m 22 |[39m
      [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
@@ -129,36 +473,149 @@ At line:1 char:1
       at trimPrefix (node_modules/router/index.js:340:13)
       at node_modules/router/index.js:297:9
       at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at next (node_modules/router/lib/route.js:155:13)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at next (node_modules/router/lib/route.js:155:13)
+      at src/middlewares/auth.middleware.js:21:48
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at src/middlewares/auth.middleware.js:13:3
+
+  console.error
+    Message: Access denied.
+
+    [0m [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 25 |[39m
+    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 27 |[39m
+     [90m 28 |[39m     [36mif[39m (err[33m.[39mcause) {
+     [90m 29 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:26:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at next (node_modules/router/lib/route.js:155:13)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at next (node_modules/router/lib/route.js:155:13)
+      at src/middlewares/auth.middleware.js:21:48
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at src/middlewares/auth.middleware.js:13:3
+
+  console.error
+    [31m--------------------------------------------------------------[0m
+
+    [0m [90m 37 |[39m     }
+     [90m 38 |[39m
+    [31m[1m>[22m[39m[90m 39 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 40 |[39m   }
+     [90m 41 |[39m }[33m;[39m
+     [90m 42 |[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:39:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at next (node_modules/router/lib/route.js:155:13)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at next (node_modules/router/lib/route.js:155:13)
+      at src/middlewares/auth.middleware.js:21:48
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at src/middlewares/auth.middleware.js:13:3
+
+  console.error
+    [31m[EXCEPTION] [2026-04-30T16:28:35.462Z] -----------------------[0m
+
+    [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
+     [90m 22 |[39m
+    [31m[1m>[22m[39m[90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 25 |[39m
+     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:23:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at next (node_modules/router/lib/route.js:155:13)
+      at src/middlewares/zodValidator.middleware.js:13:5
+
+  console.error
+    Method: POST | URL: /api/payments | Code: 500 | IP: ::ffff:127.0.0.1
+
+    [0m [90m 22 |[39m
+     [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 25 |[39m
+     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+     [90m 27 |[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:24:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at next (node_modules/router/lib/route.js:155:13)
+      at src/middlewares/zodValidator.middleware.js:13:5
 
   console.error
     Message: [
       {
-        "code": "invalid_union",
-        "errors": [
-          [
-            {
-              "code": "invalid_type",
-              "expected": "ObjectId",
-              "path": [],
-              "message": "Invalid input: expected ObjectId, received undefined"
-            }
-          ],
-          [
-            {
-              "expected": "string",
-              "code": "invalid_type",
-              "path": [],
-              "message": "Course ID is required"
-            }
-          ]
-        ],
+        "expected": "string",
+        "code": "invalid_type",
         "path": [
           "body",
-          "courseId"
+          "orderId"
         ],
-        "message": "Invalid input"
+        "message": "Order ID is required"
       }
     ]
 
@@ -176,8 +633,15 @@ At line:1 char:1
       at trimPrefix (node_modules/router/index.js:340:13)
       at node_modules/router/index.js:297:9
       at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at next (node_modules/router/lib/route.js:155:13)
+      at src/middlewares/zodValidator.middleware.js:13:5
 
   console.error
     [31m--------------------------------------------------------------[0m
@@ -196,11 +660,18 @@ At line:1 char:1
       at trimPrefix (node_modules/router/index.js:340:13)
       at node_modules/router/index.js:297:9
       at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at next (node_modules/router/lib/route.js:155:13)
+      at src/middlewares/zodValidator.middleware.js:13:5
 
   console.error
-    [31m[EXCEPTION] [2026-04-30T15:17:30.316Z] -----------------------[0m
+    [31m[EXCEPTION] [2026-04-30T16:28:35.904Z] -----------------------[0m
 
     [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 22 |[39m
@@ -216,11 +687,18 @@ At line:1 char:1
       at trimPrefix (node_modules/router/index.js:340:13)
       at node_modules/router/index.js:297:9
       at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at next (node_modules/router/lib/route.js:155:13)
+      at src/middlewares/zodValidator.middleware.js:13:5
 
   console.error
-    Method: POST | URL: /api/wishlist | Code: 500 | IP: ::ffff:127.0.0.1
+    Method: POST | URL: /api/payments | Code: 500 | IP: ::ffff:127.0.0.1
 
     [0m [90m 22 |[39m
      [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
@@ -236,8 +714,15 @@ At line:1 char:1
       at trimPrefix (node_modules/router/index.js:340:13)
       at node_modules/router/index.js:297:9
       at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at next (node_modules/router/lib/route.js:155:13)
+      at src/middlewares/zodValidator.middleware.js:13:5
 
   console.error
     Message: [
@@ -245,9 +730,9 @@ At line:1 char:1
         "code": "custom",
         "path": [
           "body",
-          "courseId"
+          "orderId"
         ],
-        "message": "Invalid course ID format"
+        "message": "Invalid order ID format"
       }
     ]
 
@@ -265,8 +750,15 @@ At line:1 char:1
       at trimPrefix (node_modules/router/index.js:340:13)
       at node_modules/router/index.js:297:9
       at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at next (node_modules/router/lib/route.js:155:13)
+      at src/middlewares/zodValidator.middleware.js:13:5
 
   console.error
     [31m--------------------------------------------------------------[0m
@@ -285,11 +777,18 @@ At line:1 char:1
       at trimPrefix (node_modules/router/index.js:340:13)
       at node_modules/router/index.js:297:9
       at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at next (node_modules/router/lib/route.js:155:13)
+      at src/middlewares/zodValidator.middleware.js:13:5
 
   console.error
-    [31m[EXCEPTION] [2026-04-30T15:17:30.356Z] -----------------------[0m
+    [31m[EXCEPTION] [2026-04-30T16:28:36.491Z] -----------------------[0m
 
     [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 22 |[39m
@@ -305,11 +804,18 @@ At line:1 char:1
       at trimPrefix (node_modules/router/index.js:340:13)
       at node_modules/router/index.js:297:9
       at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at next (node_modules/router/lib/route.js:155:13)
+      at src/middlewares/zodValidator.middleware.js:13:5
 
   console.error
-    Method: POST | URL: /api/wishlist | Code: 401 | IP: ::ffff:127.0.0.1
+    Method: POST | URL: /api/payments | Code: 500 | IP: ::ffff:127.0.0.1
 
     [0m [90m 22 |[39m
      [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
@@ -325,827 +831,26 @@ At line:1 char:1
       at trimPrefix (node_modules/router/index.js:340:13)
       at node_modules/router/index.js:297:9
       at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    Message: You are not logged in. Please log in first.
-
-    [0m [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 27 |[39m
-     [90m 28 |[39m     [36mif[39m (err[33m.[39mcause) {
-     [90m 29 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:26:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m--------------------------------------------------------------[0m
-
-    [0m [90m 37 |[39m     }
-     [90m 38 |[39m
-    [31m[1m>[22m[39m[90m 39 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 40 |[39m   }
-     [90m 41 |[39m }[33m;[39m
-     [90m 42 |[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:39:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m[EXCEPTION] [2026-04-30T15:17:30.443Z] -----------------------[0m
-
-    [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
-     [90m 22 |[39m
-    [31m[1m>[22m[39m[90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:23:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    Method: POST | URL: /api/wishlist | Code: 403 | IP: ::ffff:127.0.0.1
-
-    [0m [90m 22 |[39m
-     [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-    [31m[1m>[22m[39m[90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m 27 |[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:24:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    Message: Access denied.
-
-    [0m [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 27 |[39m
-     [90m 28 |[39m     [36mif[39m (err[33m.[39mcause) {
-     [90m 29 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:26:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m--------------------------------------------------------------[0m
-
-    [0m [90m 37 |[39m     }
-     [90m 38 |[39m
-    [31m[1m>[22m[39m[90m 39 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 40 |[39m   }
-     [90m 41 |[39m }[33m;[39m
-     [90m 42 |[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:39:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m[EXCEPTION] [2026-04-30T15:17:31.525Z] -----------------------[0m
-
-    [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
-     [90m 22 |[39m
-    [31m[1m>[22m[39m[90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:23:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    Method: GET | URL: /api/wishlist | Code: 401 | IP: ::ffff:127.0.0.1
-
-    [0m [90m 22 |[39m
-     [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-    [31m[1m>[22m[39m[90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m 27 |[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:24:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    Message: You are not logged in. Please log in first.
-
-    [0m [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 27 |[39m
-     [90m 28 |[39m     [36mif[39m (err[33m.[39mcause) {
-     [90m 29 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:26:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m--------------------------------------------------------------[0m
-
-    [0m [90m 37 |[39m     }
-     [90m 38 |[39m
-    [31m[1m>[22m[39m[90m 39 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 40 |[39m   }
-     [90m 41 |[39m }[33m;[39m
-     [90m 42 |[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:39:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m[EXCEPTION] [2026-04-30T15:17:31.587Z] -----------------------[0m
-
-    [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
-     [90m 22 |[39m
-    [31m[1m>[22m[39m[90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:23:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    Method: GET | URL: /api/wishlist | Code: 403 | IP: ::ffff:127.0.0.1
-
-    [0m [90m 22 |[39m
-     [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-    [31m[1m>[22m[39m[90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m 27 |[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:24:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    Message: Access denied.
-
-    [0m [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 27 |[39m
-     [90m 28 |[39m     [36mif[39m (err[33m.[39mcause) {
-     [90m 29 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:26:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m--------------------------------------------------------------[0m
-
-    [0m [90m 37 |[39m     }
-     [90m 38 |[39m
-    [31m[1m>[22m[39m[90m 39 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 40 |[39m   }
-     [90m 41 |[39m }[33m;[39m
-     [90m 42 |[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:39:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m[EXCEPTION] [2026-04-30T15:17:31.850Z] -----------------------[0m
-
-    [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
-     [90m 22 |[39m
-    [31m[1m>[22m[39m[90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:23:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    Method: GET | URL: /api/wishlist/check?courseId=not-a-valid-id | Code: 500 | IP: ::ffff:127.0.0.1
-
-    [0m [90m 22 |[39m
-     [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-    [31m[1m>[22m[39m[90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m 27 |[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:24:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at next (node_modules/router/lib/route.js:155:13)
+      at src/middlewares/zodValidator.middleware.js:13:5
 
   console.error
     Message: [
       {
-        "code": "custom",
-        "path": [
-          "query",
-          "courseId"
-        ],
-        "message": "Invalid course ID format"
-      }
-    ]
-
-    [0m [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 27 |[39m
-     [90m 28 |[39m     [36mif[39m (err[33m.[39mcause) {
-     [90m 29 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:26:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m--------------------------------------------------------------[0m
-
-    [0m [90m 37 |[39m     }
-     [90m 38 |[39m
-    [31m[1m>[22m[39m[90m 39 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 40 |[39m   }
-     [90m 41 |[39m }[33m;[39m
-     [90m 42 |[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:39:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m[EXCEPTION] [2026-04-30T15:17:31.859Z] -----------------------[0m
-
-    [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
-     [90m 22 |[39m
-    [31m[1m>[22m[39m[90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:23:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    Method: GET | URL: /api/wishlist/check?courseId=694e8e85ed8f2ec45dc0d4ec | Code: 401 | IP: ::ffff:127.0.0.1
-
-    [0m [90m 22 |[39m
-     [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-    [31m[1m>[22m[39m[90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m 27 |[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:24:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    Message: You are not logged in. Please log in first.
-
-    [0m [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 27 |[39m
-     [90m 28 |[39m     [36mif[39m (err[33m.[39mcause) {
-     [90m 29 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:26:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m--------------------------------------------------------------[0m
-
-    [0m [90m 37 |[39m     }
-     [90m 38 |[39m
-    [31m[1m>[22m[39m[90m 39 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 40 |[39m   }
-     [90m 41 |[39m }[33m;[39m
-     [90m 42 |[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:39:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m[EXCEPTION] [2026-04-30T15:17:31.910Z] -----------------------[0m
-
-    [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
-     [90m 22 |[39m
-    [31m[1m>[22m[39m[90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:23:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    Method: GET | URL: /api/wishlist/check?courseId=694e8e85ed8f2ec45dc0d4ec | Code: 403 | IP: ::ffff:127.0.0.1
-
-    [0m [90m 22 |[39m
-     [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-    [31m[1m>[22m[39m[90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m 27 |[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:24:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    Message: Access denied.
-
-    [0m [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 27 |[39m
-     [90m 28 |[39m     [36mif[39m (err[33m.[39mcause) {
-     [90m 29 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:26:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m--------------------------------------------------------------[0m
-
-    [0m [90m 37 |[39m     }
-     [90m 38 |[39m
-    [31m[1m>[22m[39m[90m 39 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 40 |[39m   }
-     [90m 41 |[39m }[33m;[39m
-     [90m 42 |[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:39:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m[EXCEPTION] [2026-04-30T15:17:32.261Z] -----------------------[0m
-
-    [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
-     [90m 22 |[39m
-    [31m[1m>[22m[39m[90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:23:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    Method: GET | URL: /api/wishlist/count | Code: 401 | IP: ::ffff:127.0.0.1
-
-    [0m [90m 22 |[39m
-     [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-    [31m[1m>[22m[39m[90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m 27 |[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:24:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    Message: You are not logged in. Please log in first.
-
-    [0m [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 27 |[39m
-     [90m 28 |[39m     [36mif[39m (err[33m.[39mcause) {
-     [90m 29 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:26:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m--------------------------------------------------------------[0m
-
-    [0m [90m 37 |[39m     }
-     [90m 38 |[39m
-    [31m[1m>[22m[39m[90m 39 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 40 |[39m   }
-     [90m 41 |[39m }[33m;[39m
-     [90m 42 |[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:39:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m[EXCEPTION] [2026-04-30T15:17:32.315Z] -----------------------[0m
-
-    [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
-     [90m 22 |[39m
-    [31m[1m>[22m[39m[90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:23:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    Method: GET | URL: /api/wishlist/count | Code: 403 | IP: ::ffff:127.0.0.1
-
-    [0m [90m 22 |[39m
-     [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-    [31m[1m>[22m[39m[90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m 27 |[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:24:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    Message: Access denied.
-
-    [0m [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 27 |[39m
-     [90m 28 |[39m     [36mif[39m (err[33m.[39mcause) {
-     [90m 29 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:26:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m--------------------------------------------------------------[0m
-
-    [0m [90m 37 |[39m     }
-     [90m 38 |[39m
-    [31m[1m>[22m[39m[90m 39 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 40 |[39m   }
-     [90m 41 |[39m }[33m;[39m
-     [90m 42 |[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:39:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m[EXCEPTION] [2026-04-30T15:17:32.865Z] -----------------------[0m
-
-    [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
-     [90m 22 |[39m
-    [31m[1m>[22m[39m[90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:23:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    Method: DELETE | URL: /api/wishlist | Code: 404 | IP: ::ffff:127.0.0.1
-
-    [0m [90m 22 |[39m
-     [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-    [31m[1m>[22m[39m[90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m 27 |[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:24:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    Message: Course not found in wishlist
-
-    [0m [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 27 |[39m
-     [90m 28 |[39m     [36mif[39m (err[33m.[39mcause) {
-     [90m 29 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:26:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m--------------------------------------------------------------[0m
-
-    [0m [90m 37 |[39m     }
-     [90m 38 |[39m
-    [31m[1m>[22m[39m[90m 39 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 40 |[39m   }
-     [90m 41 |[39m }[33m;[39m
-     [90m 42 |[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:39:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m[EXCEPTION] [2026-04-30T15:17:32.920Z] -----------------------[0m
-
-    [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
-     [90m 22 |[39m
-    [31m[1m>[22m[39m[90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:23:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    Method: DELETE | URL: /api/wishlist | Code: 500 | IP: ::ffff:127.0.0.1
-
-    [0m [90m 22 |[39m
-     [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-    [31m[1m>[22m[39m[90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m 27 |[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:24:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    Message: [
-      {
-        "code": "custom",
+        "expected": "string",
+        "code": "invalid_type",
         "path": [
           "body",
-          "courseId"
+          "paymentMethod"
         ],
-        "message": "Invalid course ID format"
+        "message": "Payment method is required"
       }
     ]
 
@@ -1163,8 +868,15 @@ At line:1 char:1
       at trimPrefix (node_modules/router/index.js:340:13)
       at node_modules/router/index.js:297:9
       at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at next (node_modules/router/lib/route.js:155:13)
+      at src/middlewares/zodValidator.middleware.js:13:5
 
   console.error
     [31m--------------------------------------------------------------[0m
@@ -1183,11 +895,18 @@ At line:1 char:1
       at trimPrefix (node_modules/router/index.js:340:13)
       at node_modules/router/index.js:297:9
       at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at next (node_modules/router/lib/route.js:155:13)
+      at src/middlewares/zodValidator.middleware.js:13:5
 
   console.error
-    [31m[EXCEPTION] [2026-04-30T15:17:33.028Z] -----------------------[0m
+    [31m[EXCEPTION] [2026-04-30T16:28:37.073Z] -----------------------[0m
 
     [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 22 |[39m
@@ -1203,11 +922,18 @@ At line:1 char:1
       at trimPrefix (node_modules/router/index.js:340:13)
       at node_modules/router/index.js:297:9
       at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at next (node_modules/router/lib/route.js:155:13)
+      at src/middlewares/zodValidator.middleware.js:13:5
 
   console.error
-    Method: DELETE | URL: /api/wishlist | Code: 404 | IP: ::ffff:127.0.0.1
+    Method: POST | URL: /api/payments | Code: 500 | IP: ::ffff:127.0.0.1
 
     [0m [90m 22 |[39m
      [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
@@ -1223,11 +949,32 @@ At line:1 char:1
       at trimPrefix (node_modules/router/index.js:340:13)
       at node_modules/router/index.js:297:9
       at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at next (node_modules/router/lib/route.js:155:13)
+      at src/middlewares/zodValidator.middleware.js:13:5
 
   console.error
-    Message: Course not found in wishlist
+    Message: [
+      {
+        "code": "invalid_value",
+        "values": [
+          "momo",
+          "vnpay",
+          "free"
+        ],
+        "path": [
+          "body",
+          "paymentMethod"
+        ],
+        "message": "Payment method not supported"
+      }
+    ]
 
     [0m [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
      [90m 25 |[39m
@@ -1243,8 +990,15 @@ At line:1 char:1
       at trimPrefix (node_modules/router/index.js:340:13)
       at node_modules/router/index.js:297:9
       at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at next (node_modules/router/lib/route.js:155:13)
+      at src/middlewares/zodValidator.middleware.js:13:5
 
   console.error
     [31m--------------------------------------------------------------[0m
@@ -1263,11 +1017,18 @@ At line:1 char:1
       at trimPrefix (node_modules/router/index.js:340:13)
       at node_modules/router/index.js:297:9
       at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at next (node_modules/router/lib/route.js:155:13)
+      at src/middlewares/zodValidator.middleware.js:13:5
 
   console.error
-    [31m[EXCEPTION] [2026-04-30T15:17:33.037Z] -----------------------[0m
+    [31m[EXCEPTION] [2026-04-30T16:28:37.831Z] -----------------------[0m
 
     [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 22 |[39m
@@ -1283,11 +1044,15 @@ At line:1 char:1
       at trimPrefix (node_modules/router/index.js:340:13)
       at node_modules/router/index.js:297:9
       at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
 
   console.error
-    Method: DELETE | URL: /api/wishlist | Code: 401 | IP: ::ffff:127.0.0.1
+    Method: POST | URL: /api/payments | Code: 404 | IP: ::ffff:127.0.0.1
 
     [0m [90m 22 |[39m
      [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
@@ -1303,11 +1068,15 @@ At line:1 char:1
       at trimPrefix (node_modules/router/index.js:340:13)
       at node_modules/router/index.js:297:9
       at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
 
   console.error
-    Message: You are not logged in. Please log in first.
+    Message: Order not found.
 
     [0m [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
      [90m 25 |[39m
@@ -1323,8 +1092,12 @@ At line:1 char:1
       at trimPrefix (node_modules/router/index.js:340:13)
       at node_modules/router/index.js:297:9
       at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
 
   console.error
     [31m--------------------------------------------------------------[0m
@@ -1343,11 +1116,15 @@ At line:1 char:1
       at trimPrefix (node_modules/router/index.js:340:13)
       at node_modules/router/index.js:297:9
       at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
 
   console.error
-    [31m[EXCEPTION] [2026-04-30T15:17:33.101Z] -----------------------[0m
+    [31m[EXCEPTION] [2026-04-30T16:28:38.457Z] -----------------------[0m
 
     [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 22 |[39m
@@ -1363,11 +1140,15 @@ At line:1 char:1
       at trimPrefix (node_modules/router/index.js:340:13)
       at node_modules/router/index.js:297:9
       at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
 
   console.error
-    Method: DELETE | URL: /api/wishlist | Code: 403 | IP: ::ffff:127.0.0.1
+    Method: POST | URL: /api/payments | Code: 404 | IP: ::ffff:127.0.0.1
 
     [0m [90m 22 |[39m
      [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
@@ -1383,11 +1164,15 @@ At line:1 char:1
       at trimPrefix (node_modules/router/index.js:340:13)
       at node_modules/router/index.js:297:9
       at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
 
   console.error
-    Message: Access denied.
+    Message: Order not found.
 
     [0m [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
      [90m 25 |[39m
@@ -1403,8 +1188,12 @@ At line:1 char:1
       at trimPrefix (node_modules/router/index.js:340:13)
       at node_modules/router/index.js:297:9
       at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
 
   console.error
     [31m--------------------------------------------------------------[0m
@@ -1423,60 +1212,984 @@ At line:1 char:1
       at trimPrefix (node_modules/router/index.js:340:13)
       at node_modules/router/index.js:297:9
       at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
 
-PASS tests/wishlist.test.js (14.731 s)
-  EDV-226: Add Course To Wishlist
-    ÔêÜ Success: Add to wishlist ÔåÆ 201 with correct shape (300 ms)
-    ÔêÜ DB verify: Wishlist document created in database (42 ms)
-    ÔêÜ No sensitive field leakage in add response (234 ms)
-    ÔêÜ [BUG EDV-259] thumnail field should contain thumbnail URL (currently 
-always null) (227 ms)
-    ÔêÜ [BUG EDV-260] lectureCount should be removed (always 0, Course has 
-lecturesCount) (215 ms)
-    ÔêÜ Error: Already in wishlist ÔåÆ 409 (165 ms)
-    ÔêÜ Error: Missing courseId ÔåÆ 400 (66 ms)
-    ÔêÜ Error: Invalid courseId ÔåÆ 400 (85 ms)
-    ÔêÜ Error: Unauthorized ÔåÆ 401 (46 ms)
-    ÔêÜ Error: Forbidden (instructor) ÔåÆ 403 (72 ms)
-  EDV-225: Get Wishlist
-    ÔêÜ Success: Get wishlist ÔåÆ 200 with courses (221 ms)
-    ÔêÜ Success: Wishlist item has correct field types (278 ms)
-    ÔêÜ DB cross-check: result count matches Wishlist.countDocuments (271 ms)
-    ÔêÜ No sensitive field leakage in list response (192 ms)
-    ÔêÜ Error: Unauthorized ÔåÆ 401 (16 ms)
-    ÔêÜ Error: Forbidden (instructor) ÔåÆ 403 (59 ms)
-  EDV-228: Check Course In Wishlist
-    ÔêÜ Success: Course in wishlist ÔåÆ exists: true (106 ms)
-    ÔêÜ Success: Course not in wishlist ÔåÆ exists: false (93 ms)
-    ÔêÜ Error: Invalid courseId format ÔåÆ 400 (59 ms)
-    ÔêÜ Error: Unauthorized ÔåÆ 401 (10 ms)
-    ÔêÜ Error: Forbidden (instructor) ÔåÆ 403 (50 ms)
-  EDV-229: Get Wishlist Count
-    ÔêÜ Success: Get count ÔåÆ 200 with number (111 ms)
-    ÔêÜ DB cross-check: count matches Wishlist.countDocuments (137 ms)
-    ÔêÜ No sensitive field leakage (92 ms)
-    ÔêÜ Error: Unauthorized ÔåÆ 401 (9 ms)
-    ÔêÜ Error: Forbidden (instructor) ÔåÆ 403 (54 ms)
-  EDV-227: Delete Course From Wishlist
-    ÔêÜ Success: Remove from wishlist ÔåÆ 200 (119 ms)
-    ÔêÜ DB verify: Wishlist document removed from database (46 ms)
-    ÔêÜ Error: Course not in wishlist ÔåÆ 404 (127 ms)
-    ÔêÜ Error: Invalid courseId format ÔåÆ 400 (56 ms)
-    ÔêÜ No sensitive field leakage in delete response (107 ms)
-    ÔêÜ Error: Unauthorized ÔåÆ 401 (10 ms)
-    ÔêÜ Error: Forbidden (instructor) ÔåÆ 403 (63 ms)
+  console.error
+    [31m[EXCEPTION] [2026-04-30T16:28:39.324Z] -----------------------[0m
+
+    [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
+     [90m 22 |[39m
+    [31m[1m>[22m[39m[90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 25 |[39m
+     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:23:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+
+  console.error
+    Method: POST | URL: /api/payments | Code: 400 | IP: ::ffff:127.0.0.1
+
+    [0m [90m 22 |[39m
+     [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 25 |[39m
+     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+     [90m 27 |[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:24:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+
+  console.error
+    Message: Order is not pending.
+
+    [0m [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 25 |[39m
+    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 27 |[39m
+     [90m 28 |[39m     [36mif[39m (err[33m.[39mcause) {
+     [90m 29 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:26:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+
+  console.error
+    [31m--------------------------------------------------------------[0m
+
+    [0m [90m 37 |[39m     }
+     [90m 38 |[39m
+    [31m[1m>[22m[39m[90m 39 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 40 |[39m   }
+     [90m 41 |[39m }[33m;[39m
+     [90m 42 |[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:39:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+
+  console.error
+    [31m[EXCEPTION] [2026-04-30T16:28:40.253Z] -----------------------[0m
+
+    [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
+     [90m 22 |[39m
+    [31m[1m>[22m[39m[90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 25 |[39m
+     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:23:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+
+  console.error
+    Method: POST | URL: /api/cart/items | Code: 409 | IP: ::ffff:127.0.0.1
+
+    [0m [90m 22 |[39m
+     [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 25 |[39m
+     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+     [90m 27 |[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:24:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+
+  console.error
+    Message: You already own this course.
+
+    [0m [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 25 |[39m
+    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 27 |[39m
+     [90m 28 |[39m     [36mif[39m (err[33m.[39mcause) {
+     [90m 29 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:26:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+
+  console.error
+    [31m--------------------------------------------------------------[0m
+
+    [0m [90m 37 |[39m     }
+     [90m 38 |[39m
+    [31m[1m>[22m[39m[90m 39 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 40 |[39m   }
+     [90m 41 |[39m }[33m;[39m
+     [90m 42 |[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:39:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+
+  console.error
+    [31m[EXCEPTION] [2026-04-30T16:28:40.624Z] -----------------------[0m
+
+    [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
+     [90m 22 |[39m
+    [31m[1m>[22m[39m[90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 25 |[39m
+     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:23:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+
+  console.error
+    Method: POST | URL: /api/orders | Code: 400 | IP: ::ffff:127.0.0.1
+
+    [0m [90m 22 |[39m
+     [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 25 |[39m
+     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+     [90m 27 |[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:24:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+
+  console.error
+    Message: Your cart is empty.
+
+    [0m [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 25 |[39m
+    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 27 |[39m
+     [90m 28 |[39m     [36mif[39m (err[33m.[39mcause) {
+     [90m 29 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:26:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+
+  console.error
+    [31m--------------------------------------------------------------[0m
+
+    [0m [90m 37 |[39m     }
+     [90m 38 |[39m
+    [31m[1m>[22m[39m[90m 39 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 40 |[39m   }
+     [90m 41 |[39m }[33m;[39m
+     [90m 42 |[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:39:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+
+  console.warn
+    ÔÜá´©Å ONE-SHOT: COURSE_B already owned ÔÇö test skipped (DB state exhausted)
+
+    [0m [90m 347 |[39m   it([32m"Ô£à Valid sig + rspCode 00 ÔåÆ 200 {RspCode:'00'}, DB: order completed + transaction success [ÔÜá´©Å ONE-SHOT: COURSE_B]"[39m[33m,[39m [36masync[39m () [33m=>[39m {
+     [90m 348 |[39m     [36mconst[39m order [33m=[39m [36mawait[39m createPendingOrder([33mCOURSE_B[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 349 |[39m     [36mif[39m ([33m![39morder) { console[33m.[39mwarn([32m"ÔÜá´©Å ONE-SHOT: COURSE_B already owned ÔÇö test skipped (DB state exhausted)"[39m)[33m;[39m [36mreturn[39m[33m;[39m }
+     [90m     |[39m                           [31m[1m^[22m[39m
+     [90m 350 |[39m
+     [90m 351 |[39m     [36mconst[39m txnNo  [33m=[39m [32m`VNP${Date.now()}`[39m[33m;[39m
+     [90m 352 |[39m     [36mconst[39m params [33m=[39m buildVnpayQuery(order[33m.[39morderId[33m,[39m order[33m.[39mtotalAmount[33m,[39m [32m"00"[39m[33m,[39m txnNo)[33m;[39m[0m
+
+      at Object.<anonymous> (tests/payment.test.js:349:27)
+
+  console.error
+    [31m[EXCEPTION] [2026-04-30T16:28:44.348Z] -----------------------[0m
+
+    [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
+     [90m 22 |[39m
+    [31m[1m>[22m[39m[90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 25 |[39m
+     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:23:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+
+  console.error
+    Method: POST | URL: /api/cart/items | Code: 409 | IP: ::ffff:127.0.0.1
+
+    [0m [90m 22 |[39m
+     [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 25 |[39m
+     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+     [90m 27 |[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:24:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+
+  console.error
+    Message: You already own this course.
+
+    [0m [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 25 |[39m
+    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 27 |[39m
+     [90m 28 |[39m     [36mif[39m (err[33m.[39mcause) {
+     [90m 29 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:26:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+
+  console.error
+    [31m--------------------------------------------------------------[0m
+
+    [0m [90m 37 |[39m     }
+     [90m 38 |[39m
+    [31m[1m>[22m[39m[90m 39 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 40 |[39m   }
+     [90m 41 |[39m }[33m;[39m
+     [90m 42 |[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:39:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+
+  console.error
+    [31m[EXCEPTION] [2026-04-30T16:28:44.525Z] -----------------------[0m
+
+    [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
+     [90m 22 |[39m
+    [31m[1m>[22m[39m[90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 25 |[39m
+     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:23:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+
+  console.error
+    Method: POST | URL: /api/orders | Code: 400 | IP: ::ffff:127.0.0.1
+
+    [0m [90m 22 |[39m
+     [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 25 |[39m
+     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+     [90m 27 |[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:24:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+
+  console.error
+    Message: Your cart is empty.
+
+    [0m [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 25 |[39m
+    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 27 |[39m
+     [90m 28 |[39m     [36mif[39m (err[33m.[39mcause) {
+     [90m 29 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:26:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+
+  console.error
+    [31m--------------------------------------------------------------[0m
+
+    [0m [90m 37 |[39m     }
+     [90m 38 |[39m
+    [31m[1m>[22m[39m[90m 39 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 40 |[39m   }
+     [90m 41 |[39m }[33m;[39m
+     [90m 42 |[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:39:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+
+  console.warn
+    ÔÜá´©Å ONE-SHOT: COURSE_C already owned ÔÇö test skipped (DB state exhausted)
+
+    [0m [90m 428 |[39m   it([32m"Ô£à Valid sig + rspCode 00 ÔåÆ 302 redirect to /student/payment-success [ÔÜá´©Å ONE-SHOT: COURSE_C]"[39m[33m,[39m [36masync[39m () [33m=>[39m {
+     [90m 429 |[39m     [36mconst[39m order [33m=[39m [36mawait[39m createPendingOrder([33mCOURSE_C[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 430 |[39m     [36mif[39m ([33m![39morder) { console[33m.[39mwarn([32m"ÔÜá´©Å ONE-SHOT: COURSE_C already owned ÔÇö test skipped (DB state exhausted)"[39m)[33m;[39m [36mreturn[39m[33m;[39m }
+     [90m     |[39m                           [31m[1m^[22m[39m
+     [90m 431 |[39m
+     [90m 432 |[39m     [36mconst[39m txnNo  [33m=[39m [32m`VNP${Date.now()}`[39m[33m;[39m
+     [90m 433 |[39m     [36mconst[39m params [33m=[39m buildVnpayQuery(order[33m.[39morderId[33m,[39m order[33m.[39mtotalAmount[33m,[39m [32m"00"[39m[33m,[39m txnNo)[33m;[39m[0m
+
+      at Object.<anonymous> (tests/payment.test.js:430:27)
+
+  console.error
+    [31m[EXCEPTION] [2026-04-30T16:28:48.101Z] -----------------------[0m
+
+    [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
+     [90m 22 |[39m
+    [31m[1m>[22m[39m[90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 25 |[39m
+     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:23:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+
+  console.error
+    Method: POST | URL: /api/cart/items | Code: 409 | IP: ::ffff:127.0.0.1
+
+    [0m [90m 22 |[39m
+     [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 25 |[39m
+     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+     [90m 27 |[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:24:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+
+  console.error
+    Message: You already own this course.
+
+    [0m [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 25 |[39m
+    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 27 |[39m
+     [90m 28 |[39m     [36mif[39m (err[33m.[39mcause) {
+     [90m 29 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:26:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+
+  console.error
+    [31m--------------------------------------------------------------[0m
+
+    [0m [90m 37 |[39m     }
+     [90m 38 |[39m
+    [31m[1m>[22m[39m[90m 39 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 40 |[39m   }
+     [90m 41 |[39m }[33m;[39m
+     [90m 42 |[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:39:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+
+  console.error
+    [31m[EXCEPTION] [2026-04-30T16:28:48.412Z] -----------------------[0m
+
+    [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
+     [90m 22 |[39m
+    [31m[1m>[22m[39m[90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 25 |[39m
+     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:23:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+
+  console.error
+    Method: POST | URL: /api/orders | Code: 400 | IP: ::ffff:127.0.0.1
+
+    [0m [90m 22 |[39m
+     [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 25 |[39m
+     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+     [90m 27 |[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:24:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+
+  console.error
+    Message: Your cart is empty.
+
+    [0m [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 25 |[39m
+    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 27 |[39m
+     [90m 28 |[39m     [36mif[39m (err[33m.[39mcause) {
+     [90m 29 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:26:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+
+  console.error
+    [31m--------------------------------------------------------------[0m
+
+    [0m [90m 37 |[39m     }
+     [90m 38 |[39m
+    [31m[1m>[22m[39m[90m 39 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 40 |[39m   }
+     [90m 41 |[39m }[33m;[39m
+     [90m 42 |[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:39:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+
+  console.warn
+    ÔÜá´©Å ONE-SHOT: COURSE_D already owned ÔÇö test skipped (DB state exhausted)
+
+    [0m [90m 466 |[39m   it([32m"Ô£à Valid sig + resultCode 0 ÔåÆ 204, DB: order completed + transaction success [ÔÜá´©Å ONE-SHOT: COURSE_D]"[39m[33m,[39m [36masync[39m () [33m=>[39m {
+     [90m 467 |[39m     [36mconst[39m order [33m=[39m [36mawait[39m createPendingOrder([33mCOURSE_D[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 468 |[39m     [36mif[39m ([33m![39morder) { console[33m.[39mwarn([32m"ÔÜá´©Å ONE-SHOT: COURSE_D already owned ÔÇö test skipped (DB state exhausted)"[39m)[33m;[39m [36mreturn[39m[33m;[39m }
+     [90m     |[39m                           [31m[1m^[22m[39m
+     [90m 469 |[39m
+     [90m 470 |[39m     [36mconst[39m txnId [33m=[39m [32m`MMO${Date.now()}`[39m[33m;[39m
+     [90m 471 |[39m     [36mconst[39m body  [33m=[39m buildMomoBody(order[33m.[39morderId[33m,[39m order[33m.[39mtotalAmount[33m,[39m [35m0[39m[33m,[39m txnId)[33m;[39m[0m
+
+      at Object.<anonymous> (tests/payment.test.js:468:27)
+
+  console.error
+    [31m[EXCEPTION] [2026-04-30T16:28:52.878Z] -----------------------[0m
+
+    [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
+     [90m 22 |[39m
+    [31m[1m>[22m[39m[90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 25 |[39m
+     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:23:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+
+  console.error
+    Method: POST | URL: /api/cart/items | Code: 409 | IP: ::ffff:127.0.0.1
+
+    [0m [90m 22 |[39m
+     [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 25 |[39m
+     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+     [90m 27 |[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:24:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+
+  console.error
+    Message: You already own this course.
+
+    [0m [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 25 |[39m
+    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 27 |[39m
+     [90m 28 |[39m     [36mif[39m (err[33m.[39mcause) {
+     [90m 29 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:26:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+
+  console.error
+    [31m--------------------------------------------------------------[0m
+
+    [0m [90m 37 |[39m     }
+     [90m 38 |[39m
+    [31m[1m>[22m[39m[90m 39 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 40 |[39m   }
+     [90m 41 |[39m }[33m;[39m
+     [90m 42 |[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:39:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+
+  console.error
+    [31m[EXCEPTION] [2026-04-30T16:28:53.076Z] -----------------------[0m
+
+    [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
+     [90m 22 |[39m
+    [31m[1m>[22m[39m[90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 25 |[39m
+     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:23:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+
+  console.error
+    Method: POST | URL: /api/orders | Code: 400 | IP: ::ffff:127.0.0.1
+
+    [0m [90m 22 |[39m
+     [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 25 |[39m
+     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+     [90m 27 |[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:24:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+
+  console.error
+    Message: Your cart is empty.
+
+    [0m [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 25 |[39m
+    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 27 |[39m
+     [90m 28 |[39m     [36mif[39m (err[33m.[39mcause) {
+     [90m 29 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:26:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+
+  console.error
+    [31m--------------------------------------------------------------[0m
+
+    [0m [90m 37 |[39m     }
+     [90m 38 |[39m
+    [31m[1m>[22m[39m[90m 39 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 40 |[39m   }
+     [90m 41 |[39m }[33m;[39m
+     [90m 42 |[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:39:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+
+  console.warn
+    ÔÜá´©Å ONE-SHOT: COURSE_E already owned ÔÇö test skipped (DB state exhausted)
+
+    [0m [90m 540 |[39m   it([32m"Ô£à Valid sig + resultCode 0 ÔåÆ 302 redirect to /student/payment-success [ÔÜá´©Å ONE-SHOT: COURSE_E]"[39m[33m,[39m [36masync[39m () [33m=>[39m {
+     [90m 541 |[39m     [36mconst[39m order [33m=[39m [36mawait[39m createPendingOrder([33mCOURSE_E[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 542 |[39m     [36mif[39m ([33m![39morder) { console[33m.[39mwarn([32m"ÔÜá´©Å ONE-SHOT: COURSE_E already owned ÔÇö test skipped (DB state exhausted)"[39m)[33m;[39m [36mreturn[39m[33m;[39m }
+     [90m     |[39m                           [31m[1m^[22m[39m
+     [90m 543 |[39m
+     [90m 544 |[39m     [36mconst[39m txnId  [33m=[39m [32m`MMO${Date.now()}`[39m[33m;[39m
+     [90m 545 |[39m     [36mconst[39m params [33m=[39m buildMomoBody(order[33m.[39morderId[33m,[39m order[33m.[39mtotalAmount[33m,[39m [35m0[39m[33m,[39m txnId)[33m;[39m[0m
+
+      at Object.<anonymous> (tests/payment.test.js:542:27)
+
+PASS tests/payment.test.js (45.423 s)
+  EDV-209 | POST /api/payments
+    ÔêÜ Ô£à Success (VNPay): student + pending order ÔåÆ 200 'Payment URL 
+created successfully', payUrl + paymentMethod (5521 ms)
+    ÔêÜ Ô£à Success (MoMo): student + pending order ÔåÆ 200 'Payment URL 
+created successfully', payUrl + paymentMethod (5415 ms)
+    ÔêÜ ÔØî Unauthorized: kh├┤ng ─æ─âng nhß║¡p ÔåÆ 401 (1165 ms)
+    ÔêÜ ÔØî Forbidden: instructor role ÔåÆ 403 (781 ms)
+    ÔêÜ ÔØî Missing orderId ÔåÆ 400 Zod validation (1168 ms)
+    ÔêÜ ÔØî Invalid orderId format (not ObjectId) ÔåÆ 400 Zod validation (437 
+ms)
+    ÔêÜ ÔØî Missing paymentMethod ÔåÆ 400 Zod validation (585 ms)
+    ÔêÜ ÔØî Invalid paymentMethod ('creditcard') ÔåÆ 400 Zod validation (582 
+ms)
+    ÔêÜ ÔØî Order not found (non-existent ID) ÔåÆ 404 'Order not found' (764 
+ms)
+    ÔêÜ ÔØî Order belongs to another user ÔåÆ 404 'Order not found' (622 ms)
+    ÔêÜ ÔØî Order is not pending (completed) ÔåÆ 400 'not pending' (865 ms)
+    Ôùï skipped ÔØî Order Expired: expiresAt < now ÔåÆ 400 'Order expired.' 
+[cß║ºn fixture DB vß╗øi expiresAt qu├í khß╗®]
+  VNPay IPN | GET /api/payments/vnpay/ipn
+    ÔêÜ Ô£à Valid sig + rspCode 00 ÔåÆ 200 {RspCode:'00'}, DB: order completed 
++ transaction success [ÔÜá´©Å ONE-SHOT: COURSE_B] (1309 ms)
+    ÔêÜ ÔØî Valid sig + rspCode 24 (user cancelled) ÔåÆ 200 {RspCode:'00'}, 
+DB: order cancelled + transaction failed (1845 ms)
+    ÔêÜ ÔØî Invalid signature ÔåÆ 200 {RspCode:'97', Message:'Checksum 
+failed'} (544 ms)
+    ÔêÜ ÔØî No vnp_TxnRef (valid sig) ÔåÆ 200 {RspCode:'01', Message:'Invalid 
+request'} (421 ms)
+  VNPay return | GET /api/payments/vnpay/return
+    ÔêÜ Ô£à Valid sig + rspCode 00 ÔåÆ 302 redirect to 
+/student/payment-success [ÔÜá´©Å ONE-SHOT: COURSE_C] (1090 ms)
+    ÔêÜ ÔØî Valid sig + rspCode 24 ÔåÆ 302 redirect to 
+/student/payment-failed, DB: order cancelled (2347 ms)
+  MoMo IPN | POST /api/payments/momo/ipn
+    ÔêÜ Ô£à Valid sig + resultCode 0 ÔåÆ 204, DB: order completed + 
+transaction success [ÔÜá´©Å ONE-SHOT: COURSE_D] (1535 ms)
+    ÔêÜ ÔØî Valid sig + resultCode 1006 (failed) ÔåÆ 204, DB: order cancelled 
++ transaction failed (2792 ms)
+    ÔêÜ ÔØî Invalid signature ÔåÆ 200 {message: 'Invalid signature'} (796 ms)
+  MoMo return | GET /api/payments/momo/return
+    ÔêÜ Ô£à Valid sig + resultCode 0 ÔåÆ 302 redirect to 
+/student/payment-success [ÔÜá´©Å ONE-SHOT: COURSE_E] (1077 ms)
+    ÔêÜ ÔØî Valid sig + resultCode 1006 ÔåÆ 302 redirect to 
+/student/payment-failed, DB: order cancelled (2338 ms)
 
 
 ­ƒôä Test report saved:
-   C:\personal\EduVerse\backend\test-reports\wishlist_2026-04-30_15-17.md
+   C:\personal\EduVerse\backend\test-reports\payment_2026-04-30_16-28.md
    C:\personal\EduVerse\backend\test-reports\latest.md
 
 Test Suites: 1 passed, 1 total
-Tests:       33 passed, 33 total
+Tests:       1 skipped, 22 passed, 23 total
 Snapshots:   0 total
-Time:        14.983 s, estimated 45 s
-Ran all test suites matching wishlist.
+Time:        45.653 s
+Ran all test suites matching payment.
 Force exiting Jest: Have you considered using `--detectOpenHandles` to detect 
 async operations that kept running after all tests finished?
