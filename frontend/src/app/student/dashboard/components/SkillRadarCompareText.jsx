@@ -19,23 +19,21 @@ const SkillRadarCompareText = ({ radar }) => {
         let tone = "neutral";
         let note = "Equal system average.";
 
-        if (diff >= 10) {
+        if (diff > 0) {
           tone = "good";
-          note = `Above system average +${diff}%.`;
-        } else if (diff > 0) {
-          tone = "good";
-          note = `Above system average +${diff}%.`;
-        } else if (diff <= -10) {
-          tone = "bad";
-          note = `Below system average ${diff}%. You should focus on improving this skill.`;
+          note = `Above the system average by ${diff}%.`;
         } else if (diff < 0) {
           tone = "bad";
-          note = `Below system average ${diff}%.`;
+          note =
+            diff <= -10
+              ? `Below the system average by ${Math.abs(
+                diff
+              )}%. You should focus on improving this skill.`
+              : `Below the system average by ${Math.abs(diff)}%.`;
         }
 
         return { label, my, avg, diff, tone, note };
       })
-      // ✅ Ẩn skill mà cả user & system đều 0%
       .filter((r) => !(r.my === 0 && r.avg === 0));
   }, [radar]);
 
@@ -48,15 +46,15 @@ const SkillRadarCompareText = ({ radar }) => {
         {rows.map((r) => (
           <div key={r.label} className="small text-body">
             <span className="fw-semibold">{r.label}</span>:{" "}
-            <span className="">You {r.my}%</span>{" "}
-            <span className="text">• System {r.avg}%</span>{" "}
+            <span>You {r.my}%</span>{" "}
+            <span>• System {r.avg}%</span>{" "}
             <span
               className={
                 r.tone === "good"
                   ? "text-success fw-semibold"
                   : r.tone === "bad"
-                  ? "text-danger fw-semibold"
-                  : "text-muted"
+                    ? "text-danger fw-semibold"
+                    : "text-muted"
               }
             >
               • {r.note}

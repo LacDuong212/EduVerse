@@ -1,19 +1,46 @@
 import * as checkoutService from "#modules/checkout/checkout.service.js";
 import asyncHandler from "#utils/asyncHandler.js";
-import { sendSuccessResponse } from "#utils/response.js";
+import { sendPaginatedResponse, sendSuccessResponse } from "#utils/response.js";
 import * as orderService from "./order.service.js";
 import * as orderMapper from "./order.mapper.js";
 
-// @route GET /
-export const getOrders = asyncHandler(async (req, res) => {
-  const orders = await orderService.getUserOrders(req.user?.userId);
-  return sendSuccessResponse(res, 200, "Orders fetched", orderMapper.toOrderDtoList(orders));
+export const getOrdersStats = asyncHandler(async (req, res) => {
+  const userId = req.user?.userId;
+  const result = await orderService.getUserOrdersStats(userId);
+
+  return sendSuccessResponse(res, 200, "Get order stats successfully!", result);
 });
 
-// @route GET /:id
-export const getOrderById = asyncHandler(async (req, res) => {
-  const order = await orderService.getOrderById(req.validated?.params?.id, req.user?.userId);
-  return sendSuccessResponse(res, 200, "Order fetched", orderMapper.toOrderDto(order));
+export const getOrders = asyncHandler(async (req, res) => {
+  const userId = req.user?.userId;
+  const query = req.validated?.query || {};
+
+  const { orders, total, page, limit } = await orderService.getPaginatedUserOrders(
+    userId,
+    query
+  );
+
+  return sendPaginatedResponse(
+    res,
+    200,
+    "Get orders successfully!",
+    orderMapper.toOrderListDtoList(orders),
+    { page, limit, totalItems: total }
+  );
+});
+
+export const getOrderDetail = asyncHandler(async (req, res) => {
+  const userId = req.user?.userId;
+  const { orderId } = req.validated?.params || {};
+
+  const order = await orderService.getUserOrderDetail(userId, orderId);
+
+  return sendSuccessResponse(
+    res,
+    200,
+    "Get order detail successfully!",
+    orderMapper.toOrderDetailDto(order)
+  );
 });
 
 // @route POST /

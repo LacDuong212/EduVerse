@@ -38,7 +38,7 @@ const ChangePasswordSetting = () => {
 
     setLoading(true);
     try {
-      const res = await axios.patch(
+      const res = await axios.post(
         `${backendUrl}/api/user/change-password`,
         {
           oldPassword: formData.oldPassword,
@@ -57,7 +57,7 @@ const ChangePasswordSetting = () => {
         }, 2000);
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'An error occurred');
+      setError(err.response?.data?.errors?.[0]?.message || 'An error occurred');
     } finally {
       setLoading(false);
     }

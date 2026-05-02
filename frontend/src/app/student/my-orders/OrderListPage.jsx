@@ -1,8 +1,8 @@
 import PageMetaData from "@/components/PageMetaData";
-import { Button, Card, CardBody } from "react-bootstrap";
-import { FaAngleLeft, FaAngleRight } from "react-icons/fa";
+import { Button, Card, CardBody, Form } from "react-bootstrap";
+import { FaAngleLeft, FaAngleRight, FaSearch } from "react-icons/fa";
 import { BsArrowRepeat } from "react-icons/bs";
-import { useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import useMyOrders from "./useMyOrders";
@@ -12,30 +12,25 @@ import OrderCounter from "./OrderCounter";
 
 const shortOrderCode = (id) => {
   const s = String(id || "");
-  if (!s) return "";
-  return s.slice(-4).toUpperCase();
+  return s ? s.slice(-4).toUpperCase() : "";
 };
 
-const OrderRow = ({ _id, createdAt, status, totalAmount, courses }) => {
+const OrderRow = ({ orderId, createdAt, status, totalAmount, courses }) => {
   const navigate = useNavigate();
 
   const created = createdAt ? new Date(createdAt) : null;
   const createdText = created ? created.toLocaleString("vi-VN") : "N/A";
   const coursesCount = Array.isArray(courses) ? courses.length : 0;
 
-  // ✅ NEW: lấy course đầu tiên (nếu backend populate courses.course)
   const firstItem = Array.isArray(courses) && courses.length > 0 ? courses[0] : null;
   const firstCourse = firstItem?.course || {};
-  const firstTitle =
-    firstCourse?.title || firstCourse?.name || "Untitled Course";
-  const firstThumb =
-    firstCourse?.thumbnail || firstCourse?.image || "";
+  const firstTitle = firstCourse?.title || "Untitled Course";
+  const firstThumb = firstCourse?.thumbnail || firstCourse?.image || "";
 
   return (
     <tr>
       <td>
         <div className="d-flex align-items-center">
-          {/* ✅ NEW: thumbnail */}
           <div
             className="rounded overflow-hidden bg-light flex-shrink-0"
             style={{ width: 72, height: 52 }}
@@ -50,35 +45,22 @@ const OrderRow = ({ _id, createdAt, status, totalAmount, courses }) => {
           </div>
 
           <div className="flex-grow-1 ms-2">
-            {/* ✅ NEW: show first course title */}
             <h6 className="mb-1 text-truncate">
               <span
                 className="text-decoration-none text-primary"
                 style={{ cursor: "pointer" }}
-                onClick={() => navigate(`/student/orders/${_id}`)}
+                onClick={() => navigate(`/student/orders/${orderId}`)}
                 title={firstTitle}
               >
-                 {_id ? (
-                <span >
-                  Order #{shortOrderCode(_id)}
-                </span>
-              ) : null}
+                Order #{shortOrderCode(orderId)}
               </span>
-
-              {/* nếu có nhiều hơn 1 course
-              {coursesCount > 1 ? (
-                <span className="text-secondary small ms-2">
-                  +{coursesCount - 1} more
-                </span>
-              ) : null} */}
             </h6>
-            <div className="text-secondary small fw-light fw-bold fa-fw">
+
+            <div className="text-secondary small fw-bold">
               {coursesCount} course{coursesCount > 1 ? "s" : ""}
             </div>
 
-            <div className="text-secondary small">
-              {createdText}
-            </div>
+            <div className="text-secondary small">{createdText}</div>
           </div>
         </div>
       </td>
@@ -96,7 +78,7 @@ const OrderRow = ({ _id, createdAt, status, totalAmount, courses }) => {
           variant="primary-soft"
           size="sm"
           className="icons-center"
-          onClick={() => navigate(`/student/orders/${_id}`)}
+          onClick={() => navigate(`/student/orders/${orderId}`)}
         >
           View Detail
         </Button>
@@ -106,27 +88,41 @@ const OrderRow = ({ _id, createdAt, status, totalAmount, courses }) => {
 };
 
 export default function OrderListPage() {
-  const { orders, loading, refetch, stats, pagination, fetchMyOrders } = useMyOrders();
-  const [q, setQ] = useState("");
+  const {
+    orders,
+    loading,
+    refetch,
+    stats,
+    pagination,
+    fetchMyOrders,
+    filters,
+    handleSearch,
+    handleSort,
+    handleStatus,
+  } = useMyOrders();
 
-  // Search nhẹ: cho phép search bằng 4 ký tự cuối của orderId hoặc theo ngày (dd/mm/yyyy)
-  const filtered = useMemo(() => {
-    const keyword = (q || "").trim().toLowerCase();
-    if (!keyword) return orders || [];
+  const [q, setQ] = useState(filters.search || "");
+  const didMountRef = useRef(false);
 
-    return (orders || []).filter((o) => {
-      const id4 = shortOrderCode(o?._id).toLowerCase();
+  useEffect(() => {
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    }
 
-      const created = o?.createdAt ? new Date(o.createdAt) : null;
-      const dateStr = created ? created.toLocaleDateString("vi-VN").toLowerCase() : "";
+    const timer = setTimeout(() => {
+      if (q !== filters.search) {
+        handleSearch(q);
+      }
+    }, 400);
 
-      return id4.includes(keyword) || dateStr.includes(keyword);
-    });
-  }, [orders, q]);
+    return () => clearTimeout(timer);
+  }, [q, filters.search, handleSearch]);
 
   const handlePageChange = (page) => {
-    if (!pagination || !fetchMyOrders) return;
-    if (page >= 1 && page <= pagination.totalPages) fetchMyOrders(page);
+    if (page >= 1 && page <= pagination.totalPages) {
+      fetchMyOrders(page);
+    }
   };
 
   return (
@@ -137,16 +133,45 @@ export default function OrderListPage() {
         <CardBody>
           <OrderCounter stats={stats} loading={loading} />
 
-          {/* Search + Refresh */}
           <div className="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
-            <div className="d-flex gap-2 align-items-center">
-              <input
-                className="form-control bg-transparent"
-                style={{ width: 360, maxWidth: "100%" }}
-                placeholder="Search by date (dd/mm) or Order # (last 4)..."
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-              />
+            <div className="d-flex gap-2 align-items-center flex-wrap">
+              <div className="position-relative">
+                <input
+                  className="form-control bg-transparent pe-5"
+                  style={{ width: 360, maxWidth: "100%" }}
+                  placeholder="Search by order ID or first course title..."
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                />
+                <FaSearch
+                  className="position-absolute top-50 end-0 translate-middle-y me-3 text-muted"
+                />
+              </div>
+
+              <Form.Select
+                style={{ width: 180 }}
+                value={filters.sort}
+                onChange={(e) => handleSort(e.target.value)}
+              >
+                <option value="newest">Newest</option>
+                <option value="oldest">Oldest</option>
+                <option value="totalAsc">Total low to high</option>
+                <option value="totalDesc">Total high to low</option>
+                <option value="statusAsc">Status A-Z</option>
+                <option value="statusDesc">Status Z-A</option>
+              </Form.Select>
+
+              <Form.Select
+                style={{ width: 160 }}
+                value={filters.status}
+                onChange={(e) => handleStatus(e.target.value)}
+              >
+                <option value="">All status</option>
+                <option value="pending">Pending</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+                <option value="refunded">Refunded</option>
+              </Form.Select>
 
               <Button
                 variant="primary-soft"
@@ -183,8 +208,8 @@ export default function OrderListPage() {
                 </thead>
 
                 <tbody>
-                  {filtered.length > 0 ? (
-                    filtered.map((o, idx) => <OrderRow key={idx} {...o} />)
+                  {orders.length > 0 ? (
+                    orders.map((o) => <OrderRow key={o.orderId} {...o} />)
                   ) : (
                     <tr>
                       <td colSpan={4} className="text-center text-muted py-5">
@@ -197,7 +222,6 @@ export default function OrderListPage() {
             </div>
           )}
 
-          {/* Pagination */}
           {!loading && pagination?.totalPages > 1 && (
             <div className="d-sm-flex justify-content-sm-between align-items-sm-center mt-4">
               <p className="mb-0 text-center text-sm-start">
@@ -205,7 +229,7 @@ export default function OrderListPage() {
               </p>
 
               <ul className="pagination pagination-sm pagination-primary-soft mb-0">
-                <li className={`page-item ${pagination.page === 1 && "disabled"}`}>
+                <li className={`page-item ${pagination.page === 1 ? "disabled" : ""}`}>
                   <button
                     className="page-link"
                     onClick={() => handlePageChange(pagination.page - 1)}
@@ -228,7 +252,11 @@ export default function OrderListPage() {
                   </li>
                 ))}
 
-                <li className={`page-item ${pagination.page === pagination.totalPages && "disabled"}`}>
+                <li
+                  className={`page-item ${
+                    pagination.page === pagination.totalPages ? "disabled" : ""
+                  }`}
+                >
                   <button
                     className="page-link"
                     onClick={() => handlePageChange(pagination.page + 1)}
