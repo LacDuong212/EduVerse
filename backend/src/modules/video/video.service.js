@@ -36,7 +36,7 @@ export const getKeys = (insId, videoIds) => {
 export const getVideoViewUrl = async (user, videoId) => {
   if (!videoId) throw new AppError("Please provide a valid video ID!", 400);
 
-  const { courseId, insId, isFree } = await getCourseInfoForVideoId(videoId);
+  const { courseId, insId, isFree } = (await getCourseInfoForVideoId(videoId, user?.userId)) || {};
 
   if (!courseId) {
     const expirationDate = new Date(Date.now() + EXPIRE_DURATION);
@@ -45,10 +45,11 @@ export const getVideoViewUrl = async (user, videoId) => {
       { $set: { expireAt: expirationDate } }
     ).catch(err => logger.error(`Failed to set expiration for videoId: ${videoId}`, err));
 
+    logger.warn(`Set expiration for videoId: ${videoId}`);
     throw new AppError("Video not found.", 404);
   }
 
-  const key = getKey(insId, videoId);
+  const key = getKey(insId || user?.userId, videoId);
 
   if (!isFree) {
     const isInstructor = user?.role === "instructor" && user?.userId === insId;

@@ -23,9 +23,7 @@ export default function useEditCourse() {
       if (!courseId) return navigate("/instructor/courses");
       setIsLoading(true);
 
-      const response = await handleRequest(
-        authApi.get(`/instructor/courses/${courseId}`)
-      );
+      const response = await handleRequest(authApi.get(`/instructor/courses/${courseId}`));
 
       if (response.success) {
         setCourse(response.result);
@@ -48,18 +46,37 @@ export default function useEditCourse() {
     });
   }, [course, changes]);
 
-  const isDirty = useMemo(() => Object.keys(changes).length > 0, [changes]);
+  const cleanEmptyParents = (obj, path) => {
+    const parts = path.split(".");
+    while (parts.length > 1) {
+      parts.pop();
+      const parentPath = parts.join(".");
+      const parentVal = _.get(obj, parentPath);
+      if (_.isObject(parentVal) && _.isEmpty(parentVal)) {
+        _.unset(obj, parentPath);
+      } else break;
+    }
+  };
 
-  const updateField = useCallback((path, value) => {
+  const updateField = useCallback((pathOrObject, newValue) => {
     setChanges((prev) => {
       const nextChanges = { ...prev };
-      const originalValue = _.get(courseRef.current, path);
 
-      if (_.isEqual(value, originalValue)) {
-        _.unset(nextChanges, path);
-        cleanEmptyParents(nextChanges, path);
+      const processChange = (path, value) => {
+        const originalValue = _.get(courseRef.current, path);
+
+        if (_.isEqual(value, originalValue)) {
+          _.unset(nextChanges, path);
+          cleanEmptyParents(nextChanges, path);
+        } else {
+          _.set(nextChanges, path, value);
+        }
+      };
+
+      if (_.isObject(pathOrObject) && newValue === undefined) {
+        Object.entries(pathOrObject).forEach(([path, val]) => processChange(path, val));
       } else {
-        _.set(nextChanges, path, value);
+        processChange(pathOrObject, newValue);
       }
 
       return { ...nextChanges };
@@ -71,10 +88,8 @@ export default function useEditCourse() {
     if (Object.keys(payload).length === 0) return true;
 
     setErrors({});
-    const response = await handleRequest(
-      authApi.patch(`/instructor/courses/${courseId}`, payload)
-    );
 
+    const response = await handleRequest(authApi.patch(`/instructor/courses/${courseId}`, payload));
     if (response.success) {
       setCourse(response.result);
       setChanges({});
@@ -123,18 +138,6 @@ export default function useEditCourse() {
     setIsLoading(false);
   };
 
-  const cleanEmptyParents = (obj, path) => {
-    const parts = path.split(".");
-    while (parts.length > 1) {
-      parts.pop();
-      const parentPath = parts.join(".");
-      const parentVal = _.get(obj, parentPath);
-      if (_.isObject(parentVal) && _.isEmpty(parentVal)) {
-        _.unset(obj, parentPath);
-      } else break;
-    }
-  };
-
   return {
     course,
     changes,
@@ -143,7 +146,7 @@ export default function useEditCourse() {
     onUpdate,
     onSubmit,
     onDiscardChanges,
-    isDirty,
+    isDirty: !_.isEmpty(changes),
     isLoading,
     isSubmitting,
     errors,

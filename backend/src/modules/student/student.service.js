@@ -46,6 +46,7 @@ const getUpdateData = (data) => {
   if (data.name) userUpdate.name = data.name;
   if (data.phonenumber !== undefined) userUpdate.phonenumber = data.phonenumber;
   if (data.avatar !== undefined) userUpdate.pfpImg = data.avatar;
+  if (data.bio !== undefined) userUpdate.bio = data.bio;
   if (data.website !== undefined) userUpdate.website = data.website;
   if (data.socials?.facebook !== undefined) userUpdate["socials.facebook"] = data.socials.facebook;
   if (data.socials?.instagram !== undefined) userUpdate["socials.instagram"] = data.socials.instagram;
@@ -61,7 +62,7 @@ export const getStudentProfile = async (userId) => {
   const student = await Student.findOne({ user: userId })
     .populate({
       path: "user",
-      select: "name email phonenumber pfpImg website socials"
+      select: "name email phonenumber pfpImg bio website socials"
     }).lean();
   if (!student) throw new AppError("Student not found.", 404);
 

@@ -9,6 +9,7 @@ export const toStudentProfileDto = (student) => {
     email: student.user?.email,
     phonenumber: student.user?.phonenumber,
     avatar: student.user?.pfpImg,
+    bio: student.user?.bio,
 
     website: student.user?.website,
     socials: {

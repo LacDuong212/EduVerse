@@ -32,12 +32,7 @@ export default function useImageUpload() {
     const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
 
     const response = await axios.post(cloudinaryUrl, formData, {
-      onUploadProgress: (progressEvent) => {
-        const percentCompleted = Math.round(
-          (progressEvent.loaded * 100) / progressEvent.total
-        );
-        setUploadProgress(percentCompleted);
-      },
+      onUploadProgress: (e) => setUploadProgress(Math.round((e.loaded * 100) / e.total)),
     });
 
     return response.data.secure_url;
@@ -60,7 +55,8 @@ export default function useImageUpload() {
         return null;
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || "Image upload failed..");
+      console.log("[ERR]:", err);
+      toast.error("Image upload failed..");
       return null;
     } finally {
       setIsUploading(false);

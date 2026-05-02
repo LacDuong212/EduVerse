@@ -32,7 +32,7 @@ export const getCourseAccess = async (userRole, userId, course) => {
   if (!userRole || !userId) return { isOwner: false, isEnrolled: false };
 
   const isOwner = userRole === "instructor" && course?.instructor?.ref?.toString() === userId;
-  const isEnrolled = userRole === "student" && await existsEnrollment(userId, course._id);
+  const isEnrolled = userRole === "student" && await existsEnrollment(userId, course?._id);
 
   return { isOwner, isEnrolled };
 };
@@ -189,10 +189,23 @@ const getMongoSort = (strategy) => {
   return maps[strategy] || { createdAt: -1 };
 };
 
-export const getCourseInfoForVideoId = async (videoId) => {
-  if (!videoId) return null;
+export const getCourseInfoForVideoId = async (videoId, insId = null) => {
+  if (!videoId) return { courseId: null, insId, isFree: false };
 
-  const result = await Course.aggregate([
+  const matchQuery = {
+    $or: [
+      { previewVideo: videoId },
+      { "pendingUpdate.data.previewVideo": videoId },
+      { "curriculum.sections.lectures.videoId": videoId },
+      { "curriculum.pendingUpdate.data.sections.lectures.videoId": videoId }
+    ]
+  };
+
+  if (mongoose.Types.ObjectId.isValid(insId)) {
+    matchQuery["instructor.ref"] = new mongoose.Types.ObjectId(insId);
+  }
+
+  const [result] = await Course.aggregate([
     {
       $lookup: {
         from: "curriculums",
@@ -201,44 +214,46 @@ export const getCourseInfoForVideoId = async (videoId) => {
         as: "curriculum"
       }
     },
-    { $unwind: "$curriculum" },
-    {
-      $match: {
-        $or: [
-          { previewVideo: videoId },
-          { "curriculum.sections.lectures.videoId": videoId }
-        ]
-      }
-    },
+    { $unwind: { path: "$curriculum", preserveNullAndEmptyArrays: true } },
+    { $match: matchQuery },
     {
       $project: {
         _id: 0,
         courseId: "$_id",
-        insId: "$instructor.ref",
-        previewVideo: 1,
-        sections: "$curriculum.sections"
+        livePreview: "$previewVideo",
+        pendingPreview: "$pendingUpdate.data.previewVideo",
+        liveSections: "$curriculum.sections",
+        pendingSections: "$curriculum.pendingUpdate.data.sections"
       }
     }
   ]);
 
-  if (!result.length) return null;
+  if (!result) return { courseId: null, insId, isFree: false };
 
-  const course = result[0];
+  const findLecture = (sections) =>
+    sections?.flatMap(s => s.lectures || []).find(l => l.videoId === videoId);
 
   let isFree = false;
 
-  if (course.previewVideo === videoId) {
+  if (result.livePreview === videoId || result.pendingPreview === videoId) {
     isFree = true;
-  } else {
-    const allLectures = course.sections.flatMap(s => s.lectures);
-    const targetLecture = allLectures.find(l => l.videoId === videoId);
-    isFree = targetLecture?.isFree ?? false;
+  }
+  else {
+    const pendingLecture = findLecture(result.pendingSections);
+    if (pendingLecture) {
+      isFree = !!pendingLecture.isFree;
+    } else {
+      const liveLecture = findLecture(result.liveSections);
+      if (liveLecture) {
+        isFree = !!liveLecture.isFree;
+      }
+    }
   }
 
   return {
-    courseId: course.courseId || null,
-    insId: course.insId || null,
-    isFree: isFree
+    courseId: result.courseId?.toString(),
+    insId: insId?.toString(),
+    isFree
   };
 };
 
@@ -997,4 +1012,17 @@ export const countInstructorLiveCourses = async (insId) => {
   });
 
   return count;
+};
+
+export const publicCourseExist = async (courseId) => {
+  if (!courseId || !mongoose.Types.ObjectId.isValid(courseId)) {
+    return false;
+  }
+
+  const result = await Course.exists({ 
+    _id: courseId, 
+    ...publicFilter,
+  });
+
+  return !!result;
 };

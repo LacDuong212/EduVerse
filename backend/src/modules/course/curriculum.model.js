@@ -61,5 +61,6 @@ const curriculumSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 curriculumSchema.index({ "sections.lectures.videoId": 1 });
+curriculumSchema.index({ "pendingUpdate.data.sections.lectures.videoId": 1 });
 
 export default mongoose.model("Curriculum", curriculumSchema);

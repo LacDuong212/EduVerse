@@ -1,4 +1,5 @@
 import AppError from "#exceptions/app.error.js";
+import { publicCourseExist } from "#modules/course/course.service.js";
 import { getOrderStatusByUserIdAndCourseId } from "#modules/order/order.service.js";
 import { STATUS_ENUM } from "#modules/order/order.model.js";
 import { withTransaction } from "#utils/transaction.js";
@@ -18,30 +19,39 @@ export const getCart = async (stuId, session = null) => {
 };
 
 export const addToCart = async (stuId, courseId) => {
-  let cart = await Cart.findOne({ user: stuId });
-  if (!cart) {
-    cart = await Cart.create({ user: stuId, courses: [] });
-  }
+  return await withTransaction(async (session) => {
+    const courseExists = await publicCourseExist(courseId);
+    if (!courseExists) throw new AppError("Course is either unavailable or not found.", 404);
 
-  const courseExists = cart.courses.some(c =>
-    c.course?.toString() === courseId);
-  if (courseExists) throw new AppError("Course already in cart.", 409);
+    const orderStatus = await getOrderStatusByUserIdAndCourseId(stuId, courseId);
+    if (orderStatus === STATUS_ENUM.completed)
+      throw new AppError("You already own this course.", 409);
+    if (orderStatus === STATUS_ENUM.pending)
+      throw new AppError("This course is already in a pending order.", 409);
 
-  const orderStatus = await getOrderStatusByUserIdAndCourseId(stuId, courseId);
-  if (orderStatus === STATUS_ENUM.completed)
-    throw new AppError("You already own this course.", 409);
-  if (orderStatus === STATUS_ENUM.pending)
-    throw new AppError("This course is already in a pending order.", 409);
+    const updatedCart = await Cart.findOneAndUpdate(
+      { user: stuId, "courses.course": { $ne: courseId } },
+      {
+        $addToSet: { courses: { course: courseId } }
+      },
+      {
+        session,
+        new: true,
+        upsert: true,
+        setDefaultsOnInsert: true
+      }
+    );
 
-  cart.courses.push({ course: courseId });
-  await cart.save();
+    if (!updatedCart)
+      throw new AppError("Course already in cart.", 409);
 
-  return cartMapper.toCartItemsDto(await cart.populate("courses.course"));
+    return cartMapper.toCartItemsDto(await updatedCart.populate("courses.course"));
+  });
 };
 
 export const bulkRemoveFromCart = async (stuId, courseIds, session = null) => {
   if (courseIds?.length === 0)
-    throw new AppError("Please provide at least one coure to remove from cart.", 400);
+    throw new AppError("Please provide at least one course to remove from cart.", 400);
 
   return await withTransaction(async (s) => {
     let cart = await Cart.findOne({ user: stuId }).session(s);

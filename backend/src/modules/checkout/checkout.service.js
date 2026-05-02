@@ -17,6 +17,16 @@ export const placeOrder = async (userId, body) => {
     const selectedItems = cart.filter(item => selectedCourseIds.includes(item?.courseId));
     if (!selectedItems.length) throw new AppError("Selected courses not found in cart.", 409);
 
+    const existingPendingOrder = await Order.findOne({
+      user: userId,
+      status: STATUS_ENUM.pending,
+      "courses.course": { $in: selectedCourseIds }
+    }).session(session);
+    if (existingPendingOrder) throw new AppError(
+      "One or more selected courses are already in a pending order. Please complete your existing payment or wait for it to expire.",
+      409
+    );
+
     let couponDoc = null;
     if (couponCode) {
       couponDoc = await couponService.validateCoupon(couponCode, userId, session);

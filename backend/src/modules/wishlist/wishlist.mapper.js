@@ -28,7 +28,7 @@ export const toWishlistDto = (course) => {
     title: course?.title || null,
     subtitle: course?.subtitle || null,
     image: course?.image || null,
-    thumnail: course?.thumnail || null,
+    thumbnail: course?.thumbnail || null,
     duration: course?.duration || null,
     lecturesCount: course?.lecturesCount || null,
 
@@ -47,7 +47,7 @@ export const toWishlistDto = (course) => {
       total: ratingTotal,
       count: ratingCount
     },
-    lectureCount: course?.lectureCount || 0
+    lecturesCount: course?.lecturesCount || 0
   }
 }
 
