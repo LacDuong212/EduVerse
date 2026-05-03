@@ -122,58 +122,56 @@ const CourseCard = ({ course }) => {
         }}
       />
 
-      <CardBody className="d-flex flex-column pb-0">
-        <div className="flex-grow-1">
-          <div className="d-flex align-items-center justify-content-between mb-2">
-            <div>
-              <span className={`badge ${levelBadge.class} bg-opacity-60`}>{levelBadge.text}</span>{" "}
-              <span className={`badge ${categoryBadge.class} bg-opacity-60`}>{categoryBadge.text}</span>
-            </div>
-            <span role="button" className="h6 mb-0" onClick={handleWishlistToggle}>
-              {isWishlisted ? <FaHeart fill="red" /> : <FaRegHeart />}
-            </span>
+      <CardBody className="d-flex flex-column pb-0 flex-grow-1">
+        <div className="d-flex align-items-center justify-content-between mb-2">
+          <div className="d-flex flex-wrap gap-1">
+            <span className={`badge ${levelBadge.class} bg-opacity-60`}>{levelBadge.text}</span>
+            <span className={`badge ${categoryBadge.class} bg-opacity-60`}>{categoryBadge.text}</span>
           </div>
+          <span role="button" className="h6 mb-0" onClick={handleWishlistToggle}>
+            {isWishlisted ? <FaHeart fill="red" /> : <FaRegHeart />}
+          </span>
+        </div>
 
-          <CardTitle>
-            <Link
-              to={`/courses/${currentCourseId}`}
-              className="text-decoration-none"
-            >
-              {title}
-            </Link>
-          </CardTitle>
+        <CardTitle>
+          <Link
+            to={`/courses/${currentCourseId}`}
+            className="text-decoration-none"
+          >
+            {title}
+          </Link>
+        </CardTitle>
 
-          {subtitle && <p className="mb-2 text-truncate-2">{subtitle}</p>}
+        {subtitle && <p className="mb-2 text-truncate-2">{subtitle}</p>}
 
-          <div className="mt-auto d-flex justify-content-between align-items-center">
-            <ul className="list-inline mb-0">
-              {Array.from({ length: fullStars }).map((_, idx) => (
-                <li key={`f-${idx}`} className="list-inline-item me-1 small">
-                  <FaStar size={14} className="text-warning" />
-                </li>
-              ))}
-              {hasHalf && (
-                <li className="list-inline-item me-1 small">
-                  <FaStarHalfAlt size={14} className="text-warning" />
-                </li>
-              )}
-              {Array.from({ length: emptyStars }).map((_, idx) => (
-                <li key={`e-${idx}`} className="list-inline-item me-1 small">
-                  <FaRegStar size={14} className="text-warning" />
-                </li>
-              ))}
-            </ul>
+        <div className="mt-auto d-flex justify-content-between align-items-center">
+          <ul className="list-inline mb-0">
+            {Array.from({ length: fullStars }).map((_, idx) => (
+              <li key={`f-${idx}`} className="list-inline-item me-1 small">
+                <FaStar size={14} className="text-warning" />
+              </li>
+            ))}
+            {hasHalf && (
+              <li className="list-inline-item me-1 small">
+                <FaStarHalfAlt size={14} className="text-warning" />
+              </li>
+            )}
+            {Array.from({ length: emptyStars }).map((_, idx) => (
+              <li key={`e-${idx}`} className="list-inline-item me-1 small">
+                <FaRegStar size={14} className="text-warning" />
+              </li>
+            ))}
+          </ul>
 
-            <div>
-              {isFree ? <h5 className="text-success mb-0">Free</h5> :
-                hasDiscount ? (
-                  <div className="text-end">
-                    <small className="text-secondary text-decoration-line-through">{formatCurrency(price)}</small>
-                    <h5 className="text-success mb-0">{formatCurrency(discountPrice)}</h5>
-                  </div>
-                ) : <h5 className="text-success mb-0">{formatCurrency(price)}</h5>
-              }
-            </div>
+          <div>
+            {isFree ? <h5 className="text-success mb-0">Free</h5> :
+              hasDiscount ? (
+                <div className="text-end">
+                  <small className="text-secondary text-decoration-line-through">{formatCurrency(price)}</small>
+                  <h5 className="text-success mb-0">{formatCurrency(discountPrice)}</h5>
+                </div>
+              ) : <h5 className="text-success mb-0">{formatCurrency(price)}</h5>
+            }
           </div>
         </div>
       </CardBody>

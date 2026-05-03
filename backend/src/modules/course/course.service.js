@@ -14,7 +14,7 @@ import { getPaginationOptions } from "#utils/pagination.js";
 import { withTransaction } from "#utils/transaction.js";
 import * as courseMapper from "./course.mapper.js";
 import Course, { LEVEL_ENUM, STATUS_ENUM, UPDATE_STATUS_ENUM } from "./course.model.js";
-import { courseSchema, priceFilterEnum, sortFilterEnum } from "./course.validation.js";
+import { validateCourseSchema, priceFilterEnum, sortFilterEnum } from "./course.validation.js";
 import Curriculum, { AI_DATA_STATUS } from "./curriculum.model.js";
 
 const publicFilter = {
@@ -189,7 +189,7 @@ const getMongoSort = (strategy) => {
   return maps[strategy] || { createdAt: -1 };
 };
 
-export const getCourseInfoForVideoId = async (videoId, insId = null) => {
+export const getCourseInfoForVideoId = async (videoId, insId = null, session = null) => {
   if (!videoId) return { courseId: null, insId, isFree: false };
 
   const matchQuery = {
@@ -226,7 +226,7 @@ export const getCourseInfoForVideoId = async (videoId, insId = null) => {
         pendingSections: "$curriculum.pendingUpdate.data.sections"
       }
     }
-  ]);
+  ], { session });
 
   if (!result) return { courseId: null, insId, isFree: false };
 
@@ -685,7 +685,7 @@ export const submitCourse = async (insId, courseId, changes = null, session = nu
 
     const categoryId = (mergedCourse.category?._id || mergedCourse.category)?.toString() || null;
 
-    const validation = courseSchema.safeParse({
+    const validation = validateCourseSchema.safeParse({
       ...mergedCourse,
       categoryId,
       curriculum: { sections: mergedCurr.sections || [] }

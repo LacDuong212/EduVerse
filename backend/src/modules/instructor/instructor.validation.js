@@ -1,8 +1,6 @@
 import mongoose from "mongoose";
 import { z } from "zod";
-import {
-  courseIdSchema, updateCourseSchema, submitCourseSchema
-} from "#modules/course/course.validation.js";
+import { courseIdSchema, updateCourseSchema } from "#modules/course/course.validation.js";
 import {
   nameSchema,
   optionalUrlSchema,
@@ -159,7 +157,7 @@ export const updateCourseRequest = z.object({
 
 export const submitCourseRequest = z.object({
   params: z.object({ courseId: courseIdSchema }),
-  body: submitCourseSchema
+  body: updateCourseSchema
 });
 
 export const courseStudentsRequest = z.object({

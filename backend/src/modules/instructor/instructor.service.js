@@ -21,7 +21,7 @@ export const handleBecomeInstructor = async (user) => {
         throw new AppError("Your request is currently pending approval.", 409);
 
       if (user.role === "instructor")
-        throw new AppError("Your acccount is blocked.", 403);
+        throw new AppError("Your account is blocked.", 403);
     }
 
     const newInstructor = new Instructor({
@@ -110,7 +110,7 @@ export const updateInstructorProfile = async (userId, changes) => {
 
     const result = await instructor.populate({
       path: "user",
-      select: "name email phonenumber pfpImg website socials"
+      select: "name email phonenumber pfpImg website socials isActivated"
     });
 
     return result.toObject();
