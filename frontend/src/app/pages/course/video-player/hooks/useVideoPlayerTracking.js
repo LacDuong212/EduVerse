@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import useLectureTracking from "@/hooks/useLearningProgress";
 
 export default function useVideoPlayerTracking({
@@ -7,159 +7,222 @@ export default function useVideoPlayerTracking({
   source,
   playerKey,
   currentProgress,
+  progressLoading,
+  progressReady = true,
   setLocalProgressOverrides,
 }) {
   const playerContainerRef = useRef(null);
+
   const [hasStartedPlayback, setHasStartedPlayback] = useState(false);
-  
-  // States cho Dialog & Seek
   const [showResumeDialog, setShowResumeDialog] = useState(false);
   const [resumeShownForLectureId, setResumeShownForLectureId] = useState(null);
   const [pendingSeekSec, setPendingSeekSec] = useState(null);
-
-  // State cho Modal kết thúc bài học
   const [showConclusionDialog, setShowConclusionDialog] = useState(false);
 
-  const lectureDurationSec = typeof currentLecture?.duration === "number" ? currentLecture.duration : undefined;
+  const lectureId = currentLecture?.lecId;
 
-  // ✅ FIX: Khai báo savedPos ở đây để dùng được trong return
-  const savedPos = currentProgress?.lastPositionSec || 0;
+  const lectureDurationSec =
+    typeof currentLecture?.duration === "number" ? currentLecture.duration : 0;
 
-  // 1. Setup API Tracking Hook
-  const { reportTimeUpdate, reportCompleted, resetTracking } = useLectureTracking({
-    courseId,
-    lectureId: currentLecture?._id,
-    durationSec: lectureDurationSec,
-    initialStatus: currentProgress?.status,
-  });
+  const savedPos = Math.max(0, Number(currentProgress?.lastPositionSec) || 0);
 
-  // 2. Reset khi đổi bài
+  const { reportTimeUpdate, reportCompleted, resetTracking } =
+    useLectureTracking({
+      courseId,
+      lectureId,
+      durationSec: lectureDurationSec,
+      initialStatus: currentProgress?.status,
+    });
+
   useEffect(() => {
-    if (!currentLecture?._id) return;
+    if (!lectureId) return;
+
     resetTracking();
-    setHasStartedPlayback(false); 
-    setShowConclusionDialog(false); 
-    
-    // Khởi tạo override rỗng
-    setLocalProgressOverrides((prev) => ({ ...prev, [currentLecture._id]: prev[currentLecture._id] || {} }));
-  }, [courseId, currentLecture?._id, resetTracking, setLocalProgressOverrides]);
+    setHasStartedPlayback(false);
+    setShowResumeDialog(false);
+    setShowConclusionDialog(false);
+    setResumeShownForLectureId(null);
+    setPendingSeekSec(null);
+  }, [courseId, lectureId, resetTracking]);
 
-  // 3. Logic hiển thị Resume Dialog
   useEffect(() => {
-    if (!currentLecture?._id || hasStartedPlayback) return;
-    if (resumeShownForLectureId === currentLecture._id) return;
+    if (!progressReady || progressLoading) return;
+    if (!lectureId) return;
+    if (resumeShownForLectureId === lectureId) return;
 
     const isCompleted = currentProgress?.status === "completed";
 
-    // Sử dụng savedPos đã khai báo ở trên
     if (savedPos > 0 && !isCompleted) {
       setShowResumeDialog(true);
-      setResumeShownForLectureId(currentLecture._id);
-    } else {
-      setShowResumeDialog(false);
+      setResumeShownForLectureId(lectureId);
     }
-  }, [currentLecture?._id, currentProgress, hasStartedPlayback, resumeShownForLectureId, savedPos]);
+  }, [
+    progressReady,
+    progressLoading,
+    lectureId,
+    resumeShownForLectureId,
+    currentProgress?.status,
+    savedPos,
+  ]);
 
-  // 4. Attach Events (TimeUpdate, Ended)
   useEffect(() => {
-    if (!currentLecture?._id || !source) return;
+    if (!progressReady || progressLoading) return;
+    if (!lectureId || !source) return;
+
     const videoEl = playerContainerRef.current?.querySelector("video");
     if (!videoEl) return;
 
-    const handleTime = () => {
-      const t = videoEl.currentTime || 0;
-      const dur = videoEl.duration || lectureDurationSec || 0;
+    const handleTimeUpdate = () => {
+      const currentTime = videoEl.currentTime || 0;
+      const duration = videoEl.duration || lectureDurationSec || 0;
 
-      if (!hasStartedPlayback && t > 0) setHasStartedPlayback(true);
-      if (currentProgress?.status === "completed") return; 
+      if (currentTime <= 0.5) return;
 
-      const previousPos = currentProgress?.lastPositionSec || 0;
-      if (t <= previousPos && !hasStartedPlayback) return; 
+      if (!hasStartedPlayback) {
+        setHasStartedPlayback(true);
+      }
 
-      reportTimeUpdate(t);
+      if (currentProgress?.status === "completed") return;
+
+      reportTimeUpdate(currentTime, duration);
 
       setLocalProgressOverrides((prev) => ({
         ...prev,
-        [currentLecture._id]: {
-          ...(prev[currentLecture._id] || {}),
+        [lectureId]: {
+          ...(prev[lectureId] || {}),
           status: "in_progress",
-          lastPositionSec: t,
-          durationSec: dur,
+          lastPositionSec: currentTime,
+          durationSec: duration,
         },
       }));
     };
 
     const handleEnded = () => {
-      const t = videoEl.currentTime || videoEl.duration || 0;
-      
-      // 1. Report Server
+      const duration = videoEl.duration || lectureDurationSec || 0;
+      const currentTime = videoEl.currentTime || duration || 0;
+
       if (currentProgress?.status !== "completed") {
-        reportCompleted(t, videoEl.duration);
+        reportCompleted(currentTime, duration);
       }
-      
-      // 2. Update Local UI (Completed)
+
       setLocalProgressOverrides((prev) => ({
         ...prev,
-        [currentLecture._id]: {
-          ...(prev[currentLecture._id] || {}),
+        [lectureId]: {
+          ...(prev[lectureId] || {}),
           status: "completed",
-          lastPositionSec: t,
-          durationSec: t,
+          lastPositionSec: duration || currentTime,
+          durationSec: duration || currentTime,
         },
       }));
 
-      // 3. Hiển thị Modal Summary/Quiz
       const aiData = currentLecture?.aiData;
-      const hasAiContent = aiData && (aiData.summary || (aiData.quizzes && aiData.quizzes.length > 0));
-      
+      const hasAiContent =
+        aiData &&
+        (aiData.summary ||
+          aiData.lessonNotes ||
+          (Array.isArray(aiData.quizzes) && aiData.quizzes.length > 0));
+
       if (hasAiContent) {
         setShowConclusionDialog(true);
       }
     };
 
-    videoEl.addEventListener("timeupdate", handleTime);
+    videoEl.addEventListener("timeupdate", handleTimeUpdate);
     videoEl.addEventListener("ended", handleEnded);
+
     return () => {
-      videoEl.removeEventListener("timeupdate", handleTime);
+      videoEl.removeEventListener("timeupdate", handleTimeUpdate);
       videoEl.removeEventListener("ended", handleEnded);
     };
-  }, [currentLecture, source, playerKey, hasStartedPlayback, currentProgress, lectureDurationSec, reportTimeUpdate, reportCompleted, setLocalProgressOverrides]);
+  }, [
+    progressReady,
+    progressLoading,
+    lectureId,
+    source,
+    playerKey,
+    hasStartedPlayback,
+    currentProgress?.status,
+    lectureDurationSec,
+    reportTimeUpdate,
+    reportCompleted,
+    setLocalProgressOverrides,
+    currentLecture,
+  ]);
 
-  // 5. Logic Seek
   useEffect(() => {
-    if (pendingSeekSec == null || !currentLecture?._id) return;
-    const videoEl = playerContainerRef.current?.querySelector("video");
-    if (!videoEl) return;
+    if (!progressReady || progressLoading) return;
+    if (pendingSeekSec == null || !lectureId) return;
 
-    const doSeek = () => {
-      if (videoEl.duration > 0) {
-        videoEl.currentTime = Math.min(pendingSeekSec, videoEl.duration - 0.1);
+    let cancelled = false;
+
+    const trySeek = () => {
+      if (cancelled) return;
+
+      const videoEl = playerContainerRef.current?.querySelector("video");
+
+      if (!videoEl) {
+        setTimeout(trySeek, 100);
+        return;
+      }
+
+      const doSeek = () => {
+        if (cancelled) return;
+
+        const duration = videoEl.duration || lectureDurationSec || 0;
+        const target =
+          duration > 0
+            ? Math.min(pendingSeekSec, Math.max(0, duration - 0.1))
+            : pendingSeekSec;
+
+        videoEl.currentTime = target;
         setPendingSeekSec(null);
+      };
+
+      if (videoEl.readyState >= 1) {
+        doSeek();
+      } else {
+        videoEl.addEventListener("loadedmetadata", doSeek, { once: true });
       }
     };
 
-    if (videoEl.readyState >= 1) doSeek();
-    else {
-      videoEl.addEventListener("loadedmetadata", doSeek, { once: true });
-    }
-  }, [pendingSeekSec, currentLecture?._id]);
+    trySeek();
 
-  // Handlers cho Dialog
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    progressReady,
+    progressLoading,
+    pendingSeekSec,
+    lectureId,
+    lectureDurationSec,
+    source,
+    playerKey,
+  ]);
+
   const handleResume = useCallback(() => {
     setShowResumeDialog(false);
-    if (savedPos > 0) setPendingSeekSec(savedPos);
+
+    if (savedPos > 0) {
+      setPendingSeekSec(savedPos);
+    }
   }, [savedPos]);
 
   const handleRestart = useCallback(() => {
     setShowResumeDialog(false);
     setPendingSeekSec(0);
-    if (currentLecture?._id) {
-       setLocalProgressOverrides(prev => ({
-           ...prev,
-           [currentLecture._id]: { status: 'not_started', lastPositionSec: 0, durationSec: lectureDurationSec || 0 }
-       }));
-    }
-  }, [currentLecture, lectureDurationSec, setLocalProgressOverrides]);
+
+    if (!lectureId) return;
+
+    setLocalProgressOverrides((prev) => ({
+      ...prev,
+      [lectureId]: {
+        status: "not_started",
+        lastPositionSec: 0,
+        durationSec: lectureDurationSec || 0,
+      },
+    }));
+  }, [lectureId, lectureDurationSec, setLocalProgressOverrides]);
 
   return {
     playerContainerRef,
@@ -167,9 +230,9 @@ export default function useVideoPlayerTracking({
     setShowResumeDialog,
     handleResume,
     handleRestart,
-    savedPos, // ✅ Giờ biến này đã tồn tại
-    durationForDialog: currentProgress?.durationSec ?? lectureDurationSec ?? 0,
+    savedPos,
+    durationForDialog: currentProgress?.durationSec || lectureDurationSec || 0,
     showConclusionDialog,
-    setShowConclusionDialog
+    setShowConclusionDialog,
   };
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -6,12 +6,14 @@ const backendUrl = import.meta.env.VITE_BACKEND_URL;
 export default function useCourseProgress(courseId) {
   const [progress, setProgress] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [ready, setReady] = useState(false);
   const [error, setError] = useState(null);
 
   const fetchProgress = useCallback(async () => {
     if (!courseId || !backendUrl) return;
 
     setLoading(true);
+    setReady(false);
     setError(null);
 
     try {
@@ -38,16 +40,22 @@ export default function useCourseProgress(courseId) {
       );
     } finally {
       setLoading(false);
+      setReady(true);
     }
   }, [courseId]);
 
   useEffect(() => {
+    setProgress(null);
+    setError(null);
+    setReady(false);
+
     fetchProgress();
   }, [fetchProgress]);
 
   return {
     progress,
     loading,
+    ready,
     error,
     refresh: fetchProgress,
   };

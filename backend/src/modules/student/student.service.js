@@ -123,23 +123,32 @@ export const getStudentStats = async (userId) => {
 
 export const handleUpdateLectureProgress = async (stuId, courseId, lecId, data) => {
   if (!stuId) throw new AppError("Student ID is required", 400);
+  if (!courseId) throw new AppError("Course ID is required", 400);
+  if (!lecId) throw new AppError("Lecture ID is required", 400);
 
   const isEnrolled = await existsEnrollment(stuId, courseId);
-  if (!isEnrolled)
+  if (!isEnrolled) {
     throw new AppError("You haven't enrolled this course yet!", 403);
+  }
 
   const {
-    currentTimeSec, deltaTimeSec, isCompleted, isNewSession
+    currentTimeSec = 0,
+    durationSec = 0,
+    deltaTimeSec = 0,
+    isCompleted = false,
+    isNewSession = false,
   } = data;
 
   let progress = await learningService.syncLectureProgress(stuId, courseId, lecId, {
     currentTimeSec,
+    durationSec,
     deltaTimeSec,
-    isNewSession
+    isNewSession,
   });
 
-  if (isCompleted)
+  if (isCompleted) {
     progress = await learningService.completeLecture(stuId, courseId, lecId);
+  }
 
   return progress;
 };

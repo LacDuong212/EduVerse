@@ -2,11 +2,19 @@ import { Collapse } from "react-bootstrap";
 import Playlist from "./Playlist";
 import useToggle from "@/hooks/useToggle";
 
-const CoursePlaylistSidebar = ({ course, currentLectureId, lectureProgressMap, onSelectLecture }) => {
+export default function CoursePlaylistSidebar({
+  course,
+  currentLectureId,
+  lectureProgressMap = {},
+  onSelectLecture,
+}) {
   const { isTrue: isOpen, toggle } = useToggle(true);
 
   return (
-    <div className="flex-shrink-0 border-start bg-white position-relative" style={{ zIndex: 10 }}>
+    <div
+      className="flex-shrink-0 border-start bg-white position-relative"
+      style={{ zIndex: 10 }}
+    >
       <button
         onClick={toggle}
         className="navbar-toggler btn btn-white mt-4 plyr-toggler"
@@ -21,17 +29,15 @@ const CoursePlaylistSidebar = ({ course, currentLectureId, lectureProgressMap, o
       </button>
 
       <Collapse className="collapse-horizontal" in={isOpen} dimension="width">
-        <div style={{ width: '400px', maxWidth: '100vw' }}>
+        <div style={{ width: 400, maxWidth: "100vw" }}>
           <Playlist
             course={course}
-            onSelect={onSelectLecture}
             currentId={currentLectureId}
             lectureProgress={lectureProgressMap}
+            onSelect={onSelectLecture}
           />
         </div>
       </Collapse>
     </div>
   );
-};
-
-export default CoursePlaylistSidebar;
+}
