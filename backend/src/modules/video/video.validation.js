@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { courseIdSchema } from "#modules/course/course.validation.js";
 import { CONTENT_TYPE } from "./draft-video.model.js";
 
 const contentTypeSchema = z.enum(CONTENT_TYPE, {
@@ -10,6 +11,7 @@ const contentTypeSchema = z.enum(CONTENT_TYPE, {
 
 export const uploadVideoRequest = z.object({
   body: z.object({
+
     contentType: contentTypeSchema
   }, "Content type is required")
 });

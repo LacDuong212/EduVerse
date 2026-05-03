@@ -15,7 +15,7 @@ export const getViewUrl = asyncHandler(async (req, res) => {
 // @roure POST /
 export const getUploadUrl = asyncHandler(async (req, res) => {
   const userId = req.user?.userId;
-  const { contentType } = req.validated?.body || {};
-  const result = await videoService.getVideoUploadUrl(userId, contentType);
+  const { courseId, contentType } = req.validated?.body || {};
+  const result = await videoService.getVideoUploadUrl(userId, courseId, contentType);
   sendSuccessResponse(res, 200, "Get video upload URL successfully.", result);
 });

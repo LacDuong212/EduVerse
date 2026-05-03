@@ -46,8 +46,8 @@ export const getVideoViewUrl = async (user, videoId) => {
     const { courseId, isFree } = info || {};
 
     if (!courseId) {
-      video.expireAt = new Date(Date.now() + EXPIRE_DURATION);
-      await video.save({ session });
+      // video.expireAt = new Date(Date.now() + EXPIRE_DURATION);
+      // await video.save({ session });
 
       logger.warn(`Set expiration for videoId: ${videoId}`);
       throw new AppError("Video not found.", 404);
@@ -71,7 +71,7 @@ export const getVideoViewUrl = async (user, videoId) => {
   });
 };
 
-export const getVideoUploadUrl = async (insId, contentType) => {
+export const getVideoUploadUrl = async (insId, courseId, contentType) => {
   if (!insId) throw new AppError("Instructor ID is required", 400);
 
   if (!CONTENT_TYPE.includes(contentType))
@@ -88,6 +88,7 @@ export const getVideoUploadUrl = async (insId, contentType) => {
     const [draft] = await DraftVideo.create([{
       videoId,
       userId: insId,
+      courseId,
       key: filePath,
       contentType
     }], { session: s });
