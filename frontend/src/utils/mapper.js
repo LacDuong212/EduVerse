@@ -12,7 +12,8 @@ export const mapResponseErrors = (errorsArr) => {
 export const mapZodErrors = (zodError) => {
   const fieldErrors = {};
   zodError.issues.forEach((issue) => {
-    fieldErrors[issue.path[0]] = issue.message;
+    const pathKey = issue.path.join(".");
+    fieldErrors[pathKey] = issue.message;
   });
   return fieldErrors;
 };

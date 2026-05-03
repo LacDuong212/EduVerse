@@ -35,7 +35,7 @@ export const updateStudentProfile = async (userId, changes, session = null) => {
 
     const result = await student.populate({
       path: "user",
-      select: "name email phonenumber pfpImg website socials"
+      select: "name email phonenumber pfpImg bio website socials isActivated"
     });
 
     return result.toObject();
@@ -64,7 +64,7 @@ export const getStudentProfile = async (userId) => {
   const student = await Student.findOne({ user: userId })
     .populate({
       path: "user",
-      select: "name email phonenumber pfpImg bio website socials"
+      select: "name email phonenumber pfpImg bio website socials isActivated"
     }).lean();
   if (!student) throw new AppError("Student not found.", 404);
 

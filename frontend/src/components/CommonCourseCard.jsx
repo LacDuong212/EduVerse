@@ -74,10 +74,10 @@ const CommonCourseCard = ({ course }) => {
 
       <CardBody className="pb-0 d-flex flex-column flex-grow-1">
         <div className="d-flex justify-content-between mb-3">
-          <span className="hstack gap-2">
-            <span className={`badge ${levelBadge.class} bg-opacity-60`}>{levelBadge.text}</span>{" "}
+          <div className="d-flex flex-wrap gap-1">
+            <span className={`badge ${levelBadge.class} bg-opacity-60`}>{levelBadge.text}</span>
             <span className={`badge ${categoryBadge.class} bg-opacity-60`}>{categoryBadge.text}</span>
-          </span>
+          </div>
         </div>
 
         <CardTitle className="mb-2">
