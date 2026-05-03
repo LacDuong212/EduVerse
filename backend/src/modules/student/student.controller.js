@@ -119,3 +119,22 @@ export const getMySkillRadar = asyncHandler(async (req, res) => {
   const result = await getStudentSkillsRadar(userId);
   return sendSuccessResponse(res, 200, "Get skill radar successfully!", result);
 });
+
+// @desc  Get enrolled course detail for learning page
+// @route GET /courses/:courseId
+export const getLearningCourseDetail = asyncHandler(async (req, res) => {
+  const userId = req.user?.userId;
+  const { courseId } = req.validated?.params || {};
+
+  const course = await studentService.getStudentLearningCourseDetail(
+    userId,
+    courseId
+  );
+
+  return sendSuccessResponse(
+    res,
+    200,
+    "Get learning course detail successfully!",
+    { course }
+  );
+});

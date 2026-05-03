@@ -4,6 +4,8 @@ import * as learningService from "#modules/learning/learning.service.js";
 import { updateProfile } from "#modules/user/user.service.js";
 import { withTransaction } from "#utils/transaction.js";
 import Student from "./student.model.js"
+import Course, { STATUS_ENUM as COURSE_STATUS } from "#modules/course/course.model.js";
+import { toStudentLearningCourseDto } from "#modules/course/course.mapper.js";
 
 export const createNewStudent = async (userId, session = null) => {
   if (!userId) throw new AppError("User ID is required", 400);
@@ -146,4 +148,39 @@ export const getStudentInterests = async (userId) => {
   if (!userId) return [];
   const student = await Student.findOne({ user: userId }).select("interests").lean();
   return student.interests || [];
+};
+
+export const getStudentLearningCourseDetail = async (userId, courseId) => {
+  if (!userId) throw new AppError("Student ID is required.", 400);
+  if (!courseId) throw new AppError("Course ID is required.", 400);
+
+  const isEnrolled = await existsEnrollment(userId, courseId);
+  if (!isEnrolled) {
+    throw new AppError("You haven't enrolled this course yet!", 403);
+  }
+
+  const course = await Course.findOne({
+    _id: courseId,
+    isDeleted: false,
+  })
+    .populate({
+      path: "category",
+      select: "name slug",
+    })
+    .populate({
+      path: "curriculum",
+      select: {
+        "_id": 0,
+        "__v": 0,
+      },
+    })
+    .lean();
+
+  if (!course) throw new AppError("Course not found.", 404);
+
+  if (course.status !== COURSE_STATUS.live) {
+    throw new AppError("Course is currently unavailable.", 404);
+  }
+
+  return toStudentLearningCourseDto(course);
 };

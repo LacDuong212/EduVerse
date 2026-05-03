@@ -8,11 +8,10 @@
     lectureId,
     durationSec,
     minDeltaSeconds = 5,
-    initialStatus, // ⬅️ NEW
+    initialStatus,
   } = {}) {
     const lastReportedTimeRef = useRef(0);
 
-    // 🔒 nếu lecture đã completed => disable tracking (không gửi timeupdate nữa)
     const disabledRef = useRef(initialStatus === "completed");
 
     useEffect(() => {
@@ -30,7 +29,6 @@
           return;
         }
 
-        // ✅ Nếu lecture đã completed rồi và đây KHÔNG PHẢI là gói completed nữa → bỏ qua
         if (disabledRef.current && !isCompleted) {
           console.log(
             "[useLectureTracking] SKIP: lecture already completed, ignore timeupdate",
@@ -43,14 +41,12 @@
         const last = lastReportedTimeRef.current || 0;
         const rawDelta = current - last;
 
-        // ⛔ Không cho delta âm
         const safeDelta = rawDelta > 0 ? rawDelta : 0;
 
         let isNewSession =
           last === 0 && current > 0 && !isCompleted && !disabledRef.current;
 
         if (disabledRef.current) {
-          // đã completed rồi thì không coi là session mới nữa
           isNewSession = false;
         }
 
@@ -89,13 +85,13 @@
         };
 
         console.log("[useLectureTracking] SENDING", {
-          url: `${backendUrl}/api/courses/${courseId}/progress/lectures/${lectureId}`,
+          url: `${backendUrl}/api/student/courses/${courseId}/lectures/${lectureId}/progress`,
           payload,
         });
 
         try {
           await axios.post(
-            `${backendUrl}/api/courses/${courseId}/progress/lectures/${lectureId}`,
+            `${backendUrl}/api/student/courses/${courseId}/lectures/${lectureId}/progress`,
             payload,
             { withCredentials: true }
           );

@@ -30,6 +30,11 @@ studentRoute.get("/streak", studentController.getMyStreak);
 studentRoute.post("/streak", studentController.updateMyStreak);
 studentRoute.get("/courses/stats", studentController.getCoursesStats);
 studentRoute.get(
+  "/courses/:courseId",
+  validate(studentSchema.courseIdParam),
+  studentController.getLearningCourseDetail
+);
+studentRoute.get(
   "/courses/:courseId/progress",
   validate(studentSchema.courseIdParam),
   studentController.getCourseLearningProgress
