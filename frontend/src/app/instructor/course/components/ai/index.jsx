@@ -1,12 +1,26 @@
+import { useEffect, useRef } from "react";
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Nav, Tab, Accordion, Badge, Alert } from "react-bootstrap";
 import { BsXLg } from "react-icons/bs";
-import { FaRobot, FaRedo, FaTrash, FaCheckCircle, FaLightbulb, FaListUl, FaQuestionCircle } from "react-icons/fa";
+import { FaCheckCircle, FaLightbulb, FaListUl, FaPlayCircle, FaQuestionCircle, FaRobot, FaRedo, FaTrash } from "react-icons/fa";
 import { useAiData } from "./useAiData";
 
 const AiData = ({ show, onClose, lecture, onGenerate, onDelete }) => {
   const { state, data, handlers } = useAiData(lecture, show);
 
-  // if no lecture selected, don't render anything
+  const videoRef = useRef(null);
+
+  useEffect(() => {
+    if (state.activeTab !== "source" && videoRef.current) {
+      videoRef.current.pause();
+    }
+  }, [state.activeTab]);
+
+  useEffect(() => {
+    if (!show && videoRef.current) {
+      videoRef.current.pause();
+    }
+  }, [show]);
+
   if (!lecture) return null;
 
   return (
@@ -68,6 +82,11 @@ const AiData = ({ show, onClose, lecture, onGenerate, onDelete }) => {
               <Nav.Item>
                 <Nav.Link eventKey="quiz" className="d-flex align-items-center">
                   <FaQuestionCircle className="me-2" /> Quiz <Badge bg="secondary" className="ms-2">{data.quizzes.length}</Badge>
+                </Nav.Link>
+              </Nav.Item>
+              <Nav.Item>
+                <Nav.Link eventKey="source" className="d-flex align-items-center">
+                  <FaPlayCircle className="me-2" /> Source
                 </Nav.Link>
               </Nav.Item>
             </Nav>
@@ -137,6 +156,30 @@ const AiData = ({ show, onClose, lecture, onGenerate, onDelete }) => {
                     </Accordion.Item>
                   ))}
                 </Accordion>
+              </Tab.Pane>
+
+              {/* TAB: Source Video */}
+              <Tab.Pane eventKey="source">
+                <div className="p-2">
+                  <h6>Source Video</h6>
+                  {data.videoUrl ? (
+                    <div className="rounded overflow-hidden border bg-black">
+                      <video
+                        ref={videoRef}
+                        key={data.videoUrl}
+                        controls
+                        className="w-100"
+                        style={{ maxHeight: "350px", display: "block" }}
+                        preload="metadata"
+                      >
+                        <source src={data.videoUrl} />
+                        Your browser does not support the video tag.
+                      </video>
+                    </div>
+                  ) : (
+                    <Alert variant="info">No source video available for this lecture.</Alert>
+                  )}
+                </div>
               </Tab.Pane>
             </Tab.Content>
           </Tab.Container>

@@ -1,5 +1,6 @@
 import Fuse from "fuse.js";
 import mongoose from "mongoose";
+import _ from "lodash";
 import AppError from "#exceptions/app.error.js";
 import { getAllCatgeoriesWithSort } from "#modules/category/category.service.js";
 import { existsEnrollment } from "#modules/enrollment/enrollment.service.js";
@@ -265,7 +266,7 @@ export const getCoursePublicDetails = async (user, courseId) => {
       path: "category",
       select: "name slug",
     }, {
-      path: "instructor",
+      path: "instructor.ref",
       select: "name pfpImg"
     }, {
       path: "curriculum",
@@ -576,6 +577,7 @@ const getPlainPendingData = (pendingUpdate) => {
   return pendingUpdate?.data || {};
 };
 
+// #TODO: seperate old, new video
 const getMergedState = (courseDoc, curriculumDoc) => {
   const pendingCourse = courseDoc.pendingUpdate?.data || {};
   const pendingCurr = curriculumDoc?.pendingUpdate?.data || {};
@@ -594,32 +596,49 @@ const getMergedState = (courseDoc, curriculumDoc) => {
 };
 
 const getProcessedCurriculum = (incomingSections, curriculumDoc) => {
-  const liveLectures = (curriculumDoc?.sections || []).flatMap(s => s.lectures || []);
-  const pendingLectures = (curriculumDoc?.pendingUpdate?.data?.sections || []).flatMap(s => s.lectures || []);
+  const liveSections = curriculumDoc?.sections || [];
+  const pendingSections = curriculumDoc?.pendingUpdate?.data?.sections || [];
+
+  let baseSections = _.cloneDeep(pendingSections.length > 0 ? pendingSections : liveSections);
+
+  if (_.isObject(incomingSections) && !_.isArray(incomingSections)) {
+    Object.entries(incomingSections).forEach(([key, value]) => {
+      const idx = parseInt(key);
+      if (!isNaN(idx)) {
+        baseSections[idx] = _.merge({}, baseSections[idx] || {}, value);
+      }
+    });
+  } else if (_.isArray(incomingSections)) {
+    incomingSections.forEach((value, idx) => {
+      if (value !== null && value !== undefined) {
+        baseSections[idx] = _.merge({}, baseSections[idx] || {}, value);
+      }
+    });
+
+    if (incomingSections.length < baseSections.length && !incomingSections.includes(null)) {
+      baseSections = incomingSections;
+    }
+  }
 
   const aiDataMap = new Map();
-  [...liveLectures, ...pendingLectures].forEach(l => {
-    if (l.videoId && l.aiData) aiDataMap.set(l.videoId, l.aiData);
+  [...liveSections, ...pendingSections].forEach(s => {
+    (s.lectures || []).forEach(l => {
+      if (l.videoId && l.aiData) aiDataMap.set(l.videoId, l.aiData);
+    });
   });
 
-  return (incomingSections || []).map(section => {
-    return {
-      _id: section.secId || new mongoose.Types.ObjectId(),
-      title: section.title,
-      lectures: (section.lectures || []).map(lecture => {
-        const preservedAiData = aiDataMap.get(lecture.videoId) || null;
-
-        return {
-          _id: lecture.lecId || new mongoose.Types.ObjectId(),
-          title: lecture.title,
-          duration: lecture.duration,
-          videoId: lecture.videoId,
-          isFree: lecture.isFree ?? false,
-          aiData: preservedAiData
-        };
-      })
-    };
-  });
+  return baseSections.map(section => ({
+    _id: section._id || (section.secId ? new mongoose.Types.ObjectId(section.secId) : new mongoose.Types.ObjectId()),
+    title: section.title,
+    lectures: (section.lectures || []).map(lecture => ({
+      _id: lecture._id || (lecture.lecId ? new mongoose.Types.ObjectId(lecture.lecId) : new mongoose.Types.ObjectId()),
+      title: lecture.title,
+      duration: lecture.duration,
+      videoId: lecture.videoId,
+      isFree: lecture.isFree ?? false,
+      aiData: lecture.aiData || aiDataMap.get(lecture.videoId) || null
+    }))
+  }));
 };
 
 export const updateCourse = async (insId, courseId, changes, session = null) => {
@@ -632,11 +651,25 @@ export const updateCourse = async (insId, courseId, changes, session = null) => 
     if (!curriculumDoc) curriculumDoc = new Curriculum({ courseId });
 
     const { curriculum, categoryId, ...courseData } = changes;
+    const abandonedVideoIds = [];
+
     if (categoryId) courseData.category = new mongoose.Types.ObjectId(categoryId);
 
     const cleanCourseData = Object.fromEntries(
       Object.entries(courseData).filter(([_, v]) => v !== undefined)
     );
+
+    if (cleanCourseData.previewVideo) {
+      const oldPendingPreview = course.pendingUpdate?.data?.previewVideo;
+      const livePreview = course.previewVideo;
+
+      if (oldPendingPreview &&
+        oldPendingPreview !== cleanCourseData.previewVideo &&
+        oldPendingPreview !== livePreview) {
+        abandonedVideoIds.push(oldPendingPreview);
+      }
+    }
+
     const plainPending = getPlainPendingData(course.pendingUpdate);
 
     course.pendingUpdate = {
@@ -647,7 +680,22 @@ export const updateCourse = async (insId, courseId, changes, session = null) => 
     course.markModified("pendingUpdate.data");
 
     if (curriculum) {
+      const existingPendingSections = curriculumDoc.pendingUpdate?.data?.sections || curriculumDoc.sections || [];
+      const liveSections = curriculumDoc.sections || [];
+
       const processedSections = getProcessedCurriculum(curriculum.sections, curriculumDoc);
+
+      const getVids = (secs) => (secs || []).flatMap(s => s.lectures || []).map(l => l.videoId).filter(Boolean);
+
+      const oldPendingVids = getVids(existingPendingSections);
+      const newPendingVids = new Set(getVids(processedSections));
+      const liveVids = new Set(getVids(liveSections));
+
+      oldPendingVids.forEach(vidId => {
+        if (!newPendingVids.has(vidId) && !liveVids.has(vidId)) {
+          abandonedVideoIds.push(vidId);
+        }
+      });
 
       curriculumDoc.pendingUpdate = {
         data: { sections: processedSections },
@@ -659,6 +707,10 @@ export const updateCourse = async (insId, courseId, changes, session = null) => 
 
     await course.save({ session: s });
     await curriculumDoc.save({ session: s });
+
+    if (abandonedVideoIds.length > 0) {
+      await expireOrphanVideos(abandonedVideoIds, s);
+    }
 
     const {
       course: mergedCourse, curriculum: mergedCurr
@@ -691,13 +743,10 @@ export const submitCourse = async (insId, courseId, changes = null, session = nu
       curriculum: { sections: mergedCurr.sections || [] }
     });
 
-    if (!validation.success) {
-      throw validation.error;
-    }
+    if (!validation.success) throw validation.error;
 
-    if (courseDoc.status === STATUS_ENUM.draft) {
+    if (courseDoc.status === STATUS_ENUM.draft)
       courseDoc.status = STATUS_ENUM.pending;
-    }
 
     const now = new Date();
 
@@ -1019,8 +1068,8 @@ export const publicCourseExist = async (courseId) => {
     return false;
   }
 
-  const result = await Course.exists({ 
-    _id: courseId, 
+  const result = await Course.exists({
+    _id: courseId,
     ...publicFilter,
   });
 

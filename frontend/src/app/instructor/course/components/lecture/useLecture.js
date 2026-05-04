@@ -17,7 +17,7 @@ const getVideoDuration = (source) => {
   });
 };
 
-export const useLecture = (show, initialLecture, onSave) => {
+export const useLecture = (show, initialLecture = null, onSave) => {
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -42,7 +42,7 @@ export const useLecture = (show, initialLecture, onSave) => {
           isFree: initialLecture.isFree || false,
           duration: initialLecture.duration || 0,
         });
-        setExistingVideoId(initialLecture.videoUrl || "");
+        setExistingVideoId(initialLecture.videoId || "");
       } else {
         setForm({ title: "", description: "", isFree: false, duration: 0 });
         setExistingVideoId("");
@@ -54,12 +54,14 @@ export const useLecture = (show, initialLecture, onSave) => {
 
   const previewHref = useMemo(() => {
     if (videoFile) return URL.createObjectURL(videoFile);
-    if (s3StreamUrl) return s3StreamUrl;
+    if (existingVideoId && s3StreamUrl) return s3StreamUrl;
     return null;
   }, [videoFile, s3StreamUrl]);
 
   useEffect(() => {
-    return () => { if (previewHref?.startsWith("blob:")) URL.revokeObjectURL(previewHref); };
+    return () => {
+      if (previewHref?.startsWith("blob:")) URL.revokeObjectURL(previewHref);
+    };
   }, [previewHref]);
 
   const updateField = (field, value) => {
@@ -102,10 +104,10 @@ export const useLecture = (show, initialLecture, onSave) => {
     if (videoFile) {
       const newVideoId = await uploadVideo(videoFile);
       if (newVideoId) {
-        onSave({ ...form, videoUrl: newVideoId });
+        onSave({ ...form, videoId: newVideoId });
       }
     } else {
-      onSave({ ...form, videoUrl: existingVideoId });
+      onSave({ ...form, videoId: existingVideoId });
     }
   };
 

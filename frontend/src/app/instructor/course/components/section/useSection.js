@@ -15,9 +15,7 @@ export default function useSection(show, initialSection, onSave) {
 
   const handleSave = () => {
     if (!title.trim()) return;
-    
     onSave(title.trim());
-    
     setTitle("");
   };
 

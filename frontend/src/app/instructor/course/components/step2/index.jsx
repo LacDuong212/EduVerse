@@ -1,10 +1,19 @@
+import { useEffect, useRef } from "react";
 import { Alert, Col, Nav, ProgressBar, Row, Spinner, Tab } from "react-bootstrap";
 import { FaTrash, FaVideo } from "react-icons/fa";
 import galleryImg from "@/assets/images/element/gallery.svg";
 import { useStep2 } from "./useStep2";
 
-const Step2 = ({ stepperInstance }) => {
+const Step2 = ({ stepperInstance, activeStep }) => {
   const { state, previews, refs, dropzone, methods } = useStep2(stepperInstance);
+
+  const videoRef = useRef(null);
+
+  useEffect(() => {
+    if (activeStep !== 2 && videoRef.current) {
+      videoRef.current.pause();
+    }
+  }, [activeStep]);
 
   return (
     <form
@@ -32,7 +41,7 @@ const Step2 = ({ stepperInstance }) => {
               <Tab.Pane eventKey="upload">
                 <div
                   {...dropzone.getRootProps()}
-                  className={`text-center p-4 border border-2 border-dashed rounded-3 ${state.fieldErrors?.image ? "border-danger bg-light-danger" :
+                  className={`text-center p-4 border border-2 border-dashed rounded-3 ${state.errors?.image ? "border-danger bg-light-danger" :
                     dropzone.isDragActive ? "border-primary bg-light" : ""
                     }`}
                   style={{ cursor: "pointer" }}
@@ -41,7 +50,7 @@ const Step2 = ({ stepperInstance }) => {
 
                   {state.isImgLoading ? (
                     <div className="text-primary">
-                      <div className="spinner-border mb-2" />
+                      <div className="spinner-border" />
                       <p>Uploading...</p>
                     </div>
                   ) : (
@@ -58,17 +67,17 @@ const Step2 = ({ stepperInstance }) => {
                     </>
                   )}
                 </div>
-                {state.fieldErrors?.image && <div className="text-danger small mt-2">{state.fieldErrors.image}</div>}
+                {state.errors?.image && <div className="text-danger small mt-2">{state.errors.image}</div>}
               </Tab.Pane>
               <Tab.Pane eventKey="url">
                 <input
                   type="url"
-                  className={`form-control ${state.fieldErrors?.image ? "is-invalid" : ""}`}
+                  className={`form-control ${state.errors?.image ? "is-invalid" : ""}`}
                   placeholder="Paste image URL here..."
                   value={state.imageState.url}
                   onChange={(e) => methods.setImageState(p => ({ ...p, url: e.target.value, file: null }))}
                 />
-                {state.fieldErrors?.image && <div className="invalid-feedback">{state.fieldErrors.image}</div>}
+                {state.errors?.image && <div className="invalid-feedback">{state.errors.image}</div>}
               </Tab.Pane>
             </Tab.Content>
           </Tab.Container>
@@ -101,18 +110,18 @@ const Step2 = ({ stepperInstance }) => {
         {/* VIDEO SECTION */}
         <Col xs={12} className="mt-4">
           <h5 className="mb-0">Course Preview Video</h5>
-          <p className="small">Upload a short preview to engage students. Max size: 2GB.</p>
+          <p className="small">Upload a short preview to engage students. Accepts only MP4, MOV, or OGG. Max size: 2GB.</p>
 
           <div className="mb-3">
             <input
               ref={refs.videoInputRef}
               type="file"
-              className={`form-control ${state.fieldErrors?.videoId ? "is-invalid" : ""}`}
-              accept="video/mp4, video/mov, video/mkv"
+              className={`form-control ${state.errors?.previewVideo ? "is-invalid" : ""}`}
+              accept="video/mp4,video/webm,video/ogg,.mp4,.webm,.ogv,.ogg"
               disabled={state.isVidLoading}
               onChange={methods.handleVideoFileChange}
             />
-            {state.fieldErrors?.videoId && <div className="invalid-feedback">{state.fieldErrors.videoId}</div>}
+            {state.errors?.previewVideo && <div className="invalid-feedback">{state.errors.previewVideo}</div>}
           </div>
 
           {state.isVidLoading && (
@@ -145,6 +154,7 @@ const Step2 = ({ stepperInstance }) => {
 
               {state.videoState.file ? (
                 <video
+                  ref={videoRef}
                   key={previews.videoObjectUrl}
                   controls
                   width="100%"
@@ -158,6 +168,7 @@ const Step2 = ({ stepperInstance }) => {
                 </div>
               ) : (
                 <video
+                  ref={videoRef}
                   controls
                   controlsList="nodownload"
                   width="100%"

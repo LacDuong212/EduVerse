@@ -8,21 +8,14 @@ import { useCourseEditor } from "../../CourseEditorContext";
 import { step1Fields, validateStep1 } from "../../schemas";
 
 export default function useStep1(stepperInstance) {
+  const { changes, currentCourse, updateField, onUpdate, errors: globalErrors } = useCourseEditor();
+
   const [options, setOptions] = useState({
     categories: [],
     languages: ["english", "vietnamese", "others"],
     levels: ["all", "beginner", "intermedidate", "advanced"],
   });
   const [optionLoading, setOptionLoading] = useState(true);
-
-  const {
-    currentCourse: course,
-    changes,
-    updateField: onUpdateField,
-    onUpdate,
-    errors: serverErrors,
-    setErrors,
-  } = useCourseEditor();
 
   useEffect(() => {
     const fetchFilterData = async () => {
@@ -43,10 +36,19 @@ export default function useStep1(stepperInstance) {
     fetchFilterData();
   }, []);
 
-  const displayData = {
-    ...course,
-    price: toCurrency(course?.price),
-    discountPrice: toCurrency(course?.discountPrice),
+  const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    const relevantErrors = _.pick(globalErrors, step1Fields);
+    if (!_.isEqual(errors, relevantErrors)) {
+      setErrors(relevantErrors);
+    }
+  }, [globalErrors]);
+
+  const formData = {
+    ...currentCourse,
+    price: toCurrency(currentCourse?.price),
+    discountPrice: toCurrency(currentCourse?.discountPrice),
   };
 
   const handleChange = (e) => {
@@ -57,9 +59,9 @@ export default function useStep1(stepperInstance) {
       finalValue = parseCurrency(value);
     }
 
-    onUpdateField(name, finalValue);
+    updateField(name, finalValue);
 
-    if (serverErrors[name]) setErrors(prev => ({ ...prev, [name]: null }));
+    if (globalErrors[name]) setErrors(prev => ({ ...prev, [name]: null }));
   };
 
   const handleCustomChange = (name, value) => {
@@ -70,29 +72,31 @@ export default function useStep1(stepperInstance) {
       }
     }
 
-    onUpdateField(name, value);
-    if (serverErrors[name]) setErrors(prev => ({ ...prev, [name]: null }));
+    updateField(name, value);
+    if (globalErrors[name]) setErrors(prev => ({ ...prev, [name]: null }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const { success: validateSuccess, errors: newErrors } = validateStep1(course);
-
+    const { success: validateSuccess, errors: newErrors } = validateStep1(currentCourse);
     if (!validateSuccess) {
       setErrors(prev => {
         const cleanedErrors = _.omit(prev, step1Fields);
         return { ...cleanedErrors, ...newErrors };
       });
+
+      toast.error("Please make sure all the fields are correct..");
+      return;
     }
 
     const step1Changes = _.pick(changes, step1Fields);
-
     if (_.isEmpty(step1Changes)) return stepperInstance?.next();
 
     const success = await onUpdate(step1Changes);
 
     if (success) {
+      setErrors({});
       toast.success("Progress saved!");
       stepperInstance?.next();
     }
@@ -101,8 +105,8 @@ export default function useStep1(stepperInstance) {
   return {
     ...options,
     optionLoading,
-    formData: displayData,
-    errors: serverErrors,
+    formData,
+    errors,
     handleChange,
     handleCustomChange,
     handleSubmit,

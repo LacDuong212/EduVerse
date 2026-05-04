@@ -122,7 +122,7 @@ const EditCourseForm = () => {
   const { currentCourse, isLoading } = useCourseEditor();
 
   const stepperRef = useRef(null);
-  const stepperInstance = useBSStepper(stepperRef, !isLoading && !!currentCourse);
+  const { stepperInstance, activeStep } = useBSStepper(stepperRef, !isLoading && !!currentCourse);
 
   if (isLoading) {
     return (
@@ -207,10 +207,10 @@ const EditCourseForm = () => {
             {/* --- Stepper Content --- */}
             <CardBody>
               <div className="bs-stepper-content">
-                <Step1 stepperInstance={stepperInstance} />
-                <Step2 stepperInstance={stepperInstance} />
-                <Step3 stepperInstance={stepperInstance} />
-                <Step4 stepperInstance={stepperInstance} />
+                <Step1 stepperInstance={stepperInstance} activeStep={activeStep} />
+                <Step2 stepperInstance={stepperInstance} activeStep={activeStep} />
+                <Step3 stepperInstance={stepperInstance} activeStep={activeStep} />
+                <Step4 stepperInstance={stepperInstance} activeStep={activeStep} />
               </div>
             </CardBody>
           </div>

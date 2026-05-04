@@ -3,7 +3,6 @@ import CommonCourseSlider from "@/components/CommonCourseSlider";
 
 const RelatedCourses = ({ relatedCourses = [] }) => {
   if (!relatedCourses || (Array.isArray(relatedCourses) && relatedCourses.length === 0)) return null;
-  console.log(relatedCourses)
 
   return (
     <section className="pt-0">
