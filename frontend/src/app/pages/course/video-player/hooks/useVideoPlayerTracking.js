@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import useLectureTracking from "@/hooks/useLearningProgress";
 
 export default function useVideoPlayerTracking({
@@ -20,7 +20,6 @@ export default function useVideoPlayerTracking({
   const [showConclusionDialog, setShowConclusionDialog] = useState(false);
 
   const lectureId = currentLecture?.lecId;
-
   const lectureDurationSec =
     typeof currentLecture?.duration === "number" ? currentLecture.duration : 0;
 
@@ -37,7 +36,7 @@ export default function useVideoPlayerTracking({
   useEffect(() => {
     if (!lectureId) return;
 
-    resetTracking();
+    resetTracking?.();
     setHasStartedPlayback(false);
     setShowResumeDialog(false);
     setShowConclusionDialog(false);
@@ -48,19 +47,27 @@ export default function useVideoPlayerTracking({
   useEffect(() => {
     if (!progressReady || progressLoading) return;
     if (!lectureId) return;
+    if (hasStartedPlayback) return;
     if (resumeShownForLectureId === lectureId) return;
 
-    const isCompleted = currentProgress?.status === "completed";
+    const shouldShowResume =
+      currentProgress?.lecId === lectureId &&
+      currentProgress?.status === "in_progress" &&
+      savedPos >= 5;
 
-    if (savedPos > 0 && !isCompleted) {
+    if (shouldShowResume) {
       setShowResumeDialog(true);
       setResumeShownForLectureId(lectureId);
+    } else {
+      setShowResumeDialog(false);
     }
   }, [
     progressReady,
     progressLoading,
     lectureId,
+    hasStartedPlayback,
     resumeShownForLectureId,
+    currentProgress?.lecId,
     currentProgress?.status,
     savedPos,
   ]);
@@ -80,6 +87,7 @@ export default function useVideoPlayerTracking({
 
       if (!hasStartedPlayback) {
         setHasStartedPlayback(true);
+        setShowResumeDialog(false);
       }
 
       if (currentProgress?.status === "completed") return;
@@ -90,6 +98,7 @@ export default function useVideoPlayerTracking({
         ...prev,
         [lectureId]: {
           ...(prev[lectureId] || {}),
+          lecId: lectureId,
           status: "in_progress",
           lastPositionSec: currentTime,
           durationSec: duration,
@@ -109,6 +118,7 @@ export default function useVideoPlayerTracking({
         ...prev,
         [lectureId]: {
           ...(prev[lectureId] || {}),
+          lecId: lectureId,
           status: "completed",
           lastPositionSec: duration || currentTime,
           durationSec: duration || currentTime,
@@ -120,7 +130,7 @@ export default function useVideoPlayerTracking({
         aiData &&
         (aiData.summary ||
           aiData.lessonNotes ||
-          (Array.isArray(aiData.quizzes) && aiData.quizzes.length > 0));
+          (aiData.quizzes && aiData.quizzes.length > 0));
 
       if (hasAiContent) {
         setShowConclusionDialog(true);
@@ -159,7 +169,6 @@ export default function useVideoPlayerTracking({
       if (cancelled) return;
 
       const videoEl = playerContainerRef.current?.querySelector("video");
-
       if (!videoEl) {
         setTimeout(trySeek, 100);
         return;
@@ -203,7 +212,7 @@ export default function useVideoPlayerTracking({
   const handleResume = useCallback(() => {
     setShowResumeDialog(false);
 
-    if (savedPos > 0) {
+    if (savedPos >= 5) {
       setPendingSeekSec(savedPos);
     }
   }, [savedPos]);
@@ -212,16 +221,17 @@ export default function useVideoPlayerTracking({
     setShowResumeDialog(false);
     setPendingSeekSec(0);
 
-    if (!lectureId) return;
-
-    setLocalProgressOverrides((prev) => ({
-      ...prev,
-      [lectureId]: {
-        status: "not_started",
-        lastPositionSec: 0,
-        durationSec: lectureDurationSec || 0,
-      },
-    }));
+    if (lectureId) {
+      setLocalProgressOverrides((prev) => ({
+        ...prev,
+        [lectureId]: {
+          lecId: lectureId,
+          status: "not_started",
+          lastPositionSec: 0,
+          durationSec: lectureDurationSec || 0,
+        },
+      }));
+    }
   }, [lectureId, lectureDurationSec, setLocalProgressOverrides]);
 
   return {

@@ -106,7 +106,7 @@ export const getCourseCurriculum = (curriculum, hasAiData = false) => {
 };
 
 const getAiData = (aiData) => {
-  aiData = aiData?.toJSON();
+  aiData = typeof aiData?.toJSON === "function" ? aiData.toJSON() : aiData;
   if (!aiData || Object.keys(aiData).length === 0) return null;
 
   const keyConcepts = (aiData.lessonNotes?.keyConcepts || []).map((kc) => ({
@@ -294,7 +294,7 @@ export const toStudentLearningCourseDto = (course) => {
     instructor: getCourseInstructor(course.instructor),
 
     curriculum: {
-      sections: getCourseCurriculum(course.curriculum?.sections || []),
+      sections: getCourseCurriculum(course.curriculum?.sections || [], true),
     },
   };
 };
