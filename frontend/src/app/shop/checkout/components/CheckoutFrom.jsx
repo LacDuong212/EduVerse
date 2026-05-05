@@ -1,12 +1,10 @@
-import { useState, useEffect } from 'react';
 import { Button, Card, Col, Container, Row, Form, InputGroup, Spinner } from 'react-bootstrap';
-import { useLocation, useNavigate, Link } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import { Link } from 'react-router-dom';
 
 import momoImg from '@/assets/images/client/momo.svg';
 import vnpayImg from '@/assets/images/client/vnpay.svg';
 import { formatCurrency } from '@/utils/currency';
-import useCartDetail from '../../cart/useCartDetails';
+import useCheckout from '../useCheckout';
 
 const CheckoutProductCard = ({ image, title, price, discountPrice }) => {
   return (
@@ -32,42 +30,25 @@ const CheckoutProductCard = ({ image, title, price, discountPrice }) => {
 };
 
 const CheckoutFrom = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { selectedIds } = location.state || {};
-
   const {
     displayedCourses,
     displayedSubTotal,
-    handleCheckout,
     couponCode,
     setCouponCode,
-    handleApplyCoupon,
+    onApplyCouponClick,
     handleRemoveCoupon,
     appliedCoupon,
     isApplyingCoupon,
     couponDiscountAmount,
-    finalTotal
-  } = useCartDetail(selectedIds);
+    finalTotal,
+    paymentMethod,
+    setPaymentMethod,
+    onPlaceOrder,
+    isFreeOrder,
+    isNoSelectedIds,
+  } = useCheckout();
 
-  const [paymentMethod, setPaymentMethod] = useState('');
-
-  useEffect(() => {
-    if (finalTotal === 0) {
-      setPaymentMethod('free');
-    } else {
-      if (paymentMethod === 'free') setPaymentMethod('');
-    }
-  }, [finalTotal]);
-
-  useEffect(() => {
-    if (!selectedIds || selectedIds.length === 0) {
-      toast.warning("Please select items from cart first.");
-      navigate('/student/cart');
-    }
-  }, [selectedIds, navigate]);
-
-  if (!selectedIds || selectedIds.length === 0) {
+  if (isNoSelectedIds) {
     return (
       <Container className="pt-5 text-center">
         <Spinner animation="border" variant="primary" />
@@ -75,28 +56,6 @@ const CheckoutFrom = () => {
       </Container>
     );
   }
-
-  const onApplyCouponClick = () => {
-    handleApplyCoupon();
-  };
-
-  const onPlaceOrder = async () => {
-    if (finalTotal > 0 && !paymentMethod) {
-      return toast.error('Please select payment method');
-    }
-
-    const result = await handleCheckout(paymentMethod);
-
-    if (result) {
-      if (result.type === 'redirect_internal') {
-        navigate(result.url);
-      } else if (result.type === 'redirect_external') {
-        window.location.href = result.url;
-      }
-    }
-  };
-
-  const isFreeOrder = finalTotal === 0;
 
   return (
     <section className="pt-5">

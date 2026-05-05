@@ -1,162 +1,259 @@
-// useMyCourses.js
 import axios from "axios";
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
-const getFirstLectureId = (course) => {
-  const sections = Array.isArray(course?.curriculum) ? course.curriculum : [];
-  for (const sec of sections) {
-    const lecs = Array.isArray(sec?.lectures) ? sec.lectures : [];
-    const free = lecs.find((l) => l?.isFree);
-    if (free?._id) return free._id;
-  }
-  for (const sec of sections) {
-    const lecs = Array.isArray(sec?.lectures) ? sec.lectures : [];
-    if (lecs.length && lecs[0]?._id) return lecs[0]._id;
-  }
-  if (course?.previewVideo) return "preview";
-  return null;
+const FALLBACK_IMAGE = "https://placehold.co/640x360?text=No+Course+Image";
+const DEFAULT_LIMIT = 8;
+
+const getContinueLectureId = (progress) => {
+  if (!progress) return null;
+
+  return (
+    progress.currentLectureId ||
+    progress.nextLectureId ||
+    progress.lastLearningLectureId ||
+    progress.lastLectureId ||
+    progress.activeLectureId ||
+    progress?.currentLecture?._id ||
+    progress?.nextLecture?._id ||
+    null
+  );
 };
 
 export const useMyCourses = () => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
   const [courseData, setCourseData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [statsLoading, setStatsLoading] = useState(false);
+  const [progressLoading, setProgressLoading] = useState(false);
+
+  const [filters, setFilters] = useState({
+    page: 1,
+    limit: DEFAULT_LIMIT,
+    search: "",
+    sort: "",
+  });
+
   const [pagination, setPagination] = useState({
     page: 1,
     totalPages: 1,
-    total: 0,
-    limit: 8,
+    totalItems: 0,
+    limit: DEFAULT_LIMIT,
   });
 
   const [stats, setStats] = useState({
     total: 0,
     completed: 0,
     inProgress: 0,
+    notStarted: 0,
   });
 
-  const fetchMyCourses = async (_page = 1) => {
+  const normalizeCourse = useCallback((course) => {
+    const id = course?.courseId || "";
+
+    return {
+      courseId: id,
+      name: course?.title || "Untitled Course",
+      image: course?.thumbnail || course?.image || FALLBACK_IMAGE,
+      totalLectures: Number(course?.totalLectures ?? 0),
+      completedLectures: Number(course?.completedLectures ?? 0),
+      progress: null,
+      continueLectureId: null,
+    };
+  }, []);
+
+  const fetchStats = useCallback(async () => {
     try {
-      setLoading(true);
+      setStatsLoading(true);
 
       const { data } = await axios.get(
-        `${backendUrl}/api/student/my-courses`,
+        `${backendUrl}/api/student/courses/stats`,
         { withCredentials: true }
       );
 
-      if (data.success) {
-        const courses = data.courses || [];
-
-        // 1) normalize
-        const normalized = courses.map((c) => ({
-          _id: c._id,
-          name: c.title || "Untitled Course",
-          image:
-            c.image ||
-            c.thumbnail ||
-            "https://placehold.co/640x360?text=No+Video+Preview",
-          totalLectures: c.lecturesCount ?? c.totalLectures ?? 0,
-          completedLectures: 0, // sẽ override sau
-          firstLectureId: getFirstLectureId(c),
-          hasPreview: !!c.previewVideo,
-        }));
-
-        // 2) lấy progress từng course
-        let withProgress = normalized;
-
-        if (courses.length > 0) {
-          try {
-            const progressResults = await Promise.all(
-              courses.map(async (c) => {
-                try {
-                  const url = `${backendUrl}/api/courses/${encodeURIComponent(
-                    c._id
-                  )}/progress`;
-
-                  const { data: pData } = await axios.get(url, {
-                    withCredentials: true,
-                  });
-
-                  const completedLecturesCount =
-                    pData?.progress?.completedLecturesCount ?? 0;
-
-                  return {
-                    courseId: c._id,
-                    completedLectures: completedLecturesCount,
-                  };
-                } catch (err) {
-                  console.warn(
-                    "[useMyCourses] cannot load progress for course",
-                    c._id,
-                    err
-                  );
-                  return {
-                    courseId: c._id,
-                    completedLectures: 0,
-                  };
-                }
-              })
-            );
-
-            const progressMap = {};
-            for (const item of progressResults) {
-              progressMap[item.courseId] = item.completedLectures;
-            }
-
-            withProgress = normalized.map((item) => ({
-              ...item,
-              completedLectures: progressMap[item._id] ?? 0,
-            }));
-          } catch (err) {
-            console.warn("[useMyCourses] progress batch error", err);
-          }
-        }
-
-        // ✅ set courseData với completedLectures
-        setCourseData(withProgress);
-
-        // 3) TÍNH stats: số course đã hoàn thành / đang học
-        const totalCourses = withProgress.length;
-        let completedCourses = 0;
-        let inProgressCourses = 0;
-
-        withProgress.forEach((c) => {
-          const total = Number(c.totalLectures || 0);
-          const done = Number(c.completedLectures || 0);
-
-          if (total > 0 && done >= total) {
-            completedCourses += 1;
-          } else if (done > 0 && done < total) {
-            inProgressCourses += 1;
-          }
-        });
+      if (data?.success) {
+        const result = data?.result || {};
 
         setStats({
-          total: totalCourses,
-          completed: completedCourses,
-          inProgress: inProgressCourses,
+          total: Number(result?.totalCourses ?? 0),
+          completed: Number(result?.totalCompleted ?? 0),
+          inProgress: Number(result?.totalInProgress ?? 0),
+          notStarted: Number(result?.totalNotStarted ?? 0),
         });
-
-        setPagination({
-          page: 1,
-          total: totalCourses,
-          limit: withProgress.length || 8,
-          totalPages: 1,
-        });
-      } else {
-        toast.error(data.message || "Failed to fetch courses");
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Error loading courses");
+      console.error("Fetch stats error:", error);
+      toast.error(
+        error?.response?.data?.message || "Error loading course statistics"
+      );
     } finally {
-      setLoading(false);
+      setStatsLoading(false);
     }
-  };
+  }, [backendUrl]);
+
+  const fetchProgressForCourses = useCallback(
+    async (courses) => {
+      const validCourses = courses.filter((course) => course.courseId);
+
+      if (validCourses.length === 0) return courses;
+
+      try {
+        setProgressLoading(true);
+
+        const progressResults = await Promise.all(
+          validCourses.map(async (course) => {
+            try {
+              const { data } = await axios.get(
+                `${backendUrl}/api/student/courses/${encodeURIComponent(
+                  course.courseId
+                )}/progress`,
+                { withCredentials: true }
+              );
+
+              const progress = data?.result || null;
+
+              return {
+                courseId: course.courseId,
+                progress,
+                continueLectureId: getContinueLectureId(progress),
+              };
+            } catch {
+              return {
+                courseId: course.courseId,
+                progress: null,
+                continueLectureId: null,
+              };
+            }
+          })
+        );
+
+        const progressMap = progressResults.reduce((acc, item) => {
+          acc[item.courseId] = item;
+          return acc;
+        }, {});
+
+        return courses.map((course) => ({
+          ...course,
+          progress: progressMap[course.courseId]?.progress || null,
+          continueLectureId:
+            progressMap[course.courseId]?.continueLectureId || null,
+        }));
+      } finally {
+        setProgressLoading(false);
+      }
+    },
+    [backendUrl]
+  );
+
+  const fetchCourses = useCallback(
+    async (activeFilters) => {
+      try {
+        setLoading(true);
+
+        const params = new URLSearchParams();
+        params.set("page", String(activeFilters.page || 1));
+        params.set("limit", String(DEFAULT_LIMIT));
+
+        if (activeFilters.search?.trim()) {
+          params.set("search", activeFilters.search.trim());
+        }
+
+        if (activeFilters.sort) {
+          params.set("sort", activeFilters.sort);
+        }
+
+        const { data } = await axios.get(
+          `${backendUrl}/api/student/courses?${params.toString()}`,
+          { withCredentials: true }
+        );
+
+        if (data?.success) {
+          const result = Array.isArray(data?.result) ? data.result : [];
+          const pageInfo = data?.pagination || {};
+
+          const normalizedCourses = result.map(normalizeCourse);
+          const coursesWithProgress = await fetchProgressForCourses(
+            normalizedCourses
+          );
+
+          setCourseData(coursesWithProgress);
+          setPagination({
+            page: Number(pageInfo?.page ?? activeFilters.page ?? 1),
+            totalPages: Number(pageInfo?.totalPages ?? 1),
+            totalItems: Number(pageInfo?.totalItems ?? 0),
+            limit: DEFAULT_LIMIT,
+          });
+        } else {
+          setCourseData([]);
+          setPagination({
+            page: 1,
+            totalPages: 1,
+            totalItems: 0,
+            limit: DEFAULT_LIMIT,
+          });
+        }
+      } catch (error) {
+        console.error("Fetch courses error:", error);
+        toast.error(error?.response?.data?.message || "Error loading courses");
+        setCourseData([]);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [backendUrl, normalizeCourse, fetchProgressForCourses]
+  );
 
   useEffect(() => {
-    fetchMyCourses(1);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    fetchStats();
+  }, [fetchStats]);
+
+  useEffect(() => {
+    fetchCourses(filters);
+  }, [fetchCourses, filters.page, filters.search, filters.sort]);
+
+  const fetchMyCourses = useCallback((page = 1) => {
+    setFilters((prev) => ({
+      ...prev,
+      page,
+      limit: DEFAULT_LIMIT,
+    }));
   }, []);
 
-  return { courseData, pagination, loading, fetchMyCourses, stats };
+  const handleSearch = useCallback((searchValue) => {
+    setFilters((prev) => ({
+      ...prev,
+      search: searchValue,
+      page: 1,
+      limit: DEFAULT_LIMIT,
+    }));
+  }, []);
+
+  const handleSort = useCallback((sortValue) => {
+    setFilters((prev) => ({
+      ...prev,
+      sort: sortValue,
+      page: 1,
+      limit: DEFAULT_LIMIT,
+    }));
+  }, []);
+
+  const refetch = useCallback(async () => {
+    await Promise.all([fetchStats(), fetchCourses(filters)]);
+  }, [fetchStats, fetchCourses, filters]);
+
+  return {
+    courseData,
+    pagination,
+    loading: loading || statsLoading,
+    progressLoading,
+    stats,
+    filters,
+    fetchMyCourses,
+    handleSearch,
+    handleSort,
+    refetch,
+  };
 };
+
+export default useMyCourses;

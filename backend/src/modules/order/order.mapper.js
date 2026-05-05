@@ -30,7 +30,60 @@ export const toOrderDto = (order) => {
   };
 };
 
-export const toOrderDtoList = (orders) => {
-  if (!Array.isArray(orders)) return [];
-  return orders.map(toOrderDto);
-};
+export const toOrderListDto = (order) => ({
+  orderId: String(order?._id || ""),
+  createdAt: order?.createdAt || null,
+  status: order?.status || "",
+  paymentMethod: order?.paymentMethod || "",
+  subTotal: Number(order?.subTotal || 0),
+  discountAmount: Number(order?.discountAmount || 0),
+  totalAmount: Number(order?.totalAmount || 0),
+  coursesCount: Number(order?.coursesCount || order?.courses?.length || 0),
+  firstCourseTitle: order?.firstCourseTitle || "",
+  firstCourseImage: order?.firstCourseImage || "",
+  courses: Array.isArray(order?.courses)
+    ? order.courses.map((item) => ({
+        pricePaid: Number(item?.pricePaid || 0),
+        course: item?.course
+          ? {
+              courseId: String(item.course._id || ""),
+              title: item.course.title || "",
+              image: item.course.image || null,
+              thumbnail: item.course.thumbnail || null,
+            }
+          : null,
+      }))
+    : [],
+});
+
+export const toOrderListDtoList = (orders) =>
+  Array.isArray(orders) ? orders.map(toOrderListDto) : [];
+
+export const toOrderDetailDto = (order) => ({
+  orderId: String(order?._id || ""),
+  createdAt: order?.createdAt || null,
+  status: order?.status || "",
+  paymentMethod: order?.paymentMethod || "",
+  subTotal: Number(order?.subTotal || 0),
+  discountAmount: Number(order?.discountAmount || 0),
+  totalAmount: Number(order?.totalAmount || 0),
+  coupon: order?.coupon
+    ? {
+        couponId: String(order.coupon._id || ""),
+        code: order.coupon.code || "",
+      }
+    : null,
+  courses: Array.isArray(order?.courses)
+    ? order.courses.map((item) => ({
+        pricePaid: Number(item?.pricePaid || 0),
+        course: item?.course
+          ? {
+              courseId: String(item.course._id || ""),
+              title: item.course.title || "",
+              image: item.course.image || null,
+              thumbnail: item.course.thumbnail || null,
+            }
+          : null,
+      }))
+    : [],
+});

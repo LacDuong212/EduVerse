@@ -1,14 +1,14 @@
-import { useState, useCallback, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useCallback, useMemo, useState } from "react";
 import { Row } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 
 import useVideoPlayerData from "../hooks/useVideoPlayerData";
 import useVideoPlayerTracking from "../hooks/useVideoPlayerTracking";
 
-import VideoScreen from "./VideoScreen";
 import CoursePlaylistSidebar from "./CoursePlaylistSidebar";
+import LectureConclusionModal from "./LectureConclusionModal";
 import ResumeProgressDialog from "./ResumeProgressDialog";
-import LectureConclusionModal from "./LectureConclusionModal"; 
+import VideoScreen from "./VideoScreen";
 
 export default function VideoPlayerDetail({
   course,
@@ -28,8 +28,22 @@ export default function VideoPlayerDetail({
     playerKey,
     lectureProgressMap,
     currentProgress,
-    lectures
-  } = useVideoPlayerData(course, courseId, lectureId, localProgressOverrides);
+    lectures,
+    progressLoading,
+    progressError,
+    progressReady,
+  } = useVideoPlayerData(
+    course,
+    courseId,
+    lectureId,
+    localProgressOverrides
+  );
+
+  const safeCurrentProgress = useMemo(() => {
+    if (!currentLecture?.lecId) return null;
+
+    return lectureProgressMap?.[currentLecture.lecId] || currentProgress || null;
+  }, [currentLecture?.lecId, lectureProgressMap, currentProgress]);
 
   const {
     playerContainerRef,
@@ -40,93 +54,107 @@ export default function VideoPlayerDetail({
     savedPos,
     durationForDialog,
     showConclusionDialog,
-    setShowConclusionDialog
+    setShowConclusionDialog,
   } = useVideoPlayerTracking({
     courseId,
     currentLecture,
     source,
     playerKey,
-    currentProgress,
-    setLocalProgressOverrides
+    currentProgress: safeCurrentProgress,
+    progressLoading,
+    progressReady,
+    setLocalProgressOverrides,
   });
 
-  const handleSelectLecture = useCallback((lec) => {
-      if (!lec?._id) return;
-      navigate(`/courses/${courseId}/watch/${lec._id}`);
-  }, [navigate, courseId]);
+  const handleSelectLecture = useCallback(
+    (lecture) => {
+      if (!lecture?.lecId) return;
+      navigate(`/courses/${courseId}/watch/${lecture.lecId}`);
+    },
+    [navigate, courseId]
+  );
 
   const handleNextLesson = useCallback(() => {
     setShowConclusionDialog(false);
+
     if (!lectures || !currentLecture) return;
 
-    const currentIndex = lectures.findIndex(l => l._id === currentLecture._id);
+    const currentIndex = lectures.findIndex(
+      (lecture) => lecture.lecId === currentLecture.lecId
+    );
+
     if (currentIndex !== -1 && currentIndex < lectures.length - 1) {
-      const nextLecture = lectures[currentIndex + 1];
-      handleSelectLecture(nextLecture);
+      handleSelectLecture(lectures[currentIndex + 1]);
     }
   }, [lectures, currentLecture, handleSelectLecture, setShowConclusionDialog]);
 
   const hasNextLesson = useMemo(() => {
     if (!lectures || !currentLecture) return false;
-    const idx = lectures.findIndex(l => l._id === currentLecture._id);
-    return idx !== -1 && idx < lectures.length - 1;
+
+    const index = lectures.findIndex(
+      (lecture) => lecture.lecId === currentLecture.lecId
+    );
+
+    return index !== -1 && index < lectures.length - 1;
   }, [lectures, currentLecture]);
 
   const isLastLecture = useMemo(() => {
     if (!lectures || !currentLecture) return false;
-    const idx = lectures.findIndex(l => l._id === currentLecture._id);
-    // Là bài cuối nếu index là phần tử cuối mảng
-    return idx !== -1 && idx === lectures.length - 1;
+
+    const index = lectures.findIndex(
+      (lecture) => lecture.lecId === currentLecture.lecId
+    );
+
+    return index !== -1 && index === lectures.length - 1;
   }, [lectures, currentLecture]);
 
   return (
     <section className="py-0 bg-dark position-relative min-vh-100">
       <Row className="g-0">
         <div className="d-flex w-100 flex-column flex-lg-row">
-          
-          {/* LEFT: Video Screen */}
           <div className="flex-grow-1" style={{ minWidth: 0 }}>
-             <VideoScreen 
-                playerContainerRef={playerContainerRef}
-                source={source}
-                playerKey={playerKey}
-                loading={loading}
-                error={error}
-                streamLoading={streamLoading}
-                streamError={streamError}
-                hasCourse={!!course}
-                hasLecture={!!currentLecture}
-             />
+            <VideoScreen
+              playerContainerRef={playerContainerRef}
+              source={source}
+              playerKey={playerKey}
+              loading={loading || progressLoading || !progressReady}
+              error={error || progressError}
+              streamLoading={streamLoading}
+              streamError={streamError}
+              hasCourse={!!course}
+              hasLecture={!!currentLecture}
+            />
           </div>
 
-          {/* RIGHT: Playlist Sidebar */}
-          <CoursePlaylistSidebar 
-             course={course}
-             currentLectureId={lectureId}
-             lectureProgressMap={lectureProgressMap}
-             onSelectLecture={handleSelectLecture}
+          <CoursePlaylistSidebar
+            course={course}
+            currentLectureId={lectureId}
+            lectureProgressMap={lectureProgressMap}
+            onSelectLecture={handleSelectLecture}
           />
         </div>
       </Row>
 
-      {/* Dialog Resume */}
       <ResumeProgressDialog
         show={showResumeDialog}
         onClose={() => setShowResumeDialog(false)}
         onResume={handleResume}
         onRestart={handleRestart}
-        savedSeconds={savedPos}
-        durationSeconds={durationForDialog}
+        savedSeconds={safeCurrentProgress?.lastPositionSec || savedPos}
+        durationSeconds={
+          safeCurrentProgress?.durationSec ||
+          currentLecture?.duration ||
+          durationForDialog
+        }
       />
 
-      <LectureConclusionModal 
+      <LectureConclusionModal
         show={showConclusionDialog}
         onHide={() => setShowConclusionDialog(false)}
         aiData={currentLecture?.aiData}
-        onNext={hasNextLesson ? handleNextLesson : null} 
-        
+        onNext={hasNextLesson ? handleNextLesson : null}
         courseId={courseId}
-        lectureId={currentLecture?._id}
+        lectureId={currentLecture?.lecId}
         isLastLecture={isLastLecture}
       />
     </section>

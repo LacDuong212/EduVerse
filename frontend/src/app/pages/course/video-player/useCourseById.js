@@ -1,73 +1,100 @@
 import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 
-/**
- * Hook lấy chi tiết 1 khóa học theo ID
- * @param {string} courseId - ID của khóa học (Mongo _id)
- * @returns {{ course:any, loading:boolean, error:string|null, refresh:Function }}
- */
 export default function useCourseById(courseId) {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-  const [course, setCourse]   = useState(null);
+  const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState(null);
+  const [error, setError] = useState(null);
 
   const fetchCourse = useCallback(async () => {
-    if (!courseId) return; // không gọi nếu thiếu id
+    if (!courseId || !backendUrl) return;
+
+    setLoading(true);
+    setError(null);
+
     try {
-      setLoading(true);
-      setError(null);
+      const url = `${backendUrl}/api/student/courses/${encodeURIComponent(
+        courseId
+      )}`;
 
-      const url = `${backendUrl}/api/courses/${encodeURIComponent(courseId)}`;
-      const { data } = await axios.get(url, { withCredentials: true });
+      const { data } = await axios.get(url, {
+        withCredentials: true,
+      });
 
-      // API của bạn: { success: true, course: {...} }
-      if (data?.success && data?.course) {
-        setCourse(data.course);
+      if (data?.success) {
+        setCourse(data.result?.course || null);
       } else {
         setCourse(null);
         setError(data?.message || "Failed to load course");
       }
     } catch (err) {
       setCourse(null);
-      setError(err?.response?.data?.message || err?.message || "Error");
+      setError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Error loading course"
+      );
     } finally {
       setLoading(false);
     }
   }, [backendUrl, courseId]);
 
   useEffect(() => {
-    // reset khi đổi id để tránh nhấp nháy dữ liệu cũ
-    setCourse(null);
-    setError(null);
-    if (!courseId) return;
-
     let isMounted = true;
-    (async () => {
+
+    const loadCourse = async () => {
+      if (!courseId || !backendUrl) return;
+
+      setCourse(null);
+      setError(null);
+      setLoading(true);
+
       try {
-        setLoading(true);
-        const url = `${backendUrl}/api/courses/${encodeURIComponent(courseId)}`;
-        const { data } = await axios.get(url, { withCredentials: true });
+        const url = `${backendUrl}/api/student/courses/${encodeURIComponent(
+          courseId
+        )}`;
+
+        const { data } = await axios.get(url, {
+          withCredentials: true,
+        });
+
         if (!isMounted) return;
 
-        if (data?.success && data?.course) {
-          setCourse(data.course);
+        if (data?.success) {
+          setCourse(data.result?.course || null);
         } else {
           setCourse(null);
           setError(data?.message || "Failed to load course");
         }
       } catch (err) {
         if (!isMounted) return;
-        setCourse(null);
-        setError(err?.response?.data?.message || err?.message || "Error");
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    })();
 
-    return () => { isMounted = false; };
+        setCourse(null);
+        setError(
+          err?.response?.data?.message ||
+            err?.message ||
+            "Error loading course"
+        );
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadCourse();
+
+    return () => {
+      isMounted = false;
+    };
   }, [backendUrl, courseId]);
 
-  return { course, loading, error, refresh: fetchCourse };
+  return {
+    course,
+    loading,
+    error,
+    refresh: fetchCourse,
+  };
 }

@@ -68,6 +68,7 @@ export const useHomeCourses = () => {
       dispatch(setRecommendedCourses([]));
       return;
     }
+    
 
     setRecLoading(true);
     try {

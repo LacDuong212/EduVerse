@@ -106,7 +106,6 @@ export const getCourseCurriculum = (curriculum, hasAiData = false) => {
 };
 
 const getAiData = (aiData) => {
-  // Handle both Mongoose subdocuments (have .toJSON) and plain lean objects
   aiData = typeof aiData?.toJSON === "function" ? aiData.toJSON() : aiData;
   if (!aiData || Object.keys(aiData).length === 0) return null;
 
@@ -265,6 +264,37 @@ export const toEditCourseDto = (course, curriculum) => {
     curriculum: {
       sections: getCourseCurriculum(curriculum?.sections, true) ?? null,
       hasPendingChanges: !!curriculum?.hasPendingChanges,
+    },
+  };
+};
+
+export const toStudentLearningCourseDto = (course) => {
+  if (!course) return null;
+
+  return {
+    courseId: course._id?.toString() || course.id?.toString() || null,
+
+    title: course.title || null,
+    subtitle: course.subtitle || null,
+    description: course.description || null,
+
+    image: course.image || null,
+    thumbnail: course.thumbnail || course.image || null,
+    previewVideo: course.previewVideo || null,
+
+    language: course.language || null,
+    level: course.level || null,
+    duration: course.duration || 0,
+    durationUnit: course.durationUnit || null,
+
+    sectionsCount: course.sectionsCount || 0,
+    lecturesCount: course.lecturesCount || 0,
+
+    category: getCourseCatgegory(course.category),
+    instructor: getCourseInstructor(course.instructor),
+
+    curriculum: {
+      sections: getCourseCurriculum(course.curriculum?.sections || [], true),
     },
   };
 };

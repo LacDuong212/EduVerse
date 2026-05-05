@@ -1,11 +1,9 @@
-import useProfile from '@/hooks/useProfile';
-import { useState } from 'react';
+import { useMemo } from "react";
 import { Card, CardBody, CardHeader, Col, OverlayTrigger, Row, Tooltip } from "react-bootstrap";
 import { BsQuestionCircle, BsX } from "react-icons/bs";
 import { FaFacebook, FaGlobe, FaInstagram, FaLinkedin, FaUndo, FaYoutube } from "react-icons/fa";
-import { toast } from 'react-toastify';
+import useMyProfile from "../useMyProfile";
 
-// constants
 const MAX_INPUT_LENGTH = {
   name: 48,
   phonenumber: 18,
@@ -16,108 +14,39 @@ const MAX_INPUT_LENGTH = {
   youtube: 128,
   website: 128,
 };
+
 const MAX_BIO_LINES = 5;
 
 const MyProfile = () => {
-  const { user, uploadAvatar, isAvatarUploading, updateProfile } = useProfile();
-  const [previewAvatar, setPreviewAvatar] = useState(null);
+  const {
+    student,
+    updateField,
+    avatarLogic,
+    handleFileChange,
+    submitProfile,
+    errors,
+    loading,
+    submitting,
+    isDirty,
+  } = useMyProfile();
 
-  const savedAvatarSrc = user?.pfpImg || "";
-  const currentAvatarSrc = previewAvatar === "" ? null : (previewAvatar || savedAvatarSrc);
+  const disableSubmit = avatarLogic.isUploading || loading || submitting || !isDirty;
 
-  const handleFileChange = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const getFieldProps = (fieldName) => ({
+    isinvalid: errors?.[fieldName],
+    className: `form-control ${errors?.[fieldName] ? "is-invalid" : ""}`,
+  });
 
-    // upload to get new avatar url
-    const uploadedUrl = await uploadAvatar(file);
-
-    // if success show new avatar
-    if (uploadedUrl) {
-      setPreviewAvatar(uploadedUrl);
-    }
-  };
-
-  const handleUndoAvatar = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setPreviewAvatar(null);
-  };
-
-  const handleRemoveAvatar = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setPreviewAvatar("");
-  };
+  const avatarText = useMemo(() => {
+    return (student?.name?.[0] || "S").toUpperCase();
+  }, [student?.name]);
 
   const handleBioChange = (e) => {
     const value = e.target.value;
-
-    // split by line breaks
     const lines = value.split(/\r\n|\r|\n/);
 
     if (lines.length <= MAX_BIO_LINES) {
-      e.target.value = value;
-    } else {
-      // prevent adding more lines
-      e.preventDefault();
-    }
-  };
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (isSubmitting) return;
-
-    // collect data
-    const formData = new FormData(e.target);
-    const name = (formData.get("name") || '').trim();
-    const phonenumber = (formData.get("phonenumber") || '').trim();
-
-    // validations
-    if (!name) {
-      toast.error('Full name is required');
-      return;
-    }
-
-    // phone: accept digits, spaces, +, -, parentheses; require 7-15 digits
-    if (phonenumber) {
-      const digitsOnly = phonenumber.replace(/\D/g, '');
-      if (digitsOnly.length < 7 || digitsOnly.length > 15) {
-        toast.error('Phone number is invalid');
-        return;
-      }
-    }
-
-    const payload = {
-      name,
-      phonenumber,
-      pfpImg: currentAvatarSrc === "" ? "" : currentAvatarSrc || null,
-      bio: formData.get("bio"),
-      socials: {
-        facebook: formData.get("facebook") || '',
-        linkedin: formData.get("linkedin") || '',
-        instagram: formData.get("instagram") || '',
-        youtube: formData.get("youtube") || '',
-      },
-      website: formData.get("website") || '',
-    };
-
-    setIsSubmitting(true);
-    try {
-      const result = await updateProfile(payload);
-      if (result && result.success) {
-        toast.success('Profile updated');
-      } else {
-        toast.error(result?.message || 'Failed to update profile');
-      }
-    } catch (err) {
-      console.error('Update profile error:', err);
-      toast.error(err?.message || 'Failed to update profile');
-    } finally {
-      setIsSubmitting(false);
+      updateField("bio", value);
     }
   };
 
@@ -126,40 +55,60 @@ const MyProfile = () => {
       <CardHeader className="bg-transparent border-bottom">
         <h3 className="card-header-title mb-0">Edit Profile</h3>
       </CardHeader>
+
       <CardBody>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={submitProfile}>
           <Row className="align-items-center g-3">
             <Col xs={12} md="auto">
               <div className="d-flex flex-column align-items-center me-2 gap-3">
                 <div className="mt-2 position-relative" style={{ width: "160px", height: "160px" }}>
-                  {currentAvatarSrc ? (
-                    <img src={currentAvatarSrc} className="rounded-3 border border-body border-3 shadow w-100 h-100 object-fit-cover" alt="Avatar" />
+                  {avatarLogic.currentSrc ? (
+                    <img
+                      src={avatarLogic.currentSrc}
+                      className="rounded-3 border border-body border-3 shadow w-100 h-100 object-fit-cover"
+                      alt="Avatar"
+                    />
                   ) : (
-                    <div className="rounded-3 border border-body border-3 shadow d-flex align-items-center justify-content-center bg-light w-100 h-100 fs-1 fw-bold">{(user?.name?.[0] || "U").toUpperCase()}</div>
+                    <div className="rounded-3 border border-body border-3 shadow d-flex align-items-center justify-content-center bg-light w-100 h-100 fs-1 fw-bold">
+                      {avatarText}
+                    </div>
                   )}
-                  {currentAvatarSrc ? (
+
+                  {avatarLogic.currentSrc ? (
                     <button
                       type="button"
                       className="btn btn-danger btn-sm position-absolute top-0 start-100 translate-middle rounded-circle p-0 d-flex align-items-center justify-content-center border border-2 border-white"
-                      onClick={handleRemoveAvatar}
+                      onClick={avatarLogic.remove}
                       style={{ width: "30px", height: "30px" }}
                     >
                       <BsX size={24} />
                     </button>
-                  ) : (savedAvatarSrc &&
-                    <button
-                      type="button"
-                      className="btn btn-primary btn-sm position-absolute top-0 start-100 translate-middle rounded-circle p-0 d-flex align-items-center justify-content-center border border-2 border-white"
-                      onClick={handleUndoAvatar}
-                      style={{ width: "30px", height: "30px" }}
-                    >
-                      <FaUndo size={14} />
-                    </button>
+                  ) : (
+                    avatarLogic.hasSavedAvatar && (
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-sm position-absolute top-0 start-100 translate-middle rounded-circle p-0 d-flex align-items-center justify-content-center border border-2 border-white"
+                        onClick={avatarLogic.undo}
+                        style={{ width: "30px", height: "30px" }}
+                      >
+                        <FaUndo size={14} />
+                      </button>
+                    )
                   )}
                 </div>
+
                 <div>
-                  <label className="btn btn-primary-soft btn-sm" htmlFor="uploadfile-1">{isAvatarUploading ? "Uploading..." : "Change"}</label>
-                  <input id="uploadfile-1" className="d-none" type="file" onChange={handleFileChange} disabled={isAvatarUploading} />
+                  <label className="btn btn-primary-soft btn-sm" htmlFor="uploadfile-1">
+                    {avatarLogic.isUploading ? "Uploading..." : "Change"}
+                  </label>
+                  <input
+                    id="uploadfile-1"
+                    className="d-none"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    disabled={avatarLogic.isUploading}
+                  />
                 </div>
               </div>
             </Col>
@@ -167,36 +116,45 @@ const MyProfile = () => {
             <Col xs={12} md>
               <Row className="g-3 g-md-4 mb-3">
                 <Col>
-                  <label className="form-label mb-0">Full Name <span className="text-danger">*</span></label>
+                  <label className="form-label mb-0">
+                    Full Name <span className="text-danger">*</span>
+                  </label>
                   <div className="input-group">
                     <input
                       type="text"
                       name="name"
                       maxLength={MAX_INPUT_LENGTH.name}
-                      className="form-control"
-                      defaultValue={user?.name || ""}
+                      value={student?.name || ""}
+                      onChange={(e) => updateField("name", e.target.value)}
+                      {...getFieldProps("name")}
                     />
+                    {errors?.name && <div className="invalid-feedback">{errors.name}</div>}
                   </div>
                 </Col>
               </Row>
 
               <Row className="g-3 g-md-4">
-                {/* Email */}
                 <Col md={6}>
                   <label className="form-label mb-0">
                     Email
                     <OverlayTrigger
                       placement="right"
-                      overlay={<Tooltip>Can be changed in Settings</Tooltip>}
+                      overlay={<Tooltip>Currently unchangeable, sorry!</Tooltip>}
                     >
                       <BsQuestionCircle className="text-primary small ms-1 mb-1" />
                     </OverlayTrigger>
                   </label>
                   <div className="input-group">
-                    <input type="text" className="form-control" defaultValue={user?.email || ''} disabled />
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={student?.email || ""}
+                      disabled
+                      readOnly
+                    />
                   </div>
                 </Col>
-                {/* Phonenumber */}
+
                 <Col md={6}>
                   <label className="form-label mb-0">Phone Number</label>
                   <div className="input-group">
@@ -204,9 +162,13 @@ const MyProfile = () => {
                       type="text"
                       name="phonenumber"
                       maxLength={MAX_INPUT_LENGTH.phonenumber}
-                      className="form-control"
-                      defaultValue={user?.phonenumber || ''}
+                      value={student?.phonenumber || ""}
+                      onChange={(e) => updateField("phonenumber", e.target.value)}
+                      {...getFieldProps("phonenumber")}
                     />
+                    {errors?.phonenumber && (
+                      <div className="invalid-feedback">{errors.phonenumber}</div>
+                    )}
                   </div>
                 </Col>
               </Row>
@@ -216,59 +178,128 @@ const MyProfile = () => {
           <Col xs={12}>
             <label className="h5 form-label mt-4">Bio</label>
             <textarea
-              className="form-control"
+              className={`form-control ${errors?.bio ? "is-invalid" : ""}`}
               maxLength={MAX_INPUT_LENGTH.bio}
               name="bio"
               rows={3}
-              placeholder='I am not a robot...'
-              defaultValue={user?.bio}
+              placeholder="I am not a robot..."
+              value={student?.bio || ""}
               onChange={handleBioChange}
             />
+            {errors?.bio && <div className="invalid-feedback">{errors.bio}</div>}
             <div className="form-text">Brief description for your profile. Max 5 lines.</div>
           </Col>
 
           <Col xs={12}>
             <h5 className="card-header-title mt-4 mb-3">Social Media</h5>
+
             <div className="mb-3">
               <label className="form-label d-flex align-items-center">
                 <FaFacebook className="fab fa-facebook text-facebook me-2 fs-5" />
                 Facebook profile URL
               </label>
-              <input className="form-control" maxLength={MAX_INPUT_LENGTH.facebook} type="text" name="facebook" placeholder="facebook.com/your_username" defaultValue={user?.socials?.facebook || ''} />
+              <div className="input-group">
+                <input
+                  maxLength={MAX_INPUT_LENGTH.facebook}
+                  type="text"
+                  name="facebook"
+                  placeholder="facebook.com/your_username"
+                  value={student?.socials?.facebook || ""}
+                  onChange={(e) => updateField("socials.facebook", e.target.value)}
+                  {...getFieldProps("socials.facebook")}
+                />
+                {errors?.["socials.facebook"] && (
+                  <div className="invalid-feedback">{errors["socials.facebook"]}</div>
+                )}
+              </div>
             </div>
+
             <div className="mb-3">
               <label className="form-label d-flex align-items-center mb-0">
                 <FaInstagram className="fab fa-instagram text-danger mb-1 me-2 fs-5" />
                 Instagram profile URL
               </label>
-              <input className="form-control" maxLength={MAX_INPUT_LENGTH.instagram} type="text" name="instagram" placeholder="instagram.com/your_username" defaultValue={user?.socials?.instagram || ''} />
+              <div className="input-group">
+                <input
+                  maxLength={MAX_INPUT_LENGTH.instagram}
+                  type="text"
+                  name="instagram"
+                  placeholder="instagram.com/your_username"
+                  value={student?.socials?.instagram || ""}
+                  onChange={(e) => updateField("socials.instagram", e.target.value)}
+                  {...getFieldProps("socials.instagram")}
+                />
+                {errors?.["socials.instagram"] && (
+                  <div className="invalid-feedback">{errors["socials.instagram"]}</div>
+                )}
+              </div>
             </div>
+
             <div className="mb-3">
               <label className="form-label d-flex align-items-center mb-0">
                 <FaLinkedin className="fa fa-linkedin text-linkedin mb-1 me-2 fs-5" />
                 Linkedin profile URL
               </label>
-              <input className="form-control" maxLength={MAX_INPUT_LENGTH.linkedin} type="text" name="linkedin" placeholder="linkedin.com/in/your_username" defaultValue={user?.socials?.linkedin || ''} />
+              <div className="input-group">
+                <input
+                  maxLength={MAX_INPUT_LENGTH.linkedin}
+                  type="text"
+                  name="linkedin"
+                  placeholder="linkedin.com/in/your_username"
+                  value={student?.socials?.linkedin || ""}
+                  onChange={(e) => updateField("socials.linkedin", e.target.value)}
+                  {...getFieldProps("socials.linkedin")}
+                />
+                {errors?.["socials.linkedin"] && (
+                  <div className="invalid-feedback">{errors["socials.linkedin"]}</div>
+                )}
+              </div>
             </div>
+
             <div className="mb-3">
               <label className="form-label d-flex align-items-center mb-0">
                 <FaYoutube className="fab fa-youtube text-youtube mb-1 me-2 fs-5" />
                 YouTube channel URL
               </label>
-              <input className="form-control" maxLength={MAX_INPUT_LENGTH.youtube} type="text" name="youtube" placeholder="youtube.com/@your_channel" defaultValue={user?.socials?.youtube || ''} />
+              <div className="input-group">
+                <input
+                  maxLength={MAX_INPUT_LENGTH.youtube}
+                  type="text"
+                  name="youtube"
+                  placeholder="youtube.com/@your_channel"
+                  value={student?.socials?.youtube || ""}
+                  onChange={(e) => updateField("socials.youtube", e.target.value)}
+                  {...getFieldProps("socials.youtube")}
+                />
+                {errors?.["socials.youtube"] && (
+                  <div className="invalid-feedback">{errors["socials.youtube"]}</div>
+                )}
+              </div>
             </div>
+
             <div className="mb-3">
               <label className="form-label d-flex align-items-center mb-0">
                 <FaGlobe className="text-success mb-1 me-2 fs-5" />
                 Website URL
               </label>
-              <input className="form-control" maxLength={MAX_INPUT_LENGTH.website} type="text" name="website" defaultValue={user?.website || ''} placeholder="https://www.example.com" />
+              <div className="input-group">
+                <input
+                  maxLength={MAX_INPUT_LENGTH.website}
+                  type="text"
+                  name="website"
+                  placeholder="https://www.example.com"
+                  value={student?.website || ""}
+                  onChange={(e) => updateField("website", e.target.value)}
+                  {...getFieldProps("website")}
+                />
+                {errors?.website && <div className="invalid-feedback">{errors.website}</div>}
+              </div>
             </div>
           </Col>
 
           <div className="d-flex justify-content-center justify-content-md-end mt-4">
-            <button type="submit" className="btn btn-primary mb-0" disabled={isAvatarUploading || isSubmitting}>
-              {isSubmitting ? 'Saving...' : 'Save Changes'}
+            <button type="submit" className="btn btn-primary mb-0" disabled={disableSubmit}>
+              {submitting ? "Saving..." : "Save Changes"}
             </button>
           </div>
         </form>

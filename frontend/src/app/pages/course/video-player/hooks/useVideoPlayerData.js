@@ -1,79 +1,113 @@
 import { useMemo } from "react";
-import useVideoStream from "@/hooks/useVideoStream";
-import { toPlyrSource, parseYouTubeId } from "@/utils/plyrSource";
 import useCourseProgress from "@/hooks/useCourseProgress";
+import useVideoStream from "@/hooks/useVideoStream";
+import { parseYouTubeId, toPlyrSource } from "@/utils/plyrSource";
 
-export default function useVideoPlayerData(course, courseId, lectureId, localProgressOverrides) {
-  const { progress } = useCourseProgress(courseId);
+export default function useVideoPlayerData(
+  course,
+  courseId,
+  lectureId,
+  localProgressOverrides = {}
+) {
+  const {
+    progress,
+    loading: progressLoading,
+    error: progressError,
+    ready: progressReady,
+  } = useCourseProgress(courseId);
 
-  // 1. Chuẩn hóa lectures
-  const lectures = useMemo(
-    () => (course?.curriculum ? course.curriculum.flatMap((s) => s.lectures || []) : []),
-    [course]
-  );
+  const sections = useMemo(() => {
+    return course?.curriculum?.sections || [];
+  }, [course]);
 
-  // 2. Chọn lecture hiện tại
+  const lectures = useMemo(() => {
+    return sections.flatMap((section) => section.lectures || []);
+  }, [sections]);
+
   const currentLecture = useMemo(() => {
     if (!course) return null;
+
     return (
-      lectures.find((l) => l._id === lectureId) ||
-      lectures.find((l) => l.isFree) ||
-      (course.previewVideo
-        ? { _id: "preview", title: course.title, videoUrl: course.previewVideo, isFree: true, duration: course.duration }
-        : null)
+      lectures.find((lecture) => lecture.lecId === lectureId) ||
+      lectures.find((lecture) => lecture.isFree) ||
+      null
     );
   }, [course, lectures, lectureId]);
 
-  const rawVideoSource = currentLecture?.videoUrl || null;
+  const videoId = currentLecture?.videoId || null;
 
-  // 3. Lấy stream URL
-  const { streamUrl, loading: streamLoading, error: streamError } = useVideoStream(courseId, rawVideoSource);
+  const {
+    streamUrl,
+    loading: streamLoading,
+    error: streamError,
+  } = useVideoStream(videoId);
 
-  // 4. Xác định Provider (Youtube / HTML5)
   const provider = useMemo(() => {
-    const urlForDetect = streamUrl || rawVideoSource;
-    const yt = urlForDetect ? parseYouTubeId(urlForDetect) : null;
+    const yt = streamUrl ? parseYouTubeId(streamUrl) : null;
     return yt ? "yt" : "html5";
-  }, [streamUrl, rawVideoSource]);
+  }, [streamUrl]);
 
-  // 5. Tạo Source cho Plyr
   const source = useMemo(() => {
-    if (!currentLecture || !course) return null;
-    const effectiveUrl = provider === "yt" ? streamUrl || rawVideoSource : streamUrl;
-    if (!effectiveUrl) return null;
-    return toPlyrSource(effectiveUrl, currentLecture.title || course.title, course.thumbnail);
-  }, [currentLecture, course, provider, streamUrl, rawVideoSource]);
+    if (!currentLecture || !streamUrl) return null;
 
-  // 6. Tạo Key để remount Plyr
+    return toPlyrSource(
+      streamUrl,
+      currentLecture.title || course?.title,
+      course?.thumbnail
+    );
+  }, [currentLecture, streamUrl, course]);
+
   const playerKey = useMemo(() => {
-    return [courseId || "no-course", currentLecture?._id || "no-lecture", provider].join("|");
-  }, [courseId, currentLecture?._id, provider]);
+    return [
+      courseId || "no-course",
+      currentLecture?.lecId || "no-lecture",
+      provider,
+    ].join("|");
+  }, [courseId, currentLecture?.lecId, provider]);
 
-  // 7. Merge Progress (Server + Local)
   const lectureProgressMap = useMemo(() => {
     const finalMap = {};
-    // Server data
-    if (progress?.lectures) {
-      progress.lectures.forEach((lec) => {
-        if (lec.lectureId) finalMap[lec.lectureId] = { ...lec };
+
+    if (Array.isArray(progress?.lectures)) {
+      progress.lectures.forEach((item) => {
+        const lecId = item.lecId || item.lectureId;
+
+        if (lecId) {
+          finalMap[lecId] = {
+            ...item,
+            lecId,
+          };
+        }
       });
     }
-    // Local overrides
-    Object.entries(localProgressOverrides || {}).forEach(([lecId, override]) => {
+
+    Object.entries(localProgressOverrides).forEach(([lecId, override]) => {
       const server = finalMap[lecId] || {};
-      const merged = { ...server, ...override };
-      if (server?.status === "completed") {
-        merged.status = "completed"; // Không bao giờ downgrade status
-        merged.durationSec = Math.max(server.durationSec || 0, override.durationSec || 0);
+      const merged = {
+        ...server,
+        ...override,
+      };
+
+      if (server.status === "completed") {
+        merged.status = "completed";
+        merged.durationSec = Math.max(
+          server.durationSec || 0,
+          override.durationSec || 0
+        );
       }
+
       finalMap[lecId] = merged;
     });
+
     return finalMap;
   }, [progress, localProgressOverrides]);
 
-  const currentProgress = currentLecture?._id ? lectureProgressMap[currentLecture._id] : null;
+  const currentProgress = currentLecture?.lecId
+    ? lectureProgressMap[currentLecture.lecId] || null
+    : null;
 
   return {
+    sections,
     lectures,
     currentLecture,
     streamLoading,
@@ -82,5 +116,8 @@ export default function useVideoPlayerData(course, courseId, lectureId, localPro
     playerKey,
     lectureProgressMap,
     currentProgress,
+    progressLoading,
+    progressError,
+    progressReady,
   };
 }

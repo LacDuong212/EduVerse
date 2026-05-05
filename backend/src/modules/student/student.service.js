@@ -4,6 +4,8 @@ import * as learningService from "#modules/learning/learning.service.js";
 import { updateProfile } from "#modules/user/user.service.js";
 import { withTransaction } from "#utils/transaction.js";
 import Student from "./student.model.js"
+import Course, { STATUS_ENUM as COURSE_STATUS } from "#modules/course/course.model.js";
+import { toStudentLearningCourseDto } from "#modules/course/course.mapper.js";
 
 export const createNewStudent = async (userId, session = null) => {
   if (!userId) throw new AppError("User ID is required", 400);
@@ -24,11 +26,7 @@ export const updateStudentProfile = async (userId, changes, session = null) => {
     const student = await Student.findOne({ user: userId }).session(s);
     if (!student) throw new AppError("Student not found.", 404);
 
-    const { userUpdate, stuUpdate } = getUpdateData(changes);
-
-    Object.keys(stuUpdate).forEach((key) => {
-      student.set(key, stuUpdate[key]);
-    });
+    const { userUpdate } = getUpdateData(changes);
 
     if (userUpdate && Object.keys(userUpdate).length > 0)
       await updateProfile(userId, userUpdate, s);
@@ -57,11 +55,7 @@ const getUpdateData = (data) => {
   if (data.socials?.linkedin !== undefined) userUpdate["socials.linkedin"] = data.socials.linkedin;
   if (data.socials?.youtube !== undefined) userUpdate["socials.youtube"] = data.socials.youtube;
 
-  const stuUpdate = {};
-
-  if (data.interests !== undefined) stuUpdate.interests = data.interests;
-
-  return { userUpdate, stuUpdate };
+  return { userUpdate };
 };
 
 export const getStudentProfile = async (userId) => {
@@ -129,23 +123,32 @@ export const getStudentStats = async (userId) => {
 
 export const handleUpdateLectureProgress = async (stuId, courseId, lecId, data) => {
   if (!stuId) throw new AppError("Student ID is required", 400);
+  if (!courseId) throw new AppError("Course ID is required", 400);
+  if (!lecId) throw new AppError("Lecture ID is required", 400);
 
   const isEnrolled = await existsEnrollment(stuId, courseId);
-  if (!isEnrolled)
+  if (!isEnrolled) {
     throw new AppError("You haven't enrolled this course yet!", 403);
+  }
 
   const {
-    currentTimeSec, deltaTimeSec, isCompleted, isNewSession
+    currentTimeSec = 0,
+    durationSec = 0,
+    deltaTimeSec = 0,
+    isCompleted = false,
+    isNewSession = false,
   } = data;
 
   let progress = await learningService.syncLectureProgress(stuId, courseId, lecId, {
     currentTimeSec,
+    durationSec,
     deltaTimeSec,
-    isNewSession
+    isNewSession,
   });
 
-  if (isCompleted)
+  if (isCompleted) {
     progress = await learningService.completeLecture(stuId, courseId, lecId);
+  }
 
   return progress;
 };
@@ -154,4 +157,39 @@ export const getStudentInterests = async (userId) => {
   if (!userId) return [];
   const student = await Student.findOne({ user: userId }).select("interests").lean();
   return student.interests || [];
+};
+
+export const getStudentLearningCourseDetail = async (userId, courseId) => {
+  if (!userId) throw new AppError("Student ID is required.", 400);
+  if (!courseId) throw new AppError("Course ID is required.", 400);
+
+  const isEnrolled = await existsEnrollment(userId, courseId);
+  if (!isEnrolled) {
+    throw new AppError("You haven't enrolled this course yet!", 403);
+  }
+
+  const course = await Course.findOne({
+    _id: courseId,
+    isDeleted: false,
+  })
+    .populate({
+      path: "category",
+      select: "name slug",
+    })
+    .populate({
+      path: "curriculum",
+      select: {
+        "_id": 0,
+        "__v": 0,
+      },
+    })
+    .lean();
+
+  if (!course) throw new AppError("Course not found.", 404);
+
+  if (course.status !== COURSE_STATUS.live) {
+    throw new AppError("Course is currently unavailable.", 404);
+  }
+
+  return toStudentLearningCourseDto(course);
 };

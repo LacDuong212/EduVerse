@@ -13,62 +13,25 @@ import {
   TabContent,
   TabPane,
 } from "react-bootstrap";
-import { useParams } from "react-router-dom";
 
 import CourseMaterial from "./CourseMaterial";
-import useLearningCourseDetail from "../useLearningCourse";
-import useCourseProgress from "@/hooks/useCourseProgress";
 
-const CourseDetail = () => {
-  const { courseId } = useParams(); // /student/courses/:courseId
-
-  const { course, loading } = useLearningCourseDetail();
-
-  console.log("[CourseDetail] render");
-  console.log("[CourseDetail] courseId from URL:", courseId);
-  console.log("[CourseDetail] loading:", loading);
-  console.log("[CourseDetail] course:", course);
-
-  // Lấy progress theo courseId từ URL (không phụ thuộc course._id)
-  const {
-    progress,
-    loading: progressLoading,
-    error: progressError,
-  } = useCourseProgress(courseId);
-
-  console.log("[CourseDetail] progressLoading:", progressLoading);
-  console.log("[CourseDetail] progress:", progress);
-
-  // Map progress.lectures -> lectureTracking cho CourseMaterial
-  // progress từ hook = data.progress (theo code useCourseProgress của bạn)
+const CourseDetail = ({ course, progress, progressError }) => {
   const lectureTracking = useMemo(() => {
     const map = {};
 
-    if (!progress?.lectures) {
-      console.log("[CourseDetail] no progress.lectures, return empty map");
-      return map;
-    }
+    if (!progress?.lectures) return map;
 
     for (const lp of progress.lectures) {
-      const lectureId = lp.lectureId;
+      const lectureId = lp.lecId;
       if (!lectureId) continue;
 
-      const statusFromBackend = lp.status || "not-started";
+      const status = lp.status || "not_started";
       const lastPositionSec = lp.lastPositionSec ?? 0;
       const durationSec = lp.durationSec ?? 0;
 
-      let status = statusFromBackend;
-      if (!statusFromBackend) {
-        if (durationSec > 0 && lastPositionSec >= durationSec) {
-          status = "completed";
-        } else if (lastPositionSec > 0) {
-          status = "in-progress";
-        } else {
-          status = "not-started";
-        }
-      }
-
       let percent = 0;
+
       if (status === "completed") {
         percent = 100;
       } else if (durationSec > 0 && lastPositionSec > 0) {
@@ -84,42 +47,10 @@ const CourseDetail = () => {
       };
     }
 
-    console.log("[CourseDetail] lectureTracking map:", map);
     return map;
   }, [progress]);
 
-  if (loading) {
-    console.log("[CourseDetail] loading = true -> show spinner");
-    return (
-      <section className="pt-0">
-        <Container>
-          <Row>
-            <Col xs={12} className="py-5 text-center">
-              <div className="spinner-border text-primary" />
-            </Col>
-          </Row>
-        </Container>
-      </section>
-    );
-  }
-
-  // ❌ Chỉ khi API course fail thực sự thì mới show lỗi này
-  if (!course) {
-    console.log("[CourseDetail] course is null -> show error UI");
-    return (
-      <section className="pt-0">
-        <Container>
-          <Row>
-            <Col xs={12} className="py-5 text-center text-muted">
-              Cannot load course detail.
-            </Col>
-          </Row>
-        </Container>
-      </section>
-    );
-  }
-
-  console.log("[CourseDetail] course is available, render UI");
+  if (!course) return null;
 
   return (
     <section className="pt-0">
@@ -128,7 +59,6 @@ const CourseDetail = () => {
           <Col xs={12}>
             <Card className="shadow rounded-2 p-0 mt-n5">
               <TabContainer defaultActiveKey="course">
-                {/* --------- NAV TABS --------- */}
                 <CardHeader className="border-bottom px-4 pt-3 pb-0">
                   <Nav
                     className="nav-bottom-line py-0"
@@ -146,36 +76,18 @@ const CourseDetail = () => {
                         Course Materials
                       </NavLink>
                     </NavItem>
-
-                    {/* <NavItem className="me-2 me-sm-4" role="presentation">
-                      <NavLink
-                        as="button"
-                        eventKey="discussion"
-                        className="mb-2 mb-md-0"
-                        type="button"
-                        role="tab"
-                      >
-                        Discussion
-                      </NavLink>
-                    </NavItem> */}
                   </Nav>
                 </CardHeader>
 
-                {/* --------- TAB CONTENT --------- */}
                 <CardBody className="p-sm-4">
                   <TabContent id="course-pills-tabContent">
-                    {/* TAB: COURSE MATERIALS */}
                     <TabPane
                       eventKey="course"
                       className="fade"
                       role="tabpanel"
                     >
                       <CourseMaterial
-                        title={course.title}
-                        curriculum={course.curriculum}
-                        previewVideo={course.previewVideo}
-                        instructor={course.instructor}
-                        description={course.description}
+                        curriculum={course.curriculum?.sections || []}
                         lectureTracking={lectureTracking}
                       />
 
@@ -184,13 +96,6 @@ const CourseDetail = () => {
                           Cannot load progress: {String(progressError)}
                         </p>
                       )}
-                    </TabPane>
-
-                    <TabPane
-                      eventKey="discussion"
-                      className="fade"
-                      role="tabpanel"
-                    >
                     </TabPane>
                   </TabContent>
                 </CardBody>
