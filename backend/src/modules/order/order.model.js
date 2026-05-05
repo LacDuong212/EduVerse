@@ -4,7 +4,7 @@ import Coupon from "#modules/coupon/coupon.model.js";
 
 export const ORDER_EXPIRATION = 1 * 60 * 60 * 1000;
 export const PAYMENT_METHOD_ENUM = new Enum({
-  mom: "momo",
+  momo: "momo",
   vnpay: "vnpay",
   free: "free"
 });

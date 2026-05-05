@@ -1,20 +1,28 @@
-import ChoicesFormInput from '@/components/form/ChoicesFormInput';
-import PageMetaData from '@/components/PageMetaData';
-import { Button, Card, CardBody, CardHeader, Col, ProgressBar, Row } from 'react-bootstrap';
-import { BsArrowRepeat, BsCheck, BsPlayCircle } from 'react-icons/bs';
-import { FaAngleLeft, FaAngleRight, FaSearch } from 'react-icons/fa';
-import { useMyCourses } from './useMyCourses';
+import { useEffect, useRef, useState } from "react";
+import ChoicesFormInput from "@/components/form/ChoicesFormInput";
+import PageMetaData from "@/components/PageMetaData";
+import {
+  Button,
+  Card,
+  CardBody,
+  CardHeader,
+  Col,
+  ProgressBar,
+  Row,
+} from "react-bootstrap";
+import { BsArrowRepeat, BsPlayCircle } from "react-icons/bs";
+import { FaAngleLeft, FaAngleRight, FaSearch } from "react-icons/fa";
+import { useMyCourses } from "./useMyCourses";
 import { useNavigate } from "react-router-dom";
-import Counter from './Counter';
+import Counter from "./Counter";
 
 const CourseRow = ({
-  _id,
+  courseId,
   completedLectures,
   image,
   name,
   totalLectures,
-  firstLectureId,
-  hasPreview,
+  continueLectureId,
 }) => {
   const navigate = useNavigate();
 
@@ -22,21 +30,27 @@ const CourseRow = ({
     totalLectures > 0 ? Math.trunc((completedLectures * 100) / totalLectures) : 0;
 
   const gotoLearning = () => {
-    navigate(`/student/courses/${_id}`);
+    if (continueLectureId) {
+      navigate(`/student/courses/${courseId}?lecture=${continueLectureId}`);
+      return;
+    }
+
+    navigate(`/student/courses/${courseId}`);
   };
+
   const gotoCourseDetail = () => {
-    navigate(`/courses/${_id}`);
+    navigate(`/courses/${courseId}`);
   };
 
   return (
     <tr>
       <td>
         <div className="d-flex align-items-center">
-          <div className="w-100px">
-            <img src={image} className="rounded" alt="courses" />
+          <div className="w-100px flex-shrink-0">
+            <img src={image} className="rounded w-100" alt={name} />
           </div>
 
-          <div className="flex-grow-1 ms-2">
+          <div className="flex-grow-1 ms-2 min-w-0">
             <h6 className="mb-1 text-truncate">
               <span
                 className="text-decoration-none text-primary"
@@ -54,11 +68,7 @@ const CourseRow = ({
 
               <ProgressBar
                 now={percentage}
-                className="progress progress-sm bg-opacity-10 aos"
-                data-aos="slide-right"
-                data-aos-delay={200}
-                data-aos-duration={1000}
-                data-aos-easing="ease-in-out"
+                className="progress progress-sm bg-opacity-10"
                 aria-valuenow={percentage}
                 aria-valuemin={0}
                 aria-valuemax={100}
@@ -73,11 +83,12 @@ const CourseRow = ({
       <td>
         {percentage === 100 ? (
           <Button
-
             className="icons-center"
-            onClick={gotoLearning}
-            variant="light" size="sm" >
-            <BsArrowRepeat className="me-1 icons-center" />
+            onClick={() => navigate(`/student/courses/${courseId}`)}
+            variant="light"
+            size="sm"
+          >
+            <BsArrowRepeat className="me-1" />
             Restart
           </Button>
         ) : (
@@ -96,11 +107,36 @@ const CourseRow = ({
   );
 };
 
-
 const StudentMyCourses = () => {
+  const {
+    courseData,
+    pagination,
+    loading,
+    progressLoading,
+    fetchMyCourses,
+    stats,
+    filters,
+    handleSearch,
+    handleSort,
+  } = useMyCourses();
 
-  const { courseData, pagination, loading, fetchMyCourses, stats } = useMyCourses();
+  const [searchText, setSearchText] = useState(filters.search || "");
+  const didMountRef = useRef(false);
 
+  useEffect(() => {
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      if (searchText !== filters.search) {
+        handleSearch(searchText);
+      }
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [searchText, filters.search, handleSearch]);
 
   const handlePageChange = (page) => {
     if (page >= 1 && page <= pagination.totalPages) {
@@ -111,39 +147,55 @@ const StudentMyCourses = () => {
   return (
     <>
       <PageMetaData title="My Courses" />
+
       <Card className="bg-transparent border rounded-3">
-        {/* <CardHeader className="bg-transparent border-bottom">
+        <CardHeader className="bg-transparent border-bottom">
           <Row className="g-3 align-items-center justify-content-between">
-            <Col md={8}>
-              <form className="rounded position-relative">
-                <input className="form-control pe-5 bg-transparent" type="search" placeholder="Search" aria-label="Search" />
-                <button className="bg-transparent p-2 position-absolute top-50 end-0 translate-middle-y border-0 text-primary-hover text-reset" type="submit">
-                  <FaSearch className="fs-6 " />
+            <Col md={8} lg={7}>
+              <form
+                className="rounded position-relative"
+                onSubmit={(e) => e.preventDefault()}
+              >
+                <input
+                  className="form-control pe-5 bg-transparent"
+                  type="search"
+                  placeholder="Search course title"
+                  aria-label="Search"
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
+                />
+                <button
+                  className="bg-transparent p-2 position-absolute top-50 end-0 translate-middle-y border-0 text-primary-hover text-reset"
+                  type="submit"
+                >
+                  <FaSearch className="fs-6" />
                 </button>
               </form>
             </Col>
-            <Col md={4}>
-              <form>
-                <ChoicesFormInput
-                  name="sort"
-                  className="form-select js-choice border-0 z-index-9 bg-transparent"
-                  aria-label=".form-select-sm"
-                  onChange={(e) => (e?.target?.value || "")}
-                >
-                  <option value="">Sort by</option>
-                  <option value="free">Free</option>
-                  <option value="newest">Newest</option>
-                  <option value="mostPopular">Most Popular</option>
-                  <option value="levelDesc">Level Descending</option>
-                </ChoicesFormInput>
-              </form>
+
+            <Col md={4} lg={3}>
+              <ChoicesFormInput
+                name="sort"
+                className="form-select js-choice border-0 z-index-9 bg-transparent"
+                value={filters.sort}
+                onChange={(e) => handleSort(e?.target?.value || "")}
+              >
+                <option value="">Sort by</option>
+                <option value="enrolledDesc">Latest Enrolled</option>
+                <option value="enrolledAsc">Oldest Enrolled</option>
+                <option value="activityDesc">Recent Activity</option>
+                <option value="activityAsc">Oldest Activity</option>
+                <option value="titleAsc">Title A-Z</option>
+                <option value="titleDesc">Title Z-A</option>
+              </ChoicesFormInput>
             </Col>
           </Row>
-        </CardHeader> */}
+        </CardHeader>
 
         <CardBody>
           <Counter stats={stats} loading={loading} />
-          {loading ? (
+
+          {(loading || progressLoading) && courseData.length === 0 ? (
             <div className="text-center py-5">
               <div className="spinner-border text-primary" role="status" />
               <p className="mt-3">Loading your courses...</p>
@@ -154,15 +206,20 @@ const StudentMyCourses = () => {
                 <thead>
                   <tr>
                     <th scope="col">Course Title</th>
-                    <th scope="col">Total Lectures</th>
-                    <th scope="col">Completed Lectures</th>
+                    <th scope="col" className="text-center">
+                      Total Lectures
+                    </th>
+                    <th scope="col" className="text-center">
+                      Completed Lectures
+                    </th>
                     <th scope="col">Action</th>
                   </tr>
                 </thead>
+
                 <tbody>
                   {courseData.length > 0 ? (
-                    courseData.map((item, idx) => (
-                      <CourseRow key={idx} {...item} />
+                    courseData.map((item) => (
+                      <CourseRow key={item.courseId} {...item} />
                     ))
                   ) : (
                     <tr>
@@ -176,14 +233,14 @@ const StudentMyCourses = () => {
             </div>
           )}
 
-          {/* pagination */}
           {!loading && pagination.totalPages > 1 && (
             <div className="d-sm-flex justify-content-sm-between align-items-sm-center mt-4">
               <p className="mb-0 text-center text-sm-start">
                 Showing page {pagination.page} of {pagination.totalPages}
               </p>
+
               <ul className="pagination pagination-sm pagination-primary-soft mb-0">
-                <li className={`page-item ${pagination.page === 1 && "disabled"}`}>
+                <li className={`page-item ${pagination.page === 1 ? "disabled" : ""}`}>
                   <button
                     className="page-link"
                     onClick={() => handlePageChange(pagination.page - 1)}
@@ -195,8 +252,7 @@ const StudentMyCourses = () => {
                 {Array.from({ length: pagination.totalPages }).map((_, i) => (
                   <li
                     key={i}
-                    className={`page-item ${pagination.page === i + 1 ? "active" : ""
-                      }`}
+                    className={`page-item ${pagination.page === i + 1 ? "active" : ""}`}
                   >
                     <button
                       className="page-link"
@@ -208,8 +264,9 @@ const StudentMyCourses = () => {
                 ))}
 
                 <li
-                  className={`page-item ${pagination.page === pagination.totalPages && "disabled"
-                    }`}
+                  className={`page-item ${
+                    pagination.page === pagination.totalPages ? "disabled" : ""
+                  }`}
                 >
                   <button
                     className="page-link"

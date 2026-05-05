@@ -1,9 +1,7 @@
-// src/components/StreakBadge.jsx
 import { useEffect, useMemo } from "react";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import { FaFire } from "react-icons/fa";
 
-// Helper format YYYY-MM-DD
 function formatYMD(date) {
   const d = new Date(date);
   const y = d.getFullYear();
@@ -15,7 +13,6 @@ function formatYMD(date) {
 const dayLabels = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
 const StreakBadge = ({ streak, loading }) => {
-  // 🔥 inject CSS animation cho icon (chỉ 1 lần)
   useEffect(() => {
     if (typeof document === "undefined") return;
 
@@ -37,7 +34,6 @@ const StreakBadge = ({ streak, loading }) => {
     }
   }, []);
 
-  // 🔢 luôn chuẩn bị data trước, KHÔNG return trước khi gọi hooks
   const current = streak?.currentStreak ?? 0;
   const longest = streak?.longestStreak ?? 0;
   const activeDates = Array.isArray(streak?.activeDates)
@@ -45,7 +41,6 @@ const StreakBadge = ({ streak, loading }) => {
     : [];
   const todayDone = !!streak?.todayDone;
 
-  // 7 ngày gần nhất (từ hôm nay lùi 6 ngày)
   const days = useMemo(() => {
     const arr = [];
     const today = new Date();
@@ -76,7 +71,6 @@ const StreakBadge = ({ streak, loading }) => {
     </Tooltip>
   );
 
-  // Sau khi gọi hooks xong mới return
   if (loading) {
     return <span className="text-muted small">Loading streak...</span>;
   }
@@ -117,7 +111,7 @@ const StreakBadge = ({ streak, loading }) => {
                 fontSize: "0.7rem",
                 background: d.active ? "#ff4d4d" : "#e9ecef",
                 color: d.active ? "white" : "#adb5bd",
-                boxShadow: "none", // không viền hôm nay
+                boxShadow: "none",
               }}
               title={`${d.label} - ${d.dateStr} ${
                 d.active ? "(learned)" : ""

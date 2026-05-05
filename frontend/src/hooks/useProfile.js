@@ -13,7 +13,7 @@ export default function useProfile() {
   const updateProfile = async (updates) => {
     try {
       const { data } = await axios.patch(
-        `${backendUrl}/api/user/profile`,
+        `${backendUrl}/api/student/profile`,
         updates,
         { withCredentials: true }
       );

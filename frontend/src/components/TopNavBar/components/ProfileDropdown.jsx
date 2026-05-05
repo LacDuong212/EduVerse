@@ -80,7 +80,7 @@ const ProfileDropdown = ({ className, dropdownItems }) => {
               )}
             </div>
             <div>
-              <a className="h6" href="#">
+              <a className="h6">
                 {user?.name || "User"}
               </a>
               <p className="small m-0">{user?.email || "user@example.com"}</p>

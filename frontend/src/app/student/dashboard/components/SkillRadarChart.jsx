@@ -10,12 +10,20 @@ import {
 import { Radar } from "react-chartjs-2";
 import { useEffect, useMemo, useState } from "react";
 
-ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend);
+ChartJS.register(
+  RadialLinearScale,
+  PointElement,
+  LineElement,
+  Filler,
+  Tooltip,
+  Legend
+);
 
 const clamp = (n) => Math.max(0, Math.min(100, Number(n) || 0));
+
 const CATEGORY_TO_SKILL = {
-  "Web Development": "Frontend/Backend Web",
-  Security: "Cyber Security",
+  "Web Development": "Frontend / Backend Web",
+  Security: "Cybersecurity",
   "Information Technology": "IT Fundamentals",
   DevOps: "CI/CD & Deployment",
   Data: "Data Analysis",
@@ -26,15 +34,11 @@ const CATEGORY_TO_SKILL = {
   "Artificial Intelligence": "Machine Learning",
 };
 
-/**
- * Read Bootstrap CSS variables so it matches light/dark automatically
- * Assumes your app toggles theme via Bootstrap (data-bs-theme="dark") or similar.
- */
 const readThemeTokens = () => {
   const el = document.documentElement;
   const cs = getComputedStyle(el);
 
-  const v = (name, fallback) => (cs.getPropertyValue(name).trim() || fallback);
+  const v = (name, fallback) => cs.getPropertyValue(name).trim() || fallback;
 
   const primary = v("--bs-primary", "#0d6efd");
   const bodyColor = v("--bs-body-color", "#212529");
@@ -42,7 +46,6 @@ const readThemeTokens = () => {
   const borderColor = v("--bs-border-color", "rgba(0,0,0,0.15)");
   const bodyBg = v("--bs-body-bg", "#ffffff");
 
-  // Make subtle grid using borderColor (works for both themes)
   const grid = borderColor.includes("rgb")
     ? borderColor.replace("rgb(", "rgba(").replace(")", ", 0.35)")
     : "rgba(0,0,0,0.12)";
@@ -51,24 +54,32 @@ const readThemeTokens = () => {
     ? borderColor.replace("rgb(", "rgba(").replace(")", ", 0.22)")
     : "rgba(0,0,0,0.10)";
 
-  return { primary, bodyColor, secondaryColor, borderColor, bodyBg, grid, angle };
+  return { primary, bodyColor, secondaryColor, bodyBg, grid, angle };
 };
 
-const SkillRadarChart = ({ radar, title = "Skill Radar (by Category)", height = 520 }) => {
-  const [tokens, setTokens] = useState(() => (typeof window === "undefined" ? null : readThemeTokens()));
+const SkillRadarChart = ({
+  radar,
+  title = "Skill Radar (by Category)",
+  height = 520,
+}) => {
+  const [tokens, setTokens] = useState(() =>
+    typeof window === "undefined" ? null : readThemeTokens()
+  );
 
-  // Re-read tokens when theme changes (data-bs-theme toggled) or window resized
   useEffect(() => {
     if (typeof window === "undefined") return;
 
     const update = () => setTokens(readThemeTokens());
     update();
 
-    // Watch for theme attribute changes
     const obs = new MutationObserver(update);
-    obs.observe(document.documentElement, { attributes: true, attributeFilter: ["data-bs-theme", "class"] });
+    obs.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-bs-theme", "class"],
+    });
 
     window.addEventListener("resize", update);
+
     return () => {
       obs.disconnect();
       window.removeEventListener("resize", update);
@@ -78,12 +89,12 @@ const SkillRadarChart = ({ radar, title = "Skill Radar (by Category)", height = 
   if (!radar || !radar.labels?.length) {
     return (
       <div className="p-4 border rounded bg-transparent text-muted">
-        "No skill data available yet. Complete more courses to see your progress!"
+        No skill data available yet. Complete more courses to see your progress.
       </div>
     );
   }
 
-  const labels = radar.labels; // data labels
+  const labels = radar.labels;
   const displayLabels = labels.map((c) => CATEGORY_TO_SKILL[c] || c);
   const values = (radar.values || []).map(clamp);
   const systemAvgValues = (radar.systemAvgValues || []).map(clamp);
@@ -97,47 +108,42 @@ const SkillRadarChart = ({ radar, title = "Skill Radar (by Category)", height = 
     bodyBg: "#fff",
   };
 
-  const avg = values.length ? Math.round(values.reduce((a, b) => a + b, 0) / values.length) : 0;
-
   const data = useMemo(
     () => ({
       labels: displayLabels,
       datasets: [
-        // ✅ System Average (vẽ trước -> nằm dưới)
-        // ✅ My Skills (vẽ sau -> đè lên trên)
         {
           label: "My Skills",
           data: values,
-
-          borderWidth: 5,
+          borderWidth: 4,
           borderColor: t.primary,
           backgroundColor: t.primary.includes("rgb")
             ? t.primary.replace("rgb(", "rgba(").replace(")", ", 0.22)")
             : "rgba(13,110,253,0.22)",
-
           pointBackgroundColor: t.bodyBg,
           pointBorderColor: t.primary,
           pointBorderWidth: 2,
-          pointRadius: 5,
-          pointHoverRadius: 7,
-
+          pointRadius: 4,
+          pointHoverRadius: 6,
           tension: 0.25,
           order: 1,
-        }, {
+        },
+        {
           label: "System Average",
           data: systemAvgValues,
-
-          backgroundColor: "rgba(255, 0, 0, 0.66)", // xanh nhạt   
-          borderWidth: 0,
-          borderColor: "transparent",
-          pointRadius: 0,
-          pointHoverRadius: 0,
+          backgroundColor: "rgba(255, 0, 0, 0.16)",
+          borderColor: "rgba(255, 0, 0, 0.75)",
+          borderWidth: 2,
+          pointBackgroundColor: "rgba(255, 0, 0, 0.75)",
+          pointBorderColor: "rgba(255, 0, 0, 0.75)",
+          pointRadius: 3,
+          pointHoverRadius: 4,
           tension: 0.25,
           order: 2,
         },
       ],
     }),
-    [labels, values, systemAvgValues, t.primary, t.bodyBg]
+    [displayLabels, values, systemAvgValues, t.primary, t.bodyBg]
   );
 
   const options = useMemo(
@@ -145,7 +151,6 @@ const SkillRadarChart = ({ radar, title = "Skill Radar (by Category)", height = 
       responsive: true,
       maintainAspectRatio: false,
       layout: { padding: 10 },
-
       plugins: {
         legend: {
           display: true,
@@ -171,10 +176,12 @@ const SkillRadarChart = ({ radar, title = "Skill Radar (by Category)", height = 
               return `${ctx.dataset.label}: ${val}%`;
             },
             afterBody: (items) => {
-              // items chứa cả 2 dataset (system + user)
-              const label = items?.[0]?.label;
-              const userIdx = items.findIndex((i) => i.dataset.label === "My Skills");
-              const sysIdx = items.findIndex((i) => i.dataset.label === "System Average");
+              const userIdx = items.findIndex(
+                (i) => i.dataset.label === "My Skills"
+              );
+              const sysIdx = items.findIndex(
+                (i) => i.dataset.label === "System Average"
+              );
 
               const userVal =
                 userIdx >= 0 ? Math.round(items[userIdx].parsed.r) : null;
@@ -184,21 +191,19 @@ const SkillRadarChart = ({ radar, title = "Skill Radar (by Category)", height = 
               if (userVal == null || sysVal == null) return "";
 
               const diff = userVal - sysVal;
-              const sign = diff > 0 ? "+" : diff < 0 ? "" : "±";
-              return `So với hệ thống: ${sign}${diff}%`;
+              if (diff === 0) return "Compared to system average: equal";
+
+              const sign = diff > 0 ? "+" : "-";
+              return `Compared to system average: ${sign}${Math.abs(diff)}%`;
             },
           },
         },
-
-
       },
-
       scales: {
         r: {
           min: 0,
           max: 100,
           backgroundColor: "transparent",
-
           grid: {
             circular: true,
             color: t.grid,
@@ -208,7 +213,6 @@ const SkillRadarChart = ({ radar, title = "Skill Radar (by Category)", height = 
             color: t.angle,
             lineWidth: 1,
           },
-
           ticks: {
             stepSize: 20,
             color: t.secondaryColor,
@@ -217,7 +221,6 @@ const SkillRadarChart = ({ radar, title = "Skill Radar (by Category)", height = 
             backdropPadding: 0,
             showLabelBackdrop: false,
           },
-
           pointLabels: {
             color: t.bodyColor,
             font: { size: 13, weight: "700" },
@@ -225,7 +228,6 @@ const SkillRadarChart = ({ radar, title = "Skill Radar (by Category)", height = 
           },
         },
       },
-
       elements: {
         line: { borderJoinStyle: "round" },
       },
@@ -238,12 +240,7 @@ const SkillRadarChart = ({ radar, title = "Skill Radar (by Category)", height = 
       <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
         <div>
           <h5 className="mb-0 fw-bold text-body">{title}</h5>
-          {/* <div className="text-muted small">Thang điểm 0–100%</div> */}
         </div>
-
-        {/* <span className="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">
-          Avg: {avg}%
-        </span> */}
       </div>
 
       <div style={{ height }}>

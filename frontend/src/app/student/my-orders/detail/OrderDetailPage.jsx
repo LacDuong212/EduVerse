@@ -1,5 +1,4 @@
-// src/app/pages/student/orders/OrderDetailPage.jsx
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import {
   Alert,
@@ -12,10 +11,10 @@ import {
   Spinner,
   Table,
 } from "react-bootstrap";
-import axios from "axios";
 
 import { formatCurrency } from "@/utils/currency";
 import { paymentLabel, statusLabel, statusVariant } from "@/utils/order";
+import useOrderDetail from "./useOrderDetail";
 
 import {
   FaArrowLeft,
@@ -25,11 +24,11 @@ import {
   FaTag,
   FaInfoCircle,
 } from "react-icons/fa";
+import axios from "axios";
 
 const shortOrderCode = (id) => {
   const s = String(id || "");
-  if (!s) return "";
-  return s.slice(-4).toUpperCase();
+  return s ? s.slice(-4).toUpperCase() : "";
 };
 
 export default function OrderDetailPage() {
@@ -37,52 +36,14 @@ export default function OrderDetailPage() {
   const navigate = useNavigate();
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-  const [order, setOrder] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const { order, loading, error, refetch, setOrder } = useOrderDetail(id);
 
-  // ✅ error state
-  const [error, setError] = useState(null);
-
-  // ✅ cancel flow
   const [showCancel, setShowCancel] = useState(false);
   const [cancelLoading, setCancelLoading] = useState(false);
+  const [actionError, setActionError] = useState(null);
 
   const canLearn = order?.status === "completed";
   const canCancel = order?.status === "pending";
-
-  // ---- Fetch order detail ----
-  useEffect(() => {
-    if (!id || !backendUrl) return;
-
-    const fetchOrder = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const { data } = await axios.get(`${backendUrl}/api/orders/${id}`, {
-          withCredentials: true,
-        });
-        if (data?.success) setOrder(data.order);
-        else {
-          setOrder(null);
-          setError(data?.message || "Failed to load order");
-        }
-      } catch (err) {
-        setOrder(null);
-        const msg =
-          err?.response?.data?.message ||
-          (err?.response?.status === 403
-            ? "Unauthorized access to this order."
-            : err?.response?.status === 404
-            ? "Order not found."
-            : "Something went wrong while loading order.");
-        setError(msg);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchOrder();
-  }, [id, backendUrl]);
 
   const createdAt = useMemo(() => {
     if (!order?.createdAt) return "N/A";
@@ -93,45 +54,43 @@ export default function OrderDetailPage() {
     return (order?.courses || []).map((item, idx) => {
       const course = item.course || {};
       return {
-        key: item._id || idx,
+        key: `${course.courseId || idx}-${idx}`,
         index: idx + 1,
-        title: course.title || course.name || "Untitled Course",
+        title: course.title || "Untitled Course",
         thumbnail: course.thumbnail || course.image || "",
-        courseId: course._id,
+        courseId: course.courseId,
         pricePaid: item.pricePaid || 0,
       };
     });
   }, [order]);
 
-  // ✅ cancel order handler
   const handleCancelOrder = async () => {
-    if (!backendUrl || !order?._id) return;
+    if (!backendUrl || !order?.orderId) return;
     setCancelLoading(true);
+    setActionError(null);
 
     try {
       const { data } = await axios.patch(
-        `${backendUrl}/api/orders/${order._id}/update`,
+        `${backendUrl}/api/orders/${order.orderId}/update`,
         { status: "cancelled" },
         { withCredentials: true }
       );
 
       if (data?.success) {
-        setOrder(data.order); // update UI immediately
+        await refetch();
         setShowCancel(false);
       } else {
-        setError(data?.message || "Cancel order failed");
+        setActionError(data?.message || "Cancel order failed");
       }
     } catch (err) {
-      const msg =
-        err?.response?.data?.message ||
-        "Cancel order failed. Please try again.";
-      setError(msg);
+      setActionError(
+        err?.response?.data?.message || "Cancel order failed. Please try again."
+      );
     } finally {
       setCancelLoading(false);
     }
   };
 
-  // ===== Loading =====
   if (loading) {
     return (
       <div className="py-5 text-center">
@@ -140,7 +99,6 @@ export default function OrderDetailPage() {
     );
   }
 
-  // ✅ Error UI (no infinite spinner)
   if (error && !order) {
     return (
       <Card className="border-0 shadow-sm">
@@ -163,11 +121,10 @@ export default function OrderDetailPage() {
 
   if (!order) return null;
 
-  const orderCode = shortOrderCode(order._id);
+  const orderCode = shortOrderCode(order.orderId);
 
   return (
     <div>
-      {/* ===== Top bar ===== */}
       <div className="d-flex align-items-center justify-content-between mb-3">
         <div>
           <div className="d-flex align-items-center gap-2">
@@ -177,18 +134,16 @@ export default function OrderDetailPage() {
             </Badge>
           </div>
 
-          {/* ✅ stronger contrast */}
-          <div className="text-body small mt-1" title={order._id}>
+          <div className="text-body small mt-1" title={order.orderId}>
             Order <span className="fw-semibold">#{orderCode}</span>
             <span className="ms-2 text-muted">·</span>
             <span className="ms-2 text-muted">
-              ID: {String(order._id).slice(0, 8)}…
+              ID: {String(order.orderId).slice(0, 8)}…
             </span>
           </div>
         </div>
 
         <div className="d-flex gap-2">
-          {/* Cancel order (pending only) */}
           {canCancel && (
             <Button
               variant="outline-danger"
@@ -206,10 +161,9 @@ export default function OrderDetailPage() {
         </div>
       </div>
 
-      {/* inline error (if any) */}
       {error ? <Alert variant="warning">{error}</Alert> : null}
+      {actionError ? <Alert variant="warning">{actionError}</Alert> : null}
 
-      {/* ===== Information ===== */}
       <Card className="border-0 shadow-sm mb-3">
         <Card.Body>
           <div className="d-flex align-items-center gap-2 mb-3">
@@ -247,7 +201,6 @@ export default function OrderDetailPage() {
         </Card.Body>
       </Card>
 
-      {/* ===== Courses ===== */}
       <Card className="border-0 shadow-sm mb-3">
         <Card.Body>
           <div className="d-flex align-items-center justify-content-between mb-3">
@@ -291,9 +244,6 @@ export default function OrderDetailPage() {
                               height: "100%",
                               objectFit: "cover",
                             }}
-                            onError={(e) => {
-                              e.currentTarget.style.display = "none";
-                            }}
                           />
                         ) : null}
                       </div>
@@ -331,7 +281,6 @@ export default function OrderDetailPage() {
                           size="sm"
                           variant="outline-secondary"
                           disabled
-                          title="Order must be completed to access learning"
                         >
                           Locked
                         </Button>
@@ -349,7 +298,6 @@ export default function OrderDetailPage() {
         </Card.Body>
       </Card>
 
-      {/* ===== Summary ===== */}
       <Card className="border-0 shadow-sm">
         <Card.Body>
           <div className="d-flex align-items-center gap-2 mb-3">
@@ -387,7 +335,6 @@ export default function OrderDetailPage() {
         </Card.Body>
       </Card>
 
-      {/* Cancel confirm modal */}
       <Modal show={showCancel} onHide={() => setShowCancel(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title>Cancel this order?</Modal.Title>
