@@ -46,7 +46,7 @@ export const INSTRUCTOR_APP_MENU_ITEMS = [{
   url: '/instructor/courses'
 }, {
   key: 'students',
-  label: 'Students',
+  label: 'My Students',
   url: '/instructor/students'
 }];
 export const INSTRUCTOR_MENU_ITEMS = [{

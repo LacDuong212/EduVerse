@@ -26,6 +26,7 @@ const CartCard = ({ item, isSelected, onSelect, onRemove }) => {
               src={item.image || DEFAULT_COURSE_IMG}
               className="rounded"
               alt="Image"
+              onError={(e) => e.target.src = DEFAULT_COURSE_IMG}
               style={{ width: "100px", height: "auto", objectFit: "cover" }}
             />
           </div>

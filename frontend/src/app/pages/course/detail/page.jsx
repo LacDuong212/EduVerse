@@ -35,7 +35,13 @@ const CourseDetail = () => {
 
   if (error)
     return <ErrorState
-      message="Look like something went wrong..😵"
+      messages={[
+        "Course is pulling a no-show 🏃‍♂️💨",
+        "Database failed the entrance exam 📝❌",
+        "Server stayed up too late studying 🧠🌫️",
+        "Digital ink spill on the syllabus! 🖋️🐙",
+        "Course checked out indefinitely 📚🚶‍♂️"
+      ]}
       showReturn
       onRetry={refetch}
     />;

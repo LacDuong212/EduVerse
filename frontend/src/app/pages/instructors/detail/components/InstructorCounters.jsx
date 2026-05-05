@@ -1,6 +1,7 @@
-import { Col, Row } from 'react-bootstrap';
-import CountUp from 'react-countup';
-import { FaBook, FaStar, FaUserGraduate } from 'react-icons/fa';
+import { Col } from "react-bootstrap";
+import CountUp from "react-countup";
+import { BsFillChatLeftTextFill } from "react-icons/bs";
+import { FaBook, FaUserGraduate } from "react-icons/fa";
 
 const CounterCard = ({
   count,
@@ -26,35 +27,39 @@ const CounterCard = ({
   );
 };
 
-const InstructorCounters = ({ 
-  totalPublicCourses = 0, 
-  totalStudents = 0,
-  totalReviews = 0 
-}) => {
+const InstructorCounters = ({ stats }) => {
+  const {
+    totalCourses = 0,
+    totalStudents = 0,
+    totalReviews = 0,
+  } = stats || {};
+
+  const toThousand = (value) => value >= 10000 ? value / 1000 : value;
+
   const formatSuffix = (value, defaultSuffix) => {
-    if (!Number.isFinite(value)) return defaultSuffix || '';
-    if (value >= 1000) return 'K+';
-    return defaultSuffix || '';
+    if (!Number.isFinite(value)) return defaultSuffix || "";
+    if (value >= 10000) return "k+";
+    return defaultSuffix || "";
   }
 
   const counterData = [{
-    count: Math.max(0, Number(totalPublicCourses || 0)),
-    title: 'Total Courses',
+    count: toThousand(totalCourses),
+    title: "Total Courses",
     icon: FaBook,
-    suffix: formatSuffix(totalPublicCourses, ''),
-    variant: 'orange'
+    suffix: formatSuffix(totalCourses, ""),
+    variant: "orange"
   }, {
-    count: Math.max(0, Number(totalStudents || 0)),
-    title: 'Total Students',
+    count: toThousand(totalStudents),
+    title: "Total Students",
     icon: FaUserGraduate,
-    suffix: formatSuffix(totalStudents, ''),
-    variant: 'success'
+    suffix: formatSuffix(totalStudents, ""),
+    variant: "success"
   }, {
     count: Math.max(0, Number(totalReviews || 0)),
-    title: 'Total Reviews',
-    icon: FaStar,
-    suffix: formatSuffix(totalReviews, ''),
-    variant: 'warning'
+    title: "Total Reviews",
+    icon: BsFillChatLeftTextFill,
+    suffix: formatSuffix(totalReviews, ""),
+    variant: "purple"
   }];
 
   return (
