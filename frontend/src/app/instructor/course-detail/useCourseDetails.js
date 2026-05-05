@@ -70,9 +70,9 @@ export const useCourseStudentList = () => {
     if (!courseId) return;
     setLoading(true);
 
-    const res = await handleRequest(authApi.get(`/instructor/courses/${courseId}/students`, {
-      params: filters,
-    }));
+    const res = await handleRequest(
+      authApi.get(`/instructor/courses/${courseId}/students`, { params: filters, })
+    );
 
     if (res.success) {
       setStudents(res.result || []);

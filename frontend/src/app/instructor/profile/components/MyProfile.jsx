@@ -4,7 +4,7 @@ import { FaAngleRight, FaFacebook, FaGlobe, FaInstagram, FaLinkedin, FaUndo, FaY
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
 import { Link } from "react-router-dom";
-import { mapErrors } from "@/utils/mapper";
+import { mapResponseErrors } from "@/utils/mapper";
 import useMyProfile from "../useMyProfile";
 
 const MAX_EDUCATION_LENGTH = 5;
@@ -61,7 +61,7 @@ const MyProfile = () => {
 
   const disableSubmit = avatarLogic.isUploading || loading || submitting || !isDirty;
 
-  const errors = mapErrors(rawErrors);
+  const errors = mapResponseErrors(rawErrors);
 
   const getFieldProps = (fieldName) => ({
     isInvalid: !!errors[fieldName],

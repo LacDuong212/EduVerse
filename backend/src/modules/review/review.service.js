@@ -90,7 +90,7 @@ export const getPaginatedReviewsByCourseId = async (
   if (user?.userId) {
     const {
       isOwner, isEnrolled
-    } = getCourseAccess(user.role, user.userId, courseId);
+    } = await getCourseAccess(user.role, user.userId, course);
 
     if (course.isPrivate || course.status !== COURSE_STATUS.live)
       if (!isOwner || !isEnrolled)

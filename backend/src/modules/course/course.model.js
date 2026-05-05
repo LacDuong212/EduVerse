@@ -96,13 +96,16 @@ courseSchema.index({
   tags: "text"
 }, {
   weights: { title: 10, tags: 5, subtitle: 2 },
-  name: "CourseSearchIndex"
+  name: "CourseSearchIndex",
+  language_override: "dummy_field_name"
 });
 courseSchema.index({ status: 1, isPrivate: 1, isDeleted: 1 });
 courseSchema.index({ category: 1, status: 1 });
 courseSchema.index({ "instructor.ref": 1, isDeleted: 1 });
 courseSchema.index({ studentsEnrolled: -1 });
 courseSchema.index({ createdAt: -1 });
+courseSchema.index({ previewVideo: 1 })
+courseSchema.index({ "pendingUpdate.data.previewVideo": 1 });
 
 courseSchema.virtual("curriculum", {
   ref: "Curriculum",

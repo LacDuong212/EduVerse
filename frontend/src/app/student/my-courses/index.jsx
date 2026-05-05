@@ -21,12 +21,12 @@ const CourseRow = ({
   const percentage =
     totalLectures > 0 ? Math.trunc((completedLectures * 100) / totalLectures) : 0;
 
- const gotoLearning = () => {
-  navigate(`/student/courses/${_id}`);
-};
- const gotoCourseDetail = () => {
-  navigate(`/courses/${_id}`);
-};
+  const gotoLearning = () => {
+    navigate(`/student/courses/${_id}`);
+  };
+  const gotoCourseDetail = () => {
+    navigate(`/courses/${_id}`);
+  };
 
   return (
     <tr>
@@ -72,11 +72,11 @@ const CourseRow = ({
       <td className="text-center">{completedLectures}</td>
       <td>
         {percentage === 100 ? (
-          <Button  
-    
+          <Button
+
             className="icons-center"
             onClick={gotoLearning}
-           variant="light" size="sm" >
+            variant="light" size="sm" >
             <BsArrowRepeat className="me-1 icons-center" />
             Restart
           </Button>
@@ -123,13 +123,19 @@ const StudentMyCourses = () => {
               </form>
             </Col>
             <Col md={4}>
-              <form> <ChoicesFormInput className="form-select js-choice border-0 z-index-9 bg-transparent" aria-label=".form-select-sm">
-                <option>Sort by</option>
-                <option value="free">Free</option>
-                <option value="newest">Newest</option>
-                <option value="mostPopular">Most Popular</option>
-                <option value="levelDesc">Level Descending</option>
-              </ChoicesFormInput>
+              <form>
+                <ChoicesFormInput
+                  name="sort"
+                  className="form-select js-choice border-0 z-index-9 bg-transparent"
+                  aria-label=".form-select-sm"
+                  onChange={(e) => (e?.target?.value || "")}
+                >
+                  <option value="">Sort by</option>
+                  <option value="free">Free</option>
+                  <option value="newest">Newest</option>
+                  <option value="mostPopular">Most Popular</option>
+                  <option value="levelDesc">Level Descending</option>
+                </ChoicesFormInput>
               </form>
             </Col>
           </Row>

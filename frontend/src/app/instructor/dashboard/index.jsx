@@ -1,3 +1,4 @@
+import ErrorState from "@/components/ErrorState";
 import PageMetaData from "@/components/PageMetaData";
 import useInstructorDashboard from "./useInstructorDashboard";
 import DashboardCounter from "./components/DashboardCounter";
@@ -30,14 +31,7 @@ const InstructorDashboard = () => {
     );
   }
 
-  if (error) {
-    return (
-      <Container className="position-absolute top-50 start-50 translate-middle d-flex flex-column align-items-center justify-content-center">
-        <h3>Error loading Dashboard..</h3>
-        <button onClick={refetch} className="btn btn-primary-soft">Retry</button>
-      </Container>
-    );
-  }
+  if (error) return <ErrorState onRetry={refetch} />;
 
   return (
     <>

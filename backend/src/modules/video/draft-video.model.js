@@ -9,6 +9,7 @@ export const CONTENT_TYPE = Object.freeze([
 const draftVideoSchema = new mongoose.Schema({
   videoId: { type: String, required: true },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  courseId:  { type: mongoose.Schema.Types.ObjectId, ref: "Course" },
   key: { type: String, required: true },
   contentType: { type: String, enum: CONTENT_TYPE, required: true },
   expireAt: { type: Date }

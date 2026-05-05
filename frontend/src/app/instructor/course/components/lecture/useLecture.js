@@ -1,201 +1,132 @@
-import { useState, useEffect, useMemo } from "react";
-import { useSelector } from "react-redux";
-import { useVideoStream } from "@/hooks/useVideoStream";
-import { useVideoUpload } from "@/hooks/useVideoUpload";
+import { useEffect, useMemo, useState } from "react";
+import useVideoStream from "@/hooks/useVideoStream";
+import useVideoUpload from "@/hooks/useVideoUpload";
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024 * 1024; // 2GB
-const ALLOWED_EXTENSIONS = ["mp4", "mov", "mkv", "avi"];
 
-// helper: get duration from video file
-const getVideoDurationFromFile = (file) => {
-  return new Promise((resolve, reject) => {
-    try {
-      const video = document.createElement("video");
-      video.preload = "metadata";
-      video.onloadedmetadata = function () {
-        window.URL.revokeObjectURL(video.src);
-        resolve(Math.round(video.duration));
-      };
-      video.onerror = function () { reject("Cannot load video metadata"); };
-      video.src = URL.createObjectURL(file);
-    } catch (e) { reject(e); }
-  });
-};
-// helper: get duration from video URL
-const getVideoDurationFromUrl = (url) => {
+const getVideoDuration = (source) => {
   return new Promise((resolve, reject) => {
     const video = document.createElement("video");
     video.preload = "metadata";
     video.onloadedmetadata = () => {
+      if (source instanceof File) window.URL.revokeObjectURL(video.src);
       resolve(Math.round(video.duration));
     };
-    video.onerror = () => reject("Failed to load video metadata from S3");
-    video.src = url;
+    video.onerror = () => reject("Failed to load video metadata");
+    video.src = source instanceof File ? URL.createObjectURL(source) : source;
   });
 };
 
-export const useLecture = (show, initialLecture, onSave, courseId) => {
-  const userId = useSelector((state) => state.auth.userData?.id);
-  const iocId = courseId || userId || null;
-
+export const useLecture = (show, initialLecture = null, onSave) => {
   const [form, setForm] = useState({
-    title: '',
-    description: '',
+    title: "",
+    description: "",
     isFree: false,
     duration: 0,
   });
 
-  const [videoState, setVideoState] = useState({
-    file: null,
-    fileName: '',
-    videoId: ''
-  });
-
+  const [videoFile, setVideoFile] = useState(null);
+  const [existingVideoId, setExistingVideoId] = useState("");
   const [errors, setErrors] = useState({});
+
   const { uploadVideo, progress, isUploading } = useVideoUpload();
 
-  const isS3Reference = useMemo(() => {
-    if (!videoState.videoId || videoState.file) return false;
-    const val = videoState.videoId;
-    return val.startsWith("LEC") || /^1766.*\.mp4$/.test(val);
-  }, [videoState.videoId, videoState.file]);
+  const { streamUrl: s3StreamUrl } = useVideoStream(existingVideoId);
 
-  const { streamUrl: s3StreamUrl } = useVideoStream(
-    iocId,
-    isS3Reference ? videoState.videoId : null
-  );
-
-  // init
   useEffect(() => {
     if (show) {
       if (initialLecture) {
         setForm({
-          title: initialLecture.title || '',
-          description: initialLecture.description || '',
+          title: initialLecture.title || "",
+          description: initialLecture.description || "",
           isFree: initialLecture.isFree || false,
           duration: initialLecture.duration || 0,
         });
-        setVideoState({
-          file: null,
-          fileName: '',
-          videoId: initialLecture.videoUrl || ''
-        });
+        setExistingVideoId(initialLecture.videoId || "");
       } else {
-        setForm({ title: '', description: '', isFree: false, duration: 0 });
-        setVideoState({ file: null, fileName: '', videoId: '' });
+        setForm({ title: "", description: "", isFree: false, duration: 0 });
+        setExistingVideoId("");
       }
+      setVideoFile(null);
       setErrors({});
     }
   }, [show, initialLecture]);
 
-  useEffect(() => {
-    if (s3StreamUrl && !videoState.file) {
-      getVideoDurationFromUrl(s3StreamUrl)
-        .then((seconds) => {
-          updateForm("duration", seconds);
-        })
-        .catch((err) => console.error("S3 Duration Error:", err));
-    }
-  }, [s3StreamUrl, videoState.file]);
-
-  // --- Preview Logic ---
-  const filePreviewUrl = useMemo(() => {
-    if (videoState.file) return URL.createObjectURL(videoState.file);
-    return null;
-  }, [videoState.file]);
-
-  useEffect(() => {
-    return () => { if (filePreviewUrl) URL.revokeObjectURL(filePreviewUrl); };
-  }, [filePreviewUrl]);
-
   const previewHref = useMemo(() => {
-    if (filePreviewUrl) return filePreviewUrl; // priority: new file
-    if (s3StreamUrl) return s3StreamUrl;       // fallback: valid ID
+    if (videoFile) return URL.createObjectURL(videoFile);
+    if (existingVideoId && s3StreamUrl) return s3StreamUrl;
     return null;
-  }, [filePreviewUrl, s3StreamUrl]);
+  }, [videoFile, s3StreamUrl]);
 
-  // --- Handlers ---
-  const updateForm = (field, value) => {
+  useEffect(() => {
+    return () => {
+      if (previewHref?.startsWith("blob:")) URL.revokeObjectURL(previewHref);
+    };
+  }, [previewHref]);
+
+  const updateField = (field, value) => {
     setForm(prev => ({ ...prev, [field]: value }));
     if (errors[field]) setErrors(prev => ({ ...prev, [field]: null }));
   };
 
-  const handleIdChange = (e) => {
-    setVideoState({
-      videoId: e.target.value,
-      file: null,
-      fileName: ''
-    });
-    setErrors(prev => ({ ...prev, videoId: null }));
-  };
-
   const handleFileChange = async (e) => {
-    const file = e.target.files && e.target.files[0];
-
-    setVideoState(prev => ({ ...prev, file: null, fileName: '', videoId: '' }));
-    updateForm("duration", 0);
-    setErrors(prev => ({ ...prev, video: null }));
-
+    const file = e.target.files?.[0];
     if (!file) return;
 
     if (file.size > MAX_FILE_SIZE) {
-      setErrors(prev => ({ ...prev, video: `File is too large. Max size is 2GB.` }));
-      e.target.value = "";
-      return;
-    }
-    const fileExt = file.name.split('.').pop().toLowerCase();
-    if (!ALLOWED_EXTENSIONS.includes(fileExt)) {
-      setErrors(prev => ({ ...prev, video: `Invalid file type.` }));
-      e.target.value = "";
+      setErrors(prev => ({ ...prev, videoId: "File is too large (Max 2GB)" }));
       return;
     }
 
     try {
-      const seconds = await getVideoDurationFromFile(file);
-      updateForm("duration", seconds);
+      const seconds = await getVideoDuration(file);
+      updateField("duration", seconds);
+      setVideoFile(file);
+      setExistingVideoId("");
+      setErrors(prev => ({ ...prev, videoId: null }));
     } catch (err) {
-      console.error("Duration error", err);
+      setErrors(prev => ({ ...prev, videoId: "Could not read video metadata" }));
     }
-
-    setVideoState({ file, fileName: file.name, videoId: '' });
   };
 
-  const validate = () => {
+  const handleSubmit = async (e) => {
+    if (e) e.preventDefault();
+
     const newErrors = {};
-    if (!form.title.trim()) newErrors.title = "Lecture title is required.";
+    if (!form.title.trim()) newErrors.title = "Title is required";
+    if (!videoFile && !existingVideoId) newErrors.videoId = "Video is required";
 
-    // must have EITHER a file OR a videoId
-    if (!videoState.file) {
-      if (!videoState.videoId.trim())
-        newErrors.video = "Please upload a video or enter a valid Video ID.";
-      if (!isS3Reference)
-        newErrors.videoId = "Please provide a valid video ID.";
-    }
-
-    return newErrors;
-  };
-
-  const handleSubmit = () => {
-    const newErrors = validate();
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
 
-    const submitData = (key) => {
-      onSave({ ...form, videoUrl: key });
-    };
-
-    if (videoState.file) {
-      uploadVideo(videoState.file, (key) => submitData(key));
+    if (videoFile) {
+      const newVideoId = await uploadVideo(videoFile);
+      if (newVideoId) {
+        onSave({ ...form, videoId: newVideoId });
+      }
     } else {
-      submitData(videoState.videoId);
+      onSave({ ...form, videoId: existingVideoId });
     }
   };
 
   return {
-    state: { form, videoState, errors, isUploading, progress },
-    computed: { previewHref },
-    handlers: { updateForm, handleIdChange, handleFileChange, handleSubmit }
+    state: {
+      form,
+      videoFile,
+      errors,
+      isUploading,
+      progress
+    },
+    computed: {
+      previewHref,
+      isNewVideo: !!videoFile
+    },
+    handlers: {
+      updateField,
+      handleFileChange,
+      handleSubmit
+    }
   };
 };

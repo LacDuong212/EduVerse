@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 import { authApi } from "@/utils/api";
 import { handleRequest } from "@/utils/request";
 
-export const useVideoStream = (videoId) => {
+export default function useVideoStream(videoId) {
   const [streamUrl, setStreamUrl] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -23,7 +23,9 @@ export const useVideoStream = (videoId) => {
         setStreamUrl(res.result);
       } else {
         setStatusCode(res.statusCode);
-        setError(res.message || "Failed to load video.");
+        setError("Failed to load video.");
+
+        console.log(res.message);
 
         if (![403, 404].includes(res.statusCode)) {
           toast.error(res.message || "Failed to load video.");
@@ -33,6 +35,7 @@ export const useVideoStream = (videoId) => {
       const status = err.response?.status;
       const msg = err.response?.data?.message || "Failed to load video.";
       setStatusCode(status);
+      console.log(err);
       setError(msg);
       if (![403, 404].includes(status)) toast.error(msg);
     } finally {
@@ -51,4 +54,4 @@ export const useVideoStream = (videoId) => {
     statusCode,
     refetch: fetchStreamUrl,
   };
-};
+}

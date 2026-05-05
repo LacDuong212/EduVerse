@@ -1,8 +1,8 @@
 import { Col, Row } from "react-bootstrap";
 import { useStep4 } from "./useStep4";
 
-const Step4 = ({ stepperInstance }) => {
-  const { state, handlers } = useStep4(stepperInstance);
+const Step4 = ({ stepperInstance, activeStep }) => {
+  const { tagsInput, setTagsInput, goBack, handleSubmit, isSubmitting } = useStep4(stepperInstance);
 
   return (
     <form
@@ -10,25 +10,22 @@ const Step4 = ({ stepperInstance }) => {
       role="tabpanel"
       className="content fade"
       aria-labelledby="steppertrigger4"
-      onSubmit={handlers.handleSubmit}
-      onKeyDown={(e) => e.key === "Enter" && e.preventDefault()} // prevent accidental submit on Enter
+      onSubmit={handleSubmit}
+      onKeyDown={(e) => e.key === "Enter" && e.preventDefault()}
     >
-      <h4>Additional Information (Optional)</h4>
-      <hr />
-
       <Row className="g-4">
         <Col xs={12}>
           <div className="bg-light border rounded p-4">
             <h5 className="mb-0">
-              Tags <span>({state.tagsInput?.split(',').filter(t => t.trim()).length} / 14)</span>
+              Tags <span>({tagsInput?.split(", ").filter(t => t.trim()).length} / 14) (Optional)</span>
             </h5>
             <div className="mt-3">
               <input
                 type="text"
                 className="form-control"
                 placeholder="Enter tags separated by commas..."
-                value={state.tagsInput}
-                onChange={handlers.handleTagsChange}
+                value={tagsInput}
+                onChange={(e) => setTagsInput(e.target.value)}
                 maxLength={200}
               />
             </div>
@@ -46,8 +43,8 @@ const Step4 = ({ stepperInstance }) => {
         <button
           type="button"
           className="btn btn-outline-secondary mb-0"
-          onClick={handlers.goBack}
-          disabled={state.isSubmitting}
+          onClick={goBack}
+          disabled={isSubmitting}
         >
           Previous
         </button>
@@ -61,9 +58,9 @@ const Step4 = ({ stepperInstance }) => {
             <button
               type="submit"
               className="btn btn-success mb-0"
-              disabled={state.isSubmitting}
+              disabled={isSubmitting}
             >
-              {state.isSubmitting ? (
+              {isSubmitting ? (
                 <>
                   <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                   Submitting...

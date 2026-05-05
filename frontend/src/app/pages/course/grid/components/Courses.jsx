@@ -87,10 +87,11 @@ const Courses = () => {
               <Col xl={3} className="mt-3 mt-xl-0">
                 <form className="border rounded p-2 input-borderless">
                   <ChoicesFormInput
+                    name="sort"
                     className="form-select form-select-sm js-choice border-0"
                     aria-label=".form-select-sm"
                     value={sort}
-                    onChange={(value) => setSort(value)}
+                    onChange={(e) => setSort(e?.target?.value || "")}
                   >
                     <option value="newest">Newest</option>
                     <option value="oldest">Oldest</option>

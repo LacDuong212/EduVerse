@@ -40,5 +40,5 @@ export const toEnrolledCourseRowDto = (course) => {
 
 export const toEnrolledCourseRowDtoList = (courses) => {
   if (!Array.isArray(courses)) return [];
-  return courses.map(course => toEnrolledCourseRowDtoList(course));
+  return courses.map(course => toEnrolledCourseRowDto(course));
 };

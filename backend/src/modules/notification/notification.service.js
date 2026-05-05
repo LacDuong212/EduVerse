@@ -29,7 +29,8 @@ export const markOneAsRead = async (userId, notifId) => {
     { _id: notifId, user: userId },
     { isRead: true },
     { new: true }
-  );
+  ).lean();
+
   if (!notif) throw new AppError("Notification not found.", 404);
 
   return notif;

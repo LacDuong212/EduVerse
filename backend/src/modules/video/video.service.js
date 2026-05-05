@@ -36,36 +36,42 @@ export const getKeys = (insId, videoIds) => {
 export const getVideoViewUrl = async (user, videoId) => {
   if (!videoId) throw new AppError("Please provide a valid video ID!", 400);
 
-  const { courseId, insId, isFree } = await getCourseInfoForVideoId(videoId);
+  return await withTransaction(async (session) => {
+    const video = await DraftVideo.findOne({ videoId }).session(session);
+    if (!video) throw new AppError("Video not found.", 404);
 
-  if (!courseId) {
-    const expirationDate = new Date(Date.now() + EXPIRE_DURATION);
-    DraftVideo.updateOne(
-      { videoId },
-      { $set: { expireAt: expirationDate } }
-    ).catch(err => logger.error(`Failed to set expiration for videoId: ${videoId}`, err));
+    const insId = video.userId?.toString();
 
-    throw new AppError("Video not found.", 404);
-  }
+    const info = await getCourseInfoForVideoId(videoId, insId, session);
+    const { courseId, isFree } = info || {};
 
-  const key = getKey(insId, videoId);
+    if (!courseId) {
+      // video.expireAt = new Date(Date.now() + EXPIRE_DURATION);
+      // await video.save({ session });
 
-  if (!isFree) {
-    const isInstructor = user?.role === "instructor" && user?.userId === insId;
-    const isEnrolled = user?.role === "student" && await existsEnrollment(user?.userId, courseId);
-
-    if (!isInstructor && !isEnrolled) {
-      throw new AppError("You don't have access to this video.", 403);
+      logger.warn(`Set expiration for videoId: ${videoId}`);
+      throw new AppError("Video not found.", 404);
     }
-  }
 
-  const viewUrl = await s3Service.generateStreamUrl(key);
-  if (!viewUrl) throw new AppError("Failed to generate stream link.", 500);
+    const key = getKey(insId, videoId);
 
-  return viewUrl;
+    if (!isFree) {
+      const isInstructor = user?.role === "instructor" && user?.userId === insId;
+      const isEnrolled = user?.role === "student" && await existsEnrollment(user?.userId, courseId);
+
+      if (!isInstructor && !isEnrolled) {
+        throw new AppError("You don't have access to this video.", 403);
+      }
+    }
+
+    const viewUrl = await s3Service.generateStreamUrl(key);
+    if (!viewUrl) throw new AppError("Failed to generate stream link.", 500);
+
+    return viewUrl;
+  });
 };
 
-export const getVideoUploadUrl = async (insId, contentType) => {
+export const getVideoUploadUrl = async (insId, courseId, contentType) => {
   if (!insId) throw new AppError("Instructor ID is required", 400);
 
   if (!CONTENT_TYPE.includes(contentType))
@@ -82,6 +88,7 @@ export const getVideoUploadUrl = async (insId, contentType) => {
     const [draft] = await DraftVideo.create([{
       videoId,
       userId: insId,
+      courseId,
       key: filePath,
       contentType
     }], { session: s });

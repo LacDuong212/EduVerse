@@ -7,7 +7,8 @@ import * as notifMapper from "./notification.mapper.js";
 // @route GET ...?limit=
 export const getMyNotifications = asyncHandler(async (req, res) => {
   const userId = req.user?.userId;
-  const notifications = await notifService.getUserNotifications(userId);
+  const { limit } = req.validated?.query || {};
+  const notifications = await notifService.getUserNotifications(userId, limit);
   return sendSuccessResponse(
     res,
     200,
@@ -30,14 +31,9 @@ export const markAsRead = asyncHandler(async (req, res) => {
   const userId = req.user?.userId;
   const { id } = req.validated?.params || {};
 
-  const markedCount = await notifService.markOneAsRead(userId, id);
-  if (markedCount)
-    return sendSuccessResponse(
-      res,
-      200,
-      `Marked ${markedCount} notification${markedCount === 1 ? "" : "s"} as read!`,
-      markedCount
-    );
+  const notif = notifMapper.toNotifDto(await notifService.markOneAsRead(userId, id));
+  if (notif?.isRead)
+    return sendSuccessResponse(res, 200, "Marked notification as read successfully!", notif);
   else
     return sendUnsuccessResponse(res, 500, "Failed to mark your notification as read.");
 });

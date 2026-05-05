@@ -1,5 +1,6 @@
 import Fuse from "fuse.js";
 import mongoose from "mongoose";
+import _ from "lodash";
 import AppError from "#exceptions/app.error.js";
 import { getAllCatgeoriesWithSort } from "#modules/category/category.service.js";
 import { existsEnrollment } from "#modules/enrollment/enrollment.service.js";
@@ -14,7 +15,7 @@ import { getPaginationOptions } from "#utils/pagination.js";
 import { withTransaction } from "#utils/transaction.js";
 import * as courseMapper from "./course.mapper.js";
 import Course, { LEVEL_ENUM, STATUS_ENUM, UPDATE_STATUS_ENUM } from "./course.model.js";
-import { courseSchema, priceFilterEnum, sortFilterEnum } from "./course.validation.js";
+import { validateCourseSchema, priceFilterEnum, sortFilterEnum } from "./course.validation.js";
 import Curriculum, { AI_DATA_STATUS } from "./curriculum.model.js";
 
 const publicFilter = {
@@ -32,7 +33,7 @@ export const getCourseAccess = async (userRole, userId, course) => {
   if (!userRole || !userId) return { isOwner: false, isEnrolled: false };
 
   const isOwner = userRole === "instructor" && course?.instructor?.ref?.toString() === userId;
-  const isEnrolled = userRole === "student" && await existsEnrollment(userId, course._id);
+  const isEnrolled = userRole === "student" && await existsEnrollment(userId, course?._id);
 
   return { isOwner, isEnrolled };
 };
@@ -190,10 +191,23 @@ const getMongoSort = (strategy) => {
   return maps[strategy] || { createdAt: -1 };
 };
 
-export const getCourseInfoForVideoId = async (videoId) => {
-  if (!videoId) return null;
+export const getCourseInfoForVideoId = async (videoId, insId = null, session = null) => {
+  if (!videoId) return { courseId: null, insId, isFree: false };
 
-  const result = await Course.aggregate([
+  const matchQuery = {
+    $or: [
+      { previewVideo: videoId },
+      { "pendingUpdate.data.previewVideo": videoId },
+      { "curriculum.sections.lectures.videoId": videoId },
+      { "curriculum.pendingUpdate.data.sections.lectures.videoId": videoId }
+    ]
+  };
+
+  if (mongoose.Types.ObjectId.isValid(insId)) {
+    matchQuery["instructor.ref"] = new mongoose.Types.ObjectId(insId);
+  }
+
+  const [result] = await Course.aggregate([
     {
       $lookup: {
         from: "curriculums",
@@ -202,44 +216,46 @@ export const getCourseInfoForVideoId = async (videoId) => {
         as: "curriculum"
       }
     },
-    { $unwind: "$curriculum" },
-    {
-      $match: {
-        $or: [
-          { previewVideo: videoId },
-          { "curriculum.sections.lectures.videoId": videoId }
-        ]
-      }
-    },
+    { $unwind: { path: "$curriculum", preserveNullAndEmptyArrays: true } },
+    { $match: matchQuery },
     {
       $project: {
         _id: 0,
         courseId: "$_id",
-        insId: "$instructor.ref",
-        previewVideo: 1,
-        sections: "$curriculum.sections"
+        livePreview: "$previewVideo",
+        pendingPreview: "$pendingUpdate.data.previewVideo",
+        liveSections: "$curriculum.sections",
+        pendingSections: "$curriculum.pendingUpdate.data.sections"
       }
     }
-  ]);
+  ], { session });
 
-  if (!result.length) return null;
+  if (!result) return { courseId: null, insId, isFree: false };
 
-  const course = result[0];
+  const findLecture = (sections) =>
+    sections?.flatMap(s => s.lectures || []).find(l => l.videoId === videoId);
 
   let isFree = false;
 
-  if (course.previewVideo === videoId) {
+  if (result.livePreview === videoId || result.pendingPreview === videoId) {
     isFree = true;
-  } else {
-    const allLectures = course.sections.flatMap(s => s.lectures);
-    const targetLecture = allLectures.find(l => l.videoId === videoId);
-    isFree = targetLecture?.isFree ?? false;
+  }
+  else {
+    const pendingLecture = findLecture(result.pendingSections);
+    if (pendingLecture) {
+      isFree = !!pendingLecture.isFree;
+    } else {
+      const liveLecture = findLecture(result.liveSections);
+      if (liveLecture) {
+        isFree = !!liveLecture.isFree;
+      }
+    }
   }
 
   return {
-    courseId: course.courseId || null,
-    insId: course.insId || null,
-    isFree: isFree
+    courseId: result.courseId?.toString(),
+    insId: insId?.toString(),
+    isFree
   };
 };
 
@@ -251,7 +267,7 @@ export const getCoursePublicDetails = async (user, courseId) => {
       path: "category",
       select: "name slug",
     }, {
-      path: "instructor",
+      path: "instructor.ref",
       select: "name pfpImg"
     }, {
       path: "curriculum",
@@ -562,18 +578,18 @@ const getPlainPendingData = (pendingUpdate) => {
   return pendingUpdate?.data || {};
 };
 
-const getMergedCourseState = (courseDoc, curriculumDoc) => {
+// #TODO: seperate old, new video
+const getMergedState = (courseDoc, curriculumDoc) => {
   const pendingCourse = courseDoc.pendingUpdate?.data || {};
   const pendingCurr = curriculumDoc?.pendingUpdate?.data || {};
 
   return {
     course: {
       ...courseDoc.toObject(),
-      ...pendingCourse, // Overwrites live fields with pending ones
+      ...pendingCourse,
       hasPendingChanges: Object.keys(pendingCourse).length > 0
     },
     curriculum: {
-      // Use pending sections if they exist, otherwise live
       sections: pendingCurr.sections || curriculumDoc?.sections || [],
       hasPendingChanges: !!pendingCurr.sections?.length
     }
@@ -581,32 +597,49 @@ const getMergedCourseState = (courseDoc, curriculumDoc) => {
 };
 
 const getProcessedCurriculum = (incomingSections, curriculumDoc) => {
-  const liveLectures = (curriculumDoc?.sections || []).flatMap(s => s.lectures || []);
-  const pendingLectures = (curriculumDoc?.pendingUpdate?.data?.sections || []).flatMap(s => s.lectures || []);
+  const liveSections = curriculumDoc?.sections || [];
+  const pendingSections = curriculumDoc?.pendingUpdate?.data?.sections || [];
+
+  let baseSections = _.cloneDeep(pendingSections.length > 0 ? pendingSections : liveSections);
+
+  if (_.isObject(incomingSections) && !_.isArray(incomingSections)) {
+    Object.entries(incomingSections).forEach(([key, value]) => {
+      const idx = parseInt(key);
+      if (!isNaN(idx)) {
+        baseSections[idx] = _.merge({}, baseSections[idx] || {}, value);
+      }
+    });
+  } else if (_.isArray(incomingSections)) {
+    incomingSections.forEach((value, idx) => {
+      if (value !== null && value !== undefined) {
+        baseSections[idx] = _.merge({}, baseSections[idx] || {}, value);
+      }
+    });
+
+    if (incomingSections.length < baseSections.length && !incomingSections.includes(null)) {
+      baseSections = incomingSections;
+    }
+  }
 
   const aiDataMap = new Map();
-  [...liveLectures, ...pendingLectures].forEach(l => {
-    if (l.videoId && l.aiData) aiDataMap.set(l.videoId, l.aiData);
+  [...liveSections, ...pendingSections].forEach(s => {
+    (s.lectures || []).forEach(l => {
+      if (l.videoId && l.aiData) aiDataMap.set(l.videoId, l.aiData);
+    });
   });
 
-  return (incomingSections || []).map(section => {
-    return {
-      _id: section.secId || new mongoose.Types.ObjectId(),
-      title: section.title,
-      lectures: (section.lectures || []).map(lecture => {
-        const preservedAiData = aiDataMap.get(lecture.videoId) || null;
-
-        return {
-          _id: lecture.lecId || new mongoose.Types.ObjectId(),
-          title: lecture.title,
-          duration: lecture.duration,
-          videoId: lecture.videoId,
-          isFree: lecture.isFree ?? false,
-          aiData: preservedAiData
-        };
-      })
-    };
-  });
+  return baseSections.map(section => ({
+    _id: section._id || (section.secId ? new mongoose.Types.ObjectId(section.secId) : new mongoose.Types.ObjectId()),
+    title: section.title,
+    lectures: (section.lectures || []).map(lecture => ({
+      _id: lecture._id || (lecture.lecId ? new mongoose.Types.ObjectId(lecture.lecId) : new mongoose.Types.ObjectId()),
+      title: lecture.title,
+      duration: lecture.duration,
+      videoId: lecture.videoId,
+      isFree: lecture.isFree ?? false,
+      aiData: lecture.aiData || aiDataMap.get(lecture.videoId) || null
+    }))
+  }));
 };
 
 export const updateCourse = async (insId, courseId, changes, session = null) => {
@@ -619,11 +652,25 @@ export const updateCourse = async (insId, courseId, changes, session = null) => 
     if (!curriculumDoc) curriculumDoc = new Curriculum({ courseId });
 
     const { curriculum, categoryId, ...courseData } = changes;
+    const abandonedVideoIds = [];
+
     if (categoryId) courseData.category = new mongoose.Types.ObjectId(categoryId);
 
     const cleanCourseData = Object.fromEntries(
       Object.entries(courseData).filter(([_, v]) => v !== undefined)
     );
+
+    if (cleanCourseData.previewVideo) {
+      const oldPendingPreview = course.pendingUpdate?.data?.previewVideo;
+      const livePreview = course.previewVideo;
+
+      if (oldPendingPreview &&
+        oldPendingPreview !== cleanCourseData.previewVideo &&
+        oldPendingPreview !== livePreview) {
+        abandonedVideoIds.push(oldPendingPreview);
+      }
+    }
+
     const plainPending = getPlainPendingData(course.pendingUpdate);
 
     course.pendingUpdate = {
@@ -634,7 +681,22 @@ export const updateCourse = async (insId, courseId, changes, session = null) => 
     course.markModified("pendingUpdate.data");
 
     if (curriculum) {
+      const existingPendingSections = curriculumDoc.pendingUpdate?.data?.sections || curriculumDoc.sections || [];
+      const liveSections = curriculumDoc.sections || [];
+
       const processedSections = getProcessedCurriculum(curriculum.sections, curriculumDoc);
+
+      const getVids = (secs) => (secs || []).flatMap(s => s.lectures || []).map(l => l.videoId).filter(Boolean);
+
+      const oldPendingVids = getVids(existingPendingSections);
+      const newPendingVids = new Set(getVids(processedSections));
+      const liveVids = new Set(getVids(liveSections));
+
+      oldPendingVids.forEach(vidId => {
+        if (!newPendingVids.has(vidId) && !liveVids.has(vidId)) {
+          abandonedVideoIds.push(vidId);
+        }
+      });
 
       curriculumDoc.pendingUpdate = {
         data: { sections: processedSections },
@@ -647,9 +709,13 @@ export const updateCourse = async (insId, courseId, changes, session = null) => 
     await course.save({ session: s });
     await curriculumDoc.save({ session: s });
 
+    if (abandonedVideoIds.length > 0) {
+      await expireOrphanVideos(abandonedVideoIds, s);
+    }
+
     const {
       course: mergedCourse, curriculum: mergedCurr
-    } = getMergedCourseState(course, curriculumDoc);
+    } = getMergedState(course, curriculumDoc);
 
     return courseMapper.toEditCourseDto(mergedCourse, mergedCurr);
   }, session);
@@ -668,23 +734,20 @@ export const submitCourse = async (insId, courseId, changes = null, session = nu
 
     const {
       course: mergedCourse, curriculum: mergedCurr
-    } = getMergedCourseState(courseDoc, curriculumDoc);
+    } = getMergedState(courseDoc, curriculumDoc);
 
     const categoryId = (mergedCourse.category?._id || mergedCourse.category)?.toString() || null;
 
-    const validation = courseSchema.safeParse({
+    const validation = validateCourseSchema.safeParse({
       ...mergedCourse,
       categoryId,
       curriculum: { sections: mergedCurr.sections || [] }
     });
 
-    if (!validation.success) {
-      throw validation.error;
-    }
+    if (!validation.success) throw validation.error;
 
-    if (courseDoc.status === STATUS_ENUM.draft) {
+    if (courseDoc.status === STATUS_ENUM.draft)
       courseDoc.status = STATUS_ENUM.pending;
-    }
 
     const now = new Date();
 
@@ -737,16 +800,6 @@ export const clearPendingChanges = async (insId, courseId, session = null) => {
       videosToRemove.push(...lectureVideos);
     }
 
-    if (hasCurriculumChanges) {
-      const pendingCurrData = getPlainPendingData(curriculumDoc.pendingUpdate);
-      const lectureVideos = (pendingCurrData.sections || [])
-        .flatMap(sec => sec.lectures || [])
-        .map(l => l.videoId)
-        .filter(Boolean);
-
-      videosToRemove.push(...lectureVideos);
-    }
-
     course.pendingUpdate = {
       data: null,
       submittedAt: null,
@@ -769,7 +822,7 @@ export const clearPendingChanges = async (insId, courseId, session = null) => {
 
     const {
       course: mergedCourse, curriculum: mergedCurr
-    } = getMergedCourseState(course, curriculumDoc);
+    } = getMergedState(course, curriculumDoc);
 
     return courseMapper.toEditCourseDto(mergedCourse, mergedCurr);
   }, session);
@@ -786,7 +839,7 @@ export const getCourseForEdit = async (insId, courseId) => {
   const {
     course: mergedCourse,
     curriculum: mergedCurr
-  } = getMergedCourseState(courseDoc, courseDoc.curriculum);
+  } = getMergedState(courseDoc, courseDoc.curriculum);
 
   return courseMapper.toEditCourseDto(mergedCourse, mergedCurr);
 };
@@ -1009,4 +1062,17 @@ export const countInstructorLiveCourses = async (insId) => {
   });
 
   return count;
+};
+
+export const publicCourseExist = async (courseId) => {
+  if (!courseId || !mongoose.Types.ObjectId.isValid(courseId)) {
+    return false;
+  }
+
+  const result = await Course.exists({
+    _id: courseId,
+    ...publicFilter,
+  });
+
+  return !!result;
 };

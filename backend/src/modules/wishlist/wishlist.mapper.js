@@ -28,10 +28,7 @@ export const toWishlistDto = (course) => {
     title: course?.title || null,
     subtitle: course?.subtitle || null,
     image: course?.image || null,
-    thumnail: course?.thumnail || null,
-    duration: course?.duration || null,
-    lecturesCount: course?.lecturesCount || null,
-
+    thumbnail: course?.thumbnail || null,
 
     price,
     discountPrice,
@@ -39,15 +36,8 @@ export const toWishlistDto = (course) => {
     isFree,
 
     level: course?.level || null,
-    category:{
-      name: categoryName
-    },
-
-    rating: {
-      total: ratingTotal,
-      count: ratingCount
-    },
-    lectureCount: course?.lectureCount || 0
+    ratingAvg,
+    lecturesCount: course?.lecturesCount || 0
   }
 }
 

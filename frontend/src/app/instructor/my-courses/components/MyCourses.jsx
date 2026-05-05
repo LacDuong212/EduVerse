@@ -91,10 +91,11 @@ const MyCourses = ({
               <Col xs={12} md={7} lg={8}>
                 <form>
                   <ChoicesFormInput
+                    name="sortValue"
                     className="form-select js-choice border-0 z-index-9 bg-transparent"
                     aria-label=".form-select-sm"
                     value={sortValue}
-                    onChange={handleSortChange}
+                    onChange={(e) => handleSortChange(e?.target?.value || "")}
                   >
                     <option value="recentUpdate">Recently Updated</option>
                     <option value="newest">Newest</option>

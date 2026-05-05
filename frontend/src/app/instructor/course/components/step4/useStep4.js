@@ -1,51 +1,20 @@
-import { useState, useEffect, useRef } from "react";
+import _ from "lodash";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { useCourseEditor } from "../../CourseEditorContext";
+import { step4Fields, validateCourse } from "../../schemas";
 
 export const useStep4 = (stepperInstance) => {
-  const {
-    currentCourse: course,
-    courseDraft: draft,
-    updateField: onUpdateField,
-    isSubmitting,
-    handleSubmit: onSubmit
-  } = useCourseEditor();
+  const { changes, currentCourse, isDirty, onSubmit, isSubmitting, errors: globalErrors, setErrors: setGlobalErrors } = useCourseEditor();
+  const [tagsInput, setTagsInput] = useState(currentCourse.tags?.join(", ") || "");
+  const [errors, setErrors] = useState({});
 
-  // init
-  const [tagsInput, setTagsInput] = useState(course.tags?.join(', ') || '');
-  const isFirstRender = useRef(true);
-
-  // auto-save tags with debounce
   useEffect(() => {
-    // skip the very first render to avoid overwriting parent state immediately
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
+    const relevantErrors = _.pick(globalErrors, step4Fields);
+    if (!_.isEqual(errors, relevantErrors)) {
+      setErrors(relevantErrors);
     }
-
-    // wait before saving
-    const timeoutId = setTimeout(() => {
-      const formattedTags = tagsInput
-        .split(',')
-        .map((t) => t.trim().toLowerCase())             // clean whitespace & lowercase
-        .filter((t) => t.length > 0 && t.length <= 25)   // remove empty or insanely long strings
-        .slice(0, 14);                                  // limit tags
-
-      // check if the tags have actually changed
-      const currentTags = course?.tags || [];
-      if (JSON.stringify(currentTags) !== JSON.stringify(formattedTags)) {
-        onUpdateField("tags", formattedTags);
-      }
-    }, 800);
-
-    // cleanup timeout if user types again quickly
-    return () => clearTimeout(timeoutId);
-  }, [tagsInput, onUpdateField]);
-
-  // --- handlers ---
-  const handleTagsChange = (e) => {
-    setTagsInput(e.target.value);
-  };
+  }, [globalErrors]);
 
   const goBack = () => {
     stepperInstance?.previous();
@@ -56,24 +25,46 @@ export const useStep4 = (stepperInstance) => {
     if (isSubmitting) return;
 
     const finalTags = tagsInput
-      .split(',')
+      .split(",")
       .map((t) => t.trim().toLowerCase())
       .filter((t) => t.length > 0 && t.length <= 25)
       .slice(0, 14);
 
-    onUpdateField("tags", finalTags);
+    const originalTags = currentCourse?.tags || [];
+    const tagsChanged = !_.isEqual(finalTags, originalTags);
 
-    const hasChangesInDraft = Object.keys(draft).length > 0;
-    if (!hasChangesInDraft && course?.status?.toUpperCase() !== "DRAFT") {
-      toast.info("No changes to submit.");
+    let finalChanges = { ...changes };
+
+    if (tagsChanged) {
+      _.set(finalChanges, "tags", finalTags);
+    } else {
+      _.unset(finalChanges, "tags");
+    }
+
+    const actualDirty = Object.keys(finalChanges).length > 0
+      || currentCourse.curriculum.hasPendingChanges
+      || currentCourse.hasPendingChanges;
+    if (!actualDirty) return toast.info("You haven't changed anything to submit..");
+
+    const validationData = { ...currentCourse, tags: finalTags };
+    const { success, step, errors: newErrors } = validateCourse(validationData);
+
+    if (!success) {
+      setGlobalErrors((prev) => ({ ...prev, ...newErrors }));
+      toast.error("Course failed validation, please check each step again before submitting.");
+      if (step !== null) stepperInstance?.to(step);
       return;
     }
 
-    await onSubmit();
+    await onSubmit(finalChanges);
   };
 
   return {
-    state: { tagsInput, isSubmitting },
-    handlers: { handleTagsChange, goBack, handleSubmit }
+    isDirty,
+    tagsInput,
+    setTagsInput,
+    goBack,
+    handleSubmit,
+    isSubmitting,
   };
 };

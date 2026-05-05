@@ -1,19 +1,21 @@
-import { useState, useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import useVideoStream from "@/hooks/useVideoStream";
 
 export const useAiData = (lecture, show) => {
   const [activeTab, setActiveTab] = useState("summary");
 
-  // reset tab to summary whenever the modal opens or lecture changes
+  const { streamUrl: s3StreamUrl } = useVideoStream(lecture?.videoId);
+
   useEffect(() => {
     if (show) setActiveTab("summary");
   }, [show, lecture?.id]);
 
   const aiData = lecture?.aiData || {};
-  const status = aiData.status || "None";
+  const status = aiData.status || "none";
 
-  const isProcessing = status === "Processing";
-  const isFailed = status === "Failed";
-  const hasData = status === "Completed";
+  const isProcessing = status === "processing";
+  const isFailed = status === "failed";
+  const hasData = status === "completed";
 
   const content = useMemo(() => ({
     title: lecture?.title || "Unknown Lecture",
@@ -21,7 +23,8 @@ export const useAiData = (lecture, show) => {
     keyConcepts: aiData.lessonNotes?.keyConcepts || [],
     mainPoints: aiData.lessonNotes?.mainPoints || [],
     quizzes: aiData.quizzes || [],
-  }), [lecture, aiData]);
+    videoUrl: s3StreamUrl,
+  }), [lecture, aiData, s3StreamUrl]);
 
   return {
     state: {

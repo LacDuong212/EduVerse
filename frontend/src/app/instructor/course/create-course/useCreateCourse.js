@@ -1,42 +1,34 @@
-import axios from "axios";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { authApi } from "@/utils/api";
+import { handleRequest } from "@/utils/request";
 import { toast } from "react-toastify";
 
-const useCreateCourse = () => {
-  const [isLoading, setIsLoading] = useState(false);
+export default function useCreateCourse({ autoRun = false } = {}) {
   const navigate = useNavigate();
-  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  const [isCreating, setIsCreating] = useState(false);
 
-  const createCourse = async () => {
-    setIsLoading(true);
-    try {
-      const response = await axios.post(
-        `${backendUrl}/api/instructor/courses`,
-        {},
-        { withCredentials: true }
-      );
-      const data = response.data;
-      
-      if (data.success && data.result) {
-        const courseId = data.result;
+  const create = useCallback(async () => {
+    if (isCreating) return;
+    setIsCreating(true);
 
-        toast.success("New draft course created!");
-
-        navigate(`/instructor/courses/${courseId}/edit`, { replace: true });
-      } else {
-        toast.error(data.message || "Failed to create course");
-      }
-
-    } catch (error) {
-      console.error("Create course error:", error);
-      toast.error("Error creating course");
-    } finally {
-      setIsLoading(false); 
+    const res = await handleRequest(authApi.post("/instructor/courses"));
+    
+    if (res.success) {
+      const courseId = res.result.courseId;
+      toast.success(res.message || "New course created!");
+      navigate(`/instructor/courses/${courseId}/edit`, { replace: true });
+    } else {
+      navigate("/instructor/courses");
     }
-  };
+    setIsCreating(false);
+  }, [navigate]);
 
-  return { createCourse, isLoading };
-};
+  useEffect(() => {
+    if (autoRun) {
+      create();
+    }
+  }, [autoRun, create]);
 
-export default useCreateCourse;
+  return { isCreating };
+}
