@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import AppError from "#exceptions/app.error.js"
 import Coupon from "./coupon.model.js";
 
