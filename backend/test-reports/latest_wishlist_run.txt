@@ -2,66 +2,26 @@
 > backend@1.0.0 test:wishlist
 > cross-env NODE_OPTIONS=--experimental-vm-modules jest --testPathPatterns=wishlist --forceExit
 
-node.exe : (node:26288) ExperimentalWarning: VM Modules is an experimental 
+node.exe : (node:20724) ExperimentalWarning: VM Modules is an experimental 
 feature and might change at any time
 At line:1 char:1
 + & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
 + ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: ((node:26288) Ex...nge at any time 
+    + CategoryInfo          : NotSpecified: ((node:20724) Ex...nge at any time 
    :String) [], RemoteException
     + FullyQualifiedErrorId : NativeCommandError
  
 (Use `node --trace-warnings ...` to show where the warning was created)
   console.error
-    [31m[EXCEPTION] [2026-04-30T15:17:30.144Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-05T16:24:35.455Z] -----------------------[0m
 
-    [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
-     [90m 22 |[39m
-    [31m[1m>[22m[39m[90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+    [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:23:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    Method: POST | URL: /api/wishlist | Code: 409 | IP: ::ffff:127.0.0.1
-
-    [0m [90m 22 |[39m
-     [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-    [31m[1m>[22m[39m[90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
      [90m    |[39m             [31m[1m^[22m[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m 27 |[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:24:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    Message: Course already in wishlist
-
-    [0m [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 27 |[39m
-     [90m 28 |[39m     [36mif[39m (err[33m.[39mcause) {
-     [90m 29 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
+     [90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 28 |[39m
+     [90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
 
       at Object.logErrorWithContext (src/shared/utils/logger.js:26:13)
       at errorMiddleware (src/middlewares/error.middleware.js:6:10)
@@ -73,17 +33,17 @@ At line:1 char:1
       at Immediate._onImmediate (node_modules/router/index.js:688:15)
 
   console.error
-    [31m--------------------------------------------------------------[0m
+    Method: POST | URL: /api/wishlist | Code: 409 | IP: ::ffff:127.0.0.1
 
-    [0m [90m 37 |[39m     }
-     [90m 38 |[39m
-    [31m[1m>[22m[39m[90m 39 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
+    [0m [90m 25 |[39m
+     [90m 26 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
      [90m    |[39m             [31m[1m^[22m[39m
-     [90m 40 |[39m   }
-     [90m 41 |[39m }[33m;[39m
-     [90m 42 |[39m[0m
+     [90m 28 |[39m
+     [90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+     [90m 30 |[39m[0m
 
-      at Object.logErrorWithContext (src/shared/utils/logger.js:39:13)
+      at Object.logErrorWithContext (src/shared/utils/logger.js:27:13)
       at errorMiddleware (src/middlewares/error.middleware.js:6:10)
       at Layer.handleError (node_modules/router/lib/layer.js:116:17)
       at trimPrefix (node_modules/router/index.js:340:13)
@@ -93,17 +53,57 @@ At line:1 char:1
       at Immediate._onImmediate (node_modules/router/index.js:688:15)
 
   console.error
-    [31m[EXCEPTION] [2026-04-30T15:17:30.234Z] -----------------------[0m
+    Message: Course already in wishlist
 
-    [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
-     [90m 22 |[39m
-    [31m[1m>[22m[39m[90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+    [0m [90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 28 |[39m
+    [31m[1m>[22m[39m[90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
      [90m    |[39m             [31m[1m^[22m[39m
-     [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
+     [90m 30 |[39m
+     [90m 31 |[39m     [36mif[39m (err[33m.[39mcause) {
+     [90m 32 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
 
-      at Object.logErrorWithContext (src/shared/utils/logger.js:23:13)
+      at Object.logErrorWithContext (src/shared/utils/logger.js:29:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at Immediate.next (node_modules/router/index.js:291:5)
+      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+
+  console.error
+    [38;5;208m--------------------------------------------------------------[0m
+
+    [0m [90m 40 |[39m     }
+     [90m 41 |[39m
+    [31m[1m>[22m[39m[90m 42 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 43 |[39m   }
+     [90m 44 |[39m }[33m;[39m
+     [90m 45 |[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:42:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at Immediate.next (node_modules/router/index.js:291:5)
+      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+
+  console.error
+    [38;5;208m[EXCEPTION] [2026-05-05T16:24:35.534Z] -----------------------[0m
+
+    [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
+     [90m 25 |[39m
+    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 28 |[39m
+     [90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:26:13)
       at errorMiddleware (src/middlewares/error.middleware.js:6:10)
       at Layer.handleError (node_modules/router/lib/layer.js:116:17)
       at trimPrefix (node_modules/router/index.js:340:13)
@@ -115,15 +115,15 @@ At line:1 char:1
   console.error
     Method: POST | URL: /api/wishlist | Code: 500 | IP: ::ffff:127.0.0.1
 
-    [0m [90m 22 |[39m
-     [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-    [31m[1m>[22m[39m[90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+    [0m [90m 25 |[39m
+     [90m 26 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
      [90m    |[39m             [31m[1m^[22m[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m 27 |[39m[0m
+     [90m 28 |[39m
+     [90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+     [90m 30 |[39m[0m
 
-      at Object.logErrorWithContext (src/shared/utils/logger.js:24:13)
+      at Object.logErrorWithContext (src/shared/utils/logger.js:27:13)
       at errorMiddleware (src/middlewares/error.middleware.js:6:10)
       at Layer.handleError (node_modules/router/lib/layer.js:116:17)
       at trimPrefix (node_modules/router/index.js:340:13)
@@ -162,13 +162,53 @@ At line:1 char:1
       }
     ]
 
-    [0m [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+    [0m [90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 28 |[39m
+    [31m[1m>[22m[39m[90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
      [90m    |[39m             [31m[1m^[22m[39m
-     [90m 27 |[39m
-     [90m 28 |[39m     [36mif[39m (err[33m.[39mcause) {
-     [90m 29 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
+     [90m 30 |[39m
+     [90m 31 |[39m     [36mif[39m (err[33m.[39mcause) {
+     [90m 32 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:29:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at Immediate.next (node_modules/router/index.js:291:5)
+      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+
+  console.error
+    [38;5;208m--------------------------------------------------------------[0m
+
+    [0m [90m 40 |[39m     }
+     [90m 41 |[39m
+    [31m[1m>[22m[39m[90m 42 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 43 |[39m   }
+     [90m 44 |[39m }[33m;[39m
+     [90m 45 |[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:42:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at Immediate.next (node_modules/router/index.js:291:5)
+      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+
+  console.error
+    [38;5;208m[EXCEPTION] [2026-05-05T16:24:35.587Z] -----------------------[0m
+
+    [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
+     [90m 25 |[39m
+    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 28 |[39m
+     [90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
 
       at Object.logErrorWithContext (src/shared/utils/logger.js:26:13)
       at errorMiddleware (src/middlewares/error.middleware.js:6:10)
@@ -180,57 +220,17 @@ At line:1 char:1
       at Immediate._onImmediate (node_modules/router/index.js:688:15)
 
   console.error
-    [31m--------------------------------------------------------------[0m
-
-    [0m [90m 37 |[39m     }
-     [90m 38 |[39m
-    [31m[1m>[22m[39m[90m 39 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 40 |[39m   }
-     [90m 41 |[39m }[33m;[39m
-     [90m 42 |[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:39:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m[EXCEPTION] [2026-04-30T15:17:30.316Z] -----------------------[0m
-
-    [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
-     [90m 22 |[39m
-    [31m[1m>[22m[39m[90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:23:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
     Method: POST | URL: /api/wishlist | Code: 500 | IP: ::ffff:127.0.0.1
 
-    [0m [90m 22 |[39m
-     [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-    [31m[1m>[22m[39m[90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+    [0m [90m 25 |[39m
+     [90m 26 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
      [90m    |[39m             [31m[1m^[22m[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m 27 |[39m[0m
+     [90m 28 |[39m
+     [90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+     [90m 30 |[39m[0m
 
-      at Object.logErrorWithContext (src/shared/utils/logger.js:24:13)
+      at Object.logErrorWithContext (src/shared/utils/logger.js:27:13)
       at errorMiddleware (src/middlewares/error.middleware.js:6:10)
       at Layer.handleError (node_modules/router/lib/layer.js:116:17)
       at trimPrefix (node_modules/router/index.js:340:13)
@@ -251,55 +251,55 @@ At line:1 char:1
       }
     ]
 
-    [0m [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+    [0m [90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 28 |[39m
+    [31m[1m>[22m[39m[90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
      [90m    |[39m             [31m[1m^[22m[39m
-     [90m 27 |[39m
-     [90m 28 |[39m     [36mif[39m (err[33m.[39mcause) {
-     [90m 29 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
+     [90m 30 |[39m
+     [90m 31 |[39m     [36mif[39m (err[33m.[39mcause) {
+     [90m 32 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:29:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at Immediate.next (node_modules/router/index.js:291:5)
+      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+
+  console.error
+    [38;5;208m--------------------------------------------------------------[0m
+
+    [0m [90m 40 |[39m     }
+     [90m 41 |[39m
+    [31m[1m>[22m[39m[90m 42 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 43 |[39m   }
+     [90m 44 |[39m }[33m;[39m
+     [90m 45 |[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:42:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at Immediate.next (node_modules/router/index.js:291:5)
+      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+
+  console.error
+    [38;5;208m[EXCEPTION] [2026-05-05T16:24:35.615Z] -----------------------[0m
+
+    [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
+     [90m 25 |[39m
+    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 28 |[39m
+     [90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
 
       at Object.logErrorWithContext (src/shared/utils/logger.js:26:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m--------------------------------------------------------------[0m
-
-    [0m [90m 37 |[39m     }
-     [90m 38 |[39m
-    [31m[1m>[22m[39m[90m 39 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 40 |[39m   }
-     [90m 41 |[39m }[33m;[39m
-     [90m 42 |[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:39:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m[EXCEPTION] [2026-04-30T15:17:30.356Z] -----------------------[0m
-
-    [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
-     [90m 22 |[39m
-    [31m[1m>[22m[39m[90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:23:13)
       at errorMiddleware (src/middlewares/error.middleware.js:6:10)
       at Layer.handleError (node_modules/router/lib/layer.js:116:17)
       at trimPrefix (node_modules/router/index.js:340:13)
@@ -311,15 +311,15 @@ At line:1 char:1
   console.error
     Method: POST | URL: /api/wishlist | Code: 401 | IP: ::ffff:127.0.0.1
 
-    [0m [90m 22 |[39m
-     [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-    [31m[1m>[22m[39m[90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+    [0m [90m 25 |[39m
+     [90m 26 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
      [90m    |[39m             [31m[1m^[22m[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m 27 |[39m[0m
+     [90m 28 |[39m
+     [90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+     [90m 30 |[39m[0m
 
-      at Object.logErrorWithContext (src/shared/utils/logger.js:24:13)
+      at Object.logErrorWithContext (src/shared/utils/logger.js:27:13)
       at errorMiddleware (src/middlewares/error.middleware.js:6:10)
       at Layer.handleError (node_modules/router/lib/layer.js:116:17)
       at trimPrefix (node_modules/router/index.js:340:13)
@@ -331,55 +331,55 @@ At line:1 char:1
   console.error
     Message: You are not logged in. Please log in first.
 
-    [0m [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+    [0m [90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 28 |[39m
+    [31m[1m>[22m[39m[90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
      [90m    |[39m             [31m[1m^[22m[39m
-     [90m 27 |[39m
-     [90m 28 |[39m     [36mif[39m (err[33m.[39mcause) {
-     [90m 29 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
+     [90m 30 |[39m
+     [90m 31 |[39m     [36mif[39m (err[33m.[39mcause) {
+     [90m 32 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:29:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at Immediate.next (node_modules/router/index.js:291:5)
+      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+
+  console.error
+    [38;5;208m--------------------------------------------------------------[0m
+
+    [0m [90m 40 |[39m     }
+     [90m 41 |[39m
+    [31m[1m>[22m[39m[90m 42 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 43 |[39m   }
+     [90m 44 |[39m }[33m;[39m
+     [90m 45 |[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:42:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at Immediate.next (node_modules/router/index.js:291:5)
+      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+
+  console.error
+    [38;5;208m[EXCEPTION] [2026-05-05T16:24:35.668Z] -----------------------[0m
+
+    [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
+     [90m 25 |[39m
+    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 28 |[39m
+     [90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
 
       at Object.logErrorWithContext (src/shared/utils/logger.js:26:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m--------------------------------------------------------------[0m
-
-    [0m [90m 37 |[39m     }
-     [90m 38 |[39m
-    [31m[1m>[22m[39m[90m 39 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 40 |[39m   }
-     [90m 41 |[39m }[33m;[39m
-     [90m 42 |[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:39:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m[EXCEPTION] [2026-04-30T15:17:30.443Z] -----------------------[0m
-
-    [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
-     [90m 22 |[39m
-    [31m[1m>[22m[39m[90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:23:13)
       at errorMiddleware (src/middlewares/error.middleware.js:6:10)
       at Layer.handleError (node_modules/router/lib/layer.js:116:17)
       at trimPrefix (node_modules/router/index.js:340:13)
@@ -391,15 +391,15 @@ At line:1 char:1
   console.error
     Method: POST | URL: /api/wishlist | Code: 403 | IP: ::ffff:127.0.0.1
 
-    [0m [90m 22 |[39m
-     [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-    [31m[1m>[22m[39m[90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+    [0m [90m 25 |[39m
+     [90m 26 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
      [90m    |[39m             [31m[1m^[22m[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m 27 |[39m[0m
+     [90m 28 |[39m
+     [90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+     [90m 30 |[39m[0m
 
-      at Object.logErrorWithContext (src/shared/utils/logger.js:24:13)
+      at Object.logErrorWithContext (src/shared/utils/logger.js:27:13)
       at errorMiddleware (src/middlewares/error.middleware.js:6:10)
       at Layer.handleError (node_modules/router/lib/layer.js:116:17)
       at trimPrefix (node_modules/router/index.js:340:13)
@@ -411,55 +411,55 @@ At line:1 char:1
   console.error
     Message: Access denied.
 
-    [0m [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+    [0m [90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 28 |[39m
+    [31m[1m>[22m[39m[90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
      [90m    |[39m             [31m[1m^[22m[39m
-     [90m 27 |[39m
-     [90m 28 |[39m     [36mif[39m (err[33m.[39mcause) {
-     [90m 29 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
+     [90m 30 |[39m
+     [90m 31 |[39m     [36mif[39m (err[33m.[39mcause) {
+     [90m 32 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:29:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at Immediate.next (node_modules/router/index.js:291:5)
+      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+
+  console.error
+    [38;5;208m--------------------------------------------------------------[0m
+
+    [0m [90m 40 |[39m     }
+     [90m 41 |[39m
+    [31m[1m>[22m[39m[90m 42 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 43 |[39m   }
+     [90m 44 |[39m }[33m;[39m
+     [90m 45 |[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:42:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at Immediate.next (node_modules/router/index.js:291:5)
+      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+
+  console.error
+    [38;5;208m[EXCEPTION] [2026-05-05T16:24:36.342Z] -----------------------[0m
+
+    [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
+     [90m 25 |[39m
+    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 28 |[39m
+     [90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
 
       at Object.logErrorWithContext (src/shared/utils/logger.js:26:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m--------------------------------------------------------------[0m
-
-    [0m [90m 37 |[39m     }
-     [90m 38 |[39m
-    [31m[1m>[22m[39m[90m 39 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 40 |[39m   }
-     [90m 41 |[39m }[33m;[39m
-     [90m 42 |[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:39:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m[EXCEPTION] [2026-04-30T15:17:31.525Z] -----------------------[0m
-
-    [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
-     [90m 22 |[39m
-    [31m[1m>[22m[39m[90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:23:13)
       at errorMiddleware (src/middlewares/error.middleware.js:6:10)
       at Layer.handleError (node_modules/router/lib/layer.js:116:17)
       at trimPrefix (node_modules/router/index.js:340:13)
@@ -471,15 +471,15 @@ At line:1 char:1
   console.error
     Method: GET | URL: /api/wishlist | Code: 401 | IP: ::ffff:127.0.0.1
 
-    [0m [90m 22 |[39m
-     [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-    [31m[1m>[22m[39m[90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+    [0m [90m 25 |[39m
+     [90m 26 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
      [90m    |[39m             [31m[1m^[22m[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m 27 |[39m[0m
+     [90m 28 |[39m
+     [90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+     [90m 30 |[39m[0m
 
-      at Object.logErrorWithContext (src/shared/utils/logger.js:24:13)
+      at Object.logErrorWithContext (src/shared/utils/logger.js:27:13)
       at errorMiddleware (src/middlewares/error.middleware.js:6:10)
       at Layer.handleError (node_modules/router/lib/layer.js:116:17)
       at trimPrefix (node_modules/router/index.js:340:13)
@@ -491,55 +491,55 @@ At line:1 char:1
   console.error
     Message: You are not logged in. Please log in first.
 
-    [0m [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+    [0m [90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 28 |[39m
+    [31m[1m>[22m[39m[90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
      [90m    |[39m             [31m[1m^[22m[39m
-     [90m 27 |[39m
-     [90m 28 |[39m     [36mif[39m (err[33m.[39mcause) {
-     [90m 29 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
+     [90m 30 |[39m
+     [90m 31 |[39m     [36mif[39m (err[33m.[39mcause) {
+     [90m 32 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:29:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at Immediate.next (node_modules/router/index.js:291:5)
+      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+
+  console.error
+    [38;5;208m--------------------------------------------------------------[0m
+
+    [0m [90m 40 |[39m     }
+     [90m 41 |[39m
+    [31m[1m>[22m[39m[90m 42 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 43 |[39m   }
+     [90m 44 |[39m }[33m;[39m
+     [90m 45 |[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:42:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at Immediate.next (node_modules/router/index.js:291:5)
+      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+
+  console.error
+    [38;5;208m[EXCEPTION] [2026-05-05T16:24:36.390Z] -----------------------[0m
+
+    [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
+     [90m 25 |[39m
+    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 28 |[39m
+     [90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
 
       at Object.logErrorWithContext (src/shared/utils/logger.js:26:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m--------------------------------------------------------------[0m
-
-    [0m [90m 37 |[39m     }
-     [90m 38 |[39m
-    [31m[1m>[22m[39m[90m 39 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 40 |[39m   }
-     [90m 41 |[39m }[33m;[39m
-     [90m 42 |[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:39:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m[EXCEPTION] [2026-04-30T15:17:31.587Z] -----------------------[0m
-
-    [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
-     [90m 22 |[39m
-    [31m[1m>[22m[39m[90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:23:13)
       at errorMiddleware (src/middlewares/error.middleware.js:6:10)
       at Layer.handleError (node_modules/router/lib/layer.js:116:17)
       at trimPrefix (node_modules/router/index.js:340:13)
@@ -551,15 +551,15 @@ At line:1 char:1
   console.error
     Method: GET | URL: /api/wishlist | Code: 403 | IP: ::ffff:127.0.0.1
 
-    [0m [90m 22 |[39m
-     [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-    [31m[1m>[22m[39m[90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+    [0m [90m 25 |[39m
+     [90m 26 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
      [90m    |[39m             [31m[1m^[22m[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m 27 |[39m[0m
+     [90m 28 |[39m
+     [90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+     [90m 30 |[39m[0m
 
-      at Object.logErrorWithContext (src/shared/utils/logger.js:24:13)
+      at Object.logErrorWithContext (src/shared/utils/logger.js:27:13)
       at errorMiddleware (src/middlewares/error.middleware.js:6:10)
       at Layer.handleError (node_modules/router/lib/layer.js:116:17)
       at trimPrefix (node_modules/router/index.js:340:13)
@@ -571,13 +571,53 @@ At line:1 char:1
   console.error
     Message: Access denied.
 
-    [0m [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+    [0m [90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 28 |[39m
+    [31m[1m>[22m[39m[90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
      [90m    |[39m             [31m[1m^[22m[39m
-     [90m 27 |[39m
-     [90m 28 |[39m     [36mif[39m (err[33m.[39mcause) {
-     [90m 29 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
+     [90m 30 |[39m
+     [90m 31 |[39m     [36mif[39m (err[33m.[39mcause) {
+     [90m 32 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:29:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at Immediate.next (node_modules/router/index.js:291:5)
+      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+
+  console.error
+    [38;5;208m--------------------------------------------------------------[0m
+
+    [0m [90m 40 |[39m     }
+     [90m 41 |[39m
+    [31m[1m>[22m[39m[90m 42 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 43 |[39m   }
+     [90m 44 |[39m }[33m;[39m
+     [90m 45 |[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:42:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at Immediate.next (node_modules/router/index.js:291:5)
+      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+
+  console.error
+    [38;5;208m[EXCEPTION] [2026-05-05T16:24:36.579Z] -----------------------[0m
+
+    [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
+     [90m 25 |[39m
+    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 28 |[39m
+     [90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
 
       at Object.logErrorWithContext (src/shared/utils/logger.js:26:13)
       at errorMiddleware (src/middlewares/error.middleware.js:6:10)
@@ -589,57 +629,17 @@ At line:1 char:1
       at Immediate._onImmediate (node_modules/router/index.js:688:15)
 
   console.error
-    [31m--------------------------------------------------------------[0m
-
-    [0m [90m 37 |[39m     }
-     [90m 38 |[39m
-    [31m[1m>[22m[39m[90m 39 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 40 |[39m   }
-     [90m 41 |[39m }[33m;[39m
-     [90m 42 |[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:39:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m[EXCEPTION] [2026-04-30T15:17:31.850Z] -----------------------[0m
-
-    [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
-     [90m 22 |[39m
-    [31m[1m>[22m[39m[90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:23:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
     Method: GET | URL: /api/wishlist/check?courseId=not-a-valid-id | Code: 500 | IP: ::ffff:127.0.0.1
 
-    [0m [90m 22 |[39m
-     [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-    [31m[1m>[22m[39m[90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+    [0m [90m 25 |[39m
+     [90m 26 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
      [90m    |[39m             [31m[1m^[22m[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m 27 |[39m[0m
+     [90m 28 |[39m
+     [90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+     [90m 30 |[39m[0m
 
-      at Object.logErrorWithContext (src/shared/utils/logger.js:24:13)
+      at Object.logErrorWithContext (src/shared/utils/logger.js:27:13)
       at errorMiddleware (src/middlewares/error.middleware.js:6:10)
       at Layer.handleError (node_modules/router/lib/layer.js:116:17)
       at trimPrefix (node_modules/router/index.js:340:13)
@@ -660,55 +660,55 @@ At line:1 char:1
       }
     ]
 
-    [0m [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+    [0m [90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 28 |[39m
+    [31m[1m>[22m[39m[90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
      [90m    |[39m             [31m[1m^[22m[39m
-     [90m 27 |[39m
-     [90m 28 |[39m     [36mif[39m (err[33m.[39mcause) {
-     [90m 29 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
+     [90m 30 |[39m
+     [90m 31 |[39m     [36mif[39m (err[33m.[39mcause) {
+     [90m 32 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:29:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at Immediate.next (node_modules/router/index.js:291:5)
+      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+
+  console.error
+    [38;5;208m--------------------------------------------------------------[0m
+
+    [0m [90m 40 |[39m     }
+     [90m 41 |[39m
+    [31m[1m>[22m[39m[90m 42 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 43 |[39m   }
+     [90m 44 |[39m }[33m;[39m
+     [90m 45 |[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:42:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at Immediate.next (node_modules/router/index.js:291:5)
+      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+
+  console.error
+    [38;5;208m[EXCEPTION] [2026-05-05T16:24:36.593Z] -----------------------[0m
+
+    [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
+     [90m 25 |[39m
+    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 28 |[39m
+     [90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
 
       at Object.logErrorWithContext (src/shared/utils/logger.js:26:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m--------------------------------------------------------------[0m
-
-    [0m [90m 37 |[39m     }
-     [90m 38 |[39m
-    [31m[1m>[22m[39m[90m 39 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 40 |[39m   }
-     [90m 41 |[39m }[33m;[39m
-     [90m 42 |[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:39:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m[EXCEPTION] [2026-04-30T15:17:31.859Z] -----------------------[0m
-
-    [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
-     [90m 22 |[39m
-    [31m[1m>[22m[39m[90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:23:13)
       at errorMiddleware (src/middlewares/error.middleware.js:6:10)
       at Layer.handleError (node_modules/router/lib/layer.js:116:17)
       at trimPrefix (node_modules/router/index.js:340:13)
@@ -720,15 +720,15 @@ At line:1 char:1
   console.error
     Method: GET | URL: /api/wishlist/check?courseId=694e8e85ed8f2ec45dc0d4ec | Code: 401 | IP: ::ffff:127.0.0.1
 
-    [0m [90m 22 |[39m
-     [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-    [31m[1m>[22m[39m[90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+    [0m [90m 25 |[39m
+     [90m 26 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
      [90m    |[39m             [31m[1m^[22m[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m 27 |[39m[0m
+     [90m 28 |[39m
+     [90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+     [90m 30 |[39m[0m
 
-      at Object.logErrorWithContext (src/shared/utils/logger.js:24:13)
+      at Object.logErrorWithContext (src/shared/utils/logger.js:27:13)
       at errorMiddleware (src/middlewares/error.middleware.js:6:10)
       at Layer.handleError (node_modules/router/lib/layer.js:116:17)
       at trimPrefix (node_modules/router/index.js:340:13)
@@ -740,55 +740,55 @@ At line:1 char:1
   console.error
     Message: You are not logged in. Please log in first.
 
-    [0m [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+    [0m [90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 28 |[39m
+    [31m[1m>[22m[39m[90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
      [90m    |[39m             [31m[1m^[22m[39m
-     [90m 27 |[39m
-     [90m 28 |[39m     [36mif[39m (err[33m.[39mcause) {
-     [90m 29 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
+     [90m 30 |[39m
+     [90m 31 |[39m     [36mif[39m (err[33m.[39mcause) {
+     [90m 32 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:29:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at Immediate.next (node_modules/router/index.js:291:5)
+      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+
+  console.error
+    [38;5;208m--------------------------------------------------------------[0m
+
+    [0m [90m 40 |[39m     }
+     [90m 41 |[39m
+    [31m[1m>[22m[39m[90m 42 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 43 |[39m   }
+     [90m 44 |[39m }[33m;[39m
+     [90m 45 |[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:42:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at Immediate.next (node_modules/router/index.js:291:5)
+      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+
+  console.error
+    [38;5;208m[EXCEPTION] [2026-05-05T16:24:36.642Z] -----------------------[0m
+
+    [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
+     [90m 25 |[39m
+    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 28 |[39m
+     [90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
 
       at Object.logErrorWithContext (src/shared/utils/logger.js:26:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m--------------------------------------------------------------[0m
-
-    [0m [90m 37 |[39m     }
-     [90m 38 |[39m
-    [31m[1m>[22m[39m[90m 39 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 40 |[39m   }
-     [90m 41 |[39m }[33m;[39m
-     [90m 42 |[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:39:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m[EXCEPTION] [2026-04-30T15:17:31.910Z] -----------------------[0m
-
-    [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
-     [90m 22 |[39m
-    [31m[1m>[22m[39m[90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:23:13)
       at errorMiddleware (src/middlewares/error.middleware.js:6:10)
       at Layer.handleError (node_modules/router/lib/layer.js:116:17)
       at trimPrefix (node_modules/router/index.js:340:13)
@@ -800,15 +800,15 @@ At line:1 char:1
   console.error
     Method: GET | URL: /api/wishlist/check?courseId=694e8e85ed8f2ec45dc0d4ec | Code: 403 | IP: ::ffff:127.0.0.1
 
-    [0m [90m 22 |[39m
-     [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-    [31m[1m>[22m[39m[90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+    [0m [90m 25 |[39m
+     [90m 26 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
      [90m    |[39m             [31m[1m^[22m[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m 27 |[39m[0m
+     [90m 28 |[39m
+     [90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+     [90m 30 |[39m[0m
 
-      at Object.logErrorWithContext (src/shared/utils/logger.js:24:13)
+      at Object.logErrorWithContext (src/shared/utils/logger.js:27:13)
       at errorMiddleware (src/middlewares/error.middleware.js:6:10)
       at Layer.handleError (node_modules/router/lib/layer.js:116:17)
       at trimPrefix (node_modules/router/index.js:340:13)
@@ -820,55 +820,55 @@ At line:1 char:1
   console.error
     Message: Access denied.
 
-    [0m [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+    [0m [90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 28 |[39m
+    [31m[1m>[22m[39m[90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
      [90m    |[39m             [31m[1m^[22m[39m
-     [90m 27 |[39m
-     [90m 28 |[39m     [36mif[39m (err[33m.[39mcause) {
-     [90m 29 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
+     [90m 30 |[39m
+     [90m 31 |[39m     [36mif[39m (err[33m.[39mcause) {
+     [90m 32 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:29:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at Immediate.next (node_modules/router/index.js:291:5)
+      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+
+  console.error
+    [38;5;208m--------------------------------------------------------------[0m
+
+    [0m [90m 40 |[39m     }
+     [90m 41 |[39m
+    [31m[1m>[22m[39m[90m 42 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 43 |[39m   }
+     [90m 44 |[39m }[33m;[39m
+     [90m 45 |[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:42:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at Immediate.next (node_modules/router/index.js:291:5)
+      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+
+  console.error
+    [38;5;208m[EXCEPTION] [2026-05-05T16:24:36.905Z] -----------------------[0m
+
+    [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
+     [90m 25 |[39m
+    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 28 |[39m
+     [90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
 
       at Object.logErrorWithContext (src/shared/utils/logger.js:26:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m--------------------------------------------------------------[0m
-
-    [0m [90m 37 |[39m     }
-     [90m 38 |[39m
-    [31m[1m>[22m[39m[90m 39 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 40 |[39m   }
-     [90m 41 |[39m }[33m;[39m
-     [90m 42 |[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:39:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m[EXCEPTION] [2026-04-30T15:17:32.261Z] -----------------------[0m
-
-    [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
-     [90m 22 |[39m
-    [31m[1m>[22m[39m[90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:23:13)
       at errorMiddleware (src/middlewares/error.middleware.js:6:10)
       at Layer.handleError (node_modules/router/lib/layer.js:116:17)
       at trimPrefix (node_modules/router/index.js:340:13)
@@ -880,15 +880,15 @@ At line:1 char:1
   console.error
     Method: GET | URL: /api/wishlist/count | Code: 401 | IP: ::ffff:127.0.0.1
 
-    [0m [90m 22 |[39m
-     [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-    [31m[1m>[22m[39m[90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+    [0m [90m 25 |[39m
+     [90m 26 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
      [90m    |[39m             [31m[1m^[22m[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m 27 |[39m[0m
+     [90m 28 |[39m
+     [90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+     [90m 30 |[39m[0m
 
-      at Object.logErrorWithContext (src/shared/utils/logger.js:24:13)
+      at Object.logErrorWithContext (src/shared/utils/logger.js:27:13)
       at errorMiddleware (src/middlewares/error.middleware.js:6:10)
       at Layer.handleError (node_modules/router/lib/layer.js:116:17)
       at trimPrefix (node_modules/router/index.js:340:13)
@@ -900,55 +900,55 @@ At line:1 char:1
   console.error
     Message: You are not logged in. Please log in first.
 
-    [0m [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+    [0m [90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 28 |[39m
+    [31m[1m>[22m[39m[90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
      [90m    |[39m             [31m[1m^[22m[39m
-     [90m 27 |[39m
-     [90m 28 |[39m     [36mif[39m (err[33m.[39mcause) {
-     [90m 29 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
+     [90m 30 |[39m
+     [90m 31 |[39m     [36mif[39m (err[33m.[39mcause) {
+     [90m 32 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:29:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at Immediate.next (node_modules/router/index.js:291:5)
+      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+
+  console.error
+    [38;5;208m--------------------------------------------------------------[0m
+
+    [0m [90m 40 |[39m     }
+     [90m 41 |[39m
+    [31m[1m>[22m[39m[90m 42 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 43 |[39m   }
+     [90m 44 |[39m }[33m;[39m
+     [90m 45 |[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:42:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at Immediate.next (node_modules/router/index.js:291:5)
+      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+
+  console.error
+    [38;5;208m[EXCEPTION] [2026-05-05T16:24:36.952Z] -----------------------[0m
+
+    [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
+     [90m 25 |[39m
+    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 28 |[39m
+     [90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
 
       at Object.logErrorWithContext (src/shared/utils/logger.js:26:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m--------------------------------------------------------------[0m
-
-    [0m [90m 37 |[39m     }
-     [90m 38 |[39m
-    [31m[1m>[22m[39m[90m 39 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 40 |[39m   }
-     [90m 41 |[39m }[33m;[39m
-     [90m 42 |[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:39:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m[EXCEPTION] [2026-04-30T15:17:32.315Z] -----------------------[0m
-
-    [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
-     [90m 22 |[39m
-    [31m[1m>[22m[39m[90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:23:13)
       at errorMiddleware (src/middlewares/error.middleware.js:6:10)
       at Layer.handleError (node_modules/router/lib/layer.js:116:17)
       at trimPrefix (node_modules/router/index.js:340:13)
@@ -960,15 +960,15 @@ At line:1 char:1
   console.error
     Method: GET | URL: /api/wishlist/count | Code: 403 | IP: ::ffff:127.0.0.1
 
-    [0m [90m 22 |[39m
-     [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-    [31m[1m>[22m[39m[90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+    [0m [90m 25 |[39m
+     [90m 26 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
      [90m    |[39m             [31m[1m^[22m[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m 27 |[39m[0m
+     [90m 28 |[39m
+     [90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+     [90m 30 |[39m[0m
 
-      at Object.logErrorWithContext (src/shared/utils/logger.js:24:13)
+      at Object.logErrorWithContext (src/shared/utils/logger.js:27:13)
       at errorMiddleware (src/middlewares/error.middleware.js:6:10)
       at Layer.handleError (node_modules/router/lib/layer.js:116:17)
       at trimPrefix (node_modules/router/index.js:340:13)
@@ -980,55 +980,55 @@ At line:1 char:1
   console.error
     Message: Access denied.
 
-    [0m [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+    [0m [90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 28 |[39m
+    [31m[1m>[22m[39m[90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
      [90m    |[39m             [31m[1m^[22m[39m
-     [90m 27 |[39m
-     [90m 28 |[39m     [36mif[39m (err[33m.[39mcause) {
-     [90m 29 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
+     [90m 30 |[39m
+     [90m 31 |[39m     [36mif[39m (err[33m.[39mcause) {
+     [90m 32 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:29:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at Immediate.next (node_modules/router/index.js:291:5)
+      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+
+  console.error
+    [38;5;208m--------------------------------------------------------------[0m
+
+    [0m [90m 40 |[39m     }
+     [90m 41 |[39m
+    [31m[1m>[22m[39m[90m 42 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 43 |[39m   }
+     [90m 44 |[39m }[33m;[39m
+     [90m 45 |[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:42:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at Immediate.next (node_modules/router/index.js:291:5)
+      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+
+  console.error
+    [38;5;208m[EXCEPTION] [2026-05-05T16:24:37.337Z] -----------------------[0m
+
+    [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
+     [90m 25 |[39m
+    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 28 |[39m
+     [90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
 
       at Object.logErrorWithContext (src/shared/utils/logger.js:26:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m--------------------------------------------------------------[0m
-
-    [0m [90m 37 |[39m     }
-     [90m 38 |[39m
-    [31m[1m>[22m[39m[90m 39 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 40 |[39m   }
-     [90m 41 |[39m }[33m;[39m
-     [90m 42 |[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:39:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m[EXCEPTION] [2026-04-30T15:17:32.865Z] -----------------------[0m
-
-    [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
-     [90m 22 |[39m
-    [31m[1m>[22m[39m[90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:23:13)
       at errorMiddleware (src/middlewares/error.middleware.js:6:10)
       at Layer.handleError (node_modules/router/lib/layer.js:116:17)
       at trimPrefix (node_modules/router/index.js:340:13)
@@ -1040,15 +1040,15 @@ At line:1 char:1
   console.error
     Method: DELETE | URL: /api/wishlist | Code: 404 | IP: ::ffff:127.0.0.1
 
-    [0m [90m 22 |[39m
-     [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-    [31m[1m>[22m[39m[90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+    [0m [90m 25 |[39m
+     [90m 26 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
      [90m    |[39m             [31m[1m^[22m[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m 27 |[39m[0m
+     [90m 28 |[39m
+     [90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+     [90m 30 |[39m[0m
 
-      at Object.logErrorWithContext (src/shared/utils/logger.js:24:13)
+      at Object.logErrorWithContext (src/shared/utils/logger.js:27:13)
       at errorMiddleware (src/middlewares/error.middleware.js:6:10)
       at Layer.handleError (node_modules/router/lib/layer.js:116:17)
       at trimPrefix (node_modules/router/index.js:340:13)
@@ -1060,13 +1060,53 @@ At line:1 char:1
   console.error
     Message: Course not found in wishlist
 
-    [0m [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+    [0m [90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 28 |[39m
+    [31m[1m>[22m[39m[90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
      [90m    |[39m             [31m[1m^[22m[39m
-     [90m 27 |[39m
-     [90m 28 |[39m     [36mif[39m (err[33m.[39mcause) {
-     [90m 29 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
+     [90m 30 |[39m
+     [90m 31 |[39m     [36mif[39m (err[33m.[39mcause) {
+     [90m 32 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:29:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at Immediate.next (node_modules/router/index.js:291:5)
+      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+
+  console.error
+    [38;5;208m--------------------------------------------------------------[0m
+
+    [0m [90m 40 |[39m     }
+     [90m 41 |[39m
+    [31m[1m>[22m[39m[90m 42 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 43 |[39m   }
+     [90m 44 |[39m }[33m;[39m
+     [90m 45 |[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:42:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at Immediate.next (node_modules/router/index.js:291:5)
+      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+
+  console.error
+    [38;5;208m[EXCEPTION] [2026-05-05T16:24:37.383Z] -----------------------[0m
+
+    [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
+     [90m 25 |[39m
+    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 28 |[39m
+     [90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
 
       at Object.logErrorWithContext (src/shared/utils/logger.js:26:13)
       at errorMiddleware (src/middlewares/error.middleware.js:6:10)
@@ -1078,57 +1118,17 @@ At line:1 char:1
       at Immediate._onImmediate (node_modules/router/index.js:688:15)
 
   console.error
-    [31m--------------------------------------------------------------[0m
-
-    [0m [90m 37 |[39m     }
-     [90m 38 |[39m
-    [31m[1m>[22m[39m[90m 39 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 40 |[39m   }
-     [90m 41 |[39m }[33m;[39m
-     [90m 42 |[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:39:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m[EXCEPTION] [2026-04-30T15:17:32.920Z] -----------------------[0m
-
-    [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
-     [90m 22 |[39m
-    [31m[1m>[22m[39m[90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:23:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
     Method: DELETE | URL: /api/wishlist | Code: 500 | IP: ::ffff:127.0.0.1
 
-    [0m [90m 22 |[39m
-     [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-    [31m[1m>[22m[39m[90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+    [0m [90m 25 |[39m
+     [90m 26 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
      [90m    |[39m             [31m[1m^[22m[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m 27 |[39m[0m
+     [90m 28 |[39m
+     [90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+     [90m 30 |[39m[0m
 
-      at Object.logErrorWithContext (src/shared/utils/logger.js:24:13)
+      at Object.logErrorWithContext (src/shared/utils/logger.js:27:13)
       at errorMiddleware (src/middlewares/error.middleware.js:6:10)
       at Layer.handleError (node_modules/router/lib/layer.js:116:17)
       at trimPrefix (node_modules/router/index.js:340:13)
@@ -1149,55 +1149,55 @@ At line:1 char:1
       }
     ]
 
-    [0m [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+    [0m [90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 28 |[39m
+    [31m[1m>[22m[39m[90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
      [90m    |[39m             [31m[1m^[22m[39m
-     [90m 27 |[39m
-     [90m 28 |[39m     [36mif[39m (err[33m.[39mcause) {
-     [90m 29 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
+     [90m 30 |[39m
+     [90m 31 |[39m     [36mif[39m (err[33m.[39mcause) {
+     [90m 32 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:29:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at Immediate.next (node_modules/router/index.js:291:5)
+      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+
+  console.error
+    [38;5;208m--------------------------------------------------------------[0m
+
+    [0m [90m 40 |[39m     }
+     [90m 41 |[39m
+    [31m[1m>[22m[39m[90m 42 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 43 |[39m   }
+     [90m 44 |[39m }[33m;[39m
+     [90m 45 |[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:42:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at Immediate.next (node_modules/router/index.js:291:5)
+      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+
+  console.error
+    [38;5;208m[EXCEPTION] [2026-05-05T16:24:37.464Z] -----------------------[0m
+
+    [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
+     [90m 25 |[39m
+    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 28 |[39m
+     [90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
 
       at Object.logErrorWithContext (src/shared/utils/logger.js:26:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m--------------------------------------------------------------[0m
-
-    [0m [90m 37 |[39m     }
-     [90m 38 |[39m
-    [31m[1m>[22m[39m[90m 39 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 40 |[39m   }
-     [90m 41 |[39m }[33m;[39m
-     [90m 42 |[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:39:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m[EXCEPTION] [2026-04-30T15:17:33.028Z] -----------------------[0m
-
-    [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
-     [90m 22 |[39m
-    [31m[1m>[22m[39m[90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:23:13)
       at errorMiddleware (src/middlewares/error.middleware.js:6:10)
       at Layer.handleError (node_modules/router/lib/layer.js:116:17)
       at trimPrefix (node_modules/router/index.js:340:13)
@@ -1209,15 +1209,15 @@ At line:1 char:1
   console.error
     Method: DELETE | URL: /api/wishlist | Code: 404 | IP: ::ffff:127.0.0.1
 
-    [0m [90m 22 |[39m
-     [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-    [31m[1m>[22m[39m[90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+    [0m [90m 25 |[39m
+     [90m 26 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
      [90m    |[39m             [31m[1m^[22m[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m 27 |[39m[0m
+     [90m 28 |[39m
+     [90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+     [90m 30 |[39m[0m
 
-      at Object.logErrorWithContext (src/shared/utils/logger.js:24:13)
+      at Object.logErrorWithContext (src/shared/utils/logger.js:27:13)
       at errorMiddleware (src/middlewares/error.middleware.js:6:10)
       at Layer.handleError (node_modules/router/lib/layer.js:116:17)
       at trimPrefix (node_modules/router/index.js:340:13)
@@ -1229,55 +1229,55 @@ At line:1 char:1
   console.error
     Message: Course not found in wishlist
 
-    [0m [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+    [0m [90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 28 |[39m
+    [31m[1m>[22m[39m[90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
      [90m    |[39m             [31m[1m^[22m[39m
-     [90m 27 |[39m
-     [90m 28 |[39m     [36mif[39m (err[33m.[39mcause) {
-     [90m 29 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
+     [90m 30 |[39m
+     [90m 31 |[39m     [36mif[39m (err[33m.[39mcause) {
+     [90m 32 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:29:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at Immediate.next (node_modules/router/index.js:291:5)
+      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+
+  console.error
+    [38;5;208m--------------------------------------------------------------[0m
+
+    [0m [90m 40 |[39m     }
+     [90m 41 |[39m
+    [31m[1m>[22m[39m[90m 42 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 43 |[39m   }
+     [90m 44 |[39m }[33m;[39m
+     [90m 45 |[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:42:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at Immediate.next (node_modules/router/index.js:291:5)
+      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+
+  console.error
+    [38;5;208m[EXCEPTION] [2026-05-05T16:24:37.478Z] -----------------------[0m
+
+    [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
+     [90m 25 |[39m
+    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 28 |[39m
+     [90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
 
       at Object.logErrorWithContext (src/shared/utils/logger.js:26:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m--------------------------------------------------------------[0m
-
-    [0m [90m 37 |[39m     }
-     [90m 38 |[39m
-    [31m[1m>[22m[39m[90m 39 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 40 |[39m   }
-     [90m 41 |[39m }[33m;[39m
-     [90m 42 |[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:39:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m[EXCEPTION] [2026-04-30T15:17:33.037Z] -----------------------[0m
-
-    [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
-     [90m 22 |[39m
-    [31m[1m>[22m[39m[90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:23:13)
       at errorMiddleware (src/middlewares/error.middleware.js:6:10)
       at Layer.handleError (node_modules/router/lib/layer.js:116:17)
       at trimPrefix (node_modules/router/index.js:340:13)
@@ -1289,15 +1289,15 @@ At line:1 char:1
   console.error
     Method: DELETE | URL: /api/wishlist | Code: 401 | IP: ::ffff:127.0.0.1
 
-    [0m [90m 22 |[39m
-     [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-    [31m[1m>[22m[39m[90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+    [0m [90m 25 |[39m
+     [90m 26 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
      [90m    |[39m             [31m[1m^[22m[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m 27 |[39m[0m
+     [90m 28 |[39m
+     [90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+     [90m 30 |[39m[0m
 
-      at Object.logErrorWithContext (src/shared/utils/logger.js:24:13)
+      at Object.logErrorWithContext (src/shared/utils/logger.js:27:13)
       at errorMiddleware (src/middlewares/error.middleware.js:6:10)
       at Layer.handleError (node_modules/router/lib/layer.js:116:17)
       at trimPrefix (node_modules/router/index.js:340:13)
@@ -1309,55 +1309,55 @@ At line:1 char:1
   console.error
     Message: You are not logged in. Please log in first.
 
-    [0m [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+    [0m [90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 28 |[39m
+    [31m[1m>[22m[39m[90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
      [90m    |[39m             [31m[1m^[22m[39m
-     [90m 27 |[39m
-     [90m 28 |[39m     [36mif[39m (err[33m.[39mcause) {
-     [90m 29 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
+     [90m 30 |[39m
+     [90m 31 |[39m     [36mif[39m (err[33m.[39mcause) {
+     [90m 32 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:29:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at Immediate.next (node_modules/router/index.js:291:5)
+      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+
+  console.error
+    [38;5;208m--------------------------------------------------------------[0m
+
+    [0m [90m 40 |[39m     }
+     [90m 41 |[39m
+    [31m[1m>[22m[39m[90m 42 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 43 |[39m   }
+     [90m 44 |[39m }[33m;[39m
+     [90m 45 |[39m[0m
+
+      at Object.logErrorWithContext (src/shared/utils/logger.js:42:13)
+      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at Immediate.next (node_modules/router/index.js:291:5)
+      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+
+  console.error
+    [38;5;208m[EXCEPTION] [2026-05-05T16:24:37.526Z] -----------------------[0m
+
+    [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
+     [90m 25 |[39m
+    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 28 |[39m
+     [90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
 
       at Object.logErrorWithContext (src/shared/utils/logger.js:26:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m--------------------------------------------------------------[0m
-
-    [0m [90m 37 |[39m     }
-     [90m 38 |[39m
-    [31m[1m>[22m[39m[90m 39 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 40 |[39m   }
-     [90m 41 |[39m }[33m;[39m
-     [90m 42 |[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:39:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at Immediate.next (node_modules/router/index.js:291:5)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [31m[EXCEPTION] [2026-04-30T15:17:33.101Z] -----------------------[0m
-
-    [0m [90m 21 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
-     [90m 22 |[39m
-    [31m[1m>[22m[39m[90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:23:13)
       at errorMiddleware (src/middlewares/error.middleware.js:6:10)
       at Layer.handleError (node_modules/router/lib/layer.js:116:17)
       at trimPrefix (node_modules/router/index.js:340:13)
@@ -1369,15 +1369,15 @@ At line:1 char:1
   console.error
     Method: DELETE | URL: /api/wishlist | Code: 403 | IP: ::ffff:127.0.0.1
 
-    [0m [90m 22 |[39m
-     [90m 23 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-    [31m[1m>[22m[39m[90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+    [0m [90m 25 |[39m
+     [90m 26 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
      [90m    |[39m             [31m[1m^[22m[39m
-     [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m 27 |[39m[0m
+     [90m 28 |[39m
+     [90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+     [90m 30 |[39m[0m
 
-      at Object.logErrorWithContext (src/shared/utils/logger.js:24:13)
+      at Object.logErrorWithContext (src/shared/utils/logger.js:27:13)
       at errorMiddleware (src/middlewares/error.middleware.js:6:10)
       at Layer.handleError (node_modules/router/lib/layer.js:116:17)
       at trimPrefix (node_modules/router/index.js:340:13)
@@ -1389,15 +1389,15 @@ At line:1 char:1
   console.error
     Message: Access denied.
 
-    [0m [90m 24 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 25 |[39m
-    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
+    [0m [90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
+     [90m 28 |[39m
+    [31m[1m>[22m[39m[90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
      [90m    |[39m             [31m[1m^[22m[39m
-     [90m 27 |[39m
-     [90m 28 |[39m     [36mif[39m (err[33m.[39mcause) {
-     [90m 29 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
+     [90m 30 |[39m
+     [90m 31 |[39m     [36mif[39m (err[33m.[39mcause) {
+     [90m 32 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
 
-      at Object.logErrorWithContext (src/shared/utils/logger.js:26:13)
+      at Object.logErrorWithContext (src/shared/utils/logger.js:29:13)
       at errorMiddleware (src/middlewares/error.middleware.js:6:10)
       at Layer.handleError (node_modules/router/lib/layer.js:116:17)
       at trimPrefix (node_modules/router/index.js:340:13)
@@ -1407,17 +1407,17 @@ At line:1 char:1
       at Immediate._onImmediate (node_modules/router/index.js:688:15)
 
   console.error
-    [31m--------------------------------------------------------------[0m
+    [38;5;208m--------------------------------------------------------------[0m
 
-    [0m [90m 37 |[39m     }
-     [90m 38 |[39m
-    [31m[1m>[22m[39m[90m 39 |[39m     console[33m.[39merror([32m"\x1b[31m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
+    [0m [90m 40 |[39m     }
+     [90m 41 |[39m
+    [31m[1m>[22m[39m[90m 42 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
      [90m    |[39m             [31m[1m^[22m[39m
-     [90m 40 |[39m   }
-     [90m 41 |[39m }[33m;[39m
-     [90m 42 |[39m[0m
+     [90m 43 |[39m   }
+     [90m 44 |[39m }[33m;[39m
+     [90m 45 |[39m[0m
 
-      at Object.logErrorWithContext (src/shared/utils/logger.js:39:13)
+      at Object.logErrorWithContext (src/shared/utils/logger.js:42:13)
       at errorMiddleware (src/middlewares/error.middleware.js:6:10)
       at Layer.handleError (node_modules/router/lib/layer.js:116:17)
       at trimPrefix (node_modules/router/index.js:340:13)
@@ -1426,57 +1426,105 @@ At line:1 char:1
       at Immediate.next (node_modules/router/index.js:291:5)
       at Immediate._onImmediate (node_modules/router/index.js:688:15)
 
-PASS tests/wishlist.test.js (14.731 s)
+FAIL tests/wishlist.test.js (10.637 s)
   EDV-226: Add Course To Wishlist
-    ÔêÜ Success: Add to wishlist ÔåÆ 201 with correct shape (300 ms)
-    ÔêÜ DB verify: Wishlist document created in database (42 ms)
-    ÔêÜ No sensitive field leakage in add response (234 ms)
-    ÔêÜ [BUG EDV-259] thumnail field should contain thumbnail URL (currently 
-always null) (227 ms)
-    ÔêÜ [BUG EDV-260] lectureCount should be removed (always 0, Course has 
-lecturesCount) (215 ms)
-    ÔêÜ Error: Already in wishlist ÔåÆ 409 (165 ms)
-    ÔêÜ Error: Missing courseId ÔåÆ 400 (66 ms)
-    ÔêÜ Error: Invalid courseId ÔåÆ 400 (85 ms)
-    ÔêÜ Error: Unauthorized ÔåÆ 401 (46 ms)
-    ÔêÜ Error: Forbidden (instructor) ÔåÆ 403 (72 ms)
+    ÔêÜ Success: Add to wishlist ÔåÆ 201 with correct shape (203 ms)
+    ÔêÜ DB verify: Wishlist document created in database (37 ms)
+    ÔêÜ No sensitive field leakage in add response (144 ms)
+    ├ù [BUG EDV-259] thumnail field should contain thumbnail URL (currently 
+always null) (147 ms)
+    ├ù [BUG EDV-260] lectureCount should be removed (always 0, Course has 
+lecturesCount) (138 ms)
+    ÔêÜ Error: Already in wishlist ÔåÆ 409 (109 ms)
+    ÔêÜ Error: Missing courseId ÔåÆ 400 (53 ms)
+    ÔêÜ Error: Invalid courseId ÔåÆ 400 (59 ms)
+    ÔêÜ Error: Unauthorized ÔåÆ 401 (23 ms)
+    ÔêÜ Error: Forbidden (instructor) ÔåÆ 403 (43 ms)
   EDV-225: Get Wishlist
-    ÔêÜ Success: Get wishlist ÔåÆ 200 with courses (221 ms)
-    ÔêÜ Success: Wishlist item has correct field types (278 ms)
-    ÔêÜ DB cross-check: result count matches Wishlist.countDocuments (271 ms)
-    ÔêÜ No sensitive field leakage in list response (192 ms)
+    ÔêÜ Success: Get wishlist ÔåÆ 200 with courses (136 ms)
+    ÔêÜ Success: Wishlist item has correct field types (139 ms)
+    ÔêÜ DB cross-check: result count matches Wishlist.countDocuments (173 ms)
+    ÔêÜ No sensitive field leakage in list response (140 ms)
     ÔêÜ Error: Unauthorized ÔåÆ 401 (16 ms)
-    ÔêÜ Error: Forbidden (instructor) ÔåÆ 403 (59 ms)
+    ÔêÜ Error: Forbidden (instructor) ÔåÆ 403 (47 ms)
   EDV-228: Check Course In Wishlist
-    ÔêÜ Success: Course in wishlist ÔåÆ exists: true (106 ms)
-    ÔêÜ Success: Course not in wishlist ÔåÆ exists: false (93 ms)
-    ÔêÜ Error: Invalid courseId format ÔåÆ 400 (59 ms)
-    ÔêÜ Error: Unauthorized ÔåÆ 401 (10 ms)
-    ÔêÜ Error: Forbidden (instructor) ÔåÆ 403 (50 ms)
+    ÔêÜ Success: Course in wishlist ÔåÆ exists: true (72 ms)
+    ÔêÜ Success: Course not in wishlist ÔåÆ exists: false (69 ms)
+    ÔêÜ Error: Invalid courseId format ÔåÆ 400 (47 ms)
+    ÔêÜ Error: Unauthorized ÔåÆ 401 (15 ms)
+    ÔêÜ Error: Forbidden (instructor) ÔåÆ 403 (48 ms)
   EDV-229: Get Wishlist Count
-    ÔêÜ Success: Get count ÔåÆ 200 with number (111 ms)
-    ÔêÜ DB cross-check: count matches Wishlist.countDocuments (137 ms)
-    ÔêÜ No sensitive field leakage (92 ms)
-    ÔêÜ Error: Unauthorized ÔåÆ 401 (9 ms)
-    ÔêÜ Error: Forbidden (instructor) ÔåÆ 403 (54 ms)
+    ÔêÜ Success: Get count ÔåÆ 200 with number (70 ms)
+    ÔêÜ DB cross-check: count matches Wishlist.countDocuments (106 ms)
+    ÔêÜ No sensitive field leakage (71 ms)
+    ÔêÜ Error: Unauthorized ÔåÆ 401 (13 ms)
+    ÔêÜ Error: Forbidden (instructor) ÔåÆ 403 (45 ms)
   EDV-227: Delete Course From Wishlist
-    ÔêÜ Success: Remove from wishlist ÔåÆ 200 (119 ms)
-    ÔêÜ DB verify: Wishlist document removed from database (46 ms)
-    ÔêÜ Error: Course not in wishlist ÔåÆ 404 (127 ms)
-    ÔêÜ Error: Invalid courseId format ÔåÆ 400 (56 ms)
-    ÔêÜ No sensitive field leakage in delete response (107 ms)
-    ÔêÜ Error: Unauthorized ÔåÆ 401 (10 ms)
-    ÔêÜ Error: Forbidden (instructor) ÔåÆ 403 (63 ms)
+    ÔêÜ Success: Remove from wishlist ÔåÆ 200 (83 ms)
+    ÔêÜ DB verify: Wishlist document removed from database (33 ms)
+    ÔêÜ Error: Course not in wishlist ÔåÆ 404 (86 ms)
+    ÔêÜ Error: Invalid courseId format ÔåÆ 400 (47 ms)
+    ÔêÜ No sensitive field leakage in delete response (81 ms)
+    ÔêÜ Error: Unauthorized ÔåÆ 401 (15 ms)
+    ÔêÜ Error: Forbidden (instructor) ÔåÆ 403 (48 ms)
+
+  ÔùÅ EDV-226: Add Course To Wishlist ÔÇ║ [BUG EDV-259] thumnail field should 
+contain thumbnail URL (currently always null)
+
+    Failing test passed even though it was supposed to fail. Remove `.failing` 
+to remove error.
+
+    [0m [90m  97 |[39m
+     [90m  98 |[39m   [90m// BUG EDV-259: thumbnail typo in mapper ÔÇö 
+always returns null[39m
+    [31m[1m>[22m[39m[90m  99 |[39m   test[33m.[39mfailing([32m"[BUG 
+EDV-259] thumnail field should contain thumbnail URL (currently always 
+null)"[39m[33m,[39m [36masync[39m () [33m=>[39m {
+     [90m     |[39m        [31m[1m^[22m[39m
+     [90m 100 |[39m     [36mconst[39m res [33m=[39m [36mawait[39m 
+authGet([32m""[39m)[33m;[39m
+     [90m 101 |[39m     
+expect(res[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m 102 |[39m     [36mif[39m 
+(res[33m.[39mbody[33m.[39mresult[33m.[39mlength [33m>[39m [35m0[39m) 
+{[0m
+
+      at tests/wishlist.test.js:99:8
+      at tests/wishlist.test.js:54:1
+
+  ÔùÅ EDV-226: Add Course To Wishlist ÔÇ║ [BUG EDV-260] lectureCount should be 
+removed (always 0, Course has lecturesCount)
+
+    Failing test passed even though it was supposed to fail. Remove `.failing` 
+to remove error.
+
+    [0m [90m 108 |[39m
+     [90m 109 |[39m   [90m// BUG EDV-260: lectureCount always 0 (Course 
+model has lecturesCount)[39m
+    [31m[1m>[22m[39m[90m 110 |[39m   test[33m.[39mfailing([32m"[BUG 
+EDV-260] lectureCount should be removed (always 0, Course has 
+lecturesCount)"[39m[33m,[39m [36masync[39m () [33m=>[39m {
+     [90m     |[39m        [31m[1m^[22m[39m
+     [90m 111 |[39m     [36mconst[39m res [33m=[39m [36mawait[39m 
+authGet([32m""[39m)[33m;[39m
+     [90m 112 |[39m     
+expect(res[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m 113 |[39m     [36mif[39m 
+(res[33m.[39mbody[33m.[39mresult[33m.[39mlength [33m>[39m [35m0[39m) 
+{[0m
+
+      at tests/wishlist.test.js:110:8
+      at tests/wishlist.test.js:54:1
 
 
 ­ƒôä Test report saved:
-   C:\personal\EduVerse\backend\test-reports\wishlist_2026-04-30_15-17.md
+   C:\personal\EduVerse\backend\test-reports\wishlist_2026-05-05_16-24.md
    C:\personal\EduVerse\backend\test-reports\latest.md
 
-Test Suites: 1 passed, 1 total
-Tests:       33 passed, 33 total
+Test Suites: 1 failed, 1 total
+Tests:       2 failed, 31 passed, 33 total
 Snapshots:   0 total
-Time:        14.983 s, estimated 45 s
+Time:        10.801 s, estimated 15 s
 Ran all test suites matching wishlist.
 Force exiting Jest: Have you considered using `--detectOpenHandles` to detect 
 async operations that kept running after all tests finished?
