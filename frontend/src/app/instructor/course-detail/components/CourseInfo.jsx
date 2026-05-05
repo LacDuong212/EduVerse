@@ -1,6 +1,5 @@
 import { Fragment } from "react";
 import { Alert, Card, CardBody, CardHeader, Col, Row } from "react-bootstrap";
-import { FaStar } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { DEFAULT_COURSE_IMG } from "@/contexts/constants";
 import { formatCurrency } from "@/utils/currency";
@@ -45,6 +44,7 @@ const CourseInfo = ({ col = 6, course }) => {
                     src={course?.image || course?.thumbnail || DEFAULT_COURSE_IMG}
                     alt={course?.title || "Course Image"}
                     className="rounded w-100 h-100 object-fit-cover"
+                    onError={(e) => e.target.src = DEFAULT_COURSE_IMG}
                   />
                 </div>
               </Col>
@@ -146,7 +146,7 @@ const CourseInfo = ({ col = 6, course }) => {
                   <li className="list-group-item">
                     <span>Average Rating:</span>
                     <span className="h6 mb-0">
-                      {course?.rating?.average || 0}
+                      {course?.ratingCount > 0 ? course?.ratingTotal/course?.ratingCount : 0}
                     </span>
                   </li>
                   <li className="list-group-item">

@@ -4,7 +4,7 @@ import { Card, CardBody, CardHeader, Col, Row } from "react-bootstrap";
 import { BsArrowUp, BsArrowDown } from "react-icons/bs";
 import { currency } from "@/contexts/constants";
 import { formatCurrency } from "@/utils/currency";
-import { useCourseEnrollments, useCourseRevenue  } from "../useCourseDetails";
+import { useCourseEnrollments, useCourseRevenue  } from "./useCourseStats";
 
 const getCSSVar = (variable) => {
   return getComputedStyle(document.documentElement).getPropertyValue(variable).trim();
@@ -76,19 +76,19 @@ const getChangeDisplay = (dataArray, isCurrency = false) => {
   }
 };
 
-const CourseStats = ({ col = 6, courseId = "" }) => {
+const CourseStats = ({ col = 6, courseId }) => {
   // fetch data --
   const {
     data: revenueData,
     total: totalRevenue = 0,
     loading: revenueLoading
-  } = useCourseRevenue();
+  } = useCourseRevenue(courseId);
 
   const {
     data: enrollmentsData,
     total: totalEnrollments = 0,
     loading: enrollmentsLoading
-  } = useCourseEnrollments();
+  } = useCourseEnrollments(courseId);
 
   // process revenue data --
   const revenueChartConfig = useMemo(() => {

@@ -9,7 +9,8 @@ import { Container, Row, Spinner } from "react-bootstrap";
 import { useSelector } from "react-redux";
 
 const InstructorDashboard = () => {
-  const instructorName = useSelector(state => state.auth.userData.name);
+  const insName = useSelector(state => state.auth.userData.name);
+
   const {
     stats,
     revenueChart,
@@ -21,22 +22,30 @@ const InstructorDashboard = () => {
 
   if (loading) {
     return (
-      <div className="position-absolute top-50 start-50 translate-middle">
-        <Spinner
-          animation="border"
-          variant="primary"
-          style={{ width: "30px", height: "30px" }}
-        />
-      </div>
+      <>
+        <PageMetaData title="Dashboard" />
+        <div className="position-absolute top-50 start-50 translate-middle">
+          <Spinner
+            animation="border"
+            variant="primary"
+            style={{ width: "30px", height: "30px" }}
+          />
+        </div>
+      </>
     );
   }
 
-  if (error) return <ErrorState onRetry={refetch} />;
+  if (error) return (
+    <>
+      <PageMetaData title="Dashboard" />
+      <ErrorState onRetry={refetch} />
+    </>
+  );
 
   return (
     <>
       <PageMetaData title="Dashboard" />
-      <WelcomeBack instructorName={instructorName} />
+      <WelcomeBack instructorName={insName} />
       <Container className="pt-3 pb-5">
         <DashboardCounter counterData={stats} />
         <Row className="mt-3 g-4">

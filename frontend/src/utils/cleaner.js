@@ -1,5 +1,5 @@
 
-function cleanQuillHtml(html, options = {}) {
+export function cleanQuillHtml(html, options = {}) {
   if (!html) return html;
 
   const {

@@ -51,9 +51,7 @@ const ProfileDropdown = ({ className, dropdownItems }) => {
               className="avatar-img rounded-circle border border-light border-1 shadow "
               src={user.avatar}
               alt="Avatar"
-              onError={(e) => {
-                e.currentTarget.src = DEFAULT_AVATAR_IMG;
-              }}
+              onError={(e) => e.target.src = DEFAULT_AVATAR_IMG}
             />
           ) : (
             <div className="avatar-img rounded-circle border border-light border-1 shadow d-flex align-items-center justify-content-center bg-light text-dark fw-bold fs-5">

@@ -14,7 +14,7 @@ export const toInstructorDetails = (instructor, timestamp = false) => {
   })).filter(Boolean);
 
   return {
-    // insId: (instructor.user?._id || instructor.user)?.toString(),
+    insId: (instructor.user?._id || instructor.user)?.toString(),
 
     name: instructor.user?.name,
     email: instructor.user?.email,

@@ -78,7 +78,7 @@ const PricingCard = ({ course, owned, onAddToCart }) => {
   return (
     <Card className="shadow p-3 mb-4 rounded-3 z-index-9">
       <div className="overflow-hidden rounded-2">
-        <img src={videoThumbnail} alt="Thumbnail" />
+        <img src={videoThumbnail} alt="Thumbnail" onError={(e) => e.target.src = DEFAULT_COURSE_IMG} />
         <div className="bg-overlay bg-dark opacity-4" />
         <div className="card-img-overlay d-flex flex-column">
           <div className="m-auto">

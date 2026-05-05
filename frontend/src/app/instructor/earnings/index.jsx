@@ -19,19 +19,22 @@ const InstructorEarnings = () => {
 
   if (loading) {
     return (
-      <div className="d-flex justify-content-center align-items-center w-100 h-75">
-        <Spinner
-          animation="border"
-          variant="primary"
-          style={{ width: "30px", height: "30px" }}
-        />
-      </div>
+      <>
+        <PageMetaData title="Earnings" />
+        <div className="d-flex justify-content-center align-items-center w-100 h-75">
+          <Spinner
+            animation="border"
+            variant="primary"
+            style={{ width: "30px", height: "30px" }}
+          />
+        </div>
+      </>
     );
   }
 
   return (
     <>
-      <PageMetaData title="Dashboard" />
+      <PageMetaData title="Earnings" />
       <div className="pb-5 d-flex flex-column gap-4">
         <EarningCards
           thisMonthRevenue={thisMonthRevenue}

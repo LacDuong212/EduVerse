@@ -1,31 +1,51 @@
-import React from "react";
+import _ from "lodash";
+import { useMemo } from "react";
 import { Container, Button } from "react-bootstrap";
 import { FaArrowLeft, FaRotateRight } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 
 const ErrorState = ({
   className = "position-absolute top-50 start-50 translate-middle d-flex flex-column align-items-center justify-content-center gap-3",
-  message = "Uh-oh, looks like something went wrong..🤔",
+  message = "",
+  messages = [],
   onRetry,
   retryBtnName = "Retry",
   showReturn = false,
   onReturn,
   returnBtnName = "Return",
+  ...props
 }) => {
   const navigate = useNavigate();
-  const defaultRetry = () => navigate(-1);
+
+  const defaultMessages = useMemo(() => [
+    "It's quiet in here... too quiet. 🌵🏜️",
+    "Uh-oh, looks like something went wrong..🤔",
+    "Our servers are currently having an existential crisis..🧘‍♂️⚡",
+  ], []);
+
+  const displayMessage = useMemo(() => {
+    if (message) return message;
+
+    if (messages && messages.length > 0) {
+      return _.sample(messages);
+    }
+
+    return _.sample(defaultMessages);
+  }, [message, messages, defaultMessages]);
+
+  const handleReturn = onReturn || (() => navigate(-1));
 
   return (
-    <Container className={className}>
+    <Container className={className} {...props}>
       {/* Message */}
-      <span className="h3 mb-0 text-center">{message}</span>
+      <span className="h3 mb-0 text-center">{displayMessage}</span>
 
       {/* Actions */}
       <div className="d-flex align-items-center gap-5">
         {showReturn && (
           <Button
             variant="link"
-            onClick={onReturn ? onReturn : defaultRetry}
+            onClick={handleReturn}
             className="p-0 d-flex align-items-center mb-0"
           >
             <FaArrowLeft className="me-2" />{returnBtnName}
