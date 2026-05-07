@@ -5,7 +5,6 @@ import { toast } from "react-toastify";
 import { authApi } from "@/utils/api";
 import { mapResponseErrors } from "@/utils/mapper";
 import { handleRequest } from "@/utils/request";
-import { validateCourse } from "../schemas";
 
 export default function useEditCourse() {
   const navigate = useNavigate();
@@ -42,7 +41,10 @@ export default function useEditCourse() {
   const currentCourse = useMemo(() => {
     if (!course) return null;
     return _.mergeWith({}, course, changes, (objValue, srcValue) => {
-      if (_.isArray(srcValue)) return srcValue;
+      if (_.isArray(srcValue)) {
+        if (objValue && srcValue.length !== objValue.length) return srcValue;
+        return undefined;
+      }
     });
   }, [course, changes]);
 
@@ -101,21 +103,26 @@ export default function useEditCourse() {
     }
   };
 
-  const onSubmit = async () => {
+  const onSubmit = async (specificChanges = null) => {
+    const payload = specificChanges || changes;
+
     setIsSubmitting(true);
     setErrors({});
 
     const response = await handleRequest(
-      authApi.post(`/instructor/courses/${courseId}/submit`, changes)
+      authApi.post(`/instructor/courses/${courseId}/submit`, payload)
     );
 
     if (response.success) {
       toast.success("Course submitted for review!");
+      setChanges({});
       navigate("/instructor/courses");
     } else {
-      if (response.errors) setErrors(mapResponseErrors(response.errors));
+      if (response.errors) {
+        setErrors(mapResponseErrors(response.errors));
+      }
+      setIsSubmitting(false);
     }
-    setIsSubmitting(false);
   };
 
   const onDiscardChanges = async () => {

@@ -34,7 +34,7 @@ const toTitleCase = (str) => {
   return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
 };
 
-const Step1 = ({ stepperInstance }) => {
+const Step1 = ({ stepperInstance, activeStep }) => {
   const {
     categories,
     languages,
@@ -102,7 +102,7 @@ const Step1 = ({ stepperInstance }) => {
               >
                 {categories?.length > 0 ? (
                   <>
-                    <option value=''>Select category</option>
+                    <option value="">Select category</option>
                     {categories.map(cat => <option key={cat.cateId} value={cat.cateId}>{cat.cateName}</option>)}
                   </>
                 ) : (
@@ -125,7 +125,7 @@ const Step1 = ({ stepperInstance }) => {
               >
                 {levels?.length > 0 ? (
                   <>
-                    <option value=''>Select course level</option>
+                    <option value="">Select course level</option>
                     {levels.map((lvl, idx) => <option key={idx} value={lvl}>{toTitleCase(lvl)}</option>)}
                   </>
                 ) : (
@@ -146,7 +146,7 @@ const Step1 = ({ stepperInstance }) => {
               >
                 {languages?.length > 0 ? (
                   <>
-                    <option value=''>Select course language</option>
+                    <option value="">Select course language</option>
                     {languages.map((lang, idx) => <option key={idx} value={lang}>{toTitleCase(lang)}</option>)}
                   </>
                 ) : (

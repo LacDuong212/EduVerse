@@ -1,5 +1,6 @@
 import Fuse from "fuse.js";
 import mongoose from "mongoose";
+import _ from "lodash";
 import AppError from "#exceptions/app.error.js";
 import { getAllCatgeoriesWithSort } from "#modules/category/category.service.js";
 import { existsEnrollment } from "#modules/enrollment/enrollment.service.js";
@@ -8,7 +9,7 @@ import Instructor from "#modules/instructor/instructor.model.js";
 import { getCurrentInstructor } from "#modules/instructor/instructor.service.js";
 import { TYPE_ENUM as NOTIF_TYPE } from "#modules/notification/notification.model.js";
 import { sendNotification } from "#modules/notification/notification.service.js";
-import { expireOrphanVideos } from "#modules/video/video.service.js";
+import { setExpireForVideos } from "#modules/video/video.service.js";
 import { processVideoWithGemini } from "#services/ai.service.js";
 import { getPaginationOptions } from "#utils/pagination.js";
 import { withTransaction } from "#utils/transaction.js";
@@ -265,7 +266,7 @@ export const getCoursePublicDetails = async (user, courseId) => {
       path: "category",
       select: "name slug",
     }, {
-      path: "instructor",
+      path: "instructor.ref",
       select: "name pfpImg"
     }, {
       path: "curriculum",
@@ -580,6 +581,29 @@ const getMergedState = (courseDoc, curriculumDoc) => {
   const pendingCourse = courseDoc.pendingUpdate?.data || {};
   const pendingCurr = curriculumDoc?.pendingUpdate?.data || {};
 
+  const liveSections = curriculumDoc?.sections || [];
+  const pendingSections = pendingCurr?.sections;
+
+  const mergedSections = (pendingSections || liveSections).map((section, sIdx) => {
+    const liveSection = liveSections[sIdx];
+
+    return {
+      ...section,
+      lectures: section.lectures?.map((lecture, lIdx) => {
+        const liveLecture = liveSection?.lectures?.[lIdx];
+
+        const isNewVideo = pendingSections && liveLecture
+          && lecture.videoId !== liveLecture.videoId;
+
+        return {
+          ...lecture,
+          oldVideoId: isNewVideo ? liveLecture.videoId : null,
+          videoId: lecture.videoId
+        };
+      })
+    };
+  });
+
   return {
     course: {
       ...courseDoc.toObject(),
@@ -587,39 +611,71 @@ const getMergedState = (courseDoc, curriculumDoc) => {
       hasPendingChanges: Object.keys(pendingCourse).length > 0
     },
     curriculum: {
-      sections: pendingCurr.sections || curriculumDoc?.sections || [],
-      hasPendingChanges: !!pendingCurr.sections?.length
+      sections: mergedSections,
+      hasPendingChanges: !!pendingSections?.length
     }
   };
 };
 
 const getProcessedCurriculum = (incomingSections, curriculumDoc) => {
-  const liveLectures = (curriculumDoc?.sections || []).flatMap(s => s.lectures || []);
-  const pendingLectures = (curriculumDoc?.pendingUpdate?.data?.sections || []).flatMap(s => s.lectures || []);
+  const liveSections = curriculumDoc?.sections || [];
+  const pendingSections = curriculumDoc?.pendingUpdate?.data?.sections || [];
+
+  let baseSections = _.cloneDeep(pendingSections.length > 0 ? pendingSections : liveSections);
+
+  if (_.isObject(incomingSections) && !_.isArray(incomingSections)) {
+    Object.entries(incomingSections).forEach(([key, value]) => {
+      const idx = parseInt(key);
+      if (!isNaN(idx)) {
+        baseSections[idx] = _.merge({}, baseSections[idx] || {}, value);
+      }
+    });
+  } else if (_.isArray(incomingSections)) {
+    incomingSections.forEach((value, idx) => {
+      if (value !== null && value !== undefined) {
+        baseSections[idx] = _.merge({}, baseSections[idx] || {}, value);
+      }
+    });
+
+    if (incomingSections.length < baseSections.length && !incomingSections.includes(null)) {
+      baseSections = incomingSections;
+    }
+  }
 
   const aiDataMap = new Map();
-  [...liveLectures, ...pendingLectures].forEach(l => {
-    if (l.videoId && l.aiData) aiDataMap.set(l.videoId, l.aiData);
+  [...liveSections, ...pendingSections].forEach(s => {
+    (s.lectures || []).forEach(l => {
+      if (l.videoId && l.aiData) aiDataMap.set(l.videoId, l.aiData);
+    });
   });
 
-  return (incomingSections || []).map(section => {
-    return {
-      _id: section.secId || new mongoose.Types.ObjectId(),
-      title: section.title,
-      lectures: (section.lectures || []).map(lecture => {
-        const preservedAiData = aiDataMap.get(lecture.videoId) || null;
+  return baseSections.map(section => ({
+    _id: section._id || (section.secId ? new mongoose.Types.ObjectId(section.secId) : new mongoose.Types.ObjectId()),
+    title: section.title,
+    lectures: (section.lectures || []).map(lecture => ({
+      _id: lecture._id || (lecture.lecId ? new mongoose.Types.ObjectId(lecture.lecId) : new mongoose.Types.ObjectId()),
+      title: lecture.title,
+      duration: lecture.duration,
+      videoId: lecture.videoId,
+      isFree: lecture.isFree ?? false,
+      aiData: lecture.aiData || aiDataMap.get(lecture.videoId) || null
+    }))
+  }));
+};
 
-        return {
-          _id: lecture.lecId || new mongoose.Types.ObjectId(),
-          title: lecture.title,
-          duration: lecture.duration,
-          videoId: lecture.videoId,
-          isFree: lecture.isFree ?? false,
-          aiData: preservedAiData
-        };
-      })
-    };
-  });
+const extractVideoIds = (sections) =>
+  [...new Set((sections || []).flatMap(s => s.lectures || []).map(l => l.videoId).filter(Boolean))];
+
+const syncVideoExpirations = async (oldVids, newVids, session) => {
+  const oldSet = new Set(oldVids.filter(Boolean));
+  const newSet = new Set(newVids.filter(Boolean));
+
+  const abandoned = [...oldSet].filter(id => !newSet.has(id));
+
+  const active = [...newSet];
+
+  if (active.length > 0) await setExpireForVideos(active, false, session);
+  if (abandoned.length > 0) await setExpireForVideos(abandoned, true, session);
 };
 
 export const updateCourse = async (insId, courseId, changes, session = null) => {
@@ -631,14 +687,23 @@ export const updateCourse = async (insId, courseId, changes, session = null) => 
     let curriculumDoc = await Curriculum.findOne({ courseId }).session(s);
     if (!curriculumDoc) curriculumDoc = new Curriculum({ courseId });
 
+    const oldVids = [
+      course.previewVideo,
+      course.pendingUpdate?.data?.previewVideo,
+      ...extractVideoIds(curriculumDoc.sections),
+      ...extractVideoIds(curriculumDoc.pendingUpdate?.data?.sections)
+    ];
+
     const { curriculum, categoryId, ...courseData } = changes;
+    const abandonedVideoIds = [];
+
     if (categoryId) courseData.category = new mongoose.Types.ObjectId(categoryId);
 
     const cleanCourseData = Object.fromEntries(
       Object.entries(courseData).filter(([_, v]) => v !== undefined)
     );
-    const plainPending = getPlainPendingData(course.pendingUpdate);
 
+    const plainPending = getPlainPendingData(course.pendingUpdate);
     course.pendingUpdate = {
       data: { ...plainPending, ...cleanCourseData },
       submittedAt: new Date(),
@@ -648,7 +713,6 @@ export const updateCourse = async (insId, courseId, changes, session = null) => 
 
     if (curriculum) {
       const processedSections = getProcessedCurriculum(curriculum.sections, curriculumDoc);
-
       curriculumDoc.pendingUpdate = {
         data: { sections: processedSections },
         submittedAt: new Date(),
@@ -659,6 +723,15 @@ export const updateCourse = async (insId, courseId, changes, session = null) => 
 
     await course.save({ session: s });
     await curriculumDoc.save({ session: s });
+
+    const newVids = [
+      course.previewVideo,
+      course.pendingUpdate?.data?.previewVideo,
+      ...extractVideoIds(curriculumDoc.sections),
+      ...extractVideoIds(curriculumDoc.pendingUpdate?.data?.sections)
+    ];
+
+    await syncVideoExpirations(oldVids, newVids, s);
 
     const {
       course: mergedCourse, curriculum: mergedCurr
@@ -691,13 +764,10 @@ export const submitCourse = async (insId, courseId, changes = null, session = nu
       curriculum: { sections: mergedCurr.sections || [] }
     });
 
-    if (!validation.success) {
-      throw validation.error;
-    }
+    if (!validation.success) throw validation.error;
 
-    if (courseDoc.status === STATUS_ENUM.draft) {
+    if (courseDoc.status === STATUS_ENUM.draft)
       courseDoc.status = STATUS_ENUM.pending;
-    }
 
     const now = new Date();
 
@@ -732,23 +802,18 @@ export const clearPendingChanges = async (insId, courseId, session = null) => {
 
     const curriculumDoc = await Curriculum.findOne({ courseId }).session(s);
 
+    const oldVids = [
+      course.previewVideo,
+      course.pendingUpdate?.data?.previewVideo,
+      ...extractVideoIds(curriculumDoc?.sections),
+      ...extractVideoIds(curriculumDoc?.pendingUpdate?.data?.sections)
+    ];
+
     const hasCourseChanges = Object.keys(course.pendingUpdate?.data || {}).length > 0;
     const hasCurriculumChanges = !!curriculumDoc?.pendingUpdate?.data?.sections?.length;
 
     if (!hasCourseChanges && !hasCurriculumChanges)
       throw new AppError("There are no changes to clear.", 400);
-
-    let videosToRemove = [];
-
-    if (hasCurriculumChanges) {
-      const pendingCurrData = getPlainPendingData(curriculumDoc.pendingUpdate);
-      const lectureVideos = (pendingCurrData.sections || [])
-        .flatMap(sec => sec.lectures || [])
-        .map(l => l.videoId)
-        .filter(Boolean);
-
-      videosToRemove.push(...lectureVideos);
-    }
 
     course.pendingUpdate = {
       data: null,
@@ -768,7 +833,12 @@ export const clearPendingChanges = async (insId, courseId, session = null) => {
       await curriculumDoc.save({ session: s });
     }
 
-    if (videosToRemove.length > 0) await expireOrphanVideos(videosToRemove, s);
+    const newVids = [
+      course.previewVideo,
+      ...extractVideoIds(curriculumDoc?.sections)
+    ];
+
+    await syncVideoExpirations(oldVids, newVids, s);
 
     const {
       course: mergedCourse, curriculum: mergedCurr
@@ -817,72 +887,56 @@ export const updateCoursesInstructorInfo = async (insId, name, avatar, session =
 export const approveCourseUpdate = async (courseId, session = null) => {
   return await withTransaction(async (s) => {
     const course = await Course.findById(courseId).session(s);
-    if (!course) throw new AppError("Course not found.", 404);
-
     const curriculum = await Curriculum.findOne({ courseId }).session(s);
-    let oldVideoIds = [];
+    if (!course || !curriculum) throw new AppError("Unable to obtain course details.", 404);
 
-    const isPendingCourse = course.status === STATUS_ENUM.pending
-      || course.pendingUpdate?.status === UPDATE_STATUS_ENUM.pending;
-    if (!isPendingCourse) throw new AppError("Course is not pending review.", 400);
+    const oldVids = [
+      course.previewVideo,
+      course.pendingUpdate?.data?.previewVideo,
+      ...extractVideoIds(curriculum.sections),
+      ...extractVideoIds(curriculum.pendingUpdate?.data?.sections)
+    ];
 
-    if (curriculum?.pendingUpdate?.data?.sections) {
-      const pendingSections = getPlainPendingData(curriculum.pendingUpdate).sections;
+    const {
+      course: mergedCourse, curriculum: mergedCurriculum
+    } = getMergedState(course, curriculum);
 
-      const currentVideoIds = (curriculum.sections || [])
-        .flatMap(sec => sec.lectures || [])
-        .map(l => l.videoId)
-        .filter(Boolean);
+    const hasWork = course.status === STATUS_ENUM.pending ||
+      mergedCourse.hasPendingChanges ||
+      mergedCurriculum.hasPendingChanges;
+    if (!hasWork) throw new AppError("Nothing to approve.", 400);
 
-      let newTotalDuration = 0;
-      const newVideoIds = new Set();
-
-      pendingSections.forEach(section => {
-        (section.lectures || []).forEach(lecture => {
-          if (lecture.videoId) newVideoIds.add(lecture.videoId);
-          newTotalDuration += Number(lecture.duration || 0);
-        });
-      });
-
-      course.duration = newTotalDuration;
-
-      const videosToRemove = currentVideoIds.filter(id => !newVideoIds.has(id));
-      oldVideoIds.push(...videosToRemove);
-
-      curriculum.sections = pendingSections;
+    if (mergedCurriculum.hasPendingChanges) {
+      curriculum.sections = mergedCurriculum.sections;
       curriculum.pendingUpdate = { data: null, submittedAt: null, status: UPDATE_STATUS_ENUM.none };
 
-      curriculum.markModified("sections");
-      const updatedCurr = await curriculum.save({ session: s });
-      course.sectionsCount = updatedCurr.sections?.length;
-      course.lecturesCount = updatedCurr.sections?.reduce(
-        (acc, section) => acc + (section.lectures ? section.lectures.length : 0),
-        0
+      course.sectionsCount = curriculum.sections.length;
+      course.lecturesCount = curriculum.sections.reduce((acc, sec) => acc + (sec.lectures?.length || 0), 0);
+      course.duration = curriculum.sections.reduce((acc, sec) =>
+        acc + (sec.lectures?.reduce((sum, lec) => sum + Number(lec.duration || 0), 0) || 0), 0
       );
+
+      curriculum.markModified("sections");
+      await curriculum.save({ session: s });
     }
 
-    if (course.pendingUpdate?.data) {
-      const updates = getPlainPendingData(course.pendingUpdate);
-
-      if (updates.previewVideo && course.previewVideo && updates.previewVideo !== course.previewVideo) {
-        oldVideoIds.push(course.previewVideo);
-      }
-
-      Object.keys(updates).forEach((key) => {
-        course.set(key, updates[key]);
-      });
-
+    if (mergedCourse.hasPendingChanges || course.status === STATUS_ENUM.pending) {
+      const updates = course.pendingUpdate?.data || {};
+      course.set(updates);
       course.pendingUpdate = { data: null, submittedAt: null, status: UPDATE_STATUS_ENUM.none };
     }
 
     course.status = STATUS_ENUM.live;
     await course.save({ session: s });
 
-    if (oldVideoIds.length > 0) {
-      await expireOrphanVideos(oldVideoIds, s);
-    }
+    const newVids = [
+      course.previewVideo,
+      ...extractVideoIds(curriculum.sections)
+    ];
 
-    return oldVideoIds;
+    await syncVideoExpirations(oldVids, newVids, s);
+
+    return true;
   }, session);
 };
 
@@ -1019,8 +1073,8 @@ export const publicCourseExist = async (courseId) => {
     return false;
   }
 
-  const result = await Course.exists({ 
-    _id: courseId, 
+  const result = await Course.exists({
+    _id: courseId,
     ...publicFilter,
   });
 

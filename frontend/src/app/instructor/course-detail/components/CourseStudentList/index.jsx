@@ -12,7 +12,7 @@ import { FaAngleLeft, FaAngleRight, FaRegEnvelope, FaRegStar, FaSearch, FaStar, 
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import ChoicesFormInput from "@/components/form/ChoicesFormInput";
-import { useCourseStudentList } from "../useCourseDetails";
+import useCourseStudentList from "./useCourseStudentList";
 
 const CourseStudentRow = ({ idx, student = {} }) => {
   const {
@@ -114,7 +114,7 @@ const CourseStudentRow = ({ idx, student = {} }) => {
   );
 };
 
-const CourseStudents = ({ col = 12 }) => {
+const CourseStudents = ({ col = 12, courseId }) => {
   const {
     students,
     loading,
@@ -124,7 +124,7 @@ const CourseStudents = ({ col = 12 }) => {
     totalPages,
     search, setSearch,
     sort, setSort,
-  } = useCourseStudentList();
+  } = useCourseStudentList(courseId);
 
   const [searchTerm, setSearchTerm] = useState(search);
 

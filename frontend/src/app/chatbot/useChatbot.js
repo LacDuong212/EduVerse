@@ -1,16 +1,26 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
+import { authApi } from "@/utils/api";
+import { mapResponseErrors } from "@/utils/mapper";
+import { handleRequest } from "@/utils/request";
+import { GUEST_CHAT_SESSION_ID } from "./chatbot.constants";
 
-import useProfile from "@/hooks/useProfile";
-import { sendMessageToApi } from "../api/chatbot.api";
-import { GUEST_CHAT_SESSION_ID } from "../constants/chatbot.contants";
+const sendMessageToApi = async (message, sessionId, languageCode = "en") => {
+  const response = await handleRequest(authApi.post(
+    "/chatbot/message",
+    { sessionId, message, language: languageCode }
+  ));
+
+  if (response.success) return response.result;
+  else throw mapResponseErrors(response.errors);
+};
 
 export const useChatbot = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = useProfile();
+  const { userData } = useSelector((state) => state.auth);
 
-  // state
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([
@@ -21,42 +31,33 @@ export const useChatbot = () => {
   ]);
   const [isSending, setIsSending] = useState(false);
 
-  // refs
   const chatRef = useRef(null);
   const messagesEndRef = useRef(null);
 
-  // get chat session
   const sessionId = useMemo(() => {
-    // if a logged-in user
-    if (user && user._id) {
-        // clear any guest session
+    if (userData && userData.userId) {
         sessionStorage.removeItem(GUEST_CHAT_SESSION_ID); 
-        return `edv_user_${user._id}`;
+        return `edv_user_${userData.userId}`;
     }
 
-    // if a guest
     let guestId = sessionStorage.getItem(GUEST_CHAT_SESSION_ID);
     
     if (!guestId) {
-        // generate a random string + timestamp for uniqueness
-        guestId = `guest-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+        guestId = `edv_guest_${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
         sessionStorage.setItem(GUEST_CHAT_SESSION_ID, guestId);
     }
     
     return guestId;
-  }, [user]); // re-calc if user logs in/out
+  }, [userData]);
 
-  // send message
   const handleSendMessage = async (language = "en") => {
     if (!input.trim() || isSending) return;
 
-    // optimistic UI update
     const currentInput = input;
     const userMessage = { from: "user", text: currentInput };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
 
-    // lock UI (prevent user spamming messages)
     setIsSending(true);
 
     try {
@@ -83,7 +84,6 @@ export const useChatbot = () => {
         { from: "bot", text: language === "vi" ? "Lỗi kết nối máy chủ." : "Error connecting to server." },
       ]);
     } finally {
-      // unlock the UI
       setIsSending(false);
     }
   };

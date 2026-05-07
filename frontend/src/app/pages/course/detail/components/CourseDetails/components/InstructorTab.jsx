@@ -19,7 +19,12 @@ const InstructorTab = ({ instructor = {} }) => {
         <Col xs={12} md="auto" className="d-flex justify-content-center">
           <div style={{ width: "160px", height: "160px" }}>
             {avatar ? (
-              <img src={avatar} className="rounded-3 border border-body border-3 shadow h-100 w-100" alt="Avatar" />
+              <img
+                src={avatar}
+                className="rounded-3 border border-body border-3 shadow h-100 w-100"
+                alt="Avatar"
+                onError={(e) => e.target.src = DEFAULT_AVATAR_IMG}
+              />
             ) : (
               <div className="rounded-3 border border-body border-3 bg-light shadow d-flex justify-content-center align-items-center w-100 h-100 fs-1 fw-bold">
                 {(instructor?.name?.[0] || "I").toUpperCase()}

@@ -158,6 +158,7 @@ const MyCourses = ({
                           src={course.image || DEFAULT_COURSE_IMG}
                           alt={course.title || "Course Image"}
                           className="img-fluid h-100 w-100 object-fit-cover"
+                          onError={(e) => e.target.src = DEFAULT_COURSE_IMG}
                         />
                       </div>
                       <div className="ms-2 flex-grow-1 text-wrap">

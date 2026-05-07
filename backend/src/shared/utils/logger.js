@@ -23,23 +23,22 @@ const logger = {
     const { method, originalUrl, ip } = req;
     const timestamp = new Date().toISOString();
 
-    console.error("\x1b[38;5;208m%s\x1b[0m", `[EXCEPTION] [${timestamp}] -----------------------`);
-    console.error(`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`);
-
+    console.error("\x1b[38;5;208m%s\x1b[0m", `[EXCEPTION] [${timestamp}] --------------------------`);
+    console.error(`URL: ${originalUrl}`);
+    console.error(`Method: ${method} | StatusCode: ${statusCode || 500} | IP: ${ip}`);
     console.error(`Message: ${err.message}`);
 
     if (err.cause) {
-      console.error("\x1b[35mCause:\x1b[0m %s", err.cause.message || err.cause);
+      // console.error("\x1b[35mCause:\x1b[0m %s", err.cause.message || err.cause);
 
       if (process.env.NODE_ENV === "development" && err.cause.stack) {
         console.error("\x1b[2m%s\x1b[0m", err.cause.stack);
-        console.error("\x1b[35m%s\x1b[0m", "^^^ Internal Error Stack Above ^^^");
       }
     } else if (process.env.NODE_ENV === "development" && err.stack) {
       console.error("\x1b[2m%s\x1b[0m", err.stack);
     }
 
-    console.error("\x1b[38;5;208m%s\x1b[0m", "--------------------------------------------------------------");
+    console.error("\x1b[38;5;208m%s\x1b[0m", "-----------------------------------------------------------------");
   }
 };
 

@@ -3,6 +3,7 @@ import { BsPlus, BsQuestionCircle, BsX } from "react-icons/bs";
 import { FaAngleRight, FaFacebook, FaGlobe, FaInstagram, FaLinkedin, FaUndo, FaYoutube } from "react-icons/fa";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
+import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { mapResponseErrors } from "@/utils/mapper";
 import useMyProfile from "../useMyProfile";
@@ -43,6 +44,8 @@ const QUILL_FORMATS = [
 ];
 
 const MyProfile = () => {
+  const { userData } = useSelector((state) => state.auth);
+
   const {
     instructor,
     updateField,
@@ -56,6 +59,8 @@ const MyProfile = () => {
     isDirty,
   } = useMyProfile();
 
+  const insId = instructor?.insId || userData?.userId || null;
+
   const educationList = instructor.education || [];
   const skillList = instructor.skills || [];
 
@@ -64,7 +69,7 @@ const MyProfile = () => {
   const errors = mapResponseErrors(rawErrors);
 
   const getFieldProps = (fieldName) => ({
-    isInvalid: !!errors[fieldName],
+    isinvalid: errors[fieldName],
     className: `form-control ${errors[fieldName] ? "is-invalid" : ""}`
   });
 
@@ -72,7 +77,7 @@ const MyProfile = () => {
     <Card className="bg-transparent border rounded-3">
       <CardHeader className="bg-transparent border-bottom d-flex align-items-center justify-content-between p-3">
         <h3 className="card-header-title mb-0">Edit Profile</h3>
-        <Link className="fw-bold" to={instructor.insId ? `/instructors/${instructor.insId}` : "/instructors"}>
+        <Link className="fw-bold" to={`/instructors/${insId || ""}`}>
           My Public Profile<span className="fs-5"><FaAngleRight /></span>
         </Link>
       </CardHeader>

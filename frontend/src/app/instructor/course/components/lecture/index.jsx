@@ -1,21 +1,21 @@
 import { useState, useEffect } from "react";
 import { Button, Col, Modal, ModalBody, ModalFooter, ModalHeader, Collapse } from "react-bootstrap";
-import { BsXLg, BsPlayCircleFill, BsEyeSlashFill, BsFileEarmarkPlay, BsCloudCheck, BsClock } from "react-icons/bs";
+import { BsXLg, BsPlayCircleFill, BsCloudUpload } from "react-icons/bs";
 import { secondsToDuration } from "@/utils/duration";
 import { useLecture } from "./useLecture";
 
-const Lecture = ({ show, onClose, onSave, initialLecture = null, courseId }) => {
-  const { state, computed, handlers } = useLecture(show, initialLecture, onSave, courseId);
-  const { form, videoFile, errors, isUploading, progress } = state;
-  const { previewHref, isNewVideo } = computed;
+const Lecture = ({ show, onClose, onSave, initialLecture = null }) => {
+  const { state, handlers } = useLecture(show, initialLecture, onSave);
+  const { form, videoFile, errors, isUploading, progress, previewHref } = state;
 
   const [showPreview, setShowPreview] = useState(false);
 
   useEffect(() => {
-    setShowPreview(false);
-  }, [previewHref]);
+    if (!show) setShowPreview(false);
+  }, [show, previewHref]);
 
-  const hasExistingVideo = !isNewVideo && !!previewHref;
+  const hasVideoSource = !!previewHref;
+  const isNewVideo = !!videoFile;
 
   return (
     <Modal
@@ -38,104 +38,140 @@ const Lecture = ({ show, onClose, onSave, initialLecture = null, courseId }) => 
           <Col md={12}>
             <label className="form-label">Lecture Title <span className="text-danger">*</span></label>
             <input
-              className={`form-control ${errors.title ? "is-invalid" : ""}`}
+              className={`form-control ${errors?.title ? "is-invalid" : ""}`}
               type="text"
               placeholder="Enter lecture title"
               value={form.title}
               disabled={isUploading}
-              maxLength={100}
               onChange={e => handlers.updateField("title", e.target.value)}
             />
-            {errors.title && <div className="invalid-feedback">{errors.title}</div>}
+            {errors?.title && <div className="invalid-feedback">{errors.title}</div>}
           </Col>
 
           {/* --- VIDEO SECTION --- */}
           <Col md={12}>
             <label className="form-label">Lecture Video <span className="text-danger">*</span></label>
 
-            <div className="input-group">
-              <input
-                className={`form-control ${errors.videoId ? "is-invalid" : ""}`}
-                type="file"
-                accept=".mp4,.mov,.mkv,.avi"
-                disabled={isUploading}
-                onChange={handlers.handleFileChange}
-              />
-              <Button
-                variant="info"
-                disabled={!previewHref}
-                onClick={() => setShowPreview(!showPreview)}
-              >
-                {showPreview ? <BsEyeSlashFill className="me-2" /> : <BsPlayCircleFill className="me-2" />}
-                {showPreview ? "Hide" : "Preview"}
-              </Button>
+            <div className={`card border border-dashed border-2 ${errors?.videoId ? "border-danger" : ""}`}>
+              <div className="card-body p-3">
+
+                {/* Preview */}
+                {hasVideoSource && !isUploading ? (
+                  <div className="d-flex align-items-center justify-content-between">
+                    <div className="d-flex align-items-center">
+                      <div className="bg-dark rounded d-flex align-items-center justify-content-center me-3" style={{ width: "60px", height: "40px" }}>
+                        <BsPlayCircleFill className="text-white" />
+                      </div>
+                      <div>
+                        <small className={isNewVideo ? "text-info" : "text-success"}>
+                          {isNewVideo ? "Ready to upload" : "Already saved"}
+                        </small>
+                      </div>
+                    </div>
+
+                    <div className="btn-group align-items-center">
+                      <Button
+                        size="sm"
+                        variant="outline-secondary"
+                        className="mb-0"
+                        onClick={() => setShowPreview(!showPreview)}
+                      >
+                        {showPreview ? "Close Preview" : "View Video"}
+                      </Button>
+                      <label className="btn btn-sm btn-outline-primary mb-0">
+                        Change
+                        <input
+                          type="file"
+                          className="d-none"
+                          accept="video/mp4,video/webm,video/ogg,.mp4,.webm,.ogv,.ogg"
+                          onChange={handlers.handleFileChange}
+                        />
+                      </label>
+                    </div>
+                  </div>
+                ) : (
+                  /* Empty */
+                  <div className="text-center py-2">
+                    {!isUploading ? (
+                      <label className="mb-0 cursor-pointer">
+                        <BsCloudUpload size={30} className="text-primary mb-2" />
+                        <p className="h6 mb-0">Click to upload lecture video</p>
+                        <p className="small mb-0">MP4, MOV, or OGG (Max 2GB)</p>
+                        <input
+                          type="file"
+                          className="d-none"
+                          accept="video/mp4,video/webm,video/ogg,.mp4,.webm,.ogv,.ogg"
+                          onChange={handlers.handleFileChange}
+                        />
+                      </label>
+                    ) : (
+                      /* Uploading */
+                      <div className="w-100">
+                        <div className="d-flex justify-content-between mb-2 small">
+                          <span className="fw-bold">Uploading Video...</span>
+                          <span>{progress}%</span>
+                        </div>
+                        <div className="progress" style={{ height: "10px" }}>
+                          <div
+                            className="progress-bar progress-bar-striped progress-bar-animated bg-primary"
+                            style={{ width: `${progress}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
 
-            <div className="mt-1">
-              {isNewVideo ? (
-                <small className="text-success d-flex align-items-center">
-                  <BsFileEarmarkPlay className="me-1" /> New: {videoFile?.name}
-                </small>
-              ) : hasExistingVideo ? (
-                <small className="text-primary d-flex align-items-center">
-                  <BsCloudCheck className="me-1" /> Cloud video active
-                </small>
-              ) : null}
-
-              {errors.videoId && <small className="text-danger d-block mt-1">{errors.videoId}</small>}
-            </div>
-
-            {/* Embedded Player */}
-            <Collapse in={showPreview && !!previewHref}>
-              <div className="mt-3">
-                <div className="bg-dark rounded overflow-hidden shadow text-center">
-                  <video key={previewHref} controls className="w-100 d-block" style={{ maxHeight: "300px" }}>
-                    <source src={previewHref} type="video/mp4" />
+            {/* Integrated Preview Player */}
+            <Collapse in={showPreview && hasVideoSource}>
+              <div className="mt-3 bg-dark rounded shadow-inner overflow-hidden">
+                {show && hasVideoSource && (
+                  <video
+                    key={previewHref}
+                    controls
+                    className="w-100"
+                    style={{ maxHeight: "250px", display: "block" }}
+                    preload="metadata"
+                  >
+                    <source src={previewHref} />
+                    Your browser does not support the video tag.
                   </video>
-                </div>
+                )}
               </div>
             </Collapse>
 
-            {isUploading && (
-              <div className="mt-3">
-                <div className="d-flex justify-content-between mb-1 small">
-                  <span>Uploading...</span>
-                  <span>{progress}%</span>
-                </div>
-                <div className="progress" style={{ height: "8px" }}>
-                  <div className="progress-bar progress-bar-striped progress-bar-animated bg-success" style={{ width: `${progress}%` }}></div>
-                </div>
-              </div>
-            )}
+            {errors?.videoId && <div className="text-danger small mt-2">{errors.videoId}</div>}
           </Col>
 
+          {/* Duration */}
           <Col className="d-flex align-items-center">
             <label className="form-label me-2 mb-0">Duration:</label>
             <div className="input-group">
               <input
                 type="text"
-                className={`form-control text-end ${errors.duration ? "is-invalid" : ""}`}
+                className={`form-control text-end ${errors?.duration ? "is-invalid" : ""}`}
                 disabled
                 readOnly
                 value={secondsToDuration(form.duration)}
               />
             </div>
-            {errors.duration && <div className="invalid-feedback">{errors.duration}</div>}
+            {errors?.duration && <div className="invalid-feedback">{errors.duration}</div>}
           </Col>
 
           {/* Description */}
           <Col xs={12}>
             <label className="form-label">Description</label>
             <textarea
-              className={`form-control ${errors.description ? "is-invalid" : ""}`}
+              className={`form-control ${errors?.description ? "is-invalid" : ""}`}
               rows={3}
               value={form.description}
               placeholder="Enter lecture description"
-              maxLength={360}
               disabled={isUploading}
               onChange={(e) => handlers.updateField("description", e.target.value)}
             />
-            {errors.description && <div className="invalid-feedback">{errors.description}</div>}
+            {errors?.description && <div className="invalid-feedback">{errors.description}</div>}
           </Col>
 
           {/* Availability */}
@@ -157,7 +193,7 @@ const Lecture = ({ show, onClose, onSave, initialLecture = null, courseId }) => 
               />
               <label className="btn btn-sm btn-outline-primary m-0" htmlFor="optPrem">Premium</label>
             </div>
-            {errors.isFree && <div className="d-block text-danger small mt-1">{errors.isFree}</div>}
+            {errors?.isFree && <div className="d-block text-danger small mt-1">{errors.isFree}</div>}
           </Col>
         </form>
       </ModalBody>

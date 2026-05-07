@@ -1,6 +1,5 @@
 import express from "express";
 import passport from "passport";
-
 import { checkAuth, protect } from "#middlewares/auth.middleware.js";
 import validate from "#middlewares/zodValidator.middleware.js";
 import * as authController from "#modules/auth/auth.controller.js";

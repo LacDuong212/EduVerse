@@ -40,6 +40,11 @@ const CourseCard = ({ course }) => {
       return;
     }
 
+    if (userData?.role === "instructor") {
+      toast.warning("You cannot perform this action.");
+      return;
+    }
+
     if (!currentCourseId) {
       toast.error("Unable to get course info..");
       return;

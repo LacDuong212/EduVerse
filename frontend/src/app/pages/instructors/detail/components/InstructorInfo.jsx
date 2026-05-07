@@ -1,6 +1,6 @@
-import { FaEnvelope, FaGlobe, FaHeadphones, FaMapMarkerAlt } from 'react-icons/fa';
+import { FaEnvelope, FaGlobe, FaHeadphones, FaMapMarkerAlt } from "react-icons/fa";
 
-const InstructorInfo = ({ instructorData = {} }) => {
+const InstructorInfo = ({ data = {} }) => {
   const {
     name,
     occupation,
@@ -9,50 +9,44 @@ const InstructorInfo = ({ instructorData = {} }) => {
     website,
     phonenumber,
     email,
-  } = instructorData || {};
+  } = data || {};
 
   return (
     <>
-      {introduction ? (
-        <div className="mt-3 clamped-html" dangerouslySetInnerHTML={{ __html: String(introduction) }} />
-      ) : (
-        <>
-          <h5 className="mt-3 mb-0">Hi, I am</h5>
-          <h1 className="mb-0">{name || 'Unnamed Instructor'}</h1>
-          <p>{occupation || 'Instructor'}</p>
-        </>
+      {introduction && (
+        <div className="mb-3">
+          <div className="h4">Biography</div>
+          <div className="clamped-html border-start border-3 border-light ms-1 ps-3">
+            <div className="ql-editor p-0" dangerouslySetInnerHTML={{ __html: String(introduction) }} />
+          </div>
+        </div>
       )}
-
-      <ul className="list-group list-group-borderless px-3 mt-1">
-        <li className="list-group-item px-0">
-          <span className="h6 fw-light">
-            <FaMapMarkerAlt className="text-primary mb-1 me-2" />
-            Address:
-          </span>
-          <span>{address || '—'}</span>
-        </li>
-        <li className="list-group-item px-0">
-          <span className="h6 fw-light">
-            <FaEnvelope className="text-primary mb-1 me-2" />
-            Email:
-          </span>
-          <span>{email || '—'}</span>
-        </li>
-        <li className="list-group-item px-0">
-          <span className="h6 fw-light">
-            <FaHeadphones className="text-primary mb-1 me-2" />
-            Phone number:
-          </span>
-          <span>{phonenumber || '—'}</span>
-        </li>
-        <li className="list-group-item px-0">
-          <span className="h6 fw-light">
-            <FaGlobe className="text-primary mb-1 me-2" />
-            Website:
-          </span>
-          <span>{website ? (<a href={website} target="_blank" rel="noopener noreferrer">{website}</a>) : '—'}</span>
-        </li>
-      </ul>
+      <div className="row mt-0 g-3">
+        {[
+          { icon: <FaMapMarkerAlt />, label: "Address", value: address },
+          { icon: <FaEnvelope />, label: "Email", value: email },
+          { icon: <FaHeadphones />, label: "Phone", value: phonenumber },
+          { icon: <FaGlobe />, label: "Website", value: website, isLink: true }
+        ].map((item, idx) => (
+          <div key={idx} className="col-sm-6 col-md-12">
+            <div className="d-flex align-items-center">
+              <div className="bg-primary bg-opacity-10 text-primary rounded-circle p-2 me-3" style={{ width: '35px', height: '35px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {item.icon}
+              </div>
+              <div>
+                <small className="d-block lh-1 mb-1">{item.label}</small>
+                <span className="fw-medium">
+                  {item.isLink && item.value ? (
+                    <a href={item.value} target="_blank" rel="noopener noreferrer" className="">{item.value}</a>
+                  ) : (
+                    item.value || "-"
+                  )}
+                </span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </>
   );
 };

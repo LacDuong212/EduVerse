@@ -23,27 +23,20 @@ export default function useVideoStream(videoId) {
         setStreamUrl(res.result);
       } else {
         setStatusCode(res.statusCode);
-        setError("Failed to load video.");
-
-        console.log(res.message);
-
-        if (![403, 404].includes(res.statusCode)) {
-          toast.error(res.message || "Failed to load video.");
-        }
+        setError(res.message || "Failed to load video..");
       }
     } catch (err) {
       const status = err.response?.status;
-      const msg = err.response?.data?.message || "Failed to load video.";
+      const msg = err.response?.data?.message || "Failed to load video..";
       setStatusCode(status);
-      console.log(err);
       setError(msg);
-      if (![403, 404].includes(status)) toast.error(msg);
     } finally {
       setLoading(false);
     }
   }, [videoId]);
 
   useEffect(() => {
+    setStreamUrl(null); // must
     fetchStreamUrl();
   }, [fetchStreamUrl]);
 

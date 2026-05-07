@@ -4,7 +4,7 @@ import ChangePasswordSetting from './components/ChangePasswordSetting';
 const AccountSettingsPage = () => {
   return (
     <>
-      <PageMetaData title="Account Settings" />
+      <PageMetaData title="Settings" />
       <ChangePasswordSetting />
     </>
   );
