@@ -28,7 +28,7 @@ authRoute.get("/google", (req, res, next) => {
   const redirectTo = req.query.redirectTo || '/';
   passport.authenticate("google", {
     scope: ["profile", "email"],
-    state: redirectTo,  // passes the return path through Google and back to us
+    state: redirectTo,
   })(req, res, next);
 });
 
