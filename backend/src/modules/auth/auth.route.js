@@ -1,6 +1,5 @@
 import express from "express";
 import passport from "passport";
-
 import { checkAuth, protect } from "#middlewares/auth.middleware.js";
 import validate from "#middlewares/zodValidator.middleware.js";
 import * as authController from "#modules/auth/auth.controller.js";
@@ -28,7 +27,7 @@ authRoute.get("/google", (req, res, next) => {
   const redirectTo = req.query.redirectTo || '/';
   passport.authenticate("google", {
     scope: ["profile", "email"],
-    state: redirectTo,  // passes the return path through Google and back to us
+    state: redirectTo,
   })(req, res, next);
 });
 

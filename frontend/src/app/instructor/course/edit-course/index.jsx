@@ -92,7 +92,7 @@ const MagicalGuideCard = () => {
                 <li className="mb-2 d-flex align-items-start">
                   <span>
                     Changes will be <strong>saved to server</strong> by clicking{" "}
-                    <BtnRef text="Next" /> for each step.
+                    <BtnRef text="Next" /> for each step. Uploaded videos, if not <strong>saved to server</strong>, will be removed after 24h.
                   </span>
                 </li>
                 <li className="d-flex align-items-start">

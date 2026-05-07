@@ -8,7 +8,7 @@ export const useAiData = (lecture, show) => {
 
   useEffect(() => {
     if (show) setActiveTab("summary");
-  }, [show, lecture?.id]);
+  }, [show, lecture?.lecId]);
 
   const aiData = lecture?.aiData || {};
   const status = aiData.status || "none";
@@ -33,7 +33,7 @@ export const useAiData = (lecture, show) => {
       isProcessing,
       isFailed,
       hasData,
-      showModal: !!lecture && show // safety check
+      showModal: !!lecture && show
     },
     data: content,
     handlers: {

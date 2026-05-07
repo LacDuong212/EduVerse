@@ -216,7 +216,11 @@ export const updateCourseSchema = z.object({
     message: "Please provide at least one field to update",
   });
 
-export const submitCourseSchema = z.object(baseCourseFields).partial();
+export const submitCourseSchema = z.object({
+  ...baseCourseFields,
+  curriculum: updateCurriculumSchema
+}).partial()
+  .superRefine(discountValidation);
 
 export const priceFilterEnum = ["free", "paid", "all"];
 export const sortFilterEnum = [

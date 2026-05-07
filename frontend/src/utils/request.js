@@ -30,11 +30,7 @@ export const handleRequest = async (promise, showToast = false) => {
     };
 
   } catch (err) {
-    console.error("DEBUG [handleRequest]:", {
-      message: err.message,
-      stack: err.stack,
-      config: err.config,
-    });
+    console.error(`DEBUG [handleRequest]: ${err.message}`, err.stack);
 
     let userMessage = "An unexpected error occurred..";
     let statusCode = 500;
