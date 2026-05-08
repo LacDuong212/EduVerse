@@ -38,8 +38,13 @@ $red: #d6293e;
 $orange: #fd7e14;
 $yellow: #f7c32e;
 $green: #0cbc87;
-$teal: #20c997;
+$teal: #367588;
 $cyan: #17a2b8;
+$brown: #7c6357;
+$canary: #ffed5f;
+$pistachio: #93c572;
+$cream: #fffdd0;
+$fandango: #b53389;
 
 // scss-docs-start colors-map
 $colors: (
@@ -54,7 +59,12 @@ $colors: (
 	"teal": $teal,
 	"cyan": $cyan,
 	"black": $black,
-	"white": $white
+	"white": $white,
+	"brown": $brown,
+	"canary": $canary,
+	"pistachio": $pistachio,
+	"cream": $cream,
+	"fandango": $fandango,
 );
 
 // The contrast ratio to reach against white
@@ -94,6 +104,11 @@ $theme-colors: (
 	"teal": $teal,
 	"cyan": $cyan,
 	"black": $black,
+	"brown": $brown,
+	"canary": $canary,
+	"pistachio": $pistachio,
+	"cream": $cream,
+	"fandango": $fandango,
 );
 // scss-docs-end theme-colors-map
 

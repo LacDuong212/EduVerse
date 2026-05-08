@@ -4,7 +4,7 @@ import useVideoStream from "@/hooks/useVideoStream";
 export const useAiData = (lecture, show) => {
   const [activeTab, setActiveTab] = useState("summary");
 
-  const { streamUrl: s3StreamUrl } = useVideoStream(lecture?.videoId);
+  const { streamUrl: s3StreamUrl } = useVideoStream(lecture?.oldVideoId || lecture?.videoId);
 
   useEffect(() => {
     if (show) setActiveTab("summary");

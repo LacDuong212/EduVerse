@@ -17,6 +17,7 @@ import * as courseMapper from "./course.mapper.js";
 import Course, { LEVEL_ENUM, STATUS_ENUM, UPDATE_STATUS_ENUM } from "./course.model.js";
 import { validateCourseSchema, priceFilterEnum, sortFilterEnum } from "./course.validation.js";
 import Curriculum, { AI_DATA_STATUS } from "./curriculum.model.js";
+import console from "console";
 
 const publicFilter = {
   isDeleted: false,
@@ -32,7 +33,9 @@ const getAverageRating = (c) =>
 export const getCourseAccess = async (userRole, userId, course) => {
   if (!userRole || !userId) return { isOwner: false, isEnrolled: false };
 
-  const isOwner = userRole === "instructor" && course?.instructor?.ref?.toString() === userId;
+  const insId = (course?.instructor?.ref?._id || course?.instructor?.ref)?.toString();
+  const isOwner = userRole === "instructor" && insId === userId;
+
   const isEnrolled = userRole === "student" && await existsEnrollment(userId, course?._id);
 
   return { isOwner, isEnrolled };
@@ -582,27 +585,46 @@ const getMergedState = (courseDoc, curriculumDoc) => {
   const pendingCurr = curriculumDoc?.pendingUpdate?.data || {};
 
   const liveSections = curriculumDoc?.sections || [];
-  const pendingSections = pendingCurr?.sections;
+  const pendingSections = pendingCurr?.sections || [];
 
-  const mergedSections = (pendingSections || liveSections).map((section, sIdx) => {
-    const liveSection = liveSections[sIdx];
+  const maxLength = Math.max(liveSections.length, pendingSections.length);
+  const mergedSections = [];
 
-    return {
-      ...section,
-      lectures: section.lectures?.map((lecture, lIdx) => {
-        const liveLecture = liveSection?.lectures?.[lIdx];
+  for (let i = 0; i < maxLength; i++) {
+    const liveSec = liveSections[i] ? (liveSections[i].toObject?.() || liveSections[i]) : null;
+    const pendingSec = pendingSections[i] || null;
 
-        const isNewVideo = pendingSections && liveLecture
-          && lecture.videoId !== liveLecture.videoId;
+    if (!pendingSec && liveSec) {
+      mergedSections.push(liveSec);
+      continue;
+    }
 
-        return {
-          ...lecture,
-          oldVideoId: isNewVideo ? liveLecture.videoId : null,
-          videoId: lecture.videoId
-        };
-      })
-    };
-  });
+    const mergedLectures = [];
+    const maxLecLength = Math.max(liveSec?.lectures?.length || 0, pendingSec?.lectures?.length || 0);
+
+    for (let j = 0; j < maxLecLength; j++) {
+      const liveLec = liveSec?.lectures?.[j] || null;
+      const pendingLec = pendingSec?.lectures?.[j] || null;
+
+      if (pendingLec) {
+        const isNewVideo = liveLec && pendingLec.videoId !== liveLec.videoId;
+        mergedLectures.push({
+          ...liveLec,
+          ...pendingLec,
+          oldVideoId: isNewVideo ? liveLec.videoId : undefined,
+          videoId: pendingLec.videoId || liveLec?.videoId
+        });
+      } else if (liveLec) {
+        mergedLectures.push(liveLec);
+      }
+    }
+
+    mergedSections.push({
+      ...(liveSec || {}),
+      ...(pendingSec || {}),
+      lectures: mergedLectures
+    });
+  }
 
   return {
     course: {
@@ -612,7 +634,7 @@ const getMergedState = (courseDoc, curriculumDoc) => {
     },
     curriculum: {
       sections: mergedSections,
-      hasPendingChanges: !!pendingSections?.length
+      hasPendingChanges: !!pendingSections.length
     }
   };
 };
@@ -851,15 +873,15 @@ export const clearPendingChanges = async (insId, courseId, session = null) => {
 export const getCourseForEdit = async (insId, courseId) => {
   if (!insId) throw new AppError("Instructor ID is required.", 400);
 
-  const courseDoc = await Course.findById(courseId).populate("curriculum");
+  const [courseDoc, currDoc] = await Promise.all([
+    Course.findById(courseId),
+    Curriculum.findOne({ courseId })
+  ]);
 
   if (!courseDoc || courseDoc.instructor?.ref?.toString() !== insId)
     throw new AppError("Course not found or unauthorized access.", 403);
 
-  const {
-    course: mergedCourse,
-    curriculum: mergedCurr
-  } = getMergedState(courseDoc, courseDoc.curriculum);
+  const { course: mergedCourse, curriculum: mergedCurr } = getMergedState(courseDoc, currDoc);
 
   return courseMapper.toEditCourseDto(mergedCourse, mergedCurr);
 };
@@ -1079,4 +1101,10 @@ export const publicCourseExist = async (courseId) => {
   });
 
   return !!result;
+};
+
+export const removeDraftCourse = async (insId, courseId) => {
+  withTransaction()
+  const course = await Course.findById(courseId).lean();
+
 };
