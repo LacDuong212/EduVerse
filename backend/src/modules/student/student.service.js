@@ -26,10 +26,13 @@ export const updateStudentProfile = async (userId, changes, session = null) => {
     const student = await Student.findOne({ user: userId }).session(s);
     if (!student) throw new AppError("Student not found.", 404);
 
-    const { userUpdate } = getUpdateData(changes);
+    const { userUpdate, interests } = getUpdateData(changes);
 
     if (userUpdate && Object.keys(userUpdate).length > 0)
       await updateProfile(userId, userUpdate, s);
+
+    if (interests !== undefined)
+      student.interests = interests;
 
     await student.save({ session: s });
 
@@ -55,7 +58,7 @@ const getUpdateData = (data) => {
   if (data.socials?.linkedin !== undefined) userUpdate["socials.linkedin"] = data.socials.linkedin;
   if (data.socials?.youtube !== undefined) userUpdate["socials.youtube"] = data.socials.youtube;
 
-  return { userUpdate };
+  return { userUpdate, interests: data.interests };
 };
 
 export const getStudentProfile = async (userId) => {

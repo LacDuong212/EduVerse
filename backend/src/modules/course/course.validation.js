@@ -207,11 +207,14 @@ export const validateCourseSchema = z.object({
   ...baseCourseFields,
 }).superRefine(discountValidation);
 
-export const updateCourseSchema = z.object({
+// Like updateCourseSchema but allows empty body (used by submit endpoint)
+export const submitCourseBodySchema = z.object({
   ...baseCourseFields,
   curriculum: updateCurriculumSchema
 }).partial()
-  .superRefine(discountValidation)
+  .superRefine(discountValidation);
+
+export const updateCourseSchema = submitCourseBodySchema
   .refine((data) => Object.keys(data).length > 0, {
     message: "Please provide at least one field to update",
   });

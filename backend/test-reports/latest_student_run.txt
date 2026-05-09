@@ -2,18 +2,18 @@
 > backend@1.0.0 test:student
 > cross-env NODE_OPTIONS=--experimental-vm-modules jest --testPathPatterns=student --forceExit
 
-node.exe : (node:25892) ExperimentalWarning: VM Modules is an experimental 
+node.exe : (node:21552) ExperimentalWarning: VM Modules is an experimental 
 feature and might change at any time
 At line:1 char:1
 + & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
 + ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: ((node:25892) Ex...nge at any time 
+    + CategoryInfo          : NotSpecified: ((node:21552) Ex...nge at any time 
    :String) [], RemoteException
     + FullyQualifiedErrorId : NativeCommandError
  
 (Use `node --trace-warnings ...` to show where the warning was created)
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:16.685Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:01.115Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -129,7 +129,7 @@ At line:1 char:1
       at src/middlewares/zodValidator.middleware.js:13:5
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:17.026Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:01.493Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -245,7 +245,7 @@ At line:1 char:1
       at src/middlewares/zodValidator.middleware.js:13:5
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:17.078Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:01.564Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -365,7 +365,7 @@ At line:1 char:1
       at src/middlewares/zodValidator.middleware.js:13:5
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:17.098Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:01.604Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -757,7 +757,7 @@ At line:1 char:1
       at IncomingMessage.onEnd (node_modules/raw-body/index.js:287:7)
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:17.189Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:01.790Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -877,7 +877,7 @@ At line:1 char:1
       at src/middlewares/auth.middleware.js:13:3
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:18.310Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:03.105Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -997,7 +997,7 @@ At line:1 char:1
       at src/middlewares/zodValidator.middleware.js:13:5
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:18.791Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:03.689Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -1413,7 +1413,7 @@ At line:1 char:1
       at Server.app (node_modules/express/lib/express.js:38:9)
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:18.881Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:03.954Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -1533,7 +1533,7 @@ At line:1 char:1
       at src/middlewares/auth.middleware.js:13:3
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:19.382Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:04.776Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -1651,7 +1651,7 @@ At line:1 char:1
       at src/middlewares/zodValidator.middleware.js:13:5
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:19.460Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:04.837Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -1772,7 +1772,7 @@ At line:1 char:1
       at src/middlewares/zodValidator.middleware.js:13:5
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:19.494Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:04.849Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -2164,7 +2164,7 @@ At line:1 char:1
       at IncomingMessage.onEnd (node_modules/raw-body/index.js:287:7)
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:19.593Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:04.955Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -2284,7 +2284,7 @@ At line:1 char:1
       at src/middlewares/auth.middleware.js:13:3
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:20.290Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:05.669Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -2409,7 +2409,7 @@ At line:1 char:1
       at src/middlewares/zodValidator.middleware.js:13:5
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:20.341Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:05.727Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -2528,7 +2528,7 @@ At line:1 char:1
       at src/middlewares/zodValidator.middleware.js:13:5
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:20.357Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:05.737Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -2944,7 +2944,7 @@ At line:1 char:1
       at Server.app (node_modules/express/lib/express.js:38:9)
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:20.449Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:05.795Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -3064,7 +3064,7 @@ At line:1 char:1
       at src/middlewares/auth.middleware.js:13:3
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:20.949Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:06.312Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -3480,7 +3480,7 @@ At line:1 char:1
       at Server.app (node_modules/express/lib/express.js:38:9)
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:21.017Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:06.370Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -3600,7 +3600,7 @@ At line:1 char:1
       at src/middlewares/auth.middleware.js:13:3
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:21.602Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:06.876Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -4016,7 +4016,7 @@ At line:1 char:1
       at Server.app (node_modules/express/lib/express.js:38:9)
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:21.683Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:06.949Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -4136,7 +4136,7 @@ At line:1 char:1
       at src/middlewares/auth.middleware.js:13:3
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:21.971Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:07.266Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -4232,7 +4232,7 @@ At line:1 char:1
       at next (node_modules/router/lib/route.js:132:14)
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:22.082Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:07.384Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -4328,7 +4328,7 @@ At line:1 char:1
       at next (node_modules/router/lib/route.js:132:14)
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:22.163Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:07.471Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -4424,7 +4424,7 @@ At line:1 char:1
       at next (node_modules/router/lib/route.js:132:14)
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:22.238Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:07.560Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -4520,7 +4520,7 @@ At line:1 char:1
       at next (node_modules/router/lib/route.js:132:14)
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:22.254Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:07.571Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -4936,7 +4936,7 @@ At line:1 char:1
       at Server.app (node_modules/express/lib/express.js:38:9)
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:22.323Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:07.631Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -5056,7 +5056,7 @@ At line:1 char:1
       at src/middlewares/auth.middleware.js:13:3
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:22.376Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:07.678Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -5173,7 +5173,7 @@ At line:1 char:1
       at src/middlewares/zodValidator.middleware.js:13:5
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:22.487Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:07.796Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -5269,7 +5269,7 @@ At line:1 char:1
       at next (node_modules/router/lib/route.js:132:14)
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:22.648Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:07.959Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -5357,7 +5357,7 @@ At line:1 char:1
       at Immediate._onImmediate (node_modules/router/index.js:688:15)
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:22.797Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:08.119Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -5445,7 +5445,7 @@ At line:1 char:1
       at Immediate._onImmediate (node_modules/router/index.js:688:15)
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:22.938Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:08.280Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -5533,7 +5533,7 @@ At line:1 char:1
       at Immediate._onImmediate (node_modules/router/index.js:688:15)
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:22.983Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:08.327Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -5630,7 +5630,7 @@ At line:1 char:1
       at Immediate._onImmediate (node_modules/router/index.js:688:15)
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:23.029Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:08.383Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -5730,7 +5730,7 @@ At line:1 char:1
       at Immediate._onImmediate (node_modules/router/index.js:688:15)
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:23.107Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:08.465Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -5818,7 +5818,7 @@ At line:1 char:1
       at Immediate._onImmediate (node_modules/router/index.js:688:15)
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:23.118Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:08.474Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -6210,7 +6210,7 @@ At line:1 char:1
       at IncomingMessage.onEnd (node_modules/raw-body/index.js:287:7)
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:23.175Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:08.534Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -6330,7 +6330,7 @@ At line:1 char:1
       at src/middlewares/auth.middleware.js:13:3
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:23.319Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:08.706Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -6418,7 +6418,7 @@ At line:1 char:1
       at Immediate._onImmediate (node_modules/router/index.js:688:15)
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:23.476Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:08.871Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -6834,7 +6834,7 @@ At line:1 char:1
       at Server.app (node_modules/express/lib/express.js:38:9)
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:23.547Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:08.928Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -6954,7 +6954,7 @@ At line:1 char:1
       at src/middlewares/auth.middleware.js:13:3
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:23.934Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:09.319Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -7346,7 +7346,7 @@ At line:1 char:1
       at IncomingMessage.onEnd (node_modules/raw-body/index.js:287:7)
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:23.990Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:09.378Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -7466,7 +7466,7 @@ At line:1 char:1
       at src/middlewares/auth.middleware.js:13:3
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:24.347Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:09.793Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -7882,7 +7882,7 @@ At line:1 char:1
       at Server.app (node_modules/express/lib/express.js:38:9)
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:24:24.398Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-06T18:04:09.852Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -8001,108 +8001,108 @@ At line:1 char:1
       at next (node_modules/router/index.js:291:5)
       at src/middlewares/auth.middleware.js:13:3
 
-FAIL tests/student.test.js (21.333 s)
+FAIL tests/student.test.js (17.533 s)
   EDV-206: Update Student Profile
-    ÔêÜ Success: Update single field (name) (295 ms)
-    ÔêÜ Success: Update socials (nested) (240 ms)
-    ├ù Success: Update interests (94 ms)
-    ÔêÜ Success: Combined update (name + website) (235 ms)
-    ÔêÜ Error: Empty body ÔåÆ 400 (65 ms)
-    ÔêÜ Error: Name too short (min 2) ÔåÆ 400 (53 ms)
-    ÔêÜ Error: Unauthenticated ÔåÆ 401 (54 ms)
-    ÔêÜ Error: Instructor role ÔåÆ 403 (56 ms)
-    ÔêÜ Response has no sensitive field leakage (251 ms)
-    ÔêÜ Mass-assignment guard: ignores role, isVerified, isActivated (281 ms)
-    ÔêÜ DB verify: name change persisted in User document (284 ms)
+    ÔêÜ Success: Update single field (name) (355 ms)
+    ÔêÜ Success: Update socials (nested) (279 ms)
+    ├ù Success: Update interests (96 ms)
+    ÔêÜ Success: Combined update (name + website) (280 ms)
+    ÔêÜ Error: Empty body ÔåÆ 400 (61 ms)
+    ÔêÜ Error: Name too short (min 2) ÔåÆ 400 (83 ms)
+    ÔêÜ Error: Unauthenticated ÔåÆ 401 (146 ms)
+    ÔêÜ Error: Instructor role ÔåÆ 403 (66 ms)
+    ÔêÜ Response has no sensitive field leakage (313 ms)
+    ÔêÜ Mass-assignment guard: ignores role, isVerified, isActivated (305 ms)
+    ÔêÜ DB verify: name change persisted in User document (328 ms)
     ├ù [BUG EDV-258] bio field should be saved and returned but is silently 
-ignored (249 ms)
+ignored (308 ms)
     ÔêÜ Error: Invalid phone field name sends correct phonenumber ÔåÆ 400 on 
-bad format (52 ms)
+bad format (50 ms)
   GET /api/student/profile
-    ÔêÜ Success: Returns full profile shape with types (108 ms)
-    ÔêÜ Success: No sensitive field leakage (106 ms)
-    ÔêÜ Error: Unauthenticated ÔåÆ 401 (57 ms)
-    ÔêÜ Error: Instructor role ÔåÆ 403 (54 ms)
+    ÔêÜ Success: Returns full profile shape with types (125 ms)
+    ÔêÜ Success: No sensitive field leakage (166 ms)
+    ÔêÜ Error: Unauthenticated ÔåÆ 401 (38 ms)
+    ÔêÜ Error: Instructor role ÔåÆ 403 (240 ms)
   PUT /api/student/interests
-    ÔêÜ Success: Update interests returns updated array (83 ms)
-    ÔêÜ DB verify: interests persisted in Student document (109 ms)
-    ÔêÜ Success: Empty array clears interests (76 ms)
-    ÔêÜ Success: No sensitive field leakage (72 ms)
-    ÔêÜ Error: Missing interests field ÔåÆ 400 (66 ms)
-    ÔêÜ Error: Interest item empty string ÔåÆ 400 (76 ms)
-    ÔêÜ Error: Unauthenticated ÔåÆ 401 (66 ms)
-    ÔêÜ Error: Instructor role ÔåÆ 403 (52 ms)
+    ÔêÜ Success: Update interests returns updated array (89 ms)
+    ÔêÜ DB verify: interests persisted in Student document (166 ms)
+    ÔêÜ Success: Empty array clears interests (139 ms)
+    ÔêÜ Success: No sensitive field leakage (175 ms)
+    ÔêÜ Error: Missing interests field ÔåÆ 400 (141 ms)
+    ÔêÜ Error: Interest item empty string ÔåÆ 400 (61 ms)
+    ÔêÜ Error: Unauthenticated ÔåÆ 401 (28 ms)
+    ÔêÜ Error: Instructor role ÔåÆ 403 (91 ms)
   EDV-223: Get Student's Courses
     ÔêÜ Success: Default pagination (84 ms)
-    ÔêÜ Success: Custom page & limit (78 ms)
-    ÔêÜ Success: Sort by titleAsc (124 ms)
-    ÔêÜ Success: Sort by activityDesc (default) (116 ms)
+    ÔêÜ Success: Custom page & limit (85 ms)
+    ÔêÜ Success: Sort by titleAsc (95 ms)
+    ÔêÜ Success: Sort by activityDesc (default) (82 ms)
     ├ù [EDV-257 collateral] Success: Search courses (fuzzy) ÔÇö fails because 
 items are [] not objects (88 ms)
     ├ù [EDV-257 collateral] Success: Course row has expected fields ÔÇö fails 
-because items are [] not objects (80 ms)
-    ÔêÜ Error: Invalid sort value ÔåÆ 400 (50 ms)
-    ÔêÜ Error: Limit non-numeric ÔåÆ 400 (49 ms)
-    ÔêÜ Error: Unauthenticated ÔåÆ 401 (55 ms)
-    ÔêÜ Error: Instructor role ÔåÆ 403 (60 ms)
+because items are [] not objects (81 ms)
+    ÔêÜ Error: Invalid sort value ÔåÆ 400 (51 ms)
+    ÔêÜ Error: Limit non-numeric ÔåÆ 400 (53 ms)
+    ÔêÜ Error: Unauthenticated ÔåÆ 401 (21 ms)
+    ÔêÜ Error: Instructor role ÔåÆ 403 (46 ms)
     ├ù [BUG EDV-257] Each result item should be a course object, not an empty 
-array (80 ms)
-    ÔêÜ No sensitive leakage in course list items (77 ms)
+array (82 ms)
+    ÔêÜ No sensitive leakage in course list items (81 ms)
   EDV-233: Get Student's Courses Stats
-    ÔêÜ Success: Returns stats shape (107 ms)
-    ÔêÜ Success: Math safety (all >= 0) (104 ms)
+    ÔêÜ Success: Returns stats shape (115 ms)
+    ÔêÜ Success: Math safety (all >= 0) (111 ms)
     ÔêÜ Success: Sum check (completed + inProgress + notStarted Ôëñ total) 
-(108 ms)
-    ÔêÜ Error: Unauthenticated ÔåÆ 401 (35 ms)
-    ÔêÜ Error: Instructor role ÔåÆ 403 (49 ms)
-    ÔêÜ No sensitive field leakage (104 ms)
-    ÔêÜ DB verify: totalCourses matches Student.stats.totalCourses (170 ms)
-  EDV-234: Get Student's Stats
-    ÔêÜ Success: Returns stats shape (149 ms)
-    ÔêÜ Success: All values >= 0 (70 ms)
-    ÔêÜ Success: completedCourses Ôëñ totalCourses (74 ms)
-    ÔêÜ Error: Unauthenticated ÔåÆ 401 (38 ms)
-    ÔêÜ Error: Instructor role ÔåÆ 403 (59 ms)
-    ÔêÜ DB verify: completedCourses matches Student.stats (103 ms)
-    ÔêÜ No sensitive field leakage (70 ms)
-  EDV-245: Get Course Progress
-    ├ù Success: Fresh start (enrolled, no activity) (112 ms)
-    ├ù Success: completedLecturesCount Ôëñ totalLectures (110 ms)
-    ÔêÜ Error: Not enrolled ÔåÆ 403 (80 ms)
-    ÔêÜ Error: Nonexistent course ÔåÆ 403 or 404 (77 ms)
-    ÔêÜ Error: Unauthenticated ÔåÆ 401 (37 ms)
-    ÔêÜ Error: Instructor role ÔåÆ 403 (53 ms)
-    ÔêÜ Error: Invalid courseId format ÔåÆ 400 (48 ms)
-    ├ù No sensitive field leakage in progress response (110 ms)
-  EDV-246: Update Lecture Progress
-    ├ù Success: Normal play (send position + deltaTime) (160 ms)
-    ├ù Success: New session (viewCount++) (146 ms)
-    ├ù Success: Seeking (position jump) (142 ms)
-    ÔêÜ Error: currentTimeSec > durationSec ÔåÆ 400 (44 ms)
-    ÔêÜ Error: deltaTimeSec > 60 (suspicious) ÔåÆ 400 (46 ms)
-    ÔêÜ Error: Not enrolled ÔåÆ 403 (77 ms)
-    ÔêÜ Error: Unauthenticated ÔåÆ 401 (24 ms)
-    ÔêÜ Error: Instructor role ÔåÆ 403 (45 ms)
-    ├ù No sensitive field leakage in progress update response (143 ms)
-  EDV-247: Get Streak
-    ÔêÜ Success: Returns streak shape (78 ms)
-    ÔêÜ Success: longestStreak >= currentStreak (69 ms)
-    ÔêÜ Error: Unauthenticated ÔåÆ 401 (37 ms)
+(115 ms)
+    ÔêÜ Error: Unauthenticated ÔåÆ 401 (23 ms)
     ÔêÜ Error: Instructor role ÔåÆ 403 (44 ms)
-    ÔêÜ No sensitive field leakage (68 ms)
-  EDV-248: Update Streak
-    ÔêÜ Success: Register activity (streak updated) (171 ms)
-    ÔêÜ Success: Idempotency (calling again same day) (137 ms)
-    ÔêÜ Error: Unauthenticated ÔåÆ 401 (24 ms)
-    ÔêÜ Error: Instructor role ÔåÆ 403 (42 ms)
-    ÔêÜ No sensitive field leakage (134 ms)
-  EDV-250: Get Skills Radar
-    ÔêÜ Success: Returns skill radar shape (69 ms)
-    ÔêÜ Success: Values capped at 100 (75 ms)
-    ÔêÜ Success: Labels sorted alphabetically (68 ms)
+    ÔêÜ No sensitive field leakage (112 ms)
+    ÔêÜ DB verify: totalCourses matches Student.stats.totalCourses (150 ms)
+  EDV-234: Get Student's Stats
+    ÔêÜ Success: Returns stats shape (82 ms)
+    ÔêÜ Success: All values >= 0 (78 ms)
+    ÔêÜ Success: completedCourses Ôëñ totalCourses (76 ms)
+    ÔêÜ Error: Unauthenticated ÔåÆ 401 (35 ms)
+    ÔêÜ Error: Instructor role ÔåÆ 403 (47 ms)
+    ÔêÜ DB verify: completedCourses matches Student.stats (114 ms)
+    ÔêÜ No sensitive field leakage (80 ms)
+  EDV-245: Get Course Progress
+    ├ù Success: Fresh start (enrolled, no activity) (122 ms)
+    ├ù Success: completedLecturesCount Ôëñ totalLectures (118 ms)
+    ÔêÜ Error: Not enrolled ÔåÆ 403 (86 ms)
+    ÔêÜ Error: Nonexistent course ÔåÆ 403 or 404 (91 ms)
+    ÔêÜ Error: Unauthenticated ÔåÆ 401 (23 ms)
+    ÔêÜ Error: Instructor role ÔåÆ 403 (46 ms)
+    ÔêÜ Error: Invalid courseId format ÔåÆ 400 (46 ms)
+    ├ù No sensitive field leakage in progress response (117 ms)
+  EDV-246: Update Lecture Progress
+    ├ù Success: Normal play (send position + deltaTime) (164 ms)
+    ├ù Success: New session (viewCount++) (158 ms)
+    ├ù Success: Seeking (position jump) (161 ms)
+    ÔêÜ Error: currentTimeSec > durationSec ÔåÆ 400 (56 ms)
+    ÔêÜ Error: deltaTimeSec > 60 (suspicious) ÔåÆ 400 (47 ms)
+    ÔêÜ Error: Not enrolled ÔåÆ 403 (81 ms)
+    ÔêÜ Error: Unauthenticated ÔåÆ 401 (25 ms)
+    ÔêÜ Error: Instructor role ÔåÆ 403 (45 ms)
+    ├ù No sensitive field leakage in progress update response (172 ms)
+  EDV-247: Get Streak
+    ÔêÜ Success: Returns streak shape (77 ms)
+    ÔêÜ Success: longestStreak >= currentStreak (77 ms)
     ÔêÜ Error: Unauthenticated ÔåÆ 401 (20 ms)
-    ÔêÜ Error: Instructor role ÔåÆ 403 (41 ms)
-    ÔêÜ No sensitive field leakage (69 ms)
+    ÔêÜ Error: Instructor role ÔåÆ 403 (46 ms)
+    ÔêÜ No sensitive field leakage (77 ms)
+  EDV-248: Update Streak
+    ÔêÜ Success: Register activity (streak updated) (151 ms)
+    ÔêÜ Success: Idempotency (calling again same day) (153 ms)
+    ÔêÜ Error: Unauthenticated ÔåÆ 401 (21 ms)
+    ÔêÜ Error: Instructor role ÔåÆ 403 (54 ms)
+    ÔêÜ No sensitive field leakage (163 ms)
+  EDV-250: Get Skills Radar
+    ÔêÜ Success: Returns skill radar shape (77 ms)
+    ÔêÜ Success: Values capped at 100 (78 ms)
+    ÔêÜ Success: Labels sorted alphabetically (79 ms)
+    ÔêÜ Error: Unauthenticated ÔåÆ 401 (22 ms)
+    ÔêÜ Error: Instructor role ÔåÆ 403 (45 ms)
+    ÔêÜ No sensitive field leakage (79 ms)
 
   ÔùÅ EDV-206: Update Student Profile ÔÇ║ Success: Update interests
 
@@ -8263,11 +8263,6 @@ esCount)[33m.[39mtoBeLessThanOrEqual(r[33m.[39mtotalLectures)[33m;[39m
      [90m     |[39m              [31m[1m^[22m[39m
      [90m 526 |[39m   })[33m;[39m
      [90m 527 |[39m
-
-­ƒôä Test report saved:
-   C:\personal\EduVerse\backend\test-reports\student_2026-05-05_16-24.md
-   C:\personal\EduVerse\backend\test-reports\latest.md
-
      [90m 528 |[39m   test([32m"Error: Not enrolled ÔåÆ 
 403"[39m[33m,[39m [36masync[39m () [33m=>[39m {[0m
 
@@ -8294,6 +8289,11 @@ mnot[33m.[39mtoHaveProperty([32m"password"[39m)[33m;[39m
 mnot[33m.[39mtoHaveProperty([32m"__v"[39m)[33m;[39m
      [90m 561 |[39m     expect(res[33m.[39mbody)[33m.[39mnot[33m.[39mto
 HaveProperty([32m"stack"[39m)[33m;[39m[0m
+
+
+­ƒôä Test report saved:
+   C:\personal\EduVerse\backend\test-reports\student_2026-05-06_18-04.md
+   C:\personal\EduVerse\backend\test-reports\latest.md
 
       at Object.<anonymous> (tests/student.test.js:558:24)
 
@@ -8392,7 +8392,7 @@ mnot[33m.[39mtoHaveProperty([32m"__v"[39m)[33m;[39m[0m
 Test Suites: 1 failed, 1 total
 Tests:       12 failed, 72 passed, 84 total
 Snapshots:   0 total
-Time:        21.633 s, estimated 24 s
+Time:        17.691 s, estimated 18 s
 Ran all test suites matching student.
 Force exiting Jest: Have you considered using `--detectOpenHandles` to detect 
 async operations that kept running after all tests finished?

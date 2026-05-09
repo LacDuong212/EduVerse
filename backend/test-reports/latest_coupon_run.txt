@@ -2,18 +2,18 @@
 > backend@1.0.0 test:coupon
 > cross-env NODE_OPTIONS=--experimental-vm-modules jest --testPathPatterns=coupon --forceExit
 
-node.exe : (node:18796) ExperimentalWarning: VM Modules is an experimental 
+node.exe : (node:9288) ExperimentalWarning: VM Modules is an experimental 
 feature and might change at any time
 At line:1 char:1
 + & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
 + ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: ((node:18796) Ex...nge at any time 
+    + CategoryInfo          : NotSpecified: ((node:9288) Exp...nge at any time 
    :String) [], RemoteException
     + FullyQualifiedErrorId : NativeCommandError
  
 (Use `node --trace-warnings ...` to show where the warning was created)
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:28:28.277Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-05T17:06:30.961Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -101,7 +101,7 @@ At line:1 char:1
       at Immediate._onImmediate (node_modules/router/index.js:688:15)
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:28:28.387Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-05T17:06:31.114Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -199,7 +199,7 @@ At line:1 char:1
       at Immediate._onImmediate (node_modules/router/index.js:688:15)
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:28:28.451Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-05T17:06:31.183Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -299,7 +299,7 @@ At line:1 char:1
       at Immediate._onImmediate (node_modules/router/index.js:688:15)
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:28:28.519Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-05T17:06:31.252Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -397,7 +397,7 @@ At line:1 char:1
       at Immediate._onImmediate (node_modules/router/index.js:688:15)
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:28:28.596Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-05T17:06:31.320Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -497,7 +497,7 @@ At line:1 char:1
       at Immediate._onImmediate (node_modules/router/index.js:688:15)
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:28:28.706Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-05T17:06:31.460Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -519,7 +519,7 @@ At line:1 char:1
       at Immediate._onImmediate (node_modules/router/index.js:688:15)
 
   console.error
-    Method: POST | URL: /api/coupons/apply | Code: 500 | IP: ::ffff:127.0.0.1
+    Method: POST | URL: /api/coupons/apply | Code: 404 | IP: ::ffff:127.0.0.1
 
     [0m [90m 25 |[39m
      [90m 26 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
@@ -541,7 +541,7 @@ At line:1 char:1
       at Immediate._onImmediate (node_modules/router/index.js:688:15)
 
   console.error
-    Message: mongoose is not defined
+    Message: Invalid coupon code.
 
     [0m [90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
      [90m 28 |[39m
@@ -585,7 +585,7 @@ At line:1 char:1
       at Immediate._onImmediate (node_modules/router/index.js:688:15)
 
   console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:28:28.767Z] -----------------------[0m
+    [38;5;208m[EXCEPTION] [2026-05-05T17:06:31.564Z] -----------------------[0m
 
     [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
      [90m 25 |[39m
@@ -607,7 +607,7 @@ At line:1 char:1
       at Immediate._onImmediate (node_modules/router/index.js:688:15)
 
   console.error
-    Method: POST | URL: /api/coupons/apply | Code: 500 | IP: ::ffff:127.0.0.1
+    Method: POST | URL: /api/coupons/apply | Code: 400 | IP: ::ffff:127.0.0.1
 
     [0m [90m 25 |[39m
      [90m 26 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
@@ -629,7 +629,7 @@ At line:1 char:1
       at Immediate._onImmediate (node_modules/router/index.js:688:15)
 
   console.error
-    Message: mongoose is not defined
+    Message: Coupon already expired.
 
     [0m [90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
      [90m 28 |[39m
@@ -672,288 +672,24 @@ At line:1 char:1
       at Immediate.next (node_modules/router/index.js:276:14)
       at Immediate._onImmediate (node_modules/router/index.js:688:15)
 
-  console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:28:28.826Z] -----------------------[0m
-
-    [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
-     [90m 25 |[39m
-    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 28 |[39m
-     [90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:26:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at next (node_modules/router/index.js:291:5)
-      at node_modules/router/index.js:688:15
-      at Immediate.next (node_modules/router/index.js:276:14)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    Method: POST | URL: /api/coupons/apply | Code: 500 | IP: ::ffff:127.0.0.1
-
-    [0m [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-    [31m[1m>[22m[39m[90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 28 |[39m
-     [90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m 30 |[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:27:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at next (node_modules/router/index.js:291:5)
-      at node_modules/router/index.js:688:15
-      at Immediate.next (node_modules/router/index.js:276:14)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    Message: mongoose is not defined
-
-    [0m [90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 28 |[39m
-    [31m[1m>[22m[39m[90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 30 |[39m
-     [90m 31 |[39m     [36mif[39m (err[33m.[39mcause) {
-     [90m 32 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:29:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at next (node_modules/router/index.js:291:5)
-      at node_modules/router/index.js:688:15
-      at Immediate.next (node_modules/router/index.js:276:14)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [38;5;208m--------------------------------------------------------------[0m
-
-    [0m [90m 40 |[39m     }
-     [90m 41 |[39m
-    [31m[1m>[22m[39m[90m 42 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 43 |[39m   }
-     [90m 44 |[39m }[33m;[39m
-     [90m 45 |[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:42:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at next (node_modules/router/index.js:291:5)
-      at node_modules/router/index.js:688:15
-      at Immediate.next (node_modules/router/index.js:276:14)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:28:28.887Z] -----------------------[0m
-
-    [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
-     [90m 25 |[39m
-    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 28 |[39m
-     [90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:26:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at next (node_modules/router/index.js:291:5)
-      at node_modules/router/index.js:688:15
-      at Immediate.next (node_modules/router/index.js:276:14)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    Method: POST | URL: /api/coupons/apply | Code: 500 | IP: ::ffff:127.0.0.1
-
-    [0m [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-    [31m[1m>[22m[39m[90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 28 |[39m
-     [90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m 30 |[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:27:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at next (node_modules/router/index.js:291:5)
-      at node_modules/router/index.js:688:15
-      at Immediate.next (node_modules/router/index.js:276:14)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    Message: mongoose is not defined
-
-    [0m [90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 28 |[39m
-    [31m[1m>[22m[39m[90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 30 |[39m
-     [90m 31 |[39m     [36mif[39m (err[33m.[39mcause) {
-     [90m 32 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:29:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at next (node_modules/router/index.js:291:5)
-      at node_modules/router/index.js:688:15
-      at Immediate.next (node_modules/router/index.js:276:14)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [38;5;208m--------------------------------------------------------------[0m
-
-    [0m [90m 40 |[39m     }
-     [90m 41 |[39m
-    [31m[1m>[22m[39m[90m 42 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 43 |[39m   }
-     [90m 44 |[39m }[33m;[39m
-     [90m 45 |[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:42:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at next (node_modules/router/index.js:291:5)
-      at node_modules/router/index.js:688:15
-      at Immediate.next (node_modules/router/index.js:276:14)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [38;5;208m[EXCEPTION] [2026-05-05T16:28:28.942Z] -----------------------[0m
-
-    [0m [90m 24 |[39m     [36mconst[39m timestamp [33m=[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m;[39m
-     [90m 25 |[39m
-    [31m[1m>[22m[39m[90m 26 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 28 |[39m
-     [90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:26:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at next (node_modules/router/index.js:291:5)
-      at node_modules/router/index.js:688:15
-      at Immediate.next (node_modules/router/index.js:276:14)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    Method: POST | URL: /api/coupons/apply | Code: 500 | IP: ::ffff:127.0.0.1
-
-    [0m [90m 25 |[39m
-     [90m 26 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m`[EXCEPTION] [${timestamp}] -----------------------`[39m)[33m;[39m
-    [31m[1m>[22m[39m[90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 28 |[39m
-     [90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m 30 |[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:27:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at next (node_modules/router/index.js:291:5)
-      at node_modules/router/index.js:688:15
-      at Immediate.next (node_modules/router/index.js:276:14)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    Message: mongoose is not defined
-
-    [0m [90m 27 |[39m     console[33m.[39merror([32m`Method: ${method} | URL: ${originalUrl} | Code: ${statusCode || 500} | IP: ${ip}`[39m)[33m;[39m
-     [90m 28 |[39m
-    [31m[1m>[22m[39m[90m 29 |[39m     console[33m.[39merror([32m`Message: ${err.message}`[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 30 |[39m
-     [90m 31 |[39m     [36mif[39m (err[33m.[39mcause) {
-     [90m 32 |[39m       console[33m.[39merror([32m"\x1b[35mCause:\x1b[0m %s"[39m[33m,[39m err[33m.[39mcause[33m.[39mmessage [33m||[39m err[33m.[39mcause)[33m;[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:29:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at next (node_modules/router/index.js:291:5)
-      at node_modules/router/index.js:688:15
-      at Immediate.next (node_modules/router/index.js:276:14)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-  console.error
-    [38;5;208m--------------------------------------------------------------[0m
-
-    [0m [90m 40 |[39m     }
-     [90m 41 |[39m
-    [31m[1m>[22m[39m[90m 42 |[39m     console[33m.[39merror([32m"\x1b[38;5;208m%s\x1b[0m"[39m[33m,[39m [32m"--------------------------------------------------------------"[39m)[33m;[39m
-     [90m    |[39m             [31m[1m^[22m[39m
-     [90m 43 |[39m   }
-     [90m 44 |[39m }[33m;[39m
-     [90m 45 |[39m[0m
-
-      at Object.logErrorWithContext (src/shared/utils/logger.js:42:13)
-      at errorMiddleware (src/middlewares/error.middleware.js:6:10)
-      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
-      at trimPrefix (node_modules/router/index.js:340:13)
-      at node_modules/router/index.js:297:9
-      at processParams (node_modules/router/index.js:582:12)
-      at next (node_modules/router/index.js:291:5)
-      at node_modules/router/index.js:688:15
-      at Immediate.next (node_modules/router/index.js:276:14)
-      at Immediate._onImmediate (node_modules/router/index.js:688:15)
-
-FAIL tests/coupon.test.js (10.442 s)
+FAIL tests/coupon.test.js (14.695 s)
   EDV-217 | GET /api/coupons
-    ÔêÜ Ô£à Get All Coupons: no auth required ÔåÆ 200, array of coupons (88 ms)
+    ÔêÜ Ô£à Get All Coupons: no auth required ÔåÆ 200, array of coupons (74 ms)
     ÔêÜ Ô£à Get All Coupons: authenticated user also gets 200 (public 
-endpoint) (58 ms)
+endpoint) (59 ms)
   EDV-216 | POST /api/coupons/apply
-    ÔêÜ ÔØî Unauthorized: no token ÔåÆ 401 (69 ms)
-    ÔêÜ ÔØî Missing Code: body without code ÔåÆ 400 (65 ms)
-    ÔêÜ ÔØî Short Code: code length < 3 ÔåÆ 400 (62 ms)
-    ÔêÜ ÔØî Missing Original Price: body without originalPrice ÔåÆ 400 (68 ms)
-    ÔêÜ ÔØî Negative Price: originalPrice < 0 ÔåÆ 400 (122 ms)
-    ├ù ÔØî Invalid Coupon: code kh├┤ng tß╗ôn tß║íi ÔåÆ 404 (65 ms)
-    ├ù ÔØî Coupon Expired: expiryDate ─æ├ú qua ÔåÆ 400 (55 ms)
-    ├ù Ô£à Success: valid coupon, student chã░a d├╣ng ÔåÆ 200, discount data 
-vß╗øi correct math (59 ms)
-    ├ù Ô£à Instructor can apply coupon: route has protect only, no restrictTo 
-ÔåÆ 200 (59 ms)
-    ├ù Ô£à Zero originalPrice: 0 ÔåÆ 200, discountAmount=0, newPrice=0 (53 ms)
+    ÔêÜ ÔØî Unauthorized: no token ÔåÆ 401 (113 ms)
+    ÔêÜ ÔØî Missing Code: body without code ÔåÆ 400 (75 ms)
+    ÔêÜ ÔØî Short Code: code length < 3 ÔåÆ 400 (66 ms)
+    ÔêÜ ÔØî Missing Original Price: body without originalPrice ÔåÆ 400 (66 ms)
+    ÔêÜ ÔØî Negative Price: originalPrice < 0 ÔåÆ 400 (63 ms)
+    ├ù ÔØî Invalid Coupon: code kh├┤ng tß╗ôn tß║íi ÔåÆ 404 (145 ms)
+    ├ù ÔØî Coupon Expired: expiryDate ─æ├ú qua ÔåÆ 400 (98 ms)
+    ÔêÜ Ô£à Success: valid coupon, student chã░a d├╣ng ÔåÆ 200, discount data 
+vß╗øi correct math (84 ms)
+    ÔêÜ Ô£à Instructor can apply coupon: route has protect only, no restrictTo 
+ÔåÆ 200 (82 ms)
+    ÔêÜ Ô£à Zero originalPrice: 0 ÔåÆ 200, discountAmount=0, newPrice=0 (81 ms)
     Ô£Ä todo ÔØî Coupon Not Active Yet: startDate in future ÔåÆ 400 (EDV-267: 
 validateCoupon also missing this check; no fixture in DB)
     Ô£Ä todo ÔØî [EDV-266] Coupon Already Used: usersUsed.includes(userId) 
@@ -965,129 +701,57 @@ tß╗ôn tß║íi ÔåÆ 404
 
     expect(received).toBe(expected) // Object.is equality
 
-    Expected: 404
-    Received: 500
+    Expected: "Invalid coupon code"
+    Received: "Invalid coupon code."
 
-    [0m [90m 142 |[39m       [33m.[39msend({ code[33m:[39m 
-[33mINVALID_COUPON[39m[33m,[39m originalPrice[33m:[39m [35m200000[39m 
-})[33m;[39m
-     [90m 143 |[39m
-    [31m[1m>[22m[39m[90m 144 |[39m     
+    [0m [90m 144 |[39m     
 expect(res[33m.[39mstatus)[33m.[39mtoBe([35m404[39m)[33m;[39m
-     [90m     |[39m                        [31m[1m^[22m[39m
      [90m 145 |[39m     expect(res[33m.[39mbody[33m.[39msuccess)[33m.[3
 9mtoBe([36mfalse[39m)[33m;[39m
-     [90m 146 |[39m     
+    [31m[1m>[22m[39m[90m 146 |[39m     
 expect(res[33m.[39mbody[33m.[39mmessage)[33m.[39mtoBe([32m"Invalid 
 coupon code"[39m)[33m;[39m
-     [90m 147 |[39m   })[33m;[39m[0m
+     [90m     |[39m                              [31m[1m^[22m[39m
+     [90m 147 |[39m   })[33m;[39m
+     [90m 148 |[39m
+     [90m 149 |[39m   it([32m"ÔØî Coupon Expired: expiryDate ─æ├ú qua ÔåÆ 
+400"[39m[33m,[39m [36masync[39m () [33m=>[39m {[0m
 
-      at Object.<anonymous> (tests/coupon.test.js:144:24)
+      at Object.<anonymous> (tests/coupon.test.js:146:30)
 
   ÔùÅ EDV-216 | POST /api/coupons/apply ÔÇ║ ÔØî Coupon Expired: expiryDate 
 ─æ├ú qua ÔåÆ 400
 
     expect(received).toBe(expected) // Object.is equality
 
-    Expected: 400
-    Received: 500
+    Expected: "Coupon has expired"
+    Received: "Coupon already expired."
 
-    [0m [90m 153 |[39m       [33m.[39msend({ code[33m:[39m 
-[33mEXPIRED_COUPON[39m[33m,[39m originalPrice[33m:[39m [35m200000[39m 
-})[33m;[39m
-     [90m 154 |[39m
-    [31m[1m>[22m[39m[90m 155 |[39m     
+    [0m [90m 155 |[39m     
 expect(res[33m.[39mstatus)[33m.[39mtoBe([35m400[39m)[33m;[39m
-     [90m     |[39m                        [31m[1m^[22m[39m
      [90m 156 |[39m     expect(res[33m.[39mbody[33m.[39msuccess)[33m.[3
 9mtoBe([36mfalse[39m)[33m;[39m
-     [90m 157 |[39m     
+    [31m[1m>[22m[39m[90m 157 |[39m     
 expect(res[33m.[39mbody[33m.[39mmessage)[33m.[39mtoBe([32m"Coupon has 
 expired"[39m)[33m;[39m
-     [90m 158 |[39m   })[33m;[39m[0m
+     [90m     |[39m                              [31m[1m^[22m[39m
+     [90m 158 |[39m   })[33m;[39m
+     [90m 159 |[39m
+     [90m 160 |[39m   it([32m"Ô£à Success: valid coupon, student chã░a 
+d├╣ng ÔåÆ 200, discount data vß╗øi correct math"[39m[33m,[39m 
+[36masync[39m () [33m=>[39m {[0m
 
-      at Object.<anonymous> (tests/coupon.test.js:155:24)
-
-  ÔùÅ EDV-216 | POST /api/coupons/apply ÔÇ║ Ô£à Success: valid coupon, student 
-chã░a d├╣ng ÔåÆ 200, discount data vß╗øi correct math
-
-    expect(received).toBe(expected) // Object.is equality
-
-    Expected: 200
-    Received: 500
-
-    [0m [90m 165 |[39m       [33m.[39msend({ code[33m:[39m 
-[33mVALID_COUPON[39m[33m,[39m originalPrice })[33m;[39m
-     [90m 166 |[39m
-    [31m[1m>[22m[39m[90m 167 |[39m     
-expect(res[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
-     [90m     |[39m                        [31m[1m^[22m[39m
-     [90m 168 |[39m     expect(res[33m.[39mbody[33m.[39msuccess)[33m.[3
-9mtoBe([36mtrue[39m)[33m;[39m
-     [90m 169 |[39m     
-expect(res[33m.[39mbody[33m.[39mmessage)[33m.[39mtoBe([32m"Coupon 
-applied successfully."[39m)[33m;[39m
-     [90m 170 |[39m     
-expect(res[33m.[39mbody[33m.[39mresult)[33m.[39mtoMatchObject({[0m
-
-      at Object.<anonymous> (tests/coupon.test.js:167:24)
-
-  ÔùÅ EDV-216 | POST /api/coupons/apply ÔÇ║ Ô£à Instructor can apply coupon: 
-route has protect only, no restrictTo ÔåÆ 200
-
-    expect(received).toBe(expected) // Object.is equality
-
-    Expected: 200
-    Received: 500
-
-    [0m [90m 186 |[39m       
-[33m.[39m[36mset[39m([32m"Cookie"[39m[33m,[39m instructorCookie)
-     [90m 187 |[39m       [33m.[39msend({ code[33m:[39m 
-[33mVALID_COUPON[39m[33m,[39m originalPrice[33m:[39m [35m200000[39m 
-})[33m;[39m
-    [31m[1m>[22m[39m[90m 188 |[39m     
-expect(res[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
-     [90m     |[39m                        [31m[1m^[22m[39m
-     [90m 189 |[39m     expect(res[33m.[39mbody[33m.[39msuccess)[33m.[3
-9mtoBe([36mtrue[39m)[33m;[39m
-     [90m 190 |[39m   })[33m;[39m
-     [90m 191 |[39m[0m
-
-      at Object.<anonymous> (tests/coupon.test.js:188:24)
-
-  ÔùÅ EDV-216 | POST /api/coupons/apply ÔÇ║ Ô£à Zero originalPrice: 0 ÔåÆ 200, 
-discountAmount=0, newPrice=0
-
-    expect(received).toBe(expected) // Object.is equality
-
-    Expected: 200
-    Received: 500
-
-    [0m [90m 195 |[39m       
-[33m.[39m[36mset[39m([32m"Cookie"[39m[33m,[39m studentCookie)
-     [90m 196 |[39m       [33m.[39msend({ code[33m:[39m 
-[33mVALID_COUPON[39m[33m,[39m originalPrice[33m:[39m [35m0[39m 
-})[33m;[39m
-    [31m[1m>[22m[39m[90m 197 |[39m     
-expect(res[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
-     [90m     |[39m                        [31m[1m^[22m[39m
-     [90m 198 |[39m     expect(res[33m.[39mbody[33m.[39mresult[33m.[39m
-discountAmount)[33m.[39mtoBe([35m0[39m)[33m;[39m
-     [90m 199 |[39m     expect(res[33m.[39mbody[33m.[39mresult[33m.[39m
-newPrice)[33m.[39mtoBe([35m0[39m)[33m;[39m
-     [90m 200 |[39m   })[33m;[39m[0m
-
-      at Object.<anonymous> (tests/coupon.test.js:197:24)
+      at Object.<anonymous> (tests/coupon.test.js:157:30)
 
 
 ­ƒôä Test report saved:
-   C:\personal\EduVerse\backend\test-reports\coupon_2026-05-05_16-28.md
+   C:\personal\EduVerse\backend\test-reports\coupon_2026-05-05_17-06.md
    C:\personal\EduVerse\backend\test-reports\latest.md
 
 Test Suites: 1 failed, 1 total
-Tests:       5 failed, 2 todo, 7 passed, 14 total
+Tests:       2 failed, 2 todo, 10 passed, 14 total
 Snapshots:   0 total
-Time:        10.72 s
+Time:        14.914 s
 Ran all test suites matching coupon.
 Force exiting Jest: Have you considered using `--detectOpenHandles` to detect 
 async operations that kept running after all tests finished?

@@ -30,7 +30,10 @@
     "test:notification": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --testPathPatterns=notification --forceExit",
     "test:instructor": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --testPathPatterns=instructor --forceExit",
     "server": "nodemon ./src/server.js",
-    "start": "node ./src/server.js"
+    "start": "node ./src/server.js",
+    "rec:train": "node ./scripts/trainRecommender.mjs",
+    "rec:train:watch": "node ./scripts/trainRecommender.mjs --watch",
+    "rec:eval": "node ./scripts/evalRecommender.mjs"
   },
   "keywords": [],
   "author": "",

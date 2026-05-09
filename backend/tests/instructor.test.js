@@ -1,22 +1,22 @@
-﻿/**
- * INSTRUCTOR API Tests â€” HIGH COVERAGE
+/**
+ * INSTRUCTOR API Tests — HIGH COVERAGE
  * Jira: EDV-177, EDV-183, EDV-207, EDV-218, EDV-219, EDV-220, EDV-221,
  *       EDV-222, EDV-235, EDV-236, EDV-253, EDV-254
  *
  * Fixtures:
  *   - INSTRUCTOR_A : vi021ttv@gmail.com          (userId: 694cf235ddf90206a887c3a6, insId: 694cf6faddf90206a887c441)
- *     â€¢ 9 courses (5 live + 4 draft), 1 student enrolled, isApproved: true
+ *     • 9 courses (5 live + 4 draft), 1 student enrolled, isApproved: true
  *   - INSTRUCTOR_B : 22110304@student.hcmute.edu.vn (userId: 694cf0caddf90206a887c33b, insId: 694cf0fdddf90206a887c375)
- *     â€¢ 7 courses, isApproved: true
+ *     • 7 courses, isApproved: true
  *   - STUDENT      : lacduongldg212@gmail.com     (userId: 694d32d7ebe694fc49e59a67, role: student)
  *
  * Test order:
  *   1. Read-only GETs first (stats, profile, courses, students, earnings)
- *   2. EDV-253: Create course (POST â€” creates draft, cleanup after)
- *   3. EDV-219: Update course (PATCH â€” uses existing draft with pendingUpdate)
+ *   2. EDV-253: Create course (POST — creates draft, cleanup after)
+ *   3. EDV-219: Update course (PATCH — uses existing draft with pendingUpdate)
  *   4. EDV-220: Submit course
  *   5. EDV-221: Clear course changes
- *   6. EDV-177: Become instructor (last â€” tested with student who is NOT yet instructor)
+ *   6. EDV-177: Become instructor (last — tested with student who is NOT yet instructor)
  */
 import request from "supertest";
 import app from "../src/app.js";
@@ -26,11 +26,11 @@ import Instructor from "../src/modules/instructor/instructor.model.js";
 import User from "../src/modules/user/user.model.js";
 import "../tests/setup.js";
 
-// â”€â”€â”€ Bases â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Bases ────────────────────────────────────────────────────────────────────
 const PUB = "/api/instructors";  // public routes
 const PRI = "/api/instructor";   // private routes
 
-// â”€â”€â”€ Fixtures â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Fixtures ─────────────────────────────────────────────────────────────────
 const INSTRUCTOR_A = { email: "vi021ttv@gmail.com",             password: "Abc@12345" };
 const INSTRUCTOR_B = { email: "22110304@student.hcmute.edu.vn", password: "Abc@12345" };
 const STUDENT      = { email: "lacduongldg212@gmail.com",       password: "Abc@12345" };
@@ -41,7 +41,7 @@ const INS_B_USER_ID = "694cf0caddf90206a887c33b";
 const INS_B_INS_ID  = "694cf0fdddf90206a887c375";
 const STUDENT_ID    = "694d32d7ebe694fc49e59a67";
 
-// Instructor A's courses (5 live â€” the 4 draft courses no longer exist in DB)
+// Instructor A's courses (5 live — the 4 draft courses no longer exist in DB)
 const LIVE_COURSE_1       = "694d046addf90206a887c535";  // Crash Course CS, 1 student
 const LIVE_COURSE_2       = "694e9d90ed8f2ec45dc0e653";  // Crash Course DS, 1 student
 const LIVE_COURSE_3       = "694eb035a3f9fb4adc5d8d31";  // Cloud Computing
@@ -51,15 +51,16 @@ const LIVE_FREE_COURSE    = "69513fa93f95cbe46155ff69";  // Blockchain, price=0
 const INVALID_ID     = "not-a-valid-id";
 const NONEXISTENT_ID = "000000000000000000000001";
 
-// â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 async function login(creds) {
   const res = await request(app).post("/api/auth/login").send(creds);
   return res.headers["set-cookie"]?.find((c) => c.startsWith("token=")) || "";
 }
 
 let insACookie, insBCookie, studentCookie;
-let createdCourseId = null;  // tracks course created by EDV-253 for cleanup
-let clearTestCourseId = null; // second draft for EDV-221 clear tests
+let createdCourseId = null;    // [Testing] draft course fixture for EDV-219/220/221
+let clearTestCourseId = null;  // [Testing] draft course fixture for EDV-221 clear tests
+let testLiveCourseId = null;   // [Testing] live course fixture replacing official courses in write ops
 
 beforeAll(async () => {
   [insACookie, insBCookie, studentCookie] = await Promise.all([
@@ -67,34 +68,72 @@ beforeAll(async () => {
     login(INSTRUCTOR_B),
     login(STUDENT),
   ]);
+
+  // Create [Testing] draft course for EDV-219/220/221 (avoids touching official demo courses)
+  const draftRes = await request(app)
+    .post(`${PRI}/courses`)
+    .set("Cookie", insACookie);
+  createdCourseId = draftRes.body.result?.courseId;
+  if (createdCourseId) {
+    await Course.findByIdAndUpdate(createdCourseId, {
+      $set: { title: "[Testing] Draft Course" },
+    });
+  }
+
+  // Create [Testing] live course for write tests needing an existing live course
+  const liveRes = await request(app)
+    .post(`${PRI}/courses`)
+    .set("Cookie", insACookie);
+  testLiveCourseId = liveRes.body.result?.courseId;
+  if (testLiveCourseId) {
+    await Course.findByIdAndUpdate(testLiveCourseId, {
+      $set: {
+        status: "live",
+        title: "[Testing] Live Course",
+        language: "English",
+        level: "beginner",
+        price: 99.99,
+        description: "[Testing] Course created for automated tests. Safe to delete.",
+        image: "https://example.com/test-course.jpg",
+        category: "69288d99cfe4f50d205aef6f",
+        isPrivate: false,
+      },
+    });
+    await Curriculum.findOneAndUpdate(
+      { courseId: testLiveCourseId },
+      {
+        $set: {
+          sections: [{
+            title: "[Testing] Section 1",
+            lectures: [{
+              title: "[Testing] Lecture 1",
+              videoId: "LEC-fixture-001",
+              duration: 300,
+              isFree: false,
+            }],
+          }],
+        },
+      }
+    );
+  }
 });
 
 afterAll(async () => {
   try {
-    // Delete courses created during tests
-    const toDelete = [createdCourseId, clearTestCourseId].filter(Boolean);
+    // Delete all [Testing] fixture courses created during tests
+    const toDelete = [createdCourseId, clearTestCourseId, testLiveCourseId].filter(Boolean);
     if (toDelete.length) {
       await Curriculum.deleteMany({ courseId: { $in: toDelete } });
       await Course.deleteMany({ _id: { $in: toDelete } });
     }
-    // Revert pendingUpdate on live courses modified by EDV-219/220 tests
-    const liveModified = [LIVE_COURSE_1, LIVE_COURSE_3];
-    await Course.updateMany(
-      { _id: { $in: liveModified } },
-      { $set: { "pendingUpdate.data": null, "pendingUpdate.submittedAt": null, "pendingUpdate.status": "none" } }
-    );
-    await Curriculum.updateMany(
-      { courseId: { $in: liveModified } },
-      { $set: { "pendingUpdate.data": null, "pendingUpdate.submittedAt": null, "pendingUpdate.status": "none" } }
-    );
   } catch { /* connection may already be closed */ }
 });
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════════════════════════════════════
 // EDV-183: Instructor Stats
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-describe("EDV-183 Â· Instructor Stats", () => {
-  // â”€â”€ Public stats: GET /api/instructors/:insId/stats â”€â”€
+// ═══════════════════════════════════════════════════════════════════════════════
+describe("EDV-183 · Instructor Stats", () => {
+  // ── Public stats: GET /api/instructors/:insId/stats ──
   describe("GET /api/instructors/:insId/stats (public)", () => {
     it("returns public stats without auth", async () => {
       const res = await request(app).get(`${PUB}/${INS_A_USER_ID}/stats`);
@@ -127,7 +166,7 @@ describe("EDV-183 Â· Instructor Stats", () => {
     });
   });
 
-  // â”€â”€ Private stats: GET /api/instructor/stats â”€â”€
+  // ── Private stats: GET /api/instructor/stats ──
   describe("GET /api/instructor/stats (private)", () => {
     it("returns private stats with totalOrders for instructor", async () => {
       const res = await request(app)
@@ -161,11 +200,11 @@ describe("EDV-183 Â· Instructor Stats", () => {
   });
 });
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════════════════════════════════════
 // EDV-183 (cont): Public & Private Profile
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-describe("EDV-183 Â· Instructor Profile", () => {
-  // â”€â”€ Public profile: GET /api/instructors/:insId â”€â”€
+// ═══════════════════════════════════════════════════════════════════════════════
+describe("EDV-183 · Instructor Profile", () => {
+  // ── Public profile: GET /api/instructors/:insId ──
   describe("GET /api/instructors/:insId (public profile)", () => {
     it("returns full instructor profile details", async () => {
       const res = await request(app).get(`${PUB}/${INS_A_USER_ID}`);
@@ -191,7 +230,7 @@ describe("EDV-183 Â· Instructor Profile", () => {
       expect(r).toHaveProperty("isActive");
       expect(Array.isArray(r.skills)).toBe(true);
       expect(Array.isArray(r.education)).toBe(true);
-      // timestamp=true â†’ should have createdAt, updatedAt
+      // timestamp=true → should have createdAt, updatedAt
       expect(r).toHaveProperty("createdAt");
       expect(r).toHaveProperty("updatedAt");
     });
@@ -230,7 +269,7 @@ describe("EDV-183 Â· Instructor Profile", () => {
     });
   });
 
-  // â”€â”€ Private profile: GET /api/instructor/profile â”€â”€
+  // ── Private profile: GET /api/instructor/profile ──
   describe("GET /api/instructor/profile (private)", () => {
     it("returns instructor's own profile", async () => {
       const res = await request(app)
@@ -261,7 +300,7 @@ describe("EDV-183 Â· Instructor Profile", () => {
     });
   });
 
-  // â”€â”€ GET /api/instructors/me (getCurrentInstructor) â”€â”€
+  // ── GET /api/instructors/me (getCurrentInstructor) ──
   describe("GET /api/instructors/me", () => {
     it("returns instructor mini-profile when authenticated as instructor", async () => {
       const res = await request(app)
@@ -304,7 +343,7 @@ describe("EDV-183 Â· Instructor Profile", () => {
 // ===============================================================================
 // EDV-183 (cont): Update Instructor Profile  PATCH /api/instructor/profile
 // ===============================================================================
-describe("EDV-183 Â· Update Instructor Profile", () => {
+describe("EDV-183 · Update Instructor Profile", () => {
   describe("PATCH /api/instructor/profile", () => {
     let snapshotIns, snapshotUser;
 
@@ -370,8 +409,8 @@ describe("EDV-183 Â· Update Instructor Profile", () => {
       // NOTE: isActive is not included in PATCH response (populate does not select isActivated)
     });
 
-    // [BUG EDV-272] isActive should be in PATCH response but populate omits isActivated
-    it.failing("PATCH profile response should include isActive (EDV-272)", async () => {
+    // EDV-272 fixed � isActive now included in PATCH /profile response
+    it("PATCH profile response should include isActive (EDV-272)", async () => {
       const res = await request(app)
         .patch(`${PRI}/profile`)
         .set("Cookie", insACookie)
@@ -621,12 +660,12 @@ describe("EDV-183 Â· Update Instructor Profile", () => {
   });
 });
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════════════════════════════════════
 // EDV-218: Get Instructor's Courses
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-describe("EDV-218 Â· Instructor Courses", () => {
-  // â”€â”€ Private: GET /api/instructor/courses â”€â”€
-  describe("GET /api/instructor/courses (private â€” all statuses)", () => {
+// ═══════════════════════════════════════════════════════════════════════════════
+describe("EDV-218 · Instructor Courses", () => {
+  // ── Private: GET /api/instructor/courses ──
+  describe("GET /api/instructor/courses (private — all statuses)", () => {
     it("returns paginated courses for instructor", async () => {
       const res = await request(app)
         .get(`${PRI}/courses`)
@@ -727,7 +766,7 @@ describe("EDV-218 Â· Instructor Courses", () => {
     });
   });
 
-  // â”€â”€ Public: GET /api/instructors/:insId/courses â”€â”€
+  // ── Public: GET /api/instructors/:insId/courses ──
   describe("GET /api/instructors/:insId/courses (public)", () => {
     it("returns public courses with hasMore and nextSkip", async () => {
       const res = await request(app).get(`${PUB}/${INS_A_USER_ID}/courses`);
@@ -789,10 +828,10 @@ describe("EDV-218 Â· Instructor Courses", () => {
   });
 });
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════════════════════════════════════
 // EDV-235: Get Instructor's Courses Stats
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-describe("EDV-235 Â· Get Courses Stats", () => {
+// ═══════════════════════════════════════════════════════════════════════════════
+describe("EDV-235 · Get Courses Stats", () => {
   describe("GET /api/instructor/courses/stats", () => {
     it("returns course stats breakdown by status", async () => {
       const res = await request(app)
@@ -830,10 +869,10 @@ describe("EDV-235 Â· Get Courses Stats", () => {
   });
 });
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════════════════════════════════════
 // EDV-207: Get Instructor's Students
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-describe("EDV-207 Â· Get Instructor Students", () => {
+// ═══════════════════════════════════════════════════════════════════════════════
+describe("EDV-207 · Get Instructor Students", () => {
   describe("GET /api/instructor/students", () => {
     it("returns paginated students list", async () => {
       const res = await request(app)
@@ -907,7 +946,7 @@ describe("EDV-207 Â· Get Instructor Students", () => {
     });
 
     it("returns empty array for instructor with no students", async () => {
-      // Instructor B may have 0 students â€” test returns valid empty
+      // Instructor B may have 0 students — test returns valid empty
       const res = await request(app)
         .get(`${PRI}/students`)
         .set("Cookie", insBCookie);
@@ -930,10 +969,10 @@ describe("EDV-207 Â· Get Instructor Students", () => {
   });
 });
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════════════════════════════════════
 // EDV-254: Get Instructor's Students Stats
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-describe("EDV-254 Â· Get Students Stats", () => {
+// ═══════════════════════════════════════════════════════════════════════════════
+describe("EDV-254 · Get Students Stats", () => {
   describe("GET /api/instructor/students/stats", () => {
     it("returns student stats with deduplication", async () => {
       const res = await request(app)
@@ -975,10 +1014,10 @@ describe("EDV-254 Â· Get Students Stats", () => {
   });
 });
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════════════════════════════════════
 // EDV-236: Get Course's Students
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-describe("EDV-236 Â· Get Course Students", () => {
+// ═══════════════════════════════════════════════════════════════════════════════
+describe("EDV-236 · Get Course Students", () => {
   describe("GET /api/instructor/courses/:courseId/students", () => {
     it("returns paginated course students", async () => {
       const res = await request(app)
@@ -1066,10 +1105,10 @@ describe("EDV-236 Â· Get Course Students", () => {
   });
 });
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════════════════════════════════════
 // EDV-222: Get Instructor Earnings
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-describe("EDV-222 Â· Instructor Earnings", () => {
+// ═══════════════════════════════════════════════════════════════════════════════
+describe("EDV-222 · Instructor Earnings", () => {
   describe("GET /api/instructor/earnings", () => {
     it("returns monthly earnings data", async () => {
       const res = await request(app)
@@ -1123,7 +1162,7 @@ describe("EDV-222 Â· Instructor Earnings", () => {
     });
   });
 
-  // â”€â”€ Course Revenue: GET /api/instructor/courses/revenue â”€â”€
+  // ── Course Revenue: GET /api/instructor/courses/revenue ──
   describe("GET /api/instructor/courses/revenue", () => {
     it("returns all-courses monthly revenue", async () => {
       const res = await request(app)
@@ -1143,7 +1182,7 @@ describe("EDV-222 Â· Instructor Earnings", () => {
     });
   });
 
-  // â”€â”€ Top Revenue Courses: GET /api/instructor/courses/top-courses â”€â”€
+  // ── Top Revenue Courses: GET /api/instructor/courses/top-courses ──
   describe("GET /api/instructor/courses/top-courses", () => {
     it("returns top revenue courses this month", async () => {
       const res = await request(app)
@@ -1183,7 +1222,7 @@ describe("EDV-222 Â· Instructor Earnings", () => {
     });
   });
 
-  // â”€â”€ Single Course Revenue â”€â”€
+  // ── Single Course Revenue ──
   describe("GET /api/instructor/courses/:courseId/revenue", () => {
     it("returns monthly revenue for specific course", async () => {
       const res = await request(app)
@@ -1211,7 +1250,7 @@ describe("EDV-222 Â· Instructor Earnings", () => {
     });
   });
 
-  // â”€â”€ Single Course Enrollments â”€â”€
+  // ── Single Course Enrollments ──
   describe("GET /api/instructor/courses/:courseId/enrollments", () => {
     it("returns monthly enrollments for specific course", async () => {
       const res = await request(app)
@@ -1233,11 +1272,11 @@ describe("EDV-222 Â· Instructor Earnings", () => {
   });
 });
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════════════════════════════════════
 // EDV-218 (cont): Course Details & Edit
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-describe("EDV-218 Â· Course Details & Edit View", () => {
-  // â”€â”€ Course Details: GET /api/instructor/courses/:courseId/details â”€â”€
+// ═══════════════════════════════════════════════════════════════════════════════
+describe("EDV-218 · Course Details & Edit View", () => {
+  // ── Course Details: GET /api/instructor/courses/:courseId/details ──
   describe("GET /api/instructor/courses/:courseId/details", () => {
     it("returns instructor course details (toInstructorCourseDto)", async () => {
       const res = await request(app)
@@ -1308,7 +1347,7 @@ describe("EDV-218 Â· Course Details & Edit View", () => {
     });
   });
 
-  // â”€â”€ Course For Edit: GET /api/instructor/courses/:courseId â”€â”€
+  // ── Course For Edit: GET /api/instructor/courses/:courseId ──
   describe("GET /api/instructor/courses/:courseId (edit view)", () => {
     it("returns toEditCourseDto with curriculum", async () => {
       const res = await request(app)
@@ -1398,10 +1437,10 @@ describe("EDV-218 Â· Course Details & Edit View", () => {
   });
 });
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════════════════════════════════════
 // EDV-253: Create Course
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-describe("EDV-253 Â· Create Course", () => {
+// ═══════════════════════════════════════════════════════════════════════════════
+describe("EDV-253 · Create Course", () => {
   describe("POST /api/instructor/courses", () => {
     it("creates a new draft course (201)", async () => {
       const res = await request(app)
@@ -1418,8 +1457,11 @@ describe("EDV-253 Â· Create Course", () => {
       expect(r.title).toBe("New draft course");
       expect(r.status).toBe("draft");
       expect(r.isPrivate).toBe(true);
-      // Save for cleanup
-      createdCourseId = r.courseId;
+      // Self-cleanup: fixture course is managed by outer beforeAll, not this test
+      if (r.courseId) {
+        await Curriculum.deleteMany({ courseId: r.courseId });
+        await Course.findByIdAndDelete(r.courseId);
+      }
     });
 
     it("returns 401 without auth", async () => {
@@ -1440,7 +1482,7 @@ describe("EDV-253 Â· Create Course", () => {
       expect(dbCourse).not.toBeNull();
       expect(dbCourse.status).toBe("draft");
       expect(dbCourse.isPrivate).toBe(true);
-      expect(dbCourse.title).toBe("New draft course");
+      expect(dbCourse.title).toBe("[Testing] Draft Course");
       expect(dbCourse.instructor.ref.toString()).toBe(INS_A_USER_ID);
     });
 
@@ -1462,14 +1504,14 @@ describe("EDV-253 Â· Create Course", () => {
   });
 });
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════════════════════════════════════
 // EDV-219: Update Course
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-describe("EDV-219 Â· Update Course", () => {
+// ═══════════════════════════════════════════════════════════════════════════════
+describe("EDV-219 · Update Course", () => {
   const VALID_CATEGORY = "69288d99cfe4f50d205aef6f"; // Web Development
 
   describe("PATCH /api/instructor/courses/:courseId", () => {
-    // â”€â”€ Success cases â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Success cases ──────────────────────────────────────────────────────
     it("updates course title into pendingUpdate", async () => {
       const courseId = createdCourseId;
       const res = await request(app)
@@ -1524,7 +1566,7 @@ describe("EDV-219 Â· Update Course", () => {
         .patch(`${PRI}/courses/${courseId}`)
         .set("Cookie", insACookie)
         .send({ title: "Cumulative Title" });
-      // Second update: price â€” title should still be in pending
+      // Second update: price — title should still be in pending
       const res = await request(app)
         .patch(`${PRI}/courses/${courseId}`)
         .set("Cookie", insACookie)
@@ -1560,7 +1602,7 @@ describe("EDV-219 Â· Update Course", () => {
       expect(r.isPrivate).toBe(false);
     });
 
-    it("updates categoryId successfully (string â†’ ObjectId)", async () => {
+    it("updates categoryId successfully (string → ObjectId)", async () => {
       const courseId = createdCourseId;
       const res = await request(app)
         .patch(`${PRI}/courses/${courseId}`)
@@ -1611,14 +1653,14 @@ describe("EDV-219 Â· Update Course", () => {
           {
             title: "Section 1",
             lectures: [
-              { title: "Lecture 1", videoId: "vid-001", duration: 300, isFree: true },
-              { title: "Lecture 2", videoId: "vid-002", duration: 600 },
+              { title: "Lecture 1", videoId: "LEC-001", duration: 300, isFree: true },
+              { title: "Lecture 2", videoId: "LEC-002", duration: 600 },
             ],
           },
           {
             title: "Section 2",
             lectures: [
-              { title: "Lecture 3", videoId: "vid-003", duration: 450 },
+              { title: "Lecture 3", videoId: "LEC-003", duration: 450 },
             ],
           },
         ],
@@ -1646,9 +1688,9 @@ describe("EDV-219 Â· Update Course", () => {
       expect(res.body.result.title).toBe("Sanitize Test");
     });
 
-    it("updates live course â€” saves to pendingUpdate (not live data)", async () => {
+    it("updates live course — saves to pendingUpdate (not live data)", async () => {
       const res = await request(app)
-        .patch(`${PRI}/courses/${LIVE_COURSE_1}`)
+        .patch(`${PRI}/courses/${testLiveCourseId}`)
         .set("Cookie", insACookie)
         .send({ title: "Live Course Pending Update" });
       expect(res.status).toBe(200);
@@ -1669,14 +1711,14 @@ describe("EDV-219 Â· Update Course", () => {
       const dbCourse = await Course.findById(courseId).lean();
       expect(dbCourse).not.toBeNull();
       expect(dbCourse.pendingUpdate.data.title).toBe("DB Verify Title");
-      expect(dbCourse.title).toBe("New draft course");
+      expect(dbCourse.title).toBe("[Testing] Draft Course");
     });
 
     it("DB verify: LIVE course actual data unchanged after update", async () => {
-      const dbCourse = await Course.findById(LIVE_COURSE_1).lean();
+      const dbCourse = await Course.findById(testLiveCourseId).lean();
       expect(dbCourse).not.toBeNull();
       expect(dbCourse.pendingUpdate.data.title).toBe("Live Course Pending Update");
-      expect(dbCourse.title).not.toBe("Live Course Pending Update");
+      expect(dbCourse.title).toBe("[Testing] Live Course");
     });
 
     it("mass-assignment guard: ignores status, studentsEnrolled, isDeleted", async () => {
@@ -1699,7 +1741,7 @@ describe("EDV-219 Â· Update Course", () => {
       expect(after.isDeleted).toBeFalsy();
     });
 
-    // â”€â”€ Validation error cases â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Validation error cases ─────────────────────────────────────────────
     it("returns 400 for empty update body", async () => {
       const courseId = createdCourseId;
       const res = await request(app)
@@ -1710,7 +1752,7 @@ describe("EDV-219 Â· Update Course", () => {
       expect(res.body.success).toBe(false);
     });
 
-    it("returns 400 â€” title too long (>96 chars)", async () => {
+    it("returns 400 — title too long (>96 chars)", async () => {
       const courseId = createdCourseId;
       const res = await request(app)
         .patch(`${PRI}/courses/${courseId}`)
@@ -1720,7 +1762,7 @@ describe("EDV-219 Â· Update Course", () => {
       expect(res.body.success).toBe(false);
     });
 
-    it("returns 400 â€” subtitle too long (>186 chars)", async () => {
+    it("returns 400 — subtitle too long (>186 chars)", async () => {
       const courseId = createdCourseId;
       const res = await request(app)
         .patch(`${PRI}/courses/${courseId}`)
@@ -1730,7 +1772,7 @@ describe("EDV-219 Â· Update Course", () => {
       expect(res.body.success).toBe(false);
     });
 
-    it("returns 400 â€” description too long (>2000 chars)", async () => {
+    it("returns 400 — description too long (>2000 chars)", async () => {
       const courseId = createdCourseId;
       const res = await request(app)
         .patch(`${PRI}/courses/${courseId}`)
@@ -1740,7 +1782,7 @@ describe("EDV-219 Â· Update Course", () => {
       expect(res.body.success).toBe(false);
     });
 
-    it("returns 400 â€” tags exceed max 14", async () => {
+    it("returns 400 — tags exceed max 14", async () => {
       const courseId = createdCourseId;
       const tags = Array.from({ length: 15 }, (_, i) => `tag-${i}`);
       const res = await request(app)
@@ -1751,7 +1793,7 @@ describe("EDV-219 Â· Update Course", () => {
       expect(res.body.success).toBe(false);
     });
 
-    it("returns 400 â€” tag too short (<2 chars)", async () => {
+    it("returns 400 — tag too short (<2 chars)", async () => {
       const courseId = createdCourseId;
       const res = await request(app)
         .patch(`${PRI}/courses/${courseId}`)
@@ -1761,7 +1803,7 @@ describe("EDV-219 Â· Update Course", () => {
       expect(res.body.success).toBe(false);
     });
 
-    it("returns 400 â€” invalid level value", async () => {
+    it("returns 400 — invalid level value", async () => {
       const courseId = createdCourseId;
       const res = await request(app)
         .patch(`${PRI}/courses/${courseId}`)
@@ -1771,7 +1813,7 @@ describe("EDV-219 Â· Update Course", () => {
       expect(res.body.success).toBe(false);
     });
 
-    it("returns 400 â€” invalid image URL", async () => {
+    it("returns 400 — invalid image URL", async () => {
       const courseId = createdCourseId;
       const res = await request(app)
         .patch(`${PRI}/courses/${courseId}`)
@@ -1781,7 +1823,7 @@ describe("EDV-219 Â· Update Course", () => {
       expect(res.body.success).toBe(false);
     });
 
-    it("returns 400 â€” enableDiscount=true without discountPrice", async () => {
+    it("returns 400 — enableDiscount=true without discountPrice", async () => {
       const courseId = createdCourseId;
       const res = await request(app)
         .patch(`${PRI}/courses/${courseId}`)
@@ -1791,7 +1833,7 @@ describe("EDV-219 Â· Update Course", () => {
       expect(res.body.success).toBe(false);
     });
 
-    it("returns 400 â€” discountPrice >= price", async () => {
+    it("returns 400 — discountPrice >= price", async () => {
       const courseId = createdCourseId;
       const res = await request(app)
         .patch(`${PRI}/courses/${courseId}`)
@@ -1801,7 +1843,7 @@ describe("EDV-219 Â· Update Course", () => {
       expect(res.body.success).toBe(false);
     });
 
-    it("returns 400 â€” discountPrice > price", async () => {
+    it("returns 400 — discountPrice > price", async () => {
       const courseId = createdCourseId;
       const res = await request(app)
         .patch(`${PRI}/courses/${courseId}`)
@@ -1811,7 +1853,7 @@ describe("EDV-219 Â· Update Course", () => {
       expect(res.body.success).toBe(false);
     });
 
-    it("returns 400 â€” negative price", async () => {
+    it("returns 400 — negative price", async () => {
       const courseId = createdCourseId;
       const res = await request(app)
         .patch(`${PRI}/courses/${courseId}`)
@@ -1821,7 +1863,7 @@ describe("EDV-219 Â· Update Course", () => {
       expect(res.body.success).toBe(false);
     });
 
-    it("returns 400 â€” invalid categoryId format", async () => {
+    it("returns 400 — invalid categoryId format", async () => {
       const courseId = createdCourseId;
       const res = await request(app)
         .patch(`${PRI}/courses/${courseId}`)
@@ -1831,7 +1873,7 @@ describe("EDV-219 Â· Update Course", () => {
       expect(res.body.success).toBe(false);
     });
 
-    it("returns 400 â€” curriculum with empty sections array", async () => {
+    it.failing("returns 400 — curriculum with empty sections array (EDV-276)", async () => {
       const courseId = createdCourseId;
       const res = await request(app)
         .patch(`${PRI}/courses/${courseId}`)
@@ -1841,7 +1883,7 @@ describe("EDV-219 Â· Update Course", () => {
       expect(res.body.success).toBe(false);
     });
 
-    it("returns 400 â€” section with no lectures", async () => {
+    it.failing("returns 400 — section with no lectures (EDV-277)", async () => {
       const courseId = createdCourseId;
       const res = await request(app)
         .patch(`${PRI}/courses/${courseId}`)
@@ -1855,7 +1897,7 @@ describe("EDV-219 Â· Update Course", () => {
       expect(res.body.success).toBe(false);
     });
 
-    it("returns 400 â€” lecture without videoId", async () => {
+    it.failing("returns 400 — lecture without videoId (EDV-278)", async () => {
       const courseId = createdCourseId;
       const res = await request(app)
         .patch(`${PRI}/courses/${courseId}`)
@@ -1874,7 +1916,7 @@ describe("EDV-219 Â· Update Course", () => {
       expect(res.body.success).toBe(false);
     });
 
-    it("returns 400 â€” invalid courseId param", async () => {
+    it("returns 400 — invalid courseId param", async () => {
       const res = await request(app)
         .patch(`${PRI}/courses/${INVALID_ID}`)
         .set("Cookie", insACookie)
@@ -1883,10 +1925,10 @@ describe("EDV-219 Â· Update Course", () => {
       expect(res.body.success).toBe(false);
     });
 
-    // â”€â”€ Auth & ownership â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Auth & ownership ───────────────────────────────────────────────────
     it("returns 403 for course not owned by instructor", async () => {
       const res = await request(app)
-        .patch(`${PRI}/courses/${LIVE_COURSE_1}`)
+        .patch(`${PRI}/courses/${testLiveCourseId}`)
         .set("Cookie", insBCookie)
         .send({ title: "Hack" });
       expect(res.status).toBe(403);
@@ -1904,14 +1946,14 @@ describe("EDV-219 Â· Update Course", () => {
 
     it("returns 401 without auth", async () => {
       const res = await request(app)
-        .patch(`${PRI}/courses/${LIVE_COURSE_1}`)
+        .patch(`${PRI}/courses/${testLiveCourseId}`)
         .send({ title: "Test" });
       expect(res.status).toBe(401);
     });
 
     it("returns 403 for student role", async () => {
       const res = await request(app)
-        .patch(`${PRI}/courses/${LIVE_COURSE_1}`)
+        .patch(`${PRI}/courses/${testLiveCourseId}`)
         .set("Cookie", studentCookie)
         .send({ title: "Student Hack" });
       expect(res.status).toBe(403);
@@ -1919,15 +1961,15 @@ describe("EDV-219 Â· Update Course", () => {
   });
 });
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════════════════════════════════════
 // EDV-220: Submit Course
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-describe("EDV-220 Â· Submit Course", () => {
+// ═══════════════════════════════════════════════════════════════════════════════
+describe("EDV-220 · Submit Course", () => {
   const VALID_CATEGORY = "69288d99cfe4f50d205aef6f";
 
   describe("POST /api/instructor/courses/:courseId/submit", () => {
-    // â”€â”€ Success: submit draft with all required fields â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-    it("submits a fully-populated draft course (draft â†’ pending)", async () => {
+    // ── Success: submit draft with all required fields ─────────────────────
+    it("submits a fully-populated draft course (draft → pending)", async () => {
       const courseId = createdCourseId;
       // First ensure the course has all required fields via update
       // Also reset enableDiscount to avoid conflict from EDV-219 cumulative tests
@@ -1947,7 +1989,7 @@ describe("EDV-220 Â· Submit Course", () => {
               {
                 title: "Section 1",
                 lectures: [
-                  { title: "Intro", videoId: "v-submit-001", duration: 120 },
+                  { title: "Intro", videoId: "LEC-submit-001", duration: 120 },
                 ],
               },
             ],
@@ -1978,9 +2020,9 @@ describe("EDV-220 Â· Submit Course", () => {
     });
 
     it("returns full toEditCourseDto shape on submit", async () => {
-      // Use a live course to test submit with changes
+      // Use [Testing] live course to test submit with changes
       const res = await request(app)
-        .post(`${PRI}/courses/${LIVE_COURSE_1}/submit`)
+        .post(`${PRI}/courses/${testLiveCourseId}/submit`)
         .set("Cookie", insACookie)
         .send({});
       // This might be 200 or 400 depending on pending state
@@ -2011,9 +2053,9 @@ describe("EDV-220 Â· Submit Course", () => {
     });
 
     it("submits with changes in body (update + submit in one call)", async () => {
-      // Use a live course and send changes in the submit body
+      // Use [Testing] live course and send changes in the submit body
       const res = await request(app)
-        .post(`${PRI}/courses/${LIVE_COURSE_3}/submit`)
+        .post(`${PRI}/courses/${testLiveCourseId}/submit`)
         .set("Cookie", insACookie)
         .send({ title: "Submit With Changes" });
       expect(res.status).toBe(200);
@@ -2023,7 +2065,7 @@ describe("EDV-220 Â· Submit Course", () => {
       expect(r.hasPendingChanges).toBe(true);
     });
 
-    // â”€â”€ Validation failures during submit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Validation failures during submit ──────────────────────────────────
     it("returns validation error for draft without required fields", async () => {
       // Create a bare draft and try to submit (missing title, language, etc.)
       const createRes = await request(app)
@@ -2050,46 +2092,46 @@ describe("EDV-220 Â· Submit Course", () => {
       }
     });
 
-    it("returns 400 â€” submit body with enableDiscount but no discountPrice", async () => {
+    it("returns 400 — submit body with enableDiscount but no discountPrice", async () => {
       const res = await request(app)
-        .post(`${PRI}/courses/${LIVE_COURSE_NO_STU}/submit`)
+        .post(`${PRI}/courses/${testLiveCourseId}/submit`)
         .set("Cookie", insACookie)
         .send({ enableDiscount: true, price: 100 });
       expect(res.status).toBe(400);
       expect(res.body.success).toBe(false);
     });
 
-    it("returns 400 â€” submit body with discountPrice >= price", async () => {
+    it("returns 400 — submit body with discountPrice >= price", async () => {
       const res = await request(app)
-        .post(`${PRI}/courses/${LIVE_COURSE_NO_STU}/submit`)
+        .post(`${PRI}/courses/${testLiveCourseId}/submit`)
         .set("Cookie", insACookie)
         .send({ enableDiscount: true, price: 50, discountPrice: 60 });
       expect(res.status).toBe(400);
       expect(res.body.success).toBe(false);
     });
 
-    it("returns 400 â€” submit body with invalid curriculum (empty sections)", async () => {
+    it("returns 400 — submit body with invalid curriculum (empty sections)", async () => {
       const res = await request(app)
-        .post(`${PRI}/courses/${LIVE_COURSE_NO_STU}/submit`)
+        .post(`${PRI}/courses/${testLiveCourseId}/submit`)
         .set("Cookie", insACookie)
         .send({ curriculum: { sections: [] } });
       expect(res.status).toBe(400);
       expect(res.body.success).toBe(false);
     });
 
-    it("returns 400 â€” submit body with title too long", async () => {
+    it("returns 400 — submit body with title too long", async () => {
       const res = await request(app)
-        .post(`${PRI}/courses/${LIVE_COURSE_NO_STU}/submit`)
+        .post(`${PRI}/courses/${testLiveCourseId}/submit`)
         .set("Cookie", insACookie)
         .send({ title: "X".repeat(97) });
       expect(res.status).toBe(400);
       expect(res.body.success).toBe(false);
     });
 
-    // â”€â”€ Auth & ownership errors â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Auth & ownership errors ────────────────────────────────────────────
     it("returns 400 or 403 for course not owned", async () => {
       const res = await request(app)
-        .post(`${PRI}/courses/${LIVE_COURSE_1}/submit`)
+        .post(`${PRI}/courses/${testLiveCourseId}/submit`)
         .set("Cookie", insBCookie);
       expect([400, 403]).toContain(res.status);
       expect(res.body.success).toBe(false);
@@ -2104,40 +2146,47 @@ describe("EDV-220 Â· Submit Course", () => {
     });
 
     it("returns 403 for non-existent courseId (valid ObjectId)", async () => {
+      // Send non-empty body to pass updateCourseSchema validation (requires ≥1 field);
+      // service then throws 403 because the course doesn't exist
       const res = await request(app)
         .post(`${PRI}/courses/${NONEXISTENT_ID}/submit`)
         .set("Cookie", insACookie)
-        .send({});
+        .send({ title: "Ghost Course" });
       expect(res.status).toBe(403);
       expect(res.body.success).toBe(false);
     });
 
     it("returns 401 without auth", async () => {
       const res = await request(app)
-        .post(`${PRI}/courses/${LIVE_COURSE_1}/submit`);
+        .post(`${PRI}/courses/${testLiveCourseId}/submit`);
       expect(res.status).toBe(401);
     });
 
     it("returns 403 for student role", async () => {
       const res = await request(app)
-        .post(`${PRI}/courses/${LIVE_COURSE_1}/submit`)
+        .post(`${PRI}/courses/${testLiveCourseId}/submit`)
         .set("Cookie", studentCookie);
       expect(res.status).toBe(403);
     });
   });
 });
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════════════════════════════════════
 // EDV-221: Clear Course Changes
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-describe("EDV-221 Â· Clear Course Changes", () => {
+// ═══════════════════════════════════════════════════════════════════════════════
+describe("EDV-221 · Clear Course Changes", () => {
   describe("DELETE /api/instructor/courses/:courseId/changes", () => {
     beforeAll(async () => {
-      // Create a second draft course specifically for clear tests
+      // Create a [Testing] second draft course specifically for clear tests
       const res = await request(app)
         .post(`${PRI}/courses`)
         .set("Cookie", insACookie);
       clearTestCourseId = res.body.result?.courseId;
+      if (clearTestCourseId) {
+        await Course.findByIdAndUpdate(clearTestCourseId, {
+          $set: { title: "[Testing] Clear Test Course" },
+        });
+      }
     });
 
     it("clears pending changes on a draft course", async () => {
@@ -2201,7 +2250,7 @@ describe("EDV-221 Â· Clear Course Changes", () => {
 
     it("returns 403 for course not owned", async () => {
       const res = await request(app)
-        .delete(`${PRI}/courses/${LIVE_COURSE_1}/changes`)
+        .delete(`${PRI}/courses/${testLiveCourseId}/changes`)
         .set("Cookie", insBCookie);
       expect(res.status).toBe(403);
     });
@@ -2215,16 +2264,16 @@ describe("EDV-221 Â· Clear Course Changes", () => {
 
     it("returns 401 without auth", async () => {
       const res = await request(app)
-        .delete(`${PRI}/courses/${LIVE_COURSE_1}/changes`);
+        .delete(`${PRI}/courses/${testLiveCourseId}/changes`);
       expect(res.status).toBe(401);
     });
   });
 });
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════════════════════════════════════
 // EDV-177: Become Instructor
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-describe("EDV-177 Â· Become Instructor", () => {
+// ═══════════════════════════════════════════════════════════════════════════════
+describe("EDV-177 · Become Instructor", () => {
   describe("POST /api/instructors/", () => {
     it("returns 409 for user already an instructor", async () => {
       const res = await request(app)
@@ -2241,7 +2290,7 @@ describe("EDV-177 Â· Become Instructor", () => {
       expect(res.body.success).toBe(false);
     });
 
-    // NOTE: We do NOT test the success case (student â†’ become instructor)
+    // NOTE: We do NOT test the success case (student → become instructor)
     // because it would modify the student user's state permanently.
     // This requires explicit "approve" from user per DB-write rule.
   });
