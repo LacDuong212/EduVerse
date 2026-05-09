@@ -1,4 +1,4 @@
-import { nullish, z } from "zod";
+import { z } from "zod";
 import { mapZodErrors } from "@/utils/mapper";
 
 const MAX_LENGTH = {
@@ -45,12 +45,12 @@ const discountValidation = (data, ctx) => {
 };
 
 export const lecture = z.object({
-  lecId: lectureId.optional(),
-  title: z.string("Lecture video is required.")
+  lecId: lectureId.nullish(),
+  title: z.string("Lecture title is required.")
     .trim()
     .min(1, "Lecture video cannot be empty.")
     .max(MAX_LENGTH.lecTitle, "Lecture title is too long."),
-  videoId: videoIdSchema("Invalid lecture video format."),
+  videoId: videoIdSchema("Lecture video is required and must be valid."),
   duration: z.coerce.number().min(0).default(0),
   description: z.string("Invalid lecture description.")
     .trim()
@@ -60,7 +60,7 @@ export const lecture = z.object({
 });
 
 export const section = z.object({
-  secId: sectionId.optional(),
+  secId: sectionId.nullish(),
   title: z.string("Section title is required.")
     .trim()
     .min(1, "Section title cannot be empty.")
@@ -68,7 +68,7 @@ export const section = z.object({
   lectures: z.array(lecture, "Section should have at least one lecture.").min(1, "Section should have at least one lecture."),
 });
 
-const validator = (data, schema) => {
+export const validator = (data, schema) => {
   const validation = schema.safeParse(data);
 
   if (!validation.success) {

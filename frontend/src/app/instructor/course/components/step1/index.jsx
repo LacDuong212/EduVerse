@@ -1,8 +1,10 @@
 import { Col, Row, Form, InputGroup, Spinner } from "react-bootstrap";
+import { NumericFormat } from "react-number-format";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
 import ChoicesFormInput from "@/components/form/ChoicesFormInput";
 import { currency } from "@/contexts/constants";
+import { toCurrency } from "@/utils/currency";
 import { FormField } from "../FormField";
 import useStep1 from "./useStep1";
 
@@ -85,7 +87,7 @@ const Step1 = ({ stepperInstance, activeStep }) => {
                 name="subtitle"
                 placeholder="Enter short description"
                 maxLength={MAX_LENGTH.subtitle}
-                value={formData?.subtitle}
+                defaultValue={formData?.subtitle}
                 onChange={handleChange}
               />
             </FormField>
@@ -159,7 +161,17 @@ const Step1 = ({ stepperInstance, activeStep }) => {
           <Col md={6}>
             <FormField label="Price" required={true} error={errors.price}>
               <InputGroup>
-                <Form.Control name="price" placeholder="Enter price" value={formData?.price} onChange={handleChange} isInvalid={!!errors.price} />
+                <NumericFormat
+                  name="price"
+                  placeholder="Enter price"
+                  className={`form-control ${errors.price ? "is-invalid" : ""}`}
+                  thousandSeparator=","
+                  decimalSeparator="."
+                  defaultValue={formData?.price}
+                  onValueChange={(val) => handleCustomChange("price", val.floatValue)}
+                  customInput={Form.Control}
+                  isInvalid={!!errors.price}
+                />
                 <InputGroup.Text>{currency}</InputGroup.Text>
               </InputGroup>
             </FormField>
@@ -168,12 +180,16 @@ const Step1 = ({ stepperInstance, activeStep }) => {
           <Col md={6}>
             <FormField label="Discount Price" error={errors.discountPrice}>
               <InputGroup>
-                <Form.Control
+                <NumericFormat
                   name="discountPrice"
                   placeholder="Enter discount price"
-                  value={formData?.discountPrice}
-                  onChange={handleChange}
+                  className={`form-control ${errors.discountPrice ? "is-invalid" : ""}`}
+                  thousandSeparator="."
+                  decimalSeparator=","
+                  defaultValue={formData?.discountPrice}
+                  onValueChange={(val) => handleCustomChange("discountPrice", val.floatValue)}
                   disabled={!formData?.enableDiscount || false}
+                  customInput={Form.Control}
                   isInvalid={!!errors.discountPrice}
                 />
                 <InputGroup.Text>{currency}</InputGroup.Text>

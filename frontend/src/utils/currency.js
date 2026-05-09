@@ -14,10 +14,7 @@ export const toCurrency = (val) => {
   const num = Number(val);
   if (isNaN(num)) return '';
 
-  return new Intl.NumberFormat(REGION_FORMAT, {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2
-  }).format(num);
+  return new Intl.NumberFormat(REGION_FORMAT).format(num);
 };
 
 export const parseCurrency = (str) => {
@@ -40,4 +37,8 @@ export const parseCurrency = (str) => {
 
   const num = Number(cleaned);
   return isNaN(num) ? null : num;
+};
+
+export const parseRawNumber = (str) => {
+  return str.replace(/\D/g, "");
 };

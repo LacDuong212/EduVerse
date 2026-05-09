@@ -2,7 +2,7 @@ import _ from "lodash";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { api } from "@/utils/api";
-import { parseCurrency, toCurrency } from "@/utils/currency";
+import { parseRawNumber } from "@/utils/currency";
 import { handleRequest } from "@/utils/request";
 import { useCourseEditor } from "../../CourseEditorContext";
 import { step1Fields, validateStep1 } from "../../schemas";
@@ -47,17 +47,13 @@ export default function useStep1(stepperInstance) {
 
   const formData = {
     ...currentCourse,
-    price: toCurrency(currentCourse?.price),
-    discountPrice: toCurrency(currentCourse?.discountPrice),
+    price: currentCourse?.price?.toString(),
+    discountPrice: currentCourse?.discountPrice?.toString(),
   };
 
   const handleChange = (e) => {
     const { name, type, checked, value } = e.target;
     let finalValue = type === "checkbox" ? checked : value;
-
-    if (name === "price" || name === "discountPrice") {
-      finalValue = parseCurrency(value);
-    }
 
     updateField(name, finalValue);
 
@@ -66,10 +62,14 @@ export default function useStep1(stepperInstance) {
 
   const handleCustomChange = (name, value) => {
     if (name === "description") {
-      const plainText = value.replace(/<(.|\n)*?>/g, "").trim();
-      if (plainText.length === 0 && !value.includes("<img")) {
-        value = "";
-      }
+      // const plainText = value.replace(/<(.|\n)*?>/g, "").trim();
+      // if (plainText.length === 0 && !value.includes("<img")) {
+      //   value = "";
+      // }
+    }
+
+    if (name === "price" || name === "discountPrice") {
+      
     }
 
     updateField(name, value);
