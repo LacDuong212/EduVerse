@@ -76,14 +76,19 @@ export const useStep3 = (stepperInstance) => {
     const updated = _.cloneDeep(curriculum);
     const isEditing = editingLectureIndex !== null;
     const section = updated[activeSectionIndex];
+    let savedLecture;
     if (isEditing) {
       const existing = section.lectures[editingLectureIndex];
-      section.lectures[editingLectureIndex] = { ...existing, ...lectureChanges };
+      savedLecture = { ...existing, ...lectureChanges };
+      section.lectures[editingLectureIndex] = savedLecture;
     } else {
-      section.lectures.push(lectureChanges);
+      savedLecture = lectureChanges;
+      section.lectures.push(savedLecture);
     }
     setCurriculum(updated);
     updateField("curriculum.sections", updated);
+
+    setEditingLecture(savedLecture);
     setShowLectureModal(false);
   };
 
@@ -104,8 +109,8 @@ export const useStep3 = (stepperInstance) => {
     if (!lecture?.videoId) return toast.warning("No video found for this lecture.");
     try {
       updateLectureAIStatus(sectionIdx, lectureIdx, "processing");
-      const res = await handleRequest.post(
-        authApi.get(`/${course.courseId}/lectures/${lecture.lecId}/generate-ai`)
+      const res = await handleRequest(
+        authApi.post(`/courses/${course.courseId}/lectures/${lecture.lecId}/generate-ai`)
       );
       if (res.success) toast.info("AI Generation started...");
       else throw new Error(res.message);
@@ -159,10 +164,7 @@ export const useStep3 = (stepperInstance) => {
     if (e) e.preventDefault();
     const { success: validateSuccess, errors: newErrors } = validateStep3(currentCourse);
     if (!validateSuccess) {
-      setErrors((prev) => {
-        const cleanedErrors = _.omit(prev, step3Fields);
-        return { ...cleanedErrors, ...newErrors };
-      });
+      setErrors(newErrors);
 
       toast.error("Please make sure all the fields are correct..");
       return;

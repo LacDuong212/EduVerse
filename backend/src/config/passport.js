@@ -1,5 +1,6 @@
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import userModel from "#modules/user/user.model.js";
+import { toAuthUserDto } from "#modules/user/user.mapper.js";
 
 export default function(passport) {
   passport.use(
@@ -19,7 +20,7 @@ export default function(passport) {
         try {
           let user = await userModel.findOne({ googleId: googleId });
           if (user) {
-            return done(null, user);
+            return done(null, toAuthUserDto(user));
           }
 
           user = await userModel.findOne({ email: email });
@@ -29,7 +30,7 @@ export default function(passport) {
               user.pfpImg = pfpImg;
             }
             await user.save();
-            return done(null, user);
+            return done(null, toAuthUserDto(user));
           }
 
           const newUser = await userModel.create({
@@ -39,7 +40,7 @@ export default function(passport) {
             pfpImg: pfpImg,
             isVerified: true,
           });
-          return done(null, newUser);
+          return done(null, toAuthUserDto(newUser));
 
         } catch (err) {
           return done(err, false);
@@ -49,13 +50,13 @@ export default function(passport) {
   );
 
   passport.serializeUser((user, done) => {
-    done(null, user.id);
+    done(null, user.userId);
   });
 
   passport.deserializeUser(async (id, done) => {
     try {
       const user = await userModel.findById(id);
-      done(null, user);
+      done(null, toAuthUserDto(user));
     } catch (err) {
       done(err, null);
     }

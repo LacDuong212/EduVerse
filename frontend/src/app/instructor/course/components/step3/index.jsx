@@ -16,37 +16,35 @@ const Step3 = ({ stepperInstance, activeStep }) => {
 
     const status = lec.aiData?.status || "none";
 
-    let btnVariant = "purple-soft";
     let tooltip = "AI Assistant";
-    let Icon = FaRobot;
     let badge = null;
 
     if (status === "processing") {
       return (
-        <Button variant="purple-soft" size="sm" className="btn-round mb-0 me-2 d-flex" onClick={() => ai.open(secIdx, lecIdx)}>
-          <Spinner animation="border" size="sm" />
+        <Button variant="purple-soft" size="sm" className="btn-round mb-0 me-2 d-flex align-items-center justify-content-center" onClick={() => ai.open(secIdx, lecIdx)}>
+          <Spinner animation="border" size="sm" className="" />
         </Button>
       );
     }
     else if (status === "completed") {
       tooltip = "View AI Content";
-      badge = <FaCheckCircle className="position-absolute top-0 start-100 translate-middle text-success bg-white rounded-circle" fontSize={16} />;
+      badge = <FaCheckCircle className="position-absolute top-0 translate-middle text-success bg-white rounded-circle" fontSize={16} />;
     }
     else if (status === "failed") {
       tooltip = "Generation Failed";
-      badge = <FaExclamationCircle className="position-absolute top-0 start-100 translate-middle text-danger bg-white rounded-circle" fontSize={16} />;
+      badge = <FaExclamationCircle className="position-absolute top-0 translate-middle text-danger bg-white rounded-circle" fontSize={16} />;
     }
 
     return (
       <OverlayTrigger placement="top" overlay={<Tooltip>{tooltip}</Tooltip>}>
         <div className="position-relative me-2">
           <Button
-            variant={btnVariant}
+            variant="purple-soft"
             size="sm"
             className="btn-round mb-0"
             onClick={() => ai.open(secIdx, lecIdx)}
           >
-            <Icon />
+            <FaRobot />
           </Button>
           {badge}
         </div>
@@ -87,18 +85,18 @@ const Step3 = ({ stepperInstance, activeStep }) => {
 
               return (
                 <AccordionItem eventKey={String(i)} key={i} className="mt-3 border rounded overflow-hidden">
-                  <AccordionHeader as="h6" className="font-base">
-                    <div className="text-break me-2">
-                      <span className={`fw-bold ${sectionTitleErr ? "text-danger" : ""}`}>
+                  <AccordionHeader className="font-base">
+                    <div className="d-flex flex-column me-2">
+                      <span className={`h6 mb-0 text-break ${sectionTitleErr || sectionLecturesErr ? "text-danger" : ""}`}>
                         {sec.title}
                       </span>
                       {sectionTitleErr && (
-                        <div className="text-danger small fw-light">
+                        <div className="text-danger small">
                           {sectionTitleErr}
                         </div>
                       )}
                       {sectionLecturesErr && (
-                        <div className="text-danger small fw-light">
+                        <div className="text-danger small">
                           {sectionLecturesErr}
                         </div>
                       )}
@@ -110,7 +108,7 @@ const Step3 = ({ stepperInstance, activeStep }) => {
                         role="button"
                         className="btn btn-sm btn-primary-soft btn-round me-1 mb-0"
                         onClick={() => section.open(i, sec)}
-                        title="Edit Section Name"
+                        title="Edit Section Title"
                       >
                         <FaEdit size={12} />
                       </span>
@@ -137,16 +135,16 @@ const Step3 = ({ stepperInstance, activeStep }) => {
                           <div className="d-flex align-items-center flex-grow-1 min-w-0 me-3">
                             <FaSection className="text-orange fs-5 me-2 flex-shrink-0" />
                             <div className="d-flex flex-column">
-                              <span className={`h6 m-0 fw-light text-break ${lecTitleErr ? "text-danger" : ""}`} title={lec.title}>
+                              <span className={`h6 m-0 fw-light text-break ${lecTitleErr || lecVideoErr ? "text-danger" : ""}`} title={lec.title}>
                                 {lec.title}
                               </span>
                               {lecTitleErr && (
-                                <small className="text-danger fw-bold" style={{ fontSize: '0.75rem' }}>
+                                <small className="text-danger small" style={{ fontSize: '0.75rem' }}>
                                   {lecTitleErr}
                                 </small>
                               )}
                               {lecVideoErr && (
-                                <small className="text-danger fw-bold" style={{ fontSize: '0.75rem' }}>
+                                <small className="text-danger small" style={{ fontSize: '0.75rem' }}>
                                   {lecVideoErr}
                                 </small>
                               )}

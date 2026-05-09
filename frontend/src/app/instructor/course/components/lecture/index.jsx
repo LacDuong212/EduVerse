@@ -5,9 +5,8 @@ import { secondsToDuration } from "@/utils/duration";
 import { useLecture } from "./useLecture";
 
 const Lecture = ({ show, onClose, onSave, initialLecture = null }) => {
-  const { state, computed, handlers } = useLecture(show, initialLecture, onSave);
-  const { form, videoFile, errors, isUploading, progress } = state;
-  const { previewHref, isNewVideo } = computed;
+  const { state, handlers } = useLecture(show, initialLecture, onSave);
+  const { form, videoFile, errors, isUploading, progress, previewHref } = state;
 
   const [showPreview, setShowPreview] = useState(false);
 
@@ -15,8 +14,8 @@ const Lecture = ({ show, onClose, onSave, initialLecture = null }) => {
     if (!show) setShowPreview(false);
   }, [show, previewHref]);
 
-  const hasExistingVideo = !!initialLecture && !!previewHref && !videoFile;
-  const hasNewVideo = !!videoFile;
+  const hasVideoSource = !!previewHref;
+  const isNewVideo = !!videoFile;
 
   return (
     <Modal
@@ -39,25 +38,25 @@ const Lecture = ({ show, onClose, onSave, initialLecture = null }) => {
           <Col md={12}>
             <label className="form-label">Lecture Title <span className="text-danger">*</span></label>
             <input
-              className={`form-control ${errors.title ? "is-invalid" : ""}`}
+              className={`form-control ${errors?.title ? "is-invalid" : ""}`}
               type="text"
               placeholder="Enter lecture title"
               value={form.title}
               disabled={isUploading}
               onChange={e => handlers.updateField("title", e.target.value)}
             />
-            {errors.title && <div className="invalid-feedback">{errors.title}</div>}
+            {errors?.title && <div className="invalid-feedback">{errors.title}</div>}
           </Col>
 
           {/* --- VIDEO SECTION --- */}
           <Col md={12}>
             <label className="form-label">Lecture Video <span className="text-danger">*</span></label>
 
-            <div className={`card border border-dashed border-2 ${errors.videoId ? "border-danger" : ""}`}>
+            <div className={`card border border-dashed border-2 ${errors?.videoId ? "border-danger" : ""}`}>
               <div className="card-body p-3">
 
                 {/* Preview */}
-                {(hasExistingVideo || hasNewVideo) && !isUploading ? (
+                {hasVideoSource && !isUploading ? (
                   <div className="d-flex align-items-center justify-content-between">
                     <div className="d-flex align-items-center">
                       <div className="bg-dark rounded d-flex align-items-center justify-content-center me-3" style={{ width: "60px", height: "40px" }}>
@@ -126,11 +125,11 @@ const Lecture = ({ show, onClose, onSave, initialLecture = null }) => {
             </div>
 
             {/* Integrated Preview Player */}
-            <Collapse in={showPreview && !!previewHref}>
+            <Collapse in={showPreview && hasVideoSource}>
               <div className="mt-3 bg-dark rounded shadow-inner overflow-hidden">
-                {show && !!previewHref && (
+                {show && hasVideoSource && (
                   <video
-                    key={`${previewHref}`}
+                    key={previewHref}
                     controls
                     className="w-100"
                     style={{ maxHeight: "250px", display: "block" }}
@@ -143,7 +142,7 @@ const Lecture = ({ show, onClose, onSave, initialLecture = null }) => {
               </div>
             </Collapse>
 
-            {errors.videoId && <div className="text-danger small mt-2">{errors.videoId}</div>}
+            {errors?.videoId && <div className="text-danger small mt-2">{errors.videoId}</div>}
           </Col>
 
           {/* Duration */}
@@ -152,27 +151,27 @@ const Lecture = ({ show, onClose, onSave, initialLecture = null }) => {
             <div className="input-group">
               <input
                 type="text"
-                className={`form-control text-end ${errors.duration ? "is-invalid" : ""}`}
+                className={`form-control text-end ${errors?.duration ? "is-invalid" : ""}`}
                 disabled
                 readOnly
                 value={secondsToDuration(form.duration)}
               />
             </div>
-            {errors.duration && <div className="invalid-feedback">{errors.duration}</div>}
+            {errors?.duration && <div className="invalid-feedback">{errors.duration}</div>}
           </Col>
 
           {/* Description */}
           <Col xs={12}>
             <label className="form-label">Description</label>
             <textarea
-              className={`form-control ${errors.description ? "is-invalid" : ""}`}
+              className={`form-control ${errors?.description ? "is-invalid" : ""}`}
               rows={3}
-              value={form.description}
+              defaultValue={form.description}
               placeholder="Enter lecture description"
               disabled={isUploading}
               onChange={(e) => handlers.updateField("description", e.target.value)}
             />
-            {errors.description && <div className="invalid-feedback">{errors.description}</div>}
+            {errors?.description && <div className="invalid-feedback">{errors.description}</div>}
           </Col>
 
           {/* Availability */}
@@ -194,7 +193,7 @@ const Lecture = ({ show, onClose, onSave, initialLecture = null }) => {
               />
               <label className="btn btn-sm btn-outline-primary m-0" htmlFor="optPrem">Premium</label>
             </div>
-            {errors.isFree && <div className="d-block text-danger small mt-1">{errors.isFree}</div>}
+            {errors?.isFree && <div className="d-block text-danger small mt-1">{errors.isFree}</div>}
           </Col>
         </form>
       </ModalBody>

@@ -1,3 +1,4 @@
+import { PAGE_MAP } from "./chatbot.config.js";
 
 // helper: check if page is public
 export const getPublicUrl = (pageKey) => {

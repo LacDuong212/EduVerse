@@ -28,17 +28,17 @@ export const handleChatbotResponse = async (
 
       // course search intent
       if (payload.type === INTENT.COURSE_SEARCH && payload.filters) {
-        actionData = chatbotService.handleCourseSearch(payload.filters);
+        actionData = handleCourseSearch(payload.filters);
       }
 
       // page navigation intent
       else if (payload.type === INTENT.PAGE_NAVIGATION && payload.navigation) {
-        const result = chatbotService.handlePageNavigation(
+        const result = handlePageNavigation(
           payload.navigation, userRole, languageCode
         );
 
         if (result.actionData) actionData = result.actionData;
-        if (result.replyOverride) botReply = result.replyOverride;  // override Dialogflow's response message
+        if (result.replyOverride) botReply = result.replyOverride;
       }
 
       else if (payload.type === INTENT.LEARNING_PROGRESS) {
@@ -67,7 +67,7 @@ export const handleChatbotResponse = async (
         // valid student
         else {
           const latestProgress = await getLastLearningProgress(userId);
-          const result = chatbotService.handleLearningProgress(latestProgress, languageCode);
+          const result = handleLearningProgress(latestProgress, languageCode);
 
           if (result.actionData) actionData = result.actionData;
           if (result.replyOverride) botReply = result.replyOverride;  // overide Dialogflow's response

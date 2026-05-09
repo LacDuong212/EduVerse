@@ -92,13 +92,13 @@ export const getCourseFreeCurriculum = (curriculum) => {
 
 export const getCourseCurriculum = (curriculum, hasAiData = false) => {
   return (curriculum || []).map(section => ({
-    secId: section?._id || null,
-    title: section?.title || null,
+    secId: section?._id?.toString() ?? null,
+    title: section?.title ?? null,
     lectures: (section?.lectures || []).map(lecture => ({
-      lecId: lecture?._id || null,
-      title: lecture?.title || null,
-      duration: lecture?.duration || 0,
-      videoId: lecture?.videoId || null,
+      lecId: lecture?._id?.toString() ?? null,
+      title: lecture?.title ?? null,
+      duration: lecture?.duration ?? 0,
+      videoId: lecture?.videoId ?? null,
       isFree: lecture?.isFree ?? false,
       ...(hasAiData && { aiData: getAiData(lecture?.aiData) })
     }))
@@ -175,6 +175,8 @@ export const toCourseDetailsDto = (details) => {
     lecturesCount: details?.lecturesCount || 0,
 
     tags: details.tags || [],
+    
+    isPrivate: details.isPrivate ?? undefined,
 
     rating: getCourseRating(details.rating),
 
@@ -183,7 +185,7 @@ export const toCourseDetailsDto = (details) => {
     category: getCourseCatgegory(details.category),
     instructor: getCourseInstructor(details.instructor),
 
-    updatedAt: details.updatedAt || null,
+    ...getCourseTime(details),
   };
 };
 
@@ -262,7 +264,7 @@ export const toEditCourseDto = (course, curriculum) => {
     hasPendingChanges: !!course.hasPendingChanges,
 
     curriculum: {
-      sections: getCourseCurriculum(curriculum?.sections, true) ?? null,
+      sections: getCourseCurriculum(curriculum?.sections, true) ?? [],
       hasPendingChanges: !!curriculum?.hasPendingChanges,
     },
   };

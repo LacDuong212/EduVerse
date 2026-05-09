@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { BsX, BsSend } from "react-icons/bs";
-
 import LogoBox from "@/components/LogoBox";
 import MessageBubble from "./MessageBubble";
-import { CHAT_LANGUAGE } from "../constants/chatbot.contants";
+import { CHAT_LANGUAGE } from "../chatbot.constants";
 
 export default function ChatWindow({
   containerRef,
@@ -21,27 +20,22 @@ export default function ChatWindow({
 
   const textareaRef = useRef(null);
 
-  // handle language change
   const handleLanguageChange = (e) => {
     const selectedLang = e.target.value;
     setLanguage(selectedLang);
     sessionStorage.setItem(CHAT_LANGUAGE, selectedLang);
   };
 
-  // auto-resize textarea
   useEffect(() => {
     if (textareaRef.current) {
-      // reset height to shrink if text is deleted
       textareaRef.current.style.height = "auto";
-      // limit height, change to scroll
       textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 120) + "px";
     }
-  }, [input]); // re-run whenever input text changes
+  }, [input]);
 
-  // handle key press
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault(); // prevent creating new line
+      e.preventDefault();
       if (!isSending) onSend(language);
     }
   };

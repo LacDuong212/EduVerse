@@ -45,17 +45,17 @@ export const getVideoViewUrl = async (user, videoId) => {
     const info = await getCourseInfoForVideoId(videoId, insId, session);
     const { courseId, isFree } = info || {};
 
-    if (!courseId) {
-      // video.expireAt = new Date(Date.now() + EXPIRE_DURATION);
-      // await video.save({ session });
+    // if (!courseId) {
+    //   // video.expireAt = new Date(Date.now() + EXPIRE_DURATION);
+    //   // await video.save({ session });
 
-      logger.warn(`Set expiration for videoId: ${videoId}`);
-      throw new AppError("Video not found.", 404);
-    }
+    //   logger.warn(`Set expiration for videoId: ${videoId}`);
+    //   throw new AppError("Video not found.", 404);
+    // }
 
     const key = getKey(insId, videoId);
 
-    if (!isFree) {
+    if (courseId && !isFree) {
       const isInstructor = user?.role === "instructor" && user?.userId === insId;
       const isEnrolled = user?.role === "student" && await existsEnrollment(user?.userId, courseId);
 
@@ -90,7 +90,8 @@ export const getVideoUploadUrl = async (insId, courseId, contentType) => {
       userId: insId,
       courseId,
       key: filePath,
-      contentType
+      contentType,
+      expireAt: new Date(Date.now() + EXPIRE_DURATION),
     }], { session: s });
 
     const { uploadUrl } = await s3Service.generateUploadUrl(filePath, contentType);
@@ -105,14 +106,21 @@ export const getVideoUploadUrl = async (insId, courseId, contentType) => {
   });
 };
 
-export const expireOrphanVideos = async (videoIds, session = null) => {
+export const setExpireForVideos = async (videoIds, isExpired = true, session = null) => {
   if (!videoIds || videoIds.length === 0) return;
 
-  const expirationDate = new Date(Date.now() + EXPIRE_DURATION);
+  let updateQuery;
+
+  if (isExpired) {
+    const expirationDate = new Date(Date.now() + EXPIRE_DURATION);
+    updateQuery = { $set: { expireAt: expirationDate } };
+  } else {
+    updateQuery = { $unset: { expireAt: "" } };
+  }
 
   await DraftVideo.updateMany(
     { videoId: { $in: videoIds } },
-    { $set: { expireAt: expirationDate } },
+    updateQuery,
     { session }
   );
 };

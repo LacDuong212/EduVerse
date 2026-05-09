@@ -1,9 +1,8 @@
 import ChatWindow from "./components/ChatWindow";
 import ChatButton from "./components/ToggleButton";
-import { useChatbot } from "./hooks/useChatbot";
+import { useChatbot } from "./useChatbot";
 
 export default function ChatbotWidget() {
-  // get all logic and state
   const {
     isOpen,
     setIsOpen,
