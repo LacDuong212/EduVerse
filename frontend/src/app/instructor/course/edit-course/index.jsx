@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { Badge, Button, Card, CardBody, CardHeader, Col, Collapse, Container, Row, Spinner } from "react-bootstrap";
 import { BsQuestionCircle } from "react-icons/bs";
-import { FaArrowLeft } from "react-icons/fa";
+import { FaArrowLeft, FaEraser } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import PageMetaData from "@/components/PageMetaData";
 import useBSStepper from "@/hooks/useBSStepper";
@@ -119,7 +119,7 @@ const MagicalGuideCard = () => {
 
 const EditCourseForm = () => {
   const navigate = useNavigate();
-  const { currentCourse, isLoading } = useCourseEditor();
+  const { currentCourse, isLoading, onDiscardChanges } = useCourseEditor();
 
   const stepperRef = useRef(null);
   const { stepperInstance, activeStep } = useBSStepper(stepperRef, !isLoading && !!currentCourse);
@@ -141,18 +141,33 @@ const EditCourseForm = () => {
       <PageMetaData title={"Edit Course"} />
       <Container className="mt-3 mb-5">
         <Row className="g-3 mb-3">
-          {/* Navigation & Status */}
-          <Col md={12} className="d-flex align-items-center justify-content-between">
-            <Button variant="link" onClick={() => navigate(-1)} className="p-0 mb-0">
-              <FaArrowLeft className="mb-1 me-2" />Return
-            </Button>
-
-            <div>
-              <span className="mb-0 me-2">Current Status:</span>
-              <Badge bg={statusBadge(currentCourse?.status)} className="text-uppercase p-2">
-                {currentCourse?.status}
-              </Badge>
-            </div>
+          {/* Navigation & Status & Discard */}
+          <Col md={12}>
+            <Row className="d-flex align-items-center gap-2">
+              <Col>
+                <Button variant="link" onClick={() => navigate(-1)} className="p-0 mb-0">
+                  <FaArrowLeft className="mb-1 me-2" />Return
+                </Button>
+              </Col>
+              <Col className="d-flex justify-content-end">
+                <div className="d-flex justify-content-center align-items-center gap-3">
+                  <div>
+                    <span className="mb-0 me-2">Current Status:</span>
+                    <Badge bg={statusBadge(currentCourse?.status)} className="text-uppercase px-2 py-1">
+                      {currentCourse?.status}
+                    </Badge>
+                  </div>
+                  <Button
+                    variant="outline-danger"
+                    onClick={onDiscardChanges}
+                    title="Discard Changes"
+                    className="btn-sm btn-round d-flex flex-shrink-0 align-items-center justify-content-center mb-0"
+                  >
+                    <FaEraser className="me-1 fs-6" />
+                  </Button>
+                </div>
+              </Col>
+            </Row>
           </Col>
 
           {/* Guide */}

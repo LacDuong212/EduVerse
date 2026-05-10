@@ -9,6 +9,8 @@ const AiData = ({ show, onClose, lecture, onGenerate, onDelete }) => {
 
   const videoRef = useRef(null);
 
+  const displayVideoUrl = data?.videoUrl;
+
   useEffect(() => {
     if (state.activeTab !== "source" && videoRef.current) {
       videoRef.current.pause();
@@ -20,6 +22,22 @@ const AiData = ({ show, onClose, lecture, onGenerate, onDelete }) => {
       videoRef.current.pause();
     }
   }, [show]);
+
+  const renderVideoPlayer = (url) => (
+    <div className="rounded overflow-hidden border bg-black">
+      <video
+        ref={videoRef}
+        key={url}
+        controls
+        className="w-100"
+        style={{ maxHeight: "300px", display: "block" }}
+        preload="metadata"
+      >
+        <source src={url} />
+        Your browser does not support the video tag.
+      </video>
+    </div>
+  );
 
   if (!lecture) return null;
 
@@ -55,13 +73,29 @@ const AiData = ({ show, onClose, lecture, onGenerate, onDelete }) => {
 
         {/* State 3: Empty */}
         {!state.isProcessing && !state.hasData && !state.isFailed && (
-          <div className="text-center py-5">
-            <FaRobot size={40} className="text-muted mb-2 opacity-50" />
-            <h5 className="mb-0">No AI Content Yet</h5>
-            <p className="mb-2">Generate a summary, key concepts, and quizzes automatically from your video.</p>
-            <Button variant="purple" onClick={onGenerate}>
-              <FaRobot className="me-2" /> Generate Now
-            </Button>
+          <div className="p-3">
+            <div className="text-center mb-3">
+              <FaRobot size={40} className="mb-2 opacity-50" />
+              <h5 className="mb-0">No AI Content Yet</h5>
+            </div>
+
+            {displayVideoUrl ? (
+              <>
+                <div className="px-0 px-sm-3 px-md-4 px-lg-5 mb-3">
+                  {renderVideoPlayer(displayVideoUrl)}
+                  <span className="mt-1 px-1 small"><strong>*</strong> Source video for AI generated content.</span>
+                </div>
+                <div className="text-center pb-4">
+                  <Button variant="purple" size="lg" onClick={onGenerate}>
+                    <FaRobot className="me-2" /> Generate AI Content
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <Alert variant="warning" className="text-center">
+                No video file found for this lecture. Please upload a video first.
+              </Alert>
+            )}
           </div>
         )}
 
@@ -160,22 +194,9 @@ const AiData = ({ show, onClose, lecture, onGenerate, onDelete }) => {
 
               {/* TAB: Source Video */}
               <Tab.Pane eventKey="source">
-                <div className="p-2">
-                  <h6>Source Video</h6>
-                  {data.videoUrl ? (
-                    <div className="rounded overflow-hidden border bg-black">
-                      <video
-                        ref={videoRef}
-                        key={data.videoUrl}
-                        controls
-                        className="w-100"
-                        style={{ maxHeight: "350px", display: "block" }}
-                        preload="metadata"
-                      >
-                        <source src={data.videoUrl} />
-                        Your browser does not support the video tag.
-                      </video>
-                    </div>
+                <div className="p-3 pt-2">
+                  {displayVideoUrl ? (
+                    renderVideoPlayer(displayVideoUrl)
                   ) : (
                     <Alert variant="info">No source video available for this lecture.</Alert>
                   )}

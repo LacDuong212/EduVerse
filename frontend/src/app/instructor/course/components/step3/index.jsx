@@ -1,4 +1,4 @@
-import { Accordion, AccordionBody, AccordionHeader, AccordionItem, Alert, Button, Row, OverlayTrigger, Tooltip, Spinner } from "react-bootstrap";
+import { Accordion, AccordionBody, AccordionHeader, AccordionItem, Alert, Button, Row, Spinner } from "react-bootstrap";
 import { FaEdit, FaTimes, FaPlus, FaRobot, FaCheckCircle, FaExclamationCircle } from "react-icons/fa";
 import { FaSection } from "react-icons/fa6";
 import AiData from "../ai";
@@ -36,19 +36,18 @@ const Step3 = ({ stepperInstance, activeStep }) => {
     }
 
     return (
-      <OverlayTrigger placement="top" overlay={<Tooltip>{tooltip}</Tooltip>}>
-        <div className="position-relative me-2">
-          <Button
-            variant="purple-soft"
-            size="sm"
-            className="btn-round mb-0"
-            onClick={() => ai.open(secIdx, lecIdx)}
-          >
-            <FaRobot />
-          </Button>
-          {badge}
-        </div>
-      </OverlayTrigger>
+      <div className="position-relative me-2">
+        <Button
+          variant="purple-soft"
+          size="sm"
+          className="btn-round mb-0"
+          title={tooltip}
+          onClick={() => ai.open(secIdx, lecIdx)}
+        >
+          <FaRobot />
+        </Button>
+        {badge}
+      </div>
     );
   };
 
@@ -108,7 +107,7 @@ const Step3 = ({ stepperInstance, activeStep }) => {
                         role="button"
                         className="btn btn-sm btn-primary-soft btn-round me-1 mb-0"
                         onClick={() => section.open(i, sec)}
-                        title="Edit Section Title"
+                        title="Edit Section"
                       >
                         <FaEdit size={12} />
                       </span>
@@ -156,12 +155,14 @@ const Step3 = ({ stepperInstance, activeStep }) => {
 
                             <Button
                               variant="primary-soft" size="sm" className="btn-round me-2 mb-0"
+                              title="Edit Lecture"
                               onClick={() => lecture.open(i, idx, lec)}
                             >
                               <FaEdit />
                             </Button>
                             <Button
                               variant="danger-soft" size="sm" className="btn-round mb-0"
+                              title="Remove Lecture"
                               onClick={() => lecture.remove(i, idx)}
                             >
                               <FaTimes />

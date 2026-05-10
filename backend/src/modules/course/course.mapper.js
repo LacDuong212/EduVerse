@@ -98,6 +98,7 @@ export const getCourseCurriculum = (curriculum, hasAiData = false) => {
       lecId: lecture?._id?.toString() ?? null,
       title: lecture?.title ?? null,
       duration: lecture?.duration ?? 0,
+      oldVideoId: lecture?.oldVideoId,
       videoId: lecture?.videoId ?? null,
       isFree: lecture?.isFree ?? false,
       ...(hasAiData && { aiData: getAiData(lecture?.aiData) })
@@ -105,7 +106,7 @@ export const getCourseCurriculum = (curriculum, hasAiData = false) => {
   }));
 };
 
-const getAiData = (aiData) => {
+export const getAiData = (aiData) => {
   aiData = typeof aiData?.toJSON === "function" ? aiData.toJSON() : aiData;
   if (!aiData || Object.keys(aiData).length === 0) return null;
 

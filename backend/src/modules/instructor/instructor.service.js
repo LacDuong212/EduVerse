@@ -1,5 +1,5 @@
 import AppError from "#exceptions/app.error.js";
-import { countInstructorLiveCourses, createDraftCourse } from "#modules/course/course.service.js";
+import { countInstructorLiveCourses, createDraft, removeDraft } from "#modules/course/course.service.js";
 import { countCompletedOrdersByCourseIds } from "#modules/order/order.service.js";
 import { updateProfile } from "#modules/user/user.service.js";
 import { withTransaction } from "#utils/transaction.js";
@@ -162,7 +162,7 @@ export const getCurrentInstructor = async (userId, session = null) => {
   };
 };
 
-export const createNewCourse = async (userId) => {
+export const createDraftCourse = async (userId) => {
   if (!userId) throw new AppError("Instructor ID is required.", 400);
 
   return await withTransaction(async (session) => {
@@ -170,7 +170,7 @@ export const createNewCourse = async (userId) => {
       .session(session);
     if (!instructor) throw new AppError("Instructor not found or unapproved.", 403);
 
-    const course = await createDraftCourse(instructor, session);
+    const course = await createDraft(instructor, session);
 
     instructor.myCourses.push(new mongoose.Types.ObjectId(course.courseId));
     instructor.stats.totalCourses += 1;
@@ -178,5 +178,19 @@ export const createNewCourse = async (userId) => {
     await instructor.save({ session });
 
     return course;
+  });
+};
+
+export const removeDraftCourse = async (userId, courseId) => {
+  return await withTransaction(async (session) => {
+    const instructor = await Instructor.findOne({ user: userId, isApproved: true }).session(session);
+    if (!instructor) throw new AppError("Instructor not found.", 404);
+
+    await removeDraft(userId, courseId, session);
+
+    instructor.myCourses.pull(new mongoose.Types.ObjectId(courseId));
+    instructor.stats.totalCourses = instructor.myCourses.length;
+
+    await instructor.save({ session });
   });
 };

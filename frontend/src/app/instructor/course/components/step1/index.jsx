@@ -3,8 +3,7 @@ import { NumericFormat } from "react-number-format";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
 import ChoicesFormInput from "@/components/form/ChoicesFormInput";
-import { currency } from "@/contexts/constants";
-import { toCurrency } from "@/utils/currency";
+import { currency, REGION_FORMAT } from "@/contexts/constants";
 import { FormField } from "../FormField";
 import useStep1 from "./useStep1";
 
@@ -31,6 +30,14 @@ const MAX_LENGTH = {
   discountPrice: 12,
 };
 
+const MAX_PRICE = REGION_FORMAT === "vi" ? 1000000000 : 1000000;
+const PRICE_SETTINGS = {
+  thousandSeparator: REGION_FORMAT === "vi" ? "." : ",",
+  decimalSeparator: REGION_FORMAT === "vi" ? "," : ".",
+  allowNegative: false,
+  allowLeadingZeros: false,
+};
+
 const toTitleCase = (str) => {
   if (!str) return "";
   return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
@@ -48,6 +55,8 @@ const Step1 = ({ stepperInstance, activeStep }) => {
     handleCustomChange,
     handleSubmit
   } = useStep1(stepperInstance);
+
+  const limitPrice = (price) => price === undefined || (price >= 0 && price <= MAX_PRICE);
 
   return (
     <Form
@@ -165,10 +174,10 @@ const Step1 = ({ stepperInstance, activeStep }) => {
                   name="price"
                   placeholder="Enter price"
                   className={`form-control ${errors.price ? "is-invalid" : ""}`}
-                  thousandSeparator=","
-                  decimalSeparator="."
+                  {...PRICE_SETTINGS}
+                  isAllowed={(values) => limitPrice(values?.floatValue)}
                   defaultValue={formData?.price}
-                  onValueChange={(val) => handleCustomChange("price", val.floatValue)}
+                  onValueChange={(val) => handleCustomChange("price", val?.floatValue)}
                   customInput={Form.Control}
                   isInvalid={!!errors.price}
                 />
@@ -184,10 +193,10 @@ const Step1 = ({ stepperInstance, activeStep }) => {
                   name="discountPrice"
                   placeholder="Enter discount price"
                   className={`form-control ${errors.discountPrice ? "is-invalid" : ""}`}
-                  thousandSeparator="."
-                  decimalSeparator=","
+                  {...PRICE_SETTINGS}
+                  isAllowed={(values) => limitPrice(values?.floatValue)}
                   defaultValue={formData?.discountPrice}
-                  onValueChange={(val) => handleCustomChange("discountPrice", val.floatValue)}
+                  onValueChange={(val) => handleCustomChange("discountPrice", val?.floatValue ?? null)}
                   disabled={!formData?.enableDiscount || false}
                   customInput={Form.Control}
                   isInvalid={!!errors.discountPrice}

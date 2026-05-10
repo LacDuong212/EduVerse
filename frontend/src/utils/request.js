@@ -7,26 +7,27 @@ import { toast } from "react-toastify";
 export const handleRequest = async (promise, showToast = false) => {
   try {
     const response = await promise;
-    const { data, status } = response;
+    const { data, status } = response || {};
 
-    if (data.success) {
+    if (data?.success) {
+      if (showToast) toast.success(data?.message || "Success!");
       return {
         success: true,
         statusCode: status,
-        result: data.result,
-        pagination: data.pagination || null,
-        message: data.message || "Success!",
+        result: data?.result,
+        pagination: data?.pagination || null,
+        message: data?.message || "Success!",
         errors: null
       };
     }
 
-    if (showToast) toast.error(data.message || "Action failed..");
+    if (showToast) toast.error(data?.message || "Action failed..");
     return {
       success: false,
       statusCode: status,
-      result: data.result || null,
-      message: data.message,
-      errors: data.errors || null
+      result: data?.result || null,
+      message: data?.message,
+      errors: data?.errors || null
     };
 
   } catch (err) {

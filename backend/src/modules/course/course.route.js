@@ -61,11 +61,18 @@ courseRoute.get(
   validate(courseSchema.idParamRequest),
   courseController.getImageParams
 );
+courseRoute.delete(
+  "/:id/lectures/:lecId/ai-contents",
+  protect,
+  restrictTo("instructor"),
+  validate(courseSchema.aiContentsParams),
+  courseController.removeAiDataForLecture
+);
 courseRoute.post(
   "/:id/lectures/:lecId/generate-ai",
   protect,
   restrictTo("instructor"),
-  validate(courseSchema.generateAiParams),
+  validate(courseSchema.aiContentsParams),
   courseController.generateAiDataForLecture
 );
 

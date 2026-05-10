@@ -2,7 +2,6 @@ import _ from "lodash";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { api } from "@/utils/api";
-import { parseRawNumber } from "@/utils/currency";
 import { handleRequest } from "@/utils/request";
 import { useCourseEditor } from "../../CourseEditorContext";
 import { step1Fields, validateStep1 } from "../../schemas";
@@ -61,17 +60,8 @@ export default function useStep1(stepperInstance) {
   };
 
   const handleCustomChange = (name, value) => {
-    if (name === "description") {
-      // const plainText = value.replace(/<(.|\n)*?>/g, "").trim();
-      // if (plainText.length === 0 && !value.includes("<img")) {
-      //   value = "";
-      // }
-    }
-
-    if (name === "price" || name === "discountPrice") {
-      
-    }
-
+    // if (name === "description") { }
+    // if (name === "price" || name === "discountPrice") { }
     updateField(name, value);
     if (globalErrors[name]) setErrors(prev => ({ ...prev, [name]: null }));
   };
@@ -85,9 +75,7 @@ export default function useStep1(stepperInstance) {
         const cleanedErrors = _.omit(prev, step1Fields);
         return { ...cleanedErrors, ...newErrors };
       });
-
-      toast.error("Please make sure all the fields are correct..");
-      return;
+      return toast.error("Please make sure all the fields are correct..");
     }
 
     const step1Changes = _.pick(changes, step1Fields);
@@ -99,6 +87,9 @@ export default function useStep1(stepperInstance) {
       setErrors({});
       toast.success("Progress saved!");
       stepperInstance?.next();
+    } else {
+      if (globalErrors?.general) toast.error("Unable to save changes, try adjusting the fields..");
+      else toast.error("Failed to save progress..");
     }
   };
 

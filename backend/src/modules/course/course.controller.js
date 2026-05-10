@@ -118,7 +118,7 @@ export const getCourseCurriculum = asyncHandler(async (req, res) => {
   const user = req.user;
   const { id } = req.validated?.params || {};
   const curriculum = await courseService.getCourseFullCurriculum(user, id);
-  return sendSuccessResponse(res, 200, "Curriculum fetched successfully", curriculum);
+  return sendSuccessResponse(res, 200, "Get curriculum successfully!", curriculum);
 });
 
 // @desc Toggle course's privacy
@@ -154,16 +154,21 @@ export const generateFinalAssessment = asyncHandler(async (req, res) => {
   const userId = req.user?.userId;
   const { id } = req.validated?.params || {};
   const result = await generateAssessmentService(userId, id);
-  return sendSuccessResponse(res, 200, "Course assessment generated!", result);
+  return sendSuccessResponse(res, 200, "Course assessment generated successfully!", result);
 });
 
-// @desc Generate AI content for lecture
+// @desc Generate AI contents for lecture
 // @route GET /:id/lectures/:lecId/generate-ai
 export const generateAiDataForLecture = asyncHandler(async (req, res) => {
   const userId = req.user?.userId;
   const { id, lecId } = req.validated?.params || {};
   const result = await courseService.handleLectureGenerateAi(userId, id, lecId);
-  return sendSuccessResponse(res, 200, "Lecture AI content generated!", result);
+  return sendSuccessResponse(
+    res,
+    200,
+    "Lecture AI contents generated successfully!",
+    courseMapper.getAiData(result)
+  );
 });
 
 // @desc Get filters for courses search
@@ -171,4 +176,13 @@ export const generateAiDataForLecture = asyncHandler(async (req, res) => {
 export const getFilters = asyncHandler(async (req, res) => {
   const filters = await courseService.getCoursesFilters();
   return sendSuccessResponse(res, 200, "Get filters successfully!", filters);
+});
+
+// @desc Remove AI-generated contents for lecture
+// @route DELETE /:id/lectures/:lecId/ai-contents
+export const removeAiDataForLecture = asyncHandler(async (req, res) => {
+  const userId = req.user?.userId;
+  const { id, lecId } = req.validated?.params || {};
+  await courseService.removeLectureAiData(userId, id, lecId);
+  return sendSuccessResponse(res, 200, "Lecture AI contents removed successfully!");
 });

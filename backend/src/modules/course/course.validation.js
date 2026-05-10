@@ -3,6 +3,7 @@ import { z } from "zod";
 import { pageSchema, limitSchema } from "#utils/pagination.js";
 import * as CONSTANTS from "./course.constant.js"
 import { LEVEL_ENUM } from "./course.model.js";
+import { AI_DATA_STATUS } from "./curriculum.model.js";
 
 const objectIdSchema = (Name = "Field") => z.union([
   z.instanceof(mongoose.Types.ObjectId),
@@ -86,7 +87,7 @@ const aiDataSchema = z.object({
   summary: z.string().optional(),
   lessonNotes: z.record(z.any()).optional(),
   quizzes: z.array(z.any()).optional(),
-  status: z.string().optional(),
+  status: z.enum(AI_DATA_STATUS.values(), "Invalid AI data status").nullable(),
 });
 
 export const lectureIdSchema = objectIdSchema("Lecture");
@@ -112,6 +113,9 @@ const updateLectureSchema = z.object({
     .max(CONSTANTS.LECTURE_DESCRIPTION_MAX_LENGTH, "Lecture description is too long")
     .nullish(),
   isFree: z.boolean().optional(),
+  // aiData: z.any()
+  //   .optional()
+  //   .transform((val) => (val === null ? null : undefined)),
 }).partial();
 
 const lectureSchema = z.object({
@@ -294,7 +298,7 @@ export const limitQueryRequest = z.object({
   })
 });
 
-export const generateAiParams = z.object({
+export const aiContentsParams = z.object({
   params: z.object({
     id: courseIdSchema,
     lecId: lectureIdSchema,
