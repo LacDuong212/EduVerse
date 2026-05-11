@@ -17,7 +17,7 @@ const draftVideoSchema = new mongoose.Schema({
   timestamps: true
 });
 
-draftVideoSchema.index({ expireAt: 1 }, { expireAfterSeconds: 0 });
+draftVideoSchema.index({ expireAt: 1 }/*, { expireAfterSeconds: 0 }*/);
 draftVideoSchema.index({ videoId: 1 });
 
 export default mongoose.model("DraftVideo", draftVideoSchema);

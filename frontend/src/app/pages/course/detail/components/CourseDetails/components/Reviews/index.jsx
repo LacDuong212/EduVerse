@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button, Col, ProgressBar, Row } from "react-bootstrap";
 import { FaRegStar, FaStar, FaStarHalfAlt } from "react-icons/fa";
+import { DEFAULT_AVATAR_IMG } from "@/contexts/constants";
 import useCourseReviews from "./useCourseReviews";
 
 const StarRating = ({ rating, size = 16 }) => {
@@ -126,7 +127,7 @@ const Reviews = ({ rating = {}, isEnrolled }) => {
             e.target.reset();
           }}>
             <select name="rating" className="form-select mb-2">
-              {[5,4,3,2,1].map(s => <option key={s} value={s}>{s} Stars</option>)}
+              {[5, 4, 3, 2, 1].map(s => <option key={s} value={s}>{s} Stars</option>)}
             </select>
             <textarea name="description" className="form-control mb-2" rows={3} placeholder="Your thoughts..." required />
             <Button type="submit" disabled={submitting}>Post Review</Button>
@@ -147,7 +148,18 @@ const Reviews = ({ rating = {}, isEnrolled }) => {
 
           return (
             <div key={review.reviewId} className="d-flex mb-4 border-bottom pb-3">
-              <img src={review.userAvatar || '/default-avatar.png'} className="avatar avatar-md rounded-circle me-3" alt="" />
+              {review?.userAvatar ? (
+                <img
+                  src={review?.userAvatar}
+                  className="avatar avatar-sm rounded-circle me-3 border border-light border-1"
+                  alt={"avatar"}
+                  onError={(e) => e.target.src = DEFAULT_AVATAR_IMG}
+                />
+              ) : (
+                <div className="avatar-img avatar-sm rounded-circle me-3 border border-light border-1 d-flex align-items-center justify-content-center fw-bold fs-4">
+                  {(review?.userName?.[0] || "S").toUpperCase()}
+                </div>
+              )}
               <div className="flex-grow-1">
                 <div className="d-flex justify-content-between">
                   <h6 className="mb-0">

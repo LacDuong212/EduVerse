@@ -35,9 +35,7 @@ const enrollmentSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   }
-}, { 
-  timestamps: true 
-});
+}, { timestamps: true });
 
 enrollmentSchema.index({ student: 1, course: 1 }, { unique: true });
 enrollmentSchema.index({ instructor: 1, enrolledAt: -1 });

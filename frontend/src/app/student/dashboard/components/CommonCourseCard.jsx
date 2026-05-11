@@ -1,7 +1,7 @@
 import { Card, CardBody, CardFooter, CardTitle } from "react-bootstrap";
 import { FaBook, FaRegClock, FaStar, FaUserGraduate } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import { DEFAULT_COURSE_IMG } from "@/contexts/constants";
+import { DEFAULT_AVATAR_IMG, DEFAULT_COURSE_IMG } from "@/contexts/constants";
 import { formatCurrency } from "@/utils/currency";
 import { secondsToHours } from "@/utils/duration";
 
@@ -123,12 +123,13 @@ const CommonCourseCard = ({ course }) => {
               {instructor?.avatar ? (
                 <img
                   src={instructor?.avatar}
-                  className="rounded-3"
+                  className="rounded-3 border border-light border-1"
                   alt={"avatar"}
+                  onError={(e) => e.target.src = DEFAULT_AVATAR_IMG}
                 />
               ) : (
                 <div className="avatar-img rounded-3 border border-body border-1 d-flex align-items-center justify-content-center fw-bold fs-4">
-                  {(instructor?.name?.[0] || "INS").toUpperCase()}
+                  {(instructor?.name?.[0] || "I").toUpperCase()}
                 </div>
               )}
             </div>

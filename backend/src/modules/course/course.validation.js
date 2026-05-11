@@ -149,7 +149,9 @@ const updateSectionSchema = z.object({
     .trim()
     .min(1, "Section title cannot be empty")
     .max(CONSTANTS.SECTION_TITLE_MAX_LENGTH, "Section title is too long").optional(),
-  lectures: z.array(updateLectureSchema, "Section should be a list of lectures").optional(),
+  lectures: z.array(updateLectureSchema, "Section should be a list of lectures")
+    .min(1, "Section must have at least one lecture")
+    .optional(),
 }).partial();
 
 const sectionSchema = z.object({
@@ -163,12 +165,14 @@ const sectionSchema = z.object({
 });
 
 const updateCurriculumSchema = z.object({
-  sections: z.array(updateSectionSchema, "Sections should be a list of sections").optional()
+  sections: z.array(updateSectionSchema, "Sections should be a list of sections")
+    .min(1, "Sections should contain at least one section")
+    .optional(),
 }, "Curriculum should contain sections").optional();
 
 export const curriculumSchema = z.object({
   sections: z.array(sectionSchema, "Sections should be a list of sections")
-    .min(1, "Sections should contain at least one section")
+    .min(1, "Sections should contain at least one section"),
 }, "Curriculum should contain sections");
 
 const baseCourseFields = {

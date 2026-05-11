@@ -1,16 +1,14 @@
-import { useEffect, useState } from 'react';
-import { Dropdown, DropdownToggle, DropdownMenu, Card, CardHeader, CardBody, CardFooter, OverlayTrigger, Tooltip } from 'react-bootstrap';
-import { BsBan, BsBell, BsCheckCircle, BsInfoCircle, BsExclamationCircle } from 'react-icons/bs';
-import axios from 'axios';
-import { useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import { Dropdown, DropdownToggle, DropdownMenu, Card, CardHeader, CardBody, OverlayTrigger, Tooltip, Button } from "react-bootstrap";
+import { BsBan, BsBell, BsCheckCircle, BsInfoCircle, BsExclamationCircle, BsQuestion } from "react-icons/bs";
+import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
+import { Link } from "react-router-dom";
+import { useSocketContext } from "@/contexts/SocketContext";
+import { authApi } from "@/utils/api";
+import { handleRequest } from "@/utils/request";
+import { FaCheckDouble } from "react-icons/fa6";
 
-import { useSocketContext } from '@/contexts/SocketContext';
-
-// URL Backend
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-
-// --- Helper: Format thời gian ---
 const formatTimeAgo = (dateString) => {
   if (!dateString) return "";
   const date = new Date(dateString);
@@ -22,42 +20,47 @@ const formatTimeAgo = (dateString) => {
   if (minutes < 60) return `${minutes} mins ago`;
   const hours = Math.floor(minutes / 60);
   if (hours < 24) return `${hours} hours ago`;
-  return date.toLocaleDateString();
+  return date.toLocaleString("en-GB", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 };
 
-// --- Component Item (Style giống NotificationCard) ---
 const NotificationItem = ({ noti }) => {
-  // Logic hiển thị Avatar: Ảnh (nếu có) hoặc Icon (nếu không)
   const renderAvatar = () => {
-    // Nếu data có ảnh người gửi, ưu tiên hiển thị ảnh
     if (noti.sender?.avatar) {
       return <img className="avatar-img rounded-circle" src={noti.sender.avatar} alt="avatar" />;
     }
 
-    // Nếu không, hiển thị Icon trạng thái
     let Icon = BsInfoCircle;
     let colorClass = "text-primary";
     let bgClass = "bg-primary bg-opacity-10";
 
-    switch (noti.type) {
-      case 'APPROVED':
-      case 'SUCCEEDED':
+    switch (noti?.type?.toUpperCase()) {
+      case "APPROVED":
+      case "SUCCEEDED":
         Icon = BsCheckCircle;
         colorClass = "text-success";
         bgClass = "bg-success bg-opacity-10";
         break;
-      case 'REJECTED':
-      case 'FAILED':
+      case "REJECTED":
+      case "FAILED":
         Icon = BsExclamationCircle;
         colorClass = "text-danger";
         bgClass = "bg-danger bg-opacity-10";
         break;
-      case 'BLOCKED':
+      case "BLOCKED":
         Icon = BsBan;
         colorClass = "text-warning";
         bgClass = "bg-warning bg-opacity-10";
         break;
       default:
+        Icon = BsQuestion;
+        colorClass = "text-secondary";
+        bgClass = "bg-secondary bg-opacity-10";
         break;
     }
 
@@ -70,20 +73,17 @@ const NotificationItem = ({ noti }) => {
 
   return (
     <li>
-      <Link
-        className={`list-group-item-action border-0 border-bottom d-flex p-3 ${!noti.isRead ? 'bg-light' : ''}`}
-      >
+      <Link className={`list-group-item-action border-0 border-bottom d-flex p-3 ${!noti.isRead ? "bg-light" : ""}`}>
         <div className="me-3">
           <div className="avatar avatar-md">
             {renderAvatar()}
           </div>
         </div>
         <div>
-          <h6 className="mb-1">{noti.type || "New Notification"}</h6>
+          <h6 className="mb-1 text-capitalize">{noti.type || "New Notification"}</h6>
           <p className="text-body m-0">{noti.message}</p>
           <small className="text-secondary">{formatTimeAgo(noti.createdAt)}</small>
         </div>
-
         {!noti.isRead && (
           <span className="ms-auto p-1 bg-primary rounded-circle align-self-center" style={{ width: 8, height: 8 }}></span>
         )}
@@ -100,14 +100,15 @@ const NotificationDropdown = ({ className }) => {
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
-    if (userData?._id) {
+    if (userData?.userId) {
       const fetchNotifications = async () => {
-        try {
-          const res = await axios.get(`${BACKEND_URL}/api/notifications/${userData._id}`);
-          setNotifications(res.data);
-          setUnreadCount(res.data.filter(n => !n.isRead).length);
-        } catch (err) {
-          console.error("Error loading notification:", err);
+        const res = await handleRequest(authApi.get("/notifications"));
+        if (res?.success) {
+          setNotifications(res?.result);
+          setUnreadCount(res?.result.filter(n => !n.isRead).length);
+        } else {
+          setNotifications([]);
+          setUnreadCount(0);
         }
       };
       fetchNotifications();
@@ -126,55 +127,42 @@ const NotificationDropdown = ({ className }) => {
     };
   }, [socket]);
 
-  // 3. Xử lý Mark Read
-  const handleToggle = async (isOpen) => {
-    if (isOpen && unreadCount > 0 && userData?._id) {
-      try {
-        setUnreadCount(0);
-        await axios.put(`${BACKEND_URL}/api/notifications/mark-all-read/${userData._id}`);
+  const handleMarkAllRead = async (isOpen) => {
+    if (isOpen && unreadCount > 0 && userData?.userId) {
+      const res = await handleRequest(authApi.put("/notifications/read"))
+      if (res.success) {
         setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
-      } catch (err) {
-        console.error("Failed to mark as read:", err);
-      }
+        setUnreadCount(0);
+      } else toast.error(res.message || "Failed to mark notifications as read..");
     }
   };
 
   const handleClearAll = async (e) => {
     e.preventDefault();
-
-    if (!userData?._id) return;
-
-    try {
+    if (!userData?.userId) return;
+    const res = await handleRequest(authApi.delete("/notifications"));
+    if (res.success) {
       setNotifications([]);
       setUnreadCount(0);
-
-      await axios.delete(`${BACKEND_URL}/api/notifications/clear-all/${userData._id}`);
-
-      console.log("All notifications have been deleted!");
-    } catch (err) {
-      console.error("Error deleting notifications:", err);
-    }
+    } else toast.error(res.message || "Failed to clear notifications..");
   };
 
   return (
     <Dropdown
       drop="start"
       className={className}
-      onToggle={handleToggle}
+    // onToggle={handleMarkAllRead}
     >
-      <OverlayTrigger
-        placement="bottom"
-        overlay={<Tooltip>Notifications</Tooltip>}
-      >
+      <OverlayTrigger placement="bottom" overlay={<Tooltip>Notifications</Tooltip>}>
         <DropdownToggle
           className="btn btn-light btn-round mb-0 arrow-none"
           role="button"
-          style={{ overflow: 'visible' }}
+          style={{ overflow: "visible" }}
         >
           <BsBell className="bi bi-cart3 fa-fw fs-10" />
           {unreadCount > 0 && (
-            <span className="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-warning mt-xl-2 ms-n1" style={{ zIndex: 10, pointerEvents: 'none' }}>
-              {unreadCount > 99 ? '99+' : unreadCount}
+            <span className="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-warning mt-xl-2 ms-n1" style={{ zIndex: 10, pointerEvents: "none" }}>
+              {unreadCount > 99 ? "99+" : unreadCount}
             </span>
           )}
         </DropdownToggle>
@@ -182,20 +170,32 @@ const NotificationDropdown = ({ className }) => {
 
       <DropdownMenu className="dropdown-animation dropdown-menu-end dropdown-menu-size-md p-0 shadow-lg border-0 mt-2">
         <Card className="bg-transparent">
-          <CardHeader className="bg-transparent border-bottom py-3 d-flex justify-content-between">
-            <h6 className="m-0">
-              Notifications
-            </h6>
+          <CardHeader className="bg-transparent border-bottom border-3 py-3 d-flex justify-content-between align-items-center">
+            <div className="d-flex align-items-center">
+              <h5 className="mb-0 me-1">
+                Notifications
+              </h5>
+              <OverlayTrigger placement="top" overlay={<Tooltip>Mark All Read</Tooltip>}>
+                <Button
+                  variant="link"
+                  size="sm"
+                  className="text-success p-0 mb-0 btn-round d-flex align-items-center justify-content-center"
+                  onClick={handleMarkAllRead}
+                >
+                  <FaCheckDouble size={20} />
+                </Button>
+              </OverlayTrigger>
+            </div>
             <Link className="small fw-bold" to="#" onClick={handleClearAll}>
-              Clear all
+              Clear All
             </Link>
           </CardHeader>
 
           <CardBody className="p-0">
-            <ul className="list-group list-unstyled list-group-flush" style={{ maxHeight: '420px', overflowY: 'auto' }}>
+            <ul className="list-group list-unstyled list-group-flush" style={{ maxHeight: "420px", overflowY: "auto" }}>
               {notifications.length > 0 ? (
                 notifications.map((noti, idx) => (
-                  <NotificationItem key={noti._id || idx} noti={noti} />
+                  <NotificationItem key={noti?.notifId || idx} noti={noti} />
                 ))
               ) : (
                 <li className="p-4 text-center">

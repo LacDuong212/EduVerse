@@ -1,7 +1,7 @@
-import { DEFAULT_AVATAR_IMG } from "@/contexts/constants";
 import { Card, Col, OverlayTrigger, Row, Tooltip } from "react-bootstrap";
 import { FaBook, FaCommentDots, FaStar, FaUserGraduate } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import { DEFAULT_AVATAR_IMG } from "@/contexts/constants";
 
 const InstructorTab = ({ instructor = {} }) => {
   const avatar = instructor?.avatar || DEFAULT_AVATAR_IMG;

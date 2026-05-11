@@ -86,9 +86,7 @@ const courseSchema = new mongoose.Schema({
 
   isPrivate: { type: Boolean, default: true },
   isDeleted: { type: Boolean, default: false },
-}, {
-  timestamps: true
-});
+}, { timestamps: true });
 
 courseSchema.index({
   title: "text",

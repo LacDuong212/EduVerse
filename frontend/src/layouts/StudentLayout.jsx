@@ -44,7 +44,6 @@ const VerticalMenu = () => {
 
 const StudentLayout = ({ children, isNested = false }) => {
   const { pathname } = useLocation();
-  const { user } = useProfile();
   const { isTrue: isOffCanvasMenuOpen, toggle: toggleOffCanvasMenu } = useToggle();
   const { width } = useViewPort();
 
@@ -69,7 +68,7 @@ const StudentLayout = ({ children, isNested = false }) => {
       <main className="flex-grow-1">
         {isNested ? (
           <>
-            <Banner toggleOffCanvas={toggleOffCanvasMenu} studentData={user} />
+            <Banner toggleOffCanvas={toggleOffCanvasMenu} />
             <section className="pt-0">
               <Container>
                 <Row>

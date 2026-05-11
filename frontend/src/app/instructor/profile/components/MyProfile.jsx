@@ -5,6 +5,7 @@ import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import { DEFAULT_AVATAR_IMG } from "@/contexts/constants";
 import { mapResponseErrors } from "@/utils/mapper";
 import useMyProfile from "../useMyProfile";
 
@@ -90,7 +91,7 @@ const MyProfile = () => {
                 {/* Avatar */}
                 <div className="mt-2 position-relative" style={{ width: "160px", height: "160px" }}>
                   {avatarLogic.currentSrc ? (
-                    <img src={avatarLogic.currentSrc} className="rounded-3 border border-body border-3 shadow w-100 h-100 object-fit-cover" alt="Avatar" />
+                    <img src={avatarLogic.currentSrc} className="rounded-3 border border-body border-3 shadow w-100 h-100 object-fit-cover" alt="Avatar" onError={(e) => e.target.src = DEFAULT_AVATAR_IMG} />
                   ) : (
                     <div className="rounded-3 border border-body border-3 shadow d-flex align-items-center justify-content-center bg-light w-100 h-100 fs-1 fw-bold">
                       {(instructor?.name?.[0] || "I").toUpperCase()}
