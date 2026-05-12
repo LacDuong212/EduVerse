@@ -1,5 +1,4 @@
-import { useSelector } from "react-redux";
-import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import ChatbotWidget from "@/app/chatbot";
 import PublicOnlyRoute from "@/components/PublicOnlyRoute";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -14,9 +13,7 @@ const HIDE_CHATBOT = [
 ];
 
 const AppRouter = props => {
-  // const { isLoggedIn, userData } = useSelector(state => state.auth);
   const location = useLocation();
-  // const navigate = useNavigate();
 
   const shouldHideChat = HIDE_CHATBOT.some(path =>
     location.pathname.startsWith(path)
@@ -28,7 +25,6 @@ const AppRouter = props => {
       <RoutePreloaderListener />
       {!shouldHideChat && <ChatbotWidget />}
 
-      {/* #TODO: optimize */}
       <Routes>
         <Route path="/" element={<Navigate to="/home" replace />} />
 
