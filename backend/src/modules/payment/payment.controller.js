@@ -103,7 +103,13 @@ export const momoReturn = asyncHandler(async (req, res) => {
   const { isValid, amount, resultCode } = momoProvider.verifySignature(req.query);
   const { orderId, transId } = req.query;
 
-  const success = isValid && Number(resultCode) === 0;
+   if (!isValid) {
+    return res.redirect(
+      `${clientUrl}/student/payment-failed?orderId=${orderId || ""}&code=invalid_signature&gateway=momo`
+    );
+  }
+
+  const success = Number(resultCode) === 0;
 
   if (orderId && transId) {
     if (success) {
@@ -140,7 +146,13 @@ export const vnpayReturn = asyncHandler(async (req, res) => {
   const amount = Number(req.query["vnp_Amount"] || 0) / 100;
   const transactionId = req.query["vnp_TransactionNo"];
 
-  const success = isValid && rspCode === "00";
+  if (!isValid) {
+    return res.redirect(
+      `${clientUrl}/student/payment-failed?orderId=${orderId || ""}&code=invalid_signature&gateway=vnpay`
+    );
+  }
+
+  const success = rspCode === "00";
 
   if (orderId && transactionId) {
     if (success) {
