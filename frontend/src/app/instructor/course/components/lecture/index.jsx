@@ -166,7 +166,7 @@ const Lecture = ({ show, onClose, onSave, initialLecture = null }) => {
             <textarea
               className={`form-control ${errors?.description ? "is-invalid" : ""}`}
               rows={3}
-              value={form.description}
+              defaultValue={form.description}
               placeholder="Enter lecture description"
               disabled={isUploading}
               onChange={(e) => handlers.updateField("description", e.target.value)}

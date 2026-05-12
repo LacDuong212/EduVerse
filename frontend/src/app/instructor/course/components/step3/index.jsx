@@ -87,7 +87,7 @@ const Step3 = ({ stepperInstance, activeStep }) => {
                 <AccordionItem eventKey={String(i)} key={i} className="mt-3 border rounded overflow-hidden">
                   <AccordionHeader className="font-base">
                     <div className="d-flex flex-column me-2">
-                      <span className={`h5 mb-0 text-break ${sectionTitleErr || sectionLecturesErr ? "text-danger" : ""}`}>
+                      <span className={`h6 mb-0 text-break ${sectionTitleErr || sectionLecturesErr ? "text-danger" : ""}`}>
                         {sec.title}
                       </span>
                       {sectionTitleErr && (

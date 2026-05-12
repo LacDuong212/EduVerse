@@ -93,7 +93,7 @@ export const getPaginatedReviewsByCourseId = async (
     } = await getCourseAccess(user.role, user.userId, course);
 
     if (course.isPrivate || course.status !== COURSE_STATUS.live)
-      if (!isOwner || !isEnrolled)
+      if (!isOwner && !isEnrolled)
         throw new AppError("Course is currently unavailable.", 403);
 
     if (isOwner)
