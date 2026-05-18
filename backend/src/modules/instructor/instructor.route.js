@@ -96,7 +96,6 @@ privateRoutes.post(
   validate(instructorSchema.submitCourseRequest),
   instructorController.submitCourse
 );
-// #TODO: REMOVE!!
 privateRoutes.get(
   "/courses/:courseId/approve",
   validate(instructorSchema.courseIdParamRequest),

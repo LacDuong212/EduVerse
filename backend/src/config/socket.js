@@ -17,7 +17,6 @@ export const initSocket = (server) => {
     },
     transports: ["polling", "websocket"],
     pingTimeout: 60000,
-
     connectionStateRecovery: {
       maxDisconnectionDuration: 2 * 60 * 1000,
       skipMiddlewares: true,
@@ -25,12 +24,22 @@ export const initSocket = (server) => {
   });
 
   io.on("connection", (socket) => {
+    // logger.debug(`[Socket] New client connected: ${socket.id}`);
+
     socket.on("newUser", (userId) => {
       addNewUser(userId, socket.id);
     });
 
-    socket.on("disconnect", () => {
-      removeUser(socket.id);
+    socket.on("disconnect", (reason) => {
+      logger.debug(`[Socket] Disconnected (${reason}): ${socket.id}`);
+
+      if (reason === "transport close" || reason === "ping timeout") {
+        setTimeout(() => {
+          removeUser(socket.id);
+        }, 2 * 60 * 1000);
+      } else {
+        removeUser(socket.id);
+      }
     });
   });
 
@@ -40,11 +49,14 @@ export const initSocket = (server) => {
 const addNewUser = (userId, socketId) => {
   onlineUsers = onlineUsers.filter(u => u.userId !== userId);
   onlineUsers.push({ userId, socketId });
-  logger.debug("Online Users:", onlineUsers);
+  io.emit("getOnlineUsers", onlineUsers);
+  logger.debug(`[Socket] Online Users: ${onlineUsers.length}`);
+  // logger.debug(`[Socket] Online Users (${onlineUsers.length}): [ ${onlineUsers.map(u => u.userId).join(', ')} ]`);
 };
 
 const removeUser = (socketId) => {
   onlineUsers = onlineUsers.filter((user) => user.socketId !== socketId);
+  if (io) io.emit("getOnlineUsers", onlineUsers);
 };
 
 export const getIO = () => io;

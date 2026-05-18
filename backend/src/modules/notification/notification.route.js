@@ -11,8 +11,8 @@ notifRoute.use(protect);
 notifRoute.get("/", validate(notifSchema.limitQuery), notifController.getMyNotifications);
 notifRoute.delete("/", notifController.deleteAllNotifications);
 notifRoute.get("/count", notifController.countMyNoftications);
-notifRoute.put("/read", notifController.markAllRead);
+notifRoute.patch("/read", notifController.markAllRead);
 notifRoute.get("/unread/count", notifController.countMyUnreadNoftications);
-notifRoute.put("/:id/read", validate(notifSchema.notifIdParams), notifController.markAsRead);
+notifRoute.patch("/:id/read", validate(notifSchema.notifIdParams), notifController.markAsRead);
 
 export default notifRoute;

@@ -1,13 +1,43 @@
+import axios from 'axios';
 import { useState, useEffect } from 'react';
 import ReactApexChart from 'react-apexcharts';
 import { Card, CardBody, CardHeader, Col } from 'react-bootstrap';
-import { earningChat } from '../data';
-import axios from 'axios';
+import { formatCurrency, formatCurrencyNumber } from "../../../utils/currency";
 
 const Earnings = () => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
-  const [chartOptions, setChartOptions] = useState(earningChat);
-  const [chartSeries, setChartSeries] = useState(earningChat.series);
+  const [theme, setTheme] = useState(localStorage.getItem('EDUVERSE_THEME_KEY') || 'light');
+  const [chartSeries, setChartSeries] = useState([]);
+
+  const chartConfig = {
+    series: [{ data: [] }],
+    chart: { toolbar: { show: true } },
+    dataLabels: {
+      formatter: (val) => formatCurrencyNumber(val),
+      enabled: true
+    },
+    stroke: { curve: "smooth", width: 2 },
+    colors: [getComputedStyle(root).getPropertyValue('--bs-purple')],
+    xaxis: {
+      type: 'category',
+      axisBorder: { show: false },
+      axisTicks: { show: false },
+      tooltip: { enabled: false },
+    },
+    yaxis: [{
+      labels: { formatter: (val) => formatCurrency(val) },
+      axisTicks: { show: false },
+      axisBorder: { show: false },
+    }],
+    tooltip: {
+      theme: theme === 'dark' ? 'dark' : 'light',
+      y: {
+        formatter: (val) => formatCurrency(val),
+        title: { formatter: () => '' }
+      },
+      marker: { show: false }
+    }
+  };
 
   useEffect(() => {
     const fetchChartData = async () => {
@@ -18,17 +48,7 @@ const Earnings = () => {
         );
 
         if (data.success) {
-          const { series, categories } = data.data;
-
-          setChartSeries(series);
-          
-          setChartOptions(prevOptions => ({
-            ...prevOptions,
-            xaxis: {
-              ...prevOptions.xaxis,
-              categories: categories
-            }
-          }));
+          setChartSeries(data.data.series);
         }
       } catch (error) {
         console.error("Failed to fetch earnings chart:", error);
@@ -36,19 +56,19 @@ const Earnings = () => {
     };
 
     fetchChartData();
-  }, []);
+  }, [backendUrl]);
 
   return <Col xs={12}>
     <Card className="shadow h-100">
       <CardHeader className="p-4 border-bottom">
-        <h5 className="card-header-title">Earnings (Last 12 Months)</h5>
+        <h5 className="card-header-title">Courses Revenue (Last 12 Months)</h5>
       </CardHeader>
       <CardBody>
         <ReactApexChart
           height={400}
           series={chartSeries}
           type="area"
-          options={chartOptions}
+          options={chartConfig}
         />
       </CardBody>
     </Card>

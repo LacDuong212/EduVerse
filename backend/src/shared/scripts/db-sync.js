@@ -3,7 +3,7 @@ import logger from '#utils/logger.js';
 
 import Cart from '#modules/cart/cart.model.js';
 import Course, { STATUS_ENUM } from '#modules/course/course.model.js';
-import CourseProgress from '#modules/learning/course-progress.model.js';
+import CourseProgress, { LECTURE_STATUS_ENUM } from '#modules/learning/course-progress.model.js';
 import Curriculum from '#modules/course/curriculum.model.js';
 import DraftVideo from '#modules/video/draft-video.model.js';
 import Enrollment from '#modules/enrollment/enrollment.model.js';

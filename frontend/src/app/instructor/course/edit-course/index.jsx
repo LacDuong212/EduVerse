@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Badge, Button, Card, CardBody, CardHeader, Col, Collapse, Container, Row, Spinner } from "react-bootstrap";
+import { Badge, Button, Card, CardBody, CardHeader, Col, Collapse, Container, OverlayTrigger, Row, Spinner, Tooltip } from "react-bootstrap";
 import { BsQuestionCircle } from "react-icons/bs";
 import { FaArrowLeft, FaEraser } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
@@ -157,14 +157,19 @@ const EditCourseForm = () => {
                       {currentCourse?.status}
                     </Badge>
                   </div>
-                  <Button
-                    variant="outline-danger"
-                    onClick={onDiscardChanges}
-                    title="Discard Changes"
-                    className="btn-sm btn-round d-flex flex-shrink-0 align-items-center justify-content-center mb-0"
+                  <OverlayTrigger
+                    placement="bottom"
+                    overlay={<Tooltip>Discard Changes</Tooltip>}
                   >
-                    <FaEraser className="me-1 fs-6" />
-                  </Button>
+                    <Button
+                      variant="outline-danger"
+                      onClick={onDiscardChanges}
+                      disabled={!currentCourse?.hasPendingChanges}
+                      className="btn-sm btn-round d-flex flex-shrink-0 align-items-center justify-content-center mb-0"
+                    >
+                      <FaEraser className="me-1 fs-6" />
+                    </Button>
+                  </OverlayTrigger>
                 </div>
               </Col>
             </Row>

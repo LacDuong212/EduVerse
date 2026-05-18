@@ -20,7 +20,7 @@ export const ADMIN_MENU_ITEMS = [{
     key: 'all-courses',
     label: 'All Courses',
     parentKey: 'courses',
-    url: '/all-courses'
+    url: '/courses'
   }, {
     key: 'category',
     label: 'Category',

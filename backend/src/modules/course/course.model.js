@@ -52,6 +52,7 @@ const courseSchema = new mongoose.Schema({
   previewVideo: { type: String, default: null },
 
   status: { type: String, enum: STATUS_ENUM.values(), default: STATUS_ENUM.draft },
+  previousStatus: { type: String, enum: STATUS_ENUM.values(), default: null },
 
   category: { type: mongoose.Schema.Types.ObjectId, ref: "Category", default: null },
   subCategory: { type: String, default: null },

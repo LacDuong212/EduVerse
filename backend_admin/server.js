@@ -34,7 +34,7 @@ app.use(cookieParser());
 app.use(cors({origin: allowedOrigins, credentials: true}));
 
 // API Endpoints
-app.get('/', (req, res) => res.send("API is running"));
+app.get('/', (req, res) => res.send("EDV-ADM API is running"));
 app.use('/api/account', accountRoute);
 app.use('/api/auth', authRoute);
 app.use('/api/courses', courseRoute);

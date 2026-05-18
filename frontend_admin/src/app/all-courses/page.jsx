@@ -5,29 +5,31 @@ import useAdminCourses from "./useAdminCourses";
 
 
 const Courses = () => {
-  const { 
-    courses, 
-    meta, 
-    loading, 
-    search, 
-    setSearch, 
-    setPage, 
-    refreshCourses 
+  const {
+    courses,
+    setCourses,
+    meta,
+    loading,
+    search,
+    setSearch,
+    setPage,
+    refreshCourses
   } = useAdminCourses();
 
   return <>
-      <PageMetaData title="All Courses" />
-      <CoursesStat meta={meta} loading={loading} />
-      <CoursesList 
-        courses={courses} 
-        loading={loading} 
-        meta={meta}
-        search={search}
-        setSearch={setSearch}
-        setPage={setPage}
-        refreshCourses={refreshCourses}
-      />
-    </>;
+    <PageMetaData title="All Courses" />
+    <CoursesStat meta={meta} loading={loading} />
+    <CoursesList
+      courses={courses}
+      setCourses={setCourses}
+      loading={loading}
+      meta={meta}
+      search={search}
+      setSearch={setSearch}
+      setPage={setPage}
+      refreshCourses={refreshCourses}
+    />
+  </>;
 };
 
 export default Courses;

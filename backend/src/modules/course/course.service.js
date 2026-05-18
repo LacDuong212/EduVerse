@@ -781,8 +781,10 @@ export const submitCourse = async (insId, courseId, changes = null, session = nu
 
     if (!validation.success) throw validation.error;
 
-    if (courseDoc.status === STATUS_ENUM.draft)
+    if (courseDoc.status === STATUS_ENUM.draft) {
+      courseDoc.previousStatus = courseDoc.status;
       courseDoc.status = STATUS_ENUM.pending;
+    }
 
     const now = new Date();
 
@@ -898,7 +900,6 @@ export const updateCoursesInstructorInfo = async (insId, name, avatar, session =
   }, session);
 };
 
-// #TODO: REMOVE!!
 export const approveCourseUpdate = async (courseId, session = null) => {
   return await withTransaction(async (s) => {
     const course = await Course.findById(courseId).session(s);

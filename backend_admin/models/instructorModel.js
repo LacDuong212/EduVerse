@@ -1,38 +1,10 @@
 import mongoose from "mongoose";
 
-// account details
-const statsSubSchema = new mongoose.Schema({
-  totalCourses: { type: Number, default: 0 },
-  totalStudents: { type: Number, default: 0 },
-});
-const myCoursesSubSchema = new mongoose.Schema({
-  course: { type: mongoose.Schema.Types.ObjectId, ref: "Course" },
-});
-const myStudentsSubSchema = new mongoose.Schema({
-  student: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-  addedAt: { type: Date, default: Date.now },
-});
-const enrollmentSubSchema = new mongoose.Schema({
-  course: { type: mongoose.Schema.Types.ObjectId, ref: "Course" },
-  student: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-  isActive: { type: Boolean, default: false },
-  enrolledAt: { type: Date, default: Date.now },
-});
-const ratingSubSchema = new mongoose.Schema({
-  averageRating: { type: Number, min: 0, max: 5, default: 0 },
-  totalRatings: { type: Number, default: 0 },
-});
-const linkedAccountSubSchema = new mongoose.Schema({
-  platform: { type: String },
-  profileUrl: { type: String },
-  addedAt: { type: Date, default: Date.now },
-});
-
-// profile details
 const skillSubSchema = new mongoose.Schema({
   name: { type: String, required: true },
   level: { type: Number, min: 0, max: 100, required: true, default: 0 },
 });
+
 const educationSubSchema = new mongoose.Schema({
   institution: { type: String, required: true },
   degree: { type: String, default: "" },
@@ -43,25 +15,26 @@ const educationSubSchema = new mongoose.Schema({
 });
 
 const instructorSchema = new mongoose.Schema({
-  user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  stats: statsSubSchema,
-  rating: ratingSubSchema,
-  linkedAccounts: [linkedAccountSubSchema],
+  user: { type: mongoose.Schema.Types.ObjectId, ref: "User", unique: true, required: true },
+  stats: {
+    totalCourses: { type: Number, default: 0 },
+    totalStudents: { type: Number, default: 0 },
+    totalReviews: { type: Number, default: 0 },
+    ratingSum: { type: Number, default: 0 },
+  },
 
-  myCourses: [myCoursesSubSchema],
-  myStudents: [myStudentsSubSchema],
-  enrollments: [enrollmentSubSchema],
+  myCourses: [{ type: mongoose.Schema.Types.ObjectId, ref: "Course" }],
 
   introduction: { type: String, default: "" },
   address: { type: String, default: "" },
-  
+
   occupation: { type: String, default: "" },
   skills: [skillSubSchema],
   education: [educationSubSchema],
 
   isApproved: { type: Boolean, default: false }
-}, {
-  timestamps: true    // = adding createdAt & updatedAt (automatically handled by mongoose)
-});
+}, { timestamps: true });
+
+instructorSchema.index({ myCourses: 1 });
 
 export default mongoose.model("Instructor", instructorSchema);

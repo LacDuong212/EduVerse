@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { Dropdown, DropdownToggle, DropdownMenu, Card, CardHeader, CardBody, OverlayTrigger, Tooltip, Button } from "react-bootstrap";
 import { BsBan, BsBell, BsCheckCircle, BsInfoCircle, BsExclamationCircle, BsQuestion } from "react-icons/bs";
+import { FaCheckDouble } from "react-icons/fa6";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
 import { useSocketContext } from "@/contexts/SocketContext";
 import { authApi } from "@/utils/api";
 import { handleRequest } from "@/utils/request";
-import { FaCheckDouble } from "react-icons/fa6";
 
 const formatTimeAgo = (dateString) => {
   if (!dateString) return "";
@@ -29,11 +29,10 @@ const formatTimeAgo = (dateString) => {
   });
 };
 
-const NotificationItem = ({ noti }) => {
+const NotificationItem = ({ noti, onMarkRead }) => {
   const renderAvatar = () => {
-    if (noti.sender?.avatar) {
+    if (noti.sender?.avatar)
       return <img className="avatar-img rounded-circle" src={noti.sender.avatar} alt="avatar" />;
-    }
 
     let Icon = BsInfoCircle;
     let colorClass = "text-primary";
@@ -71,9 +70,18 @@ const NotificationItem = ({ noti }) => {
     );
   };
 
+  const handleClick = (e) => {
+    // e.stopPropagation(); 
+    if (noti?.notifId && !noti.isRead) onMarkRead(noti.notifId);
+  };
+
   return (
     <li>
-      <Link className={`list-group-item-action border-0 border-bottom d-flex p-3 ${!noti.isRead ? "bg-light" : ""}`}>
+      <Link
+        className={`list-group-item-action border-0 border-bottom d-flex p-3 ${!noti.isRead ? "bg-light" : ""}`}
+        onClick={handleClick}
+        style={{ cursor: "pointer" }}
+      >
         <div className="me-3">
           <div className="avatar avatar-md">
             {renderAvatar()}
@@ -103,36 +111,44 @@ const NotificationDropdown = ({ className }) => {
     if (userData?.userId) {
       const fetchNotifications = async () => {
         const res = await handleRequest(authApi.get("/notifications"));
-        if (res?.success) {
-          setNotifications(res?.result);
-          setUnreadCount(res?.result.filter(n => !n.isRead).length);
+        if (res.success) {
+          setNotifications(res.result || []);
+          setUnreadCount(res.result.filter((n) => !n.isRead).length || 0);
         } else {
           setNotifications([]);
           setUnreadCount(0);
         }
       };
+
       fetchNotifications();
     }
   }, [userData]);
 
   useEffect(() => {
     if (!socket) return;
+
     const handleNewNotification = (data) => {
       setNotifications(prev => [data, ...prev]);
       setUnreadCount(prev => prev + 1);
     };
+
     socket.on("getNotification", handleNewNotification);
-    return () => {
-      socket.off("getNotification", handleNewNotification);
-    };
+
+    return () => socket.off("getNotification", handleNewNotification);
   }, [socket]);
 
-  const handleMarkAllRead = async (isOpen) => {
-    if (isOpen && unreadCount > 0 && userData?.userId) {
-      const res = await handleRequest(authApi.put("/notifications/read"))
+  const handleMarkAllRead = async (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    if (unreadCount > 0 && userData?.userId) {
+      const res = await handleRequest(authApi.patch("/notifications/read"))
       if (res.success) {
         setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
         setUnreadCount(0);
+        toast.success("All notifications marked as read!");
       } else toast.error(res.message || "Failed to mark notifications as read..");
     }
   };
@@ -147,11 +163,28 @@ const NotificationDropdown = ({ className }) => {
     } else toast.error(res.message || "Failed to clear notifications..");
   };
 
+  const handleMarkOneRead = async (notifId) => {
+    if (!userData?.userId) return;
+
+    const targetNotif = notifications.find(n => n.notifId === notifId);
+    if (!targetNotif || targetNotif.isRead) return;
+
+    const res = await handleRequest(authApi.patch(`/notifications/${notifId}/read`));
+
+    if (res.success) {
+      setNotifications(prev =>
+        prev.map(n => n.notifId === notifId ? { ...n, isRead: true } : n)
+      );
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } else {
+      toast.error(res.message || "Failed to update notification status.");
+    }
+  };
+
   return (
     <Dropdown
       drop="start"
       className={className}
-    // onToggle={handleMarkAllRead}
     >
       <OverlayTrigger placement="bottom" overlay={<Tooltip>Notifications</Tooltip>}>
         <DropdownToggle
@@ -180,7 +213,7 @@ const NotificationDropdown = ({ className }) => {
                   variant="link"
                   size="sm"
                   className="text-success p-0 mb-0 btn-round d-flex align-items-center justify-content-center"
-                  onClick={handleMarkAllRead}
+                  onClick={(e) => handleMarkAllRead(e)}
                 >
                   <FaCheckDouble size={20} />
                 </Button>
@@ -195,7 +228,7 @@ const NotificationDropdown = ({ className }) => {
             <ul className="list-group list-unstyled list-group-flush" style={{ maxHeight: "420px", overflowY: "auto" }}>
               {notifications.length > 0 ? (
                 notifications.map((noti, idx) => (
-                  <NotificationItem key={noti?.notifId || idx} noti={noti} />
+                  <NotificationItem key={noti?.notifId || idx} noti={noti} onMarkRead={handleMarkOneRead} />
                 ))
               ) : (
                 <li className="p-4 text-center">

@@ -44,7 +44,7 @@ export const adminRoutes = [{
   name: 'Admin',
   element: <AdminDashboard />
 }, {
-  path: '/all-courses',
+  path: '/courses',
   name: 'All Courses',
   element: <AdminAllCourses />
 }, {

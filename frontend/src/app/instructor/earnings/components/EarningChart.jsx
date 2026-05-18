@@ -1,14 +1,16 @@
+import { useState } from "react";
 import ReactApexChart from "react-apexcharts";
 import { Card, CardHeader, CardBody, Col, Row } from "react-bootstrap";
 import { BsArrowUp, BsArrowDown, BsDash } from "react-icons/bs";
-import { currency } from "@/contexts/constants";
-import { formatCurrency } from "@/utils/currency";
+import { formatCurrency, toCurrencyFormat } from "@/utils/currency";
 
 const EarningChart = ({ col = 6, earningsData = [] }) => {
+  const [theme, setTheme] = useState(localStorage.getItem("EDUVERSE_THEME_KEY") || "light");
+
   const values = earningsData.map(item => item.value);
 
   const categories = earningsData.map(item => {
-    const [year, month] = item.period.split("-");
+    const [month, year] = item.period.split("-");
     return `${month}/${year}`;
   });
 
@@ -17,17 +19,14 @@ const EarningChart = ({ col = 6, earningsData = [] }) => {
       name: "Earnings",
       data: values
     }],
-    chart: {
-      height: 300,
-      type: "area",
-      toolbar: {
-        show: false
-      },
+    chart: { toolbar: { show: true } },
+    dataLabels: {
+      formatter: (val) => toCurrencyFormat(val),
+      enabled: true,
     },
-    dataLabels: { enabled: true },
-    stroke: { curve: "smooth", width: 2 },
+    stroke: { curve: "smooth", width: 1.5 },
     colors: [
-      getComputedStyle(document.documentElement).getPropertyValue("--bs-primary").trim()
+      getComputedStyle(document.documentElement).getPropertyValue("--bs-info").trim()
     ],
     fill: {
       type: "gradient",
@@ -39,26 +38,20 @@ const EarningChart = ({ col = 6, earningsData = [] }) => {
     xaxis: {
       type: "category",
       categories: categories,
-      axisBorder: {
-        show: false
-      },
-      axisTicks: {
-        show: false
-      }
+      axisBorder: { show: false },
+      axisTicks: { show: false },
+      tooltip: { enabled: false },
     },
     yaxis: [{
-      axisTicks: {
-        show: false
-      },
-      axisBorder: {
-        show: false
-      }
+      labels: { formatter: (val) => toCurrencyFormat(val) },
+      axisTicks: { show: false },
+      axisBorder: { show: false }
     }],
     tooltip: {
+      theme: theme === "dark" ? "dark" : "light",
       fixed: { enabled: false },
-      x: { show: true },
       y: {
-        formatter: (val) => `${val}${currency}`,
+        formatter: (val) => formatCurrency(val),
         title: { formatter: () => "" }
       },
       marker: { show: false }
@@ -98,13 +91,13 @@ const EarningChart = ({ col = 6, earningsData = [] }) => {
     <Col md={12} lg={col}>
       <Card className="bg-transparent border rounded-3">
         <CardHeader className="bg-transparent border-bottom">
-          <h3 className="mb-0">Earnings Overview</h3>
+          <h3 className="mb-0">Earnings Overview <span className="h4 mb-0">(Past 12 Months)</span></h3>
         </CardHeader>
         <CardBody>
           <Row className="g-4">
             <Col sm={6} md={4}>
               <span className="badge text-bg-dark">This Month</span>
-              <h4 className="text-primary my-2">{formatCurrency(thisMonthValue)}</h4>
+              <h4 className="text-info my-2">{formatCurrency(thisMonthValue)}</h4>
               <p className="mb-0">
                 {getChangeDisplay(thisMonthValue, lastMonthValue)} vs. last month
               </p>

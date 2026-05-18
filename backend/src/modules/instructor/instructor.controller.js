@@ -230,7 +230,6 @@ export const getCourseForEdit = asyncHandler(async (req, res) => {
   return sendSuccessResponse(res, 200, "Get course successfully!", course);
 });
 
-// #TODO: REMOVE!!
 export const approveCourse = asyncHandler(async (req, res) => {
   const { courseId } = req.validated?.params || {};
   const result = await courseService.approveCourseUpdate(courseId);

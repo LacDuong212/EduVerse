@@ -160,7 +160,7 @@ const MyStudentsList = ({
                   <th scope="col" className="border-0 ps-3">Student Name</th>
                   <th scope="col" className="border-0 text-center d-none d-md-table-cell">Courses Enrolled</th>
                   <th scope="col" className="border-0 text-center">Status</th>
-                  <th scope="col" className="border-0 text-center">Action</th>
+                  <th scope="col" className="border-0 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody>

@@ -1,5 +1,16 @@
+import mongoose from "mongoose";
 import { z } from "zod";
 import { complexPasswordSchema } from "#modules/auth/auth.validation.js";
+
+export const userIdSchema = z.union([
+  z.instanceof(mongoose.Types.ObjectId),
+  z.string("User ID is required")
+    .trim()
+    .min(1, "User ID cannot be empty")
+    .refine((val) => mongoose.Types.ObjectId.isValid(val), {
+      message: "Invalid user ID format",
+    })
+]);
 
 export const optionalUrlSchema = z
   .string("Must be a valid URL string")

@@ -26,9 +26,9 @@ const EarningCards = ({
         </div>
       </Col>
       <Col sm={6} lg={4}>
-        <div className="text-center p-4 border border-1 border-success rounded-3">
+        <div className="text-center p-4 border border-1 border-info rounded-3">
           <h6 className="text-body">To Be Paid</h6>
-          <h3 className="mb-0 fs-1 text-success">{format(toBePaid)}</h3>
+          <h3 className="mb-0 fs-1 text-info">{format(toBePaid)}</h3>
         </div>
       </Col>
     </Row>
