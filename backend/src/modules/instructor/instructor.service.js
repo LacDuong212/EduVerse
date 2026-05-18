@@ -173,7 +173,7 @@ export const createDraftCourse = async (userId) => {
     const course = await createDraft(instructor, session);
 
     instructor.myCourses?.push(new mongoose.Types.ObjectId(course.courseId));
-    instructor.stats?.totalCourses = instructor.myCourses?.length || 0;
+    instructor.stats.totalCourses = instructor.myCourses?.length || 0;
 
     await instructor.save({ session });
 
@@ -189,7 +189,7 @@ export const removeDraftCourse = async (userId, courseId) => {
     await removeDraft(userId, courseId, session);
 
     instructor.myCourses?.pull(new mongoose.Types.ObjectId(courseId));
-    instructor.stats?.totalCourses = instructor.myCourses?.length || 0;
+    instructor.stats.totalCourses = instructor.myCourses?.length || 0;
 
     await instructor.save({ session });
   });

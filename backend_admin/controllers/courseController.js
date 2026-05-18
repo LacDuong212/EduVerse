@@ -212,7 +212,7 @@ export const softDeleteCourse = async (req, res) => {
 
     if (instructor) {
       instructor.myCourses?.pull(course._id);
-      instructor.stats?.totalCourses = instructor.myCourses?.length || 0;
+      instructor.stats.totalCourses = instructor.myCourses?.length || 0;
       await instructor.save({ session });
 
       await notifyUser({
