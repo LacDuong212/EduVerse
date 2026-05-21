@@ -41,7 +41,8 @@ export const momoIpn = asyncHandler(async (req, res) => {
     return res.status(200).json({ message: "Invalid signature" });
   }
 
-  const { orderId, transId } = req.body;
+  const orderId = momoProvider.getRealOrderId(req.body);
+  const { transId } = req.body;
 
   if (resultCode === 0) {
     await paymentService.processSuccessfulPayment({
@@ -101,7 +102,9 @@ export const vnpayIpn = asyncHandler(async (req, res) => {
 // @route GET /momo/return
 export const momoReturn = asyncHandler(async (req, res) => {
   const { isValid, amount, resultCode } = momoProvider.verifySignature(req.query);
-  const { orderId, transId } = req.query;
+  
+  const orderId = momoProvider.getRealOrderId(req.query);
+  const { transId } = req.query;
 
    if (!isValid) {
     return res.redirect(

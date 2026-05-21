@@ -9,19 +9,26 @@ const {
     MOMO_API_ENDPOINT
 } = process.env;
 
+export const getRealOrderId = (bodyOrQuery) => {
+    return bodyOrQuery?.extraData || null;
+};
+
 export const createPayment = (orderId, amount, orderInfo) => {
     return new Promise((resolve, reject) => {
 
-        const requestId = `${orderId}-${Date.now()}`;
+        const timestamp = Date.now();
+
+        const momoOrderId = `${MOMO_PARTNER_CODE}${timestamp}`;
+        const requestId = `${MOMO_PARTNER_CODE}${timestamp}`;
         const requestType = "payWithMethod";
-        const extraData = "";
+        const extraData = String(orderId);
 
         const rawSignature =
             `accessKey=${MOMO_ACCESS_KEY}` +
             `&amount=${amount}` +
             `&extraData=${extraData}` +
             `&ipnUrl=${MOMO_IPN_URL}` +
-            `&orderId=${orderId}` +
+            `&orderId=${momoOrderId}` +
             `&orderInfo=${orderInfo}` +
             `&partnerCode=${MOMO_PARTNER_CODE}` +
             `&redirectUrl=${MOMO_REDIRECT_URL}` +
@@ -37,7 +44,7 @@ export const createPayment = (orderId, amount, orderInfo) => {
             partnerCode: MOMO_PARTNER_CODE,
             requestId,
             amount,
-            orderId,
+            orderId: momoOrderId,
             orderInfo,
             redirectUrl: MOMO_REDIRECT_URL,
             ipnUrl: MOMO_IPN_URL,
@@ -61,7 +68,6 @@ export const createPayment = (orderId, amount, orderInfo) => {
         };
 
         const req = https.request(options, res => {
-
             let data = "";
 
             res.on("data", chunk => data += chunk);
