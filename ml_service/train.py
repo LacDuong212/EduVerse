@@ -124,7 +124,8 @@ def main():
 
     logger.info(f"Training complete!")
     logger.info(f"  Clusters: {metadata['n_clusters']}")
-    logger.info(f"  Features: {metadata['n_features']}")
+    logger.info(f"  TF-IDF features: {metadata.get('n_features_tfidf', metadata.get('n_features', 'N/A'))}")
+    logger.info(f"  BERT dims: {metadata.get('n_features_bert', 'N/A')}")
     logger.info(f"  Inertia:  {metadata['inertia']:.2f}")
 
     if args.evaluate:

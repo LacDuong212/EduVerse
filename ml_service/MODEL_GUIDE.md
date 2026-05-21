@@ -11,8 +11,9 @@
 3. [Dữ liệu đầu vào](#3-dữ-liệu-đầu-vào)
 4. [Phase 1: Training (Huấn luyện)](#4-phase-1-training-huấn-luyện)
    - 4.1 TF-IDF Vectorization
-   - 4.2 K-Means Clustering
-   - 4.3 Jaccard Item-Item Matrix
+   - 4.2 BERT Sentence Embedding
+   - 4.3 K-Means Clustering (trên BERT space)
+   - 4.4 Jaccard Item-Item Matrix
 5. [Phase 2: Prediction (Dự đoán)](#5-phase-2-prediction-dự-đoán)
    - 5.1 Xây dựng User Profile
    - 5.2 Tính điểm 4 tín hiệu
@@ -50,18 +51,29 @@ Output: 1. Synthetic Data in ML        (score: 0.677)
 
 ## 2. Tổng quan kiến trúc
 
+> **Architecture: Option C — BERT clustering + TF-IDF content**
+>
+> Hệ thống sử dụng 2 kỹ thuật biểu diễn song song:
+> - **BERT (all-MiniLM-L6-v2):** Sentence embedding 384 chiều → K-Means clustering (ngữ nghĩa sâu)
+> - **TF-IDF:** Vector 500 chiều → Cosine similarity cho content scoring (keyword chính xác)
+
 ```
 ┌─────────────────── TRAINING (chạy 1 lần hoặc khi có khoá mới) ───────────────────┐
 │                                                                                    │
-│  MongoDB ──→ Lấy 35 khoá học ──→ TF-IDF ──→ K-Means ──→ Lưu model vào /model/    │
-│  MongoDB ──→ Lấy 144 tương tác ──→ Jaccard Matrix ──→ Lưu vào /model/             │
+│  MongoDB ──→ 35 khoá học ──→ TF-IDF (500 dims) ──→ Lưu vectorizer + vectors       │
+│                           ──→ BERT (384 dims)  ──→ K-Means clustering              │
+│                                                ──→ Lưu bert_vectors + kmeans       │
+│  MongoDB ──→ 144 tương tác ──→ Jaccard Matrix ──→ Lưu vào /model/                 │
 │                                                                                    │
 └────────────────────────────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────── PREDICTION (chạy mỗi khi user mở trang) ──────────────────────┐
 │                                                                                    │
-│  User request ──→ Load model ──→ Xây dựng user profile ──→ Tính 4 signal          │
-│                                  ──→ Normalize ──→ Weighted Fusion ──→ Top-K       │
+│  User profile text ──→ BERT encode ──→ kmeans.predict() ──→ Cluster signal         │
+│                    ──→ TF-IDF transform ──→ cosine_similarity ──→ Content signal   │
+│                    ──→ Jaccard lookup ──→ CF signal                                 │
+│                    ──→ Log(enrolled) ──→ Popularity signal                          │
+│                    ──→ Normalize ──→ Weighted Fusion ──→ Top-K                      │
 │                                                                                    │
 └────────────────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -70,10 +82,22 @@ Model này được gọi là **Hybrid Recommendation System** vì kết hợp 4
 
 | # | Tín hiệu | Kỹ thuật | Trả lời câu hỏi |
 |---|---|---|---|
-| 1 | **Cluster** | K-Means | "Khoá này có cùng nhóm chủ đề với user không?" |
+| 1 | **Cluster** | BERT + K-Means | "Khoá này có cùng nhóm ngữ nghĩa với user không?" |
 | 2 | **Content** | TF-IDF + Cosine | "Nội dung khoá này giống với sở thích user bao nhiêu?" |
 | 3 | **CF** | Jaccard | "Người học giống user có thích khoá này không?" |
 | 4 | **Popularity** | Log count | "Khoá này có nhiều người học không?" |
+
+### Tại sao kết hợp BERT + TF-IDF (Option C)?
+
+| Kỹ thuật | Ưu điểm | Nhược điểm | Vai trò trong hệ thống |
+|---|---|---|---|
+| **BERT** | Hiểu ngữ nghĩa sâu ("Docker" ≈ "containerization") | Chậm hơn, NDCG thấp hơn 6% khi dùng riêng | **Clustering** — nhóm khoá theo ý nghĩa |
+| **TF-IDF** | Nhanh, chính xác keyword (NDCG 0.827) | Không hiểu synonyms | **Content scoring** — so sánh chi tiết |
+
+**Kết quả đánh giá:**
+- BERT Silhouette Score: 0.1243 (gấp 2.1× so với TF-IDF 0.0579) → clustering tốt hơn
+- TF-IDF NDCG@5: 0.8265 (cao hơn BERT 0.7778) → content matching chính xác hơn
+- ⇒ Option C lấy ưu điểm cả hai: BERT cho cluster, TF-IDF cho content
 
 ---
 
@@ -131,7 +155,7 @@ Khi predict cho 1 user, hệ thống lấy:
 
 > **File:** `engine.py` → hàm `train_model(courses, interactions, n_clusters)`
 > **Khi nào chạy:** Khi cần cập nhật model (thêm khoá mới, có thêm users)
-> **Kết quả:** 5 file model lưu trong thư mục `/model/`
+> **Kết quả:** 7 file model lưu trong thư mục `/model/`
 
 ### 4.1 TF-IDF Vectorization
 
@@ -186,21 +210,92 @@ Khoá "React JS"          → [0.38, 0.0, 0.15, 0.0, ..., 0.22, 0.0]  (500 số)
 
 Tại sao cần vector? Vì máy tính **không hiểu chữ**, chỉ hiểu số. Chuyển thành vector cho phép **tính khoảng cách** giữa các khoá → khoá gần nhau = nội dung tương tự.
 
+> **Lưu ý:** TF-IDF vectors dùng cho **Content signal** (cosine similarity). Clustering dùng BERT vectors (xem mục 4.2).
+
 ---
 
-### 4.2 K-Means Clustering
+### 4.2 BERT Sentence Embedding
+
+#### BERT là gì?
+
+**BERT** (Bidirectional Encoder Representations from Transformers) là mô hình ngôn ngữ của Google, có khả năng **hiểu ngữ nghĩa** của văn bản — không chỉ đếm từ như TF-IDF.
+
+**Hệ thống sử dụng:** `all-MiniLM-L6-v2` — phiên bản nhỏ gọn (22M tham số, ~90MB) của Microsoft, được train trên 1 tỷ cặp câu.
+
+| Đặc điểm | Giá trị |
+|---|---|
+| Kiến trúc | MiniLM (distilled từ BERT-large) |
+| Số tham số | 22 triệu |
+| Output dimension | 384 |
+| Kích thước model | ~90MB |
+| Tốc độ encode | ~0.5s cho 35 khoá (CPU) |
+
+#### Tại sao cần BERT bên cạnh TF-IDF?
+
+TF-IDF chỉ đếm từ — nếu 2 khoá dùng **từ khác nhau** nhưng **cùng chủ đề**, TF-IDF không nhận ra:
+
+```
+Khoá A: "Docker containerization deployment"
+Khoá B: "Kubernetes orchestration pods"
+
+TF-IDF: cosine = 0.05 (gần như không liên quan — không có từ trùng)
+BERT:   cosine = 0.72 (hiểu rằng cả 2 đều là DevOps/container)
+```
+
+→ BERT giúp **nhóm** (clustering) các khoá chính xác hơn theo **ngữ nghĩa thực sự**.
+
+#### Cách hoạt động
+
+```python
+from sentence_transformers import SentenceTransformer
+
+bert = SentenceTransformer("all-MiniLM-L6-v2")
+
+# Mỗi khoá → 1 vector 384 chiều (dense, normalized)
+course_texts = [build_course_text(c) for c in courses]
+bert_vectors = bert.encode(course_texts, normalize_embeddings=True)
+# Shape: (35, 384)
+```
+
+**So sánh TF-IDF vs BERT:**
+
+| | TF-IDF | BERT |
+|---|---|---|
+| Kiểu vector | Sparse (nhiều số 0) | Dense (ít số 0) |
+| Số chiều | 500 | 384 |
+| Hiểu synonyms? | ❌ Không | ✅ Có |
+| Tốc độ encode | ~1ms | ~15ms/khoá |
+| Silhouette Score | 0.058 | **0.124** (gấp 2.1×) |
+| NDCG@5 (content) | **0.827** | 0.778 |
+| Vai trò | Content similarity | Clustering |
+
+#### Kết quả sau bước này
+
+Mỗi khoá học trở thành 1 vector **384 chiều (dense)**:
+```
+Khoá "Docker Essentials" → [0.032, -0.041, 0.087, ..., 0.015]  (384 số, đều khác 0)
+Khoá "React JS"          → [-0.018, 0.065, 0.003, ..., -0.041]  (384 số)
+```
+
+Các vector này được dùng cho **K-Means clustering** (bước 4.3).
+
+---
+
+### 4.3 K-Means Clustering (trên BERT space)
 
 #### K-Means là gì?
 
 K-Means là thuật toán **nhóm** (clustering) các khoá học vào K nhóm, sao cho khoá cùng nhóm có nội dung **tương tự** nhau.
 
-**Ví dụ với K=4 (hệ thống hiện tại):**
+> **Quan trọng:** Trong Option C, K-Means chạy trên **BERT vectors (384 dims)** thay vì TF-IDF. Điều này cho Silhouette Score 0.1243 (gấp 2.1× so với clustering trên TF-IDF 0.0579) → các cluster tách biệt hơn.
+
+**Ví dụ với K=4 (hệ thống hiện tại, clustering trên BERT space):**
 
 ```
-Cluster 0 (5 khoá):  Java, Android, Algorithms, Power BI, ML   → "Data/Lập trình cơ bản"
-Cluster 1 (16 khoá): Docker, AWS, K8s, Azure, Cloud, ...       → "DevOps/Cloud"
-Cluster 2 (6 khoá):  NestJS, React, Next.js, Flutter, ...      → "Web Framework"
-Cluster 3 (8 khoá):  Full Stack, JS/TS, Node.js, Testing, ...  → "Full Stack/JS"
+Cluster 0 (9 khoá):  CS Crash Course, Data Science, Algorithms, AI, ML, Cybersecurity...  → "CS/AI/Data"
+Cluster 1 (7 khoá):  Java, Full Stack, Android, Testing courses...                        → "Lập trình tổng quát"
+Cluster 2 (10 khoá): Docker, AWS, K8s, Azure, Cloud, Blockchain, iOS...                   → "DevOps/Cloud/Infra"
+Cluster 3 (9 khoá):  NestJS, React, JS/TS, GraphQL, Next.js, Flutter...                   → "Web/Mobile Framework"
 ```
 
 #### Thuật toán K-Means hoạt động thế nào?
@@ -259,13 +354,13 @@ Inertia
 
 **2. Silhouette Score:**
 - Đo mức "tách biệt" giữa các cluster (-1 đến 1, càng cao càng tốt)
-- K=4 → Silhouette = 0.058 (thấp nhưng bình thường với text data)
+- K=4, BERT space → Silhouette = 0.1243 (tốt hơn TF-IDF 0.058)
 
 **Heuristic sqrt(N/2):** sqrt(35/2) ≈ 4.18 → K=4
 
 ---
 
-### 4.3 Jaccard Item-Item Matrix
+### 4.4 Jaccard Item-Item Matrix
 
 #### Jaccard Similarity là gì?
 
@@ -314,20 +409,21 @@ item_item_matrix = {
 
 ---
 
-### 4.4 Kết quả Training — 5 file model
+### 4.5 Kết quả Training — 7 file model
 
-Sau khi train xong, 5 file được lưu trong `/model/`:
+Sau khi train xong, 7 file được lưu trong `/model/`:
 
 | File | Nội dung | Kích thước |
 |---|---|---|
 | `tfidf_vectorizer.joblib` | Bộ TF-IDF đã fit (vocabulary, IDF weights) | ~200KB |
-| `kmeans_model.joblib` | Model K-Means đã train (centroids) | ~50KB |
+| `kmeans_model.joblib` | Model K-Means đã train (centroids trên BERT space) | ~50KB |
 | `course_vectors.joblib` | Ma trận TF-IDF vectors (35 × 500) | ~100KB |
+| `bert_vectors.joblib` | Ma trận BERT embeddings (35 × 384) | ~55KB |
 | `course_ids.joblib` | Danh sách course IDs tương ứng | ~5KB |
 | `item_item_matrix.joblib` | Ma trận Jaccard similarity | ~50KB |
-| `train_metadata.joblib` | Thông tin train (ngày, config, stats) | ~2KB |
+| `train_metadata.joblib` | Thông tin train (ngày, config, stats, architecture) | ~2KB |
 
-Tại sao lưu file? Vì **training mất thời gian** (vài giây), nhưng **prediction cần nhanh** (<100ms). Load file đã train → predict ngay, không cần train lại.
+Tại sao lưu file? Vì **training mất thời gian** (~10s bao gồm BERT encode), nhưng **prediction cần nhanh** (<500ms). Load file đã train → predict ngay, không cần train lại.
 
 ---
 
@@ -385,34 +481,42 @@ user_text = "Docker... Docker... Docker... Docker... Docker... Docker...
 
 **Tại sao lặp?** TF-IDF đếm tần suất từ. Lặp khoá Docker 6 lần → các từ "docker", "container" có TF cao → vector user "nghiêng" về phía Docker/DevOps.
 
-**Bước 4: TF-IDF transform**
+**Bước 4: Dual encoding**
 ```python
+# TF-IDF (cho Content signal)
 user_vector = vectorizer.transform([user_text])
 # → vector 500 chiều, cùng không gian với course vectors
+
+# BERT (cho Cluster signal)
+bert = _get_bert_model()
+user_bert_vector = bert.encode([user_text], normalize_embeddings=True)
+# → vector 384 chiều, cùng không gian với BERT course vectors
 ```
 
 ### 5.2 Tính điểm 4 tín hiệu
 
 Với **mỗi** khoá chưa enroll (candidate), tính 4 scores:
 
-#### Signal 1: Cluster Score (trọng số 25%)
+#### Signal 1: Cluster Score (trọng số 25%) — BERT-based
 
 ```
-Nếu khoá cùng cluster với user → score = 1.0
-Nếu khác cluster → score = 1/(1 + khoảng cách giữa 2 centroids)
+1. Encode user profile + candidate với BERT → vectors 384 chiều
+2. kmeans.predict(bert_vector) → cluster assignment
+3. Nếu khoá cùng cluster với user → score = 1.0
+4. Nếu khác cluster → score = 1/(1 + khoảng cách giữa 2 BERT centroids)
 ```
 
 **Ví dụ:**
 ```
-User cluster = 1 (DevOps)
-Khoá Docker Advanced → cluster 1 → score = 1.0 ✅
-Khoá React JS        → cluster 2 → khoảng cách centroid = 3.5
-                                  → score = 1/(1+3.5) = 0.22
+User BERT vector → kmeans.predict() → cluster 2 (DevOps/Cloud)
+Khoá Docker Advanced → BERT encode → cluster 2 → score = 1.0 ✅
+Khoá React JS        → BERT encode → cluster 3 → khoảng cách centroid = 0.8
+                                                → score = 1/(1+0.8) = 0.56
 ```
 
-**Ý nghĩa:** "Khoá này có cùng lĩnh vực với user không?" Cùng lĩnh vực → bonus cao.
+**Tại sao BERT cho clustering?** BERT hiểu "Docker" ≈ "containerization" ≈ "K8s" → đặt chúng gần nhau → Silhouette 0.1243 (vs TF-IDF 0.058).
 
-#### Signal 2: Content Score (trọng số 35%)
+#### Signal 2: Content Score (trọng số 35%) — TF-IDF-based
 
 Dùng **Cosine Similarity** giữa user vector và course vector:
 
@@ -541,9 +645,12 @@ Final score = 0.250 + 0.228 + 0.240 + 0.030 = 0.748
 |---|---|---|---|
 | **n_courses** | 35 | Tổng khoá học trong catalog | Nhỏ (prototype) |
 | **n_interactions** | 144 | Tổng lượt tương tác (enrollment + wishlist + review) | 32 users × ~4.5 enrollments |
-| **n_features** | 500 | Số chiều TF-IDF vector | Đủ cho 35 khoá |
-| **n_clusters** | 4 | Số nhóm K-Means | Heuristic sqrt(35/2) ≈ 4 |
-| **inertia** | 27.69 | Tổng khoảng cách các điểm → tâm cluster | Càng thấp càng tốt (nhưng giảm dần khi K tăng) |
+| **n_features_tfidf** | 500 | Số chiều TF-IDF vector (content signal) | Đủ cho 35 khoá |
+| **n_features_bert** | 384 | Số chiều BERT embedding (cluster signal) | all-MiniLM-L6-v2 output |
+| **bert_model** | all-MiniLM-L6-v2 | Sentence transformer model | 22M params, ~90MB |
+| **n_clusters** | 4 | Số nhóm K-Means (trên BERT space) | Heuristic sqrt(35/2) ≈ 4 |
+| **inertia** | 19.13 | Tổng khoảng cách các điểm → tâm cluster (BERT space) | Càng thấp càng tốt |
+| **architecture** | Option C | BERT clustering + TF-IDF content | Hybrid best-of-both |
 
 ### 6.2 Thông số đánh giá
 
@@ -610,17 +717,19 @@ $$NDCG = \frac{1}{\log_2(rank + 1)}$$
 ```
 ml_service/
 ├── app.py           ← FastAPI server (API endpoints)
-├── engine.py        ← Core ML: train_model() + predict()
+├── engine.py        ← Core ML: train_model() + predict() [Option C: BERT+TF-IDF]
 ├── db.py            ← MongoDB connection + data loading
 ├── train.py         ← Script train model từ command line
 ├── evaluate.py      ← Script đánh giá chất lượng model
+├── evaluate_bert.py ← So sánh BERT vs TF-IDF (benchmark)
 ├── seed_data.py     ← Tạo 30 synthetic users để đánh giá
-├── requirements.txt ← Python dependencies
+├── requirements.txt ← Python dependencies (incl. sentence-transformers)
 ├── .env             ← MongoDB URI, port config
 ├── model/           ← Thư mục chứa model files (auto-generated)
 │   ├── tfidf_vectorizer.joblib
 │   ├── kmeans_model.joblib
-│   ├── course_vectors.joblib
+│   ├── course_vectors.joblib   ← TF-IDF vectors (content signal)
+│   ├── bert_vectors.joblib     ← BERT embeddings (cluster signal)
 │   ├── course_ids.joblib
 │   ├── item_item_matrix.joblib
 │   └── train_metadata.joblib
@@ -666,14 +775,16 @@ Frontend (React) ──HTTP──→ Node.js Backend ──HTTP──→ ml_serv
      │
      └── API: POST /api/train ──→ app.py ──→ engine.train_model()
                                                     │
-                                              ┌─────┼─────┐
-                                              │     │     │
-                                          TF-IDF  KMeans Jaccard
-                                          .fit()  .fit() build
-                                              │     │     │
-                                              └─────┼─────┘
+                                        ┌───────────┼───────────┐
+                                        │           │           │
+                                      TF-IDF      BERT       Jaccard
+                                      .fit()    .encode()    build
+                                        │           │           │
+                                        │       KMeans.fit()    │
+                                        │       (on BERT vecs)  │
+                                        └───────────┼───────────┘
                                                     │
-                                              Save 5 files
+                                              Save 7 files
                                               to /model/
 ```
 
@@ -797,7 +908,11 @@ Trung bình tất cả lần thử → metrics cuối cùng
 
 | Thuật ngữ | Tiếng Việt | Giải thích ngắn |
 |---|---|---|
-| **TF-IDF** | Tần suất — Nghịch tần suất tài liệu | Chuyển text → vector số |
+| **BERT** | Mã hoá ngữ nghĩa 2 chiều | Mô hình AI hiểu ý nghĩa văn bản, không chỉ đếm từ |
+| **Sentence Transformer** | Biến đổi câu thành vector | Thư viện dùng BERT để encode văn bản → vector dense |
+| **all-MiniLM-L6-v2** | Model nhỏ gọn của Microsoft | 22M params, 384 dims, train trên 1 tỷ cặp câu |
+| **Dense vector** | Vector dày đặc | Vector có ít giá trị 0 (ngược với sparse) |
+| **TF-IDF** | Tần suất — Nghịch tần suất tài liệu | Chuyển text → vector số (sparse) |
 | **K-Means** | Phân cụm K nhóm | Thuật toán chia data thành K nhóm tương tự |
 | **Centroid** | Tâm cụm | Điểm trung tâm đại diện cho 1 cluster |
 | **Inertia** | Quán tính | Tổng khoảng cách từ mỗi điểm đến centroid → thấp = cluster chặt |
@@ -820,7 +935,8 @@ Trung bình tất cả lần thử → metrics cuối cùng
 | **Hybrid** | Lai/kết hợp | Kết hợp nhiều kỹ thuật → mạnh hơn dùng 1 kỹ thuật |
 | **Sparse** | Thưa | Ma trận/vector có nhiều giá trị 0 |
 | **joblib** | Thư viện lưu model | Serialize Python objects ra file → load lại nhanh |
+| **Option C** | Phương án C | BERT cho clustering + TF-IDF cho content (kiến trúc hiện tại) |
 
 ---
 
-> **Cập nhật lần cuối:** 2026-05-09 | **Tác giả:** EduVerse ML Team
+> **Cập nhật lần cuối:** 2026-05-21 | **Kiến trúc:** Option C (BERT clustering + TF-IDF content) | **Tác giả:** EduVerse ML Team
