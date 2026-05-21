@@ -18,7 +18,7 @@ export const getMyNotifications = asyncHandler(async (req, res) => {
 });
 
 // @desc  Mark all user's notifications as read
-// @route PUT /read
+// @route PATCH /read
 export const markAllRead = asyncHandler(async (req, res) => {
   const userId = req.user?.userId;
   await notifService.markAllAsRead(userId);
@@ -26,7 +26,7 @@ export const markAllRead = asyncHandler(async (req, res) => {
 });
 
 // @desc  Mark one user's notification as read
-// @route PUT /:id/read
+// @route PATCH /:id/read
 export const markAsRead = asyncHandler(async (req, res) => {
   const userId = req.user?.userId;
   const { id } = req.validated?.params || {};

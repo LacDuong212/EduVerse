@@ -9,7 +9,6 @@ import useToggle from "@/hooks/useToggle";
 import useViewPort from "@/hooks/useViewPort";
 
 const Footer = lazy(() => import("@/components/Footer"));
-const Preloader = lazy(() => import("@/components/Preloader"));
 const Banner = lazy(() => import("@/components/studentLayoutComponents/Banner"));
 const TopNavigationBar = lazy(() => import("@/components/studentLayoutComponents/TopNavigationBar"));
 
@@ -44,7 +43,6 @@ const VerticalMenu = () => {
 
 const StudentLayout = ({ children, isNested = false }) => {
   const { pathname } = useLocation();
-  const { user } = useProfile();
   const { isTrue: isOffCanvasMenuOpen, toggle: toggleOffCanvasMenu } = useToggle();
   const { width } = useViewPort();
 
@@ -55,7 +53,7 @@ const StudentLayout = ({ children, isNested = false }) => {
   if (isFullscreen) {
     return (
       <main className="bg-dark min-vh-100">
-        <Suspense fallback={<Preloader />}>{children}</Suspense>
+        <Suspense>{children}</Suspense>
       </main>
     );
   }
@@ -69,7 +67,7 @@ const StudentLayout = ({ children, isNested = false }) => {
       <main className="flex-grow-1">
         {isNested ? (
           <>
-            <Banner toggleOffCanvas={toggleOffCanvasMenu} studentData={user} />
+            <Banner toggleOffCanvas={toggleOffCanvasMenu} />
             <section className="pt-0">
               <Container>
                 <Row>
@@ -84,7 +82,7 @@ const StudentLayout = ({ children, isNested = false }) => {
                     </Offcanvas>}
                   </Col>
                   <Col xl={9}>
-                    <Suspense fallback={<Preloader />}>{children}</Suspense>
+                    <Suspense>{children}</Suspense>
                   </Col>
                 </Row>
               </Container>

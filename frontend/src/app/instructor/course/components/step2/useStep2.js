@@ -112,10 +112,7 @@ export const useStep2 = (stepperInstance) => {
     if (e) e.preventDefault();
     if (isImgLoading || isVidLoading) return;
 
-    if (!validate()) {
-      toast.error("Please make sure all the fields are correct..");
-      return;
-    }
+    if (!validate()) return toast.error("Please make sure all the fields are correct..");
 
     try {
       let finalImg = imageState.url;
@@ -137,7 +134,8 @@ export const useStep2 = (stepperInstance) => {
           toast.success("Media changes saved!");
           stepperInstance?.next();
         } else {
-
+          if (globalErrors?.general) toast.error("Unable to save changes, try adjusting the fields..");
+          else toast.error("Failed to save progress..");
         }
       };
 

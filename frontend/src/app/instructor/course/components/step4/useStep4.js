@@ -51,9 +51,8 @@ export const useStep4 = (stepperInstance) => {
 
     if (!success) {
       setGlobalErrors((prev) => ({ ...prev, ...newErrors }));
-      toast.error("Course failed validation, please check each step again before submitting.");
       if (step !== null) stepperInstance?.to(step);
-      return;
+      return toast.error("Course failed validation, please check each step again before submitting.");
     }
 
     await onSubmit(finalChanges);

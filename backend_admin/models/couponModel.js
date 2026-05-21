@@ -9,11 +9,6 @@ const couponSchema = new mongoose.Schema({
     trim: true
   },
 
-  description: {
-    type: String,
-    required: true, 
-  },
-  
   discountPercent: {
     type: Number,
     required: true,
@@ -21,25 +16,12 @@ const couponSchema = new mongoose.Schema({
     max: 100
   },
 
-  startDate: {
-    type: Date,
-    required: true
-  },
+  description: { type: String, required: true, },
+  startDate: { type: Date, required: true },
+  expiryDate: { type: Date, required: true },
+  isActive: { type: Boolean, default: true },
 
-  expiryDate: {
-    type: Date,
-    required: true
-  },
-
-  isActive: {
-    type: Boolean,
-    default: true
-  },
-
-  usersUsed: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User"
-  }]
+  usersUsed: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }]
 }, {
   timestamps: true
 });

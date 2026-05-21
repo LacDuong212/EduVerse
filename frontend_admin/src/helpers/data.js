@@ -1,4 +1,5 @@
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -22,24 +23,145 @@ export const getAllAdminitrators = async (page = 1, search = "") => {
   }
 };
 
-export const updateCourseStatus = async ({ id, status }) => {
+// COURSE --
+export const approveCourse = async (id, message = null) => {
   try {
     const res = await axios.patch(
-      `${backendUrl}/api/courses/${id}?newStatus=${status}`,
-      {},
+      `${backendUrl}/api/courses/${id}/approve`,
+      { ...axiosConfig, data: { message } }
+    );
+
+    if (res.data?.success) {
+      toast.success(res.data.message || "Course approved successfully!");
+      return {
+        success: true,
+        message: res.data.message,
+        result: res.data.result,
+      };
+    }
+  } catch (error) {
+    console.error("Approve course failed: ", error);
+    const errorMessage = error.response?.data?.message || "Something went wrong.";
+    toast.error(errorMessage);
+    return {
+      success: false,
+      message: errorMessage,
+      result: null,
+    };
+  }
+};
+
+export const deleteCourse = async (id, message = null) => {
+  try {
+    const res = await axios.delete(
+      `${backendUrl}/api/courses/${id}`,
+      { ...axiosConfig, data: { message } }
+    );
+
+    if (res.data?.success) {
+      toast.success(res.data.message || "Course deleted successfully!");
+      return {
+        success: true,
+        message: res.data.message,
+        result: res.data.result,
+      };
+    }
+  } catch (error) {
+    console.error("Delete course failed: ", error);
+    const errorMessage = error.response?.data?.message || "Something went wrong.";
+    toast.error(errorMessage);
+    return {
+      success: false,
+      message: errorMessage,
+      result: null,
+    };
+  }
+};
+
+export const restoreCourse = async (id, message = null) => {
+  try {
+    const res = await axios.patch(
+      `${backendUrl}/api/courses/${id}/restore`,
+      { message },
+      axiosConfig
+    );
+
+    if (res.data?.success) {
+      toast.success(res.data.message || "Course restored successfully!");
+      return {
+        success: true,
+        message: res.data.message,
+        result: res.data.result,
+      };
+    }
+  } catch (error) {
+    console.error("Restore course failed: ", error);
+    const errorMessage = error.response?.data?.message || "Something went wrong.";
+    toast.error(errorMessage);
+    return {
+      success: false,
+      message: errorMessage,
+      result: null,
+    };
+  }
+};
+
+export const unblockCourse = async (id, message = null) => {
+  try {
+    const res = await axios.patch(
+      `${backendUrl}/api/courses/${id}/unblock`,
+      { message },
+      axiosConfig
+    );
+
+    if (res.data?.success) {
+      toast.success(res.data.message || "Course unblocked successfully!");
+      return {
+        success: true,
+        message: res.data.message,
+        result: res.data.result,
+      };
+    }
+  } catch (error) {
+    console.error("Unblock course failed: ", error);
+    const errorMessage = error.response?.data?.message || "Something went wrong.";
+    toast.error(errorMessage);
+    return {
+      success: false,
+      message: errorMessage,
+      result: null,
+    };
+  }
+};
+
+export const updateCourseStatus = async (id, status, message = null) => {
+  try {
+    const res = await axios.post(
+      `${backendUrl}/api/courses/${id}/status`,
+      { newValue: status, message },
       axiosConfig
     );
 
     if (res.data.success) {
-      return res.data;
+      toast.success("Notified instructor!")
+      return {
+        success: true,
+        message: res.data.message,
+        result: res.data.result,
+      };
     }
   } catch (error) {
     console.error("Update status failed: ", error);
-    return { success: false, message: error.message };
+    const errorMessage = error.response?.data?.message || "Something went wrong.";
+    return {
+      success: false,
+      message: errorMessage,
+      result: null,
+    };
   }
 };
 
-//STUDENT
+// STUDENT --
 export const getAllStudents = async (page = 1, search = "") => {
   try {
     const response = await axios.get(
@@ -97,7 +219,7 @@ export const deleteStudent = async (id) => {
   }
 };
 
-// INSTRUCTOR
+// INSTRUCTOR --
 export const getAllInstructors = async (page = 1, search = "") => {
   try {
     const response = await axios.get(
@@ -185,7 +307,7 @@ export const rejectInstructorRequest = async (id) => {
   }
 };
 
-// CATEGORY
+// CATEGORY --
 export const getAllCategories = async () => {
   try {
     const response = await axios.get(`${backendUrl}/api/category`, { params: { mode: 'all' } });
@@ -226,11 +348,11 @@ export const deleteCategory = async (id) => {
   }
 };
 
-// COUPON
+// COUPON --
 export const getAllCoupons = async () => {
   try {
     const response = await axios.get(
-      `${backendUrl}/api/coupons`, 
+      `${backendUrl}/api/coupons`,
       axiosConfig
     );
     return response.data;
@@ -243,8 +365,8 @@ export const getAllCoupons = async () => {
 export const createCoupon = async (couponData) => {
   try {
     const response = await axios.post(
-      `${backendUrl}/api/coupons`, 
-      couponData, 
+      `${backendUrl}/api/coupons`,
+      couponData,
       axiosConfig
     );
     return response.data;
@@ -257,8 +379,8 @@ export const createCoupon = async (couponData) => {
 export const updateCouponStatus = async (id, isActive) => {
   try {
     const response = await axios.put(
-      `${backendUrl}/api/coupons/${id}/status`, 
-      { isActive }, 
+      `${backendUrl}/api/coupons/${id}/status`,
+      { isActive },
       axiosConfig
     );
     return response.data;
@@ -271,7 +393,7 @@ export const updateCouponStatus = async (id, isActive) => {
 export const deleteCoupon = async (id) => {
   try {
     const response = await axios.delete(
-      `${backendUrl}/api/coupons/${id}`, 
+      `${backendUrl}/api/coupons/${id}`,
       axiosConfig
     );
     return response.data;

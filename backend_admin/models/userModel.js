@@ -1,55 +1,49 @@
+import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
-import Course from "./courseModel.js";
+import Enum from "../utils/enum.js";
 
+export const ROLE_ENUM = new Enum({
+  student: "student",
+  instructor: "instructor"
+});
 
 const userSchema = new mongoose.Schema({
-    name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    phonenumber: { type: String },
-    bio: { type: String, default: "" },
-    website: { type: String, default: "" },
-    socials: {
-        facebook: { type: String, default: "" },
-        twitter: { type: String, default: "" },
-        instagram: { type: String, default: "" },
-        youtube: { type: String, default: "" },
-    },
-    pfpImg: { type: String, default: "" },
-    password: { type: String, required: false },
-    verifyOtp: { type: String, default: '' },
-    verifyOtpExpireAt: { type: Number, default: 0 },
-    isVerified: { type: Boolean, default: false },
-    isActivated: { type: Boolean, default: true },
-    role: { type: String, enum: ['student', 'instructor'], default: 'student' },
-    googleId: { type: String, unique: true, sparse: true }
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  phonenumber: { type: String },
+  bio: { type: String, default: '' },
+  website: { type: String, default: '' },
+  socials: {
+    facebook: { type: String, default: '' },
+    instagram: { type: String, default: '' },
+    linkedin: { type: String, default: '' },
+    youtube: { type: String, default: '' },
+  },
+  pfpImg: { type: String, default: '' },
+  password: { type: String, required: false, select: false },
+  verifyOtp: { type: String, default: '' },
+  verifyOtpExpireAt: { type: Number, default: 0 },
+  isVerified: { type: Boolean, default: false },
+  isActivated: { type: Boolean, default: true },
+  role: { type: String, enum: ROLE_ENUM.values(), default: ROLE_ENUM.student },
+  googleId: { type: String, unique: true, sparse: true }
 }, { timestamps: true });
 
-userSchema.post("save", async function () {
-  await Course.updateMany(
-    { "instructor.ref": this._id },
-    { 
-      "instructor.name": this.name,
-      "instructor.avatar": this.avatar 
-    }
-  );
+userSchema.pre("save", async function(next) {
+  if (!this.isModified("password")) return next();
+  this.password = await bcrypt.hash(this.password, 10);
+  next();
 });
 
-userSchema.post("save", async function () {
-  if (!this.isModified("name") && !this.isModified("avatar")) return;
+userSchema.methods.comparePassword = async function(candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
+};
 
-  try {
-    await Course.updateMany(
-      { "instructor.ref": this._id },
-      {
-        "instructor.name": this.name,
-        "instructor.avatar": this.avatar
-      }
-    );
-  } catch (err) {
-    console.error("Failed to update instructor info in courses: ", err);
-  }
-});
+userSchema.methods.setOtp = function() {
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  this.verifyOtp = otp;
+  this.verifyOtpExpireAt = Date.now() + 10 * 60 * 1000;
+  return otp;
+};
 
-const userModel = mongoose.models.user || mongoose.model('User', userSchema);
-
-export default userModel;
+export default mongoose.model("User", userSchema) || mongoose.models.user;

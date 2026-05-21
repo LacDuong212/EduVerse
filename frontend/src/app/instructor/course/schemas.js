@@ -48,7 +48,7 @@ export const lecture = z.object({
   lecId: lectureId.nullish(),
   title: z.string("Lecture title is required.")
     .trim()
-    .min(1, "Lecture video cannot be empty.")
+    .min(1, "Lecture title cannot be empty.")
     .max(MAX_LENGTH.lecTitle, "Lecture title is too long."),
   videoId: videoIdSchema("Lecture video is required and must be valid."),
   duration: z.coerce.number().min(0).default(0),
@@ -57,7 +57,7 @@ export const lecture = z.object({
     .max(MAX_LENGTH.lecDesc, "Lecture description is too long.")
     .nullish(),
   isFree: z.boolean().default(false),
-});
+}).strip();
 
 export const section = z.object({
   secId: sectionId.nullish(),
@@ -75,12 +75,14 @@ export const validator = (data, schema) => {
     return {
       success: false,
       errors: mapZodErrors(validation.error),
+      data: null,
     };
   }
 
   return {
     success: true,
     errors: null,
+    data: validation.data
   }
 };
 
@@ -94,7 +96,7 @@ export const step2Fields = ["image", "thumbnail", "previewVideo"];
 export const step3Fields = ["curriculum"];
 export const step4Fields = ["tags"];
 
-const step1Schema = z.object({
+export const step1Schema = z.object({
   title: z.string("Course title is required.")
     .trim()
     .min(1, "Course title cannot be empty.")
@@ -124,7 +126,7 @@ const step1Schema = z.object({
     .nullish(),
 }).superRefine(discountValidation);
 
-const step2Schema = z.object({
+export const step2Schema = z.object({
   image: z.string("Image URL is required.")
     .trim()
     .url("Invalid image URL."),
@@ -136,14 +138,14 @@ const step2Schema = z.object({
     .nullish(),
 });
 
-const step3Schema = z.object({
+export const step3Schema = z.object({
   curriculum: z.object({
     sections: z.array(section, "Curriculum should have at least one section.")
       .min(1, "Curriculum should have at least one section.")
   }, "Curriculum should contain a list of sections."),
 });
 
-const step4Schema = z.object({
+export const step4Schema = z.object({
   tags: z.array(z.string("Invalid tag.")
     .trim()
     .min(2, "Each tag must have at least 2 characters.")

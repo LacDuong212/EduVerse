@@ -7,6 +7,7 @@ export const toNotifDto = (notif) => {
     type: notif.type || null,
     message: notif.message || null,
     isRead: notif.isRead ?? false,
+    createdAt: notif.createdAt,
   };
 };
 

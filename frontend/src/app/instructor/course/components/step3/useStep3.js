@@ -1,10 +1,12 @@
 import _ from "lodash";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { authApi } from "@/utils/api";
 import { handleRequest } from "@/utils/request";
 import { useCourseEditor } from "../../CourseEditorContext";
 import { step3Fields, validateStep3 } from "../../schemas";
+
+const validIndex = (ind) => Number.isInteger(ind) && ind >= 0;
 
 export const useStep3 = (stepperInstance) => {
   const { course, changes, currentCourse, updateField, onUpdate, errors: globalErrors } = useCourseEditor();
@@ -34,140 +36,145 @@ export const useStep3 = (stepperInstance) => {
     }
   }, [currentCourse?.courseId]);
 
+  // sync errors
   useEffect(() => {
-    const relevantErrors = _.pickBy(globalErrors, (value, key) => {
-      return _.startsWith(key, "curriculum");
-    });
-
-    if (!_.isEqual(errors, relevantErrors)) {
-      setErrors(relevantErrors);
-    }
-  }, [globalErrors]);
+    const relevantErrors = _.pickBy(globalErrors, (value, key) => _.startsWith(key, "curriculum"));
+    if (!_.isEqual(errors, relevantErrors)) setErrors(relevantErrors);
+  }, [globalErrors, errors]);
 
   const stats = useMemo(() => ({
     totalSections: curriculum.length,
     totalLectures: _.sumBy(curriculum, (s) => s.lectures?.length || 0)
   }), [curriculum]);
 
-  // SECTIONS ---
+  const hasProcessing = useMemo(() =>
+    curriculum.some(s => s.lectures?.some(l => l?.aiData?.status === "processing")),
+    [curriculum]
+  );
+
+  const patchLecture = useCallback((sIdx, lIdx, patch) => {
+    setCurriculum(prev => {
+      const updated = _.cloneDeep(prev);
+      const lecture = _.get(updated, `[${sIdx}].lectures[${lIdx}]`);
+      if (lecture) {
+        Object.assign(lecture, _.isFunction(patch) ? patch(lecture) : patch);
+      }
+      return updated;
+    });
+  }, []);
+
+  // section ---
   const handleSaveSection = (title) => {
-    const updatedCurriculum = _.cloneDeep(curriculum);
-    if (editingSectionIndex !== null) {
-      updatedCurriculum[editingSectionIndex].title = title;
-    } else {
-      updatedCurriculum.push({ title, lectures: [] });
-    }
-    setCurriculum(updatedCurriculum);
-    updateField("curriculum.sections", updatedCurriculum);
+    setCurriculum(prev => {
+      const updated = _.cloneDeep(prev);
+      if (validIndex(editingSectionIndex)) {
+        updated[editingSectionIndex].title = title;
+      } else {
+        updated.push({ title, lectures: [] });
+      }
+      updateField("curriculum.sections", updated);
+      return updated;
+    });
     setShowSectionModal(false);
   };
 
   const handleRemoveSection = (index) => {
-    const length = curriculum[index]?.lectures?.length;
-    if (length)
-      if (!window.confirm("Are you sure? All lectures in this section will be deleted.")) return;
-    const updated = curriculum.filter((_, i) => i !== index);
-    setCurriculum(updated);
-    updateField("curriculum.sections", updated);
+    const hasLectures = curriculum[index]?.lectures?.length > 0;
+    if (hasLectures && !window.confirm("Are you sure? All lectures in this section will be deleted.")) return;
+
+    setCurriculum(prev => {
+      const updated = prev.filter((_, i) => i !== index);
+      updateField("curriculum.sections", updated);
+      return updated;
+    });
   };
 
-  // LECTURES ---
+  // lecture ---
   const handleSaveLecture = (lectureChanges) => {
-    const updated = _.cloneDeep(curriculum);
-    const isEditing = editingLectureIndex !== null;
-    const section = updated[activeSectionIndex];
-    let savedLecture;
-    if (isEditing) {
-      const existing = section.lectures[editingLectureIndex];
-      savedLecture = { ...existing, ...lectureChanges };
-      section.lectures[editingLectureIndex] = savedLecture;
-    } else {
-      savedLecture = lectureChanges;
-      section.lectures.push(savedLecture);
-    }
-    setCurriculum(updated);
-    updateField("curriculum.sections", updated);
+    setCurriculum(prev => {
+      const updated = _.cloneDeep(prev);
+      const section = updated[activeSectionIndex];
+      if (!section) return prev;
 
-    setEditingLecture(savedLecture);
+      if (validIndex(editingLectureIndex)) {
+        section.lectures[editingLectureIndex] = {
+          ...section.lectures[editingLectureIndex],
+          ...lectureChanges
+        };
+      } else {
+        section.lectures.push(lectureChanges);
+      }
+
+      updateField("curriculum.sections", updated);
+      return updated;
+    });
     setShowLectureModal(false);
   };
 
   const handleRemoveLecture = (sectionIndex, lectureIndex) => {
     if (!window.confirm("Remove this lecture?")) return;
-    const updated = _.cloneDeep(curriculum);
-    updated[sectionIndex].lectures.splice(lectureIndex, 1);
-    setCurriculum(updated);
-    updateField("curriculum.sections", updated);
+    setCurriculum(prev => {
+      const updated = _.cloneDeep(prev);
+      updated[sectionIndex]?.lectures?.splice(lectureIndex, 1);
+      updateField("curriculum.sections", updated);
+      return updated;
+    });
   };
 
-  // AI --- #TODO
+  // AI ---
   const handleGenerateAI = async () => {
-    if (!selectedAILecture) return;
-    const { sectionIdx, lectureIdx } = selectedAILecture;
-    const lecture = curriculum[sectionIdx].lectures[lectureIdx];
-    if (!course?.courseId || !lecture?.lecId) return toast.warning("Please save curriculum changes first.");
-    if (!lecture?.videoId) return toast.warning("No video found for this lecture.");
-    try {
-      updateLectureAIStatus(sectionIdx, lectureIdx, "processing");
-      const res = await handleRequest(
-        authApi.post(`/courses/${course.courseId}/lectures/${lecture.lecId}/generate-ai`)
-      );
-      if (res.success) toast.info("AI Generation started...");
-      else throw new Error(res.message);
-    } catch (error) {
-      toast.error("Generation failed..");
-      updateLectureAIStatus(sectionIdx, lectureIdx, "failed");
+    const { sectionIdx, lectureIdx } = selectedAILecture || {};
+    if (!validIndex(sectionIdx) || !validIndex(lectureIdx)) return;
+
+    const target = curriculum[sectionIdx]?.lectures?.[lectureIdx];
+    if (!target?.lecId || !target?.videoId) return toast.warning("Missing lecture info or video.");
+
+    patchLecture(sectionIdx, lectureIdx, (l) => ({ aiData: { ...l.aiData, status: "processing" } }));
+    toast.info("AI generation started.");
+
+    const res = await handleRequest(authApi.post(
+      `/courses/${course?.courseId}/lectures/${target.lecId}/generate-ai`
+    ));
+
+    if (res?.success) {
+      patchLecture(sectionIdx, lectureIdx, { aiData: res?.result });
+      toast.success("AI contents generated!");
+    } else {
+      patchLecture(sectionIdx, lectureIdx, (l) => ({ aiData: { ...l.aiData, status: "failed" } }));
+      toast.error(res?.message || "Generation failed.");
     }
   };
 
-  const handleDeleteAI = () => {
-    if (!selectedAILecture) return;
+  const handleDeleteAI = async () => {
+    const { sectionIdx, lectureIdx } = selectedAILecture || {};
+    if (!validIndex(sectionIdx) || !validIndex(lectureIdx)) return;
+
+    const target = curriculum[sectionIdx]?.lectures?.[lectureIdx];
+    if (!target?.lecId) return toast.warning("Missing lecture info.");
+
     if (!window.confirm("Delete this AI content?")) return;
-    // const updated = [...curriculum];
-    // const targetSection = { ...updated[sectionIdx] };
-    // const targetLectures = [...targetSection.lectures];
-    // targetLectures[lectureIdx] = {
-    //   ...targetLectures[lectureIdx],
-    //   aiData: null
-    // };
-    // targetSection.lectures = targetLectures;
-    // updated[sectionIdx] = targetSection;
-    // setCurriculum(updated);
-    // updateField("curriculum", updated);
-    // setShowAIModal(false);
-    // toast.success("AI Content removed.");
+
+    const res = await handleRequest(authApi.delete(
+      `/courses/${course?.courseId}/lectures/${target.lecId}/ai-contents`
+    ));
+
+    if (res?.success) {
+      patchLecture(sectionIdx, lectureIdx, { aiData: null });
+      toast.success("AI Content removed.");
+      // setShowAIModal(false);
+    } else {
+      toast.error(res?.message || "Failed to remove AI generated contents..");
+    }
   };
 
-  const updateLectureAIStatus = (sIdx, lIdx, status) => {
-    const updated = _.cloneDeep(curriculum);
-    _.set(updated, `${sIdx}.lectures.${lIdx}.aiData.status`, status);
-    setCurriculum(updated);
-    // updateField(`curriculum.sections.${sIdx}.lectures.${lIdx}.aiData.status`, status);
-  };
-
-  // AI Polling
-  // useEffect(() => {
-  //   const hasProcessing = curriculum.some(s => s.lectures?.some(l => l.aiData?.status === "processing"));
-  //   if (!hasProcessing || !currentCourse?.courseId) return;
-  //   const interval = setInterval(async () => {
-  //     try {
-  //       const res = await handleRequest(authApi.get(`/instructor/courses/${currentCourse?.courseId}`));
-  //       if (res.success) {
-
-  //       } else throw new Error(res.message);
-  //     } catch (e) { console.error("[DEBUG] Polling Error:", e); }
-  //   }, 1 * 60 * 1000); // every 1m
-  //   return () => clearInterval(interval);
-  // }, [curriculum, currentCourse?.courseId]);
-
+  // submission ---
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
+
     const { success: validateSuccess, errors: newErrors } = validateStep3(currentCourse);
     if (!validateSuccess) {
       setErrors(newErrors);
-
-      toast.error("Please make sure all the fields are correct..");
-      return;
+      return toast.error("Please make sure all the fields are correct..");
     }
 
     const step3Changes = _.pick(changes, step3Fields);
@@ -178,6 +185,9 @@ export const useStep3 = (stepperInstance) => {
       setErrors({});
       toast.success("Curriculum progress saved!");
       stepperInstance?.next();
+    } else {
+      if (globalErrors?.general) toast.error("Unable to save changes, try adjusting the fields..");
+      else toast.error("Failed to save progress..");
     }
   };
 

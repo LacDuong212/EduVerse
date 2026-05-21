@@ -30,11 +30,11 @@ export const INSTRUCTOR_ACCOUNT_DROPDOWN_ITEMS = [{
   label: 'Settings',
   icon: BsGear,
   url: '/instructor/settings'
-}, {
-  key: 'help',
-  label: 'Help',
-  icon: BsInfoCircle,
-  url: '/help'
+// }, {
+//   key: 'help',
+//   label: 'Help',
+//   icon: BsInfoCircle,
+//   url: '/help'
 }];
 export const INSTRUCTOR_APP_MENU_ITEMS = [{
   key: 'dashboard',
@@ -124,6 +124,10 @@ export const STUDENT_APP_MENU_ITEMS = [{
   key: 'courses',
   label: 'Courses',
   url: '/courses'
+// }, {
+//   key: 'instructors',
+//   label: 'Instructors',
+//   url: '/instructors'
 }];
 export const STUDENT_MENU_ITEMS = [{
   key: 'dashboard',

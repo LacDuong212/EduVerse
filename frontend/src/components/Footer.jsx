@@ -11,7 +11,7 @@ import googlePlay from '@/assets/images/client/google-play.svg';
 import grFlag from '@/assets/images/flags/gr.svg';
 import spFlag from '@/assets/images/flags/sp.svg';
 import ukFlag from '@/assets/images/flags/uk.svg';
-import { currentYear, TEAM_NAME } from '../contexts/constants';
+import { currentYear, TEAM_NAME, SUPPORT_EMAIL } from '@/contexts/constants';
 
 
 const Footer = ({
@@ -69,11 +69,18 @@ const Footer = ({
           <Col lg={3}>
             <h5 className="mb-2 mb-md-4">Contact</h5>
             <p className="mb-2">
-              Toll free:<span className="h6 fw-light ms-2">0111-222-333</span>
-              <span className="d-block small">(9:AM to 6:PM UTC)</span>
+              Toll free:<span className="h6 fw-light ms-2">0345476211</span>
+              <span className="d-block small">(9:AM to 6:PM UTC+7)</span>
             </p>
             <p className="mb-0">
-              Email:<span className="h6 fw-light ms-2">example{TEAM_NAME}.com</span>
+              Email:<span className="ms-2">
+                <a
+                  href={`mailto:${SUPPORT_EMAIL}`}
+                  className="text-primary text-decoration-none fw-semibold"
+                >
+                  {SUPPORT_EMAIL}
+                </a>{" "}
+              </span>
             </p>
             <Row className="g-2 mt-2">
               <Col xs={6} sm={4} md={3} lg={6}>

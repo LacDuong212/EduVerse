@@ -1,6 +1,8 @@
 import { getIO, getOnlineUsers } from "#config/socket.js";
 import AppError from "#exceptions/app.error.js";
+import logger from "#utils/logger.js";
 import { withTransaction } from "#utils/transaction.js";
+import { toNotifDto } from "./notification.mapper.js";
 import Notification from "./notification.model.js";
 
 export const getUserNotifications = async (userId, limit = 50) => {
@@ -52,7 +54,10 @@ export const getAllNotificationCount = async (userId) => {
 };
 
 export const sendNotification = async (userId, type, message, session = null) => {
-  const newNotification = await withTransaction(async (s) => {
+  if (!userId || !message)
+    throw new AppError("Missing necessary info to send a notification.", 400);
+
+  const newNotif = await withTransaction(async (s) => {
     const [notification] = await Notification.create(
       [{ user: userId, type, message }],
       { session: s }
@@ -61,22 +66,19 @@ export const sendNotification = async (userId, type, message, session = null) =>
     return notification;
   }, session);
 
-  const onlineUsers = getOnlineUsers();
-  const receiver = onlineUsers.find((u) => u.userId === userId.toString());
+  const notifDto = toNotifDto(newNotif);
 
-  if (receiver) {
-    const io = getIO();
-    if (io) {
-      io.to(receiver.socketId).emit("getNotification", {
-        _id: newNotification._id,
-        user: userId,
-        message,
-        type,
-        isRead: false,
-        createdAt: newNotification.createdAt,
-      });
+  try {
+    const onlineUsers = getOnlineUsers();
+    const receiver = onlineUsers.find((u) => u.userId === userId.toString());
+
+    if (receiver) {
+      const io = getIO();
+      if (io) io.to(receiver.socketId).emit("getNotification", notifDto);
     }
+  } catch (socketError) {
+    logger.error("Real-time notification emit failed:", socketError);
   }
 
-  return newNotification;
+  return notifDto;
 };

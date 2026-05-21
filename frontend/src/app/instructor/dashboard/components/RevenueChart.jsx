@@ -1,13 +1,16 @@
+import { useState } from "react";
 import ReactApexChart from "react-apexcharts";
 import { Card, CardHeader, CardBody, Col, Row } from "react-bootstrap";
 import { BsArrowUp, BsArrowDown, BsDash } from "react-icons/bs";
-import { formatCurrency } from "@/utils/currency";
+import { formatCurrency, toCurrencyFormat } from "@/utils/currency";
 
 const RevenueChart = ({ col = 6, revenueData = [] }) => {
+  const [theme, setTheme] = useState(localStorage.getItem("EDUVERSE_THEME_KEY") || "light");
+
   const values = revenueData.map(item => item.value);
 
   const categories = revenueData.map(item => {
-    const [year, month] = item.period.split('-');
+    const [month, year] = item.period.split("-");
     return `${month}/${year}`;
   });
 
@@ -16,49 +19,37 @@ const RevenueChart = ({ col = 6, revenueData = [] }) => {
       name: "Revenue",
       data: values
     }],
-    chart: {
-      height: 300,
-      type: "area",
-      toolbar: {
-        show: false
-      },
+    chart: { toolbar: { show: true } },
+    dataLabels: {
+      formatter: (val) => toCurrencyFormat(val),
+      enabled: true,
     },
-    dataLabels: { enabled: true },
-    stroke: { curve: "smooth", width: 2 },
+    stroke: { curve: "smooth", width: 1.5 },
     colors: [
       getComputedStyle(document.documentElement).getPropertyValue("--bs-primary").trim()
     ],
     fill: {
       type: "gradient",
-      gradient: {
-        opacityFrom: 0.5,
-        opacityTo: 0.1,
-      }
+      gradient: { opacityFrom: 0.5, opacityTo: 0.1, }
     },
     xaxis: {
       type: "category",
       categories: categories,
-      axisBorder: {
-        show: false
-      },
-      axisTicks: {
-        show: false
-      }
+      axisBorder: { show: false },
+      axisTicks: { show: false },
+      tooltip: { enabled: false },
     },
     yaxis: [{
-      axisTicks: {
-        show: false
-      },
-      axisBorder: {
-        show: false
-      }
+      labels: { formatter: (val) => toCurrencyFormat(val) },
+      axisTicks: { show: false },
+      axisBorder: { show: false }
     }],
     tooltip: {
+      theme: theme === "dark" ? "dark" : "light",
       fixed: { enabled: false },
-      x: { show: true },
       y: {
         formatter: (val) => formatCurrency(val),
-        title: { formatter: () => '' }
+        title: { formatter: () => "" }
       },
       marker: { show: false }
     }
@@ -97,7 +88,7 @@ const RevenueChart = ({ col = 6, revenueData = [] }) => {
     <Col md={12} lg={col}>
       <Card className="bg-transparent border rounded-3 h-100">
         <CardHeader className="bg-light border-bottom">
-          <h5 className="mb-0">Revenue Overview</h5>
+          <h5 className="mb-0">Revenue Overview (Past 12 Months)</h5>
         </CardHeader>
         <CardBody>
           <Row className="g-4">

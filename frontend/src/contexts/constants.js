@@ -5,12 +5,11 @@ export const currentYear = new Date().getFullYear();
 
 export const TEAM_NAME = "@d2v-team";
 
+export const SUPPORT_EMAIL = "lduongwinf@gmail.com";
+
 export const DEFAULT_PAGE_TITLE = "EduVerse";
 export const DEFAULT_AVATAR_IMG = "https://res.cloudinary.com/dw1fjzfom/image/upload/v1757337425/av4_khpvlh.png";
 export const DEFAULT_COURSE_IMG = "https://res.cloudinary.com/dw1fjzfom/image/upload/q_auto/f_auto/v1764427835/course_default_image_pwqnyo.jpg";
-export const COURSE_DRAFT_KEY = 'edv-course-draft';
-export const CREATE_COURSE_DRAFT_STORAGE_KEY = "EDV_draft_createCourse";
-export const EDIT_COURSE_DRAFT_STORAGE_KEY = "EDV_draft_editCourse";
 
 export const colorVariants = ["primary", "secondary", "success", "danger", "warning", "info", "dark", "light"];
 
@@ -30,4 +29,3 @@ export const INSTRUCTOR_WELCOME_SENTENCES = [
   "Embrace the journey of teaching and learning together!",
   "Your passion for teaching lights the way for others 🌟"
 ];
-

@@ -23,7 +23,7 @@ export const login = asyncHandler(async (req, res) => {
 // @desc  Logout user
 // @route POST /logout
 export const logout = asyncHandler(async (req, res) => {
-  res.clearCookie("token", {
+  res.clearCookie("edv_token", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",

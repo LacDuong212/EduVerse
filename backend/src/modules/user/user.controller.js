@@ -26,7 +26,7 @@ export const deactivate = asyncHandler(async (req, res) => {
 
   await userService.deactivateAccount(userId);
 
-  res.clearCookie("token", {
+  res.clearCookie("edv_token", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",

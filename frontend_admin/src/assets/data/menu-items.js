@@ -1,7 +1,8 @@
+import { BiSolidCategory, BiSolidCoupon } from "react-icons/bi";
 import { BsBasket, BsHouse } from 'react-icons/bs';
-import { FaChartBar, FaRegCommentDots, FaUserCog } from 'react-icons/fa';
+import { FaBook, FaChartBar, FaCheckSquare, FaList, FaMoneyBill, FaRegCommentDots, FaUserCog } from 'react-icons/fa';
 import { FaUserGraduate, FaUserTie } from 'react-icons/fa6';
-import { BiSolidCoupon } from "react-icons/bi";
+import { IoSettingsSharp  } from 'react-icons/io5';
 
 export const ADMIN_MENU_ITEMS = [{
   key: 'admin',
@@ -15,25 +16,31 @@ export const ADMIN_MENU_ITEMS = [{
 }, {
   key: 'courses',
   label: 'Courses',
-  icon: BsBasket,
-  children: [{
-    key: 'all-courses',
-    label: 'All Courses',
-    parentKey: 'courses',
-    url: '/all-courses'
-  }, {
-    key: 'category',
-    label: 'Category',
-    parentKey: 'courses',
-    url: '/category'
-  }],
+  icon: FaBook,
+  url: '/courses'
+  // children: [{
+  //   key: 'all-courses',
+  //   label: 'All Courses',
+  //   parentKey: 'courses',
+  //   url: '/courses'
+  // }, {
+  //   key: 'category',
+  //   label: 'Category',
+  //   parentKey: 'courses',
+  //   url: '/category'
+  // }],
   // ,{
   //   key: 'course-detail',
   //   label: 'Course Detail',
   //   url: '/course-detail',
   //   parentKey: 'courses'
   // }]
-},{
+}, {
+  key: 'categories',
+  label: 'Categories',
+  icon: BiSolidCategory,
+  url: '/categories'
+}, {
   key: 'coupons',
   label: 'Coupons',
   icon: BiSolidCoupon,
@@ -49,19 +56,21 @@ export const ADMIN_MENU_ITEMS = [{
   icon: FaUserTie,
   children: [{
     key: 'instructors',
-    label: 'Instructors',
+    label: 'List',
+    icon: FaList,
     url: '/instructors',
     parentKey: 'instructors'
-  }, 
+  },
   // {
   //   key: 'instructor-detail',
   //   label: 'Instructor Detail',
   //   url: '/instructor-detail',
   //   parentKey: 'instructors'
   // }]
-   {
+  {
     key: 'instructor-requests',
-    label: 'Instructor Requests',
+    label: 'Requests',
+    icon: FaCheckSquare,
     url: '/instructor-requests',
     parentKey: 'instructors',
   }]
@@ -81,11 +90,11 @@ export const ADMIN_MENU_ITEMS = [{
 {
   key: 'earnings',
   label: 'Earnings',
-  icon: FaChartBar,
+  icon: FaMoneyBill,
   url: '/earnings'
-}, {
-  key: 'admin-settings',
-  label: 'Admin Settings',
-  icon: FaUserCog,
-  url: '/admin-settings'
+// }, {
+//   key: 'settings',
+//   label: 'Settings',
+//   icon: IoSettingsSharp ,
+//   url: '/settings'
 }];

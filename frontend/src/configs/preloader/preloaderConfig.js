@@ -12,18 +12,14 @@
 export const preloaderConfig = {
   // Routes that should HIDE preloader
   excludeRoutes: [
-    "/auth/sign-in",
-    "/auth/sign-up",
-    "/auth/forgot-password",
-    "/auth/reset-password",
+    "/",
     "/404",
     // Add more routes here...
   ],
 
   // Patterns to exclude (regex)
   excludePatterns: [
-    /^\/auth\//,  // Exclude all auth routes
-    // /^\/admin/, // Uncomment to exclude admin routes
+    /^\/auth\/(?!sign-in)/, // Exclude all auth routes except /auth/sign-in
   ],
 
   // If set, ONLY these routes will show preloader

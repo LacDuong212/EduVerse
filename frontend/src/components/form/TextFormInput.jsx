@@ -1,25 +1,49 @@
-import { FormControl, FormGroup, FormLabel } from 'react-bootstrap';
-import Feedback from 'react-bootstrap/esm/Feedback';
-import { Controller } from 'react-hook-form';
+import { FormControl, FormGroup, FormLabel } from "react-bootstrap";
+import Feedback from "react-bootstrap/esm/Feedback";
+
 const TextFormInput = ({
   name,
   containerClassName: containerClass,
-  control,
   id,
   label,
   noValidate,
   labelClassName: labelClass,
+  isInvalid,
+  error,
+  value,
+  onChange,
+  required,
   ...other
 }) => {
-  return <Controller name={name} defaultValue={''} control={control} render={({
-    field,
-    fieldState
-  }) => <FormGroup className={containerClass}>
-          {label && (typeof label === 'string' ? <FormLabel htmlFor={id ?? name} className={labelClass}>
-                {label}
-              </FormLabel> : <>{label}</>)}
-          <FormControl id={id ?? name} {...other} {...field} isInvalid={Boolean(fieldState.error?.message)} />
-          {!noValidate && fieldState.error?.message && <Feedback type="invalid">{fieldState.error?.message}</Feedback>}
-        </FormGroup>} />;
+  return (
+    <FormGroup className={containerClass}>
+      {label && (
+        typeof label === "string" ? (
+          <FormLabel htmlFor={id ?? name} className={labelClass}>
+            {label}
+            {required && <span className="text-danger ms-1">*</span>}
+          </FormLabel>
+        ) : (
+          <>{label}</>
+        )
+      )}
+      
+      <FormControl 
+        id={id ?? name} 
+        name={name}
+        value={value ?? ""}
+        onChange={onChange}
+        isInvalid={isInvalid || Boolean(error)} 
+        {...other} 
+      />
+
+      {!noValidate && (isInvalid || error) && (
+        <Feedback type="invalid">
+          {error}
+        </Feedback>
+      )}
+    </FormGroup>
+  );
 };
+
 export default TextFormInput;

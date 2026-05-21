@@ -7,6 +7,9 @@ import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import patternImg from "@/assets/images/pattern/04.png";
+import { DEFAULT_AVATAR_IMG } from "@/contexts/constants";
+import { authApi } from "@/utils/api";
+import { handleRequest } from "@/utils/request";
 
 const Banner = ({ toggleOffCanvas }) => {
   const { userData } = useSelector((state) => state.auth);
@@ -15,18 +18,10 @@ const Banner = ({ toggleOffCanvas }) => {
 
   useEffect(() => {
     const fetchStats = async () => {
-      try {
-        const { data } = await axios.get(
-          `${import.meta.env.VITE_BACKEND_URL}/api/instructor/stats`,
-          { withCredentials: true }
-        );
-
-        if (data.success) setStats(data.result);
-      } catch (err) {
-        toast.error(err.response?.data?.message || "Failed to fetch your stats..");
-      }
+      const res = await handleRequest(authApi.get("/instructor/stats"));
+      if (res?.success) setStats(res?.result);
+      else toast.error(res?.message || "Failed to fetch your stats..");
     };
-
     fetchStats();
   }, []);
 
@@ -39,7 +34,6 @@ const Banner = ({ toggleOffCanvas }) => {
             backgroundSize: "cover"
           }}></div>
       </Container>
-
       <Container className="mt-n4">
         <Row>
           <Col xs={12}>
@@ -51,7 +45,9 @@ const Banner = ({ toggleOffCanvas }) => {
                       <img
                         className="avatar-img rounded-circle border border-light border-3 shadow"
                         src={userData.avatar}
-                        alt="Instructor Avatar" />
+                        alt="Instructor Avatar"
+                        onError={(e) => e.target.src = DEFAULT_AVATAR_IMG}
+                      />
                     ) : (
                       <div className="avatar-img rounded-circle border border-light border-3 shadow d-flex align-items-center justify-content-center bg-light text-dark fw-bold fs-1">
                         {(userData?.name?.[0] || "I").toUpperCase()}

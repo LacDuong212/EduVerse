@@ -184,11 +184,11 @@ export const getInstructorPublicCourses = asyncHandler(async (req, res) => {
   );
 });
 
-// @desc Create a new course (draft)
+// @desc Create a new draft course
 // @route POST instructor/courses
 export const createCourse = asyncHandler(async (req, res) => {
   const userId = req.user?.userId;
-  const course = await instructorService.createNewCourse(userId);
+  const course = await instructorService.createDraftCourse(userId);
   return sendSuccessResponse(res, 201, "Course created successfully!", course);
 });
 
@@ -230,7 +230,6 @@ export const getCourseForEdit = asyncHandler(async (req, res) => {
   return sendSuccessResponse(res, 200, "Get course successfully!", course);
 });
 
-// #TODO: REMOVE!!
 export const approveCourse = asyncHandler(async (req, res) => {
   const { courseId } = req.validated?.params || {};
   const result = await courseService.approveCourseUpdate(courseId);
@@ -269,4 +268,13 @@ export const getStudentsStats = asyncHandler(async (req, res) => {
   const userId = req.user?.userId;
   const result = await enrollmentService.getInstructorStudentsStats(userId);
   return sendSuccessResponse(res, 200, "Get my students stats successfully", result);
+});
+
+// @desc Soft delete one instructor's draft course
+// @route DELETE instructor/courses/drafts/:courseId
+export const removeCourse = asyncHandler(async (req, res) => {
+  const userId = req.user?.userId;
+  const { courseId } = req.validated?.params || {};
+  const result = await instructorService.removeDraftCourse(userId, courseId);
+  return sendSuccessResponse(res, 200, "Removed draft course successfully!");
 });

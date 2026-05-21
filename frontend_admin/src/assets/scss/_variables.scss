@@ -40,6 +40,7 @@ $yellow: #f7c32e;
 $green: #0cbc87;
 $teal: #20c997;
 $cyan: #17a2b8;
+$pistachio: #93c572;
 
 // scss-docs-start colors-map
 $colors: (
@@ -54,7 +55,8 @@ $colors: (
 	"teal": $teal,
 	"cyan": $cyan,
 	"black": $black,
-	"white": $white
+	"white": $white,
+	"pistachio": $pistachio,
 );
 
 // The contrast ratio to reach against white
@@ -85,7 +87,16 @@ $theme-colors: (
 	"dark": $dark,
 	"orange": $orange,
 	"purple": $purple,
-	"blue": $blue
+	"blue": $blue,
+	"indigo": $indigo,
+	"pink": $pink,
+	"red": $red,
+	"yellow": $yellow,
+	"green": $green,
+	"teal": $teal,
+	"cyan": $cyan,
+	"black": $black,
+	"pistachio": $pistachio,
 );
 // scss-docs-end theme-colors-map
 
