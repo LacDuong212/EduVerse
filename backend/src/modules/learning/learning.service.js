@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Mongoose } from "mongoose";
 import AppError from "#exceptions/app.error.js";
 import { STATUS_ENUM as COURSE_STATUS } from "#modules/course/course.model.js";
 import { existsEnrollment } from "#modules/enrollment/enrollment.service.js";
@@ -42,10 +42,15 @@ export const getCourseProgress = async (stuId, courseId) => {
   if (!isEnrolled)
     throw new AppError("You haven't enrolled this course yet!", 403);
 
-  const progress = await CourseProgress.findOne({ user: stuId, course: courseId })
+  let progress = await CourseProgress.findOne({ user: stuId, course: courseId })
     .populate("course", "status");
 
-  if (!progress || !progress.course)
+  if(!progress) {
+    progress = await CourseProgress.create({ user: stuId, course: courseId });
+    await progress.populate("course", "status");
+  }
+
+  if (!progress.course)
     throw new AppError("Course not found or no progress saved.", 404);
 
   if (progress.course?.status !== COURSE_STATUS.live)
@@ -176,8 +181,12 @@ export const syncLectureProgress = async (userId, courseId, lecId, data) => {
         $inc: {
           totalTimeSpentSec: safeDelta,
         },
+        $setOnInsert: {
+          user: new mongoose.Types.ObjectId(userId),
+          course: new mongoose.Types.ObjectId(courseId)
+        },
       },
-      { new: true }
+      { new: true, upsert: true }
     );
   }
 

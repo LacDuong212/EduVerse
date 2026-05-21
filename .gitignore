@@ -157,3 +157,7 @@ tmp/
 *.json
 !package.json
 /frontend_tailwind
+
+# ML service
+ml_service/model/
+ml_service/__pycache__/
