@@ -11,13 +11,11 @@ const GlobalPreloader = () => {
 
   useEffect(() => {
     if (isLoading) {
-      // Show preloader after delay to avoid flashing on quick loads
       const timer = setTimeout(() => {
         setShowPreloader(true);
       }, preloaderConfig.showDelay);
       setTimeout(timer);
     } else {
-      // Clear timeout and hide preloader immediately
       if (timeout) clearTimeout(timeout);
       setShowPreloader(false);
     }

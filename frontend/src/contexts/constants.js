@@ -5,6 +5,8 @@ export const currentYear = new Date().getFullYear();
 
 export const TEAM_NAME = "@d2v-team";
 
+export const SUPPORT_EMAIL = "lduongwinf@gmail.com";
+
 export const DEFAULT_PAGE_TITLE = "EduVerse";
 export const DEFAULT_AVATAR_IMG = "https://res.cloudinary.com/dw1fjzfom/image/upload/v1757337425/av4_khpvlh.png";
 export const DEFAULT_COURSE_IMG = "https://res.cloudinary.com/dw1fjzfom/image/upload/q_auto/f_auto/v1764427835/course_default_image_pwqnyo.jpg";

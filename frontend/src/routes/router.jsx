@@ -1,5 +1,6 @@
-import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 import ChatbotWidget from "@/app/chatbot";
+import BaseRedirect from "@/components/BaseRedirect";
 import PublicOnlyRoute from "@/components/PublicOnlyRoute";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import ScrollToTop from "@/components/ScrollToTop";
@@ -8,6 +9,7 @@ import RoleBasedLayout from "@/layouts/RoleBasedLayout";
 import { publicRoutes, authRoutes, studentRoutes, instructorRoutes } from "./index";
 
 const HIDE_CHATBOT = [
+  "/",
   "/auth",       // includes /auth/login, /auth/sign-up,...
   "/404",
 ];
@@ -26,7 +28,7 @@ const AppRouter = props => {
       {!shouldHideChat && <ChatbotWidget />}
 
       <Routes>
-        <Route path="/" element={<Navigate to="/home" replace />} />
+        <Route path="/" element={<BaseRedirect />} />
 
         {/* INSTRUCTOR ROUTES */}
         <Route element={<ProtectedRoute allowedRole={"instructor"} />}>

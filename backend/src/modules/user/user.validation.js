@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { isValidNumber } from "libphonenumber-js";
 import { z } from "zod";
 import { complexPasswordSchema } from "#modules/auth/auth.validation.js";
 
@@ -30,11 +31,24 @@ export const nameSchema = z.string("Name cannot be null")
   .min(2, "Name must have at least 2 characters")
   .max(70, "Name is too long");
 
-export const phoneSchema = z.string("Phone number must be a string")
-  .trim()
-  .regex(/^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$/, "Invalid phone number format")
-  .nullish()
-  .or(z.literal(""));
+export const phoneSchema = z.preprocess(
+  (val) => {
+    if (typeof val === "string") {
+      const trimmed = val.trim();
+      return trimmed === "" ? undefined : trimmed;
+    }
+    return val;
+  },
+  z.string("Phone number must be a string")
+    .trim()
+    .refine(
+      (val) => {
+        if (!val) return true;
+        return isValidNumber(val, "VN");
+      },
+      { message: "Invalid phone number format" }
+    )
+).nullish();
 
 export const bioSchema = z.string("Bio must be a string")
   .trim()

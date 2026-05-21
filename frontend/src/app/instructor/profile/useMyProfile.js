@@ -5,6 +5,7 @@ import { FcGoogle } from "react-icons/fc";
 import { toast } from "react-toastify";
 import useImageUpload from "@/hooks/useImageUpload";
 import { authApi } from "@/utils/api";
+import { mapResponseErrors } from "@/utils/mapper";
 import { handleRequest } from "@/utils/request";
 
 export const linkedAccount = [{
@@ -62,17 +63,16 @@ export default function useMyProfile() {
   useEffect(() => {
     const load = async () => {
       setLoading(true);
-      try {
-        const res = await handleRequest(authApi.get("/instructor/profile"));
-        if (res.success) {
-          setInstructor(res.result);
-          setServerSnapshot(res.result);
-        }
-      } catch (e) {
-        setErrors(e);
-      } finally {
-        setLoading(false);
+
+      const res = await handleRequest(authApi.get("/instructor/profile"));
+      if (res.success) {
+        setInstructor(res.result);
+        setServerSnapshot(res.result);
+      } else {
+        setErrors(mapResponseErrors(res.errors));
       }
+
+      setLoading(false);
     };
     load();
   }, []);
@@ -164,7 +164,7 @@ export default function useMyProfile() {
         setPreviewAvatar(null);
         setSelectedFile(null);
       } else {
-        setErrors(res.errors);
+        setErrors(mapResponseErrors(res.errors));
       }
     } catch (err) {
       toast.error(err.response?.data?.message || "Update failed..");

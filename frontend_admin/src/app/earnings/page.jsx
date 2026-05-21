@@ -115,15 +115,42 @@ const EarningsPage = () => {
 
   const renderPaginationItems = () => {
     const items = [];
-    for (let i = 1; i <= pagination.totalPages; i++) {
-      items.push(
-        <li key={i} className={`page-item mb-0 ${currentPage === i ? 'active' : ''}`}>
-          <a className="page-link" href="#" onClick={(e) => { e.preventDefault(); handlePageChange(i); }}>
-            {i}
-          </a>
-        </li>
-      );
+    const totalPages = pagination.totalPages;
+
+    const siblingsCount = 1;
+
+    for (let i = 1; i <= totalPages; i++) {
+      const isFirstPage = i === 1;
+      const isLastPage = i === totalPages;
+      const isWithinRange = i >= currentPage - siblingsCount && i <= currentPage + siblingsCount;
+
+      if (isFirstPage || isLastPage || isWithinRange) {
+        items.push(
+          <li key={i} className={`page-item mb-0 ${currentPage === i ? 'active' : ''}`}>
+            <a
+              className="page-link"
+              href="#"
+              onClick={(e) => { e.preventDefault(); handlePageChange(i); }}
+            >
+              {i}
+            </a>
+          </li>
+        );
+      } else if (i === 2 && currentPage - siblingsCount > 2) {
+        items.push(
+          <li key="left-ellipsis" className="page-item mb-0 disabled">
+            <span className="page-link">...</span>
+          </li>
+        );
+      } else if (i === totalPages - 1 && currentPage + siblingsCount < totalPages - 1) {
+        items.push(
+          <li key="right-ellipsis" className="page-item mb-0 disabled">
+            <span className="page-link">...</span>
+          </li>
+        );
+      }
     }
+
     return items;
   };
 
@@ -185,7 +212,7 @@ const EarningsPage = () => {
             <nav className="d-flex justify-content-center mb-0" aria-label="navigation">
               <ul className="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
                 <li className={`page-item mb-0 ${currentPage === 1 ? 'disabled' : ''}`}>
-                  <a className="page-link" href="#" onClick={(e) => { e.preventDefault(); handlePageChange(currentPage - 1); }} tabIndex={-1}>
+                  <a className="page-link" href="#" onClick={(e) => { e.preventDefault(); handlePageChange(currentPage - 1); }}>
                     <FaAngleLeft />
                   </a>
                 </li>

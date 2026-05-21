@@ -1,16 +1,13 @@
-import axios from "axios";
 import Fuse from "fuse.js";
 import mongoose from "mongoose";
 import Course, { STATUS_ENUM as COURSE_STATUS, UPDATE_STATUS_ENUM as UPDATE_STATUS } from "../models/courseModel.js";
 import Curriculum from "../models/curriculumModel.js";
 import DraftVideo from "../models/draftVideoModel.js";
+import Instructor from "../models/instructorModel.js";
 import { TYPE_ENUM as NOTIF_TYPE } from "../models/notificationModel.js";
+import { SUPPORT_EMAIL } from "../utils/constants.js";
 import { toCourseDto, toCourseDtoList } from "../utils/mapper.js";
 import { notifyUser } from "../utils/notification.js";
-import { withTransaction } from "../utils/transaction.js";
-import Instructor from "../models/instructorModel.js";
-
-const SUPPORT_EMAIL = "lduongwinf@gmail.com";
 
 export const getCoursesOverview = async (req, res) => {
   try {

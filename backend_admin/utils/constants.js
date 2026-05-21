@@ -1,0 +1,1 @@
+export const SUPPORT_EMAIL = "lduongwinf@gmail.com";

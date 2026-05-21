@@ -6,7 +6,6 @@ import "react-quill-new/dist/quill.snow.css";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { DEFAULT_AVATAR_IMG } from "@/contexts/constants";
-import { mapResponseErrors } from "@/utils/mapper";
 import useMyProfile from "../useMyProfile";
 
 const MAX_EDUCATION_LENGTH = 5;
@@ -50,7 +49,7 @@ const MyProfile = () => {
   const {
     instructor,
     updateField,
-    errors: rawErrors,
+    errors,
     avatarLogic,
     listActions,
     handleFileChange,
@@ -66,8 +65,6 @@ const MyProfile = () => {
   const skillList = instructor.skills || [];
 
   const disableSubmit = avatarLogic.isUploading || loading || submitting || !isDirty;
-
-  const errors = mapResponseErrors(rawErrors);
 
   const getFieldProps = (fieldName) => ({
     isinvalid: errors[fieldName],
@@ -387,58 +384,60 @@ const MyProfile = () => {
 
           <Row className="mt-2 g-4">
             {/* SKILLS */}
-            <h5>Skills</h5>
-            {skillList.map((skill, index) => {
-              const skillName = `skills.${index}.name`;
+            <Col md={12}>
+              <h5>Skills</h5>
+              {skillList.map((skill, index) => {
+                const skillName = `skills.${index}.name`;
 
-              return (
-                <Col sm={12} md={6} lg={4} key={index} className="mt-0">
-                  <div className="input-group mb-1">
-                    <input
-                      type="text"
-                      title="Skill Name"
-                      placeholder="Web Design..."
-                      defaultValue={skill.name}
-                      onChange={(e) => listActions.updateSkill(index, "name", e.target.value)}
-                      {...getFieldProps(skillName)}
-                    />
-                    <span className="input-group-text text-primary" title="Skill Level (Evaluation)">
-                      {skill.level}%
-                    </span>
-                    <button
-                      type="button"
-                      className="btn btn-danger-soft border p-0"
-                      onClick={() => listActions.removeSkill(index)}
-                      title="Remove skill"
-                    >
-                      <BsX size={23} />
-                    </button>
-                    {errors[skillName] && <div className="invalid-feedback">{errors[skillName]}</div>}
-                  </div>
-                  <div className="d-flex align-items-center small mt-1 mb-2">
-                    <span className="me-2">0</span>
-                    <input
-                      type="range"
-                      title="Evaluation"
-                      className="form-range flex-grow-1"
-                      min={0}
-                      max={100}
-                      step={1}
-                      defaultValue={skill.level}
-                      onChange={(e) => listActions.updateSkill(index, "level", Number(e.target.value))}
-                    />
-                    <span className="ms-2">100</span>
-                  </div>
-                </Col>
-              );
-            })}
-            <div className="mt-0">
-              {skillList.length < MAX_SKILLS_LENGTH && (
-                <button type="button" className="btn btn-sm btn-light mb-0 d-flex align-items-center" onClick={listActions.addSkill}>
-                  <BsPlus className="mb-1 me-1 fs-5" /> Add Skill
-                </button>
-              )}
-            </div>
+                return (
+                  <Col sm={12} md={6} lg={4} key={index} className="mt-0">
+                    <div className="input-group mb-1">
+                      <input
+                        type="text"
+                        title="Skill Name"
+                        placeholder="Web Design..."
+                        defaultValue={skill.name}
+                        onChange={(e) => listActions.updateSkill(index, "name", e.target.value)}
+                        {...getFieldProps(skillName)}
+                      />
+                      <span className="input-group-text text-primary" title="Skill Level (Evaluation)">
+                        {skill.level}%
+                      </span>
+                      <button
+                        type="button"
+                        className="btn btn-danger-soft border p-0"
+                        onClick={() => listActions.removeSkill(index)}
+                        title="Remove skill"
+                      >
+                        <BsX size={23} />
+                      </button>
+                      {errors[skillName] && <div className="invalid-feedback">{errors[skillName]}</div>}
+                    </div>
+                    <div className="d-flex align-items-center small mt-1 mb-2">
+                      <span className="me-2">0</span>
+                      <input
+                        type="range"
+                        title="Evaluation"
+                        className="form-range flex-grow-1"
+                        min={0}
+                        max={100}
+                        step={1}
+                        defaultValue={skill.level}
+                        onChange={(e) => listActions.updateSkill(index, "level", Number(e.target.value))}
+                      />
+                      <span className="ms-2">100</span>
+                    </div>
+                  </Col>
+                );
+              })}
+              <div className="mt-0">
+                {skillList.length < MAX_SKILLS_LENGTH && (
+                  <button type="button" className="btn btn-sm btn-light mb-0 d-flex align-items-center" onClick={listActions.addSkill}>
+                    <BsPlus className="mb-1 me-1 fs-5" /> Add Skill
+                  </button>
+                )}
+              </div>
+            </Col>
           </Row>
 
           {/* SUBMISSION */}

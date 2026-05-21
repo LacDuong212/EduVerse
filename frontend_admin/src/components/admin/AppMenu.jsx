@@ -114,7 +114,7 @@ const AdminMenu = () => {
   }, [activeMenu]);
 
   return (
-    <ul className="navbar-nav flex-column">
+    <ul className="navbar-nav flex-column" style={{ minWidth: 140 }}>
       {(menuItems ?? []).map((item, idx) => {
         return (
           <Fragment key={item.key ?? idx}>

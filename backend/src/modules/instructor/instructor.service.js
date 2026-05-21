@@ -7,7 +7,7 @@ import mongoose from "mongoose";
 import Instructor from "./instructor.model.js";
 
 export const handleBecomeInstructor = async (user) => {
-  if (!user) throw new AppError("Cannot get your info. Please try again later.", 400);
+  if (!user) throw new AppError("Cannot get your info. Make sure you have logged in then try again!", 404);
 
   return await withTransaction(async (session) => {
     const existingRequest = await Instructor.findOne({ user: user.userId })

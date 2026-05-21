@@ -1,7 +1,6 @@
 import bcrypt from 'bcryptjs';
 import adminModel from '../models/adminModel.js';
 
-
 export const changePassword = async (req, res) => {
   try {
     const { oldPassword, newPassword } = req.body;
