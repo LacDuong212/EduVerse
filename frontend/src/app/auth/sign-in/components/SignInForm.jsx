@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { BsEnvelopeFill } from "react-icons/bs";
 import { FaLock } from "react-icons/fa";
 import { Link, useSearchParams } from "react-router-dom";
@@ -8,7 +7,6 @@ import useSignIn from "../useSignIn";
 
 export default function SignInForm({ onSignUpSuccess }) {
   const { loading, login, control, errors } = useSignIn(onSignUpSuccess);
-  const [showPassword, setShowPassword] = useState(false);
 
   const [searchParams] = useSearchParams();
   const emailFromUrl = searchParams.get("email") || "";
