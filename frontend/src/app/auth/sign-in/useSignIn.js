@@ -35,7 +35,7 @@ export default function useSignIn(onSignUpSuccess) {
 
   useEffect(() => {
     if (isLoggedIn === true && userData) {
-      const roleRedirect = userData.role === "student" ? "/" : "/instructor/dashboard";
+      const roleRedirect = userData.role === "student" ? "/home" : "/instructor/dashboard";
       const redirectTo = searchParams.get("redirectTo") || roleRedirect;
 
       navigate(redirectTo, { replace: true });
@@ -56,7 +56,7 @@ export default function useSignIn(onSignUpSuccess) {
         dispatch(setLogin(user));
         toast.success("Welcome back!");
 
-        const roleRedirect = user.role === "student" ? "/" : "/instructor/dashboard";
+        const roleRedirect = user.role === "student" ? "/home" : "/instructor/dashboard";
         const redirectTo = searchParams.get("redirectTo") || roleRedirect;
         navigate(redirectTo, { replace: true });
       }

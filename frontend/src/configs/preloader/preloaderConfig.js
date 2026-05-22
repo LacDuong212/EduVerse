@@ -12,14 +12,14 @@
 export const preloaderConfig = {
   // Routes that should HIDE preloader
   excludeRoutes: [
+    "/404",  // Not found page only
     "/",
-    "/404",
     // Add more routes here...
   ],
 
   // Patterns to exclude (regex)
   excludePatterns: [
-    /^\/auth\/(?!sign-in)/, // Exclude all auth routes except /auth/sign-in
+    /^\/auth\//, // Exclude all auth routes
   ],
 
   // If set, ONLY these routes will show preloader
@@ -49,8 +49,14 @@ export const shouldShowPreloader = (pathname) => {
     return false;
   }
 
-  // Check exclude routes
-  if (preloaderConfig.excludeRoutes?.some(route => pathname.startsWith(route))) {
+  // Check exclude routes - be careful with "/" as it matches everything!
+  if (preloaderConfig.excludeRoutes?.some(route => {
+    // For exact root match
+    if (route === "/" && pathname === "/") return true;
+    // For other routes, check startsWith
+    if (route !== "/" && pathname.startsWith(route)) return true;
+    return false;
+  })) {
     return false;
   }
 

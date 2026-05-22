@@ -24,7 +24,7 @@ export default function SignInPage() {
             <div className="mb-3">
               <FaChevronLeft className="mb-1 text-primary" />
               <Link
-                to="/"
+                to="/home"
                 className="ms-1 fw-semibold text-decoration-none"
               >
                 Back to Home

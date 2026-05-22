@@ -137,7 +137,7 @@ const MyProfile = () => {
                       type="text"
                       name="name"
                       maxLength={MAX_INPUT_LENGTH.name}
-                      defaultValue={instructor?.name || ""}
+                      value={instructor?.name ?? ""}
                       onChange={(e) => updateField("name", e.target.value)}
                       {...getFieldProps("name")}
                     />
@@ -152,7 +152,7 @@ const MyProfile = () => {
                       type="text"
                       name="occupation"
                       maxLength={MAX_INPUT_LENGTH.occupation}
-                      defaultValue={instructor?.occupation || ""}
+                      value={instructor?.occupation ?? ""}
                       onChange={(e) => updateField("occupation", e.target.value)}
                       {...getFieldProps("occupation")}
                     />
@@ -174,7 +174,7 @@ const MyProfile = () => {
                     </OverlayTrigger>
                   </label>
                   <div className="input-group">
-                    <input type="text" className="form-control" defaultValue={instructor?.email || ""} disabled />
+                    <input type="text" className="form-control" value={instructor?.email ?? ""} disabled />
                   </div>
                 </Col>
                 {/* Phonenumber */}
@@ -184,7 +184,7 @@ const MyProfile = () => {
                     <input
                       type="text"
                       name="phonenumber"
-                      defaultValue={instructor?.phonenumber || ""}
+                      value={instructor?.phonenumber ?? ""}
                       onChange={(e) => updateField("phonenumber", e.target.value)}
                       {...getFieldProps("phonenumber")}
                     />
@@ -203,7 +203,7 @@ const MyProfile = () => {
                   name="address"
                   maxLength={MAX_INPUT_LENGTH.address}
                   className="form-control"
-                  defaultValue={instructor?.address || ""}
+                  value={instructor?.address ?? ""}
                   onChange={(e) => updateField("address", e.target.value)}
                 />
               </div>
@@ -240,7 +240,7 @@ const MyProfile = () => {
                   <input
                     type="text"
                     name="facebook"
-                    defaultValue={instructor?.socials?.facebook}
+                    value={instructor?.socials?.facebook ?? ""}
                     onChange={(e) => updateField("socials.facebook", e.target.value)}
                     placeholder="facebook.com/your_username"
                     {...getFieldProps("socials.facebook")}
@@ -260,7 +260,7 @@ const MyProfile = () => {
                   <input
                     type="text"
                     name="instagram"
-                    defaultValue={instructor?.socials?.instagram}
+                    value={instructor?.socials?.instagram ?? ""}
                     onChange={(e) => updateField("socials.instagram", e.target.value)}
                     placeholder="instagram.com/your_username"
                     {...getFieldProps("socials.instagram")}
@@ -279,7 +279,7 @@ const MyProfile = () => {
                   <input
                     type="text"
                     name="linkedin"
-                    defaultValue={instructor?.socials?.linkedin}
+                    value={instructor?.socials?.linkedin ?? ""}
                     onChange={(e) => updateField("socials.linkedin", e.target.value)}
                     placeholder="linkedin.com/in/your_username"
                     {...getFieldProps("socials.linkedin")}
@@ -298,7 +298,7 @@ const MyProfile = () => {
                   <input
                     type="text"
                     name="youtube"
-                    defaultValue={instructor?.socials?.youtube}
+                    value={instructor?.socials?.youtube ?? ""}
                     onChange={(e) => updateField("socials.youtube", e.target.value)}
                     placeholder="youtube.com/@your_channel"
                     {...getFieldProps("socials.youtube")}
@@ -322,7 +322,7 @@ const MyProfile = () => {
                   <input
                     type="text"
                     name="website"
-                    defaultValue={instructor?.website}
+                    value={instructor?.website ?? ""}
                     onChange={(e) => updateField("website", e.target.value)}
                     placeholder="https://www.example.com"
                     {...getFieldProps("website")}
@@ -348,7 +348,7 @@ const MyProfile = () => {
                       title="Field of Study"
                       placeholder="Bachelor in..."
                       style={{ flexBasis: "30%" }}
-                      defaultValue={edu.fieldOfStudy}
+                      value={edu.fieldOfStudy ?? ""}
                       onChange={(e) => listActions.updateEducation(index, "fieldOfStudy", e.target.value)}
                       {...getFieldProps(fieldOfStudy)}
                     />
@@ -357,7 +357,7 @@ const MyProfile = () => {
                       type="text"
                       title="Institution"
                       placeholder="University..."
-                      defaultValue={edu.institution}
+                      value={edu.institution ?? ""}
                       onChange={(e) => listActions.updateEducation(index, "institution", e.target.value)}
                       {...getFieldProps(institution)}
                     />
@@ -396,7 +396,7 @@ const MyProfile = () => {
                         type="text"
                         title="Skill Name"
                         placeholder="Web Design..."
-                        defaultValue={skill.name}
+                        value={skill.name ?? ""}
                         onChange={(e) => listActions.updateSkill(index, "name", e.target.value)}
                         {...getFieldProps(skillName)}
                       />
@@ -422,7 +422,7 @@ const MyProfile = () => {
                         min={0}
                         max={100}
                         step={1}
-                        defaultValue={skill.level}
+                        value={skill.level ?? ""}
                         onChange={(e) => listActions.updateSkill(index, "level", Number(e.target.value))}
                       />
                       <span className="ms-2">100</span>
