@@ -40,6 +40,13 @@ const publicFilter = {
   isPrivate: false, isDeleted: false, status: COURSE_STATUS.live
 };
 
+const coursePopulate = [
+  { path: "category", select: "name slug" },
+  {
+    path: "instructor.ref", select: "name pfpImg"
+  }
+];
+
 // ---- Hybrid scoring weights -------------------------------------------------
 // Tuned for cold-start friendliness: content carries the most weight because
 // it is the only signal available for new users. CF dominates as soon as the
@@ -126,7 +133,7 @@ const getRecommendationsFromMLService = async (userId, topK) => {
     // Map ML service courseIds back to full Mongoose documents
     const courseIds = data.recommendations.map(r => r.courseId);
     const courses = await Course.find({ _id: { $in: courseIds } })
-      .populate("category", "name slug")
+      .populate(coursePopulate)
       .lean();
 
     // Preserve the ML service's ordering and attach scores
@@ -221,7 +228,7 @@ const getRecommendedCoursesNodeFallback = async (
     ...publicFilter,
     _id: { $nin: purchasedIds }
   })
-    .populate("category", "name slug")
+    .populate(coursePopulate)
     .limit(candidatesLimit)
     .lean();
 
@@ -418,7 +425,7 @@ const mmrRerank = (candidates, k, lambda = 0.75) => {
 
 const getBestSellers = async (filter, recommendedSize = 8) => {
   return await Course.find({ ...filter })
-    .populate("category", "name slug")
+    .populate(coursePopulate)
     .sort({ studentsEnrolled: -1, createdAt: -1 })
     .limit(recommendedSize)
     .lean();
@@ -445,7 +452,7 @@ export const getRelatedCourses = async (
       { category: current.category?._id },
       { tags: { $in: current.tags || [] } }
     ]
-  }).populate("category", "name slug")
+  }).populate(coursePopulate)
     .limit(candidatesLimit)
     .lean();
 
