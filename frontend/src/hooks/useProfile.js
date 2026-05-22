@@ -18,8 +18,8 @@ export default function useProfile() {
       console.log("Logout Err:", res.message);
     }
     dispatch(setLogout());
-    navigate("/");
-    toast.success("Logged out. See ya!");
+    navigate("/home");
+    toast.success("Logged out!");
   };
 
   return {

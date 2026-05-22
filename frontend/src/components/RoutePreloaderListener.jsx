@@ -9,6 +9,7 @@ const RoutePreloaderListener = () => {
 
   useEffect(() => {
     const showPreloader = shouldShowPreloader(location.pathname);
+    
     if (showPreloader) {
       setIsLoading(true);
       const timer = setTimeout(() => {
@@ -16,6 +17,8 @@ const RoutePreloaderListener = () => {
       }, 500);
 
       return () => clearTimeout(timer);
+    } else {
+      setIsLoading(false);
     }
   }, [location.pathname, setIsLoading]);
 

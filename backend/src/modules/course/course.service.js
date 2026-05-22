@@ -190,7 +190,9 @@ const getMongoSort = (strategy) => {
     ratingLowToHigh: { "rating.total": 1 },   // !
   };
 
-  return maps[strategy] || { createdAt: -1 };
+  const baseSort = maps[strategy] || { createdAt: -1 };
+
+  return { ...baseSort, title: 1 };
 };
 
 export const getCourseInfoForVideoId = async (videoId, insId = null, session = null) => {
@@ -496,15 +498,21 @@ const sortInstructorCourses = (docs, strategy) => {
   return docs.sort(strategies[strategy] || strategies.recentUpdate);
 };
 
-const getInstructorCourseSort = (strategy) => ({
-  recentUpdate: { updatedAt: -1 },
-  newest: { createdAt: -1 },
-  oldest: { createdAt: 1 },
-  mostPopular: { studentsEnrolled: -1 },
-  leastPopular: { studentsEnrolled: 1 },
-  highestRating: { "rating.average": -1 },
-  lowestRating: { "rating.average": 1 },
-})[strategy] || { updatedAt: -1 };
+const getInstructorCourseSort = (strategy) => {
+  const strategies = {
+    recentUpdate: { updatedAt: -1 },
+    newest: { createdAt: -1 },
+    oldest: { createdAt: 1 },
+    mostPopular: { studentsEnrolled: -1 },
+    leastPopular: { studentsEnrolled: 1 },
+    highestRating: { "rating.average": -1 },
+    lowestRating: { "rating.average": 1 },
+  };
+
+  const baseSort = strategies[strategy] || { updatedAt: -1 };
+
+  return { ...baseSort, title: 1 };
+};
 
 export const getInstructorCourseDetails = async (insId, courseId) => {
   if (!courseId) throw new AppError("Course ID is required.", 400);

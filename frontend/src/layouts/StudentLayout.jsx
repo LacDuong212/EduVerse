@@ -32,7 +32,7 @@ const VerticalMenu = () => {
             {label}
           </Link>;
         })}
-        <Link className="list-group-item text-danger bg-danger-soft-hover" onClick={logout} to="/">
+        <Link className="list-group-item text-danger bg-danger-soft-hover" onClick={logout} to="/home">
           <FaSignOutAlt className="fa-fw me-2" />
           Sign Out
         </Link>

@@ -35,12 +35,12 @@ export const phoneSchema = z.preprocess(
   (val) => {
     if (typeof val === "string") {
       const trimmed = val.trim();
-      return trimmed === "" ? undefined : trimmed;
+      return trimmed;
     }
     return val;
   },
   z.string("Phone number must be a string")
-    .trim()
+    .nullish()
     .refine(
       (val) => {
         if (!val) return true;
@@ -48,7 +48,7 @@ export const phoneSchema = z.preprocess(
       },
       { message: "Invalid phone number format" }
     )
-).nullish();
+);
 
 export const bioSchema = z.string("Bio must be a string")
   .trim()

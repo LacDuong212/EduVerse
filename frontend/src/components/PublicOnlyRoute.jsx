@@ -7,7 +7,7 @@ export default function PublicOnlyRoute({ children }) {
 
   // if is logged in, redirect
   if (userData) {
-    const roleRedirect = userData.role === "student" ? "/" : "/instructor/dashboard";
+    const roleRedirect = userData.role === "student" ? "/home" : "/instructor/dashboard";
     const redirectTo = searchParams.get("redirectTo") || roleRedirect;
 
     return <Navigate to={redirectTo} replace />;

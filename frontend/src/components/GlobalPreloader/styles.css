@@ -12,6 +12,7 @@
   opacity: 0;
   pointer-events: none;
   transition: opacity ease-in-out;
+  will-change: opacity;
 }
 
 .global-preloader-wrapper.show {

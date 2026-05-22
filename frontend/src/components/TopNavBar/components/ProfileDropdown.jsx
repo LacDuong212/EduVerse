@@ -97,7 +97,7 @@ const ProfileDropdown = ({ className, dropdownItems }) => {
           </li>
         ))}
         <li>
-          <Link className="dropdown-item bg-danger-soft-hover" onClick={logout} to="/">
+          <Link className="dropdown-item bg-danger-soft-hover" onClick={logout} to="/home">
             <BsPower className="fa-fw me-2 mb-1" />
             Sign Out
           </Link>

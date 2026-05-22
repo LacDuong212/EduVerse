@@ -19,7 +19,7 @@ const BaseRedirect = () => {
 
     const redirectTimeout = setTimeout(() => {
       navigate("/home", { replace: true });
-    }, 300); 
+    }, 1000); 
 
     return () => {
       clearInterval(partyInterval);
