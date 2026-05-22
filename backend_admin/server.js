@@ -23,6 +23,7 @@ const app = express();
 await connectDB();
 
 const allowedOrigins = [
+  'http://localhost:5172',
   'http://localhost:5173',
   'http://localhost:5174',
   process.env.CLIENT_URL,
