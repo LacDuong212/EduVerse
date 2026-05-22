@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, Col, ProgressBar, Row } from "react-bootstrap";
+import { Badge, Button, Col, ProgressBar, Row } from "react-bootstrap";
 import { FaRegStar, FaStar, FaStarHalfAlt } from "react-icons/fa";
 import { DEFAULT_AVATAR_IMG } from "@/contexts/constants";
 import useCourseReviews from "./useCourseReviews";

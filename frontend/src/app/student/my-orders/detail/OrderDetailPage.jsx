@@ -344,7 +344,7 @@ export default function OrderDetailPage() {
                       canLearn ? (
                         <Button
                           as={Link}
-                          to={`/learning/${r.courseId}`}
+                          to={`/student/courses/${r.courseId}`}
                           size="sm"
                           variant="outline-primary"
                         >
