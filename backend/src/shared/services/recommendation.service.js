@@ -26,6 +26,7 @@ import Review from "#modules/review/review.model.js";
 import User from "#modules/user/user.model.js";
 import Wishlist from "#modules/wishlist/wishlist.model.js";
 import RecommendationModel, { REC_MODEL_KINDS } from "#services/recommendationModel.model.js";
+import logger from "#utils/logger.js";
 import {
   buildItemItemMatrix,
   cosineRank,
@@ -90,7 +91,7 @@ export const getRecommendedCourses = async (
     const mlResult = await getRecommendationsFromMLService(userId, recommendedSize);
     if (mlResult) return mlResult;
   } catch (err) {
-    console.warn("[recommendation] ML service unavailable, falling back to Node.js:", err.message);
+    logger.warn("[Recommendation] ML service unavailable, falling back to Node.js:", err.message);
   }
 
   // ── Fallback: Node.js BM25 + Jaccard + Popularity ───────────────────────
