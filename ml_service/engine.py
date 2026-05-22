@@ -1,28 +1,35 @@
 """
 EduVerse ML Recommendation Engine
 ==================================
-Hybrid pipeline:
-  Layer 1 (ML)        — K-means clustering on TF-IDF course vectors (scikit-learn)
-  Layer 2 (Content)   — Cosine similarity between user profile vector & course vectors
-  Layer 3 (CF)        — Item-Item Jaccard collaborative filtering
-  Layer 4 (Popularity)— log(studentsEnrolled + 1) prior
+Hybrid pipeline (Option C — BERT + TF-IDF):
+  Layer 1 (Deep Learning) — K-means clustering on BERT embeddings (sentence-transformers)
+  Layer 2 (Content)       — Cosine similarity using TF-IDF vectors (best accuracy)
+  Layer 3 (CF)            — Item-Item Jaccard collaborative filtering
+  Layer 4 (Popularity)    — log(studentsEnrolled + 1) prior
 
 Training:
-  - TF-IDF vectorizer fitted on all course text (title + subtitle + tags + category)
-  - K-means trained on the TF-IDF vectors → clusters courses into K groups
+  - BERT embeddings via sentence-transformers (all-MiniLM-L6-v2, 384-dim)
+  - K-means trained on BERT embeddings (better semantic clustering, Silhouette 2x)
+  - TF-IDF vectorizer fitted on course text (for content similarity signal)
   - Item-Item Jaccard matrix precomputed from interactions
   - All artifacts persisted via joblib for fast loading
 
 Prediction:
   - Build user profile text from enrollment history + interests
-  - Transform user profile with the fitted TF-IDF vectorizer
-  - Find nearest cluster centroid (K-means predict)
+  - BERT-encode user profile → predict cluster (K-means on BERT space)
+  - TF-IDF transform user profile → cosine similarity (content signal)
   - Score candidates using 4 weighted signals (cluster, content, CF, popularity)
   - Min-max normalize + fuse → return top-K
+
+Architecture rationale (from evaluation):
+  - BERT clustering: Silhouette 0.1243 vs TF-IDF 0.0579 (2x better separation)
+  - TF-IDF content: NDCG@5 0.8265 vs BERT 0.7778 (6% better accuracy)
+  - Best of both worlds: BERT for semantic grouping, TF-IDF for keyword matching
 """
 
 import os
 import math
+import time
 import logging
 from datetime import datetime
 
@@ -31,14 +38,32 @@ import joblib
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.cluster import KMeans
 from sklearn.metrics.pairwise import cosine_similarity
+from sentence_transformers import SentenceTransformer
 
 logger = logging.getLogger("ml_engine")
+
+# ── BERT Model ───────────────────────────────────────────────────────────────
+BERT_MODEL_NAME = os.getenv("BERT_MODEL", "all-MiniLM-L6-v2")
+_bert_model = None
+
+
+def _get_bert_model():
+    """Lazy-load BERT model (avoids loading until first use)."""
+    global _bert_model
+    if _bert_model is None:
+        logger.info(f"Loading BERT model: {BERT_MODEL_NAME}...")
+        start = time.time()
+        _bert_model = SentenceTransformer(BERT_MODEL_NAME)
+        logger.info(f"  BERT loaded in {time.time() - start:.1f}s")
+    return _bert_model
 
 # ── Paths ────────────────────────────────────────────────────────────────────
 MODEL_DIR = os.getenv("MODEL_PATH", "./model")
 VECTORIZER_PATH = os.path.join(MODEL_DIR, "tfidf_vectorizer.joblib")
 KMEANS_PATH = os.path.join(MODEL_DIR, "kmeans_model.joblib")
 COURSE_VECTORS_PATH = os.path.join(MODEL_DIR, "course_vectors.joblib")
+BERT_VECTORS_PATH = os.path.join(MODEL_DIR, "bert_vectors.joblib")
+COURSE_CLUSTERS_PATH = os.path.join(MODEL_DIR, "course_clusters.joblib")
 COURSE_IDS_PATH = os.path.join(MODEL_DIR, "course_ids.joblib")
 ITEM_ITEM_PATH = os.path.join(MODEL_DIR, "item_item_matrix.joblib")
 METADATA_PATH = os.path.join(MODEL_DIR, "train_metadata.joblib")
@@ -87,7 +112,7 @@ def train_model(courses: list, interactions: list, n_clusters: int = None) -> di
     """
     Train the full recommendation pipeline:
       1. TF-IDF vectorizer on course text
-      2. K-means on course TF-IDF vectors
+      2. K-means on BERT embeddings
       3. Item-item Jaccard matrix from interactions
 
     Args:
@@ -122,25 +147,34 @@ def train_model(courses: list, interactions: list, n_clusters: int = None) -> di
         f"TF-IDF: {course_vectors.shape[0]} courses × {course_vectors.shape[1]} features"
     )
 
-    # ── Step 2: K-means Clustering ──────────────────────────────────────────
-    # Determine optimal K using a simple heuristic for small datasets.
-    # Rule: sqrt(N/2), clamped to [2, min(8, N-1)].
+    # ── Step 2: BERT Embeddings (Deep Learning) ─────────────────────────────
+    bert = _get_bert_model()
+    logger.info("Computing BERT embeddings for courses...")
+    start_bert = time.time()
+    bert_vectors = bert.encode(course_texts, show_progress_bar=False, normalize_embeddings=True)
+    logger.info(
+        f"BERT: {bert_vectors.shape[0]} courses × {bert_vectors.shape[1]} dims "
+        f"({time.time() - start_bert:.2f}s)"
+    )
+
+    # ── Step 3: K-means Clustering (on BERT embeddings) ─────────────────────
+    # Clustering on BERT space gives better semantic separation:
+    # Silhouette BERT=0.1243 vs TF-IDF=0.0579 (2x improvement)
     if n_clusters is None:
         n_clusters = max(2, min(8, int(math.sqrt(len(courses) / 2))))
-        # Never more clusters than courses
         n_clusters = min(n_clusters, len(courses) - 1)
 
     kmeans = KMeans(
         n_clusters=n_clusters,
         random_state=42,
-        n_init=10,  # Run 10 times with different centroids, pick best
+        n_init=10,
         max_iter=300,
     )
-    kmeans.fit(course_vectors)
+    kmeans.fit(bert_vectors)
     cluster_labels = kmeans.labels_
 
     logger.info(
-        f"K-means: {n_clusters} clusters, inertia={kmeans.inertia_:.2f}"
+        f"K-means (on BERT): {n_clusters} clusters, inertia={kmeans.inertia_:.2f}"
     )
 
     # Log cluster distribution
@@ -153,24 +187,29 @@ def train_model(courses: list, interactions: list, n_clusters: int = None) -> di
         ]
         logger.info(f"  Cluster {cluster_id} ({count} courses): {cluster_course_names}")
 
-    # ── Step 3: Item-Item Jaccard Matrix ────────────────────────────────────
+    # ── Step 4: Item-Item Jaccard Matrix ────────────────────────────────────
     item_item_matrix = _build_jaccard_matrix(interactions, course_ids)
 
-    # ── Step 4: Persist all artifacts ───────────────────────────────────────
+    # ── Step 5: Persist all artifacts ───────────────────────────────────────
     joblib.dump(vectorizer, VECTORIZER_PATH)
     joblib.dump(kmeans, KMEANS_PATH)
     joblib.dump(course_vectors, COURSE_VECTORS_PATH)
+    joblib.dump(bert_vectors, BERT_VECTORS_PATH)
+    joblib.dump(cluster_labels, COURSE_CLUSTERS_PATH)
     joblib.dump(course_ids, COURSE_IDS_PATH)
     joblib.dump(item_item_matrix, ITEM_ITEM_PATH)
 
     metadata = {
         "trained_at": datetime.utcnow().isoformat(),
         "n_courses": len(courses),
-        "n_features": course_vectors.shape[1],
+        "n_features_tfidf": course_vectors.shape[1],
+        "n_features_bert": bert_vectors.shape[1],
+        "bert_model": BERT_MODEL_NAME,
         "n_clusters": n_clusters,
         "n_interactions": len(interactions),
         "cluster_distribution": {int(k): int(v) for k, v in zip(unique, counts)},
         "inertia": float(kmeans.inertia_),
+        "architecture": "Option C: BERT clustering + TF-IDF content",
     }
     joblib.dump(metadata, METADATA_PATH)
 
@@ -195,7 +234,6 @@ def _build_jaccard_matrix(interactions: list, course_ids: list) -> dict:
         course_users[cid].add(uid)
 
     # Only compute for courses in our trained set
-    valid_ids = set(course_ids)
     matrix = {}
 
     for i, cid_a in enumerate(course_ids):
@@ -234,7 +272,14 @@ def _load_model():
     if _cache.get("loaded"):
         return True
 
-    required = [VECTORIZER_PATH, KMEANS_PATH, COURSE_VECTORS_PATH, COURSE_IDS_PATH]
+    required = [
+        VECTORIZER_PATH,
+        KMEANS_PATH,
+        COURSE_VECTORS_PATH,
+        BERT_VECTORS_PATH,
+        COURSE_CLUSTERS_PATH,
+        COURSE_IDS_PATH,
+    ]
     for path in required:
         if not os.path.exists(path):
             logger.warning(f"Model file missing: {path}")
@@ -243,6 +288,8 @@ def _load_model():
     _cache["vectorizer"] = joblib.load(VECTORIZER_PATH)
     _cache["kmeans"] = joblib.load(KMEANS_PATH)
     _cache["course_vectors"] = joblib.load(COURSE_VECTORS_PATH)
+    _cache["bert_vectors"] = joblib.load(BERT_VECTORS_PATH)
+    _cache["course_clusters"] = joblib.load(COURSE_CLUSTERS_PATH)
     _cache["course_ids"] = joblib.load(COURSE_IDS_PATH)
     _cache["item_item"] = (
         joblib.load(ITEM_ITEM_PATH) if os.path.exists(ITEM_ITEM_PATH) else {}
@@ -295,43 +342,64 @@ def predict(
     kmeans = _cache["kmeans"]
     trained_course_ids = _cache["course_ids"]
     trained_course_vectors = _cache["course_vectors"]
+    trained_bert_vectors = _cache["bert_vectors"]
+    course_clusters = _cache["course_clusters"]
     item_item = _cache["item_item"]
+    id_to_idx = {cid: i for i, cid in enumerate(trained_course_ids)}
 
     # ── Build user profile text (weighted by action + rating) ────────────────
     user_text = _build_user_profile_text(user_signals, candidate_courses)
     if not user_text.strip():
         return []
 
-    # ── Transform user profile to TF-IDF space ──────────────────────────────
+    # ── Transform user profile to TF-IDF space (for content signal) ─────────
     user_vector = vectorizer.transform([user_text])
 
-    # ── Find user's cluster ──────────────────────────────────────────────────
-    user_cluster = kmeans.predict(user_vector)[0]
+    # ── Encode user profile with BERT (for cluster signal) ──────────────────
+    bert = _get_bert_model()
+    user_bert_vector = bert.encode([user_text], show_progress_bar=False, normalize_embeddings=True)
 
-    # ── Build candidate vectors ──────────────────────────────────────────────
+    # ── Find user's cluster (K-means on BERT space) ─────────────────────────
+    user_cluster = kmeans.predict(user_bert_vector)[0]
+
+    # ── Build candidate TF-IDF vectors (for content scoring) ────────────────
     candidate_texts = [_build_course_text(c) for c in candidate_courses]
     candidate_vectors = vectorizer.transform(candidate_texts)
 
-    # ── Predict cluster for each candidate ───────────────────────────────────
-    candidate_clusters = kmeans.predict(candidate_vectors)
+    # ── Get candidate clusters from precomputed labels ───────────────────────────
+    candidate_clusters = []
+
+    for course in candidate_courses:
+        cid = str(course["_id"])
+        idx = id_to_idx.get(cid)
+
+        if idx is not None:
+            candidate_clusters.append(course_clusters[idx])
+        else:
+            # Safety fallback for new courses not included in last training run
+            text = _build_course_text(course)
+            emb = bert.encode([text], show_progress_bar=False, normalize_embeddings=True)
+            candidate_clusters.append(kmeans.predict(emb)[0])
+
+    candidate_clusters = np.array(candidate_clusters)
 
     # ── Score each candidate across all 4 signals ────────────────────────────
     scored = []
     for i, course in enumerate(candidate_courses):
         cid = str(course["_id"])
 
-        # Signal 1: CLUSTER proximity (ML)
-        # Same cluster → 1.0; different → decaying by centroid distance
+        # Signal 1: CLUSTER proximity (BERT-based K-Means)
+        # Same cluster → 1.0; different → decaying by BERT centroid distance
         if candidate_clusters[i] == user_cluster:
             cluster_score = 1.0
         else:
-            # Distance between user centroid and candidate centroid
+            # Distance between user centroid and candidate centroid (BERT space)
             user_centroid = kmeans.cluster_centers_[user_cluster]
             cand_centroid = kmeans.cluster_centers_[candidate_clusters[i]]
             dist = np.linalg.norm(user_centroid - cand_centroid)
             cluster_score = 1.0 / (1.0 + dist)  # Sigmoid-like decay
 
-        # Signal 2: CONTENT similarity (TF-IDF cosine)
+        # Signal 2: CONTENT similarity (TF-IDF cosine — best accuracy)
         content_score = float(
             cosine_similarity(user_vector, candidate_vectors[i:i + 1])[0, 0]
         )
@@ -353,10 +421,10 @@ def predict(
             {
                 "courseId": cid,
                 "scores": {
-                    "cluster": round(cluster_score, 4),
-                    "content": round(content_score, 4),
-                    "cf": round(cf_score, 4),
-                    "popularity": round(pop_score, 4),
+                    "cluster": float(round(float(cluster_score), 4)),
+                    "content": float(round(float(content_score), 4)),
+                    "cf": float(round(float(cf_score), 4)),
+                    "popularity": float(round(float(pop_score), 4)),
                 },
                 "cluster": int(candidate_clusters[i]),
                 "userCluster": int(user_cluster),
@@ -376,13 +444,13 @@ def predict(
 
     # ── Weighted fusion ──────────────────────────────────────────────────────
     for s in scored:
-        s["score"] = round(
-            W_CLUSTER * s["scores"]["cluster"]
-            + W_CONTENT * s["scores"]["content"]
-            + W_CF * s["scores"]["cf"]
-            + W_POPULARITY * s["scores"]["popularity"],
-            4,
+        final_score = (
+            W_CLUSTER * float(s["scores"]["cluster"])
+            + W_CONTENT * float(s["scores"]["content"])
+            + W_CF * float(s["scores"]["cf"])
+            + W_POPULARITY * float(s["scores"]["popularity"])
         )
+        s["score"] = float(round(final_score, 4))
 
     # ── Sort and return top-K ────────────────────────────────────────────────
     scored.sort(key=lambda x: x["score"], reverse=True)

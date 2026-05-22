@@ -3,7 +3,7 @@
  * ---------------------------------------------------------------------------------
  * Architecture:
  *   PRIMARY   — Python ML microservice (FastAPI + scikit-learn)
- *               K-means clustering on TF-IDF vectors, cosine similarity,
+ *               K-means clustering on BERT/MiniLM embeddings, cosine similarity,
  *               Item-Item Jaccard CF, popularity prior.
  *   FALLBACK  — Node.js BM25 + Jaccard + Popularity (existing logic)
  *               Used when the Python service is unreachable or not trained.
@@ -457,7 +457,7 @@ export const getRelatedCourses = async (
   };
 
   let related = getRecommendations(targetProfile, candidates, relatedSize);
-  let source = "TF-IDF(ContentSimilarity)";
+  let source = "BM25(ContentSimilarity)";
 
   if (related.length === 0 && current.category) {
     related = await Course.find({ ...baseFilter, category: current.category._id })

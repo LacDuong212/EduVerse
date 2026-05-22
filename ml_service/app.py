@@ -34,14 +34,21 @@ logger = logging.getLogger("ml_service")
 # ── Lifespan: load model on startup ─────────────────────────────────────────
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Load the trained model into memory when the service starts."""
+    """Load the trained model and BERT into memory when the service starts."""
     logger.info("Starting ML service...")
+
     loaded = engine.reload_model()
+
     if loaded:
-        logger.info("Pre-trained model loaded successfully")
+        # Preload MiniLM/BERT model to avoid first-request timeout
+        engine._get_bert_model()
+
+        logger.info("Pre-trained model and BERT loaded successfully")
     else:
         logger.warning("No pre-trained model found. Call POST /api/train first.")
+
     yield
+
     logger.info("Shutting down ML service")
 
 
@@ -73,9 +80,9 @@ class RecommendRequest(BaseModel):
 class RecommendationItem(BaseModel):
     courseId: str
     score: float
-    scores: dict
-    cluster: int
-    userCluster: int
+    scores: dict = {}
+    cluster: int | None = None
+    userCluster: int | None = None
 
 
 class RecommendResponse(BaseModel):
