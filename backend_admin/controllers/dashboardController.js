@@ -1,14 +1,36 @@
-import User from '../models/userModel.js';
 import Course from '../models/courseModel.js';
+import Instructor from '../models/instructorModel.js';
 import Order from '../models/orderModel.js';
-
+import User from '../models/userModel.js';
 
 export const getDashboardStats = async (req, res) => {
   try {
-    const totalStudents = await User.countDocuments({ role: 'student' });
-    const totalInstructors = await User.countDocuments({ role: 'instructor' });
+    const totalStudents = await User.countDocuments(
+      { role: 'student', isVerified: true, isActivated: true }
+    );
 
-    const totalCourses = await Course.countDocuments();
+    const insResult = await Instructor.aggregate([
+      { $match: { isApproved: true } },
+      {
+        $lookup: {
+          from: "users",
+          localField: "user",
+          foreignField: "_id",
+          as: "userData"
+        }
+      },
+      { $unwind: "$userData" },
+      {
+        $match: {
+          "userData.isVerified": true,
+          "userData.isActivated": true
+        }
+      },
+      { $count: "total" }
+    ]);
+    const totalInstructors = insResult.length > 0 ? insResult[0].total : 0;
+
+    const totalCourses = await Course.countDocuments({ isDeleted: false, status: { $ne: 'draft' } });
 
     const salesData = await Order.aggregate([
       { $match: { status: 'completed' } },
@@ -68,9 +90,11 @@ export const getEarningsChart = async (req, res) => {
       { $sort: { '_id.year': 1, '_id.month': 1 } }
     ]);
 
-    const monthLabels = [];
-    const salesValues = [];
-    const monthFormatter = new Intl.DateTimeFormat('en-US', { month: 'short' });
+    const chartData = [];
+    const monthFormatter = new Intl.DateTimeFormat('en-GB', {
+      year: "numeric",
+      month: "2-digit",
+    });
 
     let currentDate = new Date(twelveMonthsAgo);
 
@@ -78,10 +102,12 @@ export const getEarningsChart = async (req, res) => {
       const year = currentDate.getFullYear();
       const month = currentDate.getMonth() + 1;
 
-      monthLabels.push(`${monthFormatter.format(currentDate)} ${year}`);
-
       const foundMonth = salesData.find(d => d._id.year === year && d._id.month === month);
-      salesValues.push(foundMonth ? foundMonth.monthlySales : 0);
+
+      chartData.push({
+        x: monthFormatter.format(currentDate),
+        y: foundMonth ? foundMonth.monthlySales : 0
+      });
 
       currentDate.setMonth(currentDate.getMonth() + 1);
     }
@@ -89,8 +115,7 @@ export const getEarningsChart = async (req, res) => {
     res.json({
       success: true,
       data: {
-        series: [{ name: 'Earnings', data: salesValues }],
-        categories: monthLabels
+        series: [{ name: 'Revenue', data: chartData }]
       }
     });
 

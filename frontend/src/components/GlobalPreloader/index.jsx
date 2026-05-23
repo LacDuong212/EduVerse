@@ -7,25 +7,18 @@ import "./styles.css";
 const GlobalPreloader = () => {
   const { isLoading } = usePreloader();
   const [showPreloader, setShowPreloader] = useState(false);
-  const [timeout, setTimeout] = useState(null);
 
   useEffect(() => {
     if (isLoading) {
-      // Show preloader after delay to avoid flashing on quick loads
       const timer = setTimeout(() => {
         setShowPreloader(true);
       }, preloaderConfig.showDelay);
-      setTimeout(timer);
+      
+      return () => clearTimeout(timer);
     } else {
-      // Clear timeout and hide preloader immediately
-      if (timeout) clearTimeout(timeout);
       setShowPreloader(false);
     }
-
-    return () => {
-      if (timeout) clearTimeout(timeout);
-    };
-  }, [isLoading, timeout]);
+  }, [isLoading]);
 
   return (
     <div

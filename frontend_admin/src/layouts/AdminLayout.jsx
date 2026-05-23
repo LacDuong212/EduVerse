@@ -1,7 +1,8 @@
 
 import { useDispatch } from 'react-redux';
-import { Offcanvas, OffcanvasBody, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Button, Offcanvas, OffcanvasBody, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { BsGearFill, BsGlobe, BsPower } from 'react-icons/bs';
+import { FaHome, FaPowerOff } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { logoutAdmin } from '@/redux/adminSlice';
@@ -39,39 +40,26 @@ const AdminLayout = ({ children }) => {
         {width >= 1200 ? (
           <div className="sidebar-content d-flex flex-column bg-dark">
             <AppMenu />
-            <div className="px-3 mt-auto pt-3">
-              <div className="d-flex align-items-center justify-content-between text-primary-hover">
+            <div className="mt-auto">
+              <div className="d-flex align-items-center justify-content-center gap-5 text-primary-hover">
                 <OverlayTrigger overlay={<Tooltip id="tooltip-disabled">Settings</Tooltip>}>
-                  <Link className="h5 mb-0 text-body" to="/admin-settings" data-bs-toggle="tooltip" data-bs-placement="top" title="Settings">
+                  <Link className="h5 mb-0" to="/settings" data-bs-toggle="tooltip" data-bs-placement="top" title="Settings">
                     <BsGearFill />
                   </Link>
                 </OverlayTrigger>
-
                 <OverlayTrigger overlay={<Tooltip id="tooltip-disabled">Home</Tooltip>}>
-                  <Link className="h5 mb-0 text-body" to="/dashboard" data-bs-toggle="tooltip" data-bs-placement="top" title="Home">
-                    <BsGlobe />
+                  <Link className="h5 mb-0" to="/dashboard" data-bs-toggle="tooltip" data-bs-placement="top" title="Home">
+                    <FaHome />
                   </Link>
                 </OverlayTrigger>
-
-                <OverlayTrigger overlay={<Tooltip id="tooltip-disabled">Sign out</Tooltip>}>
-                  <button
+                <OverlayTrigger overlay={<Tooltip id="tooltip-disabled">Sign Out</Tooltip>}>
+                  <Button
                     onClick={handleLogout}
-                    className="text-body"
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      padding: 0,
-                      margin: 0,
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '1.25rem',
-                      lineHeight: '1',
-                      cursor: 'pointer'
-                    }}
+                    variant="outline-danger"
+                    className="fs-5 p-0 mb-0 bg-transparent border-0"
                   >
-                    <BsPower />
-                  </button>
+                    <FaPowerOff />
+                  </Button>
                 </OverlayTrigger>
               </div>
             </div>
@@ -86,32 +74,27 @@ const AdminLayout = ({ children }) => {
           >
             <OffcanvasBody className="admin-offcanvas-menu d-flex flex-column bg-dark">
               <AppMenu />
-              <div className="px-3 mt-auto pt-3">
-                <div className="d-flex align-items-center justify-content-between text-primary-hover">
-                  <Link className="h5 mb-0 text-body" to="/admin-settings" data-bs-toggle="tooltip" data-bs-placement="top" title="Settings">
-                    <BsGearFill />
-                  </Link>
-                  <Link className="h5 mb-0 text-body" to="/dashboard" data-bs-toggle="tooltip" data-bs-placement="top" title="Home">
-                    <BsGlobe />
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="text-body"
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      padding: 0,
-                      margin: 0,
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '1.25rem',
-                      lineHeight: '1',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    <BsPower />
-                  </button>
+              <div className="mt-auto">
+                <div className="d-flex align-items-center justify-content-center gap-4 text-primary-hover">
+                  <OverlayTrigger overlay={<Tooltip id="tooltip-disabled">Settings</Tooltip>}>
+                    <Link className="h5 mb-0" to="/settings" data-bs-toggle="tooltip" data-bs-placement="top" title="Settings">
+                      <BsGearFill />
+                    </Link>
+                  </OverlayTrigger>
+                  <OverlayTrigger overlay={<Tooltip id="tooltip-disabled">Home</Tooltip>}>
+                    <Link className="h5 mb-0" to="/dashboard" data-bs-toggle="tooltip" data-bs-placement="top" title="Home">
+                      <FaHome />
+                    </Link>
+                  </OverlayTrigger>
+                  <OverlayTrigger overlay={<Tooltip id="tooltip-disabled">Sign Out</Tooltip>}>
+                    <Button
+                      onClick={handleLogout}
+                      variant="outline-danger"
+                      className="fs-5 p-0 mb-0 bg-transparent border-0"
+                    >
+                      <FaPowerOff />
+                    </Button>
+                  </OverlayTrigger>
                 </div>
               </div>
             </OffcanvasBody>
@@ -124,6 +107,7 @@ const AdminLayout = ({ children }) => {
         <div className="page-content-wrapper border">{children}</div>
       </div>
     </main>
-)};
+  )
+};
 
 export default AdminLayout;

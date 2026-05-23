@@ -191,7 +191,9 @@ const getMongoSort = (strategy) => {
     ratingLowToHigh: { "rating.total": 1 },   // !
   };
 
-  return maps[strategy] || { createdAt: -1 };
+  const baseSort = maps[strategy] || { createdAt: -1 };
+
+  return { ...baseSort, title: 1 };
 };
 
 export const getCourseInfoForVideoId = async (videoId, insId = null, session = null) => {
@@ -358,16 +360,14 @@ export const getImageParams = async (courseId, insId) => {
 export const getCourseFullCurriculum = async (user, courseId) => {
   if (!courseId) throw new AppError("Course ID is required.", 400);
 
-  const course = await Course.findOne({ _id: courseId, isDeleted: false })
-    .populate({
-      path: "curriculum",
-      select: "sections"
-    })
-    .lean();
+  const course = await Course.findOne({ _id: courseId, isDeleted: false }).lean();
 
   if (!course) throw new AppError("Course not found.", 404);
   if (course.status !== STATUS_ENUM.live)
     throw new AppError("Course is currently unavailable, please try again later.", 400);
+
+  const curriculum = await Curriculum.findOne({ courseId }).lean();
+  if (!curriculum) throw new AppError("Course curriculum not found.", 404);
 
   let isOwner = false;
   let isEnrolled = false;
@@ -382,10 +382,10 @@ export const getCourseFullCurriculum = async (user, courseId) => {
     if (course.isPrivate)
       throw new AppError("Course is currently unavailable, please try again later.", 400);
 
-    return courseMapper.getCourseFreeCurriculum(course.curriculum?.sections || []);
+    return courseMapper.getCourseFreeCurriculum(curriculum?.sections || []);
   } else {
     const hasAiData = isOwner;
-    return courseMapper.getCourseCurriculum(course.curriculum?.sections || [], hasAiData);
+    return courseMapper.getCourseCurriculum(curriculum?.sections || [], hasAiData);
   }
 };
 
@@ -499,15 +499,21 @@ const sortInstructorCourses = (docs, strategy) => {
   return docs.sort(strategies[strategy] || strategies.recentUpdate);
 };
 
-const getInstructorCourseSort = (strategy) => ({
-  recentUpdate: { updatedAt: -1 },
-  newest: { createdAt: -1 },
-  oldest: { createdAt: 1 },
-  mostPopular: { studentsEnrolled: -1 },
-  leastPopular: { studentsEnrolled: 1 },
-  highestRating: { "rating.average": -1 },
-  lowestRating: { "rating.average": 1 },
-})[strategy] || { updatedAt: -1 };
+const getInstructorCourseSort = (strategy) => {
+  const strategies = {
+    recentUpdate: { updatedAt: -1 },
+    newest: { createdAt: -1 },
+    oldest: { createdAt: 1 },
+    mostPopular: { studentsEnrolled: -1 },
+    leastPopular: { studentsEnrolled: 1 },
+    highestRating: { "rating.average": -1 },
+    lowestRating: { "rating.average": 1 },
+  };
+
+  const baseSort = strategies[strategy] || { updatedAt: -1 };
+
+  return { ...baseSort, title: 1 };
+};
 
 export const getInstructorCourseDetails = async (insId, courseId) => {
   if (!courseId) throw new AppError("Course ID is required.", 400);
@@ -553,7 +559,7 @@ export const getPublicInstructorCourses = async (
   };
 };
 
-export const createDraftCourse = async (instructor, session = null) => {
+export const createDraft = async (instructor, session = null) => {
   return await withTransaction(async (s) => {
     const [course] = await Course.create([{
       title: "New draft course",
@@ -581,8 +587,16 @@ const getPlainPendingData = (pendingUpdate) => {
   return pendingUpdate?.data || {};
 };
 
-const getMergedState = (courseDoc, curriculumDoc) => {
+const getMergedCourse = (courseDoc) => {
   const pendingCourse = courseDoc.pendingUpdate?.data || {};
+  return {
+    ...courseDoc.toObject(),
+    ...pendingCourse,
+    hasPendingChanges: Object.keys(pendingCourse).length > 0
+  }
+};
+
+const getMergedCurriculum = (curriculumDoc) => {
   const pendingCurr = curriculumDoc?.pendingUpdate?.data || {};
 
   const liveSections = curriculumDoc?.sections || [];
@@ -628,15 +642,8 @@ const getMergedState = (courseDoc, curriculumDoc) => {
   }
 
   return {
-    course: {
-      ...courseDoc.toObject(),
-      ...pendingCourse,
-      hasPendingChanges: Object.keys(pendingCourse).length > 0
-    },
-    curriculum: {
-      sections: mergedSections,
-      hasPendingChanges: !!pendingSections.length
-    }
+    sections: mergedSections,
+    hasPendingChanges: !!pendingSections.length
   };
 };
 
@@ -687,7 +694,7 @@ const getProcessedCurriculum = (incomingSections, curriculumDoc) => {
 };
 
 const extractVideoIds = (sections) =>
-  [...new Set((sections || []).flatMap(s => s.lectures || []).map(l => l.videoId).filter(Boolean))];
+  [...new Set((sections || []).flatMap(s => s?.lectures || []).map(l => l?.videoId).filter(Boolean))];
 
 const syncVideoExpirations = async (oldVids, newVids, session) => {
   const oldSet = new Set(oldVids.filter(Boolean));
@@ -703,17 +710,15 @@ const syncVideoExpirations = async (oldVids, newVids, session) => {
 
 export const updateCourse = async (insId, courseId, changes, session = null) => {
   return await withTransaction(async (s) => {
-    const course = await Course.findOne({ _id: courseId, isDeleted: false }).session(s);
-    if (!course || course.instructor?.ref?.toString() !== insId)
+    const courseDoc = await Course.findOne({ _id: courseId, isDeleted: false }).session(s);
+    if (!courseDoc || courseDoc.instructor?.ref?.toString() !== insId)
       throw new AppError("Course not found or unauthorized access.", 403);
 
     let curriculumDoc = await Curriculum.findOne({ courseId }).session(s);
     if (!curriculumDoc) curriculumDoc = new Curriculum({ courseId });
 
     const oldVids = [
-      course.previewVideo,
-      course.pendingUpdate?.data?.previewVideo,
-      ...extractVideoIds(curriculumDoc.sections),
+      courseDoc.pendingUpdate?.data?.previewVideo,
       ...extractVideoIds(curriculumDoc.pendingUpdate?.data?.sections)
     ];
 
@@ -726,13 +731,13 @@ export const updateCourse = async (insId, courseId, changes, session = null) => 
       Object.entries(courseData).filter(([_, v]) => v !== undefined)
     );
 
-    const plainPending = getPlainPendingData(course.pendingUpdate);
-    course.pendingUpdate = {
+    const plainPending = getPlainPendingData(courseDoc.pendingUpdate);
+    courseDoc.pendingUpdate = {
       data: { ...plainPending, ...cleanCourseData },
       submittedAt: new Date(),
       status: UPDATE_STATUS_ENUM.none
     };
-    course.markModified("pendingUpdate.data");
+    courseDoc.markModified("pendingUpdate.data");
 
     if (curriculum) {
       const processedSections = getProcessedCurriculum(curriculum.sections, curriculumDoc);
@@ -744,21 +749,18 @@ export const updateCourse = async (insId, courseId, changes, session = null) => 
       curriculumDoc.markModified("pendingUpdate.data");
     }
 
-    await course.save({ session: s });
+    await courseDoc.save({ session: s });
     await curriculumDoc.save({ session: s });
 
     const newVids = [
-      course.previewVideo,
-      course.pendingUpdate?.data?.previewVideo,
-      ...extractVideoIds(curriculumDoc.sections),
+      courseDoc.pendingUpdate?.data?.previewVideo,
       ...extractVideoIds(curriculumDoc.pendingUpdate?.data?.sections)
     ];
 
     await syncVideoExpirations(oldVids, newVids, s);
 
-    const {
-      course: mergedCourse, curriculum: mergedCurr
-    } = getMergedState(course, curriculumDoc);
+    const mergedCourse = getMergedCourse(courseDoc);
+    const mergedCurr = getMergedCurriculum(curriculumDoc);
 
     return courseMapper.toEditCourseDto(mergedCourse, mergedCurr);
   }, session);
@@ -775,9 +777,8 @@ export const submitCourse = async (insId, courseId, changes = null, session = nu
 
     const curriculumDoc = await Curriculum.findOne({ courseId }).session(s);
 
-    const {
-      course: mergedCourse, curriculum: mergedCurr
-    } = getMergedState(courseDoc, curriculumDoc);
+    const mergedCourse = getMergedCourse(courseDoc);
+    const mergedCurr = getMergedCurriculum(curriculumDoc);
 
     const categoryId = (mergedCourse.category?._id || mergedCourse.category)?.toString() || null;
 
@@ -789,8 +790,10 @@ export const submitCourse = async (insId, courseId, changes = null, session = nu
 
     if (!validation.success) throw validation.error;
 
-    if (courseDoc.status === STATUS_ENUM.draft)
+    if (courseDoc.status === STATUS_ENUM.draft) {
+      courseDoc.previousStatus = courseDoc.status;
       courseDoc.status = STATUS_ENUM.pending;
+    }
 
     const now = new Date();
 
@@ -816,35 +819,35 @@ export const submitCourse = async (insId, courseId, changes = null, session = nu
 
 export const clearPendingChanges = async (insId, courseId, session = null) => {
   return await withTransaction(async (s) => {
-    const course = await Course.findById(courseId).session(s);
-    if (!course || course.instructor?.ref?.toString() !== insId)
+    const courseDoc = await Course.findById(courseId).session(s);
+    if (!courseDoc || courseDoc.instructor?.ref?.toString() !== insId)
       throw new AppError("Course not found or unauthorized access.", 403);
 
-    if (course.status === STATUS_ENUM.pending)
+    if (courseDoc.status === STATUS_ENUM.pending)
       throw new AppError("Cannot undo changes while the course is under review.", 400);
 
     const curriculumDoc = await Curriculum.findOne({ courseId }).session(s);
 
     const oldVids = [
-      course.previewVideo,
-      course.pendingUpdate?.data?.previewVideo,
+      courseDoc.previewVideo,
+      courseDoc.pendingUpdate?.data?.previewVideo,
       ...extractVideoIds(curriculumDoc?.sections),
       ...extractVideoIds(curriculumDoc?.pendingUpdate?.data?.sections)
     ];
 
-    const hasCourseChanges = Object.keys(course.pendingUpdate?.data || {}).length > 0;
+    const hasCourseChanges = Object.keys(courseDoc.pendingUpdate?.data || {}).length > 0;
     const hasCurriculumChanges = !!curriculumDoc?.pendingUpdate?.data?.sections?.length;
 
     if (!hasCourseChanges && !hasCurriculumChanges)
       throw new AppError("There are no changes to clear.", 400);
 
-    course.pendingUpdate = {
+    courseDoc.pendingUpdate = {
       data: null,
       submittedAt: null,
       status: UPDATE_STATUS_ENUM.none
     };
-    course.markModified("pendingUpdate");
-    await course.save({ session: s });
+    courseDoc.markModified("pendingUpdate");
+    await courseDoc.save({ session: s });
 
     if (curriculumDoc) {
       curriculumDoc.pendingUpdate = {
@@ -857,15 +860,14 @@ export const clearPendingChanges = async (insId, courseId, session = null) => {
     }
 
     const newVids = [
-      course.previewVideo,
+      courseDoc.previewVideo,
       ...extractVideoIds(curriculumDoc?.sections)
     ];
 
     await syncVideoExpirations(oldVids, newVids, s);
 
-    const {
-      course: mergedCourse, curriculum: mergedCurr
-    } = getMergedState(course, curriculumDoc);
+    const mergedCourse = getMergedCourse(courseDoc);
+    const mergedCurr = getMergedCurriculum(curriculumDoc);
 
     return courseMapper.toEditCourseDto(mergedCourse, mergedCurr);
   }, session);
@@ -875,14 +877,15 @@ export const getCourseForEdit = async (insId, courseId) => {
   if (!insId) throw new AppError("Instructor ID is required.", 400);
 
   const [courseDoc, currDoc] = await Promise.all([
-    Course.findById(courseId),
+    Course.findOne({ _id: courseId, isDeleted: false }),
     Curriculum.findOne({ courseId })
   ]);
 
   if (!courseDoc || courseDoc.instructor?.ref?.toString() !== insId)
     throw new AppError("Course not found or unauthorized access.", 403);
 
-  const { course: mergedCourse, curriculum: mergedCurr } = getMergedState(courseDoc, currDoc);
+  const mergedCourse = getMergedCourse(courseDoc);
+  const mergedCurr = getMergedCurriculum(currDoc);
 
   return courseMapper.toEditCourseDto(mergedCourse, mergedCurr);
 };
@@ -906,7 +909,6 @@ export const updateCoursesInstructorInfo = async (insId, name, avatar, session =
   }, session);
 };
 
-// #TODO: REMOVE!!
 export const approveCourseUpdate = async (courseId, session = null) => {
   return await withTransaction(async (s) => {
     const course = await Course.findById(courseId).session(s);
@@ -920,9 +922,8 @@ export const approveCourseUpdate = async (courseId, session = null) => {
       ...extractVideoIds(curriculum.pendingUpdate?.data?.sections)
     ];
 
-    const {
-      course: mergedCourse, curriculum: mergedCurriculum
-    } = getMergedState(course, curriculum);
+    const mergedCourse = getMergedCourse(course);
+    const mergedCurriculum = getMergedCurriculum(curriculum);
 
     const hasWork = course.status === STATUS_ENUM.pending ||
       mergedCourse.hasPendingChanges ||
@@ -1104,8 +1105,42 @@ export const publicCourseExist = async (courseId) => {
   return !!result;
 };
 
-export const removeDraftCourse = async (insId, courseId) => {
-  withTransaction()
-  const course = await Course.findById(courseId).lean();
+export const removeDraft = async (insId, courseId, session = null) => {
+  const course = await Course.findOne({ _id: courseId, isDeleted: false }).session(session);
 
+  if (!course || course.instructor?.ref?.toString() !== insId)
+    throw new AppError("Course not found or unauthorized access.", 403);
+
+  if (course.status !== STATUS_ENUM.draft)
+    throw new AppError("You can only remove a draft course.", 400);
+
+  course.isDeleted = true;
+
+  await course.save({ session });
+};
+
+export const removeLectureAiData = async (insId, courseId, lecId) => {
+  return await withTransaction(async (session) => {
+    const course = await Course.findOne({ _id: courseId, isDeleted: false })
+      .session(session)
+      .lean();
+
+    if (!course || course.instructor?.ref?.toString() !== insId)
+      throw new AppError("Course not found or unauthorized access.", 403);
+
+    const result = await Curriculum.updateOne(
+      { courseId },
+      { $set: { "sections.$[].lectures.$[lec].aiData": null } },
+      {
+        arrayFilters: [{ "lec._id": new mongoose.Types.ObjectId(lecId) }],
+        session
+      }
+    );
+
+    if (result.matchedCount === 0)
+      throw new AppError("Curriculum not found for this course.", 404);
+
+    if (result.modifiedCount === 0)
+      throw new AppError("Lecture not found or AI-generated contents already removed.", 404);
+  });
 };

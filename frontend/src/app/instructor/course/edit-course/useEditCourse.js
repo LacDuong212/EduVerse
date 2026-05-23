@@ -12,9 +12,12 @@ export default function useEditCourse() {
 
   const [course, setCourse] = useState(null);
   const courseRef = useRef(course);
+
   const [changes, setChanges] = useState({});
+
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [errors, setErrors] = useState({});
 
   useEffect(() => {

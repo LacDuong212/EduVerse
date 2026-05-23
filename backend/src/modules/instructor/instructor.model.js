@@ -7,7 +7,7 @@ const skillSubSchema = new mongoose.Schema({
 
 const educationSubSchema = new mongoose.Schema({
   institution: { type: String, required: true },
-  degree: { type: String, default: '' },
+  degree: { type: String, default: "" },
   fieldOfStudy: { type: String, required: true },
   startDate: { type: Date },
   endDate: { type: Date },
@@ -25,17 +25,15 @@ const instructorSchema = new mongoose.Schema({
 
   myCourses: [{ type: mongoose.Schema.Types.ObjectId, ref: "Course" }],
 
-  introduction: { type: String, default: '' },
-  address: { type: String, default: '' },
-  
-  occupation: { type: String, default: '' },
+  introduction: { type: String, default: "" },
+  address: { type: String, default: "" },
+
+  occupation: { type: String, default: "" },
   skills: [skillSubSchema],
   education: [educationSubSchema],
 
   isApproved: { type: Boolean, default: false }
-}, { 
-  timestamps: true 
-});
+}, { timestamps: true });
 
 instructorSchema.index({ myCourses: 1 });
 

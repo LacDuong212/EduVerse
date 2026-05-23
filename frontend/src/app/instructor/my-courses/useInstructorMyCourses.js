@@ -41,55 +41,67 @@ export default function useInstructorMyCourses() {
 
   const fetchCourses = useCallback(async () => {
     setLoading(true);
-    try {
-      const res = await handleRequest(authApi.get("/instructor/courses", { params: filters }));
 
-      if (res.success) {
-        setCourses(res.result || []);
-        if (res.pagination) setPagination(res.pagination);
-      } else {
-        toast.error(res.message || "Failed to load courses..");
-      }
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to load courses..");
-    } finally {
-      setLoading(false);
+    const res = await handleRequest(authApi.get("/instructor/courses", { params: filters }));
+    if (res.success) {
+      setCourses(res.result || []);
+      if (res.pagination) setPagination(res.pagination);
+    } else {
+      toast.error(res.message || "Failed to load courses..");
     }
+
+    setLoading(false);
   }, [JSON.stringify(filters)]);
 
   const fetchStats = useCallback(async () => {
     setStatsLoading(true);
-    try {
-      const res = await handleRequest(authApi.get("/instructor/courses/stats"));
-      if (res.success) setStats(res.result);
-      else toast.error(res.message || "Failed to fetch courses stats..");
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to fetch courses stats..");
-    } finally {
-      setStatsLoading(false);
-    }
+
+    const res = await handleRequest(authApi.get("/instructor/courses/stats"));
+    if (res.success) setStats(res.result);
+    else toast.error(res.message || "Failed to fetch courses statistics..");
+
+    setStatsLoading(false);
   }, []);
 
   const togglePrivacy = async (courseId) => {
+    if (!courseId) return toast.error("Unable to obtain course info. Please try again later.");
+  
     setUpdatingId(courseId);
-    try {
-      const res = await handleRequest(authApi.patch(`/courses/${courseId}/toggle-privacy`));
 
-      if (res.success) {
-        toast.success(res.message);
-        setCourses((prev) =>
-          prev.map((c) =>
-            c.courseId === courseId ? { ...c, isPrivate: res.result } : c
-          )
-        );
-      } else {
-        toast.error(res.message || "Failed to change course's privacy..");
-      }
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to change course's privacy..");
-    } finally {
-      setUpdatingId(null);
+    const res = await handleRequest(authApi.patch(`/courses/${courseId}/toggle-privacy`));
+    if (res.success) {
+      toast.success(res.message);
+      setCourses((prev) =>
+        prev.map((c) =>
+          c.courseId === courseId ? { ...c, isPrivate: res.result } : c
+        )
+      );
+    } else {
+      toast.error(res.message || "Failed to change course's privacy..");
     }
+
+    setUpdatingId(null);
+  };
+
+  const handleRemoveDraft = async (courseId) => {
+    if (!courseId) return toast.error("Unable to obtain course info. Please try again later.");
+    if (!window.confirm("Remove this draft course?")) return;
+
+    setUpdatingId(courseId);
+
+    const res = await handleRequest(
+      authApi.delete(`/instructor/courses/drafts/${courseId}`)
+    );
+
+    if (res.success) {
+      toast.success(res.message);
+      fetchCourses();
+      fetchStats();
+    } else {
+      toast.error(res.message || "Failed to remove course..");
+    }
+
+    setUpdatingId(null);
   };
 
   useEffect(() => {
@@ -115,6 +127,7 @@ export default function useInstructorMyCourses() {
     setSearch: (search) => updateFilters({ search }),
     setSort: (sort) => updateFilters({ sort }),
     togglePrivacy,
+    handleRemoveDraft,
     refresh: () => {
       fetchCourses();
       fetchStats();

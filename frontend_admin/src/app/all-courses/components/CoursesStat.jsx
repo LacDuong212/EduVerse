@@ -23,8 +23,8 @@ const CoursesStat = ({ meta, loading }) => {
       variant: "primary",
     },
     {
-      title: "Active Courses",
-      count: meta.activatedCourses || 0,
+      title: "Live Courses",
+      count: meta.liveCourses || 0,
       variant: "success",
     },
     {
@@ -32,15 +32,20 @@ const CoursesStat = ({ meta, loading }) => {
       count: meta.pendingCourses || 0,
       variant: "warning",
     },
-     {
+    {
       title: "Rejected Courses",
       count: meta.rejectedCourses || 0,
-      variant: "danger",
+      variant: "orange",
     },
-     {
+    {
       title: "Blocked Courses",
       count: meta.blockedCourses || 0,
       variant: "purple",
+    },
+    {
+      title: "Deleted Courses",
+      count: meta.deletedCourses || 0,
+      variant: "danger",
     },
   ];
 
@@ -55,7 +60,7 @@ const CoursesStat = ({ meta, loading }) => {
       {loading ? (
         <p>Loading...</p>
       ) : (
-        <Row className="g-4 mb-4" xs={1} sm={2} md={3} xl={5}>
+        <Row className="g-4 mb-4" xs={1} sm={2} md={3} xl={6}>
           {courseStatData.map((item, idx) => (
             <CourseStatCard key={idx} {...item} />
           ))}

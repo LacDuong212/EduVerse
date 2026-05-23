@@ -62,6 +62,7 @@ export const toOrderListDtoList = (orders) =>
 export const toOrderDetailDto = (order) => ({
   orderId: String(order?._id || ""),
   createdAt: order?.createdAt || null,
+  expiresAt: order?.expiresAt || null,
   status: order?.status || "",
   paymentMethod: order?.paymentMethod || "",
   subTotal: Number(order?.subTotal || 0),

@@ -23,6 +23,7 @@ const app = express();
 await connectDB();
 
 const allowedOrigins = [
+  'http://localhost:5172',
   'http://localhost:5173',
   'http://localhost:5174',
   process.env.CLIENT_URL,
@@ -34,7 +35,7 @@ app.use(cookieParser());
 app.use(cors({origin: allowedOrigins, credentials: true}));
 
 // API Endpoints
-app.get('/', (req, res) => res.send("API is running"));
+app.get('/', (req, res) => res.send("EDV-ADM API is running"));
 app.use('/api/account', accountRoute);
 app.use('/api/auth', authRoute);
 app.use('/api/courses', courseRoute);

@@ -112,11 +112,11 @@ export const login = async (req, res) => {
 
     const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET, { expiresIn: '3d' });
 
-    res.cookie('token', token, {
+    res.cookie('adm_token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: 3 * 24 * 60 * 60 * 1000,
       path: '/'
     });
 
@@ -224,7 +224,7 @@ export const isAuthenticated = (req, res) => {
 export const logout = async (req, res) => {
   try {
 
-    res.clearCookie('token', {
+    res.clearCookie('adm_token', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',

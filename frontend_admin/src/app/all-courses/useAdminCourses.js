@@ -68,6 +68,7 @@ export default function useAdminCourses() {
 
   return {
     courses,
+    setCourses,
     meta,
     loading,
     page,

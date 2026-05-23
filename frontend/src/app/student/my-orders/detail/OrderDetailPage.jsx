@@ -36,14 +36,21 @@ export default function OrderDetailPage() {
   const navigate = useNavigate();
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-  const { order, loading, error, refetch, setOrder } = useOrderDetail(id);
+  const { order, loading, error, refetch } = useOrderDetail(id);
 
   const [showCancel, setShowCancel] = useState(false);
   const [cancelLoading, setCancelLoading] = useState(false);
   const [actionError, setActionError] = useState(null);
+  const [payLoading, setPayLoading] = useState(false);
 
   const canLearn = order?.status === "completed";
   const canCancel = order?.status === "pending";
+
+  const canPayAgain =
+    order?.status === "pending" &&
+    order?.paymentMethod !== "free" &&
+    order?.expiresAt &&
+    new Date(order.expiresAt) > new Date();
 
   const createdAt = useMemo(() => {
     if (!order?.createdAt) return "N/A";
@@ -71,8 +78,8 @@ export default function OrderDetailPage() {
 
     try {
       const { data } = await axios.patch(
-        `${backendUrl}/api/orders/${order.orderId}/update`,
-        { status: "cancelled" },
+        `${backendUrl}/api/orders/${order.orderId}/cancel`,
+        {},
         { withCredentials: true }
       );
 
@@ -91,6 +98,48 @@ export default function OrderDetailPage() {
     }
   };
 
+  const handlePayAgain = async () => {
+    if (!canPayAgain) {
+      setActionError("This order can no longer be paid.");
+      return;
+    }
+
+    if (!backendUrl || !order?.orderId || !order?.paymentMethod) return;
+
+    setPayLoading(true);
+    setActionError(null);
+
+    try {
+      const { data } = await axios.post(
+        `${backendUrl}/api/payments`,
+        {
+          orderId: order.orderId,
+          paymentMethod: order.paymentMethod,
+        },
+        { withCredentials: true }
+      );
+
+      if (data?.success) {
+        const result = data?.result;
+
+        if (result?.payUrl) {
+          window.location.href = result.payUrl;
+        } else {
+          setActionError("Payment URL was not returned.");
+        }
+      } else {
+        setActionError(data?.message || "Could not create payment URL.");
+      }
+    } catch (err) {
+      setActionError(
+        err?.response?.data?.message ||
+        "Could not resume payment. Please try again."
+      );
+    } finally {
+      setPayLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="py-5 text-center">
@@ -105,7 +154,11 @@ export default function OrderDetailPage() {
         <Card.Body>
           <div className="d-flex align-items-center justify-content-between mb-3">
             <h4 className="mb-0">Order detail</h4>
-            <Button variant="outline-secondary" onClick={() => navigate(-1)}>
+            <Button
+              variant="outline-secondary"
+              onClick={() => navigate(-1)}
+              disabled={payLoading}
+            >
               <FaArrowLeft className="me-2" />
               Back
             </Button>
@@ -144,17 +197,31 @@ export default function OrderDetailPage() {
         </div>
 
         <div className="d-flex gap-2">
+          {canPayAgain && (
+            <Button
+              variant="success"
+              onClick={handlePayAgain}
+              disabled={payLoading}
+            >
+              {payLoading ? "Redirecting..." : "Pay Again"}
+            </Button>
+          )}
+
           {canCancel && (
             <Button
               variant="outline-danger"
               onClick={() => setShowCancel(true)}
-              disabled={cancelLoading}
+              disabled={cancelLoading || payLoading}
             >
               Cancel order
             </Button>
           )}
 
-          <Button variant="outline-secondary" onClick={() => navigate(-1)}>
+          <Button
+            variant="outline-secondary"
+            onClick={() => navigate(-1)}
+            disabled={payLoading}
+          >
             <FaArrowLeft className="me-2" />
             Back
           </Button>
@@ -163,6 +230,13 @@ export default function OrderDetailPage() {
 
       {error ? <Alert variant="warning">{error}</Alert> : null}
       {actionError ? <Alert variant="warning">{actionError}</Alert> : null}
+      {order?.status === "pending" &&
+        order?.expiresAt &&
+        new Date(order.expiresAt) <= new Date() && (
+          <Alert variant="warning">
+            This order has expired. Please cancel it and create a new order.
+          </Alert>
+        )}
 
       <Card className="border-0 shadow-sm mb-3">
         <Card.Body>
@@ -270,7 +344,7 @@ export default function OrderDetailPage() {
                       canLearn ? (
                         <Button
                           as={Link}
-                          to={`/learning/${r.courseId}`}
+                          to={`/student/courses/${r.courseId}`}
                           size="sm"
                           variant="outline-primary"
                         >
@@ -347,14 +421,14 @@ export default function OrderDetailPage() {
           <Button
             variant="outline-secondary"
             onClick={() => setShowCancel(false)}
-            disabled={cancelLoading}
+            disabled={cancelLoading || payLoading}
           >
             Close
           </Button>
           <Button
             variant="danger"
             onClick={handleCancelOrder}
-            disabled={cancelLoading}
+            disabled={cancelLoading || payLoading}
           >
             {cancelLoading ? "Cancelling..." : "Yes, cancel"}
           </Button>

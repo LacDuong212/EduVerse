@@ -1,10 +1,11 @@
-import PageMetaData from '@/components/PageMetaData';
-import { useState } from 'react';
-import { Col, Row } from 'react-bootstrap';
+import { useState } from "react";
+import { Col, Row } from "react-bootstrap";
 import { FaChevronLeft, FaGoogle } from "react-icons/fa";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import AuthLayout from "@/app/auth/components/AuthLayout";
 import EmailVerifyModal from "@/app/auth/email-verify/EmailVerifyModal";
+import PageMetaData from "@/components/PageMetaData";
+import { SUPPORT_EMAIL } from "@/contexts/constants";
 import SignInForm from "./components/SignInForm";
 
 export default function SignInPage() {
@@ -17,13 +18,13 @@ export default function SignInPage() {
   return <>
     <PageMetaData title="Sign-In" />
     <AuthLayout>
-      <Col xs={12} lg={6} className="m-auto">
+      <Col xs={12} lg={6} className="m-auto position-relative d-flex flex-column justify-content-center" style={{ minHeight: "100vh" }}>
         <Row className="my-5">
           <Col sm={10} xl={8} className="m-auto position-relative">
-            <div className='mb-3'>
-              <FaChevronLeft className='mb-1 text-primary' />
+            <div className="mb-3">
+              <FaChevronLeft className="mb-1 text-primary" />
               <Link
-                to="/"
+                to="/home"
                 className="ms-1 fw-semibold text-decoration-none"
               >
                 Back to Home
@@ -55,6 +56,16 @@ export default function SignInPage() {
             </div>
           </Col>
         </Row>
+        <div className="position-absolute bottom-0 start-50 translate-middle-x pb-3 text-center small w-100">
+          Having trouble? You can email{" "}
+          <a
+            href={`mailto:${SUPPORT_EMAIL}`}
+            className="text-primary text-decoration-none fw-semibold"
+          >
+            {SUPPORT_EMAIL}
+          </a>{" "}
+          for support!
+        </div>
       </Col>
 
       <EmailVerifyModal

@@ -67,6 +67,11 @@ privateRoutes.patch(
 );
 privateRoutes.get("/students/stats", instructorController.getStudentsStats);
 privateRoutes.delete(
+  "/courses/drafts/:courseId",
+  validate(instructorSchema.courseIdParamRequest),
+  instructorController.removeCourse
+);
+privateRoutes.delete(
   "/courses/:courseId/changes",
   validate(instructorSchema.courseIdParamRequest),
   instructorController.clearCourseChanges
@@ -91,7 +96,6 @@ privateRoutes.post(
   validate(instructorSchema.submitCourseRequest),
   instructorController.submitCourse
 );
-// #TODO: REMOVE!!
 privateRoutes.get(
   "/courses/:courseId/approve",
   validate(instructorSchema.courseIdParamRequest),

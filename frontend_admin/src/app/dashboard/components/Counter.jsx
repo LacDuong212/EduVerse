@@ -3,7 +3,7 @@ import { Card, Col, Row } from 'react-bootstrap';
 import CountUp from 'react-countup';
 import axios from 'axios';
 import { FaUserGraduate, FaUserTie, FaBook } from 'react-icons/fa';
-import { TbCurrencyDong } from 'react-icons/tb'
+import { FaDongSign } from "react-icons/fa6";
 
 const CounterCard = ({
   count,
@@ -41,28 +41,28 @@ const Counter = () => {
 
           const formattedData = [
             {
-              title: "Total Students",
+              title: "Active Students",
               count: stats.totalStudents,
               icon: FaUserGraduate,
+              variant: "success"
+            },
+            {
+              title: "Active Instructors",
+              count: stats.totalInstructors,
+              icon: FaUserTie,
+              variant: "warning"
+            },
+            {
+              title: "Active Courses",
+              count: stats.totalCourses,
+              icon: FaBook,
               variant: "primary"
             },
             {
-              title: "Total Instructors",
-              count: stats.totalInstructors,
-              icon: FaUserTie,
-              variant: "purple"
-            },
-            {
-              title: "Total Courses",
-              count: stats.totalCourses,
-              icon: FaBook,
-              variant: "info"
-            },
-            {
-              title: "Total Sales",
+              title: "Total Revenue",
               count: stats.totalSales,
-              icon: TbCurrencyDong,
-              variant: "success"
+              icon: FaDongSign,
+              variant: "purple"
             }
           ];
           setCounterData(formattedData);

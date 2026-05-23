@@ -44,12 +44,12 @@ export const adminRoutes = [{
   name: 'Admin',
   element: <AdminDashboard />
 }, {
-  path: '/all-courses',
+  path: '/courses',
   name: 'All Courses',
   element: <AdminAllCourses />
 }, {
-  path: '/category',
-  name: 'Category',
+  path: '/categories',
+  name: 'Categories',
   element: <AdminCategory />
 }, {
   path: '/coupons',
@@ -90,8 +90,8 @@ export const adminRoutes = [{
   name: 'Earnings',
   element: <AdminEarnings />
 }, {
-  path: '/admin-settings',
-  name: 'Admin Settings',
+  path: '/settings',
+  name: 'Settings',
   element: <AdminSettings />
 }, {
   path: '/*',

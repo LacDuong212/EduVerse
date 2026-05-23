@@ -26,6 +26,18 @@ const normalizeStatus = (rawStatus, lastPositionSec, durationSec) => {
   return "not-started";
 };
 
+const getLectureId = (lecture) => {
+  const rawId =
+    lecture?.lecId ||
+    lecture?._id ||
+    lecture?.lectureId ||
+    lecture?.id;
+
+  return typeof rawId === "string"
+    ? rawId
+    : rawId?.toString?.() ?? null;
+};
+
 const Intro = ({ course, progress }) => {
   const navigate = useNavigate();
   const { courseId } = useParams();
@@ -36,12 +48,9 @@ const Intro = ({ course, progress }) => {
 
   const instructorName = course?.instructor?.name || "Unknown instructor";
 
-  const rawStar =
-    typeof course?.rating === "object"
-      ? course?.rating?.average ?? course?.rating?.star
-      : course?.rating;
+  const averageRating = course?.rating?.count > 0 ? (course?.rating?.total || 0) / course?.rating?.count : 0;
 
-  const starNum = Number(rawStar);
+  const starNum = Number(averageRating);
   const star = Number.isFinite(starNum) ? clamp(starNum, 0, 5) : 0;
 
   const fullStars = Math.floor(star);
@@ -49,7 +58,7 @@ const Intro = ({ course, progress }) => {
   const emptyStars = Math.max(0, 5 - Math.ceil(star));
 
   const ratingCount = Number(
-    course?.rating?.count ?? course?.reviewsCount ?? 0
+    course?.rating?.count ?? 0
   );
 
   const language = course?.language || "Unknown language";
@@ -72,12 +81,15 @@ const Intro = ({ course, progress }) => {
       ? lastLectureIdRaw
       : lastLectureIdRaw?.toString?.() ?? null;
 
-  const firstLectureIdRaw =
-    course?.curriculum?.[0]?.lectures?.[0]?._id || null;
+  const curriculum = Array.isArray(course?.curriculum?.sections)
+    ? course.curriculum.sections
+    : [];
+
   const firstLectureId =
-    typeof firstLectureIdRaw === "string"
-      ? firstLectureIdRaw
-      : firstLectureIdRaw?.toString?.() ?? null;
+    curriculum
+      .flatMap((section) => section?.lectures || [])
+      .map(getLectureId)
+      .find(Boolean) || null;
 
   const handleContinueLearning = () => {
     if (!courseId) return;
@@ -85,20 +97,19 @@ const Intro = ({ course, progress }) => {
     let firstInProgressLectureId = null;
     let firstNotStartedLectureId = null;
 
-    if (Array.isArray(course?.curriculum) && Array.isArray(progress?.lectures)) {
+    if (Array.isArray(curriculum)) {
       const progressMap = {};
-      for (const p of progress.lectures) {
+      for (const p of progress?.lectures || []) {
         const rawId = p?.lectureId;
         const key = typeof rawId === "string" ? rawId : rawId?.toString?.();
         if (!key) continue;
         progressMap[key] = p;
       }
 
-      outerLoop: for (const section of course.curriculum) {
+      outerLoop: for (const section of curriculum) {
         const lectures = section?.lectures || [];
         for (const lec of lectures) {
-          const rawLecId = lec?._id;
-          const lecId = typeof rawLecId === "string" ? rawLecId : rawLecId?.toString?.();
+          const lecId = getLectureId(lec);
           if (!lecId) continue;
 
           const p = progressMap[lecId] || {};
@@ -116,11 +127,9 @@ const Intro = ({ course, progress }) => {
       }
     }
 
-    const targetLectureId =
-      firstInProgressLectureId ||
-      firstNotStartedLectureId ||
-      lastLectureId ||
-      firstLectureId;
+    const targetLectureId = hasStartedLearning
+      ? firstInProgressLectureId || lastLectureId || firstNotStartedLectureId || firstLectureId
+      : firstLectureId;
 
     if (!targetLectureId) return;
     navigate(`/courses/${courseId}/watch/${targetLectureId}`);
@@ -128,14 +137,26 @@ const Intro = ({ course, progress }) => {
 
   const handleViewResult = () => {
     if (!courseId) return;
-    navigate(`/course/${courseId}/result`, { 
-        state: { assessment: progress?.aiAssessment } 
+    console.log(progress?.aiAssessment)
+    navigate(`/course/${courseId}/result`, {
+      state: { assessment: progress?.aiAssessment }
     });
   };
 
-  const disabledContinue =
-    !courseId ||
-    (!lastLectureId && !firstLectureId && !Array.isArray(progress?.lectures));
+  const hasStartedLearning =
+    completedLessons > 0 ||
+    !!lastLectureId ||
+    !!progress?.lectures?.some((lecture) => {
+      const status = normalizeStatus(
+        lecture?.status,
+        lecture?.lastPositionSec,
+        lecture?.durationSec
+      );
+
+      return status === "in-progress" || status === "completed";
+    });
+
+  const disabledContinue = !courseId || !firstLectureId;
 
   return (
     <section className="bg-blue py-7">
@@ -195,7 +216,7 @@ const Intro = ({ course, progress }) => {
               onClick={handleContinueLearning}
               disabled={disabledContinue}
             >
-              Continue learning
+              {hasStartedLearning ? "Continue learning" : "Start learning"}
             </button>
 
             {isCompleted && (

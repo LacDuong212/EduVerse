@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Mongoose } from "mongoose";
 import AppError from "#exceptions/app.error.js";
 import { STATUS_ENUM as COURSE_STATUS } from "#modules/course/course.model.js";
 import { existsEnrollment } from "#modules/enrollment/enrollment.service.js";
@@ -45,8 +45,7 @@ export const getCourseProgress = async (stuId, courseId) => {
   let progress = await CourseProgress.findOne({ user: stuId, course: courseId })
     .populate("course", "status");
 
-  if (!progress) {
-    // Fresh start: enrolled but no progress doc yet — create a blank one
+  if(!progress) {
     progress = await CourseProgress.create({ user: stuId, course: courseId });
     await progress.populate("course", "status");
   }
@@ -184,7 +183,7 @@ export const syncLectureProgress = async (userId, courseId, lecId, data) => {
         },
         $setOnInsert: {
           user: new mongoose.Types.ObjectId(userId),
-          course: new mongoose.Types.ObjectId(courseId),
+          course: new mongoose.Types.ObjectId(courseId)
         },
       },
       { new: true, upsert: true }

@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import useImageUpload from "@/hooks/useImageUpload";
 import { authApi } from "@/utils/api";
+import { mapResponseErrors } from "@/utils/mapper";
 import { handleRequest } from "@/utils/request";
 
 const INITIAL_STATE = {
@@ -39,22 +40,17 @@ export default function useMyProfile() {
       setLoading(true);
       setErrors({});
 
-      try {
-        const res = await handleRequest(authApi.get("/student/profile"));
+      const res = await handleRequest(authApi.get("/student/profile"));
 
-        if (res?.success) {
-          const normalizedData = normalizeStudentProfile(res.result);
-          setStudent(normalizedData);
-          setServerSnapshot(normalizedData);
-        } else {
-          setErrors(res?.errors || {});
-        }
-      } catch (err) {
-        setErrors(err?.response?.data?.errors || {});
-        toast.error(err?.response?.data?.message || "Failed to load profile");
-      } finally {
-        setLoading(false);
+      if (res.success) {
+        const normalizedData = normalizeStudentProfile(res.result);
+        setStudent(normalizedData);
+        setServerSnapshot(normalizedData);
+      } else {
+        setErrors(mapResponseErrors(res.errors));
       }
+
+      setLoading(false);
     };
 
     loadProfile();
@@ -64,7 +60,6 @@ export default function useMyProfile() {
         URL.revokeObjectURL(previewAvatar);
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleFileChange = (e) => {
@@ -147,7 +142,7 @@ export default function useMyProfile() {
 
       const res = await handleRequest(authApi.patch("/student/profile", payload));
 
-      if (res?.success) {
+      if (res.success) {
         toast.success("Profile updated!");
 
         const normalizedData = normalizeStudentProfile(res.result);
@@ -161,7 +156,7 @@ export default function useMyProfile() {
         setPreviewAvatar(null);
         setSelectedFile(null);
       } else {
-        setErrors(res?.errors || {});
+        setErrors(mapResponseErrors(res.errors));
       }
     } catch (err) {
       setErrors(err?.response?.data?.errors || {});

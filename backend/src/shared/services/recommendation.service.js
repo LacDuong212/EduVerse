@@ -3,7 +3,7 @@
  * ---------------------------------------------------------------------------------
  * Architecture:
  *   PRIMARY   — Python ML microservice (FastAPI + scikit-learn)
- *               K-means clustering on TF-IDF vectors, cosine similarity,
+ *               K-means clustering on BERT/MiniLM embeddings, cosine similarity,
  *               Item-Item Jaccard CF, popularity prior.
  *   FALLBACK  — Node.js BM25 + Jaccard + Popularity (existing logic)
  *               Used when the Python service is unreachable or not trained.
@@ -26,6 +26,7 @@ import Review from "#modules/review/review.model.js";
 import User from "#modules/user/user.model.js";
 import Wishlist from "#modules/wishlist/wishlist.model.js";
 import RecommendationModel, { REC_MODEL_KINDS } from "#services/recommendationModel.model.js";
+import logger from "#utils/logger.js";
 import {
   buildItemItemMatrix,
   cosineRank,
@@ -34,18 +35,25 @@ import {
 
 // ---- Python ML service config -----------------------------------------------
 const ML_SERVICE_URL = process.env.ML_SERVICE_URL || "http://localhost:5002";
-const ML_TIMEOUT_MS  = parseInt(process.env.ML_TIMEOUT_MS || "3000", 10);
+const ML_TIMEOUT_MS = parseInt(process.env.ML_TIMEOUT_MS || "3000", 10);
 
 const publicFilter = {
   isPrivate: false, isDeleted: false, status: COURSE_STATUS.live
 };
 
+const coursePopulate = [
+  { path: "category", select: "name slug" },
+  {
+    path: "instructor.ref", select: "name pfpImg"
+  }
+];
+
 // ---- Hybrid scoring weights -------------------------------------------------
 // Tuned for cold-start friendliness: content carries the most weight because
 // it is the only signal available for new users. CF dominates as soon as the
 // user has ≥2 enrollments. Popularity is a small prior to break ties.
-const W_CONTENT    = 0.55;
-const W_CF         = 0.35;
+const W_CONTENT = 0.55;
+const W_CF = 0.35;
 const W_POPULARITY = 0.10;
 
 // MMR diversity: λ=1 ⇒ pure relevance, λ=0 ⇒ pure diversity.
@@ -55,9 +63,9 @@ const MMR_LAMBDA = 0.75;
 // term frequencies, indirectly emphasising those tags/titles in BM25 scoring.
 const ACTION_WEIGHT = {
   completed: 3,   // strongest signal — student finished the course
-  active:    2,   // mid signal — still learning
-  wishlist:  1,   // weak signal — interested but not committed
-  interest:  1,   // registration-time interest tag
+  active: 2,   // mid signal — still learning
+  wishlist: 1,   // weak signal — interested but not committed
+  interest: 1,   // registration-time interest tag
 };
 
 // Rating-derived modifier for enrollment weight: a 5★ review amplifies, 1★ shrinks.
@@ -83,7 +91,7 @@ export const getRecommendedCourses = async (
     const mlResult = await getRecommendationsFromMLService(userId, recommendedSize);
     if (mlResult) return mlResult;
   } catch (err) {
-    console.warn("[recommendation] ML service unavailable, falling back to Node.js:", err.message);
+    logger.warn("[Recommendation] ML service unavailable, falling back to Node.js:", err.message);
   }
 
   // ── Fallback: Node.js BM25 + Jaccard + Popularity ───────────────────────
@@ -126,7 +134,7 @@ const getRecommendationsFromMLService = async (userId, topK) => {
     // Map ML service courseIds back to full Mongoose documents
     const courseIds = data.recommendations.map(r => r.courseId);
     const courses = await Course.find({ _id: { $in: courseIds } })
-      .populate("category", "name slug")
+      .populate(coursePopulate)
       .lean();
 
     // Preserve the ML service's ordering and attach scores
@@ -221,7 +229,7 @@ const getRecommendedCoursesNodeFallback = async (
     ...publicFilter,
     _id: { $nin: purchasedIds }
   })
-    .populate("category", "name slug")
+    .populate(coursePopulate)
     .limit(candidatesLimit)
     .lean();
 
@@ -264,15 +272,15 @@ const getRecommendedCoursesNodeFallback = async (
     return out;
   };
   const nContent = norm(contentScores);
-  const nCf      = norm(cfScores);
-  const nPop     = norm(popScores);
+  const nCf = norm(cfScores);
+  const nPop = norm(popScores);
 
   const fused = candidates.map(c => {
     const id = String(c._id);
     const score =
-      W_CONTENT    * (nContent.get(id) || 0) +
-      W_CF         * (nCf.get(id)      || 0) +
-      W_POPULARITY * (nPop.get(id)     || 0);
+      W_CONTENT * (nContent.get(id) || 0) +
+      W_CF * (nCf.get(id) || 0) +
+      W_POPULARITY * (nPop.get(id) || 0);
     return { doc: c, score };
   }).filter(x => x.score > 0)
     .sort((a, b) => b.score - a.score);
@@ -291,10 +299,10 @@ const getRecommendedCoursesNodeFallback = async (
 
   // Compose a debug label that surfaces which arms actually contributed.
   const usedContent = [...nContent.values()].some(v => v > 0);
-  const usedCf      = [...nCf.values()].some(v => v > 0);
+  const usedCf = [...nCf.values()].some(v => v > 0);
   const debugSource = `Hybrid(${[
     usedContent ? "Content(BM25)" : null,
-    usedCf      ? "ItemCF(Jaccard)" : null,
+    usedCf ? "ItemCF(Jaccard)" : null,
     "Popularity"
   ].filter(Boolean).join("+")})`;
 
@@ -418,7 +426,7 @@ const mmrRerank = (candidates, k, lambda = 0.75) => {
 
 const getBestSellers = async (filter, recommendedSize = 8) => {
   return await Course.find({ ...filter })
-    .populate("category", "name slug")
+    .populate(coursePopulate)
     .sort({ studentsEnrolled: -1, createdAt: -1 })
     .limit(recommendedSize)
     .lean();
@@ -433,8 +441,8 @@ export const getRelatedCourses = async (
     _id: courseId,
     isDeleted: false,
   }).select("title subtitle tags category")
-  .populate("category", "name")
-  .lean();
+    .populate("category", "name")
+    .lean();
   if (!current) throw new AppError("Course not found.", 404);
 
   const baseFilter = { ...publicFilter, _id: { $ne: current._id } };
@@ -445,19 +453,19 @@ export const getRelatedCourses = async (
       { category: current.category?._id },
       { tags: { $in: current.tags || [] } }
     ]
-  }).populate("category", "name slug")
+  }).populate(coursePopulate)
     .limit(candidatesLimit)
     .lean();
 
   const targetProfile = {
-    title: current.title  || '',
+    title: current.title || '',
     subtitle: current.subtitle || '',
     tag: (current.tags || []).join(' ') || '',
     category: current.category?.name || ''
   };
 
   let related = getRecommendations(targetProfile, candidates, relatedSize);
-  let source = "TF-IDF(ContentSimilarity)";
+  let source = "BM25(ContentSimilarity)";
 
   if (related.length === 0 && current.category) {
     related = await Course.find({ ...baseFilter, category: current.category._id })

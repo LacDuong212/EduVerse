@@ -63,6 +63,7 @@ VECTORIZER_PATH = os.path.join(MODEL_DIR, "tfidf_vectorizer.joblib")
 KMEANS_PATH = os.path.join(MODEL_DIR, "kmeans_model.joblib")
 COURSE_VECTORS_PATH = os.path.join(MODEL_DIR, "course_vectors.joblib")
 BERT_VECTORS_PATH = os.path.join(MODEL_DIR, "bert_vectors.joblib")
+COURSE_CLUSTERS_PATH = os.path.join(MODEL_DIR, "course_clusters.joblib")
 COURSE_IDS_PATH = os.path.join(MODEL_DIR, "course_ids.joblib")
 ITEM_ITEM_PATH = os.path.join(MODEL_DIR, "item_item_matrix.joblib")
 METADATA_PATH = os.path.join(MODEL_DIR, "train_metadata.joblib")
@@ -111,7 +112,7 @@ def train_model(courses: list, interactions: list, n_clusters: int = None) -> di
     """
     Train the full recommendation pipeline:
       1. TF-IDF vectorizer on course text
-      2. K-means on course TF-IDF vectors
+      2. K-means on BERT embeddings
       3. Item-item Jaccard matrix from interactions
 
     Args:
@@ -194,6 +195,7 @@ def train_model(courses: list, interactions: list, n_clusters: int = None) -> di
     joblib.dump(kmeans, KMEANS_PATH)
     joblib.dump(course_vectors, COURSE_VECTORS_PATH)
     joblib.dump(bert_vectors, BERT_VECTORS_PATH)
+    joblib.dump(cluster_labels, COURSE_CLUSTERS_PATH)
     joblib.dump(course_ids, COURSE_IDS_PATH)
     joblib.dump(item_item_matrix, ITEM_ITEM_PATH)
 
@@ -232,7 +234,6 @@ def _build_jaccard_matrix(interactions: list, course_ids: list) -> dict:
         course_users[cid].add(uid)
 
     # Only compute for courses in our trained set
-    valid_ids = set(course_ids)
     matrix = {}
 
     for i, cid_a in enumerate(course_ids):
@@ -271,7 +272,14 @@ def _load_model():
     if _cache.get("loaded"):
         return True
 
-    required = [VECTORIZER_PATH, KMEANS_PATH, COURSE_VECTORS_PATH, BERT_VECTORS_PATH, COURSE_IDS_PATH]
+    required = [
+        VECTORIZER_PATH,
+        KMEANS_PATH,
+        COURSE_VECTORS_PATH,
+        BERT_VECTORS_PATH,
+        COURSE_CLUSTERS_PATH,
+        COURSE_IDS_PATH,
+    ]
     for path in required:
         if not os.path.exists(path):
             logger.warning(f"Model file missing: {path}")
@@ -281,6 +289,7 @@ def _load_model():
     _cache["kmeans"] = joblib.load(KMEANS_PATH)
     _cache["course_vectors"] = joblib.load(COURSE_VECTORS_PATH)
     _cache["bert_vectors"] = joblib.load(BERT_VECTORS_PATH)
+    _cache["course_clusters"] = joblib.load(COURSE_CLUSTERS_PATH)
     _cache["course_ids"] = joblib.load(COURSE_IDS_PATH)
     _cache["item_item"] = (
         joblib.load(ITEM_ITEM_PATH) if os.path.exists(ITEM_ITEM_PATH) else {}
@@ -334,7 +343,9 @@ def predict(
     trained_course_ids = _cache["course_ids"]
     trained_course_vectors = _cache["course_vectors"]
     trained_bert_vectors = _cache["bert_vectors"]
+    course_clusters = _cache["course_clusters"]
     item_item = _cache["item_item"]
+    id_to_idx = {cid: i for i, cid in enumerate(trained_course_ids)}
 
     # ── Build user profile text (weighted by action + rating) ────────────────
     user_text = _build_user_profile_text(user_signals, candidate_courses)
@@ -355,11 +366,22 @@ def predict(
     candidate_texts = [_build_course_text(c) for c in candidate_courses]
     candidate_vectors = vectorizer.transform(candidate_texts)
 
-    # ── Encode candidates with BERT (for cluster assignment) ────────────────
-    candidate_bert_vectors = bert.encode(candidate_texts, show_progress_bar=False, normalize_embeddings=True)
+    # ── Get candidate clusters from precomputed labels ───────────────────────────
+    candidate_clusters = []
 
-    # ── Predict cluster for each candidate (BERT space) ─────────────────────
-    candidate_clusters = kmeans.predict(candidate_bert_vectors)
+    for course in candidate_courses:
+        cid = str(course["_id"])
+        idx = id_to_idx.get(cid)
+
+        if idx is not None:
+            candidate_clusters.append(course_clusters[idx])
+        else:
+            # Safety fallback for new courses not included in last training run
+            text = _build_course_text(course)
+            emb = bert.encode([text], show_progress_bar=False, normalize_embeddings=True)
+            candidate_clusters.append(kmeans.predict(emb)[0])
+
+    candidate_clusters = np.array(candidate_clusters)
 
     # ── Score each candidate across all 4 signals ────────────────────────────
     scored = []
@@ -399,10 +421,10 @@ def predict(
             {
                 "courseId": cid,
                 "scores": {
-                    "cluster": round(cluster_score, 4),
-                    "content": round(content_score, 4),
-                    "cf": round(cf_score, 4),
-                    "popularity": round(pop_score, 4),
+                    "cluster": float(round(float(cluster_score), 4)),
+                    "content": float(round(float(content_score), 4)),
+                    "cf": float(round(float(cf_score), 4)),
+                    "popularity": float(round(float(pop_score), 4)),
                 },
                 "cluster": int(candidate_clusters[i]),
                 "userCluster": int(user_cluster),
@@ -422,13 +444,13 @@ def predict(
 
     # ── Weighted fusion ──────────────────────────────────────────────────────
     for s in scored:
-        s["score"] = round(
-            W_CLUSTER * s["scores"]["cluster"]
-            + W_CONTENT * s["scores"]["content"]
-            + W_CF * s["scores"]["cf"]
-            + W_POPULARITY * s["scores"]["popularity"],
-            4,
+        final_score = (
+            W_CLUSTER * float(s["scores"]["cluster"])
+            + W_CONTENT * float(s["scores"]["content"])
+            + W_CF * float(s["scores"]["cf"])
+            + W_POPULARITY * float(s["scores"]["popularity"])
         )
+        s["score"] = float(round(final_score, 4))
 
     # ── Sort and return top-K ────────────────────────────────────────────────
     scored.sort(key=lambda x: x["score"], reverse=True)

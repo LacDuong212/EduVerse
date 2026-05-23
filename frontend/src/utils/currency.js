@@ -8,7 +8,7 @@ export const formatCurrency = (value) => {
   }).format(n)}${currency}`;
 };
 
-export const toCurrency = (val) => {
+export const toCurrencyFormat = (val) => {
   if (val === null || val === undefined || val === '') return '';
 
   const num = Number(val);
@@ -37,8 +37,4 @@ export const parseCurrency = (str) => {
 
   const num = Number(cleaned);
   return isNaN(num) ? null : num;
-};
-
-export const parseRawNumber = (str) => {
-  return str.replace(/\D/g, "");
 };

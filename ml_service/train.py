@@ -50,14 +50,14 @@ def evaluate_model():
     from sklearn.metrics import silhouette_score as sil_score
     import joblib
 
-    vectors = joblib.load(engine.COURSE_VECTORS_PATH)
+    vectors = joblib.load(engine.BERT_VECTORS_PATH)
     kmeans = joblib.load(engine.KMEANS_PATH)
     labels = kmeans.labels_
     course_ids = joblib.load(engine.COURSE_IDS_PATH)
 
     # 1. Silhouette Score
     if len(set(labels)) >= 2:
-        score = sil_score(vectors.toarray(), labels)
+        score = sil_score(vectors, labels)
         logger.info(f"Silhouette Score: {score:.4f}")
         if score > 0.5:
             logger.info("  → Good: clusters are well-separated")

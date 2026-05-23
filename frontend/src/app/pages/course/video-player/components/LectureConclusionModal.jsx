@@ -233,7 +233,7 @@ export default function LectureConclusionModal({
                               <BsXCircleFill className="ms-2 flex-shrink-0" />
                             );
                           } else {
-                            labelClass += "btn-light text-muted opacity-50";
+                            labelClass += "btn-light opacity-50";
                           }
                         } else {
                           labelClass +=
@@ -257,7 +257,7 @@ export default function LectureConclusionModal({
                             />
 
                             <label className={labelClass} htmlFor={inputId}>
-                              <span>{opt}</span>
+                              <span>{`${opt}`}</span>
                               {icon}
                             </label>
                           </div>

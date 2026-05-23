@@ -3,6 +3,7 @@ import { z } from "zod";
 import { pageSchema, limitSchema } from "#utils/pagination.js";
 import * as CONSTANTS from "./course.constant.js"
 import { LEVEL_ENUM } from "./course.model.js";
+import { AI_DATA_STATUS } from "./curriculum.model.js";
 
 const objectIdSchema = (Name = "Field") => z.union([
   z.instanceof(mongoose.Types.ObjectId),
@@ -86,7 +87,7 @@ const aiDataSchema = z.object({
   summary: z.string().optional(),
   lessonNotes: z.record(z.any()).optional(),
   quizzes: z.array(z.any()).optional(),
-  status: z.string().optional(),
+  status: z.enum(AI_DATA_STATUS.values(), "Invalid AI data status").nullable(),
 });
 
 export const lectureIdSchema = objectIdSchema("Lecture");
@@ -112,6 +113,9 @@ const updateLectureSchema = z.object({
     .max(CONSTANTS.LECTURE_DESCRIPTION_MAX_LENGTH, "Lecture description is too long")
     .nullish(),
   isFree: z.boolean().optional(),
+  // aiData: z.any()
+  //   .optional()
+  //   .transform((val) => (val === null ? null : undefined)),
 }).partial();
 
 const lectureSchema = z.object({
@@ -145,7 +149,9 @@ const updateSectionSchema = z.object({
     .trim()
     .min(1, "Section title cannot be empty")
     .max(CONSTANTS.SECTION_TITLE_MAX_LENGTH, "Section title is too long").optional(),
-  lectures: z.array(updateLectureSchema, "Section should be a list of lectures").optional(),
+  lectures: z.array(updateLectureSchema, "Section should be a list of lectures")
+    .min(1, "Section must have at least one lecture")
+    .optional(),
 }).partial();
 
 const sectionSchema = z.object({
@@ -159,12 +165,14 @@ const sectionSchema = z.object({
 });
 
 const updateCurriculumSchema = z.object({
-  sections: z.array(updateSectionSchema, "Sections should be a list of sections").optional()
+  sections: z.array(updateSectionSchema, "Sections should be a list of sections")
+    .min(1, "Sections should contain at least one section")
+    .optional(),
 }, "Curriculum should contain sections").optional();
 
 export const curriculumSchema = z.object({
   sections: z.array(sectionSchema, "Sections should be a list of sections")
-    .min(1, "Sections should contain at least one section")
+    .min(1, "Sections should contain at least one section"),
 }, "Curriculum should contain sections");
 
 const baseCourseFields = {
@@ -297,7 +305,7 @@ export const limitQueryRequest = z.object({
   })
 });
 
-export const generateAiParams = z.object({
+export const aiContentsParams = z.object({
   params: z.object({
     id: courseIdSchema,
     lecId: lectureIdSchema,

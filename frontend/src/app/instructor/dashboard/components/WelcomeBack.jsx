@@ -76,7 +76,7 @@ const WelcomeBack = ({ instructorName = "" }) => {
   return (
     <section className="pt-4 pb-4" style={styles.wrapper}>
       <PiGlobeThin className="text-pink" style={styles.shape1} />
-      <IoStatsChartSharp className="text-teal" style={styles.shape2} />
+      <IoStatsChartSharp className="text-pistachio" style={styles.shape2} />
       <FaReact className="text-yellow" style={styles.shape3} />
       <BsTriangleFill className="text-orange" style={styles.shape4} />
       <PiPentagon className="text-purple" style={styles.shape5} />

@@ -11,7 +11,7 @@ export const setTokenCookie = (res, userId) => {
     expiresIn: process.env.JWT_EXPIRATION
   });
 
-  res.cookie("token", token, {
+  res.cookie("edv_token", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",

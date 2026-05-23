@@ -1,7 +1,10 @@
 import mongoose from "mongoose";
+import { UPDATE_STATUS_ENUM } from "./course.model.js";
 
 const isPopulated = (val) => val instanceof mongoose.Model || (val && typeof val === "object" && val._id);
 const getStringId = (id) => isPopulated(id) ? id._id?.toString() : id?.toString();
+const hasPendingChanges = (pendingUpdate) =>
+  pendingUpdate?.data && Object.keys(pendingUpdate.data).length > 0;
 
 const getCourseBasicDetails = (course) => {
   const price = course?.price ?? null;
@@ -27,62 +30,62 @@ const getCourseBasicDetails = (course) => {
 };
 
 const getCourseInfo = (course) => ({
-  language: course?.language || null,
-  level: course?.level || null,
-  duration: course?.duration || null,
+  language: course?.language ?? null,
+  level: course?.level ?? null,
+  duration: course?.duration ?? 0,
 });
 
 const getCourseCatgegory = (category) => ({
   cateId: getStringId(category) || null,
-  name: category?.name || null,
-  slug: category?.slug || null,
+  name: category?.name ?? null,
+  slug: category?.slug ?? null,
 });
 
 const getCourseInstructor = (instructor) => ({
   insId: getStringId(instructor?.ref) || null,
-  name: instructor?.ref?.name || instructor?.name || null,
-  avatar: instructor?.ref?.pfpImg || instructor?.avatar || null,
+  name: instructor?.ref?.name ?? instructor?.name ?? null,
+  avatar: instructor?.ref?.pfpImg ?? instructor?.avatar ?? null,
 });
 
 const getCourseStats = (course) => ({
-  ratingTotal: course?.rating?.total || 0,
-  ratingCount: course?.rating?.count || 0,
-  studentsEnrolled: course?.studentsEnrolled || 0,
-  sectionsCount: course?.sectionsCount || 0,
-  lecturesCount: course?.lecturesCount || 0,
+  ratingTotal: course?.rating?.total ?? 0,
+  ratingCount: course?.rating?.count ?? 0,
+  studentsEnrolled: course?.studentsEnrolled ?? 0,
+  sectionsCount: course?.sectionsCount ?? 0,
+  lecturesCount: course?.lecturesCount ?? 0,
 });
 
 const getCourseRating = (rating) => ({
-  total: rating?.total || 0,
-  count: rating?.count || 0,
+  total: rating?.total ?? 0,
+  count: rating?.count ?? 0,
   stars: {
-    1: rating?.stars?.["1"] || 0,
-    2: rating?.stars?.["2"] || 0,
-    3: rating?.stars?.["3"] || 0,
-    4: rating?.stars?.["4"] || 0,
-    5: rating?.stars?.["5"] || 0,
+    1: rating?.stars?.["1"] ?? 0,
+    2: rating?.stars?.["2"] ?? 0,
+    3: rating?.stars?.["3"] ?? 0,
+    4: rating?.stars?.["4"] ?? 0,
+    5: rating?.stars?.["5"] ?? 0,
   },
 });
 
 const getCourseTime = (course) => ({
-  createdAt: course?.createdAt || null,
-  updatedAt: course?.updatedAt || null,
+  createdAt: course?.createdAt ?? null,
+  updatedAt: course?.updatedAt ?? null,
 });
 
 export const getCourseFreeCurriculum = (curriculum) => {
   return (curriculum || []).map(section => ({
     secId: section?._id || null,
-    title: section?.title || null,
+    title: section?.title ?? null,
     lectures: (section?.lectures || []).map(lecture => {
       const publicData = {
         lecId: lecture?._id || null,
-        title: lecture?.title || null,
-        duration: lecture?.duration || 0,
+        title: lecture?.title ?? null,
+        duration: lecture?.duration ?? 0,
         isFree: lecture?.isFree ?? false,
       };
 
       if (lecture?.isFree) {
-        publicData.videoId = lecture?.videoId || null;
+        publicData.videoId = lecture?.videoId ?? null;
       }
 
       return publicData;
@@ -98,6 +101,7 @@ export const getCourseCurriculum = (curriculum, hasAiData = false) => {
       lecId: lecture?._id?.toString() ?? null,
       title: lecture?.title ?? null,
       duration: lecture?.duration ?? 0,
+      oldVideoId: lecture?.oldVideoId,
       videoId: lecture?.videoId ?? null,
       isFree: lecture?.isFree ?? false,
       ...(hasAiData && { aiData: getAiData(lecture?.aiData) })
@@ -105,7 +109,7 @@ export const getCourseCurriculum = (curriculum, hasAiData = false) => {
   }));
 };
 
-const getAiData = (aiData) => {
+export const getAiData = (aiData) => {
   aiData = typeof aiData?.toJSON === "function" ? aiData.toJSON() : aiData;
   if (!aiData || Object.keys(aiData).length === 0) return null;
 
@@ -165,17 +169,17 @@ export const toCourseDetailsDto = (details) => {
   return {
     ...getCourseBasicDetails(details),
 
-    description: details.description || null,
-    previewVideo: details.previewVideo || null,
+    description: details.description ?? null,
+    previewVideo: details.previewVideo ?? null,
 
     ...getCourseInfo(details),
 
-    studentsEnrolled: details?.studentsEnrolled || 0,
-    sectionsCount: details?.sectionsCount || 0,
-    lecturesCount: details?.lecturesCount || 0,
+    studentsEnrolled: details?.studentsEnrolled ?? 0,
+    sectionsCount: details?.sectionsCount ?? 0,
+    lecturesCount: details?.lecturesCount ?? 0,
 
     tags: details.tags || [],
-    
+
     isPrivate: details.isPrivate ?? undefined,
 
     rating: getCourseRating(details.rating),
@@ -200,12 +204,18 @@ export const toCourseCartItemDto = (course, addedAt) => {
 export const toCourseRowItemDto = (course) => {
   if (!course) return null;
 
+  const hasChanges = hasPendingChanges(course.pendingUpdate) ?? false;
+  const requestUpdate = hasChanges && course.pendingUpdate?.status === UPDATE_STATUS_ENUM?.pending;
+
   return {
     ...getCourseBasicDetails(course),
-    status: course.status || null,
+    status: course.status ?? null,
     ...getCourseStats(course),
     isPrivate: course.isPrivate ?? true,
     ...getCourseTime(course),
+
+    hasChanges,
+    requestUpdate,
   };
 };
 
@@ -219,14 +229,14 @@ export const toInstructorCourseDto = (course) => {
 
   return {
     ...getCourseBasicDetails(course),
-    description: course.description || null,
-    status: course.status || null,
+    description: course.description ?? null,
+    status: course.status ?? null,
     ...getCourseInfo(course),
     ...getCourseStats(course),
     tags: course.tags || [],
     isPrivate: course.isPrivate ?? true,
     cateId: getStringId(course?.category) || null,
-    cateName: course?.category?.name || null,
+    cateName: course?.category?.name ?? null,
     ...getCourseTime(course),
   };
 };
@@ -246,7 +256,7 @@ export const toEditCourseDto = (course, curriculum) => {
   if (!course) return null;
 
   return {
-    courseId: course._id?.toString() ?? null,
+    courseId: course._id?.toString() || null,
     title: course.title ?? null,
     subtitle: course.subtitle ?? null,
     description: course.description ?? null,
@@ -259,7 +269,7 @@ export const toEditCourseDto = (course, curriculum) => {
     thumbnail: course.thumbnail ?? null,
     previewVideo: course.previewVideo ?? null,
     status: course.status ?? null,
-    categoryId: (course.category?._id ?? course.category)?.toString() ?? null,
+    categoryId: getStringId(course.category) || null,
     isPrivate: course.isPrivate ?? true,
     hasPendingChanges: !!course.hasPendingChanges,
 
@@ -291,12 +301,18 @@ export const toStudentLearningCourseDto = (course) => {
 
     sectionsCount: course.sectionsCount || 0,
     lecturesCount: course.lecturesCount || 0,
+    studentsEnrolled: course.studentsEnrolled || 0,
 
     category: getCourseCatgegory(course.category),
     instructor: getCourseInstructor(course.instructor),
 
     curriculum: {
       sections: getCourseCurriculum(course.curriculum?.sections || [], true),
+    },
+
+    rating: {
+      total: course.rating?.total,
+      count: course.rating?.count
     },
   };
 };

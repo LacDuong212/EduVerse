@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import CountUp from "react-countup";
-import { FaBookOpen, FaUserGraduate, FaClock, FaChalkboardTeacher } from "react-icons/fa";
+import { FaBookOpen, FaUserGraduate, FaClock, FaUserTie } from "react-icons/fa";
 import { useSelector } from "react-redux";
 import { secondsToHours } from "@/utils/duration";
 
@@ -55,8 +55,8 @@ const Counter = () => {
   const counterData = [
     { icon: FaBookOpen, variant: "primary", count: metrics.totalCourses, suffix: "", title: "Courses", decimals: 0 },
     { icon: FaUserGraduate, variant: "success", count: metrics.totalLearners, suffix: "", title: "Learners", decimals: 0 },
-    { icon: FaClock, variant: "warning", count: metrics.totalHours, suffix: "h", title: "Total Hours", decimals: 2 },
-    { icon: FaChalkboardTeacher, variant: "info", count: metrics.totalInstructors, suffix: "", title: "Instructors", decimals: 0 },
+    { icon: FaClock, variant: "pink", count: metrics.totalHours, suffix: "h", title: "Total Hours", decimals: 2 },
+    { icon: FaUserTie, variant: "warning", count: metrics.totalInstructors, suffix: "", title: "Instructors", decimals: 0 },
   ];
 
   return (

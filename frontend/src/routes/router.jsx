@@ -1,6 +1,6 @@
-import { useSelector } from "react-redux";
-import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 import ChatbotWidget from "@/app/chatbot";
+import BaseRedirect from "@/components/BaseRedirect";
 import PublicOnlyRoute from "@/components/PublicOnlyRoute";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import ScrollToTop from "@/components/ScrollToTop";
@@ -9,18 +9,18 @@ import RoleBasedLayout from "@/layouts/RoleBasedLayout";
 import { publicRoutes, authRoutes, studentRoutes, instructorRoutes } from "./index";
 
 const HIDE_CHATBOT = [
+  "/",
   "/auth",       // includes /auth/login, /auth/sign-up,...
   "/404",
 ];
 
 const AppRouter = props => {
-  // const { isLoggedIn, userData } = useSelector(state => state.auth);
   const location = useLocation();
-  // const navigate = useNavigate();
 
-  const shouldHideChat = HIDE_CHATBOT.some(path =>
-    location.pathname.startsWith(path)
-  );
+  const shouldHideChat = HIDE_CHATBOT?.some(path => {
+    if (path === "/") return location.pathname === "/";
+    else location.pathname.startsWith(path);
+  });
 
   return (
     <>
@@ -28,9 +28,8 @@ const AppRouter = props => {
       <RoutePreloaderListener />
       {!shouldHideChat && <ChatbotWidget />}
 
-      {/* #TODO: optimize */}
       <Routes>
-        <Route path="/" element={<Navigate to="/home" replace />} />
+        <Route path="/" element={<BaseRedirect />} />
 
         {/* INSTRUCTOR ROUTES */}
         <Route element={<ProtectedRoute allowedRole={"instructor"} />}>

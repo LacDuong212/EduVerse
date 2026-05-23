@@ -35,7 +35,7 @@ export default function useSignUp(onSignUpSuccess) {
 
   useEffect(() => {
     if (isLoggedIn && userData) {
-      const roleRedirect = userData.role === "student" ? "/" : "/instructor/dashboard";
+      const roleRedirect = userData.role === "student" ? "/home" : "/instructor/dashboard";
       navigate(roleRedirect, { replace: true });
     }
   }, [isLoggedIn, userData, navigate]);

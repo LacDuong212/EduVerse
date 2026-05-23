@@ -13,6 +13,7 @@ const InstructorMyCourses = () => {
     sort, setSort,
     pagination, setPage,
     togglePrivacy,
+    handleRemoveDraft
   } = useInstructorMyCourses();
 
   return (
@@ -33,6 +34,7 @@ const InstructorMyCourses = () => {
           onSortChange={setSort}
           onPageChange={setPage}
           onTogglePrivacy={togglePrivacy}
+          onRemoveDraft={handleRemoveDraft}
         />
       </Container>
     </>

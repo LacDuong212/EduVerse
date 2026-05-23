@@ -12,6 +12,7 @@ import { FaAngleLeft, FaAngleRight, FaRegEnvelope, FaRegStar, FaSearch, FaStar, 
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import ChoicesFormInput from "@/components/form/ChoicesFormInput";
+import { DEFAULT_AVATAR_IMG } from "@/contexts/constants";
 import useCourseStudentList from "./useCourseStudentList";
 
 const CourseStudentRow = ({ idx, student = {} }) => {
@@ -34,7 +35,7 @@ const CourseStudentRow = ({ idx, student = {} }) => {
         <div className="d-flex align-items-center position-relative">
           <div className="avatar avatar-md flex-shrink-0">
             {avatar ? (
-              <img src={avatar} className="rounded-circle" alt={"avatar"} />
+              <img src={avatar} className="rounded-circle" alt={"avatar"} onError={(e) => e.target.src = DEFAULT_AVATAR_IMG} />
             ) : (
               <div className="avatar-img rounded-circle border border-light border-1 d-flex align-items-center justify-content-center fw-bold fs-4">
                 {(name?.[0] || "S").toUpperCase()}

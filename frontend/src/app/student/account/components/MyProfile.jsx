@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { Card, CardBody, CardHeader, Col, OverlayTrigger, Row, Tooltip } from "react-bootstrap";
 import { BsQuestionCircle, BsX } from "react-icons/bs";
 import { FaFacebook, FaGlobe, FaInstagram, FaLinkedin, FaUndo, FaYoutube } from "react-icons/fa";
+import { DEFAULT_AVATAR_IMG } from "@/contexts/constants";
 import useMyProfile from "../useMyProfile";
 
 const MAX_INPUT_LENGTH = {
@@ -67,6 +68,7 @@ const MyProfile = () => {
                       src={avatarLogic.currentSrc}
                       className="rounded-3 border border-body border-3 shadow w-100 h-100 object-fit-cover"
                       alt="Avatar"
+                      onError={(e) => e.target.src = DEFAULT_AVATAR_IMG}
                     />
                   ) : (
                     <div className="rounded-3 border border-body border-3 shadow d-flex align-items-center justify-content-center bg-light w-100 h-100 fs-1 fw-bold">
