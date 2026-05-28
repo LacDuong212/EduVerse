@@ -9,7 +9,7 @@ import CourseProgress, { LECTURE_STATUS_ENUM as LECTURE_STATUS } from "./course-
 import { toCourseProgressDto } from "./progress.mapper.js";
 
 export const getLastLearningProgress = async (userId) => {
-  const progress = await CourseProgress.findOne({ userId })
+  const progress = await CourseProgress.findOne({ user: userId })
     .sort({ lastActivityAt: -1 })
     .populate({
       path: "course",
@@ -109,7 +109,7 @@ export const completeLecture = async (userId, courseId, lecId) => {
       );
     }
 
-    await Streak.registerActivity(userId);
+    await Streak.registerActivity(userId, new Date(), s);
     await progress.save({ session: s });
 
     return toCourseProgressDto(progress);

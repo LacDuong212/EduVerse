@@ -7,7 +7,6 @@ import * as orderMapper from "./order.mapper.js";
 export const getOrdersStats = asyncHandler(async (req, res) => {
   const userId = req.user?.userId;
   const result = await orderService.getUserOrdersStats(userId);
-
   return sendSuccessResponse(res, 200, "Get order stats successfully!", result);
 });
 
@@ -47,11 +46,11 @@ export const getOrderDetail = asyncHandler(async (req, res) => {
 export const createOrder = asyncHandler(async (req, res) => {
   const body = req.validated?.body || {};
   const order = await checkoutService.placeOrder(req.user?.userId, body);
-  return sendSuccessResponse(res, 201, "Order created", orderMapper.toOrderDto(order));
+  return sendSuccessResponse(res, 201, "Order created!", orderMapper.toOrderDetailDto(order));
 });
 
 // @route PATCH /:id/cancel
 export const cancelOrder = asyncHandler(async (req, res) => {
   const order = await orderService.cancelOrder(req.validated?.params?.id, req.user?.userId);
-  return sendSuccessResponse(res, 200, "Order cancelled", orderMapper.toOrderDto(order));
+  return sendSuccessResponse(res, 200, "Order cancelled!", orderMapper.toOrderDetailDto(order));
 });

@@ -101,8 +101,20 @@ const waitForGeminiFile = async (fileName) => {
   }
   // logger.debug(">> Video is ready!");
 
-  if (file.state === "FAILED")
-    throw new AppError("Failed to process this video. Please try again later.", 500);
+  if (file.state === "FAILED") {
+    const apiError = file.error;
+
+    logger.error(`>> [2.5/5] Gemini processing failed for ${fileName}.`, {
+      code: apiError?.code,
+      message: apiError?.message
+    });
+
+    const userMessage = apiError?.message
+      ? `Gemini processing failed: ${apiError.message}`
+      : "Failed to process this video. Please try again later.";
+
+    throw new AppError(userMessage, 500);
+  }
 };
 
 const LECTURE_PROMPT = `

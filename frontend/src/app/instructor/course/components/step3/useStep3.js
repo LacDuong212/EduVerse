@@ -145,6 +145,37 @@ export const useStep3 = (stepperInstance) => {
     }
   };
 
+  const handleUpdateAI = (aiChanges) => {
+    setCurriculum(prev => {
+      const updated = _.cloneDeep(prev);
+
+      const { sectionIdx, lectureIdx } = selectedAILecture || {};
+
+      const section = updated[sectionIdx];
+      const lecture = section?.lectures?.[lectureIdx];
+      if (!lecture) return prev;
+
+      section.lectures[lectureIdx] = {
+        ...lecture,
+        aiData: {
+          ...lecture.aiData,
+          summary: aiChanges.summary,
+          lessonNotes: {
+            ...lecture.aiData?.lessonNotes,
+            keyConcepts: aiChanges.keyConcepts,
+            mainPoints: aiChanges.mainPoints
+          },
+          quizzes: aiChanges.quizzes
+        }
+      };
+
+      updateField("curriculum.sections", updated);
+      return updated;
+    });
+
+    setShowAIModal(false);
+  };
+
   const handleDeleteAI = async () => {
     const { sectionIdx, lectureIdx } = selectedAILecture || {};
     if (!validIndex(sectionIdx) || !validIndex(lectureIdx)) return;
@@ -230,6 +261,7 @@ export const useStep3 = (stepperInstance) => {
       },
       close: () => setShowAIModal(false),
       generate: handleGenerateAI,
+      update: handleUpdateAI,
       delete: handleDeleteAI,
     },
 

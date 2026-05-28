@@ -126,17 +126,86 @@ const Step3 = ({ stepperInstance, activeStep }) => {
                     {/* Lectures List */}
                     {(sec.lectures || []).map((lec, idx) => {
                       const lecPath = `curriculum.sections.${i}.lectures.${idx}`;
+                      const aiPath = `${lecPath}.aiData`;
+                      const lessonNotesPath = `${aiPath}.lessonNotes`;
+
                       const lecTitleErr = errors[`${lecPath}.title`];
                       const lecVideoErr = errors[`${lecPath}.videoId`];
+                      const lecDurationErr = errors[`${lecPath}.duration`];
+                      const lecDescriptionErr = errors[`${lecPath}.description`];
+
+                      const aiDataErr = errors[aiPath];
+                      const aiSummaryErr = errors[`${aiPath}.summary`];
+                      const lessonNotesErr = errors[`${aiPath}.lessonNotes`];
+                      const aiQuizzesErr = errors[`${aiPath}.quizzes`];
+
+                      const mainPointsStructuralErr = errors[`${lessonNotesPath}.mainPoints`];
+                      const practicalTipsStructuralErr = errors[`${lessonNotesPath}.practicalTips`];
+                      const keyConceptsStructuralErr = errors[`${lessonNotesPath}.keyConcepts`];
+
+                      const arrayErrors = [];
+
+                      Object.entries(errors).forEach(([key, message]) => {
+                        if (key.startsWith(`${lessonNotesPath}.mainPoints.`)) {
+                          const index = key.split('.').pop();
+                          arrayErrors.push(`Main point item ${Number(index) + 1}: ${message}`);
+                        }
+
+                        else if (key.startsWith(`${lessonNotesPath}.practicalTips.`)) {
+                          const index = key.split('.').pop();
+                          arrayErrors.push(`Practical tip item ${Number(index) + 1}: ${message}`);
+                        }
+
+                        else if (key.startsWith(`${lessonNotesPath}.keyConcepts.`)) {
+                          const parts = key.split('.');
+                          const field = parts.pop();
+                          const index = parts.pop();
+                          const fieldLabel = field === "term" ? "Term" : "Definition";
+                          arrayErrors.push(`Key concept item ${Number(index) + 1} (${fieldLabel}): ${message}`);
+                        }
+
+                        else if (key.startsWith(`${aiPath}.quizzes.`)) {
+                          const parts = key.split('.');
+
+                          const quizzesSegmentIndex = parts.indexOf("quizzes");
+
+                          if (quizzesSegmentIndex !== -1) {
+                            const questionIndex = parts[quizzesSegmentIndex + 1];
+                            const remainingParts = parts.slice(quizzesSegmentIndex + 2);
+
+                            const field = remainingParts[0];
+
+                            if (field === "options") {
+                              const optionIndex = remainingParts[1];
+                              arrayErrors.push(`Question ${Number(questionIndex) + 1} (Option ${Number(optionIndex) + 1}): ${message}`);
+                            } else {
+                              const fieldLabels = {
+                                question: "Question Text",
+                                correctAnswer: "Correct Answer",
+                                explanation: "Explanation",
+                                topic: "Topic"
+                              };
+                              const label = fieldLabels[field] || field;
+                              arrayErrors.push(`Question ${Number(questionIndex) + 1} (${label}): ${message}`);
+                            }
+                          }
+                        }
+                      });
+
+                      const hasAnyError = lecTitleErr || lecVideoErr || lecDurationErr || lecDescriptionErr ||
+                        aiDataErr || aiSummaryErr || lessonNotesErr || aiQuizzesErr ||
+                        mainPointsStructuralErr || practicalTipsStructuralErr || keyConceptsStructuralErr ||
+                        arrayErrors.length > 0;
 
                       return (
                         <div key={idx} className="d-flex align-items-center justify-content-between p-2 border-bottom hover-bg-light transition-base">
                           <div className="d-flex align-items-center flex-grow-1 min-w-0 me-3">
                             <FaSection className="text-orange fs-5 me-2 flex-shrink-0" />
                             <div className="d-flex flex-column">
-                              <span className={`h6 m-0 fw-light text-break ${lecTitleErr || lecVideoErr ? "text-danger" : ""}`} title={lec.title}>
+                              <span className={`h6 m-0 text-break ${hasAnyError ? "text-danger" : ""}`} title={lec.title}>
                                 {lec.title}
                               </span>
+
                               {lecTitleErr && (
                                 <small className="text-danger small" style={{ fontSize: '0.75rem' }}>
                                   {lecTitleErr}
@@ -147,14 +216,64 @@ const Step3 = ({ stepperInstance, activeStep }) => {
                                   {lecVideoErr}
                                 </small>
                               )}
+                              {lecDurationErr && (
+                                <small className="text-danger small" style={{ fontSize: '0.75rem' }}>
+                                  {lecDurationErr}
+                                </small>
+                              )}
+                              {lecDescriptionErr && (
+                                <small className="text-danger small" style={{ fontSize: '0.75rem' }}>
+                                  {lecDescriptionErr}
+                                </small>
+                              )}
+                              {aiDataErr && (
+                                <small className="text-danger small" style={{ fontSize: '0.75rem' }}>
+                                  {aiDataErr}
+                                </small>
+                              )}
+                              {aiSummaryErr && (
+                                <small className="text-danger small" style={{ fontSize: '0.75rem' }}>
+                                  {aiSummaryErr}
+                                </small>
+                              )}
+                              {lessonNotesErr && (
+                                <small className="text-danger small" style={{ fontSize: '0.75rem' }}>
+                                  {lessonNotesErr}
+                                </small>
+                              )}
+                              {mainPointsStructuralErr && (
+                                <small className="text-danger small" style={{ fontSize: '0.75rem' }}>
+                                  {mainPointsStructuralErr}
+                                </small>
+                              )}
+                              {practicalTipsStructuralErr && (
+                                <small className="text-danger small" style={{ fontSize: '0.75rem' }}>
+                                  {practicalTipsStructuralErr}
+                                </small>
+                              )}
+                              {keyConceptsStructuralErr && (
+                                <small className="text-danger small" style={{ fontSize: '0.75rem' }}>
+                                  {keyConceptsStructuralErr}
+                                </small>
+                              )}
+                              {aiQuizzesErr && (
+                                <small className="text-danger small" style={{ fontSize: '0.75rem' }}>
+                                  {aiQuizzesErr}
+                                </small>
+                              )}
+
+                              {arrayErrors.map((errMsg, errIdx) => (
+                                <small key={errIdx} className="text-danger small" style={{ fontSize: '0.75rem' }}>
+                                  {errMsg}
+                                </small>
+                              ))}
                             </div>
                           </div>
 
-                          <div className="d-flex align-items-center">
+                          <div className="d-flex flex-column flex-sm-row justify-content-center gap-2">
                             {renderAIButton(i, idx, lec)}
-
                             <Button
-                              variant="primary-soft" size="sm" className="btn-round me-2 mb-0"
+                              variant="primary-soft" size="sm" className="btn-round mb-0"
                               title="Edit Lecture"
                               onClick={() => lecture.open(i, idx, lec)}
                             >
@@ -222,6 +341,7 @@ const Step3 = ({ stepperInstance, activeStep }) => {
         onClose={ai.close}
         lecture={ai.data}
         onGenerate={ai.generate}
+        onUpdate={ai.update}
         onDelete={ai.delete}
       />
     </>

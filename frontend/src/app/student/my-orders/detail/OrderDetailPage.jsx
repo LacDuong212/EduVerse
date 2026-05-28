@@ -58,17 +58,14 @@ export default function OrderDetailPage() {
   }, [order?.createdAt]);
 
   const courseRows = useMemo(() => {
-    return (order?.courses || []).map((item, idx) => {
-      const course = item.course || {};
-      return {
-        key: `${course.courseId || idx}-${idx}`,
-        index: idx + 1,
-        title: course.title || "Untitled Course",
-        thumbnail: course.thumbnail || course.image || "",
-        courseId: course.courseId,
-        pricePaid: item.pricePaid || 0,
-      };
-    });
+    return (order?.courses || []).map((item, idx) => ({
+      index: idx + 1,
+      key: `${item?.courseId || idx}-${idx}`,
+      title: item?.title || "Untitled Course",
+      thumbnail: item?.image || item.thumbnail || "",
+      courseId: item?.courseId,
+      pricePaid: item?.pricePaid ?? 0,
+    })).filter(Boolean);
   }, [order]);
 
   const handleCancelOrder = async () => {

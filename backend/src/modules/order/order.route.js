@@ -10,7 +10,7 @@ const orderRoute = Router();
 orderRoute.use(authMiddleware.protect, authMiddleware.restrictTo("student"));
 
 orderRoute.get(
-  "",
+  "/",
   validate(orderSchema.ordersQueryRequest),
   orderController.getOrders
 );

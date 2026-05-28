@@ -1,4 +1,5 @@
 import asyncHandler from "#utils/asyncHandler.js";
+import logger from "#utils/logger.js";
 import { sendSuccessResponse } from "#utils/response.js";
 import * as paymentService from "./payment.service.js";
 import * as momoProvider from "./providers/momo.provider.js";
@@ -42,6 +43,12 @@ export const momoIpn = asyncHandler(async (req, res) => {
   }
 
   const orderId = momoProvider.getRealOrderId(req.body);
+
+  if (!orderId) {
+    logger.warn("Momo IPN: Missing order ID - acknowledging without processing");
+    return res.status(204).send();
+  }
+
   const { transId } = req.body;
 
   if (resultCode === 0) {
@@ -74,7 +81,7 @@ export const vnpayIpn = asyncHandler(async (req, res) => {
   const orderId = req.query["vnp_TxnRef"];
   if (!orderId)
     return res.status(200).json({ RspCode: "01", Message: "Invalid request" });
-  
+
   const amount = Number(req.query["vnp_Amount"]) / 100;
   const rspCode = req.query["vnp_ResponseCode"];
   const transactionId = req.query["vnp_TransactionNo"];
@@ -102,11 +109,11 @@ export const vnpayIpn = asyncHandler(async (req, res) => {
 // @route GET /momo/return
 export const momoReturn = asyncHandler(async (req, res) => {
   const { isValid, amount, resultCode } = momoProvider.verifySignature(req.query);
-  
+
   const orderId = momoProvider.getRealOrderId(req.query);
   const { transId } = req.query;
 
-   if (!isValid) {
+  if (!isValid) {
     return res.redirect(
       `${clientUrl}/student/payment-failed?orderId=${orderId || ""}&code=invalid_signature&gateway=momo`
     );
@@ -131,7 +138,7 @@ export const momoReturn = asyncHandler(async (req, res) => {
         rawData: req.query
       });
     }
-  }
+  } else logger.warn("Momo Return: Missing order or transaction ID - skipping order update")
 
   const redirectUrl = success
     ? `${clientUrl}/student/payment-success?orderId=${orderId}&code=${resultCode}&gateway=momo`
