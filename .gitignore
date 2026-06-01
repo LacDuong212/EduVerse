@@ -139,6 +139,12 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
+# Test reports
+backend/test-reports/
+backend/tests/
+backend/tests/
+
+
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
@@ -162,3 +168,5 @@ tmp/
 ml_service/model/
 ml_service/__pycache__/
 ml_service/venv/
+
+.backend\test-reports
