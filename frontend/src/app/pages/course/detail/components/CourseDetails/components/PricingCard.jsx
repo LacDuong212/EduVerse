@@ -6,11 +6,12 @@ import GlightBox from "@/components/GlightBox";
 import { DEFAULT_COURSE_IMG } from "@/contexts/constants";
 import useVideoStream from "@/hooks/useVideoStream";
 import { formatCurrency } from "@/utils/currency";
+import { useNavigate } from "react-router-dom";
 
 const VideoPlayButton = ({ videoId }) => {
-  if (!videoId) return null;
-
   const { streamUrl, loading, error } = useVideoStream(videoId);
+
+  if (!videoId) return null;
 
   if (loading) {
     return (
@@ -48,6 +49,8 @@ const VideoPlayButton = ({ videoId }) => {
 };
 
 const PricingCard = ({ course, owned, onAddToCart }) => {
+  const navigate = useNavigate();
+  
   const {
     courseId,
     thumbnail,
@@ -71,7 +74,7 @@ const PricingCard = ({ course, owned, onAddToCart }) => {
     if (owned) {
       navigate(`/student/courses/${courseId || ""}`);
     } else {
-      setActiveKey("curriculum");
+      setActiveKey?.("curriculum");
     }
   }
 

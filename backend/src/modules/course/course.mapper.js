@@ -301,12 +301,18 @@ export const toStudentLearningCourseDto = (course) => {
 
     sectionsCount: course.sectionsCount || 0,
     lecturesCount: course.lecturesCount || 0,
+    studentsEnrolled: course.studentsEnrolled || 0,
 
     category: getCourseCatgegory(course.category),
     instructor: getCourseInstructor(course.instructor),
 
     curriculum: {
       sections: getCourseCurriculum(course.curriculum?.sections || [], true),
+    },
+
+    rating: {
+      total: course.rating?.total,
+      count: course.rating?.count
     },
   };
 };

@@ -6,6 +6,8 @@ import { MdLabel } from "react-icons/md";
 
 const PageIntro = ({ course }) => {
 
+  const averageRating = course?.rating?.count > 0 ? (course?.rating?.total || 0) / course?.rating?.count : 0;
+
   return <section className="bg-blue py-0 py-sm-5 text-white" style={{
     background: `url(${pattern4}) no-repeat center center`,
     backgroundSize: "cover"
@@ -28,7 +30,8 @@ const PageIntro = ({ course }) => {
           <ul className="list-inline mb-0">
             <li className="list-inline-item h6 me-3 mb-1 icons-center text-white">
               <FaStar className="text-warning me-2 mb flex-shrink-0" />
-              {Number(course?.rating?.average || 0).toFixed(1)}/5.0              </li>
+              {Number(averageRating).toFixed(1)}/5.0
+            </li>
             <li className="list-inline-item h6 me-3 mb-1 icons-center text-white">
               <FaUserGraduate className="text-success me-2 mb flex-shrink-0" />
               {course?.studentsEnrolled ?? "0"} Enrolled

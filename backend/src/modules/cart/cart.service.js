@@ -29,8 +29,18 @@ export const addToCart = async (stuId, courseId) => {
     if (orderStatus === STATUS_ENUM.pending)
       throw new AppError("This course is already in a pending order.", 409);
 
+    const existingCart = await Cart.findOne({ user: stuId }).session(session);
+
+    if (
+      existingCart?.courses?.some(
+        (item) => item.course.toString() === courseId.toString()
+      )
+    ) {
+      throw new AppError("Course already in cart.", 409);
+    }
+
     const updatedCart = await Cart.findOneAndUpdate(
-      { user: stuId, "courses.course": { $ne: courseId } },
+      { user: stuId },
       {
         $addToSet: { courses: { course: courseId } }
       },

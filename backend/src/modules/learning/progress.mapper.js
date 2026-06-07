@@ -33,5 +33,6 @@ export const toCourseProgressDto = (progress) => {
     firstStartedAt: progress.firstStartedAt || progress.createdAt || null,
     lastActivityAt: progress.lastActivityAt || null,
     isCompleted: progress.isCompleted ?? false,
+    aiAssessment: progress.aiAssessment
   };
 };

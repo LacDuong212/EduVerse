@@ -124,6 +124,7 @@ const CourseDetails = ({ course, owned, onAddToCart }) => {
                   owned={isEnrolled}
                   courseId={courseId}
                   onAddToCart={onAddToCart}
+                  setActiveKey={setActiveKey}
                 />
                 <CourseIncludeCard course={course} />
               </Col>
