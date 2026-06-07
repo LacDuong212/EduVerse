@@ -217,6 +217,7 @@ const MyProfile = () => {
               <div className="pb-5 input-group">
                 <ReactQuill
                   theme="snow"
+                  className="w-100"
                   style={{ height: 300 }}
                   value={instructor?.introduction}
                   onChange={(content) => updateField("introduction", content)}

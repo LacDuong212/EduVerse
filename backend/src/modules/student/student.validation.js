@@ -84,7 +84,7 @@ export const updateLectureProgressRequest = z.object({
     isCompleted: z.boolean().default(false),
     deltaTimeSec: z.coerce.number()
       .min(0)
-      .max(60, "Delta time seems suspiciously high")
+      // .max(60, "Delta time seems suspiciously high")
       .default(0),
     isNewSession: z.boolean().default(false),
   }, "Request body is needed")
