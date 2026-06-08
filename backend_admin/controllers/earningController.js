@@ -5,10 +5,47 @@ export const getEarningsHistory = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 4;
+    const orderId = req.query.orderId?.trim();
+    const dateFrom = req.query.dateFrom?.trim();
+    const dateTo = req.query.dateTo?.trim();
+    const status = req.query.status?.trim();
 
     const skip = (page - 1) * limit;
 
-    const matchStage = {};
+    const matchConditions = [];
+
+    if (orderId) {
+      matchConditions.push({
+        $expr: {
+          $regexMatch: {
+            input: { $toString: "$_id" },
+            regex: orderId,
+            options: "i"
+          }
+        }
+      });
+    }
+
+    if (dateFrom || dateTo) {
+      const dateCondition = {};
+      if (dateFrom) dateCondition.$gte = new Date(dateFrom);
+      if (dateTo) {
+        const end = new Date(dateTo);
+        end.setHours(23, 59, 59, 999);
+        dateCondition.$lte = end;
+      }
+      matchConditions.push({ createdAt: dateCondition });
+    }
+
+    if (status) {
+      matchConditions.push({ status });
+    }
+
+    const matchStage = matchConditions.length === 0
+      ? {}
+      : matchConditions.length === 1
+        ? matchConditions[0]
+        : { $and: matchConditions };
 
     const results = await Order.aggregate([
       { $unwind: "$courses" },
