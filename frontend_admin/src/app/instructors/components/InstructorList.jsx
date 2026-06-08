@@ -1,4 +1,27 @@
 import { Button } from 'react-bootstrap';
+import { FaUserTie } from 'react-icons/fa';
+
+const COLS = 6;
+
+const SkeletonRows = ({ count = 5 }) => (
+  <>
+    {[...Array(count)].map((_, i) => (
+      <tr key={i} className="skeleton-row">
+        <td>
+          <div className="d-flex align-items-center gap-2">
+            <span className="placeholder rounded-circle" style={{ width: 40, height: 40, display: 'inline-block' }} />
+            <span className="placeholder col-5 rounded" />
+          </div>
+        </td>
+        <td><span className="placeholder col-8 rounded" /></td>
+        <td><span className="placeholder col-6 rounded" /></td>
+        <td><span className="placeholder col-6 rounded" /></td>
+        <td><span className="placeholder col-4 rounded" /></td>
+        <td><span className="placeholder col-5 rounded" /></td>
+      </tr>
+    ))}
+  </>
+);
 
 const InstructorList = ({ instructorsData, isLoading, onBlock, onUnblock }) => {
 
@@ -28,9 +51,7 @@ const InstructorList = ({ instructorsData, isLoading, onBlock, onUnblock }) => {
       </thead>
       <tbody>
         {isLoading ? (
-          <tr>
-            <td colSpan="5" className="text-center">Loading...</td>
-          </tr>
+          <SkeletonRows count={5} />
         ) : instructorsData && instructorsData.length > 0 ? (
           instructorsData.map((item) => (
             <tr key={item._id}>
@@ -58,7 +79,7 @@ const InstructorList = ({ instructorsData, isLoading, onBlock, onUnblock }) => {
                 {item.email}
               </td>
               <td>
-                &nbsp;{
+                {
                   new Date(item.createdAt).toLocaleString('en-US', {
                     day: '2-digit',
                     month: 'short',
@@ -67,7 +88,7 @@ const InstructorList = ({ instructorsData, isLoading, onBlock, onUnblock }) => {
                 }
               </td>
               <td>
-                &nbsp;{
+                {
                   new Date(item.updatedAt).toLocaleString('en-US', {
                     day: '2-digit',
                     month: 'short',
@@ -97,8 +118,10 @@ const InstructorList = ({ instructorsData, isLoading, onBlock, onUnblock }) => {
           ))
         ) : (
           <tr>
-            <td colSpan="5" className="text-center">
-              No instructors found.
+            <td colSpan={COLS} className="empty-state-cell">
+              <FaUserTie className="empty-icon" />
+              <div className="fw-semibold">No instructors found</div>
+              <div className="small mt-1">Try adjusting your search criteria</div>
             </td>
           </tr>
         )}

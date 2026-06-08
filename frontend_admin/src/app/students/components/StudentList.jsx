@@ -1,4 +1,28 @@
 import { Button } from 'react-bootstrap';
+import { FaUserGraduate } from 'react-icons/fa';
+
+const COLS = 7;
+
+const SkeletonRows = ({ count = 5 }) => (
+  <>
+    {[...Array(count)].map((_, i) => (
+      <tr key={i} className="skeleton-row">
+        <td>
+          <div className="d-flex align-items-center gap-2">
+            <span className="placeholder rounded-circle" style={{ width: 40, height: 40, display: 'inline-block' }} />
+            <span className="placeholder col-5 rounded" />
+          </div>
+        </td>
+        <td><span className="placeholder col-8 rounded" /></td>
+        <td><span className="placeholder col-6 rounded" /></td>
+        <td><span className="placeholder col-6 rounded" /></td>
+        <td><span className="placeholder col-4 rounded" /></td>
+        <td><span className="placeholder col-4 rounded" /></td>
+        <td><span className="placeholder col-5 rounded" /></td>
+      </tr>
+    ))}
+  </>
+);
 
 const StudentList = ({ studentsData, isLoading, onBlock, onUnblock, onDelete }) => {
 
@@ -31,9 +55,7 @@ const StudentList = ({ studentsData, isLoading, onBlock, onUnblock, onDelete }) 
       </thead>
       <tbody>
         {isLoading ? (
-          <tr>
-            <td colSpan="5" className="text-center">Loading...</td>
-          </tr>
+          <SkeletonRows count={5} />
         ) : studentsData && studentsData.length > 0 ? (
           studentsData.map((item) => (
             <tr key={item._id}>
@@ -61,7 +83,7 @@ const StudentList = ({ studentsData, isLoading, onBlock, onUnblock, onDelete }) 
                 {item.email}
               </td>
               <td>
-                &nbsp;{
+                {
                   new Date(item.createdAt).toLocaleString('en-US', {
                     day: '2-digit',
                     month: 'short',
@@ -70,7 +92,7 @@ const StudentList = ({ studentsData, isLoading, onBlock, onUnblock, onDelete }) 
                 }
               </td>
               <td>
-                &nbsp;{
+                {
                   new Date(item.updatedAt).toLocaleString('en-US', {
                     day: '2-digit',
                     month: 'short',
@@ -114,7 +136,7 @@ const StudentList = ({ studentsData, isLoading, onBlock, onUnblock, onDelete }) 
           ))
         ) : (
           <tr>
-            <td colSpan="5" className="text-center">
+            <td colSpan="7" className="text-center">
               No students found.
             </td>
           </tr>

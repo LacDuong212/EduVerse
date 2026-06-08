@@ -5,40 +5,24 @@ import ProfileDropdown from './ProfileDropdown';
 import { useLayoutContext } from '@/context/useLayoutContext';
 import { Container } from 'react-bootstrap';
 import { IoMenu } from 'react-icons/io5';
+import { BsCalendar3, BsClock } from 'react-icons/bs';
 import { Link } from 'react-router-dom';
 import NotificationDropdown from './NotificationDropdown';
+
+const formatDateTime = (d) => ({
+  weekday: d.toLocaleDateString('en-US', { weekday: 'short' }),
+  date: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+  time: d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }),
+});
 
 const NavbarTopbar = () => {
   const {
     appMenuControl
   } = useLayoutContext();
-  const [currentTime, setCurrentTime] = useState(
-    new Date().toLocaleString('en-US', {
-      weekday: 'long',
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: true
-    })
-  );
+  const [dt, setDt] = useState(() => formatDateTime(new Date()));
+
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(
-        new Date().toLocaleString('en-US', {
-          weekday: 'long',
-          month: 'long',
-          day: 'numeric',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-          hour12: true
-        })
-      );
-    }, 1000);
+    const timer = setInterval(() => setDt(formatDateTime(new Date())), 1000);
     return () => clearInterval(timer);
   }, []);
   return <nav className="navbar top-bar navbar-light border-bottom py-0 py-xl-3">
@@ -57,12 +41,23 @@ const NavbarTopbar = () => {
         </div>
 
         {/* Date & Time */}
-        <div className="d-none d-lg-block fw-semibold fs-5 flex-grow-1">
-          {currentTime}
+        <div className="d-none d-lg-flex align-items-center gap-2 flex-grow-1 topbar-datetime">
+          <span className="topbar-dt-chip topbar-dt-date">
+            <BsCalendar3 className="topbar-dt-icon" />
+            <span className="topbar-dt-weekday">{dt.weekday}</span>
+            <span className="topbar-dt-sep">·</span>
+            <span>{dt.date}</span>
+          </span>
+          <span className="topbar-dt-divider" />
+          <span className="topbar-dt-chip topbar-dt-time">
+            <BsClock className="topbar-dt-icon" />
+            <span className="topbar-dt-hms">{dt.time}</span>
+          </span>
         </div>
 
         <div className="d-flex align-items-center ms-auto">
           <ul className="navbar-nav flex-row align-items-center">
+            <NotificationDropdown className="ms-2 ms-md-3" />
             <ProfileDropdown className="ms-2 ms-md-3" />
           </ul>
         </div>

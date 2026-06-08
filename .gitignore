@@ -142,7 +142,6 @@ vite.config.ts.timestamp-*
 # Test reports
 backend/test-reports/
 backend/tests/
-backend/tests/
 
 
 .vscode/*
@@ -170,3 +169,4 @@ ml_service/__pycache__/
 ml_service/venv/
 
 .backend\test-reports
+backend/tests/notification.test.js

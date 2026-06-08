@@ -2,10 +2,13 @@ import { useState, useEffect } from 'react';
 import PageMetaData from '@/components/PageMetaData';
 import { Card, CardBody, CardHeader, Col, Row, Table } from 'react-bootstrap';
 import { BsInfoCircleFill } from 'react-icons/bs';
-import { FaAngleLeft, FaAngleRight } from 'react-icons/fa';
+import { FaAngleLeft, FaAngleRight, FaMoneyBillWave } from 'react-icons/fa';
 import CountUp from 'react-countup';
 import axios from 'axios';
+import { formatCurrency } from '@/utils/currency';
 
+
+const CURRENCY_TITLES = ['total sales', 'pending revenue'];
 
 const EarningsFastCard = ({
   amount,
@@ -13,18 +16,20 @@ const EarningsFastCard = ({
   variant,
   isInfo
 }) => {
+  const isCurrency = CURRENCY_TITLES.includes(title?.toLowerCase());
   return <Col sm={6} lg={3}>
-    <div className={`p-4 bg-${variant} bg-opacity-10 rounded-3`}>
-      <h6>
+    <div className={`p-4 bg-${variant} bg-opacity-10 rounded-3 border border-${variant} border-opacity-25 shadow-sm stat-card-hover`}>
+      <h6 className="text-muted small fw-semibold text-uppercase mb-2">
         {title}
-        {isInfo && <a tabIndex={0} className="h6 mb-0" role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="top" data-bs-content="After US royalty withholding tax" data-bs-original-title>
+        {isInfo && <a tabIndex={0} className="h6 mb-0 ms-1" role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="top" data-bs-content="After US royalty withholding tax" data-bs-original-title>
           <BsInfoCircleFill className="small" />
         </a>}
       </h6>
-      <h2 className={`mb-0 fs-1 text-${variant}`}>
+      <h2 className={`mb-0 fs-2 fw-bold text-${variant}`}>
         <CountUp
           end={amount}
           duration={1.5}
+          formattingFn={isCurrency ? (val) => formatCurrency(val) : undefined}
         />
       </h2>
     </div>
@@ -41,7 +46,7 @@ const InvoiceHistoryCard = ({
   return <tr>
     <td>
       <h6 className="table-responsive-title mb-0">
-        <a href="#">{name}</a>
+        <span>{name}</span>
       </h6>
     </td>
     <td>{new Date(date).toLocaleString('en-US', {
@@ -65,7 +70,7 @@ const InvoiceHistoryCard = ({
       />
     </td>
     <td>
-      ₫{amount}&nbsp;
+      {formatCurrency(amount)}
     </td>
     <td>
       <div className={`badge bg-${status === 'completed' ? 'success' : status === 'pending' ? 'orange' : 'danger'} bg-opacity-10 text-${status === 'completed' ? 'success' : status === 'pending' ? 'orange' : 'danger'}`}>
@@ -127,13 +132,12 @@ const EarningsPage = () => {
       if (isFirstPage || isLastPage || isWithinRange) {
         items.push(
           <li key={i} className={`page-item mb-0 ${currentPage === i ? 'active' : ''}`}>
-            <a
+            <button
               className="page-link"
-              href="#"
-              onClick={(e) => { e.preventDefault(); handlePageChange(i); }}
+              onClick={() => handlePageChange(i)}
             >
               {i}
-            </a>
+            </button>
           </li>
         );
       } else if (i === 2 && currentPage - siblingsCount > 2) {
@@ -156,18 +160,20 @@ const EarningsPage = () => {
 
   return <>
     <PageMetaData title="Earning" />
-    <div>
-      <Row className="mb-3">
-        <Col xs={12}>
-          <h1 className="h3 mb-0">Earnings</h1>
-        </Col>
-      </Row>
-      <Row className="g-4 mb-4">
-        {earningsCards.map((item, idx) => <EarningsFastCard key={idx} {...item} />)}
-      </Row>
+    <div className="page-title-box d-sm-flex align-items-start justify-content-between">
+      <div>
+        <h1 className="h3 mb-1 d-flex align-items-center gap-2">
+          <FaMoneyBillWave className="text-success" size={22} /> Earnings
+        </h1>
+        <p className="page-subtitle mb-0">Revenue overview &amp; payment history</p>
+      </div>
+    </div>
+    <Row className="g-4 mb-4">
+      {earningsCards.map((item, idx) => <EarningsFastCard key={idx} {...item} />)}
+    </Row>
       <Card className="bg-transparent border">
         <CardHeader className="bg-light border-bottom">
-          <h5 className="mb-0">Invoice History</h5>
+          <h5 className="mb-0 fw-semibold">Invoice History</h5>
         </CardHeader>
         <CardBody className="pb-0">
           <div className="table-responsive border-0">
@@ -212,24 +218,23 @@ const EarningsPage = () => {
             <nav className="d-flex justify-content-center mb-0" aria-label="navigation">
               <ul className="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
                 <li className={`page-item mb-0 ${currentPage === 1 ? 'disabled' : ''}`}>
-                  <a className="page-link" href="#" onClick={(e) => { e.preventDefault(); handlePageChange(currentPage - 1); }}>
+                  <button className="page-link" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
                     <FaAngleLeft />
-                  </a>
+                  </button>
                 </li>
 
                 {renderPaginationItems()}
 
                 <li className={`page-item mb-0 ${currentPage === pagination.totalPages ? 'disabled' : ''}`}>
-                  <a className="page-link" href="#" onClick={(e) => { e.preventDefault(); handlePageChange(currentPage + 1); }}>
+                  <button className="page-link" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === pagination.totalPages}>
                     <FaAngleRight />
-                  </a>
+                  </button>
                 </li>
               </ul>
             </nav>
           </div>
         </CardHeader>
       </Card>
-    </div>
   </>;
 };
 export default EarningsPage;

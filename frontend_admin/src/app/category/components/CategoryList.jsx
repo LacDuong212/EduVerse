@@ -1,5 +1,19 @@
 import { Button } from 'react-bootstrap';
-import { FaEdit, FaTrash } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaLayerGroup } from 'react-icons/fa';
+
+const SkeletonRows = () => (
+  <>
+    {[...Array(5)].map((_, i) => (
+      <tr key={i} className="skeleton-row">
+        <td><span className="placeholder-glow d-block"><span className="placeholder col-6 rounded" /></span></td>
+        <td><span className="placeholder-glow d-block"><span className="placeholder col-8 rounded" /></span></td>
+        <td><span className="placeholder-glow d-block"><span className="placeholder col-5 rounded" /></span></td>
+        <td><span className="placeholder-glow d-block"><span className="placeholder col-5 rounded" /></span></td>
+        <td><span className="placeholder-glow d-block"><span className="placeholder col-4 rounded" /></span></td>
+      </tr>
+    ))}
+  </>
+);
 
 const CategoryList = ({ categoriesData, isLoading, onEdit, onDelete }) => {
   return (
@@ -16,9 +30,7 @@ const CategoryList = ({ categoriesData, isLoading, onEdit, onDelete }) => {
         </thead>
         <tbody>
           {isLoading ? (
-            <tr>
-              <td colSpan="5" className="text-center">Loading...</td>
-            </tr>
+            <SkeletonRows />
           ) : categoriesData && categoriesData.length > 0 ? (
             categoriesData.map((item) => (
               <tr key={item._id}>
@@ -48,7 +60,10 @@ const CategoryList = ({ categoriesData, isLoading, onEdit, onDelete }) => {
             ))
           ) : (
             <tr>
-              <td colSpan="5" className="text-center">No categories found.</td>
+              <td colSpan="5" className="empty-state-cell text-center">
+                <FaLayerGroup className="empty-icon" />
+                <div>No categories found.</div>
+              </td>
             </tr>
           )}
         </tbody>

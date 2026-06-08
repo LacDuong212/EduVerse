@@ -1,14 +1,17 @@
 import { Col, Row } from 'react-bootstrap';
+import CountUp from 'react-countup';
 
 
 const CourseStatCard = ({ count, title, variant }) => {
   return (
-    <Col>
+    <Col className="d-flex">
       <div
-        className={`text-center p-4 bg-${variant} bg-opacity-10 border border-${variant} rounded-3`}
+        className={`w-100 text-center p-4 bg-${variant} bg-opacity-10 border border-${variant} rounded-3 stat-card-hover d-flex flex-column align-items-center justify-content-center`}
       >
-        <h6>{title}</h6>
-        <h2 className={`mb-0 fs-1 text-${variant}`}>{count}</h2>
+        <h6 className="mb-2">{title}</h6>
+        <h2 className={`mb-0 fs-1 text-${variant}`}>
+          <CountUp end={count} duration={1.5} delay={0.2} />
+        </h2>
       </div>
     </Col>
   );
@@ -51,16 +54,16 @@ const CoursesStat = ({ meta, loading }) => {
 
   return (
     <>
-      <Row className="mb-3">
-        <Col xs={12} className="d-sm-flex justify-content-between align-items-center">
-          <h1 className="h3 mb-2 mb-sm-0">Courses</h1>
-        </Col>
-      </Row>
-
       {loading ? (
-        <p>Loading...</p>
+        <Row className="g-3 mb-4" xs={2} sm={3} xl={6}>
+          {courseStatData.map((_, idx) => (
+            <Col key={idx}>
+              <div className="p-4 rounded-3 bg-light" style={{ height: '100px' }} />
+            </Col>
+          ))}
+        </Row>
       ) : (
-        <Row className="g-4 mb-4" xs={1} sm={2} md={3} xl={6}>
+        <Row className="g-3 mb-4" xs={2} sm={3} xl={6}>
           {courseStatData.map((item, idx) => (
             <CourseStatCard key={idx} {...item} />
           ))}
