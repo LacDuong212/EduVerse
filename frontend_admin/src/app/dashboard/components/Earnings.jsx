@@ -58,10 +58,10 @@ const Earnings = () => {
     fetchChartData();
   }, [backendUrl]);
 
-  return <Col xs={12}>
+  return <Col xs={12} lg={8}>
     <Card className="shadow h-100">
       <CardHeader className="p-4 border-bottom">
-        <h5 className="card-header-title">Courses Revenue (Last 12 Months)</h5>
+        <h5 className="card-header-title">Courses Revenue (Last 6 Months)</h5>
       </CardHeader>
       <CardBody>
         <ReactApexChart
