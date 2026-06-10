@@ -36,13 +36,14 @@ export const changePassword = async (userId, oldPassword, newPassword) => {
 
     if (!user) throw new AppError("User not found.", 404);
 
-    const isMatch = await bcrypt.compare(oldPassword, user.password);
-    if (!isMatch) throw new AppError("Current password is incorrect.", 401);
+    if (!user?.password) throw new AppError("You haven't set a password yet. Try resetting your password with Forget Password!");
 
-    const isSameAsOld = await bcrypt.compare(newPassword, user.password);
-    if (isSameAsOld) {
-      throw new AppError("New password cannot be the same as the old password", 400);
-    }
+    const isMatch = await user.comparePassword(oldPassword);
+    if (!isMatch) throw new AppError("Invalid credentials.", 401);
+
+    const isSameAsOld = await user.comparePassword(newPassword);
+    if (isSameAsOld)
+      throw new AppError("Please use a different password.", 400);
 
     user.password = newPassword;
     await user.save({ session: s });

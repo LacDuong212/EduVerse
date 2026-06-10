@@ -1,4 +1,4 @@
-import { FaLock, FaKey } from "react-icons/fa";
+import { FaKey, FaLock } from "react-icons/fa";
 import IconTextFormInput from "@/components/form/IconTextFormInput";
 import IconPasswordFormInput from "@/components/form/IconPasswordFormInput";
 import useResetPassword from "../useResetPassword";
@@ -67,7 +67,7 @@ export default function ResetPasswordForm({ email }) {
       <IconPasswordFormInput
         control={control}
         icon={FaLock}
-        placeholder="Confirm New Password"
+        placeholder="Re-enter New Password"
         label="Confirm Password"
         name="confirmPassword"
         disabled={loading}

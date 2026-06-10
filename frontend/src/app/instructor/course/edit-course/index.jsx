@@ -164,7 +164,7 @@ const EditCourseForm = () => {
                     <Button
                       variant="outline-danger"
                       onClick={onDiscardChanges}
-                      disabled={!currentCourse?.hasPendingChanges}
+                      disabled={!(currentCourse?.hasPendingChanges || currentCourse?.curriculum?.hasPendingChanges)}
                       className="btn-sm btn-round d-flex flex-shrink-0 align-items-center justify-content-center mb-0"
                     >
                       <FaEraser className="me-1 fs-6" />

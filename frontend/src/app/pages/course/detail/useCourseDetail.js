@@ -59,10 +59,11 @@ export default function useCourseDetail() {
       const status = err.response?.status;
       setStatusCode(status);
 
+      if (err.response?.data?.errors) setStatusCode(404);
+
       const msg = errData?.message || "Something went wrong";
       setError(msg);
 
-      toast.error(msg);
     } finally {
       setLoading(false);
     }

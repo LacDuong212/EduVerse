@@ -1,12 +1,14 @@
 import { Button, Card, CardBody, Spinner } from "react-bootstrap";
-import { FaPlay } from "react-icons/fa";
+import { FaHeart, FaPlay, FaRegHeart, FaShoppingCart } from "react-icons/fa";
 import { MdError } from "react-icons/md";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import GlightBox from "@/components/GlightBox";
 import { DEFAULT_COURSE_IMG } from "@/contexts/constants";
 import useVideoStream from "@/hooks/useVideoStream";
+import { addToWishlist, removeFromWishlist } from "@/redux/wishlistSlice";
 import { formatCurrency } from "@/utils/currency";
-import { useNavigate } from "react-router-dom";
 
 const VideoPlayButton = ({ videoId }) => {
   const { streamUrl, loading, error } = useVideoStream(videoId);
@@ -49,8 +51,9 @@ const VideoPlayButton = ({ videoId }) => {
 };
 
 const PricingCard = ({ course, owned, onAddToCart }) => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
-  
+
   const {
     courseId,
     thumbnail,
@@ -61,6 +64,9 @@ const PricingCard = ({ course, owned, onAddToCart }) => {
     discountPrice,
   } = course || {};
 
+  const { userData } = useSelector((state) => state.auth);
+  const wishlistItems = useSelector((state) => state.wishlist.items || []);
+
   const videoThumbnail = thumbnail || image || DEFAULT_COURSE_IMG;
 
   const original = Number(price ?? 0);
@@ -70,6 +76,10 @@ const PricingCard = ({ course, owned, onAddToCart }) => {
       ? Math.round(((original - sale) / original) * 100)
       : 0;
 
+  const isWishlisted = wishlistItems.some((item) => {
+    return item.courseId === courseId;
+  });
+
   const showCurriculum = () => {
     if (owned) {
       navigate(`/student/courses/${courseId || ""}`);
@@ -77,6 +87,39 @@ const PricingCard = ({ course, owned, onAddToCart }) => {
       setActiveKey?.("curriculum");
     }
   }
+
+  const handleWishlistToggle = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!userData?.userId) {
+      toast.info("Please login to add to wishlist!");
+      return;
+    }
+
+    if (userData?.role === "instructor") {
+      toast.warning("You cannot perform this action.");
+      return;
+    }
+
+    if (!courseId) {
+      toast.error("Unable to get course info..");
+      return;
+    }
+
+    try {
+      if (isWishlisted) {
+        await dispatch(removeFromWishlist({ courseId })).unwrap();
+        toast.success("Removed from wishlist!");
+      } else {
+        await dispatch(addToWishlist({ courseId })).unwrap();
+        toast.success("Added to wishlist!");
+      }
+    } catch (error) {
+      console.error("Wishlist action failed:", error);
+      toast.error(typeof error === "string" ? error : "Something went wrong..");
+    }
+  };
 
   return (
     <Card className="shadow p-3 mb-4 rounded-3 z-index-9">
@@ -90,7 +133,7 @@ const PricingCard = ({ course, owned, onAddToCart }) => {
         </div>
       </div>
 
-      <CardBody className="mt-3 px-2 py-0">
+      <CardBody className="mt-3 px-0 py-0">
         {enableDiscount ? (
           <div>
             <div className="text-decoration-line-through text-end">
@@ -106,6 +149,10 @@ const PricingCard = ({ course, owned, onAddToCart }) => {
                 {formatCurrency(sale)}
               </div>
             </div>
+          </div>
+        ) : price === 0 ? (
+          <div className="text-end">
+            <span className="h5 bg-orange text-white mb-0 px-3 py-1 rounded">Free</span>
           </div>
         ) : (
           <div className="h3 mb-0 text-end">
@@ -123,14 +170,27 @@ const PricingCard = ({ course, owned, onAddToCart }) => {
           >
             Continue Learning
           </Button>
-        ) : (
-          <Button
-            variant="success"
-            className="w-100 mb-0"
-            onClick={onAddToCart}
-          >
-            Add to Cart
-          </Button>
+        ) : userData?.role !== "instructor" && (
+          <div className="d-flex gap-2 w-100">
+            <Button
+              variant={isWishlisted ? "danger" : "outline-danger"}
+              onClick={handleWishlistToggle}
+              className="d-flex align-items-center justify-content-center px-2 mb-0 rounded-3 border-2"
+              style={{ width: 45 }}
+              title={isWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
+            >
+              {isWishlisted ? <FaHeart size={18} className="flex-shrink-0" /> : <FaRegHeart size={18} className="flex-shrink-0" />}
+            </Button>
+            
+            <Button
+              variant="success"
+              className="w-100 mb-0 py-2 fw-semibold d-flex align-items-center justify-content-center gap-2 rounded-3"
+              onClick={onAddToCart}
+            >
+              <FaShoppingCart size={18} className="flex-shrink-0 mb-1" />
+              Add to Cart
+            </Button>
+          </div>
         )}
       </div>
     </Card>

@@ -1,11 +1,10 @@
-import { cleanQuillHtml } from "@/utils/cleaner";
 
 const OverviewTab = ({ description = "" }) => {
   return (
     <div>
       {description ? (
         <div className="clamped-html">
-          <div className="ql-editor p-0" dangerouslySetInnerHTML={{ __html: cleanQuillHtml(description) }} />
+          <div className="ql-editor p-0" dangerouslySetInnerHTML={{ __html: description }} />
         </div>
       ) : (
         <span>(No full description)</span>

@@ -586,6 +586,18 @@ const getPlainPendingData = (pendingUpdate) => {
   return pendingUpdate?.data || {};
 };
 
+const stripMongoose = (val) => {
+  if (!val) return null;
+
+  const raw = typeof val.toObject === 'function' ? val.toObject() : val;
+
+  if (raw === null || (typeof raw === 'object' && Object.keys(raw).length === 0)) {
+    return null;
+  }
+
+  return raw;
+};
+
 const getMergedCourse = (courseDoc) => {
   const pendingCourse = courseDoc.pendingUpdate?.data || {};
   return {
@@ -617,17 +629,46 @@ const getMergedCurriculum = (curriculumDoc) => {
     const maxLecLength = Math.max(liveSec?.lectures?.length || 0, pendingSec?.lectures?.length || 0);
 
     for (let j = 0; j < maxLecLength; j++) {
-      const liveLec = liveSec?.lectures?.[j] || null;
+      const liveLec = liveSec?.lectures?.[j] ? (liveSec.lectures[j].toObject?.() || liveSec.lectures[j]) : null;
       const pendingLec = pendingSec?.lectures?.[j] || null;
 
       if (pendingLec) {
         const isNewVideo = liveLec && pendingLec.videoId !== liveLec.videoId;
+
+        let finalAiData = null;
+        const liveAi = stripMongoose(liveLec?.aiData);
+        const pendingAi = stripMongoose(pendingLec?.aiData);
+
+        if (pendingAi !== null && Object.keys(pendingAi).length > 0) {
+          finalAiData = {
+            summary: pendingAi.summary !== undefined ? pendingAi.summary : liveAi?.summary || "",
+            status: pendingAi.status !== undefined ? pendingAi.status : liveAi?.status || AI_DATA_STATUS.none,
+            lessonNotes: pendingAi.lessonNotes ? {
+              keyConcepts: pendingAi.lessonNotes.keyConcepts || liveAi?.lessonNotes?.keyConcepts || [],
+              mainPoints: pendingAi.lessonNotes.mainPoints || liveAi?.lessonNotes?.mainPoints || [],
+              practicalTips: pendingAi.lessonNotes.practicalTips || liveAi?.lessonNotes?.practicalTips || []
+            } : liveAi?.lessonNotes || undefined,
+            quizzes: (pendingAi.quizzes || liveAi?.quizzes)?.map(quiz => ({
+              _id: quiz._id || (quiz.questId ? new mongoose.Types.ObjectId(quiz.questId) : new mongoose.Types.ObjectId()),
+              question: quiz.question || "",
+              options: quiz.options || [],
+              correctAnswer: quiz.correctAnswer || null,
+              explanation: quiz.explanation || "",
+              topic: quiz.topic || "General Knowledge"
+            }))
+          };
+        } else {
+          finalAiData = null;
+        }
+
         mergedLectures.push({
           ...liveLec,
           ...pendingLec,
           oldVideoId: isNewVideo ? liveLec.videoId : undefined,
-          videoId: pendingLec.videoId || liveLec?.videoId
+          videoId: pendingLec.videoId || liveLec?.videoId,
+          aiData: finalAiData
         });
+
       } else if (liveLec) {
         mergedLectures.push(liveLec);
       }
@@ -681,14 +722,45 @@ const getProcessedCurriculum = (incomingSections, curriculumDoc) => {
   return baseSections.map(section => ({
     _id: section._id || (section.secId ? new mongoose.Types.ObjectId(section.secId) : new mongoose.Types.ObjectId()),
     title: section.title,
-    lectures: (section.lectures || []).map(lecture => ({
-      _id: lecture._id || (lecture.lecId ? new mongoose.Types.ObjectId(lecture.lecId) : new mongoose.Types.ObjectId()),
-      title: lecture.title,
-      duration: lecture.duration,
-      videoId: lecture.videoId,
-      isFree: lecture.isFree ?? false,
-      aiData: lecture.aiData || aiDataMap.get(lecture.videoId) || null
-    }))
+    lectures: (section.lectures || []).map(lecture => {
+      let mergedAiData = null;
+
+      const incomingAiData = stripMongoose(lecture.aiData);
+      const historicalAiData = stripMongoose(aiDataMap.get(lecture.videoId));
+
+      if (incomingAiData === null || Object.keys(incomingAiData).length === 0) {
+        mergedAiData = null;
+      } else {
+        mergedAiData = {
+          summary: incomingAiData.summary !== undefined ? incomingAiData.summary : historicalAiData?.summary || "",
+          status: incomingAiData.status !== undefined ? incomingAiData.status : historicalAiData?.status || AI_DATA_STATUS.none,
+          lessonNotes: incomingAiData.lessonNotes ? {
+            keyConcepts: incomingAiData.lessonNotes.keyConcepts || historicalAiData?.lessonNotes?.keyConcepts || [],
+            mainPoints: incomingAiData.lessonNotes.mainPoints || historicalAiData?.lessonNotes?.mainPoints || [],
+            practicalTips: incomingAiData.lessonNotes.practicalTips || historicalAiData?.lessonNotes?.practicalTips || []
+          } : historicalAiData?.lessonNotes || undefined,
+          quizzes: incomingAiData.quizzes
+            ? incomingAiData.quizzes.map(quiz => ({
+              _id: quiz._id || (quiz.questId ? new mongoose.Types.ObjectId(quiz.questId) : new mongoose.Types.ObjectId()),
+              question: quiz.question || "",
+              options: quiz.options || [],
+              correctAnswer: quiz.correctAnswer || null,
+              explanation: quiz.explanation || "",
+              topic: quiz.topic || "General Knowledge"
+            }))
+            : historicalAiData?.quizzes || undefined
+        };
+      }
+
+      return {
+        _id: lecture._id || (lecture.lecId ? new mongoose.Types.ObjectId(lecture.lecId) : new mongoose.Types.ObjectId()),
+        title: lecture.title,
+        duration: lecture.duration,
+        videoId: lecture.videoId,
+        isFree: lecture.isFree ?? false,
+        aiData: mergedAiData,
+      };
+    })
   }));
 };
 
@@ -922,6 +994,10 @@ export const approveCourseUpdate = async (courseId, session = null) => {
     ];
 
     const mergedCourse = getMergedCourse(course);
+    delete mergedCourse.hasPendingChanges;
+    delete mergedCourse.pendingUpdate;
+    delete mergedCourse._id;
+
     const mergedCurriculum = getMergedCurriculum(curriculum);
 
     const hasWork = course.status === STATUS_ENUM.pending ||
@@ -1128,7 +1204,11 @@ export const removeLectureAiData = async (insId, courseId, lecId) => {
       throw new AppError("Course not found or unauthorized access.", 403);
 
     const result = await Curriculum.updateOne(
-      { courseId },
+      {
+        courseId,
+        "sections.lectures._id": new mongoose.Types.ObjectId(lecId),
+        "sections.lectures.aiData": { $ne: null }
+      },
       { $set: { "sections.$[].lectures.$[lec].aiData": null } },
       {
         arrayFilters: [{ "lec._id": new mongoose.Types.ObjectId(lecId) }],
@@ -1136,10 +1216,17 @@ export const removeLectureAiData = async (insId, courseId, lecId) => {
       }
     );
 
-    if (result.matchedCount === 0)
-      throw new AppError("Curriculum not found for this course.", 404);
+    if (result.matchedCount === 0) {
+      const lectureExists = await Curriculum.exists({
+        courseId,
+        "sections.lectures._id": new mongoose.Types.ObjectId(lecId)
+      }).session(session);
 
-    if (result.modifiedCount === 0)
-      throw new AppError("Lecture not found or AI-generated contents already removed.", 404);
+      if (!lectureExists) {
+        throw new AppError("Lecture not found in this curriculum.", 404);
+      }
+
+      throw new AppError("Lecture AI-generated contents already removed.", 404);
+    }
   });
 };

@@ -38,7 +38,7 @@ const InstructorDashboard = () => {
   if (error) return (
     <>
       <PageMetaData title="Dashboard" />
-      <ErrorState onRetry={refetch} />
+      <ErrorState message={error} onRetry={refetch} />
     </>
   );
 

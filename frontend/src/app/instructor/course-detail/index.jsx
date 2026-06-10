@@ -6,9 +6,10 @@ import CourseStats from "./components/CourseStats";
 import CourseInfo from "./components/CourseInfo";
 import CourseStudents from "./components/CourseStudentList";
 import useCourseDetails from "./useCourseDetails";
+import NotFoundPage from "@/components/not-found";
 
 const InstructorCourseDetail = () => {
-  const { course, loading, error, refetch } = useCourseDetails();
+  const { course, loading, statusCode, error, refetch } = useCourseDetails();
 
   if (loading) {
     return (
@@ -22,14 +23,11 @@ const InstructorCourseDetail = () => {
     );
   }
 
+  if (statusCode === 404) return <NotFoundPage />;
+  if (statusCode === 403) return <ErrorState message={error} showReturn />
+
   if (error) return <ErrorState
-    messages={[
-      "Course is pulling a no-show 🏃‍♂️💨",
-      "Database failed the entrance exam 📝❌",
-      "Server stayed up too late studying 🧠🌫️",
-      "Digital ink spill on the syllabus! 🖋️🐙",
-      "Course checked out indefinitely 📚🚶‍♂️"
-    ]}
+    message={error}
     onRetry={refetch}
   />;
 

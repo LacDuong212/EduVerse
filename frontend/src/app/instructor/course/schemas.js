@@ -4,7 +4,7 @@ import { mapZodErrors } from "@/utils/mapper";
 const MAX_LENGTH = {
   title: 96,
   subtitle: 186,
-  description: 2000,
+  description: 10000,
   secTitle: 128,
   lecTitle: 186,
   lecDesc: 360

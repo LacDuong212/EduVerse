@@ -211,16 +211,18 @@ const Step1 = ({ stepperInstance, activeStep }) => {
           </Col>
 
           <Col xs={12}>
-            <Form.Label>Description</Form.Label>
-            <div className="mb-3 pb-5 pb-md-4">
-              <ReactQuill
-                theme="snow"
-                value={formData?.description}
-                onChange={(val) => handleCustomChange("description", val)}
-                {...QUILL_CONFIG}
-                style={{ height: 400 }}
-              />
-            </div>
+            <FormField label="Description" error={errors.description}>
+              <div
+                className={`quill-wrapper ${errors.description ? "is-invalid-quill border border-danger rounded" : ""}`}
+              >
+                <ReactQuill
+                  theme="snow"
+                  value={formData?.description}
+                  onChange={(val) => handleCustomChange("description", val)}
+                  {...QUILL_CONFIG}
+                />
+              </div>
+            </FormField>
           </Col>
 
           {/* <Col xs={12}>

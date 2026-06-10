@@ -34,17 +34,16 @@ const CourseDetail = () => {
   if (statusCode === 404) return <NotFoundPage />;
 
   if (error)
-    return <ErrorState
-      messages={[
-        "Course is pulling a no-show 🏃‍♂️💨",
-        "Database failed the entrance exam 📝❌",
-        "Server stayed up too late studying 🧠🌫️",
-        "Digital ink spill on the syllabus! 🖋️🐙",
-        "Course checked out indefinitely 📚🚶‍♂️"
-      ]}
-      showReturn
-      onRetry={refetch}
-    />;
+    return (
+      <div className="d-flex flex-column align-items-center justify-content-center w-100" style={{ minHeight: "calc(100vh - 200px)" }}>
+        <ErrorState
+          className="d-flex flex-column align-items-center justify-content-center gap-3"
+          message={error}
+          showReturn
+          onRetry={refetch}
+        />
+      </div>
+    );
 
   return (
     <>

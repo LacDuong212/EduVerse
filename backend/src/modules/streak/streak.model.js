@@ -38,7 +38,7 @@ streakSchema.statics.registerActivity = async function (user, dateInput = null, 
   if (!streak) {
     const [newStreak] = await LearningStreak.create(
       [{
-        user,
+        user: new mongoose.Types.ObjectId(user),
         currentStreak: 1,
         longestStreak: 1,
         lastActiveDate: todayStr,

@@ -7,6 +7,7 @@ export default function useCourseDetails() {
   const { id: courseId } = useParams();
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [statusCode, setStatusCode] = useState(null);
   const [error, setError] = useState(null);
 
   const fetchCourse = useCallback(async () => {
@@ -18,9 +19,14 @@ export default function useCourseDetails() {
 
     if (res.success) {
       setCourse(res.result);
+      setStatusCode(res.statusCode);
+    } else if (res.errors && Object.keys(res.errors)) {
+      setError("Unable to find course..");
+      setStatusCode(404);
     } else {
-      setError(res.message);
-    }
+      setError(res.message)
+      setStatusCode(res.statusCode);
+    };
 
     setLoading(false);
   }, [courseId]);
@@ -29,5 +35,5 @@ export default function useCourseDetails() {
     fetchCourse();
   }, [fetchCourse]);
 
-  return { course, loading, error, refetch: fetchCourse, courseId };
+  return { course, loading, statusCode, error, refetch: fetchCourse, courseId };
 }

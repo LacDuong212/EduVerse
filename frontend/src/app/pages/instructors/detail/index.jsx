@@ -1,6 +1,5 @@
 import { Col, Container, Row, Spinner } from "react-bootstrap";
 import { useParams } from "react-router-dom";
-import ErrorState from "@/components/ErrorState";
 import PageMetaData from "@/components/PageMetaData";
 import CoursesList from "./components/CoursesList";
 import EducationAndSkillsCard from "./components/EducationAndSkillsCard";
@@ -8,6 +7,7 @@ import InstructorAvatarCard from "./components/InstructorAvatarCard";
 import InstructorCounters from "./components/InstructorCounters";
 import InstructorInfo from "./components/InstructorInfo";
 import useInstructorPublicDetails from "./useInstructorPublicDetails";
+import NotFoundPage from "@/components/not-found";
 
 const InstructorDetailsPage = () => {
   const { id: insId } = useParams();
@@ -34,16 +34,7 @@ const InstructorDetailsPage = () => {
   if (error) return (
     <>
       <PageMetaData title="InstructorDetails" />
-      <ErrorState
-        messages={[
-          "Instructor is currently playing hooky 🎒🏃‍♂️",
-          "Prof is on a permanent coffee break ☕️🤷‍♂️",
-          "The faculty lounge is empty... creepy 👻🏫",
-          "Teacher's pet ate the profile data 🐶🍎",
-          "Instructor went 'Off the Grid' 🏔️📡"
-        ]}
-        onRetry={refresh}
-      />
+      <NotFoundPage />
     </>
   );
 

@@ -83,11 +83,43 @@ const tagsSchema = z
   )
   .max(14, "Maximum 14 tags allowed");
 
+const keyConceptSchema = z.object({
+  term: z.string().trim().min(1, "Key concept term cannot be empty"),
+  definition: z.string().trim().min(1, "Key concept definition cannot be empty"),
+});
+
+const questIdSchema = objectIdSchema("Question");
+
+const quizSchema = z.object({
+  questId: questIdSchema.nullish(),
+  _id: questIdSchema.nullish(),
+  question: z.string().trim().min(1, "Quiz question cannot be empty"),
+  options: z.array(z.string().trim().min(1, "Quiz question's options cannot be empty"))
+    .min(2, "A quiz question must have at least 2 options"),
+  correctAnswer: z.string().trim().min(1, "Correct answer cannot be empty"),
+  explanation: z.string().trim().min(1, "Explanation cannot be empty"),
+  topic: z.string().trim().default("General Knowledge"),
+});
+
 const aiDataSchema = z.object({
-  summary: z.string().optional(),
-  lessonNotes: z.record(z.any()).optional(),
-  quizzes: z.array(z.any()).optional(),
-  status: z.enum(AI_DATA_STATUS.values(), "Invalid AI data status").nullable(),
+  summary: z.string("Summary is required when AI data is provided").trim().min(1, "Summary cannot be empty"),
+  lessonNotes: z.object({
+    keyConcepts: z.array(keyConceptSchema, "Key concepts should be a array"),
+    mainPoints: z.array(z.string("Main point item cannot be empty").trim().min(1, "Main point item cannot be empty"), "Main points should be a list"),
+    practicalTips: z.array(z.string("Practical tip item cannot be empty").trim().min(1, "Practical tip item cannot be empty"), "Practical tips should be a list"),
+  }, "Lesson notes are required when AI data is provided"),
+  quizzes: z.array(quizSchema, "Quizzes is required when AI data is provided"),
+  status: z.enum(AI_DATA_STATUS.values(), {
+    error: (iss) => {
+      if (iss.code === "invalid_type") {
+        return { message: "AI status is required" };
+      }
+      if (iss.code === "invalid_value") {
+        return { message: `AI status option not found for: ${iss.input}` };
+      }
+      return undefined;
+    }
+  }),
 });
 
 export const lectureIdSchema = objectIdSchema("Lecture");
@@ -113,10 +145,8 @@ const updateLectureSchema = z.object({
     .max(CONSTANTS.LECTURE_DESCRIPTION_MAX_LENGTH, "Lecture description is too long")
     .nullish(),
   isFree: z.boolean().optional(),
-  // aiData: z.any()
-  //   .optional()
-  //   .transform((val) => (val === null ? null : undefined)),
-}).partial();
+  aiData: aiDataSchema.nullish(),
+});
 
 const lectureSchema = z.object({
   lecId: lectureIdSchema.nullish(),

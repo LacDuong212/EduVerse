@@ -381,6 +381,107 @@ export const unblockCourse = async (req, res) => {
   }
 };
 
+const stripMongoose = (val) => {
+  if (!val) return null;
+
+  const raw = typeof val.toObject === 'function' ? val.toObject() : val;
+
+  if (raw === null || (typeof raw === 'object' && Object.keys(raw).length === 0)) {
+    return null;
+  }
+
+  return raw;
+};
+
+const getMergedCourse = (courseDoc) => {
+  const pendingCourse = courseDoc.pendingUpdate?.data || {};
+  return {
+    ...courseDoc.toObject(),
+    ...pendingCourse,
+    hasPendingChanges: Object.keys(pendingCourse).length > 0
+  }
+};
+
+const getMergedCurriculum = (curriculumDoc) => {
+  const pendingCurr = curriculumDoc?.pendingUpdate?.data || {};
+
+  const liveSections = curriculumDoc?.sections || [];
+  const pendingSections = pendingCurr?.sections || [];
+
+  const maxLength = Math.max(liveSections.length, pendingSections.length);
+  const mergedSections = [];
+
+  for (let i = 0; i < maxLength; i++) {
+    const liveSec = liveSections[i] ? (liveSections[i].toObject?.() || liveSections[i]) : null;
+    const pendingSec = pendingSections[i] || null;
+
+    if (!pendingSec && liveSec) {
+      mergedSections.push(liveSec);
+      continue;
+    }
+
+    const mergedLectures = [];
+    const maxLecLength = Math.max(liveSec?.lectures?.length || 0, pendingSec?.lectures?.length || 0);
+
+    for (let j = 0; j < maxLecLength; j++) {
+      const liveLec = liveSec?.lectures?.[j] ? (liveSec.lectures[j].toObject?.() || liveSec.lectures[j]) : null;
+      const pendingLec = pendingSec?.lectures?.[j] || null;
+
+      if (pendingLec) {
+        const isNewVideo = liveLec && pendingLec.videoId !== liveLec.videoId;
+
+        let finalAiData = null;
+        const liveAi = stripMongoose(liveLec?.aiData);
+        const pendingAi = stripMongoose(pendingLec?.aiData);
+
+        if (pendingAi !== null && Object.keys(pendingAi).length > 0) {
+          finalAiData = {
+            summary: pendingAi.summary !== undefined ? pendingAi.summary : liveAi?.summary || "",
+            status: pendingAi.status !== undefined ? pendingAi.status : liveAi?.status || AI_DATA_STATUS.none,
+            lessonNotes: pendingAi.lessonNotes ? {
+              keyConcepts: pendingAi.lessonNotes.keyConcepts || liveAi?.lessonNotes?.keyConcepts || [],
+              mainPoints: pendingAi.lessonNotes.mainPoints || liveAi?.lessonNotes?.mainPoints || [],
+              practicalTips: pendingAi.lessonNotes.practicalTips || liveAi?.lessonNotes?.practicalTips || []
+            } : liveAi?.lessonNotes || undefined,
+            quizzes: (pendingAi.quizzes || liveAi?.quizzes)?.map(quiz => ({
+              _id: quiz._id || (quiz.questId ? new mongoose.Types.ObjectId(quiz.questId) : new mongoose.Types.ObjectId()),
+              question: quiz.question || "",
+              options: quiz.options || [],
+              correctAnswer: quiz.correctAnswer || null,
+              explanation: quiz.explanation || "",
+              topic: quiz.topic || "General Knowledge"
+            }))
+          };
+        } else {
+          finalAiData = null;
+        }
+
+        mergedLectures.push({
+          ...liveLec,
+          ...pendingLec,
+          oldVideoId: isNewVideo ? liveLec.videoId : undefined,
+          videoId: pendingLec.videoId || liveLec?.videoId,
+          aiData: finalAiData
+        });
+
+      } else if (liveLec) {
+        mergedLectures.push(liveLec);
+      }
+    }
+
+    mergedSections.push({
+      ...(liveSec || {}),
+      ...(pendingSec || {}),
+      lectures: mergedLectures
+    });
+  }
+
+  return {
+    sections: mergedSections,
+    hasPendingChanges: !!pendingSections.length
+  };
+};
+
 // PATCH /api/courses/:id/approve
 export const approveCourse = async (req, res) => {
   let session = null;
@@ -422,7 +523,9 @@ export const approveCourse = async (req, res) => {
     ];
 
     if (currPending) {
-      curriculum.sections = curriculum.pendingUpdate.data?.sections || curriculum.sections;
+      const { sections } = getMergedCurriculum(curriculum);
+
+      curriculum.sections = sections;
       curriculum.pendingUpdate = { data: null, submittedAt: null, status: UPDATE_STATUS.none };
 
       course.sectionsCount = curriculum.sections.length;
@@ -436,15 +539,22 @@ export const approveCourse = async (req, res) => {
     }
 
     if (coursePending || underReview) {
-      const updates = course.pendingUpdate?.data || {};
+      const mergedCourseData = getMergedCourse(course);
+
       course.previousStatus = course.status;
-      course.set(updates);
+
+      delete mergedCourseData.hasPendingChanges;
+      delete mergedCourseData.pendingUpdate;
+      delete mergedCourseData._id;
+
+      course.set(mergedCourseData);
       course.pendingUpdate = { data: null, submittedAt: null, status: UPDATE_STATUS.none };
     }
 
     course.status = COURSE_STATUS.live;
     await course.save({ session });
 
+    // 4. Evaluate Video S3 Lifecycle Assets
     const newVids = [
       course.previewVideo,
       ...extractVideoIds(curriculum.sections)
@@ -472,6 +582,11 @@ export const approveCourse = async (req, res) => {
       );
     }
 
+    // 5. Commit DB Transaction safely before sending network IO alerts
+    await session.commitTransaction();
+    session.endSession();
+    session = null;
+
     const insId = (course.instructor?.ref?._id || course.instructor?.ref)?.toString();
     try {
       await notifyUser({
@@ -480,12 +595,8 @@ export const approveCourse = async (req, res) => {
         message: `Your course "${course.title}" updates have been approved by an administrator and are now live.`
       });
     } catch (err) {
-      await session.abortTransaction();
-      console.error('Failed to notify instructor during approve:', err?.response?.data || err?.message || err);
-      return res.status(500).json({ success: false, message: 'Failed to notify instructor, approval rolled back.' });
+      console.error('[Approve Course]: Failed to dispatch instructor approval notification:', err?.message || err);
     }
-
-    await session.commitTransaction();
 
     return res.status(200).json({ success: true, message: 'Course approved and published.', result: toCourseDto(course) });
   } catch (error) {

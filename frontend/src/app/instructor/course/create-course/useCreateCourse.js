@@ -16,7 +16,7 @@ export default function useCreateCourse({ autoRun = false } = {}) {
     
     if (res.success) {
       const courseId = res.result.courseId;
-      toast.success(res.message || "New course created!");
+      // toast.success(res.message || "New course created!");
       navigate(`/instructor/courses/${courseId}/edit`, { replace: true });
     } else {
       navigate("/instructor/courses");
