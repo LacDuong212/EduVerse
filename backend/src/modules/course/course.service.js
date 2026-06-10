@@ -284,6 +284,9 @@ export const getCoursePublicDetails = async (user, courseId) => {
   if (!details || Object.keys(details).length === 0)
     throw new AppError("Course not found.", 404);
 
+  if (details.status === STATUS_ENUM.blocked)
+    throw new AppError("Course is currently inaccessible, please try again later.", 403, { isBlocked: true });
+
   if (details.status !== STATUS_ENUM.live)
     throw new AppError("Course is currently unavailable, please try again later.", 400);
 

@@ -59,7 +59,9 @@ export default function useCourseDetail() {
       const status = err.response?.status;
       setStatusCode(status);
 
-      if (err.response?.data?.errors) setStatusCode(404);
+      if (status === 403 && errData?.errors?.isBlocked) console.log("Course is blocked!");
+
+      if (status === 400 && errData?.errors) setStatusCode(404);
 
       const msg = errData?.message || "Something went wrong";
       setError(msg);
