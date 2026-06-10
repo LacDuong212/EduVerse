@@ -129,7 +129,7 @@ export default function CourseResultPage() {
             Review Course
           </Button>
 
-          <Button variant="outline-purple" onClick={() => navigate("/home")}>
+          <Button variant="outline-purple" onClick={() => navigate("/courses")}>
             Explore More Courses
           </Button>
         </div>

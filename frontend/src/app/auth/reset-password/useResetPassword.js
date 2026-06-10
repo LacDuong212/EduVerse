@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -9,9 +9,18 @@ import { resetPasswordSchema } from "./resetPasswordSchema";
 export default function useResetPassword(email) {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
 
-  const { handleSubmit, control, reset, setError, formState: { errors } } = useForm({
+  const [loading, setLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+
+  const { 
+    handleSubmit, 
+    control, 
+    reset, 
+    setError, 
+    formState: { errors } 
+  } = useForm({
     resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
       otp: "",
@@ -19,6 +28,60 @@ export default function useResetPassword(email) {
       confirmPassword: ""
     }
   });
+
+  useEffect (() => {
+    if (resendCooldown <= 0) return;
+
+    const timer = setInterval(() => {
+      setResendCooldown((prev) => prev -1)
+    }, 1000);
+  }, [resendCooldown]);
+
+  const handleResendOtp = async () => {
+    if (!email) {
+      toast.error("Missing email session. Please try the forgot password step again.");
+      return;
+    }
+
+    if (resendCooldown > 0) return;
+
+    setResendLoading(true);
+
+    try {
+      const response = await axios.post(
+        `${backendUrl}/api/auth/forget-password`,
+        {
+          email: email.toLowerCase().trim(),
+        },
+        {
+          withCredentials: true,
+        }
+      );
+
+      if (response.data.success) {
+        toast.success(response.data.message || "A new OTP has been sent to your email.");
+
+        reset({
+          otp: "",
+          password: "",
+          confirmPassword: "",
+        });
+
+        setResendCooldown(60);
+      }
+    } catch (error) {
+      console.error("Resend Reset Password OTP Error:", error);
+
+      if (error.response) {
+        toast.error(error.response.data?.message || "Failed to resend OTP");
+      } else {
+        toast.error("Network error. Please try again later.");
+      }
+    } finally {
+      setResendLoading(false);
+    }
+  };
+
 
   const onResetPassword = handleSubmit(async (data) => {
     if (!email) {
@@ -67,6 +130,9 @@ export default function useResetPassword(email) {
     control,
     handleSubmit: onResetPassword,
     loading,
+    resendLoading,
+    resendCooldown,
+    handleResendOtp,
     errors
   };
 }

@@ -1,9 +1,12 @@
-import { Container, Row, Col, Alert, Spinner } from 'react-bootstrap';
-import { FaCaretLeft, FaCaretRight } from "react-icons/fa";
+import { Container, Row, Col, Button, Alert, Spinner } from 'react-bootstrap';
+import { FaCaretLeft, FaCaretRight, FaHeartBroken, FaArrowRight } from "react-icons/fa";
 import CourseCard from '@/components/CourseCard';
 import useWishlist from '../useWishlist';
+import { useNavigate } from 'react-router-dom';
 
 const WishlistCard = () => {
+  const navigate = useNavigate();
+
   const {
     currentItems,
     currentPage,
@@ -83,13 +86,35 @@ const WishlistCard = () => {
           </>
         ) : (
           <Col xs={12}>
-            <Alert variant="black" className="text-center py-5 shadow-sm border-0">
-              <div className="mb-3">
-                <i className="bi bi-heart-break fs-1"></i>
+            <div
+              className="text-center py-5 px-4 shadow-sm border-0 rounded-4"
+            >
+              <div
+                className="mx-auto mb-4 d-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 text-primary"
+                style={{
+                  width: "82px",
+                  height: "82px",
+                }}
+              >
+                <FaHeartBroken size={34} />
               </div>
-              <h4>Your wishlist is empty!</h4>
-              <p>Browse courses and add your favorites here.</p>
-            </Alert>
+
+              <h4 className="mb-2 fw-bold">Your wishlist is empty!</h4>
+
+              <p className="text-muted mb-4">
+                Browse courses and save your favorites here for quick access later.
+              </p>
+
+              <Button
+                variant="primary"
+                type="button"
+                onClick={() => navigate("/courses")}
+                className="px-4 py-2 rounded-pill fw-semibold d-inline-flex align-items-center gap-2 shadow-sm"
+              >
+                Explore Courses
+                <FaArrowRight size={14} />
+              </Button>
+            </div>
           </Col>
         )}
       </Container>
