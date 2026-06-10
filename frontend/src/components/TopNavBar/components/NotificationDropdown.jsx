@@ -82,7 +82,7 @@ const NotificationItem = ({ noti, onMarkRead }) => {
 
   return (
     <li>
-      <Link
+      <div
         className={`list-group-item-action border-0 border-bottom d-flex p-3 ${!noti.isRead ? "bg-light" : ""}`}
         onClick={handleClick}
         style={{ cursor: "pointer" }}
@@ -94,13 +94,13 @@ const NotificationItem = ({ noti, onMarkRead }) => {
         </div>
         <div>
           <h6 className="mb-1 text-capitalize">{noti.type || "New Notification"}</h6>
-          <p className="text-body m-0">{noti.message}</p>
+          <p className="text-body m-0" dangerouslySetInnerHTML={{ __html: noti.message || "" }} />
           <small className="text-secondary">{formatTimeAgo(noti.createdAt)}</small>
         </div>
         {!noti.isRead && (
           <span className="ms-auto p-1 bg-primary rounded-circle align-self-center" style={{ width: 8, height: 8 }}></span>
         )}
-      </Link>
+      </div>
     </li>
   );
 };

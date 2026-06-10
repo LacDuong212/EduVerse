@@ -10,6 +10,15 @@ import { SUPPORT_EMAIL } from "../utils/constants.js";
 import { toCourseDto, toCourseDtoList } from "../utils/mapper.js";
 import { notifyUser, notifyUsers, createNotifications } from "../utils/notification.js";
 
+const buildCourseLink = (courseId) => {
+  return `/courses/${courseId}`;
+};
+
+const buildCourseTitleAnchor = (course) => {
+  const url = buildCourseLink(course._id);
+  return `<a href="${url}">${course.title}</a>`;
+};
+
 export const getCoursesOverview = async (req, res) => {
   try {
     const admin = req.admin;
@@ -142,7 +151,7 @@ export const updateCourseStatus = async (req, res) => {
         notificationPromises.push(createNotifications(
           enrolledIds,
           NOTIF_TYPE.info,
-          `The course "${course.title}" has been blocked by an administrator.${message ? `\nReason: “${message}”.` : ''}`,
+          `The course ${buildCourseTitleAnchor(course)} has been blocked by an administrator.${message ? `\nReason: “${message}”.` : ''}`,
           session
         ));
       }
@@ -151,7 +160,7 @@ export const updateCourseStatus = async (req, res) => {
         notificationPromises.push(createNotifications(
           [insId],
           NOTIF_TYPE.blocked,
-          `Your course "${course.title}" has been blocked by an administrator.${message ? `\nReason: “${message}”.` : ''}\nPlease update it as soon as possible to restore access.`,
+          `Your course ${buildCourseTitleAnchor(course)} has been blocked by an administrator.${message ? `\nReason: “${message}”.` : ''}\nPlease update it as soon as possible to restore access.`,
           session
         ));
       }
@@ -160,7 +169,7 @@ export const updateCourseStatus = async (req, res) => {
         notificationPromises.push(createNotifications(
           [insId],
           NOTIF_TYPE.rejected,
-          `Your course "${course.title}" changes were not approved.${message ? `\nReason: “${message}”.` : ''}`,
+          `Your course ${buildCourseTitleAnchor(course)} changes were not approved.${message ? `\nReason: “${message}”.` : ''}`,
           session
         ));
       }
@@ -169,7 +178,7 @@ export const updateCourseStatus = async (req, res) => {
         notificationPromises.push(createNotifications(
           [insId],
           NOTIF_TYPE.info,
-          `Your course "${course.title}" is under review.`,
+          `Your course ${buildCourseTitleAnchor(course)} is under review.`,
           session
         ));
       }
@@ -194,7 +203,7 @@ export const updateCourseStatus = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: `Course status changed to ${newValue}.`,
+      message: `Course status changed to ${newValue}. Notified instructor and enrolled students.`,
     });
   } catch (error) {
     if (session) await session.abortTransaction();
@@ -243,16 +252,40 @@ export const softDeleteCourse = async (req, res) => {
     course.isDeleted = true;
     await course.save({ session });
 
+    const enrolledStudents = await Enrollment.find({
+      course: course._id,
+      status: { $in: [ENROLL_STATUS.active, ENROLL_STATUS.completed] }
+    }).session(session).lean();
+
+    const studentIds = [...new Set((enrolledStudents || []).map(e => e.student?.toString()).filter(Boolean))];
+    const notificationPromises = [];
+
+    if (studentIds.length > 0) {
+      notificationPromises.push(createNotifications(
+        studentIds,
+        NOTIF_TYPE.info,
+        `The course ${buildCourseTitleAnchor(course)} has been removed by an administrator.${message ? `\nReason: “${message}”.` : ''}`,
+        session
+      ));
+    }
+
     if (instructor) {
       instructor.myCourses?.pull(course._id);
       instructor.stats.totalCourses = instructor.myCourses?.length || 0;
       await instructor.save({ session });
 
-      await createNotifications([
-        insId?.toString()
-      ], NOTIF_TYPE.blocked,
-      `Your course "${course.title}" has been deleted by an administrator.${message ? `\nReason: “${message}”.` : ''}\nIf you have any questions please email <${SUPPORT_EMAIL}> for support!`,
-      session);
+      if (insId) {
+        notificationPromises.push(createNotifications(
+          [insId.toString()],
+          NOTIF_TYPE.blocked,
+          `Your course ${buildCourseTitleAnchor(course)} has been deleted by an administrator.${message ? `\nReason: “${message}”.` : ''}\nIf you have any questions please email <${SUPPORT_EMAIL}> for support!`,
+          session
+        ));
+      }
+    }
+
+    if (notificationPromises.length > 0) {
+      await Promise.all(notificationPromises);
     }
 
     await session.commitTransaction();
@@ -260,7 +293,7 @@ export const softDeleteCourse = async (req, res) => {
     session = null;
 
     try {
-      const notifyIds = insId ? [insId.toString()] : [];
+      const notifyIds = [...new Set([...(studentIds || []), insId?.toString()].filter(Boolean))];
       if (notifyIds.length > 0) {
         await notifyUsers({ userIds: notifyIds });
       }
@@ -270,7 +303,7 @@ export const softDeleteCourse = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: 'Course has been successfully deleted.'
+      message: 'Course has been successfully removed. Notified instructor and enrolled students.'
     });
   } catch (error) {
     if (session) await session.abortTransaction();
@@ -337,18 +370,41 @@ export const restoreCourse = async (req, res) => {
     instructor.stats.totalCourses = instructor.myCourses?.length || 0;
     await instructor.save({ session });
 
-    await createNotifications([
-      insId?.toString()
-    ], NOTIF_TYPE.info,
-    `Your course "${course.title}" has been restored by an administrator.${message ? `\nReason: “${message}”.` : ''}\nIf you have any questions please email <${SUPPORT_EMAIL}> for support!`,
-    session);
+    const enrolledStudents = await Enrollment.find({
+      course: course._id,
+      status: { $in: [ENROLL_STATUS.active, ENROLL_STATUS.completed] }
+    }).session(session).lean();
+
+    const studentIds = [...new Set((enrolledStudents || []).map(e => e.student?.toString()).filter(Boolean))];
+    const notificationPromises = [];
+
+    if (studentIds.length > 0) {
+      notificationPromises.push(createNotifications(
+        studentIds,
+        NOTIF_TYPE.info,
+        `The course ${buildCourseTitleAnchor(course)} has been restored by an administrator.`,
+        session
+      ));
+    }
+
+    if (insId) {
+      notificationPromises.push(createNotifications([
+        insId.toString()
+      ], NOTIF_TYPE.info,
+      `Your course ${buildCourseTitleAnchor(course)} has been restored by an administrator.${message ? `\nReason: “${message}”.` : ''}\nIf you have any questions please email <${SUPPORT_EMAIL}> for support!`,
+      session));
+    }
+
+    if (notificationPromises.length > 0) {
+      await Promise.all(notificationPromises);
+    }
 
     await session.commitTransaction();
     session.endSession();
     session = null;
 
     try {
-      const notifyIds = insId ? [insId.toString()] : [];
+      const notifyIds = [...new Set([...(studentIds || []), insId?.toString()].filter(Boolean))];
       if (notifyIds.length > 0) {
         await notifyUsers({ userIds: notifyIds });
       }
@@ -358,7 +414,7 @@ export const restoreCourse = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: 'Course has been successfully restored.'
+      message: 'Course has been successfully restored. Notified instructor and enrolled students.'
     });
   } catch (error) {
     if (session) await session.abortTransaction();
@@ -420,7 +476,7 @@ export const unblockCourse = async (req, res) => {
       notificationPromises.push(createNotifications(
         studentIds,
         NOTIF_TYPE.info,
-        `The course "${course.title}" has been unblocked.`,
+        `The course ${buildCourseTitleAnchor(course)} has been unblocked.`,
         session
       ));
     }
@@ -429,7 +485,7 @@ export const unblockCourse = async (req, res) => {
       notificationPromises.push(createNotifications(
         [insId],
         NOTIF_TYPE.info,
-        `Your course "${course.title}" has been unblocked and reverted back to [${targetStatus.toUpperCase()}] status.${message ? `\nReason: “${message}”.` : ''}\nIf you have any questions please email <${SUPPORT_EMAIL}> for support!`,
+        `Your course ${buildCourseTitleAnchor(course)} has been unblocked and reverted back to [${targetStatus.toUpperCase()}] status.${message ? `\nReason: “${message}”.` : ''}\nIf you have any questions please email <${SUPPORT_EMAIL}> for support!`,
         session
       ));
     }
@@ -453,7 +509,7 @@ export const unblockCourse = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: `Course has been successfully unblocked and reverted to [${targetStatus.toUpperCase()}] status.${message ? `\nReason: “${message}”.` : ''}`,
+      message: `Course unblocked and reverted to [${targetStatus.toUpperCase()}] status. Notified instructor and enrolled students.`,
       result: {
         status: course.status,
         previousStatus: course.previousStatus
@@ -686,7 +742,7 @@ export const approveCourse = async (req, res) => {
         await createNotifications(
           studentIds,
           NOTIF_TYPE.info,
-          `The course "${course.title}" has been updated.`,
+          `The course ${buildCourseTitleAnchor(course)} has been updated.`,
           session
         );
       }
@@ -695,7 +751,7 @@ export const approveCourse = async (req, res) => {
         await createNotifications(
           [insId],
           NOTIF_TYPE.approved,
-          `Your course "${course.title}" updates have been approved by an administrator and are now live.`,
+          `Your course ${buildCourseTitleAnchor(course)} updates have been approved by an administrator and are now live.`,
           session
         );
       }
@@ -718,7 +774,7 @@ export const approveCourse = async (req, res) => {
       console.error('[Approve Course]: Real-time notification delivery failed (non-critical):', notifyErr.message);
     }
 
-    return res.status(200).json({ success: true, message: 'Course approved and published.', result: toCourseDto(course) });
+    return res.status(200).json({ success: true, message: 'Course approved and published. Notified instructor and enrolled students.', result: toCourseDto(course) });
   } catch (error) {
     if (session) await session.abortTransaction();
     console.error('Error approving course:', error?.response?.data || error?.message || error);

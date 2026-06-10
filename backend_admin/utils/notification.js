@@ -14,7 +14,6 @@ export const notifyUsers = async ({ userIds }) => {
       { headers: { 'x-internal-key': process.env.INTERNAL_API_KEY } }
     );
   } catch (error) {
-    // Connection/Network error - no HTTP response received
     if (!error.response) {
       const connectionMsg = error.code === 'ECONNREFUSED'
         ? 'Connection refused: Could not reach the notification service'
@@ -24,7 +23,6 @@ export const notifyUsers = async ({ userIds }) => {
       throw new Error(`Notification delivery failed (network issue): ${connectionMsg}`);
     }
 
-    // HTTP error - received a response but with error status (4** or 5**)
     const statusMsg = error.response.status >= 500
       ? `Server error (${error.response.status}): Notification service encountered an error`
       : `Client error (${error.response.status}): Invalid notification request`;
@@ -50,5 +48,5 @@ export const createNotifications = async (userIds, type, message, session = null
     message,
   }));
 
-  return await Notification.create(notificationDocs, { session: session });
+  return await Notification.insertMany(notificationDocs, { session, ordered: true });
 };

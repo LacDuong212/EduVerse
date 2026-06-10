@@ -1,8 +1,8 @@
-import mongoose, { Mongoose } from "mongoose";
+import mongoose from "mongoose";
 import AppError from "#exceptions/app.error.js";
 import { STATUS_ENUM as COURSE_STATUS } from "#modules/course/course.model.js";
 import { existsEnrollment } from "#modules/enrollment/enrollment.service.js";
-import Streak from "#modules/streak/streak.model.js";
+import { updateStreak } from "#modules/streak/streak.service.js";
 import Student from "#modules/student/student.model.js";
 import { withTransaction } from "#utils/transaction.js";
 import CourseProgress, { LECTURE_STATUS_ENUM as LECTURE_STATUS } from "./course-progress.model.js";
@@ -109,7 +109,7 @@ export const completeLecture = async (userId, courseId, lecId) => {
       );
     }
 
-    await Streak.registerActivity(userId, new Date(), s);
+    await updateStreak(userId);
     await progress.save({ session: s });
 
     return toCourseProgressDto(progress);
@@ -192,10 +192,6 @@ export const syncLectureProgress = async (userId, courseId, lecId, data) => {
 
   if (!progress) {
     throw new AppError("Progress record not found.", 404);
-  }
-
-  if (isNewSession) {
-    await Streak.registerActivity(userId);
   }
 
   return toCourseProgressDto(progress);
