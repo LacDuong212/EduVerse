@@ -1,7 +1,10 @@
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
+import { WELCOME_NOTIFICATIONS } from "#constants/others.js";
 import AppError from "#exceptions/app.error.js";
 import { isApprovedInstructor } from "#modules/instructor/instructor.service.js";
+import { sendNotification } from "#modules/notification/notification.service.js";
+import { TYPE_ENUM as NOTIF_TYPE } from "#modules/notification/notification.model.js";
 import { createNewStudent, getStudentInterests } from "#modules/student/student.service.js";
 import { toAuthUserDto } from "#modules/user/user.mapper.js"
 import User, { ROLE_ENUM as USER_ROLE } from "#modules/user/user.model.js";
@@ -34,6 +37,16 @@ export const registerUser = async ({ name, email, password }) => {
     await user.save({ session });
 
     await createNewStudent(user._id, session);
+
+    const randomIndex = Math.floor(Math.random() * WELCOME_NOTIFICATIONS.length);
+    const dynamicWelcomeMessage = WELCOME_NOTIFICATIONS[randomIndex];
+
+    await sendNotification(
+      user._id,
+      NOTIF_TYPE.info,
+      dynamicWelcomeMessage,
+      session
+    );
 
     await mailService.sendVerificationEmail(user.email, user.name, otp);
     return toAuthUserDto(user);

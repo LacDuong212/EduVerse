@@ -34,9 +34,9 @@ const NotificationItem = ({ noti, onMarkRead }) => {
     if (noti.sender?.avatar)
       return <img className="avatar-img rounded-circle" src={noti.sender.avatar} alt="avatar" />;
 
-    let Icon = BsInfoCircle;
-    let colorClass = "text-primary";
-    let bgClass = "bg-primary bg-opacity-10";
+    let Icon = null;
+    let colorClass = "";
+    let bgClass = "";
 
     switch (noti?.type?.toUpperCase()) {
       case "APPROVED":
@@ -55,6 +55,11 @@ const NotificationItem = ({ noti, onMarkRead }) => {
         Icon = BsBan;
         colorClass = "text-warning";
         bgClass = "bg-warning bg-opacity-10";
+        break;
+      case "INFO":
+        Icon = BsInfoCircle;
+        colorClass = "text-primary";
+        bgClass = "bg-primary bg-opacity-10";
         break;
       default:
         Icon = BsQuestion;
@@ -127,15 +132,26 @@ const NotificationDropdown = ({ className }) => {
   useEffect(() => {
     if (!socket) return;
 
-    const handleNewNotification = (data) => {
-      setNotifications(prev => [data, ...prev]);
-      setUnreadCount(prev => prev + 1);
+    const handleNewNotification = async (data) => {
+      if (data?.notifId && data?.message) {
+        setNotifications((prev) => [data, ...prev]);
+        setUnreadCount((prev) => prev + 1);
+        return;
+      }
+
+      if (!userData?.userId) return;
+
+      const res = await handleRequest(authApi.get("/notifications"));
+      if (res.success) {
+        setNotifications(res.result || []);
+        setUnreadCount(res.result.filter((n) => !n.isRead).length || 0);
+      }
     };
 
     socket.on("getNotification", handleNewNotification);
 
     return () => socket.off("getNotification", handleNewNotification);
-  }, [socket]);
+  }, [socket, userData]);
 
   const handleMarkAllRead = async (e) => {
     if (e) {

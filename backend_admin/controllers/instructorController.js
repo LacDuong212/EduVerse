@@ -4,7 +4,7 @@ import Instructor from "../models/instructorModel.js";
 import { TYPE_ENUM as NOTIF_TYPE } from "../models/notificationModel.js";
 import User, { ROLE_ENUM as USER_ROLE } from "../models/userModel.js";
 import { SUPPORT_EMAIL } from "../utils/constants.js";
-import { notifyUser } from "../utils/notification.js";
+import { notifyUsers, createNotifications } from "../utils/notification.js";
 
 export const getAllInstructors = async (req, res) => {
   try {
@@ -148,13 +148,17 @@ export const blockInstructor = async (req, res) => {
     const defaultMsg = 'Your instructor account has been temporarily blocked by an administrator.';
     const notiMsg = `${defaultMsg}${message ? `\n\nReason: “${message}”.` : ''}\nIf you believe this was an error, please email <${SUPPORT_EMAIL}> for support.`;
 
-    await notifyUser({
-      userId: id,
-      type: NOTIF_TYPE.blocked,
-      message: notiMsg
-    });
+    await createNotifications([id], NOTIF_TYPE.blocked, notiMsg, session);
 
     await session.commitTransaction();
+    session.endSession();
+    session = null;
+
+    try {
+      await notifyUsers({ userIds: [id] });
+    } catch (notifyErr) {
+      console.error('[Block Instructor]: Real-time notification delivery failed (non-critical):', notifyErr.message);
+    }
 
     return res.status(200).json({
       success: true,
@@ -209,13 +213,17 @@ export const unblockInstructor = async (req, res) => {
     const defaultMsg = 'Great news! Your instructor account has been successfully unblocked by an administrator. You can now access your dashboard as normal.';
     const notiMsg = `${defaultMsg}${message ? `\nNote from Admin: “${message}”.` : ''}\nIf you have any questions, please contact <${SUPPORT_EMAIL}> for support.`;
 
-    await notifyUser({
-      userId: id,
-      type: NOTIF_TYPE.info,
-      message: notiMsg
-    });
+    await createNotifications([id], NOTIF_TYPE.info, notiMsg, session);
 
     await session.commitTransaction();
+    session.endSession();
+    session = null;
+
+    try {
+      await notifyUsers({ userIds: [id] });
+    } catch (notifyErr) {
+      console.error('[Unblock Instructor]: Real-time notification delivery failed (non-critical):', notifyErr.message);
+    }
 
     return res.status(200).json({
       success: true,
@@ -284,13 +292,17 @@ export const approveInstructor = async (req, res) => {
     const defaultMsg = 'Congratulations! Your instructor application has been approved. You can now create courses.';
     const notiMsg = `${defaultMsg}${message ? `\nReason: “${message}”.` : ''}\nIf you have any questions please email <${SUPPORT_EMAIL}> for support!`;
 
-    await notifyUser({
-      userId: userId,
-      type: NOTIF_TYPE.approved,
-      message: notiMsg
-    });
+    await createNotifications([userId], NOTIF_TYPE.approved, notiMsg, session);
 
     await session.commitTransaction();
+    session.endSession();
+    session = null;
+
+    try {
+      await notifyUsers({ userIds: [userId] });
+    } catch (notifyErr) {
+      console.error('[Approve Instructor]: Real-time notification delivery failed (non-critical):', notifyErr.message);
+    }
 
     return res.status(200).json({
       success: true,
@@ -347,13 +359,17 @@ export const rejectInstructor = async (req, res) => {
     const defaultMsg = 'Thank you for your interest in teaching on our platform. After careful review, your instructor application has been declined.';
     const notiMsg = `${defaultMsg}${message ? `\nReason: “${message}”.` : ''}\nIf you have any questions or wish to appeal this decision, please reach out to <${SUPPORT_EMAIL}> for details.`;
 
-    await notifyUser({
-      userId: userId,
-      type: NOTIF_TYPE.rejected,
-      message: notiMsg
-    });
+    await createNotifications([userId], NOTIF_TYPE.rejected, notiMsg, session);
 
     await session.commitTransaction();
+    session.endSession();
+    session = null;
+
+    try {
+      await notifyUsers({ userIds: [userId] });
+    } catch (notifyErr) {
+      console.error('[Reject Instructor]: Real-time notification delivery failed (non-critical):', notifyErr.message);
+    }
 
     return res.status(200).json({
       success: true,
