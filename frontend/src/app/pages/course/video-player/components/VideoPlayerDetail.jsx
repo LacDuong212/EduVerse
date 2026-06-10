@@ -111,7 +111,7 @@ export default function VideoPlayerDetail({
   return (
     <section className="py-0 bg-dark position-relative min-vh-100">
       <Row className="g-0">
-        <div className="d-flex w-100 flex-column flex-lg-row">
+        <div className="d-flex w-100 flex-row">
           <div className="flex-grow-1" style={{ minWidth: 0 }}>
             <VideoScreen
               playerContainerRef={playerContainerRef}

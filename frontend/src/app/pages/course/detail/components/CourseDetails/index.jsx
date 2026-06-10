@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Card, CardBody, CardHeader,
   Col,
@@ -8,7 +8,7 @@ import {
   TabContainer, TabContent, TabPane
 } from "react-bootstrap";
 import { useSelector } from "react-redux";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import CurriculumTab from "./components/CurriculumTab";
 import InstructorTab from "./components/InstructorTab";
 import OverviewTab from "./components/OverviewTab";
@@ -21,8 +21,16 @@ const CourseDetails = ({ course, owned, onAddToCart }) => {
   const { userData } = useSelector((state) => state.auth);
   const navigate = useNavigate();
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
 
-  const [activeKey, setActiveKey] = useState("overview");
+  const [activeKey, setActiveKey] = useState(
+    searchParams.get("tab") || "overview"
+  );
+
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab) setActiveKey(tab);
+  }, [searchParams]);
 
   const isEnrolled = owned && userData?.role === "student";
   const courseId = course?.courseId || id;

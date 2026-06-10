@@ -12,8 +12,8 @@ import { SocketContextProvider } from "@/contexts/SocketContext";
 import { LayoutProvider } from "@/contexts/useLayoutContext";
 import { NotificationProvider } from "@/contexts/useNotificationContext";
 import { setLogin, setLogout } from "@/redux/authSlice";
-import { fetchCart } from "@/redux/cartSlice";
-import { fetchWishlist } from "@/redux/wishlistSlice";
+import { fetchCart, resetCart } from "@/redux/cartSlice";
+import { fetchWishlist, clearWishlist } from "@/redux/wishlistSlice";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -53,15 +53,13 @@ const AppProvidersWrapper = ({ children }) => {
     if (isCheckingAuth) return;
 
     if (userData?.userId && userData?.role === "student") {
-      if (cartStatus === "idle") {
         dispatch(fetchCart());
-      }
-
-      if (wishlistStatus === "idle") {
         dispatch(fetchWishlist());
-      }
+    } else {
+      dispatch(resetCart());
+      dispatch(clearWishlist());
     }
-  }, [userData, wishlistStatus, cartStatus, dispatch, isCheckingAuth]);
+  }, [userData?.userId, userData?.role, dispatch, isCheckingAuth]);
 
   useEffect(() => {
     Aos.init();

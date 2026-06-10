@@ -1,4 +1,5 @@
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { Alert, Button, Card, Col, Container, Row } from "react-bootstrap";
 import {
   FaArrowLeft,
@@ -26,6 +27,17 @@ export default function CourseResultPage() {
       </Container>
     );
   }
+
+  const [searchParams] = useSearchParams();
+
+  const [activeKey, setActiveKey] = useState(
+    searchParams.get("tab") || "overview"
+  );
+
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab) setActiveKey(tab);
+  }, [searchParams]);
 
   return (
     <Container className="py-4">
@@ -110,7 +122,14 @@ export default function CourseResultPage() {
             My Learning
           </Button>
 
-          <Button variant="primary" onClick={() => navigate("/home")}>
+          <Button
+            variant="outline-orange"
+            onClick={() => navigate(`/courses/${courseId}?tab=reviews`)}
+          >
+            Review Course
+          </Button>
+
+          <Button variant="outline-purple" onClick={() => navigate("/home")}>
             Explore More Courses
           </Button>
         </div>
