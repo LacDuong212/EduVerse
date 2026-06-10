@@ -9,10 +9,22 @@ export default function useEmailVerify(initialEmail = "", onVerifySuccess) {
   const [otp, setOtp] = useState(new Array(6).fill(""));
   const [loading, setLoading] = useState(false);
   const inputRefs = useRef([]);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
 
   useEffect(() => {
     if (initialEmail) setUserEmail(initialEmail);
   }, [initialEmail]);
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+
+    const timer = setInterval(() => {
+      setResendCooldown((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
 
   const handleChange = (e, index) => {
     const val = e.target.value.replace(/[^0-9]/g, "");
@@ -48,6 +60,45 @@ export default function useEmailVerify(initialEmail = "", onVerifySuccess) {
 
     const nextIndex = Math.min(pasteArray.length, 5);
     inputRefs.current[nextIndex]?.focus();
+  };
+
+  const handleResendOtp = async () => {
+    if (!userEmail) {
+      return toast.error("Email is required");
+    }
+
+    if (resendCooldown > 0) return;
+
+    setResendLoading(true);
+
+    try {
+      const { data } = await axios.post(
+        `${backendUrl}/api/auth/resend-otp`,
+        { email: userEmail.toLowerCase().trim() },
+        { withCredentials: true }
+      );
+
+      if (data.success) {
+        toast.success(data.message || "A new OTP has been sent to your email");
+
+        setOtp(new Array(6).fill(""));
+        inputRefs.current[0]?.focus();
+
+        setResendCooldown(60);
+      } else {
+        toast.error(data.message || "Failed to resend OTP");
+      }
+    } catch (error) {
+      console.error("Resend OTP Error:", error);
+
+      if (error.response) {
+        toast.error(error.response.data?.message || "Failed to resend OTP");
+      } else {
+        toast.error("Network error. Please try again.");
+      }
+    } finally {
+      setResendLoading(false);
+    }
   };
 
   const onSubmit = async (e) => {
@@ -102,9 +153,12 @@ export default function useEmailVerify(initialEmail = "", onVerifySuccess) {
     userEmail,
     setUserEmail,
     loading,
+    resendLoading,
+    resendCooldown,
     handleChange,
     handleKeyDown,
     handlePaste,
+    handleResendOtp,
     onSubmit,
   };
 }

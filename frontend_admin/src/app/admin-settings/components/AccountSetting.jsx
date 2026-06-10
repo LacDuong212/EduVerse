@@ -93,7 +93,7 @@ const AccountSetting = () => {
           {error && <Alert variant="danger">{error}</Alert>}
           {success && <Alert variant="success">{success}</Alert>}
 
-          <p className="mb-2">Your password has expired, Please choose a new password</p>
+          <p className="mb-2">Enter your current password to update it.</p>
           <Col xs={12}>
             <Form.Label>
               Old Password <span className="text-danger">*</span>

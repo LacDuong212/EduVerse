@@ -29,7 +29,7 @@ export default function CoursePlaylistSidebar({
       </button>
 
       <Collapse className="collapse-horizontal" in={isOpen} dimension="width">
-        <div style={{ width: 400, maxWidth: "100vw" }}>
+        <div style={{ maxWidth: "100vw" }}>
           <Playlist
             course={course}
             currentId={currentLectureId}

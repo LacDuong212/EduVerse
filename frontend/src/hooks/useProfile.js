@@ -2,6 +2,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { setLogout } from "@/redux/authSlice";
+import { resetCart } from "@/redux/cartSlice";
+import { clearWishlist } from "@/redux/wishlistSlice";
 import { handleRequest } from "@/utils/request";
 import { authApi } from "@/utils/api";
 
@@ -18,6 +20,8 @@ export default function useProfile() {
       console.log("Logout Err:", res.message);
     }
     dispatch(setLogout());
+    dispatch(resetCart);
+    dispatch(clearWishlist);
     navigate("/home");
     toast.success("Logged out!");
   };

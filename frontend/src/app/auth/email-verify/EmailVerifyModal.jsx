@@ -51,9 +51,32 @@ export default function EmailVerifyModal({ show, onHide, email, onVerifySuccess 
             ))}
           </Row>
 
-          <Button type="submit" variant="primary" className="w-50 mx-auto d-block" disabled={emailVerify.loading}>
+          <Button
+            type="submit"
+            variant="primary"
+            className="w-50 mx-auto d-block"
+            disabled={emailVerify.loading}
+          >
             {emailVerify.loading ? "Verifying..." : "Verify Email"}
           </Button>
+
+          <div className="text-center mt-3">
+            <span className="text-muted">Didn't receive the code? </span>
+
+            <Button
+              type="button"
+              variant="link"
+              className="p-0 align-baseline text-decoration-none"
+              onClick={emailVerify.handleResendOtp}
+              disabled={emailVerify.resendLoading || emailVerify.resendCooldown > 0}
+            >
+              {emailVerify.resendLoading
+                ? "Sending..."
+                : emailVerify.resendCooldown > 0
+                  ? `Resend in ${emailVerify.resendCooldown}s`
+                  : "Resend OTP"}
+            </Button>
+          </div>
         </Modal.Body>
       </Form>
     </Modal>

@@ -171,7 +171,7 @@ export default function Playlist({
                 return (
                   <AccordionItem eventKey={eventKey} key={eventKey}>
                     <AccordionHeader>
-                      <span className="mb-0 fw-bold d-inline-flex align-items-center">
+                      <span className="mb-0 fw-bold d-inline-flex align-items-center justify-content-between w-100">
                         {section.title || `Section ${sectionIndex + 1}`}
 
                         {isFutureSectionLocked && " 🔒"}
@@ -179,7 +179,7 @@ export default function Playlist({
                         {sectionCompleted && !isFutureSectionLocked && (
                           <BsCheckCircleFill
                             size={14}
-                            className="text-success ms-2"
+                            className="text-success ms-2 flex-shrink-0"
                             title="Section completed"
                           />
                         )}

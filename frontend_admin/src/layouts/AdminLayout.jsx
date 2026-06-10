@@ -1,8 +1,8 @@
 
 import { useDispatch } from 'react-redux';
 import { Button, Offcanvas, OffcanvasBody, OverlayTrigger, Tooltip } from 'react-bootstrap';
-import { BsGearFill, BsGlobe, BsPower } from 'react-icons/bs';
-import { FaHome, FaPowerOff } from 'react-icons/fa';
+import { BsBoxArrowRight, BsGearFill } from 'react-icons/bs';
+import { FaHome } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { logoutAdmin } from '@/redux/adminSlice';
@@ -58,7 +58,7 @@ const AdminLayout = ({ children }) => {
                     variant="outline-danger"
                     className="fs-5 p-0 mb-0 bg-transparent border-0"
                   >
-                    <FaPowerOff />
+                    <BsBoxArrowRight />
                   </Button>
                 </OverlayTrigger>
               </div>
@@ -66,33 +66,36 @@ const AdminLayout = ({ children }) => {
           </div>
         ) : (
           <Offcanvas
-            className="flex-row custom-scrollbar h-100"
-            style={{ width: "fit-content" }}
+            className="flex-row custom-scrollbar h-100 p-0 border-0"
+            style={{ width: "220px" }}
             show={appMenuControl.open}
             placement="start"
             onHide={appMenuControl.toggle}
           >
-            <OffcanvasBody className="admin-offcanvas-menu d-flex flex-column bg-dark">
-              <AppMenu />
-              <div className="mt-auto">
-                <div className="d-flex align-items-center justify-content-center gap-4 text-primary-hover">
-                  <OverlayTrigger overlay={<Tooltip id="tooltip-disabled">Settings</Tooltip>}>
-                    <Link className="h5 mb-0" to="/settings" data-bs-toggle="tooltip" data-bs-placement="top" title="Settings">
+            <OffcanvasBody className="admin-offcanvas-menu d-flex flex-column p-0" style={{ background: 'linear-gradient(180deg, #1a2035 0%, #0d1117 100%)' }}>
+              <div className="flex-grow-1 overflow-auto px-3 py-2 pt-3">
+                <AppMenu />
+              </div>
+
+              <div className="border-top border-white border-opacity-10">
+                <div className="d-flex align-items-center justify-content-center gap-4 text-primary-hover py-3">
+                  <OverlayTrigger overlay={<Tooltip id="tooltip-offcanvas-settings">Settings</Tooltip>}>
+                    <Link className="h5 mb-0 text-white-50" to="/settings" onClick={appMenuControl.toggle}>
                       <BsGearFill />
                     </Link>
                   </OverlayTrigger>
-                  <OverlayTrigger overlay={<Tooltip id="tooltip-disabled">Home</Tooltip>}>
-                    <Link className="h5 mb-0" to="/dashboard" data-bs-toggle="tooltip" data-bs-placement="top" title="Home">
+                  <OverlayTrigger overlay={<Tooltip id="tooltip-offcanvas-home">Home</Tooltip>}>
+                    <Link className="h5 mb-0 text-white-50" to="/dashboard" onClick={appMenuControl.toggle}>
                       <FaHome />
                     </Link>
                   </OverlayTrigger>
-                  <OverlayTrigger overlay={<Tooltip id="tooltip-disabled">Sign Out</Tooltip>}>
+                  <OverlayTrigger overlay={<Tooltip id="tooltip-offcanvas-signout">Sign Out</Tooltip>}>
                     <Button
                       onClick={handleLogout}
                       variant="outline-danger"
-                      className="fs-5 p-0 mb-0 bg-transparent border-0"
+                      className="fs-5 p-0 mb-0 bg-transparent border-0 text-white-50"
                     >
-                      <FaPowerOff />
+                      <BsBoxArrowRight />
                     </Button>
                   </OverlayTrigger>
                 </div>

@@ -402,3 +402,17 @@ export const deleteCoupon = async (id) => {
     return { success: false, message: error.response?.data?.message || "Error deleting coupon" };
   }
 };
+
+export const updateCoupon = async (id, couponData) => {
+  try {
+    const response = await axios.patch(
+      `${backendUrl}/api/coupons/${id}`,
+      couponData,
+      axiosConfig
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error updating coupon:", error);
+    return { success: false, message: error.response?.data?.message || "Error updating coupon" };
+  }
+};

@@ -87,7 +87,7 @@ const cartSlice = createSlice({
         }
       )
       .addMatcher(
-        isAnyOf(fetchCart.fulfilled, addToCart.fulfilled, removeFromCart.fulfilled, clearCart.fulfilled),
+        isAnyOf(fetchCart.fulfilled, fetchCartCount.fulfilled, addToCart.fulfilled, removeFromCart.fulfilled, clearCart.fulfilled),
         (state, action) => {
           state.status = "succeeded";
           state.items = action.payload || [];

@@ -4,21 +4,50 @@ import IconPasswordFormInput from "@/components/form/IconPasswordFormInput";
 import useResetPassword from "../useResetPassword";
 
 export default function ResetPasswordForm({ email }) {
-  const { loading, handleSubmit, control, errors } = useResetPassword(email);
+  const {
+    loading,
+    resendLoading,
+    resendCooldown,
+    handleResendOtp,
+    handleSubmit,
+    control,
+    errors
+  } = useResetPassword(email);
 
   return (
     <form onSubmit={handleSubmit} className="d-flex flex-column gap-4">
       <div>
-        <IconTextFormInput
-          control={control}
-          icon={FaKey}
-          placeholder="Enter 6-digit OTP"
-          label="OTP Code"
-          name="otp"
-          disabled={loading}
-          error={errors.otp}
-          required
-        />
+        <div className="position-relative">
+          <IconTextFormInput
+            control={control}
+            icon={FaKey}
+            placeholder="Enter 6-digit OTP"
+            label="OTP Code"
+            name="otp"
+            disabled={loading}
+            error={errors.otp}
+            required
+          />
+
+          <button
+            type="button"
+            className="btn btn-link position-absolute end-0 text-decoration-none px-3"
+            style={{
+              top: "38px",
+              zIndex: 5,
+              fontSize: "0.875rem",
+            }}
+            onClick={handleResendOtp}
+            disabled={loading || resendLoading || resendCooldown > 0}
+          >
+            {resendLoading
+              ? "Sending..."
+              : resendCooldown > 0
+                ? `${resendCooldown}s`
+                : "Resend"}
+          </button>
+        </div>
+
         <div className="form-text small">
           Check your email <span className="text-primary fw-bold">{email}</span> for the code.
         </div>

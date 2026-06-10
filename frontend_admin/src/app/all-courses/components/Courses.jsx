@@ -481,8 +481,8 @@ const CoursesList = ({
   };
 
   return (
-    <Card className="bg-transparent border">
-      <CardHeader className="bg-light border-bottom">
+    <Card>
+      <CardHeader>
         <Row className="g-3 align-items-center justify-content-between">
           <Col md={12}>
             <form className="rounded position-relative" onSubmit={(e) => e.preventDefault()}>
@@ -515,7 +515,7 @@ const CoursesList = ({
         ) : (
           <div className="table-responsive border-0">
             <table className="table table-dark-gray align-middle p-4 mb-0 table-hover">
-              <thead className={`border-0 border-start border-${HIGHLIGHT_THICKNESS} border-dark`}>
+              <thead>
                 <tr>
                   <th className="border-0 p-0"></th>
                   <th className="border-0 text-start">Course</th>

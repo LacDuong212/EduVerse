@@ -1,7 +1,15 @@
+import { useState } from 'react';
 import comingSoonImg from '@/assets/images/element/coming-soon.svg';
 import PageMetaData from '@/components/PageMetaData';
 import { Col, Container, Row } from 'react-bootstrap';
 const ComingSoonPage = () => {
+  const [notifyEmail, setNotifyEmail] = useState('');
+  const [notified, setNotified] = useState(false);
+
+  const handleNotify = () => {
+    if (!notifyEmail || !/\S+@\S+\.\S+/.test(notifyEmail)) return;
+    setNotified(true);
+  };
   return <>
       <PageMetaData title="Coming Soon" />
       <main>
@@ -35,12 +43,19 @@ const ComingSoonPage = () => {
                   <h6>Notify me when website is launched</h6>
                   <div className="bg-body border rounded-2 p-2">
                     <div className="input-group">
-                      <input className="form-control border-0 me-1" type="email" placeholder="Enter your email" />
-                      <button type="button" className="btn btn-blue mb-0 rounded-2">
+                      <input
+                        className="form-control border-0 me-1"
+                        type="email"
+                        placeholder="Enter your email"
+                        value={notifyEmail}
+                        onChange={e => setNotifyEmail(e.target.value)}
+                      />
+                      <button type="button" className="btn btn-blue mb-0 rounded-2" onClick={handleNotify}>
                         Notify Me!
                       </button>
                     </div>
                   </div>
+                  {notified && <p className="text-success mt-2 small">You'll be notified when we launch!</p>}
                 </form>
               </Col>
               <Col lg={7} className="text-center">

@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
-import { Card, CardBody, CardFooter, CardHeader, Col, Row, TabContainer } from 'react-bootstrap';
-import { FaAngleLeft, FaAngleRight, FaSearch } from 'react-icons/fa';
+import { Button, Card, CardBody, CardFooter, CardHeader, Col, Modal, Row, TabContainer } from 'react-bootstrap';
+import { FaSearch, FaTimes } from 'react-icons/fa';
 import StudentList from './StudentList';
+import PaginationBar from '@/components/PaginationBar';
 import { getAllStudents, blockStudent, unblockStudent, deleteStudent } from '@/helpers/data';
+
+const PAGE_SIZE = 5;
 
 const AllStudents = () => {
   const [page, setPage] = useState(1);
@@ -13,6 +16,7 @@ const AllStudents = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalStudents, setTotalStudents] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -66,105 +70,81 @@ const AllStudents = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this student? This action cannot be undone.")) {
-      return;
-    }
+  const handleDeleteClick = (id) => setDeleteTarget(id);
 
-    const response = await deleteStudent(id);
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    const response = await deleteStudent(deleteTarget);
     if (response.success) {
-      setStudentsData(prevData =>
-        prevData.filter(student => student._id !== id)
-      );
-      setTotalStudents(prevTotal => prevTotal - 1);
-      } else {
+      setStudentsData(prevData => prevData.filter(s => s._id !== deleteTarget));
+      setTotalStudents(prev => prev - 1);
+    } else {
       console.error("Failed to delete student");
     }
+    setDeleteTarget(null);
   };
 
-    const getPageNumbers = () => {
-    const pages = [];
-    for (let i = 1; i <= totalPages; i++) {
-      pages.push(i);
-    }
-    return pages;
-  };
+  return <>
+    <Card className="bg-transparent">
+      <TabContainer defaultActiveKey={1}>
+        <CardHeader className="bg-transparent border-bottom px-0">
+          <Row className="g-3 align-items-center justify-content-between">
+            <Col md={8}>
+              <form onSubmit={(e) => e.preventDefault()}>
+                <div className="input-group">
+                  <input
+                    className="form-control"
+                    type="text"
+                    placeholder="Search by name or email"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                  {search && (
+                    <button type="button" className="btn btn-outline-secondary border-0" onClick={() => setSearch('')} aria-label="Clear search">
+                      <FaTimes className="small" />
+                    </button>
+                  )}
+                  <button type="submit" className="btn btn-outline-secondary border-0">
+                    <FaSearch />
+                  </button>
+                </div>
+              </form>
+            </Col>
+          </Row>
+        </CardHeader>
 
-  return <Card className="bg-transparent">
-    <TabContainer defaultActiveKey={1}>
-      <CardHeader className="bg-transparent border-bottom px-0">
-        <Row className="g-3 align-items-center justify-content-between">
-          <Col md={8}>
-            <form className="rounded position-relative" onSubmit={(e) => e.preventDefault()}>
-              <input
-                className="form-control bg-transparent"
-                type="text"
-                placeholder="Search"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-              <button className="bg-transparent p-2 position-absolute top-50 end-0 translate-middle-y border-0 text-primary-hover text-reset" type="submit">
-                <FaSearch className="fs-6 " />
-              </button>
-            </form>
-          </Col>
-        </Row>
-      </CardHeader>
+        <CardBody className="px-0">
+          <StudentList
+            studentsData={studentsData}
+            isLoading={isLoading}
+            onBlock={handleBlock}
+            onUnblock={handleUnblock}
+            onDelete={handleDeleteClick}
+          />
+        </CardBody>
 
-      <CardBody className="px-0">
-        <StudentList 
-        studentsData={studentsData}
-        isLoading={isLoading}
-        onBlock={handleBlock}
-        onUnblock={handleUnblock}
-        onDelete={handleDelete}
+      </TabContainer>
+      <CardFooter className="bg-transparent pt-0 px-0">
+        <PaginationBar
+          page={page}
+          totalPages={totalPages}
+          totalItems={totalStudents}
+          pageSize={PAGE_SIZE}
+          onPageChange={setPage}
         />
-      </CardBody>
+      </CardFooter>
+    </Card>
 
-    </TabContainer>
-    <CardFooter className="bg-transparent pt-0 px-0">
-      <div className="d-sm-flex justify-content-sm-between align-items-sm-center">
-        <p className="mb-0 text-center text-sm-start">
-          Showing {totalStudents === 0 ? 0 : (page - 1) * 5 + 1} to {Math.min(page * 5, totalStudents)} of {totalStudents} entries
-        </p>
-
-        <nav className="d-flex justify-content-center mb-0" aria-label="navigation">
-          <ul className="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
-            <li className={`page-item mb-0 ${page === 1 ? 'disabled' : ''}`}>
-              <button
-                className="page-link"
-                onClick={() => setPage(p => p - 1)}
-                disabled={page === 1}
-                tabIndex={-1}
-              >
-                <FaAngleLeft />
-              </button>
-            </li>
-
-            {getPageNumbers().map(pageNum => (
-              <li key={pageNum} className={`page-item mb-0 ${pageNum === page ? 'active' : ''}`}>
-                <button
-                  className="page-link"
-                  onClick={() => setPage(pageNum)}
-                >
-                  {pageNum}
-                </button>
-              </li>
-            ))}
-
-            <li className={`page-item mb-0 ${page === totalPages || totalPages === 0 ? 'disabled' : ''}`}>
-              <button
-                className="page-link"
-                onClick={() => setPage(p => p + 1)}
-                disabled={page === totalPages || totalPages === 0}
-              >
-                <FaAngleRight />
-              </button>
-            </li>
-          </ul>
-        </nav>
-      </div>
-    </CardFooter>
-  </Card>;
+    <Modal show={!!deleteTarget} onHide={() => setDeleteTarget(null)} centered>
+      <Modal.Header closeButton>
+        <Modal.Title>Delete Student</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>Are you sure you want to delete this student? This action cannot be undone.</Modal.Body>
+      <Modal.Footer>
+        <Button variant="secondary" onClick={() => setDeleteTarget(null)}>Cancel</Button>
+        <Button variant="danger" onClick={confirmDelete}>Delete</Button>
+      </Modal.Footer>
+    </Modal>
+  </>;
 };
 export default AllStudents;

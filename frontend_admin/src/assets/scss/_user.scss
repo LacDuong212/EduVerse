@@ -1,94 +1,433 @@
 // Should you need to overwrite any of our SCSS code or need to add any custom code, We highly recommend that you add your code into this file, so whenever theme update is available and you update the theme, You will not lose your hard work :)
 
-// Note for dark mode:
-// Uncomment below code and change primary color code to set different primary(i.e. light color of your primary) color in dark mode only.
-
 /*User CSS*/
 
-// [data-bs-theme="dark"] {
-//   --bs-primary: #19f032 !important;
-//   --bs-primary-rgb: 25, 240, 50 !important;
-//   --bs-link-color:#19f032 !important;
-//   --bs-link-hover-color:#0c911c !important;
-//   --bs-link-color-rgb:25, 240, 50 !important;
-//   --bs-link-hover-color-rgb:12, 145, 28;
-//   --bs-nav-pills-link-active-bg: #19f032 !important;
+/* ================================================
+   EduVerse Admin â€” Enhanced UI/UX System
+   ================================================ */
 
-//   .navbar {
-//     --bs-navbar-hover-color: var(--#{$prefix}primary);
-//     --bs-navbar-active-color: var(--#{$prefix}primary);
-//     }
+// â”€â”€ 0. THEME-AWARE CSS VARIABLES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+[data-bs-theme="light"] {
+  --bs-body-bg: #f0f2f5;
+  --edu-card-bg: #ffffff;
+  --edu-card-border: rgba(0, 0, 0, 0.07);
+  --edu-card-shadow: 0 1px 4px rgba(0, 0, 0, 0.08), 0 0 1px rgba(0, 0, 0, 0.05);
+  --edu-card-shadow-hover: 0 4px 18px rgba(0, 0, 0, 0.11), 0 1px 3px rgba(0, 0, 0, 0.06);
+  --edu-topbar-bg: #ffffff;
+  --edu-topbar-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
+  --edu-page-title-border: #e9ecef;
+  --edu-page-title-color: #1a1d2e;
+  --edu-subtitle-color: #4b5563;
+  --edu-stat-label-color: #374151;
+  --edu-tbody-row-border: rgba(0, 0, 0, 0.04);
+  --edu-tbody-hover-bg: rgba(var(--bs-primary-rgb), 0.03);
+  --edu-auth-right-bg: #f8f9fb;
+  --edu-auth-form-bg: #ffffff;
+  --edu-auth-form-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
+  --edu-auth-input-bg: #f3f4f8;
+  --edu-auth-input-border: #e5e7eb;
+  --edu-auth-label-color: #374151;
+}
 
-//     .navbar-dark {
-//       --bs-navbar-hover-color: var(--#{$prefix}primary) !important;
-//       --bs-navbar-active-color: var(--#{$prefix}primary) !important;
-//     }
-//     .nav{
-//       --bs-nav-link-hover-color: var(--#{$prefix}primary);
-//     }
-//     .dropdown-menu {
-//       --bs-dropdown-link-hover-color: var(--#{$prefix}primary) !important;
-//       --bs-dropdown-link-hover-bg: rgba(var(--#{$prefix}primary-rgb), 0.1) !important;
-//       --bs-dropdown-link-active-color: var(--#{$prefix}primary) !important;
-//       --bs-dropdown-link-active-bg: rgba(var(--#{$prefix}primary-rgb), 0.1) !important;
-//     }
+[data-bs-theme="dark"] {
+  --bs-body-bg: #181b1e;
+  --edu-card-bg: #1b1e21;
+  --edu-card-border: rgba(255, 255, 255, 0.06);
+  --edu-card-shadow: 0 1px 4px rgba(0, 0, 0, 0.3), 0 0 1px rgba(0, 0, 0, 0.2);
+  --edu-card-shadow-hover: 0 4px 18px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.25);
+  --edu-topbar-bg: #1b1e21;
+  --edu-topbar-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  --edu-page-title-border: rgba(255, 255, 255, 0.08);
+  --edu-page-title-color: #f3f1f1;
+  --edu-subtitle-color: #9ca3af;
+  --edu-stat-label-color: #9ca3af;
+  --edu-tbody-row-border: rgba(255, 255, 255, 0.05);
+  --edu-tbody-hover-bg: rgba(var(--bs-primary-rgb), 0.08);
+  --edu-auth-right-bg: #181b1e;
+  --edu-auth-form-bg: #1b1e21;
+  --edu-auth-form-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+  --edu-auth-input-bg: #222529;
+  --edu-auth-input-border: rgba(255, 255, 255, 0.1);
+  --edu-auth-label-color: #c5c6cc;
+}
 
-//   .btn-primary {
-//     --bs-btn-bg: var(--#{$prefix}primary);
-//     --bs-btn-border-color: var(--#{$prefix}primary);
-//     --bs-btn-hover-bg: var(--#{$prefix}link-hover-color);
-//     --bs-btn-hover-border-color: var(--#{$prefix}link-hover-color);
-//     --bs-btn-active-bg: var(--#{$prefix}link-hover-color);
-//     --bs-btn-active-border-color: var(--#{$prefix}link-hover-color);
-//     --bs-btn-disabled-bg: var(--#{$prefix}primary);
-//   }
-//   .btn-link {
-//     --bs-btn-color: var(--#{$prefix}primary);
-//     --bs-link-color: var(--#{$prefix}primary);
-//     --bs-btn-hover-color: var(--#{$prefix}link-hover-color);
-//     --bs-btn-active-color: var(--#{$prefix}link-hover-color);
-//   }
-//   .btn-outline-primary {
-//     --bs-btn-color: var(--#{$prefix}primary);
-//     --bs-btn-border-color: var(--#{$prefix}primary);
-//     --bs-btn-hover-bg: var(--#{$prefix}primary);
-//     --bs-btn-hover-border-color: var(--#{$prefix}primary);
-//     --bs-btn-active-bg: var(--#{$prefix}primary);
-//     --bs-btn-active-border-color: var(--#{$prefix}primary);
-//     --bs-btn-disabled-color: var(--#{$prefix}primary);
-//     --bs-btn-disabled-border-color: var(--#{$prefix}primary);
-//   }
-//   .btn-primary-soft{
-//     color: var(--#{$prefix}primary);
-//     background-color: rgba(var(--#{$prefix}primary-rgb), 0.1);
-//     &:hover, &:focus{
-//       color: $white;
-//       background-color: var(--#{$prefix}primary) !important;
-//       border-color: var(--#{$prefix}primary) !important;
-//     }
-//   }
-//   .nav-pills {
-//     --bs-nav-pills-link-active-bg: var(--#{$prefix}primary);
-//   }
-//   .form-control:focus{
-//     border-color: var(--#{$prefix}primary);
-//   }
-//   .text-bg-primary{
-//     background-color: rgba(var(--#{$prefix}primary-rgb), 1) !important;
-//   }
-//   .form-check-input:checked {
-//     background-color: var(--#{$prefix}primary);
-//     border-color: var(--#{$prefix}primary);
-//   }
-//   .choices.is-focused .choices__inner{
-//     border-color: var(--#{$prefix}primary);
-//   }
+// â”€â”€ 1. PAGE & CONTENT WRAPPER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+.page-content .page-content-wrapper {
+  background: var(--bs-body-bg) !important;
+}
 
-//   .btn-primary-shadow{
-//     background-color: var(--#{$prefix}primary);
-//     box-shadow: 0 0 0 10px rgba(var(--#{$prefix}primary-rgb), .4);
-//     &:hover ,&.active, &:focus{
-//       border-color: var(--#{$prefix}primary);
-//     }
-//   }
-// }
+// â”€â”€ 2. CARD ELEVATION SYSTEM â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+.card,
+.card.bg-transparent {
+  background-color: var(--edu-card-bg) !important;
+  border: 1px solid var(--edu-card-border) !important;
+  box-shadow: var(--edu-card-shadow) !important;
+  border-radius: 0.75rem !important;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.card:hover {
+  box-shadow: var(--edu-card-shadow-hover) !important;
+}
+.card-header {
+  background-color: var(--edu-card-bg) !important;
+  border-radius: 0.75rem 0.75rem 0 0 !important;
+  border-bottom: 1px solid var(--edu-card-border) !important;
+  padding: 1.1rem 1.5rem !important;
+}
+.card-body {
+  padding: 1.5rem !important;
+}
+.card-footer {
+  background-color: var(--edu-card-bg) !important;
+  border-top: 1px solid var(--edu-card-border) !important;
+  padding: 1rem 1.5rem !important;
+  border-radius: 0 0 0.75rem 0.75rem !important;
+}
+
+// â”€â”€ 3. SIDEBAR UPGRADE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Sidebar keeps dark gradient regardless of theme (it's always dark)
+nav.navbar.sidebar,
+.sidebar-content {
+  background: linear-gradient(180deg, #1a2035 0%, #0d1117 100%) !important;
+}
+
+.navbar.sidebar {
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+
+  .sidebar-content .navbar-nav a.nav-link.active {
+    background-color: var(--bs-primary) !important;
+    color: #fff !important;
+    border-radius: 0.4rem;
+    box-shadow: 0 3px 10px rgba(var(--bs-primary-rgb), 0.4);
+  }
+
+  .sidebar-content .navbar-nav div.nav-link.active {
+    background-color: transparent !important;
+    color: rgba(255, 255, 255, 0.85) !important;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .sidebar-content .navbar-nav .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.07) !important;
+    color: #fff !important;
+    border-radius: 0.4rem;
+    padding-left: 1.1rem !important;
+  }
+
+  .d-flex.gap-5,
+  .d-flex.gap-4 {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 1rem 0.5rem;
+  }
+}
+
+// â”€â”€ 4. TOPBAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+.navbar.top-bar {
+  background: var(--edu-topbar-bg) !important;
+  box-shadow: var(--edu-topbar-shadow) !important;
+  border-bottom: none !important;
+}
+
+// â”€â”€ 5. PAGE HEADER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+.page-title-box {
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid var(--edu-page-title-border);
+
+  h1, .h3 {
+    font-weight: 700;
+    color: var(--edu-page-title-color);
+    font-size: 1.5rem;
+    margin-bottom: 0.15rem;
+  }
+
+  .page-subtitle {
+    font-size: 0.875rem;
+    color: var(--edu-subtitle-color);
+    font-weight: 500;
+    margin-bottom: 0;
+  }
+}
+
+// â”€â”€ 6. TABLE ENHANCEMENTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Header always uses the dark navy â€” same in both themes (high contrast)
+.table-dark-gray {
+  thead tr th {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #ffffff !important;
+    background-color: #1a2035 !important;
+    padding: 0.85rem 1rem;
+    white-space: nowrap;
+    border-bottom: none !important;
+  }
+
+  tbody tr {
+    transition: background-color 0.12s ease;
+
+    td {
+      padding: 0.9rem 1rem;
+      vertical-align: middle;
+      border-bottom: 1px solid var(--edu-tbody-row-border);
+    }
+
+    &:hover td {
+      background-color: var(--edu-tbody-hover-bg) !important;
+    }
+
+    &:last-child td {
+      border-bottom: none;
+    }
+  }
+}
+
+// â”€â”€ 7. BADGE PILL IMPROVEMENTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+.badge {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 0.35em 0.75em;
+  border-radius: 50rem;
+  font-size: 0.75em;
+}
+
+// â”€â”€ 8. BUTTON REFINEMENTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+.btn {
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: transform 0.1s ease, box-shadow 0.15s ease,
+    background-color 0.15s ease, border-color 0.15s ease,
+    color 0.15s ease !important;
+  &:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+}
+.btn-primary {
+  box-shadow: 0 4px 12px rgba(var(--bs-primary-rgb), 0.3);
+  &:hover { box-shadow: 0 6px 16px rgba(var(--bs-primary-rgb), 0.4); }
+}
+
+// â”€â”€ 9. FORM CONTROLS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+.form-control,
+.form-select {
+  border-radius: 0.5rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  &:focus {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.15);
+  }
+}
+
+// â”€â”€ 10. AUTH PAGE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+.auth-left-panel {
+  background: linear-gradient(135deg, #1a1d2e 0%, #2d3561 60%, #1e3a8a 100%);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.04);
+    top: -80px; right: -80px;
+  }
+  &::after {
+    content: '';
+    position: absolute;
+    width: 250px; height: 250px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.04);
+    bottom: 60px; left: -50px;
+  }
+
+  .auth-brand-content {
+    position: relative; z-index: 1;
+    color: #fff; text-align: center; padding: 2rem;
+
+    .auth-brand-title { font-size: 2rem; font-weight: 800; margin-bottom: 0.75rem; letter-spacing: -0.02em; }
+    .auth-brand-subtitle { font-size: 1rem; opacity: 0.7; margin-bottom: 2.5rem; }
+
+    .auth-features {
+      list-style: none; padding: 0;
+      text-align: left; display: inline-block;
+      li {
+        padding: 0.4rem 0; font-size: 0.9375rem; opacity: 0.85;
+        display: flex; align-items: center; gap: 0.6rem;
+        &::before {
+          content: 'âœ“';
+          display: inline-flex; align-items: center; justify-content: center;
+          width: 20px; height: 20px; border-radius: 50%;
+          background: rgba(255, 255, 255, 0.2); font-size: 0.7rem; flex-shrink: 0;
+        }
+      }
+    }
+  }
+}
+
+.auth-right-panel {
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--edu-auth-right-bg);
+
+  .auth-form-card {
+    background: var(--edu-auth-form-bg);
+    border-radius: 1.25rem !important;
+    box-shadow: var(--edu-auth-form-shadow) !important;
+    padding: 2.5rem;
+    width: 100%; max-width: 440px;
+
+    h1 { font-size: 1.625rem; font-weight: 800; margin-bottom: 0.4rem; letter-spacing: -0.02em; }
+
+    .auth-form-subtitle { color: var(--bs-secondary-color); margin-bottom: 2rem; font-size: 0.9rem; }
+
+    .form-label { font-weight: 600; font-size: 0.8125rem; color: var(--edu-auth-label-color); margin-bottom: 0.4rem; }
+
+    .input-group-lg .input-group-text {
+      background: var(--edu-auth-input-bg);
+      border-color: var(--edu-auth-input-border);
+      border-right: none;
+    }
+    .input-group-lg .form-control {
+      border-color: var(--edu-auth-input-border);
+      border-left: none;
+      background: var(--edu-auth-input-bg);
+      &:focus { background: var(--edu-card-bg); border-color: var(--bs-primary); box-shadow: none; }
+    }
+
+    .btn-primary { height: 48px; font-size: 1rem; font-weight: 700; border-radius: 0.625rem; }
+  }
+}
+
+// â”€â”€ 11. SKELETON & EMPTY STATE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+@keyframes edu-skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.45; }
+}
+.skeleton-row td { animation: edu-skeleton-pulse 1.6s ease-in-out infinite; }
+.skeleton-row:nth-child(2) td { animation-delay: 0.2s; }
+.skeleton-row:nth-child(3) td { animation-delay: 0.4s; }
+.skeleton-row:nth-child(4) td { animation-delay: 0.6s; }
+.skeleton-row:nth-child(5) td { animation-delay: 0.8s; }
+
+.empty-state-cell {
+  padding: 3rem 1rem !important;
+  color: var(--bs-secondary-color);
+  text-align: center;
+  .empty-icon { font-size: 2.5rem; opacity: 0.25; margin-bottom: 0.75rem; display: block; }
+}
+
+// â”€â”€ 12. PAGINATION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+.pagination .page-link {
+  border-radius: 0.5rem !important;
+  margin: 0 2px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+// â”€â”€ 13. MODAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+.modal-content {
+  border: none !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2) !important;
+}
+.modal-header { border-radius: 1rem 1rem 0 0 !important; padding: 1.25rem 1.5rem !important; }
+.modal-footer { border-radius: 0 0 1rem 1rem !important; padding: 1rem 1.5rem !important; }
+
+// ── 13b. OFFCANVAS SIDEBAR (mobile) ──────────────
+.admin-offcanvas-menu {
+  --bs-offcanvas-bg: transparent !important;
+  background: linear-gradient(180deg, #1a2035 0%, #0d1117 100%) !important;
+
+  .navbar-nav a.nav-link.active {
+    background-color: var(--bs-primary) !important;
+    color: #fff !important;
+    border-radius: 0.4rem;
+    box-shadow: 0 3px 10px rgba(var(--bs-primary-rgb), 0.4);
+  }
+
+  .navbar-nav div.nav-link.active {
+    background-color: transparent !important;
+    color: rgba(255, 255, 255, 0.85) !important;
+  }
+
+  .navbar-nav .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.07) !important;
+    color: #fff !important;
+    border-radius: 0.4rem;
+  }
+}
+
+// ── 14. TOPBAR DATETIME ──────────────────────────
+.topbar-datetime {
+  .topbar-dt-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.75rem;
+    border-radius: 2rem;
+    background: rgba(var(--bs-primary-rgb), 0.07);
+    border: 1px solid rgba(var(--bs-primary-rgb), 0.13);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--edu-page-title-color);
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+  }
+
+  .topbar-dt-icon {
+    color: var(--bs-primary);
+    flex-shrink: 0;
+    font-size: 0.8rem;
+  }
+
+  .topbar-dt-weekday {
+    color: var(--bs-primary);
+    font-weight: 700;
+  }
+
+  .topbar-dt-sep {
+    opacity: 0.4;
+    margin: 0 0.1rem;
+  }
+
+  .topbar-dt-hms {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.04em;
+  }
+
+  .topbar-dt-divider {
+    width: 1px;
+    height: 1.25rem;
+    background: var(--edu-page-title-border);
+    flex-shrink: 0;
+  }
+}
+// â”€â”€ 14. HOVER LIFTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+.counter-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: default;
+  &:hover { transform: translateY(-3px); box-shadow: var(--edu-card-shadow-hover) !important; }
+
+  // Stat label: more readable than default text-muted
+  .text-muted {
+    color: var(--edu-stat-label-color) !important;
+  }
+}
+.stat-card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  &:hover { transform: translateY(-2px); box-shadow: var(--edu-card-shadow-hover) !important; }
+
+  // Stat label: more readable than default text-muted
+  h6.text-muted, .text-muted {
+    color: var(--edu-stat-label-color) !important;
+  }
+}
+

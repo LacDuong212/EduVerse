@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import PageMetaData from '@/components/PageMetaData';
 import ChoicesFormInput from '@/components/form/ChoicesFormInput';
-import { Button, Card, CardBody, CardFooter, CardHeader, Col, Row, Table } from 'react-bootstrap';
-import { FaAngleLeft, FaAngleRight, FaSearch } from 'react-icons/fa';
+import { Button, Card, CardBody, CardFooter, CardHeader, Col, Modal, Row, Table } from 'react-bootstrap';
+import { FaSearch, FaTimes, FaUserTie } from 'react-icons/fa';
+import PaginationBar from '@/components/PaginationBar';
 
 import { getInstructorRequests, approveInstructorRequest, rejectInstructorRequest } from '@/helpers/data';
 import { toast } from 'react-toastify';
@@ -61,9 +62,7 @@ const InstructorRequestRow = ({ item, onAccept, onReject }) => {
           </div>
           <div className="mb-0 ms-2">
             <h6 className="mb-0">
-              <a href="#" className="stretched-link">
-                {item.name}
-              </a>
+              {item.name}
             </h6>
           </div>
         </div>
@@ -85,6 +84,8 @@ const InstructorRequestRow = ({ item, onAccept, onReject }) => {
   );
 };
 
+const PAGE_SIZE = 5;
+
 const InstructorRequests = () => {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -94,6 +95,7 @@ const InstructorRequests = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalRequests, setTotalRequests] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [rejectTarget, setRejectTarget] = useState(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -129,56 +131,63 @@ const InstructorRequests = () => {
         setRequestsData(prev => prev.map(item =>
           item._id === id ? { ...item, status: 'approved' } : item
         ));
+        toast.success("Request approved successfully.");
       }
     } catch (error) {
       console.error("Failed to approve:", error);
     }
   };
 
-  const handleReject = async (id) => {
-    if (!window.confirm("Are you sure you want to reject and delete this request?")) return;
+  const handleRejectClick = (id) => setRejectTarget(id);
 
+  const confirmReject = async () => {
+    if (!rejectTarget) return;
     try {
-      const response = await rejectInstructorRequest(id);
+      const response = await rejectInstructorRequest(rejectTarget);
       if (response && response.success) {
-        setRequestsData(prev => prev.filter(item => item._id !== id));
+        setRequestsData(prev => prev.filter(item => item._id !== rejectTarget));
         setTotalRequests(prev => prev - 1);
+        toast.success("Request rejected.");
       }
     } catch (error) {
       console.error("Failed to reject:", error);
     }
+    setRejectTarget(null);
   };
 
-  const getPageNumbers = () => {
-    const pages = [];
-    for (let i = 1; i <= totalPages; i++) {
-      pages.push(i);
-    }
-    return pages;
-  };
   return (
     <>
       <PageMetaData title="Instructor Request" />
-      <Row className="mb-3">
-        <Col xs={12}>
-          <h1 className="h3 mb-2 mb-sm-0">Instructor Requests</h1>
-        </Col>
-      </Row>
-      <Card className="bg-transparent border">
-        <CardHeader className="bg-light border-bottom">
+      <div className="page-title-box d-sm-flex align-items-start justify-content-between">
+        <div>
+          <h1 className="h3 mb-1 d-flex align-items-center gap-2">
+            <FaUserTie className="text-primary" size={22} /> Instructor Requests
+          </h1>
+          <p className="page-subtitle mb-0">Review and manage instructor applications</p>
+        </div>
+      </div>
+      <Card>
+        <CardHeader>
           <Row className="g-3 align-items-center justify-content-between">
             <Col md={8}>
-              <form className="rounded position-relative" onSubmit={(e) => e.preventDefault()}>
-                <input
-                  className="form-control bg-body"
-                  type="text"
-                  placeholder="Search by name or email"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-                <button className="bg-transparent p-2 position-absolute top-50 end-0 translate-middle-y border-0 text-primary-hover text-reset" type="submit">
-                  <FaSearch />
-                </button>
+              <form onSubmit={(e) => e.preventDefault()}>
+                <div className="input-group">
+                  <input
+                    className="form-control bg-body"
+                    type="text"
+                    placeholder="Search by name or email"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                  {search && (
+                    <button type="button" className="btn btn-outline-secondary border-0" onClick={() => setSearch('')} aria-label="Clear search">
+                      <FaTimes className="small" />
+                    </button>
+                  )}
+                  <button type="submit" className="btn btn-outline-secondary border-0">
+                    <FaSearch />
+                  </button>
+                </div>
               </form>
             </Col>
             <Col md={3}>
@@ -215,7 +224,7 @@ const InstructorRequests = () => {
                       key={item._id}
                       item={item}
                       onAccept={handleAccept}
-                      onReject={handleReject}
+                      onReject={handleRejectClick}
                     />
                   ))
                 ) : (
@@ -229,36 +238,26 @@ const InstructorRequests = () => {
         </CardBody>
 
         <CardFooter className="bg-transparent pt-0">
-          <div className="d-sm-flex justify-content-sm-between align-items-sm-center">
-            <p className="mb-0 text-center text-sm-start">
-              Showing {totalRequests === 0 ? 0 : (page - 1) * 5 + 1} to {Math.min(page * 5, totalRequests)} of {totalRequests} entries
-            </p>
-            <nav className="d-flex justify-content-center mb-0" aria-label="navigation">
-              <ul className="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
-                <li className={`page-item mb-0 ${page === 1 ? 'disabled' : ''}`}>
-                  <button className="page-link" onClick={() => setPage(p => p - 1)} disabled={page === 1}>
-                    <FaAngleLeft />
-                  </button>
-                </li>
-
-                {getPageNumbers().map(pageNum => (
-                  <li key={pageNum} className={`page-item mb-0 ${pageNum === page ? 'active' : ''}`}>
-                    <button className="page-link" onClick={() => setPage(pageNum)}>
-                      {pageNum}
-                    </button>
-                  </li>
-                ))}
-
-                <li className={`page-item mb-0 ${page === totalPages || totalPages === 0 ? 'disabled' : ''}`}>
-                  <button className="page-link" onClick={() => setPage(p => p + 1)} disabled={page === totalPages || totalPages === 0}>
-                    <FaAngleRight />
-                  </button>
-                </li>
-              </ul>
-            </nav>
-          </div>
+          <PaginationBar
+            page={page}
+            totalPages={totalPages}
+            totalItems={totalRequests}
+            pageSize={PAGE_SIZE}
+            onPageChange={setPage}
+          />
         </CardFooter>
       </Card>
+
+      <Modal show={!!rejectTarget} onHide={() => setRejectTarget(null)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Reject Request</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>Are you sure you want to reject and delete this request? This action cannot be undone.</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setRejectTarget(null)}>Cancel</Button>
+          <Button variant="danger" onClick={confirmReject}>Reject</Button>
+        </Modal.Footer>
+      </Modal>
     </>
   );
 };
