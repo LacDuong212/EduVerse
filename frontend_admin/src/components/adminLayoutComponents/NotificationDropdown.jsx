@@ -37,7 +37,7 @@ const NotificationDropdown = () => {
             <h6 className="m-0">
               Notifications
             </h6>
-            <span className="small text-muted">
+            <span className="small text-secondary">
               Clear all
             </span>
           </CardHeader>

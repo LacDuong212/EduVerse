@@ -9,6 +9,7 @@ import PaginationBar from '@/components/PaginationBar';
 import CategoryList from './CategoryList';
 import CategoryModal from './CategoryModal';
 import { getAllCategories, createCategory, updateCategory, deleteCategory } from '@/helpers/data';
+import useSortableData from '@/hooks/useSortableData';
 
 const AllCategories = () => {
   const [allData, setAllData] = useState([]);
@@ -17,7 +18,7 @@ const AllCategories = () => {
 
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const pageSize = 6;
+  const [pageSize, setPageSize] = useState(50);
 
   const [showModal, setShowModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
@@ -42,26 +43,23 @@ const AllCategories = () => {
     fetchCategories();
   }, []);
 
-const { paginatedData, totalPages, totalItems } = useMemo(() => {
-    let processedData = allData;
+  const filteredData = useMemo(() => {
+    if (!search.trim()) return allData;
+    const fuse = new Fuse(allData, fuseOptions);
+    return fuse.search(search).map(r => r.item);
+  }, [allData, search]);
 
-    if (search.trim()) {
-      const fuse = new Fuse(allData, fuseOptions);
-      const results = fuse.search(search);
-      processedData = results.map(result => result.item);
-    }
+  const { sortedData, sortKey, sortDir, requestSort } = useSortableData(filteredData, 'updatedAt', 'desc');
 
-    const totalItems = processedData.length;
-    const totalPages = Math.ceil(totalItems / pageSize);
-    
-    const validPage = page > totalPages ? 1 : page; 
-    
-    const startIndex = (validPage - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    const paginatedData = processedData.slice(startIndex, endIndex);
-
+  const { paginatedData, totalPages, totalItems } = useMemo(() => {
+    const totalItems = sortedData.length;
+    const totalPages = Math.ceil(totalItems / pageSize) || 1;
+    const validPage = page > totalPages ? 1 : page;
+    const paginatedData = sortedData.slice((validPage - 1) * pageSize, validPage * pageSize);
     return { paginatedData, totalPages, totalItems };
-  }, [allData, search, page]);
+  }, [sortedData, page, pageSize]);
+
+  const handlePageSizeChange = (size) => { setPageSize(size); setPage(1); };
 
   useEffect(() => {
     setPage(1);
@@ -149,6 +147,9 @@ const { paginatedData, totalPages, totalItems } = useMemo(() => {
             <CategoryList 
               categoriesData={paginatedData}
               isLoading={isLoading}
+              sortKey={sortKey}
+              sortDir={sortDir}
+              onSort={requestSort}
               onEdit={handleShowEdit}
               onDelete={handleDelete}
             />
@@ -162,6 +163,7 @@ const { paginatedData, totalPages, totalItems } = useMemo(() => {
             totalItems={totalItems}
             pageSize={pageSize}
             onPageChange={setPage}
+            onPageSizeChange={handlePageSizeChange}
           />
         </CardFooter>
       </Card>

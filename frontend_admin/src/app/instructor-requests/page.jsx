@@ -1,9 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import PageMetaData from '@/components/PageMetaData';
 import ChoicesFormInput from '@/components/form/ChoicesFormInput';
 import { Button, Card, CardBody, CardFooter, CardHeader, Col, Modal, Row, Table } from 'react-bootstrap';
 import { FaSearch, FaTimes, FaUserTie } from 'react-icons/fa';
 import PaginationBar from '@/components/PaginationBar';
+import useSortableData from '@/hooks/useSortableData';
+import SortableTh from '@/components/SortableTh';
 
 import { getInstructorRequests, approveInstructorRequest, rejectInstructorRequest } from '@/helpers/data';
 import { toast } from 'react-toastify';
@@ -35,7 +37,7 @@ const InstructorRequestRow = ({ item, onAccept, onReject }) => {
             Accept
           </Button>
           <Button
-            variant="secondary-soft"
+            variant="danger-soft"
             className="me-1 mb-1 mb-lg-0"
             size="sm"
             onClick={() => onReject(item._id)}
@@ -84,16 +86,39 @@ const InstructorRequestRow = ({ item, onAccept, onReject }) => {
   );
 };
 
-const PAGE_SIZE = 5;
+const InstructorRequestsTable = ({ requests, isLoading, sortKey, sortDir, onSort, onAccept, onReject }) => {
+  return (
+    <Table className="table-dark-gray align-middle p-4 mb-0 table-hover">
+      <thead>
+        <tr>
+          <SortableTh label="Instructor Name" sortKey="name" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0 rounded-start" />
+          <SortableTh label="Email" sortKey="email" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0" />
+          <SortableTh label="Requested Date" sortKey="createdAt" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0" />
+          <th scope="col" className="border-0 rounded-end">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {isLoading ? (
+          <tr><td colSpan="4" className="text-center py-4">Loading...</td></tr>
+        ) : requests && requests.length > 0 ? (
+          requests.map((item) => (
+            <InstructorRequestRow key={item._id} item={item} onAccept={onAccept} onReject={onReject} />
+          ))
+        ) : (
+          <tr><td colSpan="4" className="text-center py-4">No pending requests found.</td></tr>
+        )}
+      </tbody>
+    </Table>
+  );
+};
 
 const InstructorRequests = () => {
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(50);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState(search);
 
-  const [requestsData, setRequestsData] = useState([]);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalRequests, setTotalRequests] = useState(0);
+  const [allData, setAllData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [rejectTarget, setRejectTarget] = useState(null);
 
@@ -109,12 +134,10 @@ const InstructorRequests = () => {
     const fetchRequests = async () => {
       setIsLoading(true);
       try {
-        const response = await getInstructorRequests(page, debouncedSearch);
+        const response = await getInstructorRequests(1, debouncedSearch, 9999);
         if (response && response.success) {
           const mappedData = response.data.map(req => ({ ...req, status: 'pending' }));
-          setRequestsData(mappedData);
-          setTotalPages(response.pagination.totalPages);
-          setTotalRequests(response.pagination.total);
+          setAllData(mappedData);
         }
       } catch (error) {
         console.error("Error fetching requests:", error);
@@ -122,13 +145,24 @@ const InstructorRequests = () => {
       setIsLoading(false);
     };
     fetchRequests();
-  }, [page, debouncedSearch]);
+  }, [debouncedSearch]);
+
+  const { sortedData, sortKey, sortDir, requestSort } = useSortableData(allData, 'createdAt', 'desc');
+
+  const paginatedData = useMemo(
+    () => sortedData.slice((page - 1) * pageSize, page * pageSize),
+    [sortedData, page, pageSize]
+  );
+  const totalPages = Math.ceil(sortedData.length / pageSize) || 1;
+  const totalItems = sortedData.length;
+
+  const handlePageSizeChange = (size) => { setPageSize(size); setPage(1); };
 
   const handleAccept = async (id) => {
     try {
       const response = await approveInstructorRequest(id);
       if (response && response.success) {
-        setRequestsData(prev => prev.map(item =>
+        setAllData(prev => prev.map(item =>
           item._id === id ? { ...item, status: 'approved' } : item
         ));
         toast.success("Request approved successfully.");
@@ -145,8 +179,7 @@ const InstructorRequests = () => {
     try {
       const response = await rejectInstructorRequest(rejectTarget);
       if (response && response.success) {
-        setRequestsData(prev => prev.filter(item => item._id !== rejectTarget));
-        setTotalRequests(prev => prev - 1);
+        setAllData(prev => prev.filter(item => item._id !== rejectTarget));
         toast.success("Request rejected.");
       }
     } catch (error) {
@@ -204,36 +237,15 @@ const InstructorRequests = () => {
 
         <CardBody>
           <div className="table-responsive border-0">
-            <Table className="table-dark-gray align-middle p-4 mb-0 table-hover">
-              <thead>
-                <tr>
-                  <th scope="col" className="border-0 rounded-start">Instructor Name</th>
-                  <th scope="col" className="border-0">Email</th>
-                  <th scope="col" className="border-0">Requested Date</th>
-                  <th scope="col" className="border-0 rounded-end">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {isLoading ? (
-                  <tr>
-                    <td colSpan="4" className="text-center py-4">Loading...</td>
-                  </tr>
-                ) : requestsData && requestsData.length > 0 ? (
-                  requestsData.map((item) => (
-                    <InstructorRequestRow
-                      key={item._id}
-                      item={item}
-                      onAccept={handleAccept}
-                      onReject={handleRejectClick}
-                    />
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="4" className="text-center py-4">No pending requests found.</td>
-                  </tr>
-                )}
-              </tbody>
-            </Table>
+<InstructorRequestsTable
+                requests={paginatedData}
+                isLoading={isLoading}
+                sortKey={sortKey}
+                sortDir={sortDir}
+                onSort={requestSort}
+                onAccept={handleAccept}
+                onReject={handleRejectClick}
+              />
           </div>
         </CardBody>
 
@@ -241,9 +253,10 @@ const InstructorRequests = () => {
           <PaginationBar
             page={page}
             totalPages={totalPages}
-            totalItems={totalRequests}
-            pageSize={PAGE_SIZE}
+            totalItems={totalItems}
+            pageSize={pageSize}
             onPageChange={setPage}
+            onPageSizeChange={handlePageSizeChange}
           />
         </CardFooter>
       </Card>

@@ -39,3 +39,16 @@
 .table-border-color{
   border-color: var(--#{$prefix}gray-300);
 }
+
+// Sortable column headers
+th.sort-th {
+  .sort-icon {
+    display: inline-flex;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+  &:hover .sort-icon,
+  &.sort-th--active .sort-icon {
+    opacity: 1;
+  }
+}

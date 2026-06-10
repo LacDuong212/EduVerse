@@ -43,7 +43,7 @@ const CounterCard = ({
       <Card className={`card-body p-4 h-100 counter-card border-start border-4 border-${variant}`} style={{ borderLeftWidth: '4px !important' }}>
         <div className="d-flex justify-content-between align-items-start">
           <div>
-            <p className="text-muted small text-uppercase fw-bold mb-1 ls-wider">{title}</p>
+            <p className="text-secondary small text-uppercase fw-bold mb-1 ls-wider">{title}</p>
             <h2 className="fw-bold mb-0" style={{ fontSize: '2rem', letterSpacing: '-0.03em' }}>
               <CountUp end={count} suffix={suffix} delay={0.5} duration={2} />
             </h2>

@@ -1,71 +1,61 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card, CardBody, CardFooter, CardHeader, Col, Row, TabContainer } from 'react-bootstrap';
 import { FaSearch, FaTimes } from 'react-icons/fa';
 import InstructorList from './InstructorList';
 import PaginationBar from '@/components/PaginationBar';
 import { getAllInstructors, blockInstructor, unblockInstructor } from '@/helpers/data';
-
-const PAGE_SIZE = 5;
+import useSortableData from '@/hooks/useSortableData';
 
 const AllInstructors = () => {
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(50);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState(search);
 
-  const [instructorsData, setInstructorsData] = useState([]);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalInstructors, setTotalInstructors] = useState(0);
+  const [allInstructors, setAllInstructors] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
-      if (page !== 1) {
-        setPage(1);
-      }
+      setPage(1);
     }, 500);
-    return () => {
-      clearTimeout(timer);
-    };
+    return () => clearTimeout(timer);
   }, [search]);
 
   useEffect(() => {
     const fetchInstructors = async () => {
       setIsLoading(true);
-      const response = await getAllInstructors(page, debouncedSearch);
+      const response = await getAllInstructors(1, debouncedSearch, 9999);
       if (response) {
-        setInstructorsData(response.data);
-        setTotalPages(response.pagination.totalPages);
-        setTotalInstructors(response.pagination.total);
+        setAllInstructors(response.data);
       }
       setIsLoading(false);
     };
     fetchInstructors();
-  }, [page, debouncedSearch]);
+  }, [debouncedSearch]);
+
+  const { sortedData, sortKey, sortDir, requestSort } = useSortableData(allInstructors, 'updatedAt', 'desc');
+
+  const paginatedData = useMemo(
+    () => sortedData.slice((page - 1) * pageSize, page * pageSize),
+    [sortedData, page, pageSize]
+  );
+  const totalPages = Math.ceil(allInstructors.length / pageSize);
+
+  const handlePageSizeChange = (size) => { setPageSize(size); setPage(1); };
 
   const handleBlock = async (id) => {
     const response = await blockInstructor(id);
     if (response.success) {
-      setInstructorsData(prevData =>
-        prevData.map(instructor =>
-          instructor._id === id ? { ...instructor, isActivated: false } : instructor
-        )
-      );
-    } else {
-      console.error("Failed to block instructor");
+      setAllInstructors(prev => prev.map(i => i._id === id ? { ...i, isActivated: false } : i));
     }
   };
 
   const handleUnblock = async (id) => {
     const response = await unblockInstructor(id);
     if (response.success) {
-      setInstructorsData(prevData =>
-        prevData.map(instructor =>
-          instructor._id === id ? { ...instructor, isActivated: true } : instructor
-        )
-      );
-    } else {
-      console.error("Failed to unblock instructor");
+      setAllInstructors(prev => prev.map(i => i._id === id ? { ...i, isActivated: true } : i));
     }
   };
 
@@ -99,8 +89,11 @@ const AllInstructors = () => {
 
       <CardBody className="px-0">
         <InstructorList
-          instructorsData={instructorsData}
+          instructorsData={paginatedData}
           isLoading={isLoading}
+          sortKey={sortKey}
+          sortDir={sortDir}
+          onSort={requestSort}
           onBlock={handleBlock}
           onUnblock={handleUnblock}
         />
@@ -111,9 +104,10 @@ const AllInstructors = () => {
       <PaginationBar
         page={page}
         totalPages={totalPages}
-        totalItems={totalInstructors}
-        pageSize={PAGE_SIZE}
+        totalItems={allInstructors.length}
+        pageSize={pageSize}
         onPageChange={setPage}
+        onPageSizeChange={handlePageSizeChange}
       />
     </CardFooter>
   </Card>;

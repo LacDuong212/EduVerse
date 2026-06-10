@@ -1,72 +1,62 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button, Card, CardBody, CardFooter, CardHeader, Col, Modal, Row, TabContainer } from 'react-bootstrap';
 import { FaSearch, FaTimes } from 'react-icons/fa';
 import StudentList from './StudentList';
 import PaginationBar from '@/components/PaginationBar';
 import { getAllStudents, blockStudent, unblockStudent, deleteStudent } from '@/helpers/data';
-
-const PAGE_SIZE = 5;
+import useSortableData from '@/hooks/useSortableData';
 
 const AllStudents = () => {
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(50);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState(search);
 
-  const [studentsData, setStudentsData] = useState([]);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalStudents, setTotalStudents] = useState(0);
+  const [allStudents, setAllStudents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [deleteTarget, setDeleteTarget] = useState(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
-      if (page !== 1) {
-        setPage(1);
-      }
+      setPage(1);
     }, 500);
-    return () => {
-      clearTimeout(timer);
-    };
+    return () => clearTimeout(timer);
   }, [search]);
 
   useEffect(() => {
     const fetchStudents = async () => {
       setIsLoading(true);
-      const response = await getAllStudents(page, debouncedSearch);
+      const response = await getAllStudents(1, debouncedSearch, 9999);
       if (response) {
-        setStudentsData(response.data);
-        setTotalPages(response.pagination.totalPages);
-        setTotalStudents(response.pagination.total);
+        setAllStudents(response.data);
       }
       setIsLoading(false);
     };
     fetchStudents();
-  }, [page, debouncedSearch]);
+  }, [debouncedSearch]);
+
+  const { sortedData, sortKey, sortDir, requestSort } = useSortableData(allStudents, 'updatedAt', 'desc');
+
+  const paginatedData = useMemo(
+    () => sortedData.slice((page - 1) * pageSize, page * pageSize),
+    [sortedData, page, pageSize]
+  );
+  const totalPages = Math.ceil(allStudents.length / pageSize);
+
+  const handlePageSizeChange = (size) => { setPageSize(size); setPage(1); };
 
   const handleBlock = async (id) => {
     const response = await blockStudent(id);
     if (response.success) {
-      setStudentsData(prevData =>
-        prevData.map(student =>
-          student._id === id ? { ...student, isActivated: false } : student
-        )
-      );
-    } else {
-      console.error("Failed to block student");
+      setAllStudents(prev => prev.map(s => s._id === id ? { ...s, isActivated: false } : s));
     }
   };
 
   const handleUnblock = async (id) => {
     const response = await unblockStudent(id);
     if (response.success) {
-      setStudentsData(prevData =>
-        prevData.map(student =>
-          student._id === id ? { ...student, isActivated: true } : student
-        )
-      );
-    } else {
-      console.error("Failed to unblock student");
+      setAllStudents(prev => prev.map(s => s._id === id ? { ...s, isActivated: true } : s));
     }
   };
 
@@ -76,10 +66,7 @@ const AllStudents = () => {
     if (!deleteTarget) return;
     const response = await deleteStudent(deleteTarget);
     if (response.success) {
-      setStudentsData(prevData => prevData.filter(s => s._id !== deleteTarget));
-      setTotalStudents(prev => prev - 1);
-    } else {
-      console.error("Failed to delete student");
+      setAllStudents(prev => prev.filter(s => s._id !== deleteTarget));
     }
     setDeleteTarget(null);
   };
@@ -115,8 +102,11 @@ const AllStudents = () => {
 
         <CardBody className="px-0">
           <StudentList
-            studentsData={studentsData}
+            studentsData={paginatedData}
             isLoading={isLoading}
+            sortKey={sortKey}
+            sortDir={sortDir}
+            onSort={requestSort}
             onBlock={handleBlock}
             onUnblock={handleUnblock}
             onDelete={handleDeleteClick}
@@ -128,9 +118,10 @@ const AllStudents = () => {
         <PaginationBar
           page={page}
           totalPages={totalPages}
-          totalItems={totalStudents}
-          pageSize={PAGE_SIZE}
+          totalItems={allStudents.length}
+          pageSize={pageSize}
           onPageChange={setPage}
+          onPageSizeChange={handlePageSizeChange}
         />
       </CardFooter>
     </Card>

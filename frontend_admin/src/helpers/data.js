@@ -162,10 +162,10 @@ export const updateCourseStatus = async (id, status, message = null) => {
 };
 
 // STUDENT --
-export const getAllStudents = async (page = 1, search = "") => {
+export const getAllStudents = async (page = 1, search = "", limit = 9999) => {
   try {
     const response = await axios.get(
-      `${backendUrl}/api/students?page=${page}&limit=5&search=${encodeURIComponent(search)}`,
+      `${backendUrl}/api/students?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`,
       axiosConfig
     );
     if (response.data.success) {
@@ -220,10 +220,10 @@ export const deleteStudent = async (id) => {
 };
 
 // INSTRUCTOR --
-export const getAllInstructors = async (page = 1, search = "") => {
+export const getAllInstructors = async (page = 1, search = "", limit = 9999) => {
   try {
     const response = await axios.get(
-      `${backendUrl}/api/instructors?page=${page}&limit=5&search=${encodeURIComponent(search)}`,
+      `${backendUrl}/api/instructors?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`,
       axiosConfig
     );
     if (response.data.success) {
@@ -239,7 +239,7 @@ export const getAllInstructors = async (page = 1, search = "") => {
 export const getInstructorRequests = async (page = 1, search = "") => {
   try {
     const response = await axios.get(
-      `${backendUrl}/api/instructors/requests?page=${page}&limit=5&search=${encodeURIComponent(search)}`,
+      `${backendUrl}/api/instructors/requests?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`,
       axiosConfig
     );
     if (response.data.success) {

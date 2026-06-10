@@ -20,6 +20,7 @@ export default function useAdminCourses() {
   const [loading, setLoading] = useState(false);
 
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(50);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
@@ -41,7 +42,7 @@ export default function useAdminCourses() {
       const response = await axios.get(`${backendUrl}/api/courses/overview`, {
         params: {
           page: page,
-          limit: 8,
+          limit: pageSize,
           search: debouncedSearch
         },
         withCredentials: true
@@ -60,7 +61,7 @@ export default function useAdminCourses() {
     } finally {
       setLoading(false);
     }
-  }, [backendUrl, isAuthenticated, admin, page, debouncedSearch]);
+  }, [backendUrl, isAuthenticated, admin, page, pageSize, debouncedSearch]);
 
   useEffect(() => {
     fetchCourses();
@@ -73,6 +74,8 @@ export default function useAdminCourses() {
     loading,
     page,
     setPage,
+    pageSize,
+    setPageSize,
     search,
     setSearch,
     refreshCourses: fetchCourses,

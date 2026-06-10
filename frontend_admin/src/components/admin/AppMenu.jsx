@@ -134,7 +134,7 @@ const AdminMenu = () => {
         return (
           <Fragment key={item.key ?? idx}>
             {item.isTitle ? (
-              <li className="nav-item ms-2 my-2 fw-bold text-uppercase small text-muted">
+              <li className="nav-item ms-2 my-2 fw-bold text-uppercase small text-secondary">
                 {item.label}
               </li>
             ) : item.children ? (
