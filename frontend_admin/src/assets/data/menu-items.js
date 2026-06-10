@@ -55,7 +55,7 @@ export const ADMIN_MENU_ITEMS = [{
   label: 'Instructors',
   icon: FaUserTie,
   children: [{
-    key: 'instructors',
+    key: 'instructors-list',
     label: 'List',
     icon: FaList,
     url: '/instructors',

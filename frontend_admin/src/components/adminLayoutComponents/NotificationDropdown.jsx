@@ -21,7 +21,6 @@ const NotificationCard = ({
           <h6 className="mb-1">{title}</h6>
           <p className="small text-body m-0">{description}</p>
           {isDetails && <u className="small">View detail</u>}
-          {isTime && <small className="text-body">5 min ago</small>}
         </div>
       </a>
     </li>;
@@ -36,11 +35,11 @@ const NotificationDropdown = () => {
         <Card className="bg-transparent">
           <CardHeader className="bg-transparent border-bottom py-4 d-flex justify-content-between align-items-center">
             <h6 className="m-0">
-              Notifications <span className="badge bg-danger bg-opacity-10 text-danger ms-2">2 new</span>
+              Notifications
             </h6>
-            <a className="small" href="#">
+            <span className="small text-muted">
               Clear all
-            </a>
+            </span>
           </CardHeader>
           <CardBody className="p-0">
             <ul className="list-group list-unstyled list-group-flush">
@@ -48,9 +47,9 @@ const NotificationDropdown = () => {
             </ul>
           </CardBody>
           <CardFooter className="bg-transparent border-0 py-3 text-center position-relative">
-            <a href="#" className="stretched-link">
+            <span className="small">
               See all incoming activity
-            </a>
+            </span>
           </CardFooter>
         </Card>
       </DropdownMenu>

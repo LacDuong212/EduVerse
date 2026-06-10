@@ -17,7 +17,7 @@ const Earnings = () => {
       enabled: true
     },
     stroke: { curve: "smooth", width: 2 },
-    colors: [getComputedStyle(root).getPropertyValue('--bs-purple')],
+    colors: [getComputedStyle(document.documentElement).getPropertyValue('--bs-purple')],
     xaxis: {
       type: 'category',
       axisBorder: { show: false },

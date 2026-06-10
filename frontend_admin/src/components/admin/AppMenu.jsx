@@ -4,7 +4,6 @@ import {
   getAdminMenuItems,
   getMenuItemFromURL,
 } from '@/helpers/menu';
-import useToggle from '@/hooks/useToggle';
 import clsx from 'clsx';
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { Badge, Collapse } from 'react-bootstrap';
@@ -16,15 +15,22 @@ const MenuItemWithChildren = ({
   activeMenuItems,
   itemClassName,
   linkClassName,
+  openKey,
+  setOpenKey,
 }) => {
-  const { isTrue: isOpen, toggle, setTrue } = useToggle();
+  const isOpen = openKey === item.key;
   const Icon = item.icon;
 
+  // Auto-expand when a child of this item is active
   useEffect(() => {
     if (activeMenuItems?.includes(item.key)) {
-      setTrue();
+      setOpenKey(item.key);
     }
-  }, [activeMenuItems, item.key, setTrue]);
+  }, [activeMenuItems, item.key, setOpenKey]);
+
+  const handleToggle = () => {
+    setOpenKey(isOpen ? null : item.key);
+  };
 
   return (
     <div className={itemClassName}>
@@ -33,7 +39,7 @@ const MenuItemWithChildren = ({
         data-bs-toggle="collapse"
         role="button"
         aria-expanded={isOpen}
-        onClick={toggle}
+        onClick={handleToggle}
       >
         {Icon && <Icon className="me-2" />} {item.label}
       </div>
@@ -50,6 +56,8 @@ const MenuItemWithChildren = ({
                   linkClassName={clsx('nav-link', {
                     active: activeMenuItems?.includes(child.key),
                   })}
+                  openKey={openKey}
+                  setOpenKey={setOpenKey}
                 />
               ) : (
                 <MenuItem
@@ -90,6 +98,8 @@ const MenuItem = ({ item, itemClassName, linkClassName }) => {
 
 const AdminMenu = () => {
   const [activeMenuItems, setActiveMenuItems] = useState([]);
+  // Track which parent menu is currently open — only one at a time
+  const [openKey, setOpenKey] = useState(null);
   const { pathname } = useLocation();
 
   const menuItems = useMemo(() => getAdminMenuItems(), []);
@@ -101,10 +111,15 @@ const AdminMenu = () => {
     if (matchingMenuItem) {
       const activeMt = findMenuItem(menuItems, matchingMenuItem.key);
       if (activeMt) {
-        setActiveMenuItems([
-          activeMt.key,
-          ...findAllParent(menuItems, activeMt),
-        ]);
+        const parents = findAllParent(menuItems, activeMt);
+        setActiveMenuItems([activeMt.key, ...parents]);
+        // Auto-open the parent of the active item
+        if (parents.length > 0) {
+          setOpenKey(parents[0]);
+        } else {
+          // Navigated to a top-level item — collapse all sub-menus
+          setOpenKey(null);
+        }
       }
     }
   }, [pathname, menuItems]);
@@ -130,6 +145,8 @@ const AdminMenu = () => {
                 linkClassName={clsx('nav-link', {
                   active: activeMenuItems.includes(item.key),
                 })}
+                openKey={openKey}
+                setOpenKey={setOpenKey}
               />
             ) : (
               <MenuItem
