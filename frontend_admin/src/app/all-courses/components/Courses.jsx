@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button, Card, CardBody, CardFooter, CardHeader, Col, Form, Modal, OverlayTrigger, Row, Tooltip } from "react-bootstrap";
-import { FaAngleLeft, FaAngleRight, FaBan, FaCheck, FaPlay, FaSearch, FaTimes, FaTrash, FaTrashRestore } from "react-icons/fa";
+import { FaBan, FaCheck, FaPlay, FaSearch, FaTimes, FaTrash, FaTrashRestore } from "react-icons/fa";
 import { MdOutlinePending } from "react-icons/md";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -9,6 +9,9 @@ import {
 } from "@/helpers/data";
 import { DEFAULT_AVATAR_IMG, DEFAULT_COURSE_IMG } from "../../../context/constants";
 import { formatCurrency } from "../../../utils/currency";
+import useSortableData from '@/hooks/useSortableData';
+import SortableTh from '@/components/SortableTh';
+import PaginationBar from '@/components/PaginationBar';
 
 const STATUSES = Object.freeze({
   blocked: "blocked",
@@ -458,19 +461,15 @@ const CoursesList = ({
   search,
   setSearch,
   setPage,
+  pageSize,
+  setPageSize,
   refreshCourses
 }) => {
-  const start = (meta?.currentPage - 1) * 8 + 1;
-  const end = Math.min(meta?.currentPage * 8, meta?.totalCourses);
+  const start = (meta?.currentPage - 1) * pageSize + 1;
+  const end = Math.min(meta?.currentPage * pageSize, meta?.totalCourses);
+  const { sortedData: sortedCourses, sortKey, sortDir, requestSort } = useSortableData(courses, 'updatedAt', 'desc');
 
-  const getPageNumbers = () => {
-    const pages = [];
-    const totalPages = meta?.totalPages || 1;
-    for (let i = 1; i <= totalPages; i++) {
-      pages.push(i);
-    }
-    return pages;
-  };
+  const handlePageSizeChange = (size) => { setPageSize(size); setPage(1); };
 
   const handleUpdateCourse = (id, fieldName, fieldValue) => {
     setCourses(prev =>
@@ -518,18 +517,18 @@ const CoursesList = ({
               <thead>
                 <tr>
                   <th className="border-0 p-0"></th>
-                  <th className="border-0 text-start">Course</th>
-                  <th className="border-0 text-center">Instructor</th>
-                  <th className="border-0 text-center">Last Update</th>
-                  <th className="border-0 text-center">Status</th>
-                  <th className="border-0 text-center">Price</th>
+                  <SortableTh label="Course" sortKey="title" currentSortKey={sortKey} currentDir={sortDir} onSort={requestSort} className="border-0 text-start" />
+                  <SortableTh label="Instructor" sortKey="instructor.name" currentSortKey={sortKey} currentDir={sortDir} onSort={requestSort} className="border-0 text-center" />
+                  <SortableTh label="Last Update" sortKey="updatedAt" currentSortKey={sortKey} currentDir={sortDir} onSort={requestSort} className="border-0 text-center" />
+                  <SortableTh label="Status" sortKey="status" currentSortKey={sortKey} currentDir={sortDir} onSort={requestSort} className="border-0 text-center" />
+                  <SortableTh label="Price" sortKey="price" currentSortKey={sortKey} currentDir={sortDir} onSort={requestSort} className="border-0 text-center" />
                   <th className="border-0 text-center">State</th>
                   <th className="border-0 text-center rounded-0">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {courses.length > 0 ? (
-                  courses.map((item, idx) => (
+                {sortedCourses.length > 0 ? (
+                  sortedCourses.map((item, idx) => (
                     <CourseCard
                       key={item._id || idx}
                       index={idx}
@@ -552,49 +551,14 @@ const CoursesList = ({
       </CardBody>
 
       <CardFooter className="bg-transparent">
-        <div className="d-sm-flex justify-content-sm-between align-items-sm-center">
-          <p className="mb-0 text-center text-sm-start">
-            Showing {meta?.totalCourses === 0 ? 0 : start} to {end} of {meta?.totalCourses} courses
-          </p>
-
-          <nav className="d-flex justify-content-center mb-0" aria-label="navigation">
-            <ul className="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
-              <li className={`page-item mb-0 ${meta.currentPage === 1 ? "disabled" : ""}`}>
-                <button
-                  className="page-link"
-                  onClick={() => setPage(meta.currentPage - 1)}
-                  disabled={meta.currentPage === 1}
-                >
-                  <FaAngleLeft />
-                </button>
-              </li>
-
-              {getPageNumbers().map((pageNum) => (
-                <li
-                  key={pageNum}
-                  className={`page-item mb-0 ${pageNum === meta.currentPage ? "active" : ""}`}
-                >
-                  <button
-                    className="page-link"
-                    onClick={() => setPage(pageNum)}
-                  >
-                    {pageNum}
-                  </button>
-                </li>
-              ))}
-
-              <li className={`page-item mb-0 ${meta.currentPage >= meta.totalPages ? "disabled" : ""}`}>
-                <button
-                  className="page-link"
-                  onClick={() => setPage(meta.currentPage + 1)}
-                  disabled={meta.currentPage >= meta.totalPages}
-                >
-                  <FaAngleRight />
-                </button>
-              </li>
-            </ul>
-          </nav>
-        </div>
+        <PaginationBar
+          page={meta?.currentPage || 1}
+          totalPages={meta?.totalPages || 1}
+          totalItems={meta?.totalCourses || 0}
+          pageSize={pageSize}
+          onPageChange={setPage}
+          onPageSizeChange={handlePageSizeChange}
+        />
       </CardFooter>
     </Card>
   );

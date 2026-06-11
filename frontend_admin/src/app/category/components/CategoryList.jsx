@@ -1,5 +1,6 @@
 import { Button } from 'react-bootstrap';
 import { FaEdit, FaTrash, FaLayerGroup } from 'react-icons/fa';
+import SortableTh from '@/components/SortableTh';
 
 const SkeletonRows = () => (
   <>
@@ -15,16 +16,16 @@ const SkeletonRows = () => (
   </>
 );
 
-const CategoryList = ({ categoriesData, isLoading, onEdit, onDelete }) => {
+const CategoryList = ({ categoriesData, isLoading, sortKey, sortDir, onSort, onEdit, onDelete }) => {
   return (
     <div className="table-responsive border-0">
       <table className="table table-dark-gray align-middle p-4 mb-0 table-hover">
         <thead>
           <tr>
-            <th scope="col" className="border-0 rounded-start">Category Name</th>
-            <th scope="col" className="border-0">Slug</th>
-            <th scope="col" className="border-0">Created At</th>
-            <th scope="col" className="border-0">Updated At</th>
+            <SortableTh label="Category Name" sortKey="name" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0 rounded-start" />
+            <SortableTh label="Slug" sortKey="slug" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0" />
+            <SortableTh label="Created At" sortKey="createdAt" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0" />
+            <SortableTh label="Updated At" sortKey="updatedAt" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0" />
             <th scope="col" className="border-0 rounded-end">Action</th>
           </tr>
         </thead>

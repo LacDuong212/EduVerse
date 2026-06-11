@@ -1,5 +1,6 @@
 import { Button } from 'react-bootstrap';
 import { FaEdit, FaTag, FaTrash } from 'react-icons/fa';
+import SortableTh from '@/components/SortableTh';
 
 const COLS = 7;
 
@@ -25,14 +26,14 @@ const SkeletonRows = ({ count = 5 }) => (
   </>
 );
 
-const CouponList = ({ couponsData, isLoading, onToggleStatus, onDelete, onEdit }) => {
+const CouponList = ({ couponsData, isLoading, sortKey, sortDir, onSort, onToggleStatus, onDelete, onEdit }) => {
   return (
     <div className="table-responsive border-0">
       <table className="table table-dark-gray align-middle p-4 mb-0 table-hover">
         <thead>
           <tr>
-            <th scope="col" className="border-0 rounded-start">Code / Info</th>
-            <th scope="col" className="border-0">Discount</th>
+            <SortableTh label="Code / Info" sortKey="code" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0 rounded-start" />
+            <SortableTh label="Discount" sortKey="discountPercent" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0" />
             <th scope="col" className="border-0">Validity Period</th>
             <th scope="col" className="border-0">Usage</th>
             <th scope="col" className="border-0">Status</th>
@@ -58,7 +59,7 @@ const CouponList = ({ couponsData, isLoading, onToggleStatus, onDelete, onEdit }
                 <tr key={item._id}>
                   <td>
                     <h6 className="mb-1 font-monospace text-primary">{item.code}</h6>
-                    <small className="text-muted d-block text-truncate" style={{ maxWidth: "200px" }}>
+                    <small className="text-body-secondary d-block text-truncate" style={{ maxWidth: "200px" }}>
                       {item.description}
                     </small>
                   </td>
@@ -72,7 +73,7 @@ const CouponList = ({ couponsData, isLoading, onToggleStatus, onDelete, onEdit }
                   <td>
                     <span className="badge bg-blue">{item.usersUsed?.length || 0} used</span>
                     {item.maxUsageLimit && (
-                      <span className="text-muted small d-block">/ {item.maxUsageLimit} max</span>
+                      <span className="text-body-secondary small d-block">/ {item.maxUsageLimit} max</span>
                     )}
                   </td>
                   <td>{statusText}</td>

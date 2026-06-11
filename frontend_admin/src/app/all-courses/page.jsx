@@ -14,6 +14,8 @@ const Courses = () => {
     search,
     setSearch,
     setPage,
+    pageSize,
+    setPageSize,
     refreshCourses
   } = useAdminCourses();
 
@@ -36,6 +38,8 @@ const Courses = () => {
       search={search}
       setSearch={setSearch}
       setPage={setPage}
+      pageSize={pageSize}
+      setPageSize={setPageSize}
       refreshCourses={refreshCourses}
     />
   </>;

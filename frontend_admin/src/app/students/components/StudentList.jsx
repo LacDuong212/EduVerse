@@ -1,5 +1,6 @@
 import { Button } from 'react-bootstrap';
 import { FaUserGraduate } from 'react-icons/fa';
+import SortableTh from '@/components/SortableTh';
 
 const COLS = 7;
 
@@ -24,33 +25,19 @@ const SkeletonRows = ({ count = 5 }) => (
   </>
 );
 
-const StudentList = ({ studentsData, isLoading, onBlock, onUnblock, onDelete }) => {
+const StudentList = ({ studentsData, isLoading, sortKey, sortDir, onSort, onBlock, onUnblock, onDelete }) => {
 
   return <div className="table-responsive border-0">
     <table className="table table-dark-gray align-middle p-4 mb-0 table-hover">
       <thead>
         <tr>
-          <th scope="col" className="border-0 rounded-start">
-            Student name
-          </th>
-          <th scope="col" className="border-0">
-            Email
-          </th>
-          <th scope="col" className="border-0">
-            Join date
-          </th>
-          <th scope="col" className="border-0">
-            Last updated
-          </th>
-          <th scope="col" className="border-0">
-            Verified
-          </th>
-          <th scope="col" className="border-0">
-            Activated
-          </th>
-          <th scope="col" className="border-0 rounded-end">
-            Action
-          </th>
+          <SortableTh label="Student name" sortKey="name" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0 rounded-start" />
+          <SortableTh label="Email" sortKey="email" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0" />
+          <SortableTh label="Join date" sortKey="createdAt" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0" />
+          <SortableTh label="Last updated" sortKey="updatedAt" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0" />
+          <th scope="col" className="border-0">Verified</th>
+          <th scope="col" className="border-0">Activated</th>
+          <th scope="col" className="border-0 rounded-end">Action</th>
         </tr>
       </thead>
       <tbody>

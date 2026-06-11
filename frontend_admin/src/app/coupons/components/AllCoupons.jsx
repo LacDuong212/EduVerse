@@ -9,8 +9,7 @@ import CouponList from './CouponList';
 import CouponModal from './CouponModal';
 import PaginationBar from '@/components/PaginationBar';
 import { getAllCoupons, createCoupon, updateCoupon, updateCouponStatus, deleteCoupon } from '@/helpers/data';
-
-const PAGE_SIZE = 6;
+import useSortableData from '@/hooks/useSortableData';
 
 const AllCoupons = () => {
   const [allData, setAllData] = useState([]);
@@ -18,6 +17,7 @@ const AllCoupons = () => {
 
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(50);
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
@@ -48,26 +48,23 @@ const AllCoupons = () => {
     fetchCoupons();
   }, []);
 
-  // Pagination & Search Logic
+  const filteredData = useMemo(() => {
+    if (!search.trim()) return allData;
+    const fuse = new Fuse(allData, fuseOptions);
+    return fuse.search(search).map(r => r.item);
+  }, [allData, search]);
+
+  const { sortedData, sortKey, sortDir, requestSort } = useSortableData(filteredData, 'startDate', 'desc');
+
   const { paginatedData, totalPages, totalItems } = useMemo(() => {
-    let processedData = allData;
-
-    if (search.trim()) {
-      const fuse = new Fuse(allData, fuseOptions);
-      const results = fuse.search(search);
-      processedData = results.map(result => result.item);
-    }
-
-    const totalItems = processedData.length;
-    const totalPages = Math.ceil(totalItems / PAGE_SIZE);
+    const totalItems = sortedData.length;
+    const totalPages = Math.ceil(totalItems / pageSize) || 1;
     const validPage = page > totalPages ? 1 : page;
-
-    const startIndex = (validPage - 1) * PAGE_SIZE;
-    const endIndex = startIndex + PAGE_SIZE;
-    const paginatedData = processedData.slice(startIndex, endIndex);
-
+    const paginatedData = sortedData.slice((validPage - 1) * pageSize, validPage * pageSize);
     return { paginatedData, totalPages, totalItems };
-  }, [allData, search, page]);
+  }, [sortedData, page, pageSize]);
+
+  const handlePageSizeChange = (size) => { setPageSize(size); setPage(1); };
 
   useEffect(() => {
     setPage(1);
@@ -177,6 +174,9 @@ const AllCoupons = () => {
             <CouponList
               couponsData={paginatedData}
               isLoading={isLoading}
+              sortKey={sortKey}
+              sortDir={sortDir}
+              onSort={requestSort}
               onToggleStatus={handleToggleStatus}
               onDelete={handleDeleteClick}
               onEdit={handleEditClick}
@@ -189,8 +189,9 @@ const AllCoupons = () => {
             page={page}
             totalPages={totalPages}
             totalItems={totalItems}
-            pageSize={PAGE_SIZE}
+            pageSize={pageSize}
             onPageChange={setPage}
+            onPageSizeChange={handlePageSizeChange}
           />
         </CardFooter>
       </Card>

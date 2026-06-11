@@ -157,7 +157,7 @@ const CouponModal = ({ show, onHide, onSubmit, initialData }) => {
           </Row>
 
           <Form.Group className="mb-3">
-            <Form.Label>Max Usage Limit <span className="text-muted small">(optional)</span></Form.Label>
+            <Form.Label>Max Usage Limit <span className="text-secondary small">(optional)</span></Form.Label>
             <Form.Control
               type="number"
               name="maxUsageLimit"
