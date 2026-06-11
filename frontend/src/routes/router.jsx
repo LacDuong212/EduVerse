@@ -19,7 +19,7 @@ const AppRouter = props => {
 
   const shouldHideChat = HIDE_CHATBOT?.some(path => {
     if (path === "/") return location.pathname === "/";
-    else location.pathname.startsWith(path);
+    return location.pathname.startsWith(path);
   });
 
   return (

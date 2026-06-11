@@ -55,6 +55,7 @@ export const getVideoViewUrl = async (user, videoId) => {
 
     const key = getKey(insId, videoId);
 
+    // #TODO?: course must be live to watch videos (student)
     if (courseId && !isFree) {
       const isInstructor = user?.role === "instructor" && user?.userId === insId;
       const isEnrolled = user?.role === "student" && await existsEnrollment(user?.userId, courseId);

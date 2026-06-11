@@ -1,4 +1,3 @@
-import axios from "axios";
 import { useEffect, useState } from "react";
 import { Card, Col, Container, Row, Spinner } from "react-bootstrap";
 import { Controller, useForm } from "react-hook-form";
@@ -11,8 +10,10 @@ import TextAreaFormInput from "@/components/form/TextAreaFormInput";
 import TextFormInput from "@/components/form/TextFormInput";
 import { authApi } from "@/utils/api";
 import { handleRequest } from "@/utils/request";
+import { useNavigate } from "react-router-dom";
 
 const Banner = () => {
+  const navigate = useNavigate();
   const { userData } = useSelector((state) => state.auth);
 
   const [isInstructor, setIsInstructor] = useState(false);
@@ -69,6 +70,11 @@ const Banner = () => {
   };
 
   const onSubmit = async (data) => {
+    if (!userData?.email) {
+      navigate(`/auth/sign-in?email=${encodeURIComponent(data.email)}`);
+      return;
+    }
+
     const res = await handleRequest(authApi.post("/instructors", data));
 
     if (res.success) {

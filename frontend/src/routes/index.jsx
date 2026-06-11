@@ -50,16 +50,6 @@ export const publicRoutes = [{
   name: "Courses",
   element: <CoursesPage />
 }, {
-  path: "/courses/:courseId/watch/:lectureId?",
-  name: "My Video Player",
-  isNested: false,
-  element: <VideoPlayer />
-}, {
-  path: "/course/:courseId/result",
-  name: "Course Result",
-  isNested: false,
-  element: <CourseResultPage />
-}, {
   path: "/courses/:id",
   name: "CourseDetails",
   element: <CourseDetails />
@@ -167,6 +157,16 @@ export const studentRoutes = [{
   isNested: false,
   element: <LearningCourse />
 },{
+  path: "/student/courses/:courseId/watch/:lectureId?",
+  name: "My Video Player",
+  isNested: false,
+  element: <VideoPlayer />
+}, {
+  path: "/student/courses/:courseId/result",
+  name: "Course Result",
+  isNested: false,
+  element: <CourseResultPage />
+}, {
   path: "/student/checkout",
   name: "Checkout",
   isNested: false,

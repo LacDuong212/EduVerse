@@ -16,7 +16,7 @@ const buildCourseLink = (courseId) => {
 
 const buildCourseTitleAnchor = (course) => {
   const url = buildCourseLink(course._id);
-  return `<a href="${url}">${course.title}</a>`;
+  return `<a href="${url}" target="_blank">${course.title}</a>`;
 };
 
 export const getCoursesOverview = async (req, res) => {

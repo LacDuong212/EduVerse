@@ -223,7 +223,12 @@ export const syncAllStudents = async () => {
     const userId = student.user;
     logger.debug(`Syncing Student: ${userId}`);
 
-    const progressDocs = await CourseProgress.find({ user: userId });
+    const progressDocs = await CourseProgress.find({ user: userId }).lean();
+    const courseIds = progressDocs.map((prog) => prog.course.toString());
+    const courseMap = new Map(
+      (await Course.find({ _id: { $in: courseIds } }).select("lecturesCount").lean())
+        .map((course) => [course._id.toString(), course])
+    );
 
     let totalLectures = 0;
     let completedLectures = 0;
@@ -236,16 +241,29 @@ export const syncAllStudents = async () => {
         (l) => l.status === LECTURE_STATUS_ENUM.completed
       ).length || 0;
 
-      const isActuallyCompleted = totalInCourse > 0 && completedInCourse === totalInCourse;
+      const course = courseMap.get(prog.course.toString());
+      const courseTotalLectures = course?.lecturesCount ?? totalInCourse;
+      const isActuallyCompleted = courseTotalLectures > 0 && completedInCourse === courseTotalLectures;
 
-      if (prog.completedLecturesCount !== completedInCourse || prog.isCompleted !== isActuallyCompleted) {
-        prog.completedLecturesCount = completedInCourse;
-        prog.totalLectures = totalInCourse;
-        prog.isCompleted = isActuallyCompleted;
-        await prog.save();
+      const needsProgressUpdate =
+        prog.completedLecturesCount !== completedInCourse ||
+        prog.totalLectures !== courseTotalLectures ||
+        prog.isCompleted !== isActuallyCompleted;
+
+      if (needsProgressUpdate) {
+        await CourseProgress.updateOne(
+          { _id: prog._id },
+          {
+            $set: {
+              completedLecturesCount: completedInCourse,
+              totalLectures: courseTotalLectures,
+              isCompleted: isActuallyCompleted,
+            },
+          }
+        );
       }
 
-      totalLectures += totalInCourse;
+      totalLectures += courseTotalLectures;
       completedLectures += completedInCourse;
       if (isActuallyCompleted) completedCourses++;
     }

@@ -142,7 +142,7 @@ export default function useLectureConclusion({
 
         if (assessment) {
           onHide?.();
-          navigate(`/course/${courseId}/result`, {
+          navigate(`/student/courses/${courseId}/result`, {
             state: { assessment },
           });
         } else {

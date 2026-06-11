@@ -125,7 +125,7 @@ export default function Playlist({
       return;
     }
 
-    navigate(`/courses/${course?.courseId}/watch/${lecture.lecId}`);
+    navigate(`/student/courses/${course?.courseId}/watch/${lecture.lecId}`);
   };
 
   return (
