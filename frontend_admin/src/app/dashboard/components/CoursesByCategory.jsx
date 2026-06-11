@@ -5,7 +5,6 @@ import { Card, CardBody, CardHeader, Col } from 'react-bootstrap';
 
 const CoursesByCategory = () => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
-  const [theme] = useState(localStorage.getItem('EDUVERSE_THEME_KEY') || 'light');
   const [series, setSeries] = useState([]);
 
   const chartOptions = {
@@ -24,15 +23,18 @@ const CoursesByCategory = () => {
       }
     },
     tooltip: {
-      theme: theme === 'dark' ? 'dark' : 'light',
       custom: ({ seriesIndex, dataPointIndex, w }) => {
         const point = w.config.series[seriesIndex]?.data[dataPointIndex];
         if (!point) return '';
+        const isDark = (localStorage.getItem('EDUVERSE_THEME_KEY') || 'light') === 'dark';
+        const bg = isDark ? '#1e1e2d' : '#fff';
+        const color = isDark ? '#e0e0e0' : '#333';
+        const border = isDark ? '#333' : '#e0e0e0';
         return (
-          '<div style="padding:10px 14px;line-height:1.6">' +
-          `<div style="font-weight:600;margin-bottom:4px">${point.x}</div>` +
-          `<div>${point.y.toLocaleString()} students</div>` +
-          `<div>${point.courseCount ?? 0} course${point.courseCount !== 1 ? 's' : ''}</div>` +
+          `<div style="padding:10px 14px;background:${bg};color:${color};border:1px solid ${border};border-radius:6px;line-height:1.8;font-size:13px">` +
+          `<div style="font-weight:600;margin-bottom:2px">${point.x}</div>` +
+          `<div>👥 ${point.y.toLocaleString()} students</div>` +
+          `<div>📚 ${point.courseCount ?? 0} course${point.courseCount !== 1 ? 's' : ''}</div>` +
           '</div>'
         );
       }
@@ -60,7 +62,7 @@ const CoursesByCategory = () => {
       <Card className="shadow h-100">
         <CardHeader className="p-4 border-bottom">
           <h5 className="card-header-title mb-0">Student Demand by Category</h5>
-          <p className="text-muted small mb-0 mt-1">Block size = total students enrolled</p>
+          <p className="text-body small mb-0 mt-1">Block size = total students enrolled</p>
         </CardHeader>
         <CardBody>
           {series.length > 0 && (
@@ -78,3 +80,4 @@ const CoursesByCategory = () => {
 };
 
 export default CoursesByCategory;
+
