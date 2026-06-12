@@ -106,5 +106,10 @@ privateRoutes.get(
   validate(instructorSchema.courseStudentsRequest),
   instructorController.getCourseStudents
 );
+privateRoutes.get(
+  "/courses/:courseId/students/:stuId/progress",
+  validate(instructorSchema.courseStudentProgressRequest),
+  instructorController.getStudentCourseProgress
+);
 
 export default { publicRoutes, privateRoutes };

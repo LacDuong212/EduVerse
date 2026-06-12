@@ -40,7 +40,6 @@ import InstructorDetailsPage from "../app/pages/instructors/detail";
 import VideoPlayer from "../app/pages/course/video-player/page";
 import NotFoundPage from "../components/not-found";
 
-
 export const publicRoutes = [{
   path: "/home",
   name: "Home",
@@ -100,11 +99,11 @@ export const instructorRoutes = [{
   isNested: false,
   element: <InstructorMyCourses />
 }, {
-  path: "/instructor/students",
-  name: "My Students",
-  isNested: false,
-  element: <InstructorMyStudents />
-}, {
+//   path: "/instructor/students",
+//   name: "My Students",
+//   isNested: false,
+//   element: <InstructorMyStudents />
+// }, {
   path: "/instructor/profile",
   name: "My Profile",
   isNested: true,

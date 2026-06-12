@@ -1,7 +1,11 @@
 import mongoose from "mongoose";
 import AppError from "#exceptions/app.error.js";
-import { STATUS_ENUM as COURSE_STATUS } from "#modules/course/course.model.js";
+import Course, { STATUS_ENUM as COURSE_STATUS } from "#modules/course/course.model.js";
+import Curriculum from "#modules/course/curriculum.model.js";
+import Enrollment, { STATUS_ENUM as ENROLL_STATUS } from "#modules/enrollment/enrollment.model.js";
 import { existsEnrollment } from "#modules/enrollment/enrollment.service.js";
+import QuizProgress from "#modules/quiz/quiz-progress.model.js";
+import User from "#modules/user/user.model.js";
 import { updateStreak } from "#modules/streak/streak.service.js";
 import Student from "#modules/student/student.model.js";
 import { withTransaction } from "#utils/transaction.js";
@@ -45,7 +49,7 @@ export const getCourseProgress = async (stuId, courseId) => {
   let progress = await CourseProgress.findOne({ user: stuId, course: courseId })
     .populate("course", "status");
 
-  if(!progress) {
+  if (!progress) {
     progress = await CourseProgress.create({ user: stuId, course: courseId });
     await progress.populate("course", "status");
   }
@@ -57,6 +61,175 @@ export const getCourseProgress = async (stuId, courseId) => {
     throw new AppError("Course is currently unvailable. Please try again later!", 404);
 
   return toCourseProgressDto(progress);
+};
+
+export const getStudentCourseProgress = async (insId, stuId, courseId) => {
+  if (!insId) throw new AppError("Instructor ID is required.", 400);
+  if (!stuId) throw new AppError("Student ID is required.", 400);
+
+  const course = await Course.findOne({ _id: courseId, isDeleted: false }).lean();
+  if (!course) throw new AppError("Course not found.", 404);
+  if (course.instructor?.ref?.toString() !== insId)
+    throw new AppError("You don't have access to this course.", 403);
+  if (course.status !== COURSE_STATUS.live)
+    throw new AppError("Course is currently unavailable. Please try again later!", 404);
+
+  const enrollment = await Enrollment.findOne({
+    student: stuId,
+    course: courseId,
+    status: ENROLL_STATUS.active,
+  }).lean();
+  if (!enrollment)
+    throw new AppError("Student is not enrolled in this course.", 403);
+
+  const student = await User.findById(stuId)
+    .select("name email pfpImg")
+    .lean();
+  if (!student) throw new AppError("Student not found.", 404);
+
+  const [progress, quizProgress, curriculum] = await Promise.all([
+    CourseProgress.findOne({ user: stuId, course: courseId }).lean(),
+    QuizProgress.findOne({ user: stuId, course: courseId }).lean(),
+    Curriculum.findOne({ courseId }).select("sections").lean(),
+  ]);
+
+  const lectureProgressMap = new Map();
+  if (Array.isArray(progress?.lectures)) {
+    progress.lectures.forEach((item) => {
+      const lectureId = item.lectureId?.toString();
+      if (!lectureId) return;
+
+      let lectureProgress = 0;
+      if (item.status === LECTURE_STATUS.completed) {
+        lectureProgress = 100;
+      } else if (item.durationSec > 0) {
+        lectureProgress = Math.min(
+          100,
+          Math.round((item.lastPositionSec / item.durationSec) * 100)
+        );
+      }
+
+      lectureProgressMap.set(lectureId, lectureProgress);
+    });
+  }
+
+  const quizMap = new Map();
+  if (Array.isArray(quizProgress?.quizzes)) {
+    quizProgress.quizzes.forEach((quiz) => {
+      const lectureId = quiz.lectureId?.toString();
+      if (!lectureId) return;
+
+      quizMap.set(lectureId, {
+        totalQuestions: quiz.totalQuestions || 0,
+        correctAnswers: Math.max(
+          0,
+          (quiz.totalQuestions || 0) - (Array.isArray(quiz.wrongAnswers) ? quiz.wrongAnswers.length : 0)
+        ),
+      });
+    });
+  }
+
+  const sections = (curriculum?.sections || []).map((section) => ({
+    secId: section._id?.toString(),
+    title: section.title,
+    lectures: (section.lectures || []).map((lecture) => {
+      const lectureId = lecture._id?.toString() || lecture.lecId?.toString();
+      const progressValue = lectureProgressMap.get(lectureId) ?? 0;
+      const quizData = lectureId ? quizMap.get(lectureId) : null;
+
+      return {
+        lecId: lectureId,
+        title: lecture.title,
+        progress: progressValue,
+        quiz: {
+          isCompleted: Boolean(quizData),
+          correctAnswersCount: quizData?.correctAnswers || 0,
+          totalQuestionsCount: quizData?.totalQuestions || 0,
+        },
+      };
+    }),
+  }));
+
+  const totalLectures = sections.reduce(
+    (count, section) => count + (section.lectures?.length || 0),
+    0
+  );
+
+  const totalQuizzes = (curriculum?.sections || []).reduce((count, section) => {
+    if (!Array.isArray(section?.lectures)) return count;
+
+    return count + section.lectures.reduce((lectureCount, lecture) => {
+      const hasQuiz = lecture?.aiData?.quizzes?.length > 0;
+
+      return hasQuiz ? lectureCount + 1 : lectureCount;
+    }, 0);
+  }, 0);
+
+  const lectureCompleted = sections.reduce((count, section) => {
+    return (
+      count +
+      (Array.isArray(section.lectures)
+        ? section.lectures.reduce(
+          (lectureCount, lecture) => (lecture?.progress === 100 ? lectureCount + 1 : lectureCount),
+          0
+        )
+        : 0)
+    );
+  }, 0);
+
+  const quizzCleared = Array.isArray(quizProgress?.quizzes)
+    ? quizProgress.quizzes.length
+    : 0;
+
+  const totalQuizQuestions = sections.reduce((count, section) => {
+    return (
+      count +
+      (Array.isArray(section.lectures)
+        ? section.lectures.reduce(
+          (sum, lecture) => sum + (lecture?.quiz?.totalQuestionsCount || 0),
+          0
+        )
+        : 0)
+    );
+  }, 0);
+
+  const totalCorrectAnswers = sections.reduce((count, section) => {
+    return (
+      count +
+      (Array.isArray(section.lectures)
+        ? section.lectures.reduce(
+          (sum, lecture) => sum + (lecture?.quiz?.correctAnswersCount || 0),
+          0
+        )
+        : 0)
+    );
+  }, 0);
+
+  const quizAccuracy = totalQuizQuestions > 0
+    ? Math.round((totalCorrectAnswers / totalQuizQuestions) * 100)
+    : 0;
+
+  const courseProgress = totalLectures > 0
+    ? Math.round((lectureCompleted / totalLectures) * 100)
+    : 0;
+
+  return {
+    student: {
+      stuId: student._id?.toString(),
+      name: student.name,
+      email: student.email,
+      avatar: student.pfpImg || null,
+    },
+    courseProgress: {
+      sections,
+      totalLectures,
+      totalQuizzes,
+      lectureCompleted,
+      courseProgress,
+      quizzCleared,
+      quizAccuracy,
+    },
+  };
 };
 
 export const completeLecture = async (userId, courseId, lecId) => {

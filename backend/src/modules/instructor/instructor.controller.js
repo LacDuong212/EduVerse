@@ -1,6 +1,7 @@
 import * as chartService from "#modules/chart/chart.service.js";
 import * as courseService from "#modules/course/course.service.js";
 import * as enrollmentService from "#modules/enrollment/enrollment.service.js";
+import * as learningService from "#modules/learning/learning.service.js";
 import asyncHandler from "#utils/asyncHandler.js";
 import { sendPaginatedResponse, sendSuccessResponse, sendUnsuccessResponse } from "#utils/response.js";
 import * as instructorMapper from "./instructor.mapper.js";
@@ -260,6 +261,15 @@ export const getCourseStudents = asyncHandler(async (req, res) => {
     students,
     { page, limit, totalItems: total }
   );
+});
+
+// @desc Get a specific student's progress in a course
+// @route GET instructor/courses/:courseId/students/:stuId/progress
+export const getStudentCourseProgress = asyncHandler(async (req, res) => {
+  const instructorId = req.user?.userId;
+  const { courseId, stuId } = req.validated?.params || {};
+  const result = await learningService.getStudentCourseProgress(instructorId, stuId, courseId);
+  return sendSuccessResponse(res, 200, "Get student progress successfully!", result);
 });
 
 // @desc Get instructor's students stats
