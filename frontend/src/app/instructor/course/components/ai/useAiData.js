@@ -28,7 +28,6 @@ export const useAiData = (lecture, show, onUpdate) => {
   }), [lecture?.title, aiData.summary, aiData.lessonNotes, aiData.quizzes, s3StreamUrl]);
 
   useEffect(() => {
-    console.log(hasData)
     if (!show || !hasData || !lecture?.lecId) {
       if (!show) {
         lastLoadedLecId.current = null;

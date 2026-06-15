@@ -22,7 +22,7 @@ export default function useEditCourse() {
 
   useEffect(() => {
     const fetchCourse = async () => {
-      if (!courseId) return navigate("/instructor/courses");
+      if (!courseId) return navigate(-1);
       setIsLoading(true);
 
       const response = await handleRequest(authApi.get(`/instructor/courses/${courseId}`));
@@ -30,7 +30,7 @@ export default function useEditCourse() {
       if (response.success) {
         setCourse(response.result);
       } else {
-        navigate("/instructor/courses");
+        navigate(-1);
       }
       setIsLoading(false);
     };

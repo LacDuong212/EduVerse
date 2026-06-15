@@ -74,7 +74,7 @@ const Step2 = ({ stepperInstance, activeStep }) => {
                   type="url"
                   className={`form-control ${state.errors?.image ? "is-invalid" : ""}`}
                   placeholder="Paste image URL here..."
-                  value={state.imageState.url}
+                  value={state.imageState.url || ""}
                   onChange={(e) => methods.setImageState(p => ({ ...p, url: e.target.value, file: null }))}
                 />
                 {state.errors?.image && <div className="invalid-feedback">{state.errors.image}</div>}

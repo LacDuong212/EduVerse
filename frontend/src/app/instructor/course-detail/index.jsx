@@ -40,12 +40,14 @@ const InstructorCourseDetail = () => {
           <Col xs={12} sm={8} md={9}>
             <div className="d-flex align-items-center">
               <h1 className="h3 mb-0 text-wrap">{course?.title || "(No title)"}</h1>
-              <Link
-                to={course?.courseId ? `/instructor/courses/${course.courseId}/edit` : null}
-                className="ms-xs-0 ms-sm-3 mb-0 btn btn-primary-soft rounded-circle p-2 flex-shrink-0"
-              >
-                <FaRegEdit className="fs-4 p-1" />
-              </Link>
+              {(course?.courseId && course?.status !== "blocked") && (
+                <Link
+                  to={`/instructor/courses/${course.courseId}/edit`}
+                  className="ms-xs-0 ms-sm-3 mb-0 btn btn-primary-soft rounded-circle p-2 flex-shrink-0"
+                >
+                  <FaRegEdit className="fs-4 p-1" />
+                </Link>
+              )}
             </div>
           </Col>
           <Col xs={12} sm={4} md={3} className="text-end">
