@@ -16,4 +16,16 @@ router.post(
   couponController.applyCoupon
 );
 
+router.get(
+  "/refund/:courseId/status",
+  protect,
+  couponController.getRefundCouponStatus
+);
+
+router.post(
+  "/refund/:courseId/claim",
+  protect,
+  couponController.claimRefundCoupon
+);
+
 export default router;

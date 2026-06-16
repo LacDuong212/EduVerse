@@ -36,6 +36,13 @@ privateRoutes.get(
 );
 privateRoutes.post("/courses", instructorController.createCourse);
 privateRoutes.get("/earnings", instructorController.getInstructorEarnings);
+privateRoutes.get("/dashboard/enrollment-trends", instructorController.getEnrollmentTrends);
+privateRoutes.get("/dashboard/progress-breakdown", instructorController.getProgressBreakdown);
+privateRoutes.get(
+  "/dashboard/student-distribution",
+  validate(instructorSchema.limitQueryRequest),
+  instructorController.getStudentDistribution
+);
 privateRoutes.get("/profile", instructorController.getProfile);
 privateRoutes.patch(
   "/profile",

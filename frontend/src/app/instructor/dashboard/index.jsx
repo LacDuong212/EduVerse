@@ -4,6 +4,9 @@ import useInstructorDashboard from "./useInstructorDashboard";
 import DashboardCounter from "./components/DashboardCounter";
 import RevenueChart from "./components/RevenueChart";
 import TopCoursesChart from "./components/TopCoursesChart";
+import EnrollmentTrendsChart from "./components/EnrollmentTrendsChart";
+import StudentProgressChart from "./components/StudentProgressChart";
+import StudentDistributionChart from "./components/StudentDistributionChart";
 import WelcomeBack from "./components/WelcomeBack";
 import { Container, Row, Spinner } from "react-bootstrap";
 import { useSelector } from "react-redux";
@@ -15,6 +18,9 @@ const InstructorDashboard = () => {
     stats,
     revenueChart,
     topCourses,
+    enrollmentTrends,
+    progressBreakdown,
+    studentDistribution,
     loading,
     error,
     refetch
@@ -48,7 +54,8 @@ const InstructorDashboard = () => {
       <WelcomeBack instructorName={insName} />
       <Container className="pt-3 pb-5">
         <DashboardCounter counterData={stats} />
-        <Row className="mt-3 g-4">
+
+        <Row className="mt-5 g-4">
           {topCourses && topCourses.length > 0 ? (
             <>
               <RevenueChart
@@ -66,6 +73,24 @@ const InstructorDashboard = () => {
               revenueData={revenueChart}
             />
           )}
+        </Row>
+
+        <Row className="mt-4 g-4">
+          <EnrollmentTrendsChart
+            col={6}
+            enrollmentData={enrollmentTrends}
+          />
+          <StudentProgressChart
+            col={6}
+            progressData={progressBreakdown}
+          />
+        </Row>
+
+        <Row className="mt-4 g-4">
+          <StudentDistributionChart
+            col={12}
+            distributionData={studentDistribution}
+          />
         </Row>
       </Container>
     </>

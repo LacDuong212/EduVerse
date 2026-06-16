@@ -5,10 +5,13 @@ export const toCouponDto = (coupon) => {
   return {
     couponId: coupon._id?.toString(),
     code: coupon.code,
-    discountPercent: coupon.discountPercent,
+    discountType: coupon.discountType,
+    discountValue: coupon.discountValue,
+    description: coupon.description || null,
     startDate: coupon.startDate,
     expiryDate: coupon.expiryDate,
-    isActive: coupon.isActive
+    isActive: coupon.isActive,
+    courseId: coupon.courseId?.toString?.() || null
   }
 };
 

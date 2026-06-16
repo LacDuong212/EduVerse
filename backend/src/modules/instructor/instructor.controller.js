@@ -169,6 +169,31 @@ export const getInstructorEarnings = asyncHandler(async (req, res) => {
   return sendSuccessResponse(res, 200, "Get instructor monthly earning successfully!", result);
 });
 
+// @desc  Get instructor enrollment trends (past 30 days)
+// @route GET instructor/dashboard/enrollment-trends
+export const getEnrollmentTrends = asyncHandler(async (req, res) => {
+  const userId = req.user?.userId;
+  const result = await chartService.getInstructorEnrollmentTrends(userId);
+  return sendSuccessResponse(res, 200, "Get enrollment trends successfully!", result);
+});
+
+// @desc  Get student progress breakdown by enrollment status
+// @route GET instructor/dashboard/progress-breakdown
+export const getProgressBreakdown = asyncHandler(async (req, res) => {
+  const userId = req.user?.userId;
+  const result = await chartService.getStudentProgressBreakdown(userId);
+  return sendSuccessResponse(res, 200, "Get progress breakdown successfully!", result);
+});
+
+// @desc  Get student distribution across courses
+// @route GET instructor/dashboard/student-distribution
+export const getStudentDistribution = asyncHandler(async (req, res) => {
+  const userId = req.user?.userId;
+  const { limit } = req.validated?.query || { limit: 10 };
+  const result = await chartService.getStudentDistributionByCourse(userId, limit);
+  return sendSuccessResponse(res, 200, "Get student distribution successfully!", result);
+});
+
 // @desc  Get instructor's public courses (infinite scroll)
 // @route GET instructors/:insId/courses?limit=&skip=
 export const getInstructorPublicCourses = asyncHandler(async (req, res) => {

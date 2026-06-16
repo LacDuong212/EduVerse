@@ -4,6 +4,7 @@ import _ from "lodash";
 import AppError from "#exceptions/app.error.js";
 import { getAllCatgeoriesWithSort } from "#modules/category/category.service.js";
 import { existsEnrollment } from "#modules/enrollment/enrollment.service.js";
+import Enrollment from "#modules/enrollment/enrollment.model.js";
 import { getCourseImageUploadParams } from "#modules/image/image.service.js";
 import Instructor from "#modules/instructor/instructor.model.js";
 import { getCurrentInstructor } from "#modules/instructor/instructor.service.js";
@@ -285,15 +286,27 @@ export const getCoursePublicDetails = async (user, courseId) => {
   if (!details || Object.keys(details).length === 0)
     throw new AppError("Course not found.", 404);
 
-  let isOwned = undefined;
+  let isOwner = false;
+  let isEnrolled = false;
+
   if (user) {
-    const { isOwner, isEnrolled } = await getCourseAccess(user.role, user.userId, details);
-    isOwned = isOwner || isEnrolled;
+    const result = await getCourseAccess(user.role, user.userId, details);
+    isOwner = result.isOwner;
+    isEnrolled = result.isEnrolled;
   }
 
-  if (isOwned) {
+  if (isEnrolled) {
     if (details.status === STATUS_ENUM.blocked)
-      throw new AppError("This course has been blocked. Sorry for the inconvenience.", 403, { isBlocked: true });
+      throw new AppError(
+        "This course has been permanently blocked.",
+        403,
+        {
+          isBlocked: true,
+          courseId: details._id?.toString(),
+          courseTitle: details.title,
+          hasEnrollment: isEnrolled
+        }
+      );
 
     if (details.status !== STATUS_ENUM.live)
       throw new AppError("Course is currently unavailable, please try again later.", 400);
@@ -307,7 +320,7 @@ export const getCoursePublicDetails = async (user, courseId) => {
 
   return {
     ...courseMapper.toCourseDetailsDto(details),
-    isOwned,
+    isOwned: isOwner || isEnrolled,
   };
 };
 
