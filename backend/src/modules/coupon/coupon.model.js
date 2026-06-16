@@ -9,17 +9,26 @@ const couponSchema = new mongoose.Schema({
     trim: true
   },
 
-  discountPercent: {
+  discountType: {
+    type: String,
+    enum: ['percent', 'money'],
+    required: true
+  },
+
+  discountValue: {
     type: Number,
     required: true,
-    min: 1,
-    max: 100
+    min: 1
   },
 
   description: { type: String, required: true, },
   startDate: { type: Date, required: true },
   expiryDate: { type: Date, required: true },
   isActive: { type: Boolean, default: true },
+
+  courseId: { type: mongoose.Schema.Types.ObjectId, ref: "Course" },
+
+  refundees: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 
   usersUsed: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }]
 }, {

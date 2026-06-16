@@ -29,6 +29,20 @@ const CheckoutProductCard = ({ image, title, price, discountPrice }) => {
   );
 };
 
+const getCouponLabel = (coupon) => {
+  if (!coupon) return "";
+
+  if (coupon.discountType === "percent") {
+    return `-${coupon.discountValue}%`;
+  }
+
+  if (coupon.discountType === "money") {
+    return `-${formatCurrency(coupon.discountValue)}`;
+  }
+
+  return "";
+};
+
 const CheckoutFrom = () => {
   const {
     displayedCourses,
@@ -142,15 +156,19 @@ const CheckoutFrom = () => {
               <div className="mb-3">
                 <label className="form-label">Discount Code</label>
                 {appliedCoupon ? (
-                  <div className="alert alert-success d-flex justify-content-between align-items-center py-2 px-3 small mb-0">
-                    <span>
+                  <div className="alert alert-success d-flex align-items-start gap-2 py-2 px-3 small mb-0">
+                    <div className="flex-grow-1 min-w-0">
                       <i className="bi bi-tag-fill me-1"></i>
-                      <strong>{appliedCoupon.couponCode}</strong> (-{appliedCoupon.discountPercent}%)
-                    </span>
+                      <strong className="text-break">{appliedCoupon.couponCode}</strong>{" "}
+                      <span className="text-nowrap">
+                        ({getCouponLabel(appliedCoupon)})
+                      </span>
+                    </div>
+
                     <Button
                       variant="link"
                       size="sm"
-                      className="text-danger p-0 text-decoration-none"
+                      className="text-danger p-0 text-decoration-none flex-shrink-0"
                       onClick={handleRemoveCoupon}
                     >
                       Remove

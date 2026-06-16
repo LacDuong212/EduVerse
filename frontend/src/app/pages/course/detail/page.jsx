@@ -3,6 +3,7 @@ import ErrorState from "@/components/ErrorState";
 import NotFoundPage from "@/components/not-found";
 import PageMetaData from "@/components/PageMetaData";
 import CourseDetails from "./components/CourseDetails";
+import CourseBlockedNotice from "./components/CourseBlockedNotice";
 import PageIntro from "./components/PageIntro";
 import RelatedCourses from "./components/RelatedCourses";
 import useCourseDetail from "./useCourseDetail";
@@ -14,6 +15,12 @@ const CourseDetail = () => {
     loading,
     error,
     statusCode,
+    blockedInfo,
+
+    refundStatus,
+    refundLoading,
+    handleClaimRefund,
+
     handleAddToCart,
     isOwned,
     refetch,
@@ -28,6 +35,20 @@ const CourseDetail = () => {
           style={{ width: "30px", height: "30px" }}
         />
       </Container>
+    );
+  }
+
+  if (blockedInfo?.isBlocked) {
+    return (
+      <>
+        <PageMetaData title="Course Blocked" />
+        <CourseBlockedNotice
+          blockedInfo={blockedInfo}
+          refundStatus={refundStatus}
+          refundLoading={refundLoading}
+          onClaimRefund={handleClaimRefund}
+        />
+      </>
     );
   }
 

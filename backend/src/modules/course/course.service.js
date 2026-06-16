@@ -4,6 +4,7 @@ import _ from "lodash";
 import AppError from "#exceptions/app.error.js";
 import { getAllCatgeoriesWithSort } from "#modules/category/category.service.js";
 import { existsEnrollment } from "#modules/enrollment/enrollment.service.js";
+import Enrollment from "#modules/enrollment/enrollment.model.js";
 import { getCourseImageUploadParams } from "#modules/image/image.service.js";
 import Instructor from "#modules/instructor/instructor.model.js";
 import { getCurrentInstructor } from "#modules/instructor/instructor.service.js";
@@ -281,19 +282,51 @@ export const getCoursePublicDetails = async (user, courseId) => {
         "__v": 0
       }
     }]).lean();
+
   if (!details || Object.keys(details).length === 0)
     throw new AppError("Course not found.", 404);
 
-  if (details.status === STATUS_ENUM.blocked)
-    throw new AppError("Course is currently inaccessible, please try again later.", 403, { isBlocked: true });
-
-  if (details.status !== STATUS_ENUM.live)
-    throw new AppError("Course is currently unavailable, please try again later.", 400);
-
   let isOwned = undefined;
+
   if (user) {
-    const { isOwner, isEnrolled } = await getCourseAccess(user.role, user.userId, details);
+    const { isOwner, isEnrolled } = await getCourseAccess(
+      user.role,
+      user.userId,
+      details
+    );
+
     isOwned = isOwner || isEnrolled;
+  }
+
+  if (details.status === STATUS_ENUM.blocked) {
+    let hasEnrollment = false;
+
+    if (user?.role === "student") {
+      const foundEnrollment = await Enrollment.exists({
+        student: user.userId,
+        course: details._id
+      });
+
+      hasEnrollment = !!foundEnrollment;
+    }
+
+    throw new AppError(
+      "This course has been permanently blocked.",
+      403,
+      {
+        isBlocked: true,
+        courseId: details._id?.toString(),
+        courseTitle: details.title,
+        hasEnrollment
+      }
+    );
+  }
+
+  if (details.status !== STATUS_ENUM.live) {
+    throw new AppError(
+      "Course is currently unavailable, please try again later.",
+      400
+    );
   }
 
   if (!isOwned && details.isPrivate)

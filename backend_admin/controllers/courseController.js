@@ -1,5 +1,6 @@
 import Fuse from "fuse.js";
 import mongoose from "mongoose";
+import Coupon from "../models/couponModel.js";
 import Course, { STATUS_ENUM as COURSE_STATUS, UPDATE_STATUS_ENUM as UPDATE_STATUS } from "../models/courseModel.js";
 import Curriculum from "../models/curriculumModel.js";
 import DraftVideo from "../models/draftVideoModel.js";
@@ -82,6 +83,14 @@ export const getCoursesOverview = async (req, res) => {
   }
 };
 
+const generateRefundCouponCode = (courseId) => {
+  const shortCourseId = courseId.toString().slice(-6).toUpperCase();
+  const random = Math.random().toString(36).substring(2, 8).toUpperCase();
+  const time = Date.now().toString(36).toUpperCase();
+
+  return `REFUND-${shortCourseId}-${random}-${time}`;
+};
+
 // POST /api/courses/:id/status
 export const updateCourseStatus = async (req, res) => {
   let session = null;
@@ -89,8 +98,8 @@ export const updateCourseStatus = async (req, res) => {
   try {
     const { id } = req.params || {};
     const { newValue, message = null } = req.body || {};
-
     const admin = req.admin;
+
     if (!admin || !admin.isVerified || !admin.isApproved)
       return res.status(401).json({ success: false, message: 'Access denied.' });
 
@@ -130,6 +139,45 @@ export const updateCourseStatus = async (req, res) => {
     const notificationPromises = [];
 
     if (newValue === COURSE_STATUS.blocked) {
+      const now = new Date();
+
+      const expiryDate = new Date(now);
+      expiryDate.setMonth(expiryDate.getMonth() + 1);
+
+      const refundValue =
+        course.enableDiscount && course.discountPrice !== null && course.discountPrice !== undefined
+          ? course.discountPrice
+          : course.price;
+
+      if (refundValue >= 1) {
+        await Coupon.findOneAndUpdate(
+          {
+            courseId: course._id,
+            discountType: "money"
+          },
+          {
+            $setOnInsert: {
+              code: generateRefundCouponCode(course._id),
+              isActive: true,
+              discountType: "money",
+              discountValue: refundValue,
+              description: `Coupon refund for ${course.title}`,
+              startDate: now,
+              expiryDate,
+              courseId: course._id,
+              refundees: [],
+              usersUsed: []
+            }
+          },
+          {
+            new: true,
+            upsert: true,
+            session,
+            setDefaultsOnInsert: true
+          }
+        );
+      }
+
       const enrolledStudents = await Enrollment.find({
         course: course._id,
         status: { $in: [ENROLL_STATUS.active, ENROLL_STATUS.completed] }
@@ -139,10 +187,14 @@ export const updateCourseStatus = async (req, res) => {
 
       if (enrolledIds.length > 0) {
         studentIds.push(...enrolledIds);
-        notificationPromises.push(createNotifications(
+
+        notificationPromises.push(
+          createNotifications(
           enrolledIds,
           NOTIF_TYPE.info,
-          `The course "${course.title}" has been blocked by an administrator.${message ? `\nReason: “${message}”.` : ''}`,
+          `The course "${course.title}" has been blocked by an administrator.${
+            message ? `\nReason: “${message}”.` : ''
+          }\nThis course will be removed in 30 days. Please open the course to claim your refund coupon.`,
           session
         ));
       }
@@ -251,8 +303,8 @@ export const softDeleteCourse = async (req, res) => {
       await createNotifications([
         insId?.toString()
       ], NOTIF_TYPE.blocked,
-      `Your course "${course.title}" has been deleted by an administrator.${message ? `\nReason: “${message}”.` : ''}\nIf you have any questions please email <${SUPPORT_EMAIL}> for support!`,
-      session);
+        `Your course "${course.title}" has been deleted by an administrator.${message ? `\nReason: “${message}”.` : ''}\nIf you have any questions please email <${SUPPORT_EMAIL}> for support!`,
+        session);
     }
 
     await session.commitTransaction();
@@ -340,8 +392,8 @@ export const restoreCourse = async (req, res) => {
     await createNotifications([
       insId?.toString()
     ], NOTIF_TYPE.info,
-    `Your course "${course.title}" has been restored by an administrator.${message ? `\nReason: “${message}”.` : ''}\nIf you have any questions please email <${SUPPORT_EMAIL}> for support!`,
-    session);
+      `Your course "${course.title}" has been restored by an administrator.${message ? `\nReason: “${message}”.` : ''}\nIf you have any questions please email <${SUPPORT_EMAIL}> for support!`,
+      session);
 
     await session.commitTransaction();
     session.endSession();
