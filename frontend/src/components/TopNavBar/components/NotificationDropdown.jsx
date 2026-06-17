@@ -75,8 +75,19 @@ const NotificationItem = ({ noti, onMarkRead }) => {
     );
   };
 
-  const handleClick = (e) => {
-    // e.stopPropagation(); 
+  const handleClick = async(e) => {
+    // e.stopPropagation();
+
+    const couponMatch = noti.message?.match(/Coupon code:\s*([A-Z0-9-]+)/);
+    if (couponMatch && couponMatch[1]) {
+      try {
+        await navigator.clipboard.writeText(couponMatch[1]);
+        toast.success("Coupon copied!");
+      } catch (err) {
+        console.error("Failed to copy coupon:", err);
+      }
+    }
+
     if (noti?.notifId && !noti.isRead) onMarkRead(noti.notifId);
   };
 
