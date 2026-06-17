@@ -1,0 +1,49 @@
+import { FaEnvelope, FaGlobe, FaHeadphones, FaMapMarkerAlt } from "react-icons/fa";
+
+const InstructorInfo = ({ data = {} }) => {
+  const { introduction, address, website, phonenumber, email } = data || {};
+
+  return (
+    <>
+      {introduction && (
+        <div className="mb-3">
+          <div className="h4">Biography</div>
+          <div className="border-start border-3 border-light ms-1 ps-3">
+            <div dangerouslySetInnerHTML={{ __html: String(introduction) }} />
+          </div>
+        </div>
+      )}
+      <div className="row mt-0 g-3">
+        {[
+          { icon: <FaMapMarkerAlt />, label: "Address", value: address },
+          { icon: <FaEnvelope />, label: "Email", value: email },
+          { icon: <FaHeadphones />, label: "Phone", value: phonenumber },
+          { icon: <FaGlobe />, label: "Website", value: website, isLink: true },
+        ].map((item, idx) => (
+          <div key={idx} className="col-sm-6 col-md-12">
+            <div className="d-flex align-items-center">
+              <div
+                className="bg-primary bg-opacity-10 text-primary rounded-circle p-2 me-3"
+                style={{ width: "35px", height: "35px", display: "flex", alignItems: "center", justifyContent: "center" }}
+              >
+                {item.icon}
+              </div>
+              <div>
+                <small className="d-block lh-1 mb-1">{item.label}</small>
+                <span className="fw-medium">
+                  {item.isLink && item.value ? (
+                    <a href={item.value} target="_blank" rel="noopener noreferrer">{item.value}</a>
+                  ) : (
+                    item.value || "-"
+                  )}
+                </span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
+  );
+};
+
+export default InstructorInfo;

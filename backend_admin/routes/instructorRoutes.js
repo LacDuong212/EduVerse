@@ -4,7 +4,8 @@ import {
     getAllInstructors,
     blockInstructor, unblockInstructor,
     getInstructorRequests,
-    approveInstructor, rejectInstructor
+    approveInstructor, rejectInstructor,
+    getInstructorDetail, getInstructorDetailStats, getInstructorCourses
 } from '../controllers/instructorController.js';
 
 
@@ -12,6 +13,9 @@ const instructorRoute = express.Router();
 
 instructorRoute.get("/", adminAuth, getAllInstructors);
 instructorRoute.get("/requests", adminAuth, getInstructorRequests);
+instructorRoute.get("/:id/profile", adminAuth, getInstructorDetail);
+instructorRoute.get("/:id/stats", adminAuth, getInstructorDetailStats);
+instructorRoute.get("/:id/courses", adminAuth, getInstructorCourses);
 
 instructorRoute.patch("/:id/block", adminAuth, blockInstructor);
 instructorRoute.patch("/:id/unblock", adminAuth, unblockInstructor);
