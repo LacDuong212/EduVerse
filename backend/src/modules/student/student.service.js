@@ -165,6 +165,7 @@ export const getStudentLearningCourseDetail = async (userId, courseId) => {
   if (!courseId) throw new AppError("Course ID is required.", 400);
 
   const isEnrolled = await existsEnrollment(userId, courseId);
+
   if (!isEnrolled) {
     throw new AppError("You haven't enrolled this course yet!", 403);
   }
@@ -186,10 +187,34 @@ export const getStudentLearningCourseDetail = async (userId, courseId) => {
     })
     .lean();
 
-  if (!course) throw new AppError("Course not found.", 404);
+  if (!course) {
+    throw new AppError("Course not found.", 404);
+  }
+
+  if (course.status === COURSE_STATUS.blocked) {
+    throw new AppError(
+      "This course has been permanently blocked.",
+      403,
+      {
+        isBlocked: true,
+        courseId: course._id?.toString(),
+        courseTitle: course.title,
+        hasEnrollment: true,
+      }
+    );
+  }
 
   if (course.status !== COURSE_STATUS.live) {
-    throw new AppError("Course is currently unavailable.", 404);
+    throw new AppError(
+      "Course is currently unavailable.",
+      403,
+      {
+        isUnavailable: true,
+        courseId: course._id?.toString(),
+        courseTitle: course.title,
+        status: course.status,
+      }
+    );
   }
 
   return toStudentLearningCourseDto(course);

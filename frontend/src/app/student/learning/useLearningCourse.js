@@ -32,17 +32,34 @@ export default function useLearningCourseDetail() {
       console.error("[useLearningCourseDetail] ERROR:", err);
 
       const status = err.response?.status;
+      const errData = err.response?.data;
       const message =
-        err.response?.data?.message ||
-        err.response?.data?.error ||
+        errData?.message ||
+        errData?.error ||
         err.message;
 
-      if (status === 404 || status === 403) {
-        toast.error("You are not enrolled in this course");
-        navigate("/student/courses");
-      } else {
-        toast.error(message || "Cannot load course");
+      if (status === 403 && errData?.errors?.isBlocked) {
+        toast.error("This course has been permanently blocked.");
+        navigate(`/courses/${courseId}`);
+        return;
       }
+
+      if (status === 403) {
+        toast.error(
+          message ||
+          "This course is no longer available or you do not have access."
+        );
+        navigate("/student/courses");
+        return;
+      }
+
+      if (status === 404) {
+        toast.error(message || "Course not found.");
+        navigate("/student/courses");
+        return;
+      }
+
+      toast.error(message || "Cannot load course");
     } finally {
       setLoading(false);
     }
