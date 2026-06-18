@@ -69,7 +69,7 @@ export default function VideoPlayerDetail({
   const handleSelectLecture = useCallback(
     (lecture) => {
       if (!lecture?.lecId) return;
-      navigate(`/courses/${courseId}/watch/${lecture.lecId}`);
+      navigate(`/student/courses/${courseId}/watch/${lecture.lecId}`);
     },
     [navigate, courseId]
   );

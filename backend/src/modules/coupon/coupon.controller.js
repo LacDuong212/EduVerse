@@ -31,3 +31,37 @@ export const applyCoupon = asyncHandler(async (req, res) => {
     result
   );
 });
+
+// @route GET /refund/:courseId/status
+export const getRefundCouponStatus = asyncHandler(async (req, res) => {
+  const { courseId } = req.params;
+
+  const result = await couponService.getRefundCouponStatus(
+    courseId,
+    req.user?.userId
+  );
+
+  return sendSuccessResponse(
+    res,
+    200,
+    "Refund coupon status fetched successfully.",
+    result
+  );
+});
+
+// @route POST /refund/:courseId/claim
+export const claimRefundCoupon = asyncHandler(async (req, res) => {
+  const { courseId } = req.params;
+
+  const result = await couponService.claimRefundCoupon(
+    courseId,
+    req.user?.userId
+  );
+
+  return sendSuccessResponse(
+    res,
+    200,
+    result.message,
+    result
+  );
+});

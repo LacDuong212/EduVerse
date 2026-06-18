@@ -372,7 +372,7 @@ const CourseCard = ({ course, index, onUpdate, onRefresh }) => {
                   <FaCheck size={14} />
                 </Button>
               </OverlayTrigger>}
-              {pending && <OverlayTrigger
+              {pending && !approvable && <OverlayTrigger
                 placement="top"
                 overlay={<Tooltip>Reject</Tooltip>}
               >

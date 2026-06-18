@@ -4,11 +4,11 @@ import { toast } from 'react-toastify';
 import useCartDetail from '../cart/useCartDetails';
 
 const useCheckout = () => {
-    const navigate = useNavigate();
-    const location = useLocation();
-    const { selectedIds } = location.state || {};
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { selectedIds } = location.state || {};
 
-    const {
+  const {
     displayedCourses,
     displayedSubTotal,
     handleCheckout,
@@ -26,11 +26,11 @@ const useCheckout = () => {
 
   useEffect(() => {
     if (finalTotal === 0) {
-        setPaymentMethod('free');
-    } else {
-        if(paymentMethod === 'free') setPaymentMethod('');
+      setPaymentMethod("free");
+    } else if (paymentMethod === "free") {
+      setPaymentMethod("");
     }
-  }, [finalTotal]);
+  }, [finalTotal, paymentMethod]);
 
   useEffect(() => {
     if (!selectedIds || selectedIds.length === 0) {

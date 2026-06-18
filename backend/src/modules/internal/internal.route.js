@@ -8,6 +8,6 @@ import * as inSchema from "./internal.validation.js";
 const internalRoute = Router();
 internalRoute.use(internal);
 
-internalRoute.post("/notify", validate(inSchema.notifyRequest), inController.notifyUser);
+internalRoute.post("/notify", validate(inSchema.notifyRequest), inController.notify);
 
 export default internalRoute;

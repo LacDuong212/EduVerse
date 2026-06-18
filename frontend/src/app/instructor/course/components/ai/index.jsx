@@ -236,17 +236,17 @@ const AiData = ({ show, onClose, lecture, onGenerate, onUpdate, onDelete }) => {
               {/* TAB: Quiz */}
               <Tab.Pane eventKey="quiz">
                 <style>{`
-                .custom-quiz-accordion .accordion-button:not(.collapsed) {
-                  background-color: rgba(var(--bs-purple-rgb), 0.1) !important; 
-                  color: var(--bs-purple) !important;
-                }
-                .custom-quiz-accordion .accordion-button:focus {
-                  border-color: var(--bs-purple) !important;
-                  box-shadow: 0 0 0 0.25rem rgba(var(--bs-purple-rgb), 0.25) !important;
-                }
-                .custom-quiz-accordion .accordion-button:not(.collapsed)::after {
-                  filter: invert(26%) sepia(89%) saturate(5435%) hue-rotate(264deg) brightness(96%) contrast(99%);
-                }
+                  .custom-quiz-accordion .accordion-button:not(.collapsed) {
+                    background-color: rgba(var(--bs-purple-rgb), 0.1) !important; 
+                    color: var(--bs-purple) !important;
+                  }
+                  .custom-quiz-accordion .accordion-button:focus {
+                    border-color: var(--bs-purple) !important;
+                    box-shadow: 0 0 0 0.25rem rgba(var(--bs-purple-rgb), 0.25) !important;
+                  }
+                  .custom-quiz-accordion .accordion-button:not(.collapsed)::after {
+                    filter: invert(26%) sepia(89%) saturate(5435%) hue-rotate(264deg) brightness(96%) contrast(99%);
+                  }
                 `}</style>
                 <Accordion defaultActiveKey="0" className="px-1 custom-quiz-accordion">
                   {editedData.quizzes?.length === 0 && <p className="text-center my-5">No quizzes generated.</p>}

@@ -267,63 +267,67 @@ const MyCourses = ({
                     </td>
                     <td>
                       <div className="d-flex flex-wrap justify-content-center gap-2">
-                        <OverlayTrigger
-                          placement="top"
-                          overlay={<Tooltip id={`tooltip-edit-${course?.courseId || idx}`}>Edit Course</Tooltip>}
-                        >
-                          <Button
-                            variant="primary-soft"
-                            size="sm"
-                            className="btn-round mb-0"
-                            as={Link}
-                            to={`/instructor/courses/${course?.courseId || ""}/edit`}
-                          >
-                            <FaRegEdit className="fa-fw" />
-                          </Button>
-                        </OverlayTrigger>
-                        {course?.isPrivate ? (
-                          <OverlayTrigger
-                            placement="top"
-                            overlay={<Tooltip id={`tooltip-public-${course?.courseId || idx}`}>Make Public</Tooltip>}
-                          >
-                            <Button
-                              variant="success-soft"
-                              size="sm"
-                              className="btn-round mb-0"
-                              onClick={() => onTogglePrivacy(course?.courseId || "")}
+                        {course?.status !== "blocked" && (
+                          <>
+                            <OverlayTrigger
+                              placement="top"
+                              overlay={<Tooltip id={`tooltip-edit-${course?.courseId || idx}`}>Edit Course</Tooltip>}
                             >
-                              <FaGlobe className="fa-fw" />
-                            </Button>
-                          </OverlayTrigger>
-                        ) : (
-                          <OverlayTrigger
-                            placement="top"
-                            overlay={<Tooltip id={`tooltip-private-${course?.courseId || idx}`}>Make Private</Tooltip>}
-                          >
-                            <Button
-                              variant="purple-soft"
-                              size="sm"
-                              className="btn-round mb-0"
-                              onClick={() => onTogglePrivacy(course?.courseId || "")}
-                            >
-                              <FaLock className="fa-fw" />
-                            </Button>
-                          </OverlayTrigger>
-                        )}
-                        {course?.status === "draft" && (
-                          <OverlayTrigger
-                            placement="top"
-                            overlay={<Tooltip id={`tooltip-remove-${course?.courseId || idx}`}>Remove Draft</Tooltip>}
-                          >
-                            <Button
-                              variant="danger-soft"
-                              size="sm"
-                              className="btn-round mb-0"
-                              onClick={() => onRemoveDraft(course?.courseId || "")}
-                            >
-                              <FaTrash className="fa-fw" />
-                            </Button>
-                          </OverlayTrigger>
+                              <Button
+                                variant="primary-soft"
+                                size="sm"
+                                className="btn-round mb-0"
+                                as={Link}
+                                to={`/instructor/courses/${course?.courseId || ""}/edit`}
+                              >
+                                <FaRegEdit className="fa-fw" />
+                              </Button>
+                            </OverlayTrigger>
+                            {course?.isPrivate ? (
+                              <OverlayTrigger
+                                placement="top"
+                                overlay={<Tooltip id={`tooltip-public-${course?.courseId || idx}`}>Make Public</Tooltip>}
+                              >
+                                <Button
+                                  variant="success-soft"
+                                  size="sm"
+                                  className="btn-round mb-0"
+                                  onClick={() => onTogglePrivacy(course?.courseId || "")}
+                                >
+                                  <FaGlobe className="fa-fw" />
+                                </Button>
+                              </OverlayTrigger>
+                            ) : (
+                              <OverlayTrigger
+                                placement="top"
+                                overlay={<Tooltip id={`tooltip-private-${course?.courseId || idx}`}>Make Private</Tooltip>}
+                              >
+                                <Button
+                                  variant="purple-soft"
+                                  size="sm"
+                                  className="btn-round mb-0"
+                                  onClick={() => onTogglePrivacy(course?.courseId || "")}
+                                >
+                                  <FaLock className="fa-fw" />
+                                </Button>
+                              </OverlayTrigger>
+                            )}
+                            {course?.status === "draft" && (
+                              <OverlayTrigger
+                                placement="top"
+                                overlay={<Tooltip id={`tooltip-remove-${course?.courseId || idx}`}>Remove Draft</Tooltip>}
+                              >
+                                <Button
+                                  variant="danger-soft"
+                                  size="sm"
+                                  className="btn-round mb-0"
+                                  onClick={() => onRemoveDraft(course?.courseId || "")}
+                                >
+                                  <FaTrash className="fa-fw" />
+                                </Button>
+                              </OverlayTrigger>
+                            )}
+                          </>
                         )}
                       </div>
                     </td>

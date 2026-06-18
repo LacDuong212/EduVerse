@@ -85,7 +85,7 @@ export default function useInstructorMyCourses() {
 
   const handleRemoveDraft = async (courseId) => {
     if (!courseId) return toast.error("Unable to obtain course info. Please try again later.");
-    if (!window.confirm("Remove this draft course?")) return;
+    if (!window.confirm("Permanently remove this draft course?")) return;
 
     setUpdatingId(courseId);
 

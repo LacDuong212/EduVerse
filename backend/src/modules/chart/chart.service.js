@@ -349,6 +349,196 @@ export const getStudentSkillsRadar = async (stuId) => {
   };
 };
 
+/**
+ * Get instructor's enrollment trends for past 30 days
+ * Returns daily enrollment data
+ */
+export const getInstructorEnrollmentTrends = async (insId) => {
+  if (!insId) throw new AppError("Instructor ID is required.", 400);
+
+  const instructor = await Instructor.findOne({ user: insId, isApproved: true })
+    .select("myCourses")
+    .lean();
+  if (!instructor) throw new AppError("Instructor not found.", 404);
+
+  const courseIds = instructor.myCourses || [];
+  if (courseIds.length === 0) return { series: [], total: 0 };
+
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 29);
+  thirtyDaysAgo.setHours(0, 0, 0, 0);
+
+  const [result] = await Enrollment.aggregate([
+    {
+      $match: {
+        course: { $in: courseIds },
+        enrolledAt: { $gte: thirtyDaysAgo }
+      }
+    },
+    {
+      $facet: {
+        daily: [
+          {
+            $group: {
+              _id: {
+                year: { $year: "$enrolledAt" },
+                month: { $month: "$enrolledAt" },
+                day: { $dayOfMonth: "$enrolledAt" }
+              },
+              value: { $sum: 1 }
+            }
+          },
+          { $sort: { "_id.year": 1, "_id.month": 1, "_id.day": 1 } }
+        ],
+        total: [
+          { $count: "count" }
+        ]
+      }
+    }
+  ]);
+
+  // Format daily data
+  const series = [];
+  const current = new Date(thirtyDaysAgo);
+  const now = new Date();
+  now.setHours(23, 59, 59, 999);
+
+  while (current <= now) {
+    const year = current.getFullYear();
+    const month = current.getMonth() + 1;
+    const day = current.getDate();
+
+    const dbMatch = (result.daily || []).find(
+      r => r._id.year === year && r._id.month === month && r._id.day === day
+    );
+
+    const dateStr = current.toISOString().split('T')[0]; // YYYY-MM-DD
+    series.push({
+      date: dateStr,
+      value: dbMatch ? dbMatch.value : 0
+    });
+
+    current.setDate(current.getDate() + 1);
+  }
+
+  return {
+    series,
+    total: result.total[0]?.count || 0
+  };
+};
+
+/**
+ * Get breakdown of student enrollment status
+ * Returns count by status: active, completed, refunded
+ */
+export const getStudentProgressBreakdown = async (insId) => {
+  if (!insId) throw new AppError("Instructor ID is required.", 400);
+
+  const instructor = await Instructor.findOne({ user: insId, isApproved: true })
+    .select("myCourses")
+    .lean();
+  if (!instructor) throw new AppError("Instructor not found.", 404);
+
+  const courseIds = instructor.myCourses || [];
+  if (courseIds.length === 0) {
+    return {
+      statusBreakdown: [
+        { status: "active", count: 0, percentage: 0 },
+        { status: "completed", count: 0, percentage: 0 },
+        { status: "refunded", count: 0, percentage: 0 },
+        { status: "inactive", count: 0, percentage: 0 }
+      ],
+      total: 0
+    };
+  }
+
+  const results = await Enrollment.aggregate([
+    {
+      $match: {
+        course: { $in: courseIds }
+      }
+    },
+    {
+      $group: {
+        _id: "$status",
+        count: { $sum: 1 }
+      }
+    }
+  ]);
+
+  const total = results.reduce((sum, r) => sum + r.count, 0);
+  const statusMap = results.reduce((acc, r) => {
+    acc[r._id] = r.count;
+    return acc;
+  }, {});
+
+  const statusBreakdown = [
+    { status: "active", count: statusMap.active || 0 },
+    { status: "completed", count: statusMap.completed || 0 },
+    { status: "refunded", count: statusMap.refunded || 0 },
+    { status: "inactive", count: statusMap.inactive || 0 }
+  ].map(item => ({
+    ...item,
+    percentage: total > 0 ? Math.round((item.count / total) * 100) : 0
+  }));
+
+  return {
+    statusBreakdown,
+    total
+  };
+};
+
+/**
+ * Get student distribution across instructor's courses
+ */
+export const getStudentDistributionByCourse = async (insId, limit = 10) => {
+  if (!insId) throw new AppError("Instructor ID is required.", 400);
+
+  const instructor = await Instructor.findOne({ user: insId, isApproved: true })
+    .select("myCourses")
+    .lean();
+  if (!instructor) throw new AppError("Instructor not found.", 404);
+
+  const courseIds = instructor.myCourses || [];
+  if (courseIds.length === 0) return [];
+
+  const distribution = await Enrollment.aggregate([
+    {
+      $match: {
+        course: { $in: courseIds },
+        status: ENROLL_STATUS.active
+      }
+    },
+    {
+      $group: {
+        _id: "$course",
+        studentCount: { $sum: 1 }
+      }
+    },
+    { $sort: { studentCount: -1 } },
+    { $limit: limit },
+    {
+      $lookup: {
+        from: "courses",
+        localField: "_id",
+        foreignField: "_id",
+        as: "courseInfo"
+      }
+    },
+    { $unwind: "$courseInfo" },
+    {
+      $project: {
+        _id: 0,
+        courseId: "$courseInfo._id",
+        courseName: "$courseInfo.title",
+        studentCount: 1
+      }
+    }
+  ]);
+
+  return distribution;
+};
+
 const getCategoryCompletionStats = async () => {
   const pipeline = [
     {

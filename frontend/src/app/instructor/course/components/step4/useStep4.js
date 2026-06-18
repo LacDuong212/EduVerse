@@ -6,7 +6,7 @@ import { step4Fields, validateCourse } from "../../schemas";
 
 export const useStep4 = (stepperInstance) => {
   const { changes, currentCourse, isDirty, onSubmit, isSubmitting, errors: globalErrors, setErrors: setGlobalErrors } = useCourseEditor();
-  const [tagsInput, setTagsInput] = useState(currentCourse.tags?.join(", ") || "");
+  const [tagsInput, setTagsInput] = useState(currentCourse?.tags?.join(", ") || "");
   const [errors, setErrors] = useState({});
 
   useEffect(() => {

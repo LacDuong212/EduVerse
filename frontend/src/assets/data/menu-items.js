@@ -44,10 +44,10 @@ export const INSTRUCTOR_APP_MENU_ITEMS = [{
   key: 'courses',
   label: 'My Courses',
   url: '/instructor/courses'
-}, {
-  key: 'students',
-  label: 'My Students',
-  url: '/instructor/students'
+// }, {
+//   key: 'students',
+//   label: 'My Students',
+//   url: '/instructor/students'
 }];
 export const INSTRUCTOR_MENU_ITEMS = [{
   key: 'profile',
@@ -68,12 +68,12 @@ export const INSTRUCTOR_MENU_ITEMS = [{
   url: '/instructor/courses',
   parentKey: 'instructor'
 }, {
-  key: 'students',
-  label: 'My Students',
-  icon: PiStudent,
-  url: '/instructor/students',
-  parentKey: 'instructor'
-}, {
+//   key: 'students',
+//   label: 'My Students',
+//   icon: PiStudent,
+//   url: '/instructor/students',
+//   parentKey: 'instructor'
+// }, {
   key: 'earnings',
   label: 'Earnings',
   icon: IoWalletOutline,

@@ -9,13 +9,13 @@ import {
   Tooltip
 } from "react-bootstrap";
 import { FaAngleLeft, FaAngleRight, FaRegEnvelope, FaRegStar, FaSearch, FaStar, FaStarHalfAlt } from "react-icons/fa";
-import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import ChoicesFormInput from "@/components/form/ChoicesFormInput";
 import { DEFAULT_AVATAR_IMG } from "@/contexts/constants";
 import useCourseStudentList from "./useCourseStudentList";
+import StudentCourseProgressModal from "./components/StudentCourseProgressModal";
 
-const CourseStudentRow = ({ idx, student = {} }) => {
+const CourseStudentRow = ({ idx, student = {}, onOpenProgress = () => { } }) => {
   const {
     stuId,
     name,
@@ -26,13 +26,12 @@ const CourseStudentRow = ({ idx, student = {} }) => {
     review = null,
   } = student;
 
-  const studentLink = stuId ? `/instructor/students/${stuId}` : "#";
   const progressPercentage = progress?.percentage || 0;
 
   return (
     <tr>
       <td>
-        <div className="d-flex align-items-center position-relative">
+        <div className="d-flex align-items-center position-relative" style={{ cursor: "pointer" }}>
           <div className="avatar avatar-md flex-shrink-0">
             {avatar ? (
               <img src={avatar} className="rounded-circle" alt={"avatar"} onError={(e) => e.target.src = DEFAULT_AVATAR_IMG} />
@@ -43,7 +42,19 @@ const CourseStudentRow = ({ idx, student = {} }) => {
             )}
           </div>
           <div className="mb-0 ms-2">
-            <Link to={studentLink} className="stretched-link">{name}</Link>
+            <h6 className="mb-0">
+              <button
+                type="button"
+                className="btn btn-link p-0 position-relative text-decoration-none d-inline-block text-start fw-bold fs-6"
+                style={{ zIndex: 2 }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  onOpenProgress(student);
+                }}
+              >
+                {name}
+              </button>
+            </h6>
             <div className="overflow-hidden mt-1">
               <div className="d-flex align-items-center justify-content-between mb-1">
                 <span className="small fw-bold">{progressPercentage}%</span>
@@ -127,7 +138,19 @@ const CourseStudents = ({ col = 12, courseId }) => {
     sort, setSort,
   } = useCourseStudentList(courseId);
 
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [showStudentProgress, setShowStudentProgress] = useState(false);
   const [searchTerm, setSearchTerm] = useState(search);
+
+  const handleOpenStudentProgress = (student) => {
+    setSelectedStudent(student);
+    setShowStudentProgress(true);
+  };
+
+  const handleCloseStudentProgress = () => {
+    setShowStudentProgress(false);
+    setSelectedStudent(null);
+  };
 
   useEffect(() => {
     setSearchTerm(search);
@@ -211,7 +234,12 @@ const CourseStudents = ({ col = 12, courseId }) => {
                   </tr>
                 ) : (
                   students.map((student, idx) => (
-                    <CourseStudentRow key={idx} idx={idx} student={student} />
+                    <CourseStudentRow
+                      key={idx}
+                      idx={idx}
+                      student={student}
+                      onOpenProgress={handleOpenStudentProgress}
+                    />
                   ))
                 )}
               </tbody>
@@ -248,6 +276,12 @@ const CourseStudents = ({ col = 12, courseId }) => {
           </div>
         </CardFooter>
       </Card>
+      <StudentCourseProgressModal
+        show={showStudentProgress}
+        onClose={handleCloseStudentProgress}
+        courseId={courseId}
+        student={selectedStudent}
+      />
     </Col>
   );
 };

@@ -1,4 +1,3 @@
-// app/pages/course/video-player/page.jsx
 import { useParams } from 'react-router-dom';
 import PageMetaData from '@/components/PageMetaData';
 import VideoPlayerDetail from './components/VideoPlayerDetail';

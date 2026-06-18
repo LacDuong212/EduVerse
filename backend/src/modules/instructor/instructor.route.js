@@ -36,6 +36,13 @@ privateRoutes.get(
 );
 privateRoutes.post("/courses", instructorController.createCourse);
 privateRoutes.get("/earnings", instructorController.getInstructorEarnings);
+privateRoutes.get("/dashboard/enrollment-trends", instructorController.getEnrollmentTrends);
+privateRoutes.get("/dashboard/progress-breakdown", instructorController.getProgressBreakdown);
+privateRoutes.get(
+  "/dashboard/student-distribution",
+  validate(instructorSchema.limitQueryRequest),
+  instructorController.getStudentDistribution
+);
 privateRoutes.get("/profile", instructorController.getProfile);
 privateRoutes.patch(
   "/profile",
@@ -105,6 +112,11 @@ privateRoutes.get(
   "/courses/:courseId/students",
   validate(instructorSchema.courseStudentsRequest),
   instructorController.getCourseStudents
+);
+privateRoutes.get(
+  "/courses/:courseId/students/:stuId/progress",
+  validate(instructorSchema.courseStudentProgressRequest),
+  instructorController.getStudentCourseProgress
 );
 
 export default { publicRoutes, privateRoutes };

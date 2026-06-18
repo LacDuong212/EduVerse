@@ -97,9 +97,25 @@ export const updateProfileRequest = z.object({
   })
 });
 
+const studentIdSchema = z.string("Student ID is required")
+  .trim()
+  .min(1, "Student ID cannot be empty")
+  .pipe(
+    z.string().refine((val) => mongoose.Types.ObjectId.isValid(val), {
+      message: "Invalid student ID format",
+    })
+  );
+
 export const courseIdParamRequest = z.object({
   params: z.object({
     courseId: courseIdSchema,
+  })
+});
+
+export const courseStudentProgressRequest = z.object({
+  params: z.object({
+    courseId: courseIdSchema,
+    stuId: studentIdSchema,
   })
 });
 

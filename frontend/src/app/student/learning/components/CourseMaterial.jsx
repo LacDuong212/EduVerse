@@ -17,7 +17,7 @@ const CourseMaterial = ({ curriculum = [], lectureTracking = {} }) => {
 
   const goToWatch = (lectureId) => {
     if (!courseId || !lectureId) return;
-    navigate(`/courses/${courseId}/watch/${lectureId}`);
+    navigate(`/student/courses/${courseId}/watch/${lectureId}`);
   };
 
   const getLectureState = (lecture) => {

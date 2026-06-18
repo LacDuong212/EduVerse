@@ -132,13 +132,13 @@ const Intro = ({ course, progress }) => {
       : firstLectureId;
 
     if (!targetLectureId) return;
-    navigate(`/courses/${courseId}/watch/${targetLectureId}`);
+    navigate(`/student/courses/${courseId}/watch/${targetLectureId}`);
   };
 
   const handleViewResult = () => {
     if (!courseId) return;
     console.log(progress?.aiAssessment)
-    navigate(`/course/${courseId}/result`, {
+    navigate(`/student/courses/${courseId}/result`, {
       state: { assessment: progress?.aiAssessment }
     });
   };

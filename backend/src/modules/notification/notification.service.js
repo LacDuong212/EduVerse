@@ -82,3 +82,34 @@ export const sendNotification = async (userId, type, message, session = null) =>
 
   return notifDto;
 };
+
+export const notifyUsers = async (userIds) => {
+  if (!userIds || !Array.isArray(userIds) || userIds.length === 0)
+    throw new AppError("Please provide at least one user ID to notify.", 400);
+
+  try {
+    const onlineUsers = getOnlineUsers();
+    const io = getIO();
+
+    if (io && onlineUsers.length > 0) {
+      await Promise.all(
+        userIds.filter(Boolean).map(async (userId) => {
+          const receiver = onlineUsers.find((u) => u.userId === userId.toString());
+          if (!receiver) return;
+
+          const latestNotif = await Notification.findOne({ user: userId })
+            .sort({ createdAt: -1 })
+            .lean();
+
+          if (latestNotif) {
+            io.to(receiver.socketId).emit("getNotification", toNotifDto(latestNotif));
+          } else {
+            io.to(receiver.socketId).emit("getNotification", { userId: userId.toString() });
+          }
+        })
+      );
+    }
+  } catch (socketError) {
+    logger.error("Real-time batch notifications emit failed:", socketError);
+  }
+};

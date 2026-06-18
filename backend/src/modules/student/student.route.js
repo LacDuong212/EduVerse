@@ -27,7 +27,7 @@ studentRoute.patch(
 studentRoute.get("/skill-radar", studentController.getMySkillRadar);
 studentRoute.get("/stats", studentController.getStats);
 studentRoute.get("/streak", studentController.getMyStreak);
-studentRoute.post("/streak", studentController.updateMyStreak);
+// studentRoute.post("/streak", studentController.updateMyStreak);
 studentRoute.get("/courses/stats", studentController.getCoursesStats);
 studentRoute.get(
   "/courses/:courseId",

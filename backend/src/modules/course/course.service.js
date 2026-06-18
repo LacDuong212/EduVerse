@@ -4,6 +4,7 @@ import _ from "lodash";
 import AppError from "#exceptions/app.error.js";
 import { getAllCatgeoriesWithSort } from "#modules/category/category.service.js";
 import { existsEnrollment } from "#modules/enrollment/enrollment.service.js";
+import Enrollment from "#modules/enrollment/enrollment.model.js";
 import { getCourseImageUploadParams } from "#modules/image/image.service.js";
 import Instructor from "#modules/instructor/instructor.model.js";
 import { getCurrentInstructor } from "#modules/instructor/instructor.service.js";
@@ -281,24 +282,45 @@ export const getCoursePublicDetails = async (user, courseId) => {
         "__v": 0
       }
     }]).lean();
+
   if (!details || Object.keys(details).length === 0)
     throw new AppError("Course not found.", 404);
 
-  if (details.status !== STATUS_ENUM.live)
-    throw new AppError("Course is currently unavailable, please try again later.", 400);
+  let isOwner = false;
+  let isEnrolled = false;
 
-  let isOwned = undefined;
   if (user) {
-    const { isOwner, isEnrolled } = await getCourseAccess(user.role, user.userId, details);
-    isOwned = isOwner || isEnrolled;
+    const result = await getCourseAccess(user.role, user.userId, details);
+    isOwner = result.isOwner;
+    isEnrolled = result.isEnrolled;
   }
 
-  if (!isOwned && details.isPrivate)
-    throw new AppError("Course is currently unavailable, please try again later.", 400);
+  if (isEnrolled) {
+    if (details.status === STATUS_ENUM.blocked)
+      throw new AppError(
+        "This course has been permanently blocked.",
+        403,
+        {
+          isBlocked: true,
+          courseId: details._id?.toString(),
+          courseTitle: details.title,
+          hasEnrollment: isEnrolled
+        }
+      );
+
+    if (details.status !== STATUS_ENUM.live)
+      throw new AppError("Course is currently unavailable, please try again later.", 400);
+  } else {
+    if (details.status !== STATUS_ENUM.live)
+      throw new AppError("Course not found.", 404);
+
+    if (details.isPrivate)
+      throw new AppError("Course is currently unavailable, please try again later.", 400);
+  }
 
   return {
     ...courseMapper.toCourseDetailsDto(details),
-    isOwned,
+    isOwned: isOwner || isEnrolled,
   };
 };
 
@@ -357,34 +379,42 @@ export const getImageParams = async (courseId, insId) => {
 };
 
 export const getCourseFullCurriculum = async (user, courseId) => {
-  if (!courseId) throw new AppError("Course ID is required.", 400);
+  if (!courseId) throw new AppError("Invalid course ID format.", 400);
 
-  const course = await Course.findOne({ _id: courseId, isDeleted: false }).lean();
+  const course = await Course.findOne({ _id: courseId, isDeleted: false })
+    .populate([{
+      path: "curriculum",
+      select: {
+        "_id": 0,
+        "__v": 0
+      }
+    }]).lean();
 
-  if (!course) throw new AppError("Course not found.", 404);
-  if (course.status !== STATUS_ENUM.live)
-    throw new AppError("Course is currently unavailable, please try again later.", 400);
+  if (!course || Object.keys(course).length === 0)
+    throw new AppError("Course not found.", 404);
 
-  const curriculum = await Curriculum.findOne({ courseId }).lean();
-  if (!curriculum) throw new AppError("Course curriculum not found.", 404);
-
-  let isOwner = false;
-  let isEnrolled = false;
-
+  let isOwned = undefined;
   if (user) {
-    const access = await getCourseAccess(user.role, user.userId, course);
-    isOwner = access.isOwner;
-    isEnrolled = access.isEnrolled;
+    const { isOwner, isEnrolled } = await getCourseAccess(user.role, user.userId, course);
+    isOwned = isOwner || isEnrolled;
   }
 
-  if (!isOwner && !isEnrolled) {
+  if (isOwned) {
+    if (course.status === STATUS_ENUM.blocked)
+      throw new AppError("This course has been blocked. Sorry for the inconvenience.", 403, { isBlocked: true });
+
+    if (course.status !== STATUS_ENUM.live)
+      throw new AppError("Course is currently unavailable, please try again later.", 400);
+
+    return courseMapper.getCourseCurriculum(course.curriculum?.sections || [], isOwned);
+  } else {
+    if (course.status !== STATUS_ENUM.live)
+      throw new AppError("Course not found.", 404);
+
     if (course.isPrivate)
       throw new AppError("Course is currently unavailable, please try again later.", 400);
 
-    return courseMapper.getCourseFreeCurriculum(curriculum?.sections || []);
-  } else {
-    const hasAiData = isOwner;
-    return courseMapper.getCourseCurriculum(curriculum?.sections || [], hasAiData);
+    return courseMapper.getCourseFreeCurriculum(course.curriculum?.sections || []);
   }
 };
 
@@ -400,6 +430,9 @@ export const toggleCoursePrivacy = async (
     });
 
     if (!course) throw new AppError("Course not found.", 404);
+
+    if (course.status === STATUS_ENUM.blocked)
+      throw new AppError("This course has been blocked, it cannot be modified.", 403, { isBlocked: true });
 
     if (course.instructor?.ref?.toString() !== insId)
       throw new AppError("You cannot modify this course.", 403);
@@ -785,6 +818,9 @@ export const updateCourse = async (insId, courseId, changes, session = null) => 
     if (!courseDoc || courseDoc.instructor?.ref?.toString() !== insId)
       throw new AppError("Course not found or unauthorized access.", 403);
 
+    if (courseDoc.status === STATUS_ENUM.blocked)
+      throw new AppError("This course has been blocked, it cannot be modified.", 403, { isBlocked: true });
+
     let curriculumDoc = await Curriculum.findOne({ courseId }).session(s);
     if (!curriculumDoc) curriculumDoc = new Curriculum({ courseId });
 
@@ -846,6 +882,9 @@ export const submitCourse = async (insId, courseId, changes = null, session = nu
     if (!courseDoc || courseDoc.instructor?.ref?.toString() !== insId)
       throw new AppError("Course not found or unauthorized access.", 403);
 
+    if (courseDoc.status === STATUS_ENUM.blocked)
+      throw new AppError("This course has been blocked, it cannot be modified.", 403, { isBlocked: true });
+
     const curriculumDoc = await Curriculum.findOne({ courseId }).session(s);
 
     const mergedCourse = getMergedCourse(courseDoc);
@@ -893,6 +932,9 @@ export const clearPendingChanges = async (insId, courseId, session = null) => {
     const courseDoc = await Course.findById(courseId).session(s);
     if (!courseDoc || courseDoc.instructor?.ref?.toString() !== insId)
       throw new AppError("Course not found or unauthorized access.", 403);
+
+    if (courseDoc.status === STATUS_ENUM.blocked)
+      throw new AppError("This course has been blocked, it cannot be modified.", 403, { isBlocked: true });
 
     if (courseDoc.status === STATUS_ENUM.pending)
       throw new AppError("Cannot undo changes while the course is under review.", 400);
@@ -955,6 +997,9 @@ export const getCourseForEdit = async (insId, courseId) => {
   if (!courseDoc || courseDoc.instructor?.ref?.toString() !== insId)
     throw new AppError("Course not found or unauthorized access.", 403);
 
+  if (courseDoc.status === STATUS_ENUM.blocked)
+    throw new AppError("This course has been blocked, it cannot be modified.", 403, { isBlocked: true });
+
   const mergedCourse = getMergedCourse(courseDoc);
   const mergedCurr = getMergedCurriculum(currDoc);
 
@@ -985,6 +1030,12 @@ export const approveCourseUpdate = async (courseId, session = null) => {
     const course = await Course.findById(courseId).session(s);
     const curriculum = await Curriculum.findOne({ courseId }).session(s);
     if (!course || !curriculum) throw new AppError("Unable to obtain course details.", 404);
+
+    if (course.status === STATUS_ENUM.blocked)
+      throw new AppError("This course has been blocked, it cannot be modified.", 403, { isBlocked: true });
+
+    if (course.status !== STATUS_ENUM.pending)
+      throw new AppError("Course is not under review.", 400);
 
     const oldVids = [
       course.previewVideo,
@@ -1085,6 +1136,9 @@ export const handleLectureGenerateAi = async (insId, courseId, lecId) => {
 
   if (!course || course.instructor?.ref?.toString() !== insId)
     throw new AppError("Course not found or unauthorized access.", 403);
+
+  if (course.status === STATUS_ENUM.blocked)
+    throw new AppError("This course has been blocked, it cannot be modified.", 403, { isBlocked: true });
 
   if (!curriculum) throw new AppError("Course's curriculum is empty.", 409);
 
@@ -1202,6 +1256,9 @@ export const removeLectureAiData = async (insId, courseId, lecId) => {
 
     if (!course || course.instructor?.ref?.toString() !== insId)
       throw new AppError("Course not found or unauthorized access.", 403);
+
+    if (course.status === STATUS_ENUM.blocked)
+      throw new AppError("This course has been blocked, it cannot be modified.", 403, { isBlocked: true });
 
     const result = await Curriculum.updateOne(
       {

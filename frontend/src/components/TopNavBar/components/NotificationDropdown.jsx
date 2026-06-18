@@ -34,9 +34,9 @@ const NotificationItem = ({ noti, onMarkRead }) => {
     if (noti.sender?.avatar)
       return <img className="avatar-img rounded-circle" src={noti.sender.avatar} alt="avatar" />;
 
-    let Icon = BsInfoCircle;
-    let colorClass = "text-primary";
-    let bgClass = "bg-primary bg-opacity-10";
+    let Icon = null;
+    let colorClass = "";
+    let bgClass = "";
 
     switch (noti?.type?.toUpperCase()) {
       case "APPROVED":
@@ -56,6 +56,11 @@ const NotificationItem = ({ noti, onMarkRead }) => {
         colorClass = "text-warning";
         bgClass = "bg-warning bg-opacity-10";
         break;
+      case "INFO":
+        Icon = BsInfoCircle;
+        colorClass = "text-primary";
+        bgClass = "bg-primary bg-opacity-10";
+        break;
       default:
         Icon = BsQuestion;
         colorClass = "text-secondary";
@@ -70,14 +75,25 @@ const NotificationItem = ({ noti, onMarkRead }) => {
     );
   };
 
-  const handleClick = (e) => {
-    // e.stopPropagation(); 
+  const handleClick = async(e) => {
+    // e.stopPropagation();
+
+    const couponMatch = noti.message?.match(/Coupon code:\s*([A-Z0-9-]+)/);
+    if (couponMatch && couponMatch[1]) {
+      try {
+        await navigator.clipboard.writeText(couponMatch[1]);
+        toast.success("Coupon copied!");
+      } catch (err) {
+        console.error("Failed to copy coupon:", err);
+      }
+    }
+
     if (noti?.notifId && !noti.isRead) onMarkRead(noti.notifId);
   };
 
   return (
     <li>
-      <Link
+      <div
         className={`list-group-item-action border-0 border-bottom d-flex p-3 ${!noti.isRead ? "bg-light" : ""}`}
         onClick={handleClick}
         style={{ cursor: "pointer" }}
@@ -89,13 +105,13 @@ const NotificationItem = ({ noti, onMarkRead }) => {
         </div>
         <div>
           <h6 className="mb-1 text-capitalize">{noti.type || "New Notification"}</h6>
-          <p className="text-body m-0">{noti.message}</p>
+          <p className="text-body m-0" dangerouslySetInnerHTML={{ __html: noti.message || "" }} />
           <small className="text-secondary">{formatTimeAgo(noti.createdAt)}</small>
         </div>
         {!noti.isRead && (
           <span className="ms-auto p-1 bg-primary rounded-circle align-self-center" style={{ width: 8, height: 8 }}></span>
         )}
-      </Link>
+      </div>
     </li>
   );
 };
@@ -127,15 +143,26 @@ const NotificationDropdown = ({ className }) => {
   useEffect(() => {
     if (!socket) return;
 
-    const handleNewNotification = (data) => {
-      setNotifications(prev => [data, ...prev]);
-      setUnreadCount(prev => prev + 1);
+    const handleNewNotification = async (data) => {
+      if (data?.notifId && data?.message) {
+        setNotifications((prev) => [data, ...prev]);
+        setUnreadCount((prev) => prev + 1);
+        return;
+      }
+
+      if (!userData?.userId) return;
+
+      const res = await handleRequest(authApi.get("/notifications"));
+      if (res.success) {
+        setNotifications(res.result || []);
+        setUnreadCount(res.result.filter((n) => !n.isRead).length || 0);
+      }
     };
 
     socket.on("getNotification", handleNewNotification);
 
     return () => socket.off("getNotification", handleNewNotification);
-  }, [socket]);
+  }, [socket, userData]);
 
   const handleMarkAllRead = async (e) => {
     if (e) {
