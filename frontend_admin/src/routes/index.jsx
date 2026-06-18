@@ -20,23 +20,24 @@ const AdminInstructorRequests = lazy(() => import('@/app/instructor-requests/pag
 // const AdminReviews = lazy(() => import('@/app/reviews/page'));
 const AdminEarnings = lazy(() => import('@/app/earnings/page'));
 const AdminSettings = lazy(() => import('@/app/admin-settings/page'));
+import CourseDetails from "@/app/course-detail/page";
 
 export const authAdminRoutes = [{
   path: '/auth/sign-in',
   name: 'Admin Sign In',
   element: <AdminSignIn />
-// }, {
-//   path: '/auth/sign-up',
-//   name: 'Admin Sign Up',
-//   element: <AdminSignUp />
-// }, {
-//   path: '/auth/forgot-password',
-//   name: 'Admin Forgot Password',
-//   element: <AdminForgotPassword />
-// }, {
-//   path: '/auth/reset-password',
-//   name: 'Admin Reset Password',
-//   element: <AdminResetPassword />
+  // }, {
+  //   path: '/auth/sign-up',
+  //   name: 'Admin Sign Up',
+  //   element: <AdminSignUp />
+  // }, {
+  //   path: '/auth/forgot-password',
+  //   name: 'Admin Forgot Password',
+  //   element: <AdminForgotPassword />
+  // }, {
+  //   path: '/auth/reset-password',
+  //   name: 'Admin Reset Password',
+  //   element: <AdminResetPassword />
 }];
 
 export const adminRoutes = [{
@@ -47,6 +48,10 @@ export const adminRoutes = [{
   path: '/courses',
   name: 'All Courses',
   element: <AdminAllCourses />
+}, {
+  path: "/courses/:id",
+  name: "CourseDetails",
+  element: <CourseDetails />
 }, {
   path: '/categories',
   name: 'Categories',
@@ -73,7 +78,7 @@ export const adminRoutes = [{
 //   name: 'Adminstrators',
 //   element: <AdminAdminstrators />
 // },
- {
+{
   path: '/instructor-detail',
   name: 'Instructor Detail',
   element: <ComingSoonPage />
