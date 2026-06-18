@@ -15,6 +15,7 @@ const AdminCoupons = lazy(() => import('@/app/coupons/page'));
 const ComingSoonPage = lazy(() => import('@/app/coming-soon/page'));
 const AdminStudents = lazy(() => import('@/app/students/page'));
 const AdminInstructors = lazy(() => import('@/app/instructors/page'));
+const AdminInstructorDetail = lazy(() => import('@/app/instructors/detail'));
 // const AdminAdminstrators = lazy(() => import('@/app/administrators/page'));
 const AdminInstructorRequests = lazy(() => import('@/app/instructor-requests/page'));
 // const AdminReviews = lazy(() => import('@/app/reviews/page'));
@@ -79,9 +80,9 @@ export const adminRoutes = [{
 //   element: <AdminAdminstrators />
 // },
 {
-  path: '/instructor-detail',
+  path: '/instructors/:id',
   name: 'Instructor Detail',
-  element: <ComingSoonPage />
+  element: <AdminInstructorDetail />
 }, {
   path: '/instructor-requests',
   name: 'Instructor Requests',

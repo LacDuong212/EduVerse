@@ -7,6 +7,9 @@ import {
   getInstructorRequests,
   approveInstructor,
   rejectInstructor,
+  getInstructorDetail,
+  getInstructorDetailStats,
+  getInstructorCourses,
   getInstructorStatsById,
 } from "../controllers/instructorController.js";
 
@@ -14,6 +17,9 @@ const instructorRoute = express.Router();
 
 instructorRoute.get("/", adminAuth, getAllInstructors);
 instructorRoute.get("/requests", adminAuth, getInstructorRequests);
+instructorRoute.get("/:id/profile", adminAuth, getInstructorDetail);
+instructorRoute.get("/:id/stats", adminAuth, getInstructorDetailStats);
+instructorRoute.get("/:id/courses", adminAuth, getInstructorCourses);
 
 instructorRoute.get("/:id/stats", adminAuth, getInstructorStatsById);
 

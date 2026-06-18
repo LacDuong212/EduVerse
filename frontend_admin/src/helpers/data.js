@@ -252,6 +252,45 @@ export const getInstructorRequests = async (page = 1, search = "") => {
   }
 };
 
+export const getInstructorDetail = async (id) => {
+  try {
+    const response = await axios.get(
+      `${backendUrl}/api/instructors/${id}/profile`,
+      axiosConfig
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching instructor detail:", error);
+    return { success: false, message: error.response?.data?.message || error.message };
+  }
+};
+
+export const getAdminInstructorCourses = async (id, page = 1, limit = 10) => {
+  try {
+    const response = await axios.get(
+      `${backendUrl}/api/instructors/${id}/courses`,
+      { ...axiosConfig, params: { page, limit } }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching instructor courses:", error);
+    return { success: false, message: error.response?.data?.message || error.message };
+  }
+};
+
+export const getInstructorDetailStats = async (id) => {
+  try {
+    const response = await axios.get(
+      `${backendUrl}/api/instructors/${id}/stats`,
+      axiosConfig
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching instructor stats:", error);
+    return { success: false, message: error.response?.data?.message || error.message };
+  }
+};
+
 export const blockInstructor = async (id) => {
   try {
     const response = await axios.patch(

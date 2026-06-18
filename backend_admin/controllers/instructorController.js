@@ -1,10 +1,122 @@
 import Fuse from "fuse.js";
 import mongoose from "mongoose";
+import Course from "../models/courseModel.js";
 import Instructor from "../models/instructorModel.js";
 import { TYPE_ENUM as NOTIF_TYPE } from "../models/notificationModel.js";
 import User, { ROLE_ENUM as USER_ROLE } from "../models/userModel.js";
 import { SUPPORT_EMAIL } from "../utils/constants.js";
+import { toCourseDto } from "../utils/mapper.js";
 import { notifyUsers, createNotifications } from "../utils/notification.js";
+
+// GET api/instructors/:id/profile
+export const getInstructorDetail = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const user = await User.findOne({ _id: id, role: USER_ROLE.instructor });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Instructor not found.' });
+    }
+
+    const instructor = await Instructor.findOne({ user: id }).lean();
+    if (!instructor) {
+      return res.status(404).json({ success: false, message: 'Instructor profile not found.' });
+    }
+
+    const profile = {
+      insId: user._id.toString(),
+      name: user.name,
+      email: user.email,
+      phonenumber: user.phonenumber,
+      avatar: user.pfpImg,
+      address: instructor.address,
+      occupation: instructor.occupation,
+      website: user.website,
+      socials: {
+        facebook: user.socials?.facebook,
+        instagram: user.socials?.instagram,
+        linkedin: user.socials?.linkedin,
+        youtube: user.socials?.youtube,
+      },
+      introduction: instructor.introduction,
+      skills: (instructor.skills || []).map(s => ({ name: s.name, level: s.level })),
+      education: (instructor.education || []).map(e => ({
+        institution: e.institution,
+        degree: e.degree,
+        fieldOfStudy: e.fieldOfStudy,
+        startDate: e.startDate,
+        endDate: e.endDate,
+      })),
+      isActive: user.isActivated,
+      isApproved: instructor.isApproved,
+      createdAt: user.createdAt,
+    };
+
+    return res.status(200).json({ success: true, result: profile });
+  } catch (error) {
+    console.error('Error fetching instructor detail:', error);
+    return res.status(500).json({ success: false, message: 'Failed to fetch instructor detail.' });
+  }
+};
+
+// GET api/instructors/:id/courses
+export const getInstructorCourses = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const totalDocs = await Course.countDocuments({
+      'instructor.ref': id,
+      status: { $ne: 'draft' }
+    });
+
+    const courses = await Course
+      .find({ 'instructor.ref': id, status: { $ne: 'draft' } })
+      .populate('category', 'name')
+      .sort({ updatedAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .lean();
+
+    return res.status(200).json({
+      success: true,
+      data: courses.map(toCourseDto),
+      pagination: {
+        total: totalDocs,
+        page,
+        totalPages: Math.ceil(totalDocs / limit),
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching instructor courses:', error);
+    return res.status(500).json({ success: false, message: 'Failed to fetch instructor courses.' });
+  }
+};
+
+// GET api/instructors/:id/stats
+export const getInstructorDetailStats = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const instructor = await Instructor.findOne({ user: id }).lean();
+    if (!instructor) {
+      return res.status(404).json({ success: false, message: 'Instructor not found.' });
+    }
+
+    const { totalStudents = 0, totalReviews = 0, ratingSum = 0 } = instructor.stats || {};
+    const totalCourses = await Course.countDocuments({ 'instructor.ref': id, status: { $ne: 'draft' } });
+    const averageRating = totalReviews > 0 ? Number((ratingSum / totalReviews).toFixed(1)) : 0;
+
+    return res.status(200).json({
+      success: true,
+      result: { totalCourses, totalStudents, totalReviews, averageRating }
+    });
+  } catch (error) {
+    console.error('Error fetching instructor stats:', error);
+    return res.status(500).json({ success: false, message: 'Failed to fetch instructor stats.' });
+  }
+};
 
 export const getAllInstructors = async (req, res) => {
   try {

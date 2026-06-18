@@ -1,5 +1,6 @@
 import { Button } from 'react-bootstrap';
 import { FaUserTie } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 import SortableTh from '@/components/SortableTh';
 
 const COLS = 6;
@@ -25,6 +26,7 @@ const SkeletonRows = ({ count = 5 }) => (
 );
 
 const InstructorList = ({ instructorsData, isLoading, sortKey, sortDir, onSort, onBlock, onUnblock }) => {
+  const navigate = useNavigate();
 
   return <div className="table-responsive border-0">
     <table className="table table-dark-gray align-middle p-4 mb-0 table-hover">
@@ -43,7 +45,11 @@ const InstructorList = ({ instructorsData, isLoading, sortKey, sortDir, onSort, 
           <SkeletonRows count={5} />
         ) : instructorsData && instructorsData.length > 0 ? (
           instructorsData.map((item) => (
-            <tr key={item._id}>
+            <tr
+              key={item._id}
+              onClick={() => navigate(`/instructors/${item._id}`)}
+              style={{ cursor: 'pointer' }}
+            >
               <td>
                 <div className="d-flex align-items-center position-relative">
                   <div className="avatar avatar-md">
@@ -93,12 +99,12 @@ const InstructorList = ({ instructorsData, isLoading, sortKey, sortDir, onSort, 
               {
                 item.isActivated
                   ? <td>
-                    <Button variant="warning-soft" size="sm" className="me-1 mb-1 mb-md-0" onClick={() => onBlock(item._id)}>
+                    <Button variant="warning-soft" size="sm" className="me-1 mb-1 mb-md-0" onClick={(e) => { e.stopPropagation(); onBlock(item._id); }}>
                       Block
                     </Button>
                   </td>
                   : <td>
-                    <Button variant="primary-soft" size="sm" className="me-1 mb-1 mb-md-0" onClick={() => onUnblock(item._id)}>
+                    <Button variant="primary-soft" size="sm" className="me-1 mb-1 mb-md-0" onClick={(e) => { e.stopPropagation(); onUnblock(item._id); }}>
                       Unblock
                     </Button>
                   </td>
