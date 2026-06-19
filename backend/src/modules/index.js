@@ -2,6 +2,7 @@ import { Router } from "express";
 
 import authRoute from "#modules/auth/auth.route.js";
 import cartRoute from "#modules/cart/cart.route.js";
+import qaRoute from "#modules/qa/qa.route.js";
 import categoryRoute from "#modules/category/category.route.js";
 import couponRoute from "#modules/coupon/coupon.route.js";
 import courseRoute from "#modules/course/course.route.js";
@@ -33,6 +34,7 @@ apiRouter.use("/internal", internalRoute);
 apiRouter.use("/notifications", notifRoute);
 apiRouter.use("/orders", orderRoute);
 apiRouter.use("/payments", paymentRoute);
+apiRouter.use("/qa", qaRoute);
 apiRouter.use("/quizzes", quizRoute);
 apiRouter.use("/reviews", reviewRoute);
 apiRouter.use("/student", studentRoute);

@@ -11,6 +11,7 @@ const streakSchema = new mongoose.Schema({
   longestStreak: { type: Number, default: 0 },
   lastActiveDate: { type: String },
   activeDates: [{ type: String }],
+  activityLog: { type: Map, of: Number, default: {} },
 }, { timestamps: true });
 
 function formatYMD(date) {
@@ -76,6 +77,7 @@ streakSchema.statics.getUserStreak = async function (user) {
       longestStreak: 0,
       todayDone: false,
       activeDates: [],
+      activityLog: {},
     };
   }
 
@@ -87,7 +89,18 @@ streakSchema.statics.getUserStreak = async function (user) {
     longestStreak: streak.longestStreak,
     todayDone,
     activeDates: streak.activeDates,
+    activityLog: Object.fromEntries(streak.activityLog || new Map()),
   };
+};
+
+// Increment the daily lecture count for a user. Called on every completed lecture.
+streakSchema.statics.incrementDailyCount = async function (user, dateInput = null, session = null) {
+  const todayStr = typeof dateInput === "string" ? dateInput : formatYMD(dateInput || new Date());
+  await this.updateOne(
+    { user },
+    { $inc: { [`activityLog.${todayStr}`]: 1 } },
+    { session }
+  );
 };
 
 export default mongoose.model("Streak", streakSchema);

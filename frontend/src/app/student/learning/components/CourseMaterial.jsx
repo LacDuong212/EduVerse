@@ -4,16 +4,24 @@ import {
   AccordionHeader,
   AccordionItem,
 } from "react-bootstrap";
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { FaPlay } from "react-icons/fa";
-import { BsCheckCircleFill } from "react-icons/bs";
+import { BsCheckCircleFill, BsChatSquareText } from "react-icons/bs";
 import course1 from "@/assets/images/courses/4by3/01.jpg";
 import { secondsToDuration } from "@/utils/duration";
+import QnaModal from "./QnaModal";
 
 const CourseMaterial = ({ curriculum = [], lectureTracking = {} }) => {
   const navigate = useNavigate();
   const { courseId } = useParams();
+
+  const [qnaModal, setQnaModal] = useState(null); // { lectureId, lectureTitle }
+
+  const openQna = (lectureId, lectureTitle, e) => {
+    e.stopPropagation();
+    setQnaModal({ lectureId, lectureTitle });
+  };
 
   const goToWatch = (lectureId) => {
     if (!courseId || !lectureId) return;
@@ -124,7 +132,7 @@ const CourseMaterial = ({ curriculum = [], lectureTracking = {} }) => {
 
   if (!Array.isArray(curriculum) || curriculum.length === 0) {
     return (
-      <p className="text-muted mb-0">
+      <p className="text-body mb-0">
         This course does not have any published curriculum yet.
       </p>
     );
@@ -136,6 +144,15 @@ const CourseMaterial = ({ curriculum = [], lectureTracking = {} }) => {
       className="accordion-icon accordion-border"
       id="course-material-accordion"
     >
+      {qnaModal && (
+        <QnaModal
+          show={!!qnaModal}
+          onHide={() => setQnaModal(null)}
+          lectureId={qnaModal.lectureId}
+          lectureTitle={qnaModal.lectureTitle}
+        />
+      )}
+
       {curriculum.map((section, sIdx) => (
         <AccordionItem
           eventKey={`${sIdx}`}
@@ -197,7 +214,18 @@ const CourseMaterial = ({ curriculum = [], lectureTracking = {} }) => {
                     </div>
                   </div>
 
-                  {renderLectureStatus(lecture)}
+                  <div className="d-flex align-items-center gap-2 flex-shrink-0">
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1"
+                      onClick={(e) => openQna(lecture.lecId, lecture.title, e)}
+                      title="View Q&A for this lecture"
+                    >
+                      <BsChatSquareText size={13} />
+                      Q&amp;A
+                    </button>
+                    {renderLectureStatus(lecture)}
+                  </div>
                 </div>
 
                 {(section.lectures?.length || 0) - 1 !== lIdx && <hr />}
