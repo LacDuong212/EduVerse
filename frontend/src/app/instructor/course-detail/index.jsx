@@ -5,6 +5,7 @@ import ErrorState from "@/components/ErrorState";
 import CourseStats from "./components/CourseStats";
 import CourseInfo from "./components/CourseInfo";
 import CourseStudents from "./components/CourseStudentList";
+import CourseQna from "./components/CourseQna";
 import useCourseDetails from "./useCourseDetails";
 import NotFoundPage from "@/components/not-found";
 import PageMetaData from "@/components/PageMetaData";
@@ -62,6 +63,7 @@ const InstructorCourseDetail = () => {
           <CourseInfo col={7} course={course} />
           <CourseStats col={5} courseId={course?.courseId} />
           <CourseStudents col={12} courseId={course?.courseId} />
+          <CourseQna col={12} courseId={course?.courseId} />
         </Row>
       </Container>
     </>

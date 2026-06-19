@@ -30,6 +30,42 @@ export const useDashboard = () => {
   const [recLoading, setRecLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // ================= STATS =================
+  const [stats, setStats] = useState(null);
+  const [courseStats, setCourseStats] = useState(null);
+
+  const fetchStats = useCallback(async () => {
+    try {
+      const [statsRes, courseStatsRes] = await Promise.all([
+        axios.get(`${backendUrl}/api/student/stats`, { withCredentials: true }),
+        axios.get(`${backendUrl}/api/student/courses/stats`, { withCredentials: true }),
+      ]);
+      setStats(statsRes?.data?.result || null);
+      setCourseStats(courseStatsRes?.data?.result || null);
+    } catch {
+      // non-blocking — silently fail
+    }
+  }, [backendUrl]);
+
+  // ================= IN-PROGRESS COURSES =================
+  const [inProgressCourses, setInProgressCourses] = useState([]);
+
+  const fetchInProgressCourses = useCallback(async () => {
+    try {
+      const res = await axios.get(`${backendUrl}/api/student/courses`, {
+        params: { sort: "activityDesc", limit: 20, page: 1 },
+        withCredentials: true,
+      });
+      const all = res?.data?.result?.data || [];
+      const filtered = all
+        .filter((c) => c.percentage < 100)
+        .slice(0, 5);
+      setInProgressCourses(filtered);
+    } catch {
+      // non-blocking
+    }
+  }, [backendUrl]);
+
   // ================= RADAR =================
   const fetchRadar = useCallback(async () => {
     try {
@@ -123,9 +159,11 @@ export const useDashboard = () => {
       await Promise.all([
         fetchRadar(),
         fetchRecommendations(force),
+        fetchStats(),
+        fetchInProgressCourses(),
       ]);
     },
-    [fetchRadar, fetchRecommendations]
+    [fetchRadar, fetchRecommendations, fetchStats, fetchInProgressCourses]
   );
 
   useEffect(() => {
@@ -134,6 +172,9 @@ export const useDashboard = () => {
 
   return {
     radar,
+    stats,
+    courseStats,
+    inProgressCourses,
     loading: radarLoading || recLoading,
     error,
     refetch: () => fetchDashboardData(true),

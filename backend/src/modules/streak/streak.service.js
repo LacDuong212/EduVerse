@@ -52,3 +52,8 @@ export const getStreak = async (stuId) => {
   if (!stuId) throw new AppError("Student ID is required.", 400);
   return await Streak.getUserStreak(stuId);
 };
+
+export const incrementDailyCount = async (stuId, session = null) => {
+  if (!stuId) return;
+  await Streak.incrementDailyCount(stuId, null, session);
+};

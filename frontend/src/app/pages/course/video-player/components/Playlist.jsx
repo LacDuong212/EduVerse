@@ -15,6 +15,7 @@ import {
 } from "react-bootstrap";
 import { BsCheckCircleFill, BsLockFill } from "react-icons/bs";
 import { FaPlay } from "react-icons/fa";
+import QnaModal from "@/app/student/learning/components/QnaModal";
 
 export default function Playlist({
   course,
@@ -23,10 +24,19 @@ export default function Playlist({
   lectureProgress = {},
 }) {
   const navigate = useNavigate();
+  const [showQna, setShowQna] = useState(false);
 
   const sections = useMemo(() => {
     return course?.curriculum?.sections || [];
   }, [course]);
+
+  const currentLectureTitle = useMemo(() => {
+    for (const sec of sections) {
+      const found = (sec.lectures || []).find((l) => l.lecId === currentId);
+      if (found) return found.title;
+    }
+    return null;
+  }, [sections, currentId]);
 
   const sectionKeys = useMemo(() => {
     return sections.map((section, index) => String(section.secId || index));
@@ -283,7 +293,14 @@ export default function Playlist({
       </CardBody>
 
       <CardFooter>
-        <div className="d-grid">
+        <div className="d-grid gap-2">
+          <Button
+            variant="outline-primary"
+            className="mb-0"
+            onClick={() => setShowQna(true)}
+          >
+            Q&amp;A
+          </Button>
           <Link
             to={`/student/courses/${course?.courseId || ""}`}
             className="btn btn-primary-soft mb-0"
@@ -292,6 +309,15 @@ export default function Playlist({
           </Link>
         </div>
       </CardFooter>
+
+      {showQna && (
+        <QnaModal
+          show={showQna}
+          onHide={() => setShowQna(false)}
+          lectureId={currentId}
+          lectureTitle={currentLectureTitle}
+        />
+      )}
     </Card>
   );
 }

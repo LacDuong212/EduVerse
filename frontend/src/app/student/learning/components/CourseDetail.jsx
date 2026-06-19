@@ -13,10 +13,19 @@ import {
   TabContent,
   TabPane,
 } from "react-bootstrap";
+import { useSearchParams } from "react-router-dom";
 
 import CourseMaterial from "./CourseMaterial";
+import QnaTab from "./QnaTab";
 
 const CourseDetail = ({ course, progress, progressError }) => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get("tab") || "course";
+
+  const handleTabSelect = (key) => {
+    setSearchParams(key === "course" ? {} : { tab: key }, { replace: true });
+  };
+
   const lectureTracking = useMemo(() => {
     const map = {};
 
@@ -52,13 +61,18 @@ const CourseDetail = ({ course, progress, progressError }) => {
 
   if (!course) return null;
 
+  const sections = course.curriculum?.sections || [];
+
   return (
     <section className="pt-0">
       <Container>
         <Row>
           <Col xs={12}>
             <Card className="shadow rounded-2 p-0 mt-n5">
-              <TabContainer defaultActiveKey="course">
+              <TabContainer
+                activeKey={activeTab}
+                onSelect={handleTabSelect}
+              >
                 <CardHeader className="border-bottom px-4 pt-3 pb-0">
                   <Nav
                     className="nav-bottom-line py-0"
@@ -76,6 +90,18 @@ const CourseDetail = ({ course, progress, progressError }) => {
                         Course Materials
                       </NavLink>
                     </NavItem>
+
+                    <NavItem className="me-2 me-sm-4" role="presentation">
+                      <NavLink
+                        as="button"
+                        eventKey="qa"
+                        className="mb-2 mb-md-0"
+                        type="button"
+                        role="tab"
+                      >
+                        Q&amp;A
+                      </NavLink>
+                    </NavItem>
                   </Nav>
                 </CardHeader>
 
@@ -87,7 +113,7 @@ const CourseDetail = ({ course, progress, progressError }) => {
                       role="tabpanel"
                     >
                       <CourseMaterial
-                        curriculum={course.curriculum?.sections || []}
+                        curriculum={sections}
                         lectureTracking={lectureTracking}
                       />
 
@@ -95,6 +121,16 @@ const CourseDetail = ({ course, progress, progressError }) => {
                         <p className="text-danger small mt-2">
                           Cannot load progress: {String(progressError)}
                         </p>
+                      )}
+                    </TabPane>
+
+                    <TabPane
+                      eventKey="qa"
+                      className="fade"
+                      role="tabpanel"
+                    >
+                      {activeTab === "qa" && (
+                        <QnaTab sections={sections} />
                       )}
                     </TabPane>
                   </TabContent>

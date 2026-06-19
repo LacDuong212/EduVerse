@@ -1,6 +1,7 @@
 import AppError from "#exceptions/app.error.js";
 import { existsEnrollment } from "#modules/enrollment/enrollment.service.js";
 import * as learningService from "#modules/learning/learning.service.js";
+import { incrementDailyCount } from "#modules/streak/streak.service.js";
 import { updateProfile } from "#modules/user/user.service.js";
 import { withTransaction } from "#utils/transaction.js";
 import Student from "./student.model.js"
@@ -148,6 +149,7 @@ export const handleUpdateLectureProgress = async (stuId, courseId, lecId, data) 
 
   if (isCompleted) {
     progress = await learningService.completeLecture(stuId, courseId, lecId);
+    await incrementDailyCount(stuId);
   }
 
   return progress;
