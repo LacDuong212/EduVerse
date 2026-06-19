@@ -64,10 +64,10 @@ export default function NoteSidebar({
     if (!notes.length) return;
     const interval = setInterval(() => {
       const t = getCurrentTime?.() ?? 0;
+      // Notes are sorted descending — first match is the highest timestamp <= t
       let active = null;
       for (const n of notes) {
-        if (n.timestamp <= t) active = n.id;
-        else break;
+        if (n.timestamp <= t) { active = n.id; break; }
       }
       if (active !== activeNoteIdRef.current) {
         activeNoteIdRef.current = active;

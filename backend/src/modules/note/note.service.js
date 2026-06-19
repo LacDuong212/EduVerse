@@ -4,7 +4,7 @@ import Note from "./note.model.js";
 const BASE_QUERY = { isDeleted: false };
 
 export const getNotesByLecture = async (userId, lectureId) => {
-  return Note.find({ userId, lectureId, ...BASE_QUERY }).sort({ timestamp: 1 });
+  return Note.find({ userId, lectureId, ...BASE_QUERY }).sort({ timestamp: -1 });
 };
 
 export const getNotesByCourse = async (userId, courseId) => {
