@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { Button, Form, Spinner } from "react-bootstrap";
 import { BsPlus, BsDownload, BsSearch } from "react-icons/bs";
+import { Link } from "react-router-dom";
 import NoteItem from "./NoteItem";
 import TagInput from "./TagInput";
 import { exportNotesToPDF } from "../../utils/exportNotes";
+import QnaModal from "@/app/student/learning/components/QnaModal";
 
 const formatTimestamp = (seconds) => {
   const t = Math.max(0, Math.floor(seconds));
@@ -37,6 +39,7 @@ export default function NoteSidebar({
   // --- scope / search ---
   const [scope, setScope] = useState("lecture");
   const [searchQuery, setSearchQuery] = useState("");
+  const [showQna, setShowQna] = useState(false);
 
   // --- compose ---
   const [composing, setComposing] = useState(false);
@@ -61,10 +64,10 @@ export default function NoteSidebar({
     if (!notes.length) return;
     const interval = setInterval(() => {
       const t = getCurrentTime?.() ?? 0;
+      // Notes are sorted descending — first match is the highest timestamp <= t
       let active = null;
       for (const n of notes) {
-        if (n.timestamp <= t) active = n.id;
-        else break;
+        if (n.timestamp <= t) { active = n.id; break; }
       }
       if (active !== activeNoteIdRef.current) {
         activeNoteIdRef.current = active;
@@ -362,6 +365,34 @@ export default function NoteSidebar({
           )
         )}
       </div>
+
+      {/* ── Pinned footer — same as Course Content sidebar ── */}
+      <div className="flex-shrink-0 border-top px-3 py-2">
+        <div className="d-grid gap-2">
+          <Button
+            variant="outline-primary"
+            className="mb-0"
+            onClick={() => setShowQna(true)}
+          >
+            Q&amp;A
+          </Button>
+          <Link
+            to={`/student/courses/${course?.courseId || ""}`}
+            className="btn btn-primary-soft mb-0"
+          >
+            Back to Learning Course
+          </Link>
+        </div>
+      </div>
+
+      {showQna && (
+        <QnaModal
+          show={showQna}
+          onHide={() => setShowQna(false)}
+          lectureId={lectureId}
+          lectureTitle={lectureTitle}
+        />
+      )}
     </div>
   );
 }
