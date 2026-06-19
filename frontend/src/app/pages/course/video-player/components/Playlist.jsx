@@ -139,8 +139,8 @@ export default function Playlist({
   };
 
   return (
-    <Card className="vh-100 overflow-auto rounded-0 w-280px w-sm-400px">
-      <CardHeader className="bg-light rounded-0">
+    <Card className="d-flex flex-column h-100 overflow-hidden rounded-0 w-100">
+      <CardHeader className="bg-light rounded-0 flex-shrink-0">
         <h1 className="mt-2 fs-5">{course?.title || "Course"}</h1>
 
         {course?.instructor?.name && (
@@ -148,7 +148,7 @@ export default function Playlist({
         )}
       </CardHeader>
 
-      <CardBody>
+      <CardBody className="flex-grow-1 overflow-auto">
         <div className="d-sm-flex justify-content-sm-between">
           <h5>Course content</h5>
         </div>
@@ -292,7 +292,7 @@ export default function Playlist({
         </Row>
       </CardBody>
 
-      <CardFooter>
+      <CardFooter className="flex-shrink-0">
         <div className="d-grid gap-2">
           <Button
             variant="outline-primary"

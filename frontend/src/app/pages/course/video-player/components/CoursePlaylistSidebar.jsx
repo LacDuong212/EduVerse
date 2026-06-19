@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { Collapse } from "react-bootstrap";
 import Playlist from "./Playlist";
+import NoteSidebar from "./notes/NoteSidebar";
 import useToggle from "@/hooks/useToggle";
 
 export default function CoursePlaylistSidebar({
@@ -7,12 +9,18 @@ export default function CoursePlaylistSidebar({
   currentLectureId,
   lectureProgressMap = {},
   onSelectLecture,
+  courseId,
+  lectureTitle,
+  seekTo,
+  getCurrentTime,
+  notesApi,
 }) {
   const { isTrue: isOpen, toggle } = useToggle(true);
+  const [activeTab, setActiveTab] = useState("content");
 
   return (
     <div
-      className="flex-shrink-0 border-start bg-white position-relative"
+      className="flex-shrink-0 border-start bg-white position-relative h-100"
       style={{ zIndex: 10 }}
     >
       <button
@@ -28,14 +36,51 @@ export default function CoursePlaylistSidebar({
         </span>
       </button>
 
-      <Collapse className="collapse-horizontal" in={isOpen} dimension="width">
-        <div style={{ maxWidth: "100vw" }}>
-          <Playlist
-            course={course}
-            currentId={currentLectureId}
-            lectureProgress={lectureProgressMap}
-            onSelect={onSelectLecture}
-          />
+      <Collapse className="collapse-horizontal h-100" in={isOpen} dimension="width">
+        <div className="d-flex flex-column h-100 w-280px w-sm-400px">
+          {/* Tab bar */}
+          <div className="d-flex border-bottom flex-shrink-0">
+            <button
+              className={`flex-fill border-0 bg-transparent py-2 px-3 small fw-semibold ${
+                activeTab === "content" ? "text-primary" : "text-body opacity-50"
+              }`}
+              style={{ borderBottom: activeTab === "content" ? "2px solid" : "none" }}
+              onClick={() => setActiveTab("content")}
+            >
+              Course Content
+            </button>
+            <button
+              className={`flex-fill border-0 bg-transparent py-2 px-3 small fw-semibold ${
+                activeTab === "notes" ? "text-primary" : "text-body opacity-50"
+              }`}
+              style={{ borderBottom: activeTab === "notes" ? "2px solid currentColor" : "none" }}
+              onClick={() => setActiveTab("notes")}
+            >
+              Notes
+            </button>
+          </div>
+
+          <div className="flex-grow-1 overflow-hidden">
+            {activeTab === "content" ? (
+              <Playlist
+                course={course}
+                currentId={currentLectureId}
+                lectureProgress={lectureProgressMap}
+                onSelect={onSelectLecture}
+              />
+            ) : (
+              <NoteSidebar
+                notesApi={notesApi}
+                lectureId={currentLectureId}
+                lectureTitle={lectureTitle}
+                courseTitle={course?.title}
+                getCurrentTime={getCurrentTime}
+                onSeek={seekTo}
+                onNavigateToLecture={onSelectLecture}
+                course={course}
+              />
+            )}
+          </div>
         </div>
       </Collapse>
     </div>

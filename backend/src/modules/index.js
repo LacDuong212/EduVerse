@@ -18,6 +18,7 @@ import studentRoute from "#modules/student/student.route.js";
 import userRoute from "#modules/user/user.route.js";
 import videoRoute from "#modules/video/video.route.js";
 import wishlistRoute from "#modules/wishlist/wishlist.route.js";
+import noteRoute from "#modules/note/note.route.js";
 
 // @route /api
 const apiRouter = Router();
@@ -41,5 +42,6 @@ apiRouter.use("/student", studentRoute);
 apiRouter.use("/user", userRoute);
 apiRouter.use("/videos", videoRoute);
 apiRouter.use("/wishlist", wishlistRoute);
+apiRouter.use("/notes", noteRoute);
 
 export default apiRouter;
