@@ -10,6 +10,11 @@ import { TYPE_ENUM as NOTIF_TYPE } from "../models/notificationModel.js";
 import { SUPPORT_EMAIL } from "../utils/constants.js";
 import { toCourseDto, toCourseDtoList } from "../utils/mapper.js";
 import { notifyUser, notifyUsers, createNotifications } from "../utils/notification.js";
+import {
+  toAdminCourseDetailsDto,
+  toAdminCourseReviewDtoList,
+} from "../utils/adminCourseMapper.js";
+import Review from "../models/reviewModel.js";
 
 const buildCourseLink = (courseId) => {
   return `/courses/${courseId}`;
@@ -832,5 +837,136 @@ export const approveCourse = async (req, res) => {
     return res.status(500).json({ success: false, message: 'Something went wrong. Please try again later.' });
   } finally {
     if (session) await session.endSession();
+  }
+};
+
+export const getAdminCourseDetailsById = async (req, res) => {
+  try {
+    const admin = req.admin;
+
+    if (!admin || !admin.isVerified || !admin.isApproved) {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied: Account not verified or approved",
+      });
+    }
+
+    const { id } = req.params || {};
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid course ID.",
+      });
+    }
+
+    const course = await Course.findOne({ _id: id })
+      .populate("category", "name slug")
+      .populate("instructor.ref", "name email pfpImg")
+      .populate({
+        path: "curriculum",
+        select: {
+          "_id": 0,
+          "sections.lectures.aiData": 0,
+          "__v": 0,
+        },
+      })
+      .lean();
+
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Get admin course details successfully!",
+      result: toAdminCourseDetailsDto(course),
+    });
+  } catch (err) {
+    console.error("Error getting admin course details:", err);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
+export const getAdminCourseReviewsById = async (req, res) => {
+  try {
+    const admin = req.admin;
+
+    if (!admin || !admin.isVerified || !admin.isApproved) {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied: Account not verified or approved",
+      });
+    }
+
+    const { id } = req.params || {};
+
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const limit = Math.max(parseInt(req.query.limit) || 5, 1);
+    const skip = (page - 1) * limit;
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid course ID.",
+      });
+    }
+
+    const course = await Course.findOne({ _id: id }).lean();
+
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found.",
+      });
+    }
+
+    const query = {
+      course: id,
+      isDeleted: false,
+    };
+
+    const [reviews, totalItems] = await Promise.all([
+      Review.find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate("user", "name email pfpImg")
+        .lean(),
+
+      Review.countDocuments(query),
+    ]);
+
+    const totalPages = Math.ceil(totalItems / limit) || 1;
+
+    return res.status(200).json({
+      success: true,
+      message: "Get admin course reviews successfully!",
+      result: {
+        reviews: toAdminCourseReviewDtoList(reviews),
+      },
+      pagination: {
+        page,
+        limit,
+        totalItems,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+      },
+    });
+  } catch (err) {
+    console.error("Error getting admin course reviews:", err);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
 };

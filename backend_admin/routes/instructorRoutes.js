@@ -1,13 +1,17 @@
-import express from 'express';
+import express from "express";
 import { adminAuth } from "../middlewares/adminAuth.js";
 import {
-    getAllInstructors,
-    blockInstructor, unblockInstructor,
-    getInstructorRequests,
-    approveInstructor, rejectInstructor,
-    getInstructorDetail, getInstructorDetailStats, getInstructorCourses
-} from '../controllers/instructorController.js';
-
+  getAllInstructors,
+  blockInstructor,
+  unblockInstructor,
+  getInstructorRequests,
+  approveInstructor,
+  rejectInstructor,
+  getInstructorDetail,
+  getInstructorDetailStats,
+  getInstructorCourses,
+  getInstructorStatsById,
+} from "../controllers/instructorController.js";
 
 const instructorRoute = express.Router();
 
@@ -16,6 +20,8 @@ instructorRoute.get("/requests", adminAuth, getInstructorRequests);
 instructorRoute.get("/:id/profile", adminAuth, getInstructorDetail);
 instructorRoute.get("/:id/stats", adminAuth, getInstructorDetailStats);
 instructorRoute.get("/:id/courses", adminAuth, getInstructorCourses);
+
+instructorRoute.get("/:id/stats", adminAuth, getInstructorStatsById);
 
 instructorRoute.patch("/:id/block", adminAuth, blockInstructor);
 instructorRoute.patch("/:id/unblock", adminAuth, unblockInstructor);

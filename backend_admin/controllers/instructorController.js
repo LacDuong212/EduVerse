@@ -502,3 +502,66 @@ export const rejectInstructor = async (req, res) => {
     if (session) await session.endSession();
   }
 };
+
+export const getInstructorStatsById = async (req, res) => {
+  try {
+    const admin = req.admin;
+
+    if (!admin || !admin.isVerified || !admin.isApproved) {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied.",
+      });
+    }
+
+    const { id } = req.params || {};
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Instructor ID is required.",
+      });
+    }
+
+    const instructor = await Instructor.findOne({ user: id }).lean();
+
+    if (!instructor) {
+      return res.status(404).json({
+        success: false,
+        message: "Instructor not found.",
+      });
+    }
+
+    const {
+      totalStudents = 0,
+      totalReviews = 0,
+      ratingSum = 0,
+    } = instructor.stats || {};
+
+    const totalCourses = instructor.myCourses?.length || 0;
+
+    const averageRating =
+      totalReviews > 0
+        ? Number((ratingSum / totalReviews).toFixed(1))
+        : 0;
+
+    return res.status(200).json({
+      success: true,
+      message: "Get instructor stats successfully.",
+      result: {
+        totalCourses,
+        totalStudents,
+        totalReviews,
+        averageRating,
+      },
+    });
+  } catch (error) {
+    console.error("Failed to fetch instructor stats:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch instructor stats.",
+      error: error.message,
+    });
+  }
+};

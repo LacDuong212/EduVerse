@@ -43,13 +43,28 @@ const AdminInstructorDetailPage = () => {
     <>
       <PageMetaData title={`${instructor.name || "Instructor"} - Detail`} />
 
-      <div className="mb-4 d-flex align-items-center gap-3">
-        <button className="btn btn-outline-secondary btn-sm" onClick={() => navigate(-1)}>
-          <FaArrowLeft className="me-2" />Back
-        </button>
-        <div>
-          <h1 className="h3 mb-0">{instructor.name}</h1>
-          <p className="page-subtitle mb-0">{instructor.email}</p>
+      <div className="border-bottom pt-1 pb-3 mb-4">
+        <div className="d-flex align-items-center gap-3">
+          <button
+            type="button"
+            className="btn btn-link p-0 text-decoration-none d-inline-flex align-items-center fw-semibold text-primary flex-shrink-0"
+            onClick={() => navigate(-1)}
+          >
+            <span
+              className="d-inline-flex align-items-center justify-content-center rounded-circle border me-2"
+              style={{ width: 32, height: 32 }}
+            >
+              <FaArrowLeft size={13} />
+            </span>
+            Back
+          </button>
+
+          <div className="vr d-none d-sm-block" />
+
+          <div className="min-w-0">
+            <h1 className="h3 mb-0 text-truncate">{instructor.name}</h1>
+            <p className="page-subtitle mb-0 text-truncate">{instructor.email}</p>
+          </div>
         </div>
       </div>
 
