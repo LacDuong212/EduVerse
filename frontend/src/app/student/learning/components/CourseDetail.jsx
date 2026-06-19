@@ -16,6 +16,7 @@ import {
 import { useSearchParams } from "react-router-dom";
 
 import CourseMaterial from "./CourseMaterial";
+import NotesTab from "./NotesTab";
 import QnaTab from "./QnaTab";
 
 const CourseDetail = ({ course, progress, progressError }) => {
@@ -102,6 +103,18 @@ const CourseDetail = ({ course, progress, progressError }) => {
                         Q&amp;A
                       </NavLink>
                     </NavItem>
+
+                    <NavItem className="me-2 me-sm-4" role="presentation">
+                      <NavLink
+                        as="button"
+                        eventKey="notes"
+                        className="mb-2 mb-md-0"
+                        type="button"
+                        role="tab"
+                      >
+                        Notes
+                      </NavLink>
+                    </NavItem>
                   </Nav>
                 </CardHeader>
 
@@ -131,6 +144,19 @@ const CourseDetail = ({ course, progress, progressError }) => {
                     >
                       {activeTab === "qa" && (
                         <QnaTab sections={sections} />
+                      )}
+                    </TabPane>
+
+                    <TabPane
+                      eventKey="notes"
+                      className="fade"
+                      role="tabpanel"
+                    >
+                      {activeTab === "notes" && (
+                        <NotesTab
+                          sections={sections}
+                          courseTitle={course.title}
+                        />
                       )}
                     </TabPane>
                   </TabContent>
