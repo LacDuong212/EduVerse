@@ -234,6 +234,15 @@ export default function useVideoPlayerTracking({
     }
   }, [lectureId, lectureDurationSec, setLocalProgressOverrides]);
 
+  const seekTo = useCallback((seconds) => {
+    setPendingSeekSec(Math.max(0, seconds));
+  }, []);
+
+  const getCurrentTime = useCallback(() => {
+    const videoEl = playerContainerRef.current?.querySelector("video");
+    return videoEl ? Math.floor(videoEl.currentTime || 0) : 0;
+  }, []);
+
   return {
     playerContainerRef,
     showResumeDialog,
@@ -244,5 +253,7 @@ export default function useVideoPlayerTracking({
     durationForDialog: currentProgress?.durationSec || lectureDurationSec || 0,
     showConclusionDialog,
     setShowConclusionDialog,
+    seekTo,
+    getCurrentTime,
   };
 }

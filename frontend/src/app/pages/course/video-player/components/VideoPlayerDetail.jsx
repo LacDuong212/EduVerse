@@ -4,9 +4,11 @@ import { useNavigate } from "react-router-dom";
 
 import useVideoPlayerData from "../hooks/useVideoPlayerData";
 import useVideoPlayerTracking from "../hooks/useVideoPlayerTracking";
+import useNotes from "../hooks/useNotes";
 
 import CoursePlaylistSidebar from "./CoursePlaylistSidebar";
 import LectureConclusionModal from "./LectureConclusionModal";
+import NoteProgressMarkers from "./notes/NoteProgressMarkers";
 import ResumeProgressDialog from "./ResumeProgressDialog";
 import VideoScreen from "./VideoScreen";
 
@@ -32,16 +34,10 @@ export default function VideoPlayerDetail({
     progressLoading,
     progressError,
     progressReady,
-  } = useVideoPlayerData(
-    course,
-    courseId,
-    lectureId,
-    localProgressOverrides
-  );
+  } = useVideoPlayerData(course, courseId, lectureId, localProgressOverrides);
 
   const safeCurrentProgress = useMemo(() => {
     if (!currentLecture?.lecId) return null;
-
     return lectureProgressMap?.[currentLecture.lecId] || currentProgress || null;
   }, [currentLecture?.lecId, lectureProgressMap, currentProgress]);
 
@@ -55,6 +51,8 @@ export default function VideoPlayerDetail({
     durationForDialog,
     showConclusionDialog,
     setShowConclusionDialog,
+    seekTo,
+    getCurrentTime,
   } = useVideoPlayerTracking({
     courseId,
     currentLecture,
@@ -66,6 +64,9 @@ export default function VideoPlayerDetail({
     setLocalProgressOverrides,
   });
 
+  // Notes state lifted here so both NoteProgressMarkers and NoteSidebar share it
+  const notesApi = useNotes({ lectureId, courseId });
+
   const handleSelectLecture = useCallback(
     (lecture) => {
       if (!lecture?.lecId) return;
@@ -76,13 +77,8 @@ export default function VideoPlayerDetail({
 
   const handleNextLesson = useCallback(() => {
     setShowConclusionDialog(false);
-
     if (!lectures || !currentLecture) return;
-
-    const currentIndex = lectures.findIndex(
-      (lecture) => lecture.lecId === currentLecture.lecId
-    );
-
+    const currentIndex = lectures.findIndex((l) => l.lecId === currentLecture.lecId);
     if (currentIndex !== -1 && currentIndex < lectures.length - 1) {
       handleSelectLecture(lectures[currentIndex + 1]);
     }
@@ -90,28 +86,20 @@ export default function VideoPlayerDetail({
 
   const hasNextLesson = useMemo(() => {
     if (!lectures || !currentLecture) return false;
-
-    const index = lectures.findIndex(
-      (lecture) => lecture.lecId === currentLecture.lecId
-    );
-
+    const index = lectures.findIndex((l) => l.lecId === currentLecture.lecId);
     return index !== -1 && index < lectures.length - 1;
   }, [lectures, currentLecture]);
 
   const isLastLecture = useMemo(() => {
     if (!lectures || !currentLecture) return false;
-
-    const index = lectures.findIndex(
-      (lecture) => lecture.lecId === currentLecture.lecId
-    );
-
+    const index = lectures.findIndex((l) => l.lecId === currentLecture.lecId);
     return index !== -1 && index === lectures.length - 1;
   }, [lectures, currentLecture]);
 
   return (
-    <section className="py-0 bg-dark position-relative min-vh-100">
-      <Row className="g-0">
-        <div className="d-flex w-100 flex-row">
+    <section className="py-0 bg-dark position-relative vh-100 overflow-hidden">
+      <Row className="g-0 h-100">
+        <div className="d-flex w-100 flex-row h-100">
           <div className="flex-grow-1" style={{ minWidth: 0 }}>
             <VideoScreen
               playerContainerRef={playerContainerRef}
@@ -131,9 +119,21 @@ export default function VideoPlayerDetail({
             currentLectureId={lectureId}
             lectureProgressMap={lectureProgressMap}
             onSelectLecture={handleSelectLecture}
+            courseId={courseId}
+            lectureTitle={currentLecture?.title}
+            seekTo={seekTo}
+            getCurrentTime={getCurrentTime}
+            notesApi={notesApi}
           />
         </div>
       </Row>
+
+      {/* Note timestamp markers on Plyr seek bar */}
+      <NoteProgressMarkers
+        notes={notesApi.notes}
+        playerContainerRef={playerContainerRef}
+        playerKey={playerKey}
+      />
 
       <ResumeProgressDialog
         show={showResumeDialog}

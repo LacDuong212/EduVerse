@@ -48,11 +48,11 @@ const StudentLayout = ({ children, isNested = false }) => {
 
   const isFullscreen =
     pathname === "/student/video-player" ||
-    /^\/courses\/[^/]+\/watch(\/[^/]+)?$/.test(pathname);
+    /^\/(student\/)?courses\/[^/]+\/watch(\/[^/]+)?$/.test(pathname);
 
   if (isFullscreen) {
     return (
-      <main className="bg-dark min-vh-100">
+      <main className="bg-dark vh-100 overflow-hidden">
         <Suspense>{children}</Suspense>
       </main>
     );
