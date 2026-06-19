@@ -55,8 +55,7 @@ export default function QnaQuestion({
 
   return (
     <div
-      className="border rounded-2 p-3 position-relative"
-      style={isInstructorPost ? { backgroundColor: "#F9F9D6" } : undefined}
+      className={`border rounded-2 p-3 mt-3 position-relative ${isInstructorPost ? "border-info" : ""}`}
     >
       {/* Top-right actions */}
       {(isMyPost || isInstructorPost) && (
@@ -183,7 +182,6 @@ export default function QnaQuestion({
 
           {showReplyCompose && (
             <QnaCompose
-              placeholder="Write a reply..."
               submitLabel="Post Reply"
               onSubmit={handleReplySubmit}
               onCancel={() => setShowReplyCompose(false)}

@@ -97,7 +97,7 @@ export default function VideoPlayerDetail({
   }, [lectures, currentLecture]);
 
   return (
-    <section className="py-0 bg-dark position-relative vh-100 overflow-hidden">
+    <section className="py-0 position-relative vh-100 overflow-hidden bg-light">
       <Row className="g-0 h-100">
         <div className="d-flex w-100 flex-row h-100">
           <div className="flex-grow-1" style={{ minWidth: 0 }}>

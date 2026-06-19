@@ -75,11 +75,11 @@ const CourseStudentRow = ({ idx, student = {}, onOpenProgress = () => { } }) => 
       <td className="text-center">
         {enrolledAt ? new Date(enrolledAt).toLocaleDateString("en-GB") : "N/A"}
       </td>
-      <td style={{ maxWidth: "320px" }}>
+      <td className="text-wrap" style={{ minWidth: "160px", maxWidth: "320px" }}>
         {review ? (
           <>
             <div className="d-flex flex-wrap align-items-center mb-1">
-              <ul className="list-inline mb-0 me-2 d-flex">
+              <ul className="list-inline mb-1 d-flex">
                 {[...Array(5)].map((_, i) => (
                   <li key={i} className="list-inline-item me-0 small">
                     {i < Math.floor(review.rating) ? (
@@ -91,9 +91,15 @@ const CourseStudentRow = ({ idx, student = {}, onOpenProgress = () => { } }) => 
                     )}
                   </li>
                 ))}
-              </ul><span className="small">
-                {review.updatedAt ? new Date(review.updatedAt).toLocaleDateString("en-GB") : ""}
-              </span>
+              </ul>
+              {review?.updatedAt && (
+                <>
+                  <span className="p-1">•</span>
+                  <span className="small">
+                    {new Date(review.updatedAt).toLocaleDateString("en-GB", { hour: "2-digit", minute: "2-digit" })}
+                  </span>
+                </>
+              )}
             </div>
             <p title={review.description || ""} className="mb-0">
               {review.description && review.description.length > 100

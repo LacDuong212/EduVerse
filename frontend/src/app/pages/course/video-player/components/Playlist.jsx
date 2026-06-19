@@ -1,20 +1,13 @@
-import { Link, useNavigate } from "react-router-dom";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import {
-  Accordion,
-  AccordionBody,
-  AccordionHeader,
-  AccordionItem,
+  Accordion, AccordionBody, AccordionHeader, AccordionItem,
   Button,
-  Card,
-  CardBody,
-  CardFooter,
-  CardHeader,
-  Col,
-  Row,
+  Card, CardBody, CardFooter, CardHeader,
+  Col
 } from "react-bootstrap";
 import { BsCheckCircleFill, BsLockFill } from "react-icons/bs";
 import { FaPlay } from "react-icons/fa";
+import { Link, useNavigate } from "react-router-dom";
 import QnaModal from "@/app/student/learning/components/QnaModal";
 
 export default function Playlist({
@@ -141,155 +134,147 @@ export default function Playlist({
   return (
     <Card className="d-flex flex-column h-100 overflow-hidden rounded-0 w-100">
       <CardHeader className="bg-light rounded-0 flex-shrink-0">
-        <h1 className="mt-2 fs-5">{course?.title || "Course"}</h1>
+        <h1 className="fs-5">{course?.title || "Course"}</h1>
 
         {course?.instructor?.name && (
           <h6 className="mb-0 fw-normal">By {course.instructor.name}</h6>
         )}
       </CardHeader>
 
-      <CardBody className="flex-grow-1 overflow-auto">
-        <div className="d-sm-flex justify-content-sm-between">
-          <h5>Course content</h5>
-        </div>
+      <CardBody className="flex-grow-1 overflow-auto p-2">
+        <Col xs={12} className="px-0">
+          <Accordion
+            activeKey={activeKey}
+            onSelect={(eventKey) => setActiveKey(eventKey)}
+            flush
+            className="accordion-flush-light"
+          >
+            {sections.map((section, sectionIndex) => {
+              const eventKey = String(section.secId || sectionIndex);
+              const lectures = section.lectures || [];
 
-        <hr />
+              const limitByThree = lectures.length > 3;
+              const isFutureSectionLocked =
+                sectionIndex > unlockedSectionIndex;
 
-        <Row>
-          <Col xs={12}>
-            <Accordion
-              activeKey={activeKey}
-              onSelect={(eventKey) => setActiveKey(eventKey)}
-              flush
-              className="accordion-flush-light"
-            >
-              {sections.map((section, sectionIndex) => {
-                const eventKey = String(section.secId || sectionIndex);
-                const lectures = section.lectures || [];
-
-                const limitByThree = lectures.length > 3;
-                const isFutureSectionLocked =
-                  sectionIndex > unlockedSectionIndex;
-
-                const sectionCompleted =
-                  lectures.length > 0 &&
-                  lectures.every(
-                    (lecture) =>
-                      lectureProgress?.[lecture.lecId]?.status === "completed"
-                  );
-
-                return (
-                  <AccordionItem eventKey={eventKey} key={eventKey}>
-                    <AccordionHeader>
-                      <span className="mb-0 fw-bold d-inline-flex align-items-center justify-content-between w-100">
-                        {section.title || `Section ${sectionIndex + 1}`}
-
-                        {isFutureSectionLocked && " 🔒"}
-
-                        {sectionCompleted && !isFutureSectionLocked && (
-                          <BsCheckCircleFill
-                            size={14}
-                            className="text-success ms-2 flex-shrink-0"
-                            title="Section completed"
-                          />
-                        )}
-                      </span>
-                    </AccordionHeader>
-
-                    <AccordionBody className="px-3">
-                      <div className="vstack gap-3">
-                        {lectures.map((lecture, lectureIndex) => {
-                          const isQuotaLocked =
-                            limitByThree && lectureIndex >= 3;
-                          const isLocked =
-                            isFutureSectionLocked || isQuotaLocked;
-
-                          const isActive = currentId === lecture.lecId;
-                          const progress = lectureProgress?.[lecture.lecId] || {};
-                          const status = progress.status || "not_started";
-
-                          const isCompleted = status === "completed";
-                          const isInProgress =
-                            status === "in_progress" ||
-                            status === "in-progress";
-
-                          const progressPercent = getProgressPercent(lecture);
-
-                          const timeLabel =
-                            typeof lecture.duration === "number"
-                              ? formatDuration(lecture.duration)
-                              : "--";
-
-                          let buttonVariant = "primary";
-                          let buttonContent = (
-                            <FaPlay className="me-0" size={11} />
-                          );
-
-                          if (isLocked) {
-                            buttonVariant = "light";
-                            buttonContent = <BsLockFill size={11} />;
-                          } else if (isCompleted) {
-                            buttonVariant = "success";
-                            buttonContent = <BsCheckCircleFill size={11} />;
-                          } else if (isInProgress) {
-                            buttonVariant = "outline-primary";
-                            buttonContent = (
-                              <span className="small fw-bold">
-                                {progressPercent}%
-                              </span>
-                            );
-                          }
-
-                          let titleColorClass = "";
-
-                          if (isCompleted) {
-                            titleColorClass = "text-success";
-                          } else if (isInProgress) {
-                            titleColorClass = "text-primary";
-                          } else if (isActive) {
-                            titleColorClass = "text-danger";
-                          }
-
-                          return (
-                            <Fragment key={lecture.lecId || lectureIndex}>
-                              <div className="d-flex justify-content-between align-items-center">
-                                <div className="position-relative d-flex align-items-center">
-                                  <Button
-                                    variant={buttonVariant}
-                                    size="sm"
-                                    className="btn-round mb-0 stretched-link position-static"
-                                    onClick={() => {
-                                      if (!isLocked) handlePlay(lecture);
-                                    }}
-                                    disabled={isLocked}
-                                    title={lecture.title}
-                                  >
-                                    {buttonContent}
-                                  </Button>
-
-                                  <span
-                                    className={`d-inline-block text-truncate ms-2 mb-0 h6 fw-light w-100px w-sm-200px ${titleColorClass}`}
-                                    title={lecture.title}
-                                  >
-                                    {lecture.title || "Untitled"}
-                                  </span>
-                                </div>
-
-                                <p className="mb-0 text-truncate">
-                                  {timeLabel}
-                                </p>
-                              </div>
-                            </Fragment>
-                          );
-                        })}
-                      </div>
-                    </AccordionBody>
-                  </AccordionItem>
+              const sectionCompleted =
+                lectures.length > 0 &&
+                lectures.every(
+                  (lecture) =>
+                    lectureProgress?.[lecture.lecId]?.status === "completed"
                 );
-              })}
-            </Accordion>
-          </Col>
-        </Row>
+
+              return (
+                <AccordionItem eventKey={eventKey} key={eventKey}>
+                  <AccordionHeader>
+                    <span className="mb-0 fw-bold d-inline-flex align-items-center justify-content-between w-100">
+                      {section.title || `Section ${sectionIndex + 1}`}
+
+                      {isFutureSectionLocked && " 🔒"}
+
+                      {sectionCompleted && !isFutureSectionLocked && (
+                        <BsCheckCircleFill
+                          size={14}
+                          className="text-success mx-1 flex-shrink-0"
+                          title="Section completed"
+                        />
+                      )}
+                    </span>
+                  </AccordionHeader>
+
+                  <AccordionBody className="px-3">
+                    <div className="gap-3">
+                      {lectures.map((lecture, lectureIndex) => {
+                        const isQuotaLocked =
+                          limitByThree && lectureIndex >= 3;
+                        const isLocked =
+                          isFutureSectionLocked || isQuotaLocked;
+
+                        const isActive = currentId === lecture.lecId;
+                        const progress = lectureProgress?.[lecture.lecId] || {};
+                        const status = progress.status || "not_started";
+
+                        const isCompleted = status === "completed";
+                        const isInProgress =
+                          status === "in_progress" ||
+                          status === "in-progress";
+
+                        const progressPercent = getProgressPercent(lecture);
+
+                        const timeLabel =
+                          typeof lecture.duration === "number"
+                            ? formatDuration(lecture.duration)
+                            : "--";
+
+                        let buttonVariant = "primary";
+                        let buttonContent = (
+                          <FaPlay className="me-0" size={11} />
+                        );
+
+                        if (isLocked) {
+                          buttonVariant = "light";
+                          buttonContent = <BsLockFill size={11} />;
+                        } else if (isCompleted) {
+                          buttonVariant = "success";
+                          buttonContent = <BsCheckCircleFill size={11} />;
+                        } else if (isInProgress) {
+                          buttonVariant = "outline-primary";
+                          buttonContent = (
+                            <span className="small fw-bold">
+                              {progressPercent}%
+                            </span>
+                          );
+                        }
+
+                        let titleColorClass = "";
+
+                        if (isCompleted) {
+                          titleColorClass = "text-success";
+                        } else if (isInProgress) {
+                          titleColorClass = "text-primary";
+                        } else if (isActive) {
+                          titleColorClass = "text-danger";
+                        }
+
+                        return (
+                          <Fragment key={lecture.lecId || lectureIndex}>
+                            <div className="d-flex justify-content-between align-items-center">
+                              <div className="position-relative d-flex align-items-center">
+                                <Button
+                                  variant={buttonVariant}
+                                  size="sm"
+                                  className="btn-round mb-0 stretched-link position-static"
+                                  onClick={() => {
+                                    if (!isLocked) handlePlay(lecture);
+                                  }}
+                                  disabled={isLocked}
+                                  title={lecture.title}
+                                >
+                                  {buttonContent}
+                                </Button>
+
+                                <span
+                                  className={`d-inline-block text-truncate ms-2 mb-0 h6 fw-light w-100px w-sm-200px ${titleColorClass}`}
+                                  title={lecture.title}
+                                >
+                                  {lecture.title || "Untitled"}
+                                </span>
+                              </div>
+
+                              <p className="mb-0 text-truncate">
+                                {timeLabel}
+                              </p>
+                            </div>
+                          </Fragment>
+                        );
+                      })}
+                    </div>
+                  </AccordionBody>
+                </AccordionItem>
+              );
+            })}
+          </Accordion>
+        </Col>
       </CardBody>
 
       <CardFooter className="flex-shrink-0">

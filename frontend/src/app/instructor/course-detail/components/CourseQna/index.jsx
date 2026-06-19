@@ -81,12 +81,11 @@ export default function CourseQna({ courseId, col = 12 }) {
           )}
         </div>
 
-        <div className="card-body vstack gap-4">
+        <div className="card-body gap-4">
           {/* Compose */}
           <div>
             <h6 className="mb-2">Ask a question</h6>
             <QnaCompose
-              placeholder="Write a question or note for your students..."
               submitLabel="Post"
               onSubmit={handleNewQuestion}
               disabled={submitting}
@@ -105,7 +104,7 @@ export default function CourseQna({ courseId, col = 12 }) {
               No questions yet for this course.
             </p>
           ) : (
-            <div className="vstack gap-3">
+            <div className="gap-3">
               {questions.map((q) => (
                 <QnaQuestion
                   key={q.id}

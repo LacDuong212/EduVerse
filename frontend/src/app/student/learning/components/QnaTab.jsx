@@ -39,7 +39,7 @@ export default function QnaTab({ sections = [] }) {
     postQuestion({ content, lectureId: selectedLectureId || null });
 
   return (
-    <div className="vstack gap-4">
+    <div className="gap-4">
       {/* Lecture filter */}
       {sections.length > 0 && (
         <Form.Select
@@ -63,7 +63,6 @@ export default function QnaTab({ sections = [] }) {
       <div>
         <h6 className="mb-2">Ask a question</h6>
         <QnaCompose
-          placeholder="What would you like to know about this course?"
           submitLabel="Post Question"
           onSubmit={handleNewQuestion}
           disabled={submitting}
@@ -82,7 +81,7 @@ export default function QnaTab({ sections = [] }) {
           No questions yet. Be the first to ask!
         </p>
       ) : (
-        <div className="vstack gap-3">
+        <div className="gap-3">
           {questions.map((q) => (
             <QnaQuestion
               key={q.id}

@@ -1,17 +1,17 @@
-import PageMetaData from "@/components/PageMetaData";
 import { Alert, Button, Col, Row } from "react-bootstrap";
-import useDashboard from "./useDashboard";
-import { useLearningStreak } from "@/components/StudentLayoutComponents/useStudentLayout";
-import SkillRadarSection from "./components/SkillRadarSection";
-import ListedCourses from "./components/ListedCourses";
-import ContinueLearning from "./components/ContinueLearning";
+import PageMetaData from "@/components/PageMetaData";
+import { useLearningStreak } from "@/components/studentLayoutComponents/useStudentLayout";
 import ActivityCalendar from "./components/ActivityCalendar";
+import CloseToCompletion from "./components/CloseToCompletion";
+import ContinueLearning from "./components/ContinueLearning";
+import DashboardEmptyState from "./components/DashboardEmptyState";
+import DashboardSkeleton from "./components/DashboardSkeleton";
+import ListedCourses from "./components/ListedCourses";
+import SkillRadarSection from "./components/SkillRadarSection";
 import StatsCards from "./components/StatsCards";
 import StreakWidget from "./components/StreakWidget";
 import WeeklyActivityStrip from "./components/WeeklyActivityStrip";
-import DashboardSkeleton from "./components/DashboardSkeleton";
-import DashboardEmptyState from "./components/DashboardEmptyState";
-import CloseToCompletion from "./components/CloseToCompletion";
+import useDashboard from "./useDashboard";
 
 const SectionDivider = ({ label }) => (
   <div className="d-flex align-items-center gap-2 mb-3 mt-2">

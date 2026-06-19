@@ -16,8 +16,7 @@ export default function QnaReply({ reply, onDelete, submitting }) {
 
   return (
     <div
-      className="d-flex gap-2 p-2 rounded-2"
-      style={isInstructorPost ? { backgroundColor: "#F9F9D6" } : undefined}
+      className={`d-flex gap-2 p-2 rounded-2 ${isInstructorPost ? "border border-info" : ""}`}
     >
       <div className="flex-shrink-0 mt-1">
         {author?.avatar ? (
