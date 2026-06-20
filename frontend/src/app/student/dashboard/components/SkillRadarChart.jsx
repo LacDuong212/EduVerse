@@ -173,6 +173,13 @@ const SkillRadarChart = ({
             title: (items) => items?.[0]?.label || "",
             label: (ctx) => {
               const val = Math.round(ctx.parsed.r);
+              if (ctx.dataset.label === "My Skills") {
+                const origLabel = labels[ctx.dataIndex];
+                const ld = radar.raw?.lectureData?.[origLabel];
+                if (ld && ld.total > 0) {
+                  return `My Skills: ${val}% · ${ld.completed} / ${ld.total} lectures`;
+                }
+              }
               return `${ctx.dataset.label}: ${val}%`;
             },
             afterBody: (items) => {
@@ -232,7 +239,7 @@ const SkillRadarChart = ({
         line: { borderJoinStyle: "round" },
       },
     }),
-    [t.bodyColor, t.secondaryColor, t.grid, t.angle]
+    [t.bodyColor, t.secondaryColor, t.grid, t.angle, labels, radar.raw?.lectureData]
   );
 
   return (

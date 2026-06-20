@@ -29,6 +29,7 @@ import OrderListPage from "../app/student/my-orders/OrderListPage";
 import OrderDetailPage from "../app/student/my-orders/detail/OrderDetailPage";
 import AccountSettingsPage from "../app/pages/accountSettings";
 import StudentDashboard from "../app/student/dashboard";
+import AchievementsPage from "../app/student/achievements";
 import CourseResultPage from "../app/pages/course/video-player/components/CourseResultPage";
 
 // PUBLIC
@@ -200,6 +201,11 @@ export const studentRoutes = [{
   name: "dashboard",
   isNested: true,
   element: <StudentDashboard />
+}, {
+  path: "/student/achievements",
+  name: "Achievements",
+  isNested: true,
+  element: <AchievementsPage />
 }, {
   path: "/student/settings",
   name: "Settings",

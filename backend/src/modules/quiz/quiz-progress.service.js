@@ -1,4 +1,5 @@
 import AppError from "#exceptions/app.error.js";
+import { evaluateAndAward } from "#modules/badge/badge.evaluator.js";
 import QuizProgress from "./quiz-progress.model.js";
 
 export const saveQuizResult = async (
@@ -51,6 +52,29 @@ export const saveQuizResult = async (
   });
 
   await progress.save();
+
+  // Badge evaluation only on a perfect score — avoids the cross-course query on
+  // every quiz submission, since only perfect scores can advance badge thresholds.
+  const isPerfect = safeScore === safeTotal;
+  if (isPerfect) {
+    try {
+      // Count all-time perfect quizzes for this user across all courses.
+      const allProgress = await QuizProgress.find({ user: userId })
+        .select("quizzes.score quizzes.totalQuestions")
+        .lean();
+
+      const perfectCount = allProgress.reduce(
+        (n, p) =>
+          n +
+          p.quizzes.filter(
+            (q) => q.score === q.totalQuestions && q.totalQuestions > 0
+          ).length,
+        0
+      );
+
+      await evaluateAndAward(userId, "quiz_submitted", { perfectQuizCount: perfectCount });
+    } catch { /* badge failure must not affect quiz result save */ }
+  }
 
   return progress;
 };

@@ -7,7 +7,6 @@ import CourseProgress from "#modules/learning/course-progress.model.js";
 import Order, { STATUS_ENUM as ORDER_STATUS } from "#modules/order/order.model.js";
 
 const INSTRUCTOR_NET_PROFIT = 0.8;
-const TARGET_PER_CATEGORY = 5;
 
 const formatMonthlyData = (dbResults, startDate) => {
   const result = [];
@@ -324,18 +323,33 @@ export const getInstructorEarnings = async (insId) => {
 export const getStudentSkillsRadar = async (stuId) => {
   if (!stuId) throw new AppError("Student ID is required.", 400);
 
-  const statsMap = await getCategoryCompletionStats();
+  const { statsMap, platformTotals } = await getCategoryCompletionStats();
 
-  const userStats = statsMap[stuId.toString()] || {};
-  const labels = Object.keys(userStats).sort();
-  const values = labels.map(cat => userStats[cat]);
+  const userEntry = statsMap[stuId.toString()] || {};
+
+  // Labels from ALL users so system avg is always populated
+  const allCategories = new Set();
+  Object.values(statsMap).forEach(catMap =>
+    Object.keys(catMap).forEach(cat => allCategories.add(cat))
+  );
+  const labels = [...allCategories].sort();
+  const values = labels.map(cat => userEntry[cat]?.pct ?? 0);
 
   const allUserIds = Object.keys(statsMap);
-  const totalUsers = allUserIds.length || 1;
+  const totalUsers  = allUserIds.length || 1;
 
   const systemAvgValues = labels.map(cat => {
-    const sum = allUserIds.reduce((total, uid) => total + (statsMap[uid][cat] || 0), 0);
+    const sum = allUserIds.reduce((total, uid) => total + (statsMap[uid][cat]?.pct || 0), 0);
     return Math.round(sum / totalUsers);
+  });
+
+  // Raw lecture counts for tooltip display on the frontend
+  const lectureData = {};
+  labels.forEach(cat => {
+    lectureData[cat] = {
+      completed: userEntry[cat]?.completed ?? 0,
+      total:     platformTotals[cat] ?? 0,
+    };
   });
 
   return {
@@ -343,8 +357,8 @@ export const getStudentSkillsRadar = async (stuId) => {
     values,
     systemAvgValues,
     raw: {
-      student: userStats,
-      totalActiveLearners: totalUsers
+      lectureData,
+      totalActiveLearners: totalUsers,
     }
   };
 };
@@ -540,57 +554,53 @@ export const getStudentDistributionByCourse = async (insId, limit = 10) => {
 };
 
 const getCategoryCompletionStats = async () => {
-  const pipeline = [
-    {
-      $match: {
-        totalLectures: { $gt: 0 },
-        $expr: { $eq: ["$completedLecturesCount", "$totalLectures"] }
-      }
-    },
-    {
-      $lookup: {
-        from: "courses",
-        localField: "course",
-        foreignField: "_id",
-        as: "courseData"
-      }
-    },
+  const categoryLookup = [
+    { $lookup: { from: "courses",    localField: "course",            foreignField: "_id", as: "courseData" } },
     { $unwind: "$courseData" },
-    {
-      $lookup: {
-        from: "categories",
-        localField: "courseData.category",
-        foreignField: "_id",
-        as: "categoryData"
-      }
-    },
+    { $lookup: { from: "categories", localField: "courseData.category", foreignField: "_id", as: "categoryData" } },
     { $unwind: "$categoryData" },
+  ];
+
+  // Phase 1 — platform-wide lecture total per category (deduplicated by course)
+  const platformResults = await CourseProgress.aggregate([
+    { $match: { totalLectures: { $gt: 0 } } },
+    { $group: { _id: "$course", totalLectures: { $max: "$totalLectures" } } },
+    { $lookup: { from: "courses",    localField: "_id",              foreignField: "_id", as: "courseData" } },
+    { $unwind: "$courseData" },
+    { $lookup: { from: "categories", localField: "courseData.category", foreignField: "_id", as: "categoryData" } },
+    { $unwind: "$categoryData" },
+    { $group: { _id: "$categoryData.name", platformLectures: { $sum: "$totalLectures" } } },
+  ]);
+
+  const platformTotals = platformResults.reduce((acc, r) => {
+    acc[r._id] = r.platformLectures;
+    return acc;
+  }, {});
+
+  // Phase 2 — per-user completed lectures per category
+  const userResults = await CourseProgress.aggregate([
+    { $match: { totalLectures: { $gt: 0 } } },
+    ...categoryLookup,
     {
       $group: {
         _id: { userId: "$user", categoryName: "$categoryData.name" },
-        completedCount: { $sum: 1 }
+        completedLectures: { $sum: "$completedLecturesCount" },
       }
     },
-    {
-      $project: {
-        userId: "$_id.userId",
-        categoryName: "$_id.categoryName",
-        percentage: {
-          $min: [
-            100,
-            { $round: { $divide: [{ $multiply: ["$completedCount", 100] }, TARGET_PER_CATEGORY] } }
-          ]
-        }
-      }
-    }
-  ];
+  ]);
 
-  const results = await CourseProgress.aggregate(pipeline);
-
-  return results.reduce((acc, progress) => {
-    const stuId = progress.userId.toString();
-    if (!acc[stuId]) acc[stuId] = {};
-    acc[stuId][progress.categoryName] = progress.percentage;
+  // Phase 3 — percentage = completedLectures / platformTotal × 100
+  const statsMap = userResults.reduce((acc, row) => {
+    const uid          = row._id.userId.toString();
+    const cat          = row._id.categoryName;
+    const platformTotal = platformTotals[cat] || 1;
+    if (!acc[uid]) acc[uid] = {};
+    acc[uid][cat] = {
+      pct:       Math.min(100, Math.round((row.completedLectures / platformTotal) * 100)),
+      completed: row.completedLectures,
+    };
     return acc;
   }, {});
+
+  return { statsMap, platformTotals };
 };

@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 const clamp = (n) => Math.max(0, Math.min(100, Number(n) || 0));
 
 const SkillRadarCompareText = ({ radar }) => {
+  const totalActiveLearners = radar?.raw?.totalActiveLearners ?? 0;
+
   const rows = useMemo(() => {
     const labels = Array.isArray(radar?.labels) ? radar.labels : [];
     const values = Array.isArray(radar?.values) ? radar.values : [];
@@ -26,8 +28,9 @@ const SkillRadarCompareText = ({ radar }) => {
     [rows]
   );
 
+  // Only show focus areas where system avg is meaningful (≥10%) to avoid noise
   const focusAreas = useMemo(
-    () => rows.filter((r) => r.diff < 0).sort((a, b) => a.diff - b.diff).slice(0, 3),
+    () => rows.filter((r) => r.diff < 0 && r.avg >= 10).sort((a, b) => a.diff - b.diff).slice(0, 3),
     [rows]
   );
 
@@ -91,6 +94,12 @@ const SkillRadarCompareText = ({ radar }) => {
           </div>
         )}
       </div>
+
+      {totalActiveLearners > 0 && (
+        <div className="small text-body mt-3" style={{ opacity: 0.38 }}>
+          Compared to {totalActiveLearners} active learner{totalActiveLearners !== 1 ? "s" : ""} on EduVerse
+        </div>
+      )}
     </div>
   );
 };

@@ -19,6 +19,7 @@ import userRoute from "#modules/user/user.route.js";
 import videoRoute from "#modules/video/video.route.js";
 import wishlistRoute from "#modules/wishlist/wishlist.route.js";
 import noteRoute from "#modules/note/note.route.js";
+import badgeRoute from "#modules/badge/badge.route.js";
 
 // @route /api
 const apiRouter = Router();
@@ -43,5 +44,6 @@ apiRouter.use("/user", userRoute);
 apiRouter.use("/videos", videoRoute);
 apiRouter.use("/wishlist", wishlistRoute);
 apiRouter.use("/notes", noteRoute);
+apiRouter.use("/badges", badgeRoute);
 
 export default apiRouter;

@@ -4,7 +4,6 @@ import useDashboard from "./useDashboard";
 import { useLearningStreak } from "@/components/StudentLayoutComponents/useStudentLayout";
 import SkillRadarSection from "./components/SkillRadarSection";
 import ListedCourses from "./components/ListedCourses";
-import ContinueLearning from "./components/ContinueLearning";
 import ActivityCalendar from "./components/ActivityCalendar";
 import StatsCards from "./components/StatsCards";
 import StreakWidget from "./components/StreakWidget";
@@ -12,6 +11,8 @@ import WeeklyActivityStrip from "./components/WeeklyActivityStrip";
 import DashboardSkeleton from "./components/DashboardSkeleton";
 import DashboardEmptyState from "./components/DashboardEmptyState";
 import CloseToCompletion from "./components/CloseToCompletion";
+import BadgesWidget from "./components/BadgesWidget";
+import ResumeCard from "./components/ResumeCard";
 
 const SectionDivider = ({ label }) => (
   <div className="d-flex align-items-center gap-2 mb-3 mt-2">
@@ -36,7 +37,7 @@ const StudentDashboard = () => {
   if (loading && !radar && !stats) {
     return (
       <div className="pb-5">
-        <PageMetaData title="My Profile" />
+        <PageMetaData title="Dashboard" />
         <DashboardSkeleton />
       </div>
     );
@@ -45,7 +46,7 @@ const StudentDashboard = () => {
   if (error) {
     return (
       <div className="pb-5">
-        <PageMetaData title="My Profile" />
+        <PageMetaData title="Dashboard" />
         <Alert
           variant="danger"
           className="d-flex align-items-center justify-content-between"
@@ -65,32 +66,38 @@ const StudentDashboard = () => {
 
   return (
     <div className="pb-5">
-      <PageMetaData title="My Profile" />
+      <PageMetaData title="Dashboard" />
 
-      {/* 1 — Immediate action */}
-      <ContinueLearning courses={inProgressCourses} />
+      {/* 1 — Primary action: resume last lecture */}
+      <ResumeCard />
 
       {/* 2 — Progress context */}
       <StatsCards stats={stats} courseStats={courseStats} />
+
+      {/* 3 — This week's activity (visible without scrolling) */}
+      <WeeklyActivityStrip streak={streak} />
 
       {hasNoActivity ? (
         <DashboardEmptyState />
       ) : (
         <>
-          {/* 3 — Skills & streak */}
-          <SectionDivider label="Skills & Streak" />
+          {/* 4 — Skills & progress */}
+          <SectionDivider label="Skills & Progress" />
           <Row className="g-3 mb-3">
+            {/* Left: chart + in-progress courses */}
             <Col xs={12} lg={8} className="d-flex flex-column gap-3">
               <SkillRadarSection radar={radar} />
-            </Col>
-            <Col xs={12} lg={4} className="d-flex flex-column gap-3">
-              <StreakWidget streak={streak} />
               <CloseToCompletion courses={inProgressCourses} />
             </Col>
-          </Row>
-          <WeeklyActivityStrip streak={streak} />
 
-          {/* 4 — Activity history */}
+            {/* Right: streak + badges */}
+            <Col xs={12} lg={4} className="d-flex flex-column gap-3">
+              <StreakWidget streak={streak} />
+              <BadgesWidget />
+            </Col>
+          </Row>
+
+          {/* 6 — Activity history */}
           <SectionDivider label="Activity" />
           <ActivityCalendar streak={streak} />
         </>

@@ -1,6 +1,6 @@
 import { getStudentSkillsRadar } from "#modules/chart/chart.service.js";
 import { getPaginatedStudentCourses } from "#modules/enrollment/enrollment.service.js";
-import { getCourseProgress } from "#modules/learning/learning.service.js";
+import { getCourseProgress, getResumeCardData } from "#modules/learning/learning.service.js";
 import * as streakService from "#modules/streak/streak.service.js";
 import { sendPaginatedResponse, sendSuccessResponse } from "#utils/response.js";
 import asyncHandler from "#utils/asyncHandler.js";
@@ -118,6 +118,14 @@ export const getMySkillRadar = asyncHandler(async (req, res) => {
   const userId = req.user?.userId;
   const result = await getStudentSkillsRadar(userId);
   return sendSuccessResponse(res, 200, "Get skill radar successfully!", result);
+});
+
+// @desc  Get the single most-recently-accessed in-progress lecture for the resume card
+// @route GET /resume
+export const getResumeCard = asyncHandler(async (req, res) => {
+  const userId = req.user?.userId;
+  const result = await getResumeCardData(userId);
+  return sendSuccessResponse(res, 200, "Get resume card successfully!", result);
 });
 
 // @desc  Get enrolled course detail for learning page

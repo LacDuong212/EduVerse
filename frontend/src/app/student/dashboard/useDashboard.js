@@ -10,9 +10,7 @@ const ALL_CATEGORIES = [
   "DevOps",
   "Data",
   "Network",
-  "Game Development",
   "Mobile Development",
-  "Cloud Development",
   "Artificial Intelligence",
 ];
 

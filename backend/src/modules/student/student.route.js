@@ -29,6 +29,7 @@ studentRoute.get("/stats", studentController.getStats);
 studentRoute.get("/streak", studentController.getMyStreak);
 // studentRoute.post("/streak", studentController.updateMyStreak);
 studentRoute.get("/courses/stats", studentController.getCoursesStats);
+studentRoute.get("/resume", studentController.getResumeCard);
 studentRoute.get(
   "/courses/:courseId",
   validate(studentSchema.courseIdParam),
