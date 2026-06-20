@@ -34,11 +34,10 @@ const NoteItem = memo(function NoteItem({ note, isActive, onSeek, onEdit, onDele
 
   return (
     <div
-      className={`rounded-2 p-2 mb-2 border ${isActive ? "border-primary" : "border-light"}`}
+      className={`rounded-2 p-2 ${isActive ? "border border-primary" : ""}`}
       style={isActive ? { backgroundColor: "#eef0fd" } : undefined}
     >
-      {/* Timestamp + actions row */}
-      <div className="d-flex align-items-center justify-content-between mb-1">
+      <div className="d-flex align-items-center justify-content-between mb-2">
         <button
           className="btn btn-sm btn-outline-primary py-0 px-2 mb-0 fw-semibold flex-shrink-0"
           style={{ fontSize: 12, lineHeight: "20px" }}

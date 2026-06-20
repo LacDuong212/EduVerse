@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Form, Pagination, Spinner } from "react-bootstrap";
+import { Col, Form, Pagination, Row, Spinner } from "react-bootstrap";
+import ChoicesFormInput from "@/components/form/ChoicesFormInput";
 import useQna from "../hooks/useQna";
 import QnaCompose from "./QnaCompose";
 import QnaQuestion from "./QnaQuestion";
@@ -40,34 +41,39 @@ export default function QnaTab({ sections = [] }) {
 
   return (
     <div className="gap-4">
-      {/* Lecture filter */}
-      {sections.length > 0 && (
-        <Form.Select
-          size="sm"
-          style={{ maxWidth: 340 }}
-          value={selectedLectureId}
-          onChange={handleFilterChange}
-        >
-          <option value="">All lectures</option>
-          {sections.map((sec) =>
-            (sec.lectures || []).map((lec) => (
-              <option key={lec.lecId} value={lec.lecId}>
-                {sec.title} — {lec.title}
-              </option>
-            ))
-          )}
-        </Form.Select>
-      )}
+      <Row className="align-items-center mb-3 g-3">
+        <Col xs={12} sm={6} md={4}>
+          <span className="h6 mb-0 d-block d-md-inline" style={{ fontSize: "1.3rem" }}>
+            Ask a question
+          </span>
+        </Col>
 
-      {/* New question compose */}
-      <div>
-        <h6 className="mb-2">Ask a question</h6>
-        <QnaCompose
-          submitLabel="Post Question"
-          onSubmit={handleNewQuestion}
-          disabled={submitting}
-        />
-      </div>
+        {sections.length > 0 && (
+          <Col xs={12} sm={6} md={8}>
+            <ChoicesFormInput
+              name="categoryId"
+              className="w-100"
+              value={selectedLectureId}
+              onChange={handleFilterChange}
+            >
+              <option value="">All lectures</option>
+              {sections.map((sec) =>
+                (sec.lectures || []).map((lec) => (
+                  <option key={lec.lecId} value={lec.lecId}>
+                    {sec.title} — {lec.title}
+                  </option>
+                ))
+              )}
+            </ChoicesFormInput>
+          </Col>
+        )}
+      </Row>
+
+      <QnaCompose
+        submitLabel="Post Question"
+        onSubmit={handleNewQuestion}
+        disabled={submitting}
+      />
 
       <hr className="my-0" />
 
