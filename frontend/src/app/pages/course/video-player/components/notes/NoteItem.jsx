@@ -40,7 +40,7 @@ const NoteItem = memo(function NoteItem({ note, isActive, onSeek, onEdit, onDele
       {/* Timestamp + actions row */}
       <div className="d-flex align-items-center justify-content-between mb-1">
         <button
-          className="btn btn-sm btn-outline-primary py-0 px-2 fw-semibold flex-shrink-0"
+          className="btn btn-sm btn-outline-primary py-0 px-2 mb-0 fw-semibold flex-shrink-0"
           style={{ fontSize: 12, lineHeight: "20px" }}
           onClick={() => onSeek(note.timestamp)}
           title="Jump to this moment"
@@ -49,20 +49,20 @@ const NoteItem = memo(function NoteItem({ note, isActive, onSeek, onEdit, onDele
         </button>
 
         {!editing && (
-          <div className="d-flex gap-1 ms-2">
+          <div className="d-flex gap-2 ms-2">
             <button
-              className="btn btn-link btn-sm p-0 text-body opacity-50"
+              className="btn btn-link btn-sm p-0 mb-0 text-body opacity-50"
               onClick={handleStartEdit}
               title="Edit"
             >
-              <BsPencil size={12} />
+              <BsPencil size={16} />
             </button>
             <button
-              className="btn btn-link btn-sm p-0 text-danger"
+              className="btn btn-link btn-sm p-0 mb-0 text-danger"
               onClick={() => onDelete(note.id)}
               title="Delete"
             >
-              <BsTrash size={12} />
+              <BsTrash size={16} />
             </button>
           </div>
         )}

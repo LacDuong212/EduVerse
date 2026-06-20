@@ -20,7 +20,7 @@ export default function CoursePlaylistSidebar({
 
   return (
     <div
-      className="flex-shrink-0 border-start bg-white position-relative h-100"
+      className="flex-shrink-0 border-start position-relative h-100"
       style={{ zIndex: 10 }}
     >
       <button
@@ -36,7 +36,7 @@ export default function CoursePlaylistSidebar({
         </span>
       </button>
 
-      <Collapse className="collapse-horizontal h-100" in={isOpen} dimension="width">
+      <Collapse className="collapse-horizontal h-100 bg-light" in={isOpen} dimension="width">
         <div className="d-flex flex-column h-100 w-280px w-sm-400px">
           {/* Tab bar */}
           <div className="d-flex border-bottom flex-shrink-0">

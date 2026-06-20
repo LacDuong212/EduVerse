@@ -25,7 +25,7 @@ const QUILL_FORMATS = [
 const isEmptyHtml = (html) => !html?.replace(/<[^>]*>/g, "").trim();
 
 export default function QnaCompose({
-  placeholder = "Write your question...",
+  placeholder = "",
   submitLabel = "Post Question",
   onSubmit,
   disabled = false,
@@ -57,7 +57,7 @@ export default function QnaCompose({
 
   return (
     <form onSubmit={handleSubmit}>
-      <div className="mb-1" style={{ minHeight: 120 }}>
+      <div className="mb-3">
         <ReactQuill
           theme="snow"
           value={value}

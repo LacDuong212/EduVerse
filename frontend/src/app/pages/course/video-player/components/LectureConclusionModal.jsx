@@ -215,7 +215,7 @@ export default function LectureConclusionModal({
                   </CardHeader>
 
                   <CardBody>
-                    <div className="vstack gap-2">
+                    <div className="gap-2">
                       {(quiz.options || []).map((opt, oIndex) => {
                         let labelClass =
                           "btn w-100 text-start d-flex justify-content-between align-items-center text-wrap h-auto ";

@@ -78,7 +78,7 @@ const NotificationItem = ({ noti, onMarkRead }) => {
   const handleClick = async(e) => {
     // e.stopPropagation();
 
-    const couponMatch = noti.message?.match(/Coupon code:\s*([A-Z0-9-]+)/);
+    const couponMatch = noti.message?.match(/Coupon code:\s*([A-Z0-9-]+)/i);
     if (couponMatch && couponMatch[1]) {
       try {
         await navigator.clipboard.writeText(couponMatch[1]);

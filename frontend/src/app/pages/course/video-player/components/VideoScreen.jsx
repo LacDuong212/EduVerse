@@ -36,9 +36,9 @@ const VideoScreen = ({
   };
 
   return (
-    <div className="overflow-hidden fullscreen-video w-100 position-relative bg-black">
+    <div className="overflow-hidden fullscreen-video position-relative p-1">
       {/* Container có ref để tracking hook truy cập <video> */}
-      <div className="video-player rounded-3" ref={playerContainerRef}>
+      <div className="video-player" ref={playerContainerRef}>
         {source && (
           <Plyr
             key={playerKey}

@@ -159,19 +159,19 @@ export default function NoteSidebar({
     <div className="d-flex flex-column h-100">
 
       {/* ── Header ── */}
-      <div className="flex-shrink-0 px-3 pt-2 border-bottom">
-        <div className="d-flex align-items-center justify-content-between mb-2">
+      <div className="flex-shrink-0 px-3 py-3 border-bottom">
+        <div className="d-flex align-items-center justify-content-between">
           {/* Scope tabs */}
           <div className="d-flex gap-1">
             <button
-              className={`btn btn-sm py-0 px-2 ${!isAll ? "btn-primary" : "btn-light text-body"}`}
+              className={`btn btn-sm py-0 px-2 mb-0 ${!isAll ? "btn-primary" : "btn-light text-body"}`}
               style={{ fontSize: 12 }}
               onClick={() => setScope("lecture")}
             >
               This Lecture{notes.length > 0 ? ` (${notes.length})` : ""}
             </button>
             <button
-              className={`btn btn-sm py-0 px-2 ${isAll ? "btn-primary" : "btn-light text-body"}`}
+              className={`btn btn-sm py-0 px-2 mb-0 ${isAll ? "btn-primary" : "btn-light text-body"}`}
               style={{ fontSize: 12 }}
               onClick={handleScopeAll}
             >
@@ -185,7 +185,7 @@ export default function NoteSidebar({
               <Button
                 size="sm"
                 variant="light"
-                className="d-flex align-items-center py-0 text-body"
+                className="d-flex align-items-center py-0 mb-0 text-body"
                 style={{ lineHeight: "24px" }}
                 title="Export notes as PDF"
                 onClick={handleExport}
@@ -197,7 +197,7 @@ export default function NoteSidebar({
               <Button
                 size="sm"
                 variant="outline-primary"
-                className="d-flex align-items-center gap-1 py-0"
+                className="d-flex align-items-center gap-1 py-0 mb-0"
                 style={{ lineHeight: "24px" }}
                 onClick={handleStartCompose}
                 disabled={composing}
@@ -210,7 +210,7 @@ export default function NoteSidebar({
 
         {/* Search */}
         {showSearch && (
-          <div className="mb-2 position-relative">
+          <div className="mt-2 position-relative">
             <BsSearch
               size={12}
               className="position-absolute text-body opacity-50"
