@@ -48,7 +48,7 @@ const ResumeCard = () => {
   const ageLabel = timeAgoLabel(lastActivityAt);
 
   return (
-    <div className="border rounded overflow-hidden mb-4">
+    <div className="border rounded overflow-hidden">
       <div className="d-flex align-items-stretch">
         {/* Thumbnail */}
         <div className="flex-shrink-0" style={{ width: 140 }}>
@@ -80,7 +80,7 @@ const ResumeCard = () => {
 
           {/* Course title */}
           <div
-            className="fw-bold text-body lh-sm"
+            className="fw-bold fs-6 lh-sm"
             style={{
               fontSize:            "0.9rem",
               display:             "-webkit-box",
@@ -98,7 +98,6 @@ const ResumeCard = () => {
             <div
               className="small text-body"
               style={{
-                opacity:             0.65,
                 display:             "-webkit-box",
                 WebkitLineClamp:     1,
                 WebkitBoxOrient:     "vertical",
@@ -116,7 +115,7 @@ const ResumeCard = () => {
               {completedLectures} / {totalLectures} lectures
             </span>
             {ageLabel && (
-              <span className="small text-body" style={{ opacity: 0.4, fontStyle: "italic" }}>
+              <span className="small text-body" style={{ opacity: 0.5, fontStyle: "italic" }}>
                 · {ageLabel}
               </span>
             )}
@@ -126,10 +125,10 @@ const ResumeCard = () => {
           <div className="mt-1">
             <Link
               to={resumePath}
-              className="btn btn-primary btn-sm"
+              className="btn btn-primary btn-sm mb-0"
               style={{ width: "fit-content" }}
             >
-              Resume →
+              Resume
             </Link>
           </div>
         </div>

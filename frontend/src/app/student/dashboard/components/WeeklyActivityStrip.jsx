@@ -102,7 +102,7 @@ const WeeklyActivityStrip = ({ streak }) => {
   const message = getMotivationMessage(currentStreak, activatedToday, daysThisWeek);
 
   return (
-    <div className="border rounded p-3 mb-4 d-flex flex-column flex-sm-row align-items-center gap-3">
+    <div className="border rounded p-3 d-flex flex-column flex-sm-row align-items-center gap-3">
       {/* Day dots */}
       <div className="d-flex gap-2 flex-shrink-0">
         {days.map((day) => (

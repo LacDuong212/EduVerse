@@ -5,7 +5,7 @@ import MyProfile from './components/MyProfile';
 const StudentAccount = () => {
 
   return (
-    <div className='pb-5'>
+    <div>
       <PageMetaData title="My Profile" />
       <MyProfile />
     </div>

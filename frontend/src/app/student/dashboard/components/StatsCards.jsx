@@ -54,7 +54,7 @@ const StatsCards = ({ stats, courseStats }) => {
   };
 
   return (
-    <Row className="g-3 mb-4">
+    <Row className="g-3">
       {CARDS.map((card) => {
         const progress = card.key === "lectures" ? getLecturesProgress() : null;
         return (

@@ -4,6 +4,7 @@ import { useAchievements } from "./useAchievements";
 import AchievementSummary from "./components/AchievementSummary";
 import EarnedBadgeGrid from "./components/EarnedBadgeGrid";
 import LockedBadgeGrid from "./components/LockedBadgeGrid";
+import ErrorState from "@/components/ErrorState";
 
 const SectionHead = ({ tag, title }) => (
   <div className="d-flex align-items-center gap-3 mb-3 pb-2 border-bottom">
@@ -27,11 +28,11 @@ const AchievementsPage = () => {
 
   if (loading) {
     return (
-      <div className="pb-5">
+      <div className="h-100 d-flex flex-column justify-content-center align-items-center">
         <PageMetaData title="Achievements" />
-        <div className="d-flex align-items-center justify-content-center py-5">
+        <div className="d-flex align-items-center justify-content-center">
           <Spinner animation="border" size="sm" className="me-2" />
-          <span className="text-body">Loading achievements…</span>
+          <span>Loading achievements…</span>
         </div>
       </div>
     );
@@ -39,23 +40,19 @@ const AchievementsPage = () => {
 
   if (error) {
     return (
-      <div className="pb-5">
+      <div className="h-100 d-flex flex-column justify-content-center align-items-center">
         <PageMetaData title="Achievements" />
-        <Alert
-          variant="danger"
-          className="d-flex align-items-center justify-content-between"
-        >
-          <div className="me-3">{error}</div>
-          <Button size="sm" variant="outline-light" onClick={refetch}>
-            Retry
-          </Button>
-        </Alert>
+        <ErrorState
+          className="d-flex flex-column justify-content-center align-items-center gap-3"
+          message={error || "Oh no, your achievements...🙁"}
+          onRetry={refetch}
+        />
       </div>
     );
   }
 
   return (
-    <div className="pb-5">
+    <div>
       <PageMetaData title="Achievements" />
 
       <Row className="g-4 align-items-start">

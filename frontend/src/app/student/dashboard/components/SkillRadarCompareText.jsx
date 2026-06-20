@@ -37,7 +37,7 @@ const SkillRadarCompareText = ({ radar }) => {
   if (!rows.length || (!strengths.length && !focusAreas.length)) return null;
 
   return (
-    <div className="mt-3 p-3 border rounded bg-transparent">
+    <div className="p-3 border rounded bg-transparent">
       <div className="fw-bold mb-3 text-body">Skill Comparison</div>
 
       <div className="d-flex flex-column gap-3">
@@ -96,7 +96,7 @@ const SkillRadarCompareText = ({ radar }) => {
       </div>
 
       {totalActiveLearners > 0 && (
-        <div className="small text-body mt-3" style={{ opacity: 0.38 }}>
+        <div className="small text-muted mt-3">
           Compared to {totalActiveLearners} active learner{totalActiveLearners !== 1 ? "s" : ""} on EduVerse
         </div>
       )}

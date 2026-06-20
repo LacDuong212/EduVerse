@@ -10,20 +10,12 @@ const ListedCourses = () => {
   if (!recommendedCourses.length) return null;
 
   return (
-    <section className="border pt-3 mt-3">
-      <Container>
-        <Row className="mb-3">
-          <Col lg={12}>
-            <h5 className="mb-0 text-body">Recommended for You</h5>
-          </Col>
-        </Row>
-        <Row>
-          <Col lg={12}>
-            <div className="tiny-slider arrow-round arrow-blur arrow-hover">
-              <CommonCourseSlider courses={recommendedCourses} />
-            </div>
-          </Col>
-        </Row>
+    <section className="border rounded mt-2 p-4">
+      <Container className="p-0">
+        <h5 className="text-body">Recommended for You</h5>
+        <div className="tiny-slider arrow-round arrow-blur arrow-hover">
+          <CommonCourseSlider courses={recommendedCourses} />
+        </div>
       </Container>
     </section>
   );
