@@ -59,7 +59,7 @@ export default function useNotes({ lectureId, courseId }) {
             next.sort((a, b) => a.timestamp - b.timestamp);
             return next;
           });
-          // Keep courseNotes in sync if already loaded
+          // Keep courseNotes in sync if already loaded (timeline order)
           setCourseNotes((prev) => {
             if (!prev.length) return prev;
             const next = [...prev, newNote];

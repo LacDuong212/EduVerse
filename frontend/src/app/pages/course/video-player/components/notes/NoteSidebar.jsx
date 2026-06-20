@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { Button, Form, Spinner } from "react-bootstrap";
-import { BsPlus, BsDownload, BsSearch } from "react-icons/bs";
+import { BsDownload, BsSearch } from "react-icons/bs";
+import { Link } from "react-router-dom";
 import NoteItem from "./NoteItem";
 import TagInput from "./TagInput";
 import { exportNotesToPDF } from "../../utils/exportNotes";
+import QnaModal from "@/app/student/learning/components/QnaModal";
 
 const formatTimestamp = (seconds) => {
   const t = Math.max(0, Math.floor(seconds));
@@ -37,30 +39,58 @@ export default function NoteSidebar({
   // --- scope / search ---
   const [scope, setScope] = useState("lecture");
   const [searchQuery, setSearchQuery] = useState("");
+  const [showQna, setShowQna] = useState(false);
 
-  // --- compose ---
-  const [composing, setComposing] = useState(false);
-  const [composeTs, setComposeTs] = useState(0);
+  // --- compose (always visible in lecture scope) ---
   const [composeContent, setComposeContent] = useState("");
   const [composeTags, setComposeTags] = useState([]);
+  const [currentTs, setCurrentTs] = useState(0);
+  const textareaRef = useRef(null);
 
-  // --- active note highlight ---
+  // --- active note highlight + auto-scroll ---
   const [activeNoteId, setActiveNoteId] = useState(null);
   const activeNoteIdRef = useRef(null);
+  const listRef = useRef(null);
+  const [listHeight, setListHeight] = useState(300);
 
-  // Reset state when lecture changes
+  useEffect(() => {
+    if (listRef.current) setListHeight(listRef.current.clientHeight);
+  }, []);
+
+  // Reset compose when lecture changes
   useEffect(() => {
     setScope("lecture");
     setSearchQuery("");
-    setComposing(false);
+    setComposeContent("");
     setComposeTags([]);
   }, [lectureId]);
+
+  // Live timestamp for compose box
+  useEffect(() => {
+    const id = setInterval(() => setCurrentTs(getCurrentTime?.() ?? 0), 500);
+    return () => clearInterval(id);
+  }, [getCurrentTime]);
+
+  // Press Enter anywhere on the page → focus note textarea (lecture scope only)
+  useEffect(() => {
+    if (scope === "all") return;
+    const onKeyDown = (e) => {
+      if (e.key !== "Enter") return;
+      const tag = document.activeElement?.tagName?.toLowerCase();
+      if (tag === "input" || tag === "textarea" || tag === "select") return;
+      e.preventDefault();
+      textareaRef.current?.focus();
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [scope]);
 
   // Active note interval (lecture scope only)
   useEffect(() => {
     if (!notes.length) return;
     const interval = setInterval(() => {
       const t = getCurrentTime?.() ?? 0;
+      // Notes are sorted ascending — last note with timestamp <= t is the active one
       let active = null;
       for (const n of notes) {
         if (n.timestamp <= t) active = n.id;
@@ -73,6 +103,17 @@ export default function NoteSidebar({
     }, 500);
     return () => clearInterval(interval);
   }, [notes, getCurrentTime]);
+
+  // Auto-scroll: pin active note to the top of the list
+  useEffect(() => {
+    if (!activeNoteId || scope !== "lecture" || !listRef.current) return;
+    const el = listRef.current.querySelector(`[data-note-id="${activeNoteId}"]`);
+    if (!el) return;
+    const containerRect = listRef.current.getBoundingClientRect();
+    const elRect = el.getBoundingClientRect();
+    const targetTop = listRef.current.scrollTop + (elRect.top - containerRect.top);
+    listRef.current.scrollTo({ top: targetTop, behavior: "smooth" });
+  }, [activeNoteId, scope]);
 
   // Lecture map: lectureId → title (for "all" scope grouping)
   const lectureMap = useMemo(() => {
@@ -93,23 +134,14 @@ export default function NoteSidebar({
     }
   };
 
-  // Compose handlers
-  const handleStartCompose = () => {
-    setComposeTs(getCurrentTime?.() ?? 0);
-    setComposeContent("");
-    setComposeTags([]);
-    setComposing(true);
-  };
-
   const handleSubmitNote = async () => {
     if (!composeContent.trim()) return;
     const created = await addNote({
-      timestamp: composeTs,
+      timestamp: getCurrentTime?.() ?? 0,
       content: composeContent.trim(),
       tags: composeTags,
     });
     if (created) {
-      setComposing(false);
       setComposeContent("");
       setComposeTags([]);
     }
@@ -177,32 +209,18 @@ export default function NoteSidebar({
           </div>
 
           {/* Actions */}
-          <div className="d-flex gap-1">
-            {hasExportable && (
-              <Button
-                size="sm"
-                variant="light"
-                className="d-flex align-items-center py-0 mb-0 text-body"
-                style={{ lineHeight: "24px" }}
-                title="Export notes as PDF"
-                onClick={handleExport}
-              >
-                <BsDownload size={13} />
-              </Button>
-            )}
-            {!isAll && (
-              <Button
-                size="sm"
-                variant="outline-primary"
-                className="d-flex align-items-center gap-1 py-0 mb-0"
-                style={{ lineHeight: "24px" }}
-                onClick={handleStartCompose}
-                disabled={composing}
-              >
-                <BsPlus size={16} /> Add
-              </Button>
-            )}
-          </div>
+          {hasExportable && (
+            <Button
+              size="sm"
+              variant="light"
+              className="d-flex align-items-center py-0 text-body"
+              style={{ lineHeight: "24px" }}
+              title="Export notes as PDF"
+              onClick={handleExport}
+            >
+              <BsDownload size={13} />
+            </Button>
+          )}
         </div>
 
         {/* Search */}
@@ -225,50 +243,39 @@ export default function NoteSidebar({
         )}
       </div>
 
-      {/* ── Compose area (lecture scope only) ── */}
-      {composing && !isAll && (
+      {/* ── Compose area (always visible in lecture scope) ── */}
+      {!isAll && (
         <div className="px-3 py-2 border-bottom bg-light flex-shrink-0">
           <div className="mb-2">
             <span className="badge bg-primary text-white fw-semibold" style={{ fontSize: 11 }}>
-              @ {formatTimestamp(composeTs)}
+              @ {formatTimestamp(currentTs)}
             </span>
           </div>
           <Form.Control
+            ref={textareaRef}
             as="textarea"
-            rows={3}
+            rows={2}
             size="sm"
-            placeholder="Write your note…"
+            placeholder="Write your note… (Enter to save, Shift+Enter for new line)"
             value={composeContent}
             onChange={(e) => setComposeContent(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSubmitNote();
+              }
+            }}
             maxLength={5000}
-            autoFocus
           />
-          <div className="mt-2">
+          <div className="mt-1 d-flex align-items-center justify-content-between">
             <TagInput tags={composeTags} onChange={setComposeTags} />
-          </div>
-          <div className="d-flex align-items-center justify-content-between mt-2">
-            <span className="text-body opacity-50" style={{ fontSize: 11 }}>
-              {composeContent.length} / 5000
-            </span>
-            <div className="d-flex gap-2">
-              <Button size="sm" variant="light" onClick={() => setComposing(false)}>
-                Cancel
-              </Button>
-              <Button
-                size="sm"
-                variant="primary"
-                onClick={handleSubmitNote}
-                disabled={submitting || !composeContent.trim()}
-              >
-                {submitting ? <Spinner size="sm" animation="border" /> : "Save"}
-              </Button>
-            </div>
+            {submitting && <Spinner size="sm" animation="border" className="ms-2 flex-shrink-0" />}
           </div>
         </div>
       )}
 
       {/* ── Notes list ── */}
-      <div className="flex-grow-1 overflow-auto px-3 py-2">
+      <div ref={listRef} className="flex-grow-1 overflow-auto px-3 py-2">
 
         {/* Lecture scope */}
         {!isAll && (
@@ -283,22 +290,26 @@ export default function NoteSidebar({
               ) : (
                 <>
                   <p className="small mb-1">No notes yet.</p>
-                  <p className="small mb-0">Click <strong>Add</strong> to capture a moment.</p>
+                  <p className="small mb-0">Type above and press <strong>Enter</strong> to save.</p>
                 </>
               )}
             </div>
           ) : (
-            filteredNotes.map((note) => (
-              <NoteItem
-                key={note.id}
-                note={note}
-                isActive={note.id === activeNoteId}
-                onSeek={onSeek}
-                onEdit={editNote}
-                onDelete={removeNote}
-                submitting={submitting}
-              />
-            ))
+            <>
+              {filteredNotes.map((note) => (
+                <div key={note.id} data-note-id={note.id}>
+                  <NoteItem
+                    note={note}
+                    isActive={note.id === activeNoteId}
+                    onSeek={onSeek}
+                    onEdit={editNote}
+                    onDelete={removeNote}
+                    submitting={submitting}
+                  />
+                </div>
+              ))}
+              <div style={{ height: listHeight }} aria-hidden />
+            </>
           )
         )}
 
@@ -362,6 +373,34 @@ export default function NoteSidebar({
           )
         )}
       </div>
+
+      {/* ── Pinned footer — same as Course Content sidebar ── */}
+      <div className="flex-shrink-0 border-top px-3 py-2">
+        <div className="d-grid gap-2">
+          <Button
+            variant="outline-primary"
+            className="mb-0"
+            onClick={() => setShowQna(true)}
+          >
+            Q&amp;A
+          </Button>
+          <Link
+            to={`/student/courses/${course?.courseId || ""}`}
+            className="btn btn-primary-soft mb-0"
+          >
+            Back to Learning Course
+          </Link>
+        </div>
+      </div>
+
+      {showQna && (
+        <QnaModal
+          show={showQna}
+          onHide={() => setShowQna(false)}
+          lectureId={lectureId}
+          lectureTitle={lectureTitle}
+        />
+      )}
     </div>
   );
 }
