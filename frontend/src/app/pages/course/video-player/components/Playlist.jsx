@@ -5,8 +5,8 @@ import {
   Card, CardBody, CardFooter, CardHeader,
   Col
 } from "react-bootstrap";
-import { BsCheckCircleFill, BsLockFill } from "react-icons/bs";
-import { FaPlay } from "react-icons/fa";
+import { BsCheckCircleFill } from "react-icons/bs";
+import { FaLock, FaPlay } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import QnaModal from "@/app/student/learning/components/QnaModal";
 
@@ -183,7 +183,7 @@ export default function Playlist({
                   </AccordionHeader>
 
                   <AccordionBody className="px-3">
-                    <div className="gap-3">
+                    <div className="vstack gap-2">
                       {lectures.map((lecture, lectureIndex) => {
                         const isQuotaLocked =
                           limitByThree && lectureIndex >= 3;
@@ -208,15 +208,15 @@ export default function Playlist({
 
                         let buttonVariant = "primary";
                         let buttonContent = (
-                          <FaPlay className="me-0" size={11} />
+                          <FaPlay className="me-0" size={13} />
                         );
 
                         if (isLocked) {
                           buttonVariant = "light";
-                          buttonContent = <BsLockFill size={11} />;
+                          buttonContent = <FaLock size={13} />;
                         } else if (isCompleted) {
                           buttonVariant = "success";
-                          buttonContent = <BsCheckCircleFill size={11} />;
+                          buttonContent = <BsCheckCircleFill size={13} />;
                         } else if (isInProgress) {
                           buttonVariant = "outline-primary";
                           buttonContent = (

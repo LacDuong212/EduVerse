@@ -1,6 +1,5 @@
-import { BsBasket, BsBook, BsGear, BsInfoCircle, BsPerson, BsUiChecksGrid, BsBagCheck, BsTrophy  } from 'react-icons/bs';
-import { IoWalletOutline } from 'react-icons/io5'
-import { PiStudent } from 'react-icons/pi';
+import { BsBagCheck, BsBook, BsGear, BsPerson, BsTrophy, BsUiChecksGrid } from 'react-icons/bs';
+import { IoWalletOutline } from 'react-icons/io5';
 import { RiBook2Line } from 'react-icons/ri';
 
 //--GUEST
@@ -30,11 +29,11 @@ export const INSTRUCTOR_ACCOUNT_DROPDOWN_ITEMS = [{
   label: 'Settings',
   icon: BsGear,
   url: '/instructor/settings'
-// }, {
-//   key: 'help',
-//   label: 'Help',
-//   icon: BsInfoCircle,
-//   url: '/help'
+  // }, {
+  //   key: 'help',
+  //   label: 'Help',
+  //   icon: BsInfoCircle,
+  //   url: '/help'
 }];
 export const INSTRUCTOR_APP_MENU_ITEMS = [{
   key: 'dashboard',
@@ -44,10 +43,10 @@ export const INSTRUCTOR_APP_MENU_ITEMS = [{
   key: 'courses',
   label: 'My Courses',
   url: '/instructor/courses'
-// }, {
-//   key: 'students',
-//   label: 'My Students',
-//   url: '/instructor/students'
+  // }, {
+  //   key: 'students',
+  //   label: 'My Students',
+  //   url: '/instructor/students'
 }];
 export const INSTRUCTOR_MENU_ITEMS = [{
   key: 'profile',
@@ -68,12 +67,12 @@ export const INSTRUCTOR_MENU_ITEMS = [{
   url: '/instructor/courses',
   parentKey: 'instructor'
 }, {
-//   key: 'students',
-//   label: 'My Students',
-//   icon: PiStudent,
-//   url: '/instructor/students',
-//   parentKey: 'instructor'
-// }, {
+  //   key: 'students',
+  //   label: 'My Students',
+  //   icon: PiStudent,
+  //   url: '/instructor/students',
+  //   parentKey: 'instructor'
+  // }, {
   key: 'earnings',
   label: 'Earnings',
   icon: IoWalletOutline,
@@ -89,6 +88,11 @@ export const INSTRUCTOR_MENU_ITEMS = [{
 
 //---STUDENT
 export const STUDENT_ACCOUNT_DROPDOWN_ITEMS = [{
+  key: 'dashboard',
+  label: 'Dashboard',
+  icon: BsUiChecksGrid,
+  url: '/student/dashboard'
+}, {
   key: 'profile',
   label: 'My Profile',
   icon: BsPerson,
@@ -98,6 +102,11 @@ export const STUDENT_ACCOUNT_DROPDOWN_ITEMS = [{
   label: 'My Courses',
   icon: BsBook,
   url: '/student/courses'
+}, {
+  key: 'achievements',
+  label: 'Achievements',
+  icon: BsTrophy,
+  url: '/student/achievements'
 }, {
   key: 'orders',
   label: 'My Orders',
@@ -109,12 +118,12 @@ export const STUDENT_ACCOUNT_DROPDOWN_ITEMS = [{
   icon: BsGear,
   url: '/student/settings'
 }
-// , {
-//   key: 'help',
-//   label: 'Help',
-//   icon: BsInfoCircle,
-//   url: '/help'
-// }
+  // , {
+  //   key: 'help',
+  //   label: 'Help',
+  //   icon: BsInfoCircle,
+  //   url: '/help'
+  // }
 ];
 export const STUDENT_APP_MENU_ITEMS = [{
   key: 'home',
@@ -124,10 +133,10 @@ export const STUDENT_APP_MENU_ITEMS = [{
   key: 'courses',
   label: 'Courses',
   url: '/courses'
-// }, {
-//   key: 'instructors',
-//   label: 'Instructors',
-//   url: '/instructors'
+  // }, {
+  //   key: 'instructors',
+  //   label: 'Instructors',
+  //   url: '/instructors'
 }];
 export const STUDENT_MENU_ITEMS = [{
   key: 'dashboard',
@@ -141,12 +150,10 @@ export const STUDENT_MENU_ITEMS = [{
   icon: BsPerson,
   url: '/student/profile',
   parentKey: 'student'
-}, 
-
-{
+}, {
   key: 'courses',
   label: 'My Courses',
-  icon: BsBasket,
+  icon: BsBook,
   url: '/student/courses',
   parentKey: 'student'
 }, {
@@ -155,15 +162,13 @@ export const STUDENT_MENU_ITEMS = [{
   icon: BsTrophy,
   url: '/student/achievements',
   parentKey: 'student'
-},
-{
-
+}, {
   key: 'orders',
   label: 'My Orders',
-  icon: BsUiChecksGrid,
+  icon: BsBagCheck,
   url: '/student/orders',
   parentKey: 'student'
-}, 
+},
 // {
 //   key: 'payment-info',
 //   label: 'Payment Info',
@@ -184,11 +189,11 @@ export const STUDENT_MENU_ITEMS = [{
   url: '/student/settings',
   parentKey: 'student'
 }
-// , {
-//   key: 'deactivate-account',
-//   label: 'Deactivate Account',
-//   icon: MdDoNotDisturb,
-//   url: '/student/deactivate-account',
-//   parentKey: 'student'
-// }
+  // , {
+  //   key: 'deactivate-account',
+  //   label: 'Deactivate Account',
+  //   icon: MdDoNotDisturb,
+  //   url: '/student/deactivate-account',
+  //   parentKey: 'student'
+  // }
 ];

@@ -387,48 +387,48 @@ const MyProfile = () => {
             {/* SKILLS */}
             <Col md={12}>
               <h5>Skills</h5>
+                  <Row>
               {skillList.map((skill, index) => {
                 const skillName = `skills.${index}.name`;
-
                 return (
-                  <Col sm={12} md={6} lg={4} key={index} className="mt-0">
-                    <div className="input-group mb-1">
-                      <input
-                        type="text"
-                        title="Skill Name"
-                        placeholder="Web Design..."
-                        value={skill.name ?? ""}
-                        onChange={(e) => listActions.updateSkill(index, "name", e.target.value)}
-                        {...getFieldProps(skillName)}
-                      />
-                      <span className="input-group-text text-primary" title="Skill Level (Evaluation)">
-                        {skill.level}%
-                      </span>
-                      <button
-                        type="button"
-                        className="btn btn-danger-soft border p-0"
-                        onClick={() => listActions.removeSkill(index)}
-                        title="Remove skill"
-                      >
-                        <BsX size={23} />
-                      </button>
-                      {errors[skillName] && <div className="invalid-feedback">{errors[skillName]}</div>}
-                    </div>
-                    <div className="d-flex align-items-center small mt-1 mb-2">
-                      <span className="me-2">0</span>
-                      <input
-                        type="range"
-                        title="Evaluation"
-                        className="form-range flex-grow-1"
-                        min={0}
-                        max={100}
-                        step={1}
-                        value={skill.level ?? ""}
-                        onChange={(e) => listActions.updateSkill(index, "level", Number(e.target.value))}
-                      />
-                      <span className="ms-2">100</span>
-                    </div>
-                  </Col>
+                    <Col sm={12} md={6} lg={4} key={index} className="mt-0">
+                      <div className="input-group mb-1">
+                        <input
+                          type="text"
+                          title="Skill Name"
+                          placeholder="Web Design..."
+                          value={skill.name ?? ""}
+                          onChange={(e) => listActions.updateSkill(index, "name", e.target.value)}
+                          {...getFieldProps(skillName)}
+                        />
+                        <span className="input-group-text text-primary" title="Skill Level (Evaluation)">
+                          {skill.level}%
+                        </span>
+                        <button
+                          type="button"
+                          className="btn btn-danger-soft border p-0"
+                          onClick={() => listActions.removeSkill(index)}
+                          title="Remove skill"
+                        >
+                          <BsX size={23} />
+                        </button>
+                        {errors[skillName] && <div className="invalid-feedback">{errors[skillName]}</div>}
+                      </div>
+                      <div className="d-flex align-items-center small mt-1 mb-2">
+                        <span className="me-2">0</span>
+                        <input
+                          type="range"
+                          title="Evaluation"
+                          className="form-range flex-grow-1"
+                          min={0}
+                          max={100}
+                          step={1}
+                          value={skill.level ?? ""}
+                          onChange={(e) => listActions.updateSkill(index, "level", Number(e.target.value))}
+                        />
+                        <span className="ms-2">100</span>
+                      </div>
+                    </Col>
                 );
               })}
               <div className="mt-0">
@@ -437,7 +437,8 @@ const MyProfile = () => {
                     <BsPlus className="mb-1 me-1 fs-5" /> Add Skill
                   </button>
                 )}
-              </div>
+                </div>
+              </Row>
             </Col>
           </Row>
 
