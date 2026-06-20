@@ -6,6 +6,8 @@ import { initSocket } from "#config/socket.js";
 import "#services/cron.service.js";
 import logger from "#utils/logger.js";
 import { startAllTasks } from "#utils/scheduler.js";
+import { seedBadges } from "#modules/badge/badge.seed.js";
+import { runRetroactiveBadges } from "#modules/badge/badge.retroactive.js";
 
 const PORT = process.env.PORT || 5000;
 const server = http.createServer(app);
@@ -14,6 +16,10 @@ const startServer = async () => {
   try {
     await connectDB();
     logger.info("📂 Database connection established");
+
+    await seedBadges();
+    // Fire-and-forget: award badges for all existing data without blocking startup
+    runRetroactiveBadges().catch((err) => logger.error("[badge-retro] failed:", err));
 
     initSocket(server);
     startAllTasks();

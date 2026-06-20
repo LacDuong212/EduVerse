@@ -18,41 +18,85 @@ function getMotivationMessage(current, activatedToday, daysThisWeek) {
   return `${current} day streak — come back today to keep it going! ✨`;
 }
 
+// 4-state dot styles:
+// active       → primary blue fill, white ✓
+// today active → primary fill + outer ring
+// today idle   → primary border, light fill (call-to-action: "study now")
+// past missed  → grey fill + grey border (clearly seen but skipped)
+// future       → faint dashed outline
+function getDotStyle(day) {
+  if (day.active && day.isToday) {
+    return {
+      background: "var(--bs-primary, #0d6efd)",
+      border:     "none",
+      boxShadow:  "0 0 0 3px rgba(13,110,253,0.22)",
+    };
+  }
+  if (day.active) {
+    return {
+      background: "var(--bs-primary, #0d6efd)",
+      border:     "none",
+    };
+  }
+  if (day.isToday) {
+    return {
+      background: "rgba(13,110,253,0.08)",
+      border:     "2px solid var(--bs-primary, #0d6efd)",
+    };
+  }
+  if (day.isFuture) {
+    return {
+      background: "transparent",
+      border:     "1.5px dashed rgba(108,117,125,0.4)",
+    };
+  }
+  // past missed
+  return {
+    background: "rgba(108,117,125,0.18)",
+    border:     "1.5px solid rgba(108,117,125,0.45)",
+  };
+}
+
+function getLabelStyle(day) {
+  if (day.active || day.isToday) {
+    return { color: "var(--bs-primary, #0d6efd)", fontWeight: 700 };
+  }
+  if (day.isFuture) return { opacity: 0.3 };
+  return { opacity: 0.55 };
+}
+
 const WeeklyActivityStrip = ({ streak }) => {
-  const activeDates = streak?.activeDates ?? [];
+  const activeDates   = streak?.activeDates ?? [];
   const currentStreak = streak?.currentStreak ?? 0;
 
   const { days, daysThisWeek, activatedToday } = useMemo(() => {
     const activeSet = new Set(activeDates);
-    const today = new Date();
-    const todayStr = formatYMD(today);
+    const today     = new Date();
+    const todayStr  = formatYMD(today);
 
-    // Build the 7-day window: Mon–Sun of the current week (Mon = start)
-    const dayOfWeek = today.getDay(); // 0=Sun
-    // Shift so week starts on Monday: Mon=0..Sun=6
+    const dayOfWeek    = today.getDay();
     const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-    const monday = new Date(today);
+    const monday       = new Date(today);
     monday.setDate(today.getDate() + mondayOffset);
 
     const days = Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(monday);
+      const d       = new Date(monday);
       d.setDate(monday.getDate() + i);
       const dateStr = formatYMD(d);
-      const isPast = d <= today;
       return {
-        label: DAY_LABELS[d.getDay()],
+        label:    DAY_LABELS[d.getDay()],
         dateStr,
-        active: activeSet.has(dateStr),
-        isToday: dateStr === todayStr,
+        active:   activeSet.has(dateStr),
+        isToday:  dateStr === todayStr,
         isFuture: d > today,
-        isPast,
       };
     });
 
-    const daysThisWeek = days.filter((d) => d.active).length;
-    const activatedToday = activeSet.has(todayStr);
-
-    return { days, daysThisWeek, activatedToday };
+    return {
+      days,
+      daysThisWeek:   days.filter((d) => d.active).length,
+      activatedToday: activeSet.has(todayStr),
+    };
   }, [activeDates]);
 
   const message = getMotivationMessage(currentStreak, activatedToday, daysThisWeek);
@@ -65,37 +109,22 @@ const WeeklyActivityStrip = ({ streak }) => {
           <div key={day.dateStr} className="d-flex flex-column align-items-center gap-1">
             <div
               style={{
-                width: 34,
-                height: 34,
-                borderRadius: "50%",
-                background: day.active
-                  ? "var(--bs-primary, #0d6efd)"
-                  : day.isFuture
-                  ? "transparent"
-                  : "var(--bs-border-color, rgba(0,0,0,0.1))",
-                border: day.isToday
-                  ? "2px solid var(--bs-primary, #0d6efd)"
-                  : day.isFuture
-                  ? "2px dashed var(--bs-border-color, rgba(0,0,0,0.2))"
-                  : "none",
-                display: "flex",
-                alignItems: "center",
+                width:          36,
+                height:         36,
+                borderRadius:   "50%",
+                display:        "flex",
+                alignItems:     "center",
                 justifyContent: "center",
-                fontSize: 16,
-                transition: "background 0.2s",
+                fontSize:       15,
+                fontWeight:     700,
+                color:          day.active ? "#fff" : "transparent",
+                transition:     "background 0.2s, box-shadow 0.2s",
+                ...getDotStyle(day),
               }}
             >
               {day.active ? "✓" : ""}
             </div>
-            <span
-              style={{
-                fontSize: 10,
-                color: day.isToday
-                  ? "var(--bs-primary, #0d6efd)"
-                  : "var(--bs-secondary-color, #6c757d)",
-                fontWeight: day.isToday ? 700 : 400,
-              }}
-            >
+            <span style={{ fontSize: 10, ...getLabelStyle(day) }}>
               {day.label}
             </span>
           </div>
@@ -105,7 +134,7 @@ const WeeklyActivityStrip = ({ streak }) => {
       {/* Divider */}
       <div
         className="d-none d-sm-block flex-shrink-0"
-        style={{ width: 1, height: 40, background: "var(--bs-border-color, rgba(0,0,0,0.12))" }}
+        style={{ width: 1, height: 40, background: "var(--bs-border-color)" }}
       />
 
       {/* Message */}
@@ -113,15 +142,10 @@ const WeeklyActivityStrip = ({ streak }) => {
         <div className="fw-semibold text-body" style={{ fontSize: "0.9rem" }}>
           {message}
         </div>
-        <div className="small text-body">
+        <div className="small text-body" style={{ opacity: 0.65 }}>
           {daysThisWeek === 0
             ? "No activity this week yet."
             : `Active ${daysThisWeek} of 7 days this week`}
-          {currentStreak > 0 && (
-            <span className="ms-2">
-              🔥 <strong>{currentStreak}</strong> day streak
-            </span>
-          )}
         </div>
       </div>
     </div>

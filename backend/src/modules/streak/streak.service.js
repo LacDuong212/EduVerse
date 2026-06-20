@@ -1,6 +1,7 @@
 import AppError from "#exceptions/app.error.js";
 import { TYPE_ENUM as NOTIF_TYPE } from "#modules/notification/notification.model.js";
 import { sendNotification } from "#modules/notification/notification.service.js";
+import { evaluateAndAward } from "#modules/badge/badge.evaluator.js";
 import { withTransaction } from "#utils/transaction.js";
 import Streak from "./streak.model.js";
 
@@ -45,7 +46,16 @@ export const updateStreak = async (stuId) => {
       await sendNotification(stuId, NOTIF_TYPE.succeeded, message, session);
   });
 
-  return await Streak.getUserStreak(stuId);
+  const streak = await Streak.getUserStreak(stuId);
+
+  try {
+    await evaluateAndAward(stuId, "streak_updated", {
+      streakCurrent: streak.currentStreak,
+      streakLongest: streak.longestStreak,
+    });
+  } catch { /* badge failure must not affect streak update */ }
+
+  return streak;
 };
 
 export const getStreak = async (stuId) => {

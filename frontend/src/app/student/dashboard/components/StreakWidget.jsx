@@ -14,48 +14,44 @@ function todayYMD() {
 const StreakWidget = ({ streak }) => {
   if (!streak) return null;
 
-  const current = streak.currentStreak ?? 0;
-  const longest = streak.longestStreak ?? 0;
-  const next = getNextMilestone(current);
-  const progress = next ? Math.min(100, Math.round((current / next) * 100)) : 100;
+  const current    = streak.currentStreak ?? 0;
+  const longest    = streak.longestStreak ?? 0;
+  const next       = getNextMilestone(current);
+  const progress   = next ? Math.min(100, Math.round((current / next) * 100)) : 100;
   const todayCount = streak.activityLog?.[todayYMD()] ?? 0;
 
   return (
     <div className="border rounded p-3 d-flex flex-column gap-2">
-      <div className="fw-bold text-body mb-1">Learning Streak</div>
-
-      <div className="d-flex align-items-center gap-3">
-        <div
-          className="d-flex align-items-center justify-content-center rounded-circle bg-warning bg-opacity-15 flex-shrink-0"
-          style={{ width: 52, height: 52, fontSize: 26 }}
+      <div className="d-flex align-items-center justify-content-between mb-1">
+        <div className="fw-bold text-body">Streak Milestones</div>
+        <span
+          className="badge bg-warning bg-opacity-15 text-body"
+          style={{ fontSize: "0.72rem" }}
         >
-          🔥
-        </div>
-        <div>
-          <div className="fw-bold lh-1" style={{ fontSize: "1.75rem" }}>
-            {current}
-            <span className="fs-6 fw-normal text-body ms-1">
-              {current === 1 ? "day" : "days"}
-            </span>
-          </div>
-          <div className="small text-body">current streak</div>
-        </div>
-
-        {todayCount > 0 && (
-          <div
-            className="ms-auto text-end flex-shrink-0"
-          >
-            <div className="fw-bold lh-1 text-success" style={{ fontSize: "1.1rem" }}>
-              {todayCount}
-            </div>
-            <div className="small text-body" style={{ fontSize: "0.72rem" }}>
-              lecture{todayCount > 1 ? "s" : ""} today
-            </div>
-          </div>
-        )}
+          🔥 Day {current}
+        </span>
       </div>
 
-      {next && (
+      {todayCount > 0 && (
+        <div className="d-flex align-items-center gap-2">
+          <div
+            className="d-flex align-items-center justify-content-center rounded-circle bg-success bg-opacity-15 text-success flex-shrink-0"
+            style={{ width: 30, height: 30, fontSize: 13 }}
+          >
+            ✓
+          </div>
+          <div>
+            <div className="fw-semibold text-body lh-1" style={{ fontSize: "0.88rem" }}>
+              {todayCount} lecture{todayCount > 1 ? "s" : ""} today
+            </div>
+            <div className="text-body" style={{ fontSize: "0.72rem", opacity: 0.5 }}>
+              streak active
+            </div>
+          </div>
+        </div>
+      )}
+
+      {next ? (
         <div>
           <div className="d-flex justify-content-between small text-body mb-1">
             <span>Next milestone: {next} days</span>
@@ -71,7 +67,16 @@ const StreakWidget = ({ streak }) => {
               aria-valuemax={100}
             />
           </div>
+          <div className="small text-body mt-1" style={{ opacity: 0.45 }}>
+            {next - current} more {next - current === 1 ? "day" : "days"} to go
+          </div>
         </div>
+      ) : (
+        current > 0 && (
+          <div className="text-body small" style={{ opacity: 0.6 }}>
+            All milestones reached! 🏆
+          </div>
+        )
       )}
 
       {longest > 0 && (

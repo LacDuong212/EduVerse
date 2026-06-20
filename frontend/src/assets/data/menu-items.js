@@ -1,4 +1,4 @@
-import { BsBasket, BsBook, BsGear, BsInfoCircle, BsPerson, BsUiChecksGrid, BsBagCheck  } from 'react-icons/bs';
+import { BsBasket, BsBook, BsGear, BsInfoCircle, BsPerson, BsUiChecksGrid, BsBagCheck, BsTrophy  } from 'react-icons/bs';
 import { IoWalletOutline } from 'react-icons/io5'
 import { PiStudent } from 'react-icons/pi';
 import { RiBook2Line } from 'react-icons/ri';
@@ -149,9 +149,15 @@ export const STUDENT_MENU_ITEMS = [{
   icon: BsBasket,
   url: '/student/courses',
   parentKey: 'student'
-}, 
+}, {
+  key: 'achievements',
+  label: 'Achievements',
+  icon: BsTrophy,
+  url: '/student/achievements',
+  parentKey: 'student'
+},
 {
-  
+
   key: 'orders',
   label: 'My Orders',
   icon: BsUiChecksGrid,

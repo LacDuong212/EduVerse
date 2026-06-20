@@ -7,10 +7,80 @@ import { existsEnrollment } from "#modules/enrollment/enrollment.service.js";
 import QuizProgress from "#modules/quiz/quiz-progress.model.js";
 import User from "#modules/user/user.model.js";
 import { updateStreak } from "#modules/streak/streak.service.js";
+import { evaluateAndAward } from "#modules/badge/badge.evaluator.js";
 import Student from "#modules/student/student.model.js";
 import { withTransaction } from "#utils/transaction.js";
 import CourseProgress, { LECTURE_STATUS_ENUM as LECTURE_STATUS } from "./course-progress.model.js";
 import { toCourseProgressDto } from "./progress.mapper.js";
+
+export const getResumeCardData = async (userId) => {
+  const progress = await CourseProgress.findOne({
+    user: userId,
+    isCompleted: false,
+    lastActivityAt: { $exists: true, $ne: null },
+  })
+    .sort({ lastActivityAt: -1 })
+    .populate({ path: "course", select: "title image thumbnail" })
+    .lean();
+
+  if (!progress || !progress.course) return null;
+
+  const curriculum = await Curriculum.findOne({ courseId: progress.course._id })
+    .select("sections.title sections.lectures._id sections.lectures.title")
+    .lean();
+
+  let lectureId = progress.lastLectureId?.toString() ?? null;
+  let lectureTitle = null;
+
+  // Find title of the last accessed lecture
+  if (lectureId && curriculum) {
+    outer:
+    for (const section of curriculum.sections ?? []) {
+      for (const lec of section.lectures ?? []) {
+        if (lec._id?.toString() === lectureId) {
+          lectureTitle = lec.title;
+          break outer;
+        }
+      }
+    }
+  }
+
+  // Fallback: first uncompleted lecture when lastLectureId is absent or deleted
+  if (!lectureTitle && curriculum) {
+    const completedIds = new Set(
+      (progress.lectures ?? [])
+        .filter((l) => l.status === LECTURE_STATUS.completed)
+        .map((l) => l.lectureId?.toString())
+    );
+    outer:
+    for (const section of curriculum.sections ?? []) {
+      for (const lec of section.lectures ?? []) {
+        const id = lec._id?.toString();
+        if (!completedIds.has(id)) {
+          lectureId    = id;
+          lectureTitle = lec.title;
+          break outer;
+        }
+      }
+    }
+  }
+
+  const percentage = progress.totalLectures
+    ? Math.round((progress.completedLecturesCount / progress.totalLectures) * 100)
+    : 0;
+
+  return {
+    courseId:          progress.course._id?.toString(),
+    courseTitle:       progress.course.title,
+    thumbnail:         progress.course.thumbnail || progress.course.image || null,
+    lectureId,
+    lectureTitle,
+    percentage,
+    completedLectures: progress.completedLecturesCount ?? 0,
+    totalLectures:     progress.totalLectures ?? 0,
+    lastActivityAt:    progress.lastActivityAt,
+  };
+};
 
 export const getLastLearningProgress = async (userId) => {
   const progress = await CourseProgress.findOne({ user: userId })
@@ -233,7 +303,13 @@ export const getStudentCourseProgress = async (insId, stuId, courseId) => {
 };
 
 export const completeLecture = async (userId, courseId, lecId) => {
-  return await withTransaction(async (s) => {
+  // Flags captured inside the transaction so badge evaluation can run after it commits.
+  let lectureJustCompleted = false;
+  let courseJustCompleted = false;
+  let capturedFirstStartedAt = null;
+  let capturedAiScore = null;
+
+  const result = await withTransaction(async (s) => {
     const progress = await CourseProgress.findOne({
       user: userId,
       course: courseId,
@@ -266,6 +342,8 @@ export const completeLecture = async (userId, courseId, lecId) => {
         { $inc: { "stats.completedLectures": 1 } },
         { session: s }
       );
+
+      lectureJustCompleted = true;
     }
 
     if (
@@ -280,6 +358,10 @@ export const completeLecture = async (userId, courseId, lecId) => {
         { $inc: { "stats.completedCourses": 1 } },
         { session: s }
       );
+
+      courseJustCompleted = true;
+      capturedFirstStartedAt = progress.firstStartedAt ?? null;
+      capturedAiScore = progress.aiAssessment?.overallScore ?? null;
     }
 
     await updateStreak(userId);
@@ -287,6 +369,36 @@ export const completeLecture = async (userId, courseId, lecId) => {
 
     return toCourseProgressDto(progress);
   });
+
+  // Badge evaluation runs after the transaction commits so it reads the final
+  // incremented stats. Wrapped in try/catch — badge failure must not surface to
+  // the API consumer or roll back the completed lecture.
+  if (lectureJustCompleted || courseJustCompleted) {
+    try {
+      const student = await Student.findOne({ user: userId }).select("stats").lean();
+
+      if (lectureJustCompleted) {
+        await evaluateAndAward(userId, "lecture_completed", {
+          lecturesTotal: student?.stats?.completedLectures ?? 0,
+        });
+      }
+
+      if (courseJustCompleted) {
+        const daysSinceFirst =
+          capturedFirstStartedAt instanceof Date
+            ? Math.floor((Date.now() - capturedFirstStartedAt.getTime()) / 86_400_000)
+            : null;
+
+        await evaluateAndAward(userId, "course_completed", {
+          coursesTotal:          student?.stats?.completedCourses ?? 0,
+          aiScore:               capturedAiScore,
+          daysSinceFirstLecture: daysSinceFirst,
+        });
+      }
+    } catch { /* badge failure must not break lecture completion */ }
+  }
+
+  return result;
 };
 
 export const syncLectureProgress = async (userId, courseId, lecId, data) => {
