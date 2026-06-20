@@ -105,7 +105,7 @@ const NoteItem = memo(function NoteItem({ note, isActive, onSeek, onEdit, onDele
       ) : (
         <p
           className="mb-0 small text-body"
-          style={{ lineHeight: 1.55, whiteSpace: "pre-wrap", cursor: "pointer" }}
+          style={{ lineHeight: 1.55, whiteSpace: "pre-wrap", overflowWrap: "break-word", wordBreak: "break-word", cursor: "pointer" }}
           onClick={() => onSeek(note.timestamp)}
         >
           {note.content}

@@ -5,32 +5,53 @@ export default function NoteProgressMarkers({ notes, playerContainerRef, playerK
   const [progressEl, setProgressEl] = useState(null);
   const [duration, setDuration] = useState(0);
 
-  // Re-find .plyr__progress whenever the player remounts (playerKey change)
+  // Single effect: retry until both .plyr__progress AND <video> are found.
+  // Plyr initialises asynchronously so either element may be absent on first run.
   useEffect(() => {
     setProgressEl(null);
-    if (!playerContainerRef?.current) return;
-    let id;
-    const tryFind = () => {
-      const el = playerContainerRef.current?.querySelector(".plyr__progress");
-      if (el) setProgressEl(el);
-      else id = setTimeout(tryFind, 300);
-    };
-    tryFind();
-    return () => clearTimeout(id);
-  }, [playerContainerRef, playerKey]);
-
-  // Track video duration — also reset on player remount
-  useEffect(() => {
     setDuration(0);
-    const video = playerContainerRef?.current?.querySelector("video");
-    if (!video) return;
-    const onUpdate = () => setDuration(video.duration || 0);
-    video.addEventListener("loadedmetadata", onUpdate);
-    video.addEventListener("durationchange", onUpdate);
-    if (video.readyState >= 1) onUpdate();
+    if (!playerContainerRef?.current) return;
+
+    let retryId;
+    let removeListeners = () => {};
+
+    const tryInit = () => {
+      const container = playerContainerRef.current;
+      if (!container) return;
+
+      const plyrProgress = container.querySelector(".plyr__progress");
+      const video = container.querySelector("video");
+
+      if (!plyrProgress || !video) {
+        retryId = setTimeout(tryInit, 200);
+        return;
+      }
+
+      setProgressEl(plyrProgress);
+
+      const onDuration = () => {
+        if (video.duration > 0) setDuration(video.duration);
+      };
+
+      video.addEventListener("loadedmetadata", onDuration);
+      video.addEventListener("durationchange", onDuration);
+
+      // Video may already be loaded by the time we attach
+      if (video.readyState >= 1 && video.duration > 0) {
+        setDuration(video.duration);
+      }
+
+      removeListeners = () => {
+        video.removeEventListener("loadedmetadata", onDuration);
+        video.removeEventListener("durationchange", onDuration);
+      };
+    };
+
+    tryInit();
+
     return () => {
-      video.removeEventListener("loadedmetadata", onUpdate);
-      video.removeEventListener("durationchange", onUpdate);
+      clearTimeout(retryId);
+      removeListeners();
     };
   }, [playerContainerRef, playerKey]);
 
@@ -43,17 +64,18 @@ export default function NoteProgressMarkers({ notes, playerContainerRef, playerK
         return (
           <div
             key={note.id}
+            title={`Note at ${Math.floor(note.timestamp / 60)}:${String(Math.floor(note.timestamp % 60)).padStart(2, "0")}`}
             style={{
               position: "absolute",
               left: `${pct}%`,
-              top: 0,
-              bottom: 0,
-              width: 3,
-              transform: "translateX(-50%)",
-              backgroundColor: "#fbbf24",
-              borderRadius: 2,
+              top: "50%",
+              width: 8,
+              height: 8,
+              transform: "translate(-50%, -50%)",
+              backgroundColor: "#fde68a",
+              borderRadius: "50%",
               pointerEvents: "none",
-              zIndex: 1,
+              zIndex: 3,
             }}
           />
         );

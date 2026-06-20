@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Collapse } from "react-bootstrap";
 import Playlist from "./Playlist";
 import NoteSidebar from "./notes/NoteSidebar";
 import useToggle from "@/hooks/useToggle";
@@ -36,7 +35,14 @@ export default function CoursePlaylistSidebar({
         </span>
       </button>
 
-      <Collapse className="collapse-horizontal h-100" in={isOpen} dimension="width">
+      <div
+        className="h-100"
+        style={{
+          overflow: "hidden",
+          maxWidth: isOpen ? 400 : 0,
+          transition: "max-width 0.35s ease",
+        }}
+      >
         <div className="d-flex flex-column h-100 w-280px w-sm-400px">
           {/* Tab bar */}
           <div className="d-flex border-bottom flex-shrink-0">
@@ -82,7 +88,7 @@ export default function CoursePlaylistSidebar({
             )}
           </div>
         </div>
-      </Collapse>
+      </div>
     </div>
   );
 }

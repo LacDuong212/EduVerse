@@ -56,7 +56,7 @@ export default function useNotes({ lectureId, courseId }) {
           const newNote = data.result;
           setNotes((prev) => {
             const next = [...prev, newNote];
-            next.sort((a, b) => b.timestamp - a.timestamp);
+            next.sort((a, b) => a.timestamp - b.timestamp);
             return next;
           });
           // Keep courseNotes in sync if already loaded (timeline order)
