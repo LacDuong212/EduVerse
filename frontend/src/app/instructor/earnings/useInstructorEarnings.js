@@ -6,7 +6,7 @@ import { handleRequest } from "@/utils/request";
 export default function useInstructorEarnings() {
   const [earningsData, setEarningsData] = useState({
     series: [],
-    thisMonthRevenue: null,
+    thisMonthEarning: null,
     toBePaid: null,
     totalEarning: null,
   });
@@ -24,7 +24,7 @@ export default function useInstructorEarnings() {
       if (res.success) {
         setEarningsData({
           series: res.result.series || [],
-          thisMonthRevenue: res.result.thisMonthRevenue,
+          thisMonthEarning: res.result.thisMonthEarning,
           toBePaid: res.result.toBePaid,
           totalEarning: res.result.totalEarning,
         });

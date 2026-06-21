@@ -194,3 +194,47 @@ export const removeDraftCourse = async (userId, courseId) => {
     await instructor.save({ session });
   });
 };
+
+export const getBankAccounts = async (userId) => {
+  const instructor = await Instructor.findOne({ user: userId, isApproved: true })
+    .select("bankAccounts")
+    .lean();
+  if (!instructor) throw new AppError("Instructor not found.", 404);
+  return instructor.bankAccounts || [];
+};
+
+export const addBankAccount = async (userId, { bankName, accountNumber, accountName }) => {
+  const instructor = await Instructor.findOne({ user: userId, isApproved: true });
+  if (!instructor) throw new AppError("Instructor not found.", 404);
+
+  instructor.bankAccounts.push({ bankName, accountNumber, accountName });
+  await instructor.save();
+
+  return instructor.bankAccounts[instructor.bankAccounts.length - 1];
+};
+
+export const updateBankAccount = async (userId, bankId, { bankName, accountNumber, accountName }) => {
+  const instructor = await Instructor.findOne({ user: userId, isApproved: true });
+  if (!instructor) throw new AppError("Instructor not found.", 404);
+
+  const account = instructor.bankAccounts.id(bankId);
+  if (!account) throw new AppError("Bank account not found.", 404);
+
+  if (bankName      !== undefined) account.bankName      = bankName;
+  if (accountNumber !== undefined) account.accountNumber = accountNumber;
+  if (accountName   !== undefined) account.accountName   = accountName;
+
+  await instructor.save();
+  return account;
+};
+
+export const deleteBankAccount = async (userId, bankId) => {
+  const instructor = await Instructor.findOne({ user: userId, isApproved: true });
+  if (!instructor) throw new AppError("Instructor not found.", 404);
+
+  const account = instructor.bankAccounts.id(bankId);
+  if (!account) throw new AppError("Bank account not found.", 404);
+
+  account.deleteOne();
+  await instructor.save();
+};

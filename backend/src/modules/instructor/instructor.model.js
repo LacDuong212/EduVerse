@@ -14,6 +14,12 @@ const educationSubSchema = new mongoose.Schema({
   addedAt: { type: Date, default: Date.now },
 });
 
+const bankAccountSubSchema = new mongoose.Schema({
+  bankName:      { type: String, required: true, trim: true },
+  accountNumber: { type: String, required: true, trim: true },
+  accountName:   { type: String, required: true, trim: true },
+}, { _id: true });
+
 const instructorSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User", unique: true, required: true },
   stats: {
@@ -31,6 +37,8 @@ const instructorSchema = new mongoose.Schema({
   occupation: { type: String, default: "" },
   skills: [skillSubSchema],
   education: [educationSubSchema],
+
+  bankAccounts: [bankAccountSubSchema],
 
   isApproved: { type: Boolean, default: false }
 }, { timestamps: true });

@@ -313,3 +313,37 @@ export const removeCourse = asyncHandler(async (req, res) => {
   const result = await instructorService.removeDraftCourse(userId, courseId);
   return sendSuccessResponse(res, 200, "Removed draft course successfully!");
 });
+
+// @desc Get instructor's saved bank accounts
+// @route GET instructor/bank-accounts
+export const getBankAccounts = asyncHandler(async (req, res) => {
+  const userId = req.user?.userId;
+  const accounts = await instructorService.getBankAccounts(userId);
+  return sendSuccessResponse(res, 200, "Bank accounts fetched.", accounts);
+});
+
+// @desc Add a bank account
+// @route POST instructor/bank-accounts
+export const addBankAccount = asyncHandler(async (req, res) => {
+  const userId = req.user?.userId;
+  const account = await instructorService.addBankAccount(userId, req.validated?.body || req.body);
+  return sendSuccessResponse(res, 201, "Bank account added.", account);
+});
+
+// @desc Update a bank account
+// @route PATCH instructor/bank-accounts/:bankId
+export const updateBankAccount = asyncHandler(async (req, res) => {
+  const userId = req.user?.userId;
+  const { bankId } = req.validated?.params || {};
+  const account = await instructorService.updateBankAccount(userId, bankId, req.validated?.body || req.body);
+  return sendSuccessResponse(res, 200, "Bank account updated.", account);
+});
+
+// @desc Delete a bank account
+// @route DELETE instructor/bank-accounts/:bankId
+export const deleteBankAccount = asyncHandler(async (req, res) => {
+  const userId = req.user?.userId;
+  const { bankId } = req.validated?.params || {};
+  await instructorService.deleteBankAccount(userId, bankId);
+  return sendSuccessResponse(res, 200, "Bank account deleted.");
+});

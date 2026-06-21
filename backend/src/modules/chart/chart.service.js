@@ -5,6 +5,7 @@ import Enrollment, { STATUS_ENUM as ENROLL_STATUS } from "#modules/enrollment/en
 import Instructor from "#modules/instructor/instructor.model.js";
 import CourseProgress from "#modules/learning/course-progress.model.js";
 import Order, { STATUS_ENUM as ORDER_STATUS } from "#modules/order/order.model.js";
+import Payout from "#modules/payout/payout.model.js";
 
 const INSTRUCTOR_NET_PROFIT = 0.8;
 
@@ -295,7 +296,6 @@ export const getInstructorEarnings = async (insId) => {
           {
             $group: {
               _id: null,
-              revenue: { $sum: "$courses.pricePaid" },
               net: { $sum: { $multiply: ["$courses.pricePaid", INSTRUCTOR_NET_PROFIT] } }
             }
           }
@@ -304,7 +304,7 @@ export const getInstructorEarnings = async (insId) => {
           {
             $group: {
               _id: null,
-              total: { $sum: { $multiply: ["$courses.pricePaid", INSTRUCTOR_NET_PROFIT] } }
+              totalNet: { $sum: { $multiply: ["$courses.pricePaid", INSTRUCTOR_NET_PROFIT] } },
             }
           }
         ]
@@ -312,11 +312,27 @@ export const getInstructorEarnings = async (insId) => {
     }
   ]);
 
+  const totalEarning     = result.lifetime[0]?.totalNet ?? 0;
+  const thisMonthEarning = result.currentMonth[0]?.net  ?? 0;
+
+  const [paidOutAgg] = await Payout.aggregate([
+    {
+      $match: {
+        instructor: new mongoose.Types.ObjectId(insId),
+        status: { $in: ["approved", "paid"] },
+        isDeleted: false,
+      },
+    },
+    { $group: { _id: null, total: { $sum: "$amount" } } },
+  ]);
+  const totalPaidOut = paidOutAgg?.total ?? 0;
+  const toBePaid = Math.max(0, totalEarning - totalPaidOut);
+
   return {
     series: formatMonthlyData(result.monthlyChart || [], twelveMonthsAgo),
-    thisMonthRevenue: result.currentMonth[0]?.revenue || 0,
-    toBePaid: result.currentMonth[0]?.net || 0,
-    totalEarning: result.lifetime[0]?.total || 0,
+    thisMonthEarning,
+    toBePaid,
+    totalEarning,
   };
 };
 

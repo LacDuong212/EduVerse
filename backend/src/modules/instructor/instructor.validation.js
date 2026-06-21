@@ -199,3 +199,26 @@ export const courseStudentsRequest = z.object({
       .default("enrolledDesc"),
   })
 });
+
+const bankAccountBodySchema = z.object({
+  bankName:      z.string().min(1, "Bank name is required").max(100).trim(),
+  accountNumber: z.string().min(1, "Account number is required").max(50).trim(),
+  accountName:   z.string().min(1, "Account name is required").max(100).trim(),
+});
+
+const bankIdParamSchema = z.object({
+  bankId: z.string().min(1).refine((v) => mongoose.Types.ObjectId.isValid(v), { message: "Invalid bank account ID" }),
+});
+
+export const addBankAccountRequest = z.object({
+  body: bankAccountBodySchema,
+});
+
+export const updateBankAccountRequest = z.object({
+  params: z.object({ bankId: bankIdParamSchema.shape.bankId }),
+  body: bankAccountBodySchema.partial(),
+});
+
+export const deleteBankAccountRequest = z.object({
+  params: z.object({ bankId: bankIdParamSchema.shape.bankId }),
+});

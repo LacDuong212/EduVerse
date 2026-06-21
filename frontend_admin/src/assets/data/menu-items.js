@@ -1,6 +1,6 @@
 import { BiSolidCategory, BiSolidCoupon } from "react-icons/bi";
 import { BsBasket, BsHouse } from 'react-icons/bs';
-import { FaBook, FaChartBar, FaCheckSquare, FaList, FaMoneyBill, FaRegCommentDots, FaUserCog } from 'react-icons/fa';
+import { FaBook, FaChartBar, FaCheckSquare, FaList, FaMoneyBill, FaMoneyBillWave, FaRegCommentDots, FaUserCog } from 'react-icons/fa';
 import { FaUserGraduate, FaUserTie } from 'react-icons/fa6';
 import { IoSettingsSharp  } from 'react-icons/io5';
 
@@ -88,6 +88,11 @@ export const ADMIN_MENU_ITEMS = [{
 //   url: '/reviews'
 // }, 
 {
+  key: 'payouts',
+  label: 'Payouts',
+  icon: FaMoneyBillWave,
+  url: '/payouts'
+}, {
   key: 'earnings',
   label: 'Earnings',
   icon: FaMoneyBill,

@@ -16,49 +16,58 @@ export default function QnaReply({ reply, onDelete, submitting }) {
 
   return (
     <div
-      className={`d-flex gap-2 p-2 rounded-2 ${isInstructorPost ? "border border-info" : ""}`}
+      className={`rounded-2 p-3 ${isInstructorPost ? "border border-info" : ""}`}
+      style={{ background: "var(--bs-tertiary-bg, rgba(0,0,0,0.025))" }}
     >
-      <div className="flex-shrink-0 mt-1">
-        {author?.avatar ? (
-          <img
-            src={author.avatar}
-            alt={author.name}
-            className="rounded-circle"
-            width={28}
-            height={28}
-            style={{ objectFit: "cover" }}
-          />
-        ) : (
-          <BsPersonCircle size={28} className="text-body" />
-        )}
-      </div>
-
-      <div className="flex-grow-1 min-w-0">
-        <div className="d-flex align-items-center gap-2 flex-wrap mb-1">
-          <span className="fw-semibold small">{author?.name || "User"}</span>
-          {isInstructorPost && (
-            <Badge bg="primary" className="small">
-              Instructor
-            </Badge>
-          )}
-          <span className="text-body small opacity-50">{formatDate(createdAt)}</span>
-
-          {isMyPost && (
-            <button
-              className="btn btn-link btn-sm text-danger p-0 ms-auto"
-              onClick={() => onDelete(id)}
-              disabled={submitting}
-              title="Delete reply"
-            >
-              <BsTrash size={13} />
-            </button>
+      <div className="d-flex gap-2">
+        <div className="flex-shrink-0">
+          {author?.avatar ? (
+            <img
+              src={author.avatar}
+              alt={author.name}
+              className="rounded-circle"
+              width={28}
+              height={28}
+              style={{ objectFit: "cover" }}
+            />
+          ) : (
+            <BsPersonCircle size={28} className="text-body" style={{ opacity: 0.35 }} />
           )}
         </div>
 
-        <div
-          className="mb-0 small ql-editor p-0"
-          dangerouslySetInnerHTML={{ __html: content }}
-        />
+        <div className="flex-grow-1 min-w-0">
+          <div className="d-flex align-items-center gap-2 flex-wrap mb-1">
+            <span className="fw-semibold text-body" style={{ fontSize: "0.85rem" }}>
+              {author?.name || "User"}
+            </span>
+            {isInstructorPost && (
+              <Badge bg="primary" style={{ fontSize: "0.65rem" }}>
+                Instructor
+              </Badge>
+            )}
+            <span className="text-body" style={{ opacity: 0.4, fontSize: "0.78rem" }}>
+              {formatDate(createdAt)}
+            </span>
+
+            {isMyPost && (
+              <button
+                className="btn btn-link p-0 text-body text-decoration-none ms-auto"
+                style={{ opacity: 0.25 }}
+                onClick={() => onDelete(id)}
+                disabled={submitting}
+                title="Delete reply"
+              >
+                <BsTrash size={12} />
+              </button>
+            )}
+          </div>
+
+          <div
+            className="ql-editor p-0"
+            style={{ fontSize: "0.875rem" }}
+            dangerouslySetInnerHTML={{ __html: content }}
+          />
+        </div>
       </div>
     </div>
   );
