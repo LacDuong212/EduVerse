@@ -27,7 +27,6 @@ const InstructorEarnings = () => {
     setPage,
     requestPayout,
     totalPaid,
-    approvedAmount,
   } = usePayoutHistory();
 
   const [showModal, setShowModal] = useState(false);
@@ -54,7 +53,6 @@ const InstructorEarnings = () => {
           toBePaid={toBePaid}
           totalEarning={totalEarning}
           totalPaid={totalPaid}
-          approvedAmount={approvedAmount}
         />
         <EarningChart col={12} earningsData={series} />
 

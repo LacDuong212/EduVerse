@@ -9,8 +9,7 @@ export default function usePayoutHistory() {
   const [submitting, setSubmitting] = useState(false);
   const [pagination, setPagination] = useState({ totalPages: 1, totalItems: 0 });
   const [page,       setPage]       = useState(1);
-  const [totalPaid,      setTotalPaid]      = useState(0);
-  const [approvedAmount, setApprovedAmount] = useState(0);
+  const [totalPaid, setTotalPaid] = useState(0);
 
   const fetchPayouts = useCallback(async (p = 1) => {
     setLoading(true);
@@ -21,7 +20,6 @@ export default function usePayoutHistory() {
         setPayouts(data.result || []);
         setPagination(data.pagination || { totalPages: 1, totalItems: 0 });
         setTotalPaid(data.totalPaid ?? 0);
-        setApprovedAmount(data.approvedAmount ?? 0);
       }
     } finally {
       setLoading(false);
@@ -62,6 +60,5 @@ export default function usePayoutHistory() {
     requestPayout,
     refresh: fetchPayouts,
     totalPaid,
-    approvedAmount,
   };
 }

@@ -25,7 +25,7 @@ export const payoutIdParamRequest = z.object({
 export const updatePayoutStatusRequest = z.object({
   params: z.object({ id: z.string().min(1) }),
   body: z.object({
-    status:    z.enum(["approved", "paid", "rejected"]),
+    status:    z.enum(["paid", "rejected"]),
     adminNote: z.string().max(500).optional(),
   }),
 });

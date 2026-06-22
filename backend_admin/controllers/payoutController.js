@@ -1,4 +1,5 @@
 import Payout from "../models/payoutModel.js";
+import { logAction, ACTION, ENTITY } from "../utils/auditLogger.js";
 
 // GET /api/payouts
 export const getAllPayouts = async (req, res) => {
@@ -57,7 +58,7 @@ export const updatePayoutStatus = async (req, res) => {
     const { id }        = req.params;
     const { status, adminNote } = req.body;
 
-    const allowed = ["approved", "paid", "rejected"];
+    const allowed = ["paid", "rejected"];
     if (!status || !allowed.includes(status)) {
       return res.status(400).json({ success: false, message: `Status must be one of: ${allowed.join(", ")}.` });
     }
@@ -72,10 +73,23 @@ export const updatePayoutStatus = async (req, res) => {
       return res.status(400).json({ success: false, message: "Only pending requests can be updated." });
     }
 
+    const prevStatus = payout.status;
     payout.status      = status;
     payout.adminNote   = adminNote?.trim() || null;
     payout.processedAt = new Date();
     await payout.save();
+
+    logAction({
+      adminId:     req.admin._id,
+      adminName:   req.admin.name,
+      action:      status === "paid" ? ACTION.PAYOUT_MARK_PAID : ACTION.PAYOUT_REJECT,
+      entityType:  ENTITY.PAYOUT,
+      entityId:    payout._id,
+      entityLabel: `${payout.instructor?.name || "Unknown"} — ${payout.amount?.toLocaleString("vi-VN")}₫`,
+      before:      { status: prevStatus },
+      after:       { status, adminNote: payout.adminNote },
+      req,
+    });
 
     return res.json({
       success: true,

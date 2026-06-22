@@ -11,7 +11,7 @@ export const requestPayout = asyncHandler(async (req, res) => {
 
 export const getMyPayouts = asyncHandler(async (req, res) => {
   const instructorId = req.user.userId;
-  const { payouts, total, page, limit, totalPaid, approvedAmount } = await payoutService.getMyPayouts(instructorId, req.query);
+  const { payouts, total, page, limit, totalPaid } = await payoutService.getMyPayouts(instructorId, req.query);
   const lim = Number(limit);
   const pg  = Number(page);
   return res.status(200).json({
@@ -19,7 +19,6 @@ export const getMyPayouts = asyncHandler(async (req, res) => {
     message: "Payout history fetched.",
     result: payouts.map(toPayoutDto),
     totalPaid,
-    approvedAmount,
     pagination: {
       page: pg,
       limit: lim,

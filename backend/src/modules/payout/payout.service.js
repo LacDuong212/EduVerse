@@ -22,7 +22,7 @@ const getAvailableBalance = async (instructorId) => {
       { $group: { _id: null, total: { $sum: { $multiply: ["$courses.pricePaid", INSTRUCTOR_NET_PROFIT] } } } },
     ]),
     Payout.aggregate([
-      { $match: { instructor: new mongoose.Types.ObjectId(instructorId), status: { $in: ["approved", "paid"] }, isDeleted: false } },
+      { $match: { instructor: new mongoose.Types.ObjectId(instructorId), status: "paid", isDeleted: false } },
       { $group: { _id: null, total: { $sum: "$amount" } } },
     ]),
   ]);
@@ -59,15 +59,14 @@ export const getMyPayouts = async (instructorId, query) => {
     Payout.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
     Payout.countDocuments(filter),
     Payout.aggregate([
-      { $match: { instructor: instructorOid, isDeleted: false, status: { $in: ["paid", "approved"] } } },
-      { $group: { _id: "$status", total: { $sum: "$amount" } } },
+      { $match: { instructor: instructorOid, isDeleted: false, status: "paid" } },
+      { $group: { _id: null, total: { $sum: "$amount" } } },
     ]),
   ]);
 
-  const totalPaid      = statusAgg.find((s) => s._id === "paid")?.total     ?? 0;
-  const approvedAmount = statusAgg.find((s) => s._id === "approved")?.total ?? 0;
+  const totalPaid = statusAgg[0]?.total ?? 0;
 
-  return { payouts, total, page, limit, totalPaid, approvedAmount };
+  return { payouts, total, page, limit, totalPaid };
 };
 
 export const getAllPayouts = async (query) => {

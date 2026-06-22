@@ -12,7 +12,7 @@ const payoutSchema = new mongoose.Schema({
   bankInfo:    bankInfoSchema,
   status: {
     type: String,
-    enum: ["pending", "approved", "paid", "rejected"],
+    enum: ["pending", "paid", "rejected"],
     default: "pending",
   },
   adminNote:   { type: String, trim: true, default: null },

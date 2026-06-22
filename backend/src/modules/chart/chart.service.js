@@ -319,7 +319,7 @@ export const getInstructorEarnings = async (insId) => {
     {
       $match: {
         instructor: new mongoose.Types.ObjectId(insId),
-        status: { $in: ["approved", "paid"] },
+        status: "paid",
         isDeleted: false,
       },
     },

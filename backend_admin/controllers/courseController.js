@@ -15,6 +15,7 @@ import {
   toAdminCourseReviewDtoList,
 } from "../utils/adminCourseMapper.js";
 import Review from "../models/reviewModel.js";
+import { logAction, ACTION, ENTITY } from "../utils/auditLogger.js";
 
 const buildCourseLink = (courseId) => {
   return `/courses/${courseId}`;
@@ -257,6 +258,9 @@ export const updateCourseStatus = async (req, res) => {
       console.error('[Update Course Status]: Real-time notification delivery failed (non-critical):', notifyErr.message);
     }
 
+    const actionMap = { blocked: ACTION.COURSE_BLOCK, rejected: ACTION.COURSE_REJECT, pending: ACTION.COURSE_REJECT };
+    logAction({ adminId: req.admin._id, adminName: req.admin.name, action: actionMap[newValue] || ACTION.COURSE_BLOCK, entityType: ENTITY.COURSE, entityId: course._id, entityLabel: course.title, before: { status: course.previousStatus }, after: { status: newValue, message }, req });
+
     return res.status(200).json({
       success: true,
       message: `Course status changed to ${newValue}. Notified instructor and enrolled students.`,
@@ -356,6 +360,8 @@ export const softDeleteCourse = async (req, res) => {
     } catch (notifyErr) {
       console.error('[Soft Delete Course]: Real-time notification delivery failed (non-critical):', notifyErr.message);
     }
+
+    logAction({ adminId: req.admin._id, adminName: req.admin.name, action: ACTION.COURSE_DELETE, entityType: ENTITY.COURSE, entityId: course._id, entityLabel: course.title, before: { status: course.status }, after: { isDeleted: true, message }, req });
 
     return res.status(200).json({
       success: true,
@@ -468,6 +474,8 @@ export const restoreCourse = async (req, res) => {
       console.error('[Restore Course]: Real-time notification delivery failed (non-critical):', notifyErr.message);
     }
 
+    logAction({ adminId: req.admin._id, adminName: req.admin.name, action: ACTION.COURSE_RESTORE, entityType: ENTITY.COURSE, entityId: course._id, entityLabel: course.title, before: { isDeleted: true }, after: { isDeleted: false }, req });
+
     return res.status(200).json({
       success: true,
       message: 'Course has been successfully restored. Notified instructor and enrolled students.'
@@ -562,6 +570,8 @@ export const unblockCourse = async (req, res) => {
     } catch (notifyErr) {
       console.error('[Unblock Course]: Real-time notification delivery failed (non-critical):', notifyErr.message);
     }
+
+    logAction({ adminId: req.admin._id, adminName: req.admin.name, action: ACTION.COURSE_UNBLOCK, entityType: ENTITY.COURSE, entityId: course._id, entityLabel: course.title, before: { status: "blocked" }, after: { status: targetStatus }, req });
 
     return res.status(200).json({
       success: true,
@@ -829,6 +839,8 @@ export const approveCourse = async (req, res) => {
     } catch (notifyErr) {
       console.error('[Approve Course]: Real-time notification delivery failed (non-critical):', notifyErr.message);
     }
+
+    logAction({ adminId: req.admin._id, adminName: req.admin.name, action: ACTION.COURSE_APPROVE, entityType: ENTITY.COURSE, entityId: course._id, entityLabel: course.title, before: { status: course.previousStatus }, after: { status: "live" }, req });
 
     return res.status(200).json({ success: true, message: 'Course approved and published. Notified instructor and enrolled students.', result: toCourseDto(course) });
   } catch (error) {

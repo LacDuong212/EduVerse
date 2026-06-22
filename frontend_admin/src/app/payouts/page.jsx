@@ -88,7 +88,6 @@ function ActionModal({ payout, onClose, onSuccess }) {
           <Form.Label className="small fw-semibold">Action</Form.Label>
           <Form.Select value={status} onChange={(e) => setStatus(e.target.value)}>
             <option value="paid">Mark as Paid</option>
-            <option value="approved">Mark as Approved</option>
             <option value="rejected">Reject</option>
           </Form.Select>
         </Form.Group>
@@ -189,7 +188,6 @@ export default function AdminPayoutsPage() {
               >
                 <option value="">All</option>
                 <option value="pending">Pending</option>
-                <option value="approved">Approved</option>
                 <option value="paid">Paid</option>
                 <option value="rejected">Rejected</option>
               </Form.Select>

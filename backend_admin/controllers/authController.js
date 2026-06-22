@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import adminModel from '../models/adminModel.js';
 import transporter from '../configs/nodemailer.js';
+import { logAction, ACTION, ENTITY } from '../utils/auditLogger.js';
 
 
 export const register = async (req, res) => {
@@ -107,6 +108,7 @@ export const login = async (req, res) => {
     const isMatch = await bcrypt.compare(password, admin.password);
 
     if (!isMatch) {
+      logAction({ adminId: admin._id, adminName: admin.name, action: ACTION.LOGIN_FAILED, entityType: ENTITY.AUTH, success: false, failReason: "Wrong password", req });
       return res.json({ success: false, message: "Invalid email or password" });
     }
 
@@ -119,6 +121,8 @@ export const login = async (req, res) => {
       maxAge: 3 * 24 * 60 * 60 * 1000,
       path: '/'
     });
+
+    logAction({ adminId: admin._id, adminName: admin.name, action: ACTION.LOGIN_SUCCESS, entityType: ENTITY.AUTH, req });
 
     return res.status(200).json({
       success: true,
@@ -230,6 +234,10 @@ export const logout = async (req, res) => {
       sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
       path: '/'
     });
+
+    if (req.admin) {
+      logAction({ adminId: req.admin._id, adminName: req.admin.name, action: ACTION.LOGOUT, entityType: ENTITY.AUTH, req });
+    }
 
     return res.status(200).json({ success: true, message: "Logout successful" });
 
