@@ -17,22 +17,21 @@ export default function TagInput({ tags, onChange, maxTags = 10, disabled }) {
   return (
     <div>
       {tags.length > 0 && (
-        <div className="d-flex flex-wrap gap-1 mb-1">
+        <div className="d-flex flex-wrap gap-2">
           {tags.map((tag) => (
             <span
               key={tag}
-              className="d-inline-flex align-items-center gap-1 border rounded-pill px-2"
-              style={{ fontSize: 11, backgroundColor: "#f3f4f6", color: "#374151" }}
+              className="d-inline-flex align-items-center gap-1 border rounded-pill ps-2 pe-1 me-0"
+              style={{ fontSize: 12}}
             >
-              #{tag}
+              <strong>#</strong> {tag}
               {!disabled && (
                 <button
                   type="button"
-                  className="btn p-0 d-flex align-items-center"
-                  style={{ lineHeight: 1, color: "#6b7280" }}
+                  className="btn mb-0 p-0 d-flex align-items-center opacity-75"
                   onClick={() => removeTag(tag)}
                 >
-                  <BsX size={13} />
+                  <BsX size={18} color="red" />
                 </button>
               )}
             </span>
@@ -42,7 +41,7 @@ export default function TagInput({ tags, onChange, maxTags = 10, disabled }) {
       {!disabled && tags.length < maxTags && (
         <input
           type="text"
-          className="form-control form-control-sm"
+          className="form-control form-control-sm mt-2"
           placeholder="Add tag (Enter or comma)"
           value={input}
           onChange={(e) => setInput(e.target.value)}

@@ -1,5 +1,6 @@
 import Category from "../models/categoryModel.js";
 import Course from "../models/courseModel.js";
+import { logAction, ACTION, ENTITY } from "../utils/auditLogger.js";
 
 export const createCategory = async (req, res) => {
   try {
@@ -16,6 +17,17 @@ export const createCategory = async (req, res) => {
 
     const newCategory = new Category({ name });
     await newCategory.save();
+
+    logAction({
+      adminId: req.admin?._id || req.adminId,
+      adminName: req.admin?.name || "Admin",
+      action: ACTION.CATEGORY_CREATE,
+      entityType: ENTITY.CATEGORY,
+      entityId: newCategory._id,
+      entityLabel: newCategory.name,
+      after: { name },
+      req,
+    });
 
     res.status(201).json({
       success: true,

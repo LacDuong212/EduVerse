@@ -1,4 +1,5 @@
 import Coupon from "../models/couponModel.js";
+import { logAction, ACTION, ENTITY } from "../utils/auditLogger.js";
 
 export const createCoupon = async (req, res) => {
   try {
@@ -33,6 +34,17 @@ export const createCoupon = async (req, res) => {
     });
 
     await newCoupon.save();
+
+    logAction({
+      adminId: req.admin?._id || req.adminId,
+      adminName: req.admin?.name || "Admin",
+      action: ACTION.COUPON_CREATE,
+      entityType: ENTITY.COUPON,
+      entityId: newCoupon._id,
+      entityLabel: newCoupon.code,
+      after: { code: newCoupon.code, discountPercent, startDate, expiryDate },
+      req,
+    });
 
     res.status(201).json({
       success: true,
@@ -75,6 +87,18 @@ export const updateCouponStatus = async (req, res) => {
       return res.status(404).json({ success: false, message: "Coupon not found" });
     }
 
+    logAction({
+      adminId: req.admin?._id || req.adminId,
+      adminName: req.admin?.name || "Admin",
+      action: ACTION.COUPON_UPDATE_STATUS,
+      entityType: ENTITY.COUPON,
+      entityId: coupon._id,
+      entityLabel: coupon.code,
+      before: { isActive: !isActive },
+      after: { isActive },
+      req,
+    });
+
     res.status(200).json({
       success: true,
       message: `Coupon ${coupon.code} is now ${isActive ? "Active" : "Inactive"}`,
@@ -94,6 +118,16 @@ export const deleteCoupon = async (req, res) => {
     if (!coupon) {
       return res.status(404).json({ success: false, message: "Coupon not found" });
     }
+
+    logAction({
+      adminId: req.admin?._id || req.adminId,
+      adminName: req.admin?.name || "Admin",
+      action: ACTION.COUPON_DELETE,
+      entityType: ENTITY.COUPON,
+      entityId: coupon._id,
+      entityLabel: coupon.code,
+      req,
+    });
 
     res.status(200).json({
       success: true,

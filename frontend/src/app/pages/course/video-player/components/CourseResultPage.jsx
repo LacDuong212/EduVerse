@@ -6,8 +6,11 @@ import {
   FaCheckSquare,
   FaLightbulb,
   FaRobot,
+  FaStar,
 } from "react-icons/fa";
 import { RiAlertFill } from "react-icons/ri";
+import axios from "axios";
+import RatingModal from "./RatingModal";
 
 export default function CourseResultPage() {
   const { state } = useLocation();
@@ -28,7 +31,22 @@ export default function CourseResultPage() {
     );
   }
 
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const [searchParams] = useSearchParams();
+  const [showRating,   setShowRating]   = useState(false);
+  const [hasReviewed,  setHasReviewed]  = useState(null);
+
+  useEffect(() => {
+    if (!courseId) return;
+    axios
+      .get(`${backendUrl}/api/reviews/check/${courseId}`, { withCredentials: true })
+      .then((res) => {
+        const reviewed = res.data?.result?.hasReviewed ?? false;
+        setHasReviewed(reviewed);
+        if (!reviewed) setShowRating(true);
+      })
+      .catch(() => setHasReviewed(null));
+  }, [courseId]);
 
   const [activeKey, setActiveKey] = useState(
     searchParams.get("tab") || "overview"
@@ -122,18 +140,22 @@ export default function CourseResultPage() {
             My Learning
           </Button>
 
-          <Button
-            variant="outline-orange"
-            onClick={() => navigate(`/courses/${courseId}?tab=reviews`)}
-          >
-            Review Course
-          </Button>
+          {hasReviewed && (
+            <span className="d-flex align-items-center gap-2 text-body small px-3 py-2" style={{ opacity: 0.55 }}>
+              <FaStar size={13} color="#F59E0B" /> You've rated this course
+            </span>
+          )}
 
           <Button variant="outline-purple" onClick={() => navigate("/courses")}>
             Explore More Courses
           </Button>
         </div>
       </Card>
+      <RatingModal
+        show={showRating}
+        onHide={() => { setShowRating(false); setHasReviewed(true); }}
+        courseId={courseId}
+      />
     </Container>
   );
 }

@@ -36,6 +36,10 @@ privateRoutes.get(
 );
 privateRoutes.post("/courses", instructorController.createCourse);
 privateRoutes.get("/earnings", instructorController.getInstructorEarnings);
+privateRoutes.get("/bank-accounts", instructorController.getBankAccounts);
+privateRoutes.post("/bank-accounts", validate(instructorSchema.addBankAccountRequest), instructorController.addBankAccount);
+privateRoutes.patch("/bank-accounts/:bankId", validate(instructorSchema.updateBankAccountRequest), instructorController.updateBankAccount);
+privateRoutes.delete("/bank-accounts/:bankId", validate(instructorSchema.deleteBankAccountRequest), instructorController.deleteBankAccount);
 privateRoutes.get("/dashboard/enrollment-trends", instructorController.getEnrollmentTrends);
 privateRoutes.get("/dashboard/progress-breakdown", instructorController.getProgressBreakdown);
 privateRoutes.get(

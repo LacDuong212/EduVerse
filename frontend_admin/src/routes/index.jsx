@@ -21,6 +21,8 @@ const AdminInstructorRequests = lazy(() => import('@/app/instructor-requests/pag
 // const AdminReviews = lazy(() => import('@/app/reviews/page'));
 const AdminEarnings = lazy(() => import('@/app/earnings/page'));
 const AdminSettings = lazy(() => import('@/app/admin-settings/page'));
+const AdminPayouts = lazy(() => import('@/app/payouts/page'));
+const AdminAuditLogs = lazy(() => import('@/app/audit-logs/page'));
 import CourseDetails from "@/app/course-detail/page";
 
 export const authAdminRoutes = [{
@@ -95,6 +97,14 @@ export const adminRoutes = [{
   path: '/earnings',
   name: 'Earnings',
   element: <AdminEarnings />
+}, {
+  path: '/payouts',
+  name: 'Payouts',
+  element: <AdminPayouts />
+}, {
+  path: '/audit-logs',
+  name: 'Audit Logs',
+  element: <AdminAuditLogs />
 }, {
   path: '/settings',
   name: 'Settings',

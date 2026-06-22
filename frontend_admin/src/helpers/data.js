@@ -236,7 +236,7 @@ export const getAllInstructors = async (page = 1, search = "", limit = 9999) => 
   }
 };
 
-export const getInstructorRequests = async (page = 1, search = "") => {
+export const getInstructorRequests = async (page = 1, search = "", limit = 9999) => {
   try {
     const response = await axios.get(
       `${backendUrl}/api/instructors/requests?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`,

@@ -23,6 +23,15 @@ export const updateReview = asyncHandler(async (req, res) => {
   return sendSuccessResponse(res, 200, "Review updated successfully!", result);
 });
 
+// @desc  Check if current user has reviewed a course
+// @route GET /check/:courseId
+export const checkMyReview = asyncHandler(async (req, res) => {
+  const userId = req.user?.userId;
+  const { courseId } = req.params;
+  const result = await reviewService.checkMyReview(userId, courseId);
+  return sendSuccessResponse(res, 200, "Review check successful.", result);
+});
+
 // @desc  Soft-delete a review
 // @route DELETE /:reviewId
 export const removeReview = asyncHandler(async (req, res) => {

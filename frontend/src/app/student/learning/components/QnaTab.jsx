@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Col, Form, Pagination, Row, Spinner } from "react-bootstrap";
-import ChoicesFormInput from "@/components/form/ChoicesFormInput";
+import { Col, Row, Spinner } from "react-bootstrap";
+import { FaAngleLeft, FaAngleRight } from "react-icons/fa";
 import useQna from "../hooks/useQna";
+import ChoicesFormInput from "@/components/form/ChoicesFormInput";
 import QnaCompose from "./QnaCompose";
 import QnaQuestion from "./QnaQuestion";
 
@@ -51,7 +52,7 @@ export default function QnaTab({ sections = [] }) {
         {sections.length > 0 && (
           <Col xs={12} sm={6} md={8}>
             <ChoicesFormInput
-              name="categoryId"
+              name="lectureIdSelect"
               className="w-100"
               value={selectedLectureId}
               onChange={handleFilterChange}
@@ -87,7 +88,7 @@ export default function QnaTab({ sections = [] }) {
           No questions yet. Be the first to ask!
         </p>
       ) : (
-        <div className="gap-3">
+        <div>
           {questions.map((q) => (
             <QnaQuestion
               key={q.id}
@@ -105,28 +106,45 @@ export default function QnaTab({ sections = [] }) {
 
       {/* Pagination */}
       {pagination.totalPages > 1 && (
-        <div className="d-flex justify-content-center">
-          <Pagination size="sm" className="mb-0">
-            <Pagination.Prev
-              disabled={!pagination.hasPrevPage}
-              onClick={() => handlePageChange(page - 1)}
-            />
-            {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map(
-              (p) => (
-                <Pagination.Item
-                  key={p}
-                  active={p === page}
+        <div className="d-sm-flex justify-content-sm-between align-items-sm-center mt-3">
+          <p className="mb-0 text-center text-sm-start">
+            Showing page {pagination.page} of {pagination.totalPages}
+          </p>
+          <ul className="pagination pagination-sm pagination-primary-soft mb-0">
+            <li className={`page-item ${!pagination.hasPrevPage ? "disabled" : ""}`}>
+              <button
+                className="page-link"
+                onClick={() => handlePageChange(pagination.page - 1)}
+                disabled={!pagination.hasPrevPage}
+              >
+                <FaAngleLeft />
+              </button>
+            </li>
+
+            {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((p) => (
+              <li
+                key={p}
+                className={`page-item ${pagination.page === p ? "active" : ""}`}
+              >
+                <button
+                  className="page-link"
                   onClick={() => handlePageChange(p)}
                 >
                   {p}
-                </Pagination.Item>
-              )
-            )}
-            <Pagination.Next
-              disabled={!pagination.hasNextPage}
-              onClick={() => handlePageChange(page + 1)}
-            />
-          </Pagination>
+                </button>
+              </li>
+            ))}
+
+            <li className={`page-item ${!pagination.hasNextPage ? "disabled" : ""}`}>
+              <button
+                className="page-link"
+                onClick={() => handlePageChange(pagination.page + 1)}
+                disabled={!pagination.hasNextPage}
+              >
+                <FaAngleRight />
+              </button>
+            </li>
+          </ul>
         </div>
       )}
     </div>

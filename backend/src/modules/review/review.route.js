@@ -7,6 +7,12 @@ import * as reviewSchema from "./review.validation.js";
 // @route /reviews
 const reviewRoute = Router();
 
+reviewRoute.get(
+  "/check/:courseId",
+  protect,
+  restrictTo("student"),
+  reviewController.checkMyReview
+);
 reviewRoute.post(
   "/",
   protect,

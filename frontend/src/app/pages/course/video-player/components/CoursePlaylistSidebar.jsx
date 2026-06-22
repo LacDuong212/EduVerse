@@ -24,7 +24,7 @@ export default function CoursePlaylistSidebar({
     >
       <button
         onClick={toggle}
-        className="navbar-toggler btn btn-white mt-4 plyr-toggler"
+        className="navbar-toggler btn btn-light mt-4 plyr-toggler"
         type="button"
         aria-expanded={isOpen}
       >

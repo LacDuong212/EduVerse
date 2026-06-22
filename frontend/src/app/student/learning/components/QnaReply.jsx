@@ -4,10 +4,12 @@ import { BsPersonCircle, BsTrash } from "react-icons/bs";
 
 const formatDate = (dateStr) => {
   if (!dateStr) return "";
-  return new Date(dateStr).toLocaleDateString("en-US", {
+  return new Date(dateStr).toLocaleDateString("en-GB", {
     year: "numeric",
-    month: "short",
-    day: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit"
   });
 };
 
@@ -16,50 +18,70 @@ export default function QnaReply({ reply, onDelete, submitting }) {
 
   return (
     <div
-      className={`d-flex gap-2 p-2 rounded-2 ${isInstructorPost ? "border border-info" : ""}`}
+      className={`border rounded-3 p-3 position-relative ${isInstructorPost ? "border-info" : ""}`}
+      style={
+        isInstructorPost
+          ? { background: "rgba(var(--bs-info-rgb), 0.03)" }
+          : undefined
+      }
     >
-      <div className="flex-shrink-0 mt-1">
-        {author?.avatar ? (
-          <img
-            src={author.avatar}
-            alt={author.name}
-            className="rounded-circle"
-            width={28}
-            height={28}
-            style={{ objectFit: "cover" }}
-          />
-        ) : (
-          <BsPersonCircle size={28} className="text-body" />
-        )}
-      </div>
+      {/* ── Top-right actions ── */}
+      {isMyPost && (
+        <div className="position-absolute top-0 end-0 p-3 d-flex align-items-center gap-2">
+          <button
+            className="btn btn-link p-0 text-danger opacity-75 text-decoration-none mb-0"
+            onClick={() => onDelete(id)}
+            disabled={submitting}
+            title="Delete reply"
+          >
+            <BsTrash size={16} />
+          </button>
+        </div>
+      )}
 
-      <div className="flex-grow-1 min-w-0">
-        <div className="d-flex align-items-center gap-2 flex-wrap mb-1">
-          <span className="fw-semibold small">{author?.name || "User"}</span>
-          {isInstructorPost && (
-            <Badge bg="primary" className="small">
-              Instructor
-            </Badge>
-          )}
-          <span className="text-body small opacity-50">{formatDate(createdAt)}</span>
-
-          {isMyPost && (
-            <button
-              className="btn btn-link btn-sm text-danger p-0 ms-auto"
-              onClick={() => onDelete(id)}
-              disabled={submitting}
-              title="Delete reply"
-            >
-              <BsTrash size={13} />
-            </button>
+      {/* ── Author row ── */}
+      <div className="d-flex align-items-center gap-3 mb-3">
+        <div className="flex-shrink-0">
+          {author?.avatar ? (
+            <img
+              src={author.avatar}
+              alt={author.name}
+              className="rounded-circle"
+              width={38}
+              height={38}
+              style={{ objectFit: "cover" }}
+            />
+          ) : (
+            <BsPersonCircle size={38} className="text-body" style={{ opacity: 0.35 }} />
           )}
         </div>
 
-        <div
-          className="mb-0 small ql-editor p-0"
-          dangerouslySetInnerHTML={{ __html: content }}
-        />
+        <div className="flex-grow-1 min-w-0">
+          <div className="d-flex align-items-center gap-2 flex-wrap">
+            <span className="fw-semibold text-body" style={{ fontSize: "0.9rem" }}>
+              {author?.name || "User"}
+            </span>
+            {isInstructorPost && (
+              <Badge bg="primary" style={{ fontSize: "0.68rem" }}>
+                Instructor
+              </Badge>
+            )}
+          </div>
+
+          <div className="d-flex align-items-center gap-2 flex-wrap mt-1">
+            <span className="text-body" style={{ opacity: 0.6, fontSize: "0.78rem" }}>
+              {formatDate(createdAt)}
+            </span>
+          </div>
+        </div>
       </div>
+
+      {/* ── Content ── */}
+      <div
+        className="ql-editor p-0"
+        style={{ fontSize: "0.9rem" }}
+        dangerouslySetInnerHTML={{ __html: content }}
+      />
     </div>
   );
 }

@@ -76,6 +76,11 @@ export const softDeleteReview = async (stuId, reviewId) => {
   return true;
 };
 
+export const checkMyReview = async (userId, courseId) => {
+  const exists = await Review.exists({ user: userId, course: courseId, isDeleted: false });
+  return { hasReviewed: !!exists };
+};
+
 export const getPaginatedReviewsByCourseId = async (
   user = null, courseId, { page = 1, limit = 5 }
 ) => {

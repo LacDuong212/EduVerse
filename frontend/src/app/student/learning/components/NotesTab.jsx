@@ -1,11 +1,11 @@
-import NoteItem from "@/app/pages/course/video-player/components/notes/NoteItem";
-import { exportNotesToPDF } from "@/app/pages/course/video-player/utils/exportNotes";
 import { useMemo, useState } from "react";
 import { Button, Card, Col, Form, ListGroup, Row, Spinner } from "react-bootstrap";
-import { BsArrowRightShort, BsDownload, BsJournalText, BsSearch } from "react-icons/bs";
-import { useNavigate, useParams } from "react-router-dom";
-import useCourseNotes from "../hooks/useCourseNotes";
+import { BsDownload, BsJournalText, BsSearch } from "react-icons/bs";
 import { FaPlay } from "react-icons/fa";
+import { useNavigate, useParams } from "react-router-dom";
+import NoteItem from "@/app/pages/course/video-player/components/notes/NoteItem";
+import { exportNotesToPDF } from "@/app/pages/course/video-player/utils/exportNotes";
+import useCourseNotes from "../hooks/useCourseNotes";
 
 export default function NotesTab({ sections = [], courseTitle }) {
   const { courseId } = useParams();
@@ -68,7 +68,7 @@ export default function NotesTab({ sections = [], courseTitle }) {
 
   return (
     <div className="vstack gap-4">
-      <Card className="border-0 shadow-sm p-3 bg-white rounded-3">
+      <Card className="border-0 shadow-sm p-3 bg-light rounded-3">
         <Row className="align-items-center g-3">
           <Col xs={12} sm={6} md={4} lg={3} className="d-flex align-items-center gap-2">
             <span className="badge bg-primary-subtle text-primary fw-semibold px-2.5 py-1.5 rounded-pill small">
@@ -81,14 +81,14 @@ export default function NotesTab({ sections = [], courseTitle }) {
             <div className="position-relative w-100">
               <BsSearch
                 size={14}
-                className="position-absolute text-secondary"
+                className="position-absolute"
                 style={{ top: "50%", left: 12, transform: "translateY(-50%)", pointerEvents: "none", opacity: 0.7 }}
               />
               <Form.Control
                 size="md"
                 type="text"
-                className="bg-light-subtle border-light-subtle shadow-none rounded-3"
-                placeholder="Search matching content or tags..."
+                className="rounded-3"
+                placeholder="Search notes or tags..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{ paddingLeft: 36 }}
@@ -111,9 +111,9 @@ export default function NotesTab({ sections = [], courseTitle }) {
       </Card>
 
       {filteredNotes.length === 0 && (
-        <Card className="text-center py-4 border-0 shadow-sm bg-white rounded-3">
+        <Card className="text-center mt-2">
           <p className="text-secondary small mb-0">
-            No note references match keyword: <strong className="text-dark">&ldquo;{searchQuery}&rdquo;</strong>
+            No note references match keyword: <strong>&ldquo;{searchQuery}&rdquo;</strong>
           </p>
         </Card>
       )}
@@ -125,11 +125,11 @@ export default function NotesTab({ sections = [], courseTitle }) {
           const secTitle = info?.sectionTitle;
 
           return (
-            <Card key={lecId} className="border shadow-sm overflow-hidden rounded-3 bg-white">
+            <Card key={lecId} className="border shadow-sm overflow-hidden rounded-3">
               <Card.Header className="bg-light border-bottom p-3 d-flex align-items-center justify-content-between gap-3 flex-wrap">
                 <div className="min-w-0 flex-grow-1">
                   {secTitle && (
-                    <div className="text-secondary small text-truncate text-uppercase tracking-wider fw-semibold mb-0.5" style={{ fontSize: "0.75rem" }}>
+                    <div className="text-secondary small text-truncate tracking-wider fw-semibold mb-0.5" style={{ fontSize: "0.75rem" }}>
                       {secTitle}
                     </div>
                   )}

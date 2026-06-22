@@ -20,6 +20,7 @@ import videoRoute from "#modules/video/video.route.js";
 import wishlistRoute from "#modules/wishlist/wishlist.route.js";
 import noteRoute from "#modules/note/note.route.js";
 import badgeRoute from "#modules/badge/badge.route.js";
+import payoutRoute from "#modules/payout/payout.route.js";
 
 // @route /api
 const apiRouter = Router();
@@ -45,5 +46,7 @@ apiRouter.use("/videos", videoRoute);
 apiRouter.use("/wishlist", wishlistRoute);
 apiRouter.use("/notes", noteRoute);
 apiRouter.use("/badges", badgeRoute);
+apiRouter.use("/instructor/payouts", payoutRoute.instructorRoutes);
+apiRouter.use("/admin/payouts", payoutRoute.adminRoutes);
 
 export default apiRouter;

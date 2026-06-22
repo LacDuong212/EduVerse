@@ -17,7 +17,7 @@ const BATCH_SIZE = 50;
 
 export async function runRetroactiveBadges({ dryRun = false } = {}) {
   const students = await Student.find({}).select("user stats").lean();
-  logger.info(`[badge-retro] ${students.length} students to process | dry-run=${dryRun}`);
+  logger.debug(`[badge-retro] ${students.length} students to process | dry-run=${dryRun}`);
 
   let totalAwarded = 0;
 
@@ -40,14 +40,14 @@ export async function runRetroactiveBadges({ dryRun = false } = {}) {
         );
 
         const contexts = {
-          streak_updated:    { streakCurrent: streak?.currentStreak ?? 0, streakLongest: streak?.longestStreak ?? 0 },
+          streak_updated: { streakCurrent: streak?.currentStreak ?? 0, streakLongest: streak?.longestStreak ?? 0 },
           lecture_completed: { lecturesTotal: student.stats?.completedLectures ?? 0 },
-          course_completed:  { coursesTotal: student.stats?.completedCourses ?? 0, aiScore: null, daysSinceFirstLecture: null },
-          quiz_submitted:    { perfectQuizCount: perfectCount },
+          course_completed: { coursesTotal: student.stats?.completedCourses ?? 0, aiScore: null, daysSinceFirstLecture: null },
+          quiz_submitted: { perfectQuizCount: perfectCount },
         };
 
         if (dryRun) {
-          logger.info(
+          logger.debug(
             `[badge-retro][DRY] ${userId} | streak=${contexts.streak_updated.streakCurrent}` +
             ` lectures=${contexts.lecture_completed.lecturesTotal}` +
             ` courses=${contexts.course_completed.coursesTotal}` +
@@ -57,16 +57,16 @@ export async function runRetroactiveBadges({ dryRun = false } = {}) {
         }
 
         const results = await Promise.all([
-          evaluateAndAward(userId, "streak_updated",    contexts.streak_updated),
+          evaluateAndAward(userId, "streak_updated", contexts.streak_updated),
           evaluateAndAward(userId, "lecture_completed", contexts.lecture_completed),
-          evaluateAndAward(userId, "course_completed",  contexts.course_completed),
-          evaluateAndAward(userId, "quiz_submitted",    contexts.quiz_submitted),
+          evaluateAndAward(userId, "course_completed", contexts.course_completed),
+          evaluateAndAward(userId, "quiz_submitted", contexts.quiz_submitted),
         ]);
 
         const awarded = results.flat();
         if (awarded.length > 0) {
           totalAwarded += awarded.length;
-          logger.info(`[badge-retro][+] ${userId} → ${awarded.map((b) => b.name).join(", ")}`);
+          logger.debug(`[badge-retro][+] ${userId} → ${awarded.map((b) => b.name).join(", ")}`);
         }
       })
     );
@@ -75,6 +75,6 @@ export async function runRetroactiveBadges({ dryRun = false } = {}) {
     await new Promise((resolve) => setImmediate(resolve));
   }
 
-  logger.info(`[badge-retro] Done. Total badges awarded: ${totalAwarded}`);
+  logger.debug(`[badge-retro] Done. Total badges awarded: ${totalAwarded}`);
   return totalAwarded;
 }

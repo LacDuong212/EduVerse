@@ -84,7 +84,6 @@ const CourseDetail = ({ course, progress, progressError }) => {
                       <NavLink
                         as="button"
                         eventKey="course"
-                        className="mb-2 mb-md-0"
                         type="button"
                         role="tab"
                       >
@@ -96,7 +95,6 @@ const CourseDetail = ({ course, progress, progressError }) => {
                       <NavLink
                         as="button"
                         eventKey="qa"
-                        className="mb-2 mb-md-0"
                         type="button"
                         role="tab"
                       >
@@ -108,7 +106,6 @@ const CourseDetail = ({ course, progress, progressError }) => {
                       <NavLink
                         as="button"
                         eventKey="notes"
-                        className="mb-2 mb-md-0"
                         type="button"
                         role="tab"
                       >
