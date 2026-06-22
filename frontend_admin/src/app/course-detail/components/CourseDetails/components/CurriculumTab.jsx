@@ -15,46 +15,77 @@ import GlightBox from "@/components/GlightBox";
 import useVideoStream from "@/hooks/useVideoStream";
 import { secondsToDuration } from "@/utils/duration";
 
-const LecturePlayButton = ({ idx, lecId, title, videoId }) => {
+const LecturePlayLink = ({ idx, lecId, title, videoId, duration }) => {
   const { streamUrl, loading, error } = useVideoStream(videoId);
 
   const lectureName = title || `#${idx + 1}`;
 
+  const content = (
+    <>
+      <div className="position-relative d-flex align-items-center">
+        <span
+          className={clsx(
+            "btn btn-sm btn-round mb-0 position-static flex-centered me-2",
+            {
+              "btn-light": !videoId || loading,
+              "btn-danger": error || (!loading && videoId && !streamUrl),
+              "btn-orange-soft": videoId && streamUrl && !error,
+            }
+          )}
+        >
+          {loading ? (
+            <Spinner
+              animation="border"
+              size="sm"
+              style={{ width: "15px", height: "15px" }}
+            />
+          ) : error || !videoId || !streamUrl ? (
+            <MdError size={18} />
+          ) : (
+            <FaPlay className="me-0" size={14} />
+          )}
+        </span>
+
+        <span className="d-inline-block text-wrap mb-0 h6 fw-light">
+          {title || "Untitled Lecture"}
+        </span>
+      </div>
+
+      <p className="mb-0 small w-80px text-end">
+        {duration ? secondsToDuration(duration) : "-m -s"}
+      </p>
+    </>
+  );
+
   if (!videoId) {
     return (
-      <Button
-        variant="light"
-        size="sm"
-        className="btn-round mb-0 position-static flex-centered"
+      <button
+        type="button"
+        className="w-100 border-0 bg-transparent p-0 d-flex justify-content-between align-items-center text-start"
         onClick={() => toast.error(`No video found for lecture: ${lectureName}`)}
       >
-        <MdError size={18} />
-      </Button>
+        {content}
+      </button>
     );
   }
 
   if (loading) {
     return (
-      <div className="btn btn-sm btn-round btn-light mb-0 position-static flex-centered">
-        <Spinner
-          animation="border"
-          size="sm"
-          style={{ width: "15px", height: "15px" }}
-        />
+      <div className="d-flex justify-content-between align-items-center">
+        {content}
       </div>
     );
   }
 
   if (error || !streamUrl) {
     return (
-      <Button
-        variant="danger"
-        size="sm"
-        className="btn-round mb-0 position-static flex-centered"
+      <button
+        type="button"
+        className="w-100 border-0 bg-transparent p-0 d-flex justify-content-between align-items-center text-start"
         onClick={() => toast.error(`Unable to play lecture: ${lectureName}`)}
       >
-        <MdError size={18} />
-      </Button>
+        {content}
+      </button>
     );
   }
 
@@ -63,9 +94,9 @@ const LecturePlayButton = ({ idx, lecId, title, videoId }) => {
       data-glightbox
       data-gallery={`lecture-${lecId || idx}`}
       href={streamUrl}
-      className="btn btn-sm btn-round btn-orange-soft mb-0 position-static flex-centered"
+      className="w-100 d-flex justify-content-between align-items-center text-decoration-none text-body"
     >
-      <FaPlay className="me-0" size={14} />
+      {content}
     </GlightBox>
   );
 };
@@ -103,26 +134,13 @@ const CurriculumTab = ({ curriculum }) => {
           <AccordionBody className="mt-3">
             {(section.lectures || []).map((lecture, i) => (
               <Fragment key={lecture.lecId || i}>
-                <div className="d-flex justify-content-between align-items-center">
-                  <div className="position-relative d-flex align-items-center">
-                    <LecturePlayButton
-                      idx={i}
-                      lecId={lecture.lecId}
-                      title={lecture.title}
-                      videoId={lecture.videoId}
-                    />
-
-                    <span className="d-inline-block text-wrap ms-2 mb-0 h6 fw-light">
-                      {lecture.title || "Untitled Lecture"}
-                    </span>
-                  </div>
-
-                  <p className="mb-0 small w-80px text-end">
-                    {lecture.duration
-                      ? secondsToDuration(lecture.duration)
-                      : "-m -s"}
-                  </p>
-                </div>
+                <LecturePlayLink
+                  idx={i}
+                  lecId={lecture.lecId}
+                  title={lecture.title}
+                  videoId={lecture.videoId}
+                  duration={lecture.duration}
+                />
 
                 {(section.lectures || []).length - 1 !== i && <hr />}
               </Fragment>

@@ -1,11 +1,17 @@
 import { Fragment } from "react";
 import {
-  Accordion, AccordionBody, AccordionHeader, AccordionItem,
+  Accordion,
+  AccordionBody,
+  AccordionHeader,
+  AccordionItem,
   Button,
   Col,
-  Modal, ModalBody, ModalFooter, ModalHeader,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
   Row,
-  Spinner
+  Spinner,
 } from "react-bootstrap";
 import clsx from "clsx";
 import { BsPatchCheckFill } from "react-icons/bs";
@@ -27,29 +33,98 @@ import useToggle from "@/hooks/useToggle";
 import { formatCurrency } from "@/utils/currency";
 import { secondsToDuration } from "@/utils/duration";
 
-const LecturePlayButton = ({ idx, lecId, title, videoId }) => {
+const LecturePlayLink = ({ idx, lecId, title, videoId, duration, isFree, onLocked }) => {
   const { streamUrl, loading, error } = useVideoStream(videoId);
+
+  const lectureName = title || `#${idx + 1}`;
+
+  const content = (
+    <>
+      <div className="position-relative d-flex align-items-center">
+        <span
+          className={clsx(
+            "btn btn-sm btn-round mb-0 position-static flex-centered me-2",
+            {
+              "btn-light": !isFree || !videoId || loading,
+              "btn-danger": isFree && (error || (!loading && videoId && !streamUrl)),
+              "btn-orange-soft": isFree && videoId && streamUrl && !error,
+            }
+          )}
+        >
+          {loading && isFree ? (
+            <Spinner
+              animation="border"
+              size="sm"
+              style={{ width: "15px", height: "15px" }}
+            />
+          ) : isFree && (error || !videoId || !streamUrl) ? (
+            <MdError size={18} />
+          ) : (
+            <FaPlay className="me-0" size={14} />
+          )}
+        </span>
+
+        <span className="d-inline-block text-wrap mb-0 h6 fw-light">
+          {title || "Untitled Lecture"}
+        </span>
+      </div>
+
+      <div className="d-flex justify-content-between align-items-center">
+        {!isFree && (
+          <span className="badge text-bg-orange me-3">
+            <FaLock className="fa-fw me-1" />
+            Premium
+          </span>
+        )}
+
+        <p className="mb-0 small w-80px text-end">
+          {duration ? secondsToDuration(duration) : "-m -s"}
+        </p>
+      </div>
+    </>
+  );
+
+  if (!isFree) {
+    return (
+      <button
+        type="button"
+        className="w-100 border-0 bg-transparent p-0 d-flex justify-content-between align-items-center text-start"
+        onClick={onLocked}
+      >
+        {content}
+      </button>
+    );
+  }
+
+  if (!videoId) {
+    return (
+      <button
+        type="button"
+        className="w-100 border-0 bg-transparent p-0 d-flex justify-content-between align-items-center text-start"
+        onClick={() => toast.error(`No video found for lecture: ${lectureName}`)}
+      >
+        {content}
+      </button>
+    );
+  }
 
   if (loading) {
     return (
-      <div className="btn btn-sm btn-round btn-light mb-0 position-static flex-centered">
-        <Spinner animation="border" size="sm" style={{ width: "15px", height: "15px" }} />
+      <div className="d-flex justify-content-between align-items-center">
+        {content}
       </div>
     );
   }
 
-  const lectureName = title || `#${idx + 1}`;
-
-  if (error) {
+  if (error || !streamUrl) {
     return (
-      <Button
-        variant="danger"
-        size="sm"
-        className="btn-round mb-0 position-static flex-centered"
+      <button
+        type="button"
+        className="w-100 border-0 bg-transparent p-0 d-flex justify-content-between align-items-center text-start"
         onClick={() => toast.error(`Unable to play lecture: ${lectureName}`)}
       >
-        <MdError size={18} />
-      </Button>
+        {content}
+      </button>
     );
   }
 
@@ -58,9 +133,9 @@ const LecturePlayButton = ({ idx, lecId, title, videoId }) => {
       data-glightbox
       data-gallery={`lecture-${lecId || idx}`}
       href={streamUrl}
-      className="btn btn-sm btn-round btn-orange-soft mb-0 position-static flex-centered"
+      className="w-100 d-flex justify-content-between align-items-center text-decoration-none text-body"
     >
-      <FaPlay className="me-0" size={14} />
+      {content}
     </GlightBox>
   );
 };
@@ -68,12 +143,13 @@ const LecturePlayButton = ({ idx, lecId, title, videoId }) => {
 const CurriculumTab = ({ curriculum, price, action }) => {
   const { isTrue: isOpen, toggle } = useToggle();
 
-  if (!curriculum || !Array.isArray(curriculum))
+  if (!curriculum || !Array.isArray(curriculum)) {
     return (
       <div className="text-center py-5 text-muted">
         No curriculum available.
       </div>
     );
+  }
 
   return (
     <>
@@ -100,44 +176,17 @@ const CurriculumTab = ({ curriculum, price, action }) => {
             <AccordionBody className="mt-3">
               {(section.lectures || []).map((lecture, i) => (
                 <Fragment key={lecture.lecId || i}>
-                  <div className="d-flex justify-content-between align-items-center">
-                    <div className="position-relative d-flex align-items-center">
-                      {lecture.isFree ? (
-                        <LecturePlayButton
-                          idx={i}
-                          lecId={lecture.lecId}
-                          title={lecture.title}
-                          videoId={lecture.videoId}
-                        />
-                      ) : (
-                        <Button
-                          variant="light"
-                          size="sm"
-                          className="btn-round mb-0 position-static"
-                          onClick={toggle}
-                        >
-                          <FaPlay className="me-0" size={14} />
-                        </Button>
-                      )}
-                      <span className="d-inline-block text-wrap ms-2 mb-0 h6 fw-light">
-                        {lecture.title || "Untitled Lecture"}
-                      </span>
-                    </div>
+                  <LecturePlayLink
+                    idx={i}
+                    lecId={lecture.lecId}
+                    title={lecture.title}
+                    videoId={lecture.videoId}
+                    duration={lecture.duration}
+                    isFree={lecture.isFree}
+                    onLocked={toggle}
+                  />
 
-                    <div className="d-flex justify-content-between align-items-center">
-                      {!lecture.isFree && (
-                        <span className="badge text-bg-orange">
-                          <FaLock className="fa-fw me-1" />
-                          Premium
-                        </span>
-                      )}
-                      <p className="mb-0 small w-80px text-end">
-                        {(lecture.duration ? `${secondsToDuration(lecture.duration || 0)}` : "-m -s")}
-                      </p>
-                    </div>
-                  </div>
-
-                  {section.lectures.length - 1 !== i && <hr />}
+                  {(section.lectures || []).length - 1 !== i && <hr />}
                 </Fragment>
               ))}
             </AccordionBody>
@@ -156,17 +205,20 @@ const CurriculumTab = ({ curriculum, price, action }) => {
         aria-hidden="true"
       >
         <ModalHeader className="border-0 bg-warning" closeButton />
+
         <ModalBody className="px-5 pb-5 position-relative overflow-hidden">
           <figure className="position-absolute bottom-0 end-0 mb-n4 me-n4 d-none d-sm-block">
             <img src={element1} alt="element" />
           </figure>
+
           <h3 className="d-flex align-items-center">
             Get course NOW for the PRICE of
-            <span className="h2 border border-3 border-primary rounded bg-primary bg-opacity-10 text-primary ms-2 py-1 px-2">{formatCurrency(price)}</span>
+            <span className="h2 border border-3 border-primary rounded bg-primary bg-opacity-10 text-primary ms-2 py-1 px-2">
+              {formatCurrency(price)}
+            </span>
           </h3>
-          <p>
-            Unlock full access to all lectures and materials in this course.
-          </p>
+
+          <p>Unlock full access to all lectures and materials in this course.</p>
 
           <Row className="mb-3 item-collapse">
             <Col sm={6}>
@@ -181,6 +233,7 @@ const CurriculumTab = ({ curriculum, price, action }) => {
                 </li>
               </ul>
             </Col>
+
             <Col sm={6}>
               <ul className="list-group list-group-borderless">
                 <li className="list-group-item text-body">
@@ -195,23 +248,28 @@ const CurriculumTab = ({ curriculum, price, action }) => {
             </Col>
           </Row>
 
-          <Button variant="orange-soft" size="lg" className="mb-0" onClick={action}>
+          <Button
+            variant="orange-soft"
+            size="lg"
+            className="mb-0"
+            onClick={action}
+          >
             Purchase Course
           </Button>
         </ModalBody>
+
         <ModalFooter className="d-block bg-info">
           <div className="d-sm-flex justify-content-sm-between align-items-center text-center text-sm-start">
             <ul className="list-inline mb-0 social-media-btn mb-2 mb-sm-0">
-              {[FaFacebookF, FaInstagram, FaLinkedinIn].map(
-                (Icon, i) => (
-                  <li className="list-inline-item" key={i}>
-                    <a className="btn btn-white btn-sm shadow px-2 mb-0" href="#">
-                      <Icon className="fa-fw" />
-                    </a>
-                  </li>
-                )
-              )}
+              {[FaFacebookF, FaInstagram, FaLinkedinIn].map((Icon, i) => (
+                <li className="list-inline-item" key={i}>
+                  <a className="btn btn-white btn-sm shadow px-2 mb-0" href="#">
+                    <Icon className="fa-fw" />
+                  </a>
+                </li>
+              ))}
             </ul>
+
             <div>
               <p className="mb-1 small">
                 <a href="#" className="text-white">
@@ -219,6 +277,7 @@ const CurriculumTab = ({ curriculum, price, action }) => {
                   example@d2v-team.com
                 </a>
               </p>
+
               <p className="mb-0 small">
                 <a href="#" className="text-white">
                   <FaHeadset className="fa-fw me-2" />
