@@ -236,6 +236,7 @@ export default function AdminPayoutsPage() {
                 <thead>
                   <tr>
                     <th className="border-0 rounded-start">Instructor</th>
+                    <th className="border-0">Email</th>
                     <th className="border-0 text-center">Amount</th>
                     <th className="border-0 text-center">Bank / Account</th>
                     <th className="border-0 text-center">Status</th>
@@ -249,7 +250,7 @@ export default function AdminPayoutsPage() {
                   {payouts.map((p) => (
                     <tr key={p.id}>
                       <td>
-                        <div className="d-flex align-items-center position-relative">
+                        <div className="d-flex align-items-center">
                           <div className="avatar avatar-md">
                             {p.instructor?.avatar ? (
                               <img src={p.instructor.avatar} className="rounded-circle" alt="avatar" />
@@ -259,12 +260,10 @@ export default function AdminPayoutsPage() {
                               </div>
                             )}
                           </div>
-                          <div className="mb-0 ms-3">
-                            <h6 className="mb-0">{p.instructor?.name || "—"}</h6>
-                            <span>{p.instructor?.email || "—"}</span>
-                          </div>
+                          <h6 className="mb-0 ms-3">{p.instructor?.name || "—"}</h6>
                         </div>
                       </td>
+                      <td className="text-body-secondary">{p.instructor?.email || "—"}</td>
                       <td className="fw-semibold text-info text-end">{formatCurrency(p.amount)}</td>
                       <td>
                         <div className="font-monospace">{p.bankInfo?.bankName}</div>
