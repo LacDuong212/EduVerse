@@ -54,6 +54,7 @@ const VideoScreen = ({
       {renderOverlay()}
       {activeQuiz && (
         <QuizOverlay
+          key={activeQuiz.index}
           quiz={activeQuiz.quiz}
           index={activeQuiz.index}
           total={quizTotal}
