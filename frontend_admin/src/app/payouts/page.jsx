@@ -10,22 +10,28 @@ import PageMetaData from "@/components/PageMetaData";
 import PaginationBar from "@/components/PaginationBar";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-const AXIOS_CFG   = { withCredentials: true };
+const AXIOS_CFG = { withCredentials: true };
 
 const STATUS_VARIANT = { pending: "warning", paid: "success", approved: "success", rejected: "danger" };
-const STATUS_LABEL   = { pending: "Pending", paid: "Paid", approved: "Paid", rejected: "Rejected" };
+const STATUS_LABEL = { pending: "Pending", paid: "Paid", approved: "Paid", rejected: "Rejected" };
 
 const formatDate = (d) =>
-  d ? new Date(d).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) : "—";
+  d ? new Date(d).toLocaleDateString("en-GB", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit"
+  }) : "—";
 
 const formatCurrency = (n) =>
   n == null ? "—" : new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(n);
 
 function ActionModal({ payout, onClose, onSuccess }) {
-  const [status,    setStatus]    = useState("paid");
+  const [status, setStatus] = useState("paid");
   const [adminNote, setAdminNote] = useState("");
   const [noteError, setNoteError] = useState("");
-  const [loading,   setLoading]   = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
     if (status === "rejected" && !adminNote.trim()) {
@@ -132,13 +138,13 @@ function ActionModal({ payout, onClose, onSuccess }) {
 }
 
 export default function AdminPayoutsPage() {
-  const [payouts,     setPayouts]     = useState([]);
-  const [pagination,  setPagination]  = useState({ totalPages: 1, totalItems: 0 });
-  const [page,        setPage]        = useState(1);
-  const [pageSize,    setPageSize]    = useState(20);
-  const [status,      setStatus]      = useState("");
+  const [payouts, setPayouts] = useState([]);
+  const [pagination, setPagination] = useState({ totalPages: 1, totalItems: 0 });
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [status, setStatus] = useState("");
   const [appliedStatus, setAppliedStatus] = useState("");
-  const [loading,     setLoading]     = useState(true);
+  const [loading, setLoading] = useState(true);
   const [activePayout, setActivePayout] = useState(null);
 
   const fetchPayouts = useCallback(async (p = 1, st = "") => {
@@ -192,7 +198,7 @@ export default function AdminPayoutsPage() {
               <label className="form-label small fw-semibold mb-1">Status</label>
               <Form.Select
                 size="sm"
-                className="bg-body"
+                className="bg-light"
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
               >
@@ -203,7 +209,7 @@ export default function AdminPayoutsPage() {
               </Form.Select>
             </div>
             <div className="col-6 col-md-3 d-flex gap-2">
-              <button className="btn btn-sm btn-primary" onClick={handleApplyFilter}>
+              <button className="btn btn-sm btn-primary mb-0" onClick={handleApplyFilter}>
                 <FaSearch className="me-1" /> Apply
               </button>
               {appliedStatus && (
@@ -230,14 +236,13 @@ export default function AdminPayoutsPage() {
                 <thead>
                   <tr>
                     <th className="border-0 rounded-start">Instructor</th>
-                    <th className="border-0">Email</th>
-                    <th className="border-0">Amount</th>
-                    <th className="border-0">Bank / Account</th>
-                    <th className="border-0">Status</th>
-                    <th className="border-0">Submitted</th>
-                    <th className="border-0">Processed</th>
-                    <th className="border-0">Note</th>
-                    <th className="border-0 rounded-end">Action</th>
+                    <th className="border-0 text-center">Amount</th>
+                    <th className="border-0 text-center">Bank / Account</th>
+                    <th className="border-0 text-center">Status</th>
+                    <th className="border-0 text-center">Submitted</th>
+                    <th className="border-0 text-center">Processed</th>
+                    <th className="border-0 text-center">Note</th>
+                    <th className="border-0 text-center rounded-end">Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -256,33 +261,33 @@ export default function AdminPayoutsPage() {
                           </div>
                           <div className="mb-0 ms-3">
                             <h6 className="mb-0">{p.instructor?.name || "—"}</h6>
+                            <span>{p.instructor?.email || "—"}</span>
                           </div>
                         </div>
                       </td>
-                      <td>{p.instructor?.email || "—"}</td>
-                      <td className="fw-semibold text-success">{formatCurrency(p.amount)}</td>
+                      <td className="fw-semibold text-info text-end">{formatCurrency(p.amount)}</td>
                       <td>
-                        <div>{p.bankInfo?.bankName}</div>
-                        <div className="font-monospace text-body-secondary">{p.bankInfo?.accountNumber}</div>
-                        <div className="text-body-secondary">{p.bankInfo?.accountName}</div>
+                        <div className="font-monospace">{p.bankInfo?.bankName}</div>
+                        <div className="font-monospace">{p.bankInfo?.accountNumber}</div>
+                        <div className="font-monospace">{p.bankInfo?.accountName}</div>
                       </td>
-                      <td>
+                      <td className="text-center">
                         <Badge bg={STATUS_VARIANT[p.status] || "secondary"}>
                           {STATUS_LABEL[p.status] || p.status}
                         </Badge>
                       </td>
                       <td>{formatDate(p.createdAt)}</td>
                       <td>{formatDate(p.processedAt)}</td>
-                      <td className="text-body-secondary" style={{ maxWidth: 160 }}>
+                      <td style={{ maxWidth: 160 }}>
                         {p.adminNote || "—"}
                       </td>
-                      <td>
+                      <td className="text-center">
                         {p.status === "pending" ? (
                           <Button variant="primary-soft" size="sm" onClick={() => setActivePayout(p)}>
                             Process
                           </Button>
                         ) : (
-                          <span className="text-body-secondary">—</span>
+                          <span>—</span>
                         )}
                       </td>
                     </tr>

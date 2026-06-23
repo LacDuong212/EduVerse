@@ -33,11 +33,10 @@ const InstructorList = ({ instructorsData, isLoading, sortKey, sortDir, onSort, 
       <thead>
         <tr>
           <SortableTh label="Instructor name" sortKey="name" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0 rounded-start" />
-          <SortableTh label="Email" sortKey="email" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0" />
-          <SortableTh label="Join date" sortKey="createdAt" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0" />
-          <SortableTh label="Last updated" sortKey="updatedAt" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0" />
-          <th scope="col" className="border-0">Activated</th>
-          <th scope="col" className="border-0 rounded-end">Action</th>
+          <SortableTh label="Join date" sortKey="createdAt" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0 text-center" />
+          <SortableTh label="Last updated" sortKey="updatedAt" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0 text-center" />
+          <th scope="col" className="border-0 text-center">Activated</th>
+          <th scope="col" className="border-0 rounded-end text-center">Action</th>
         </tr>
       </thead>
       <tbody>
@@ -67,44 +66,42 @@ const InstructorList = ({ instructorsData, isLoading, sortKey, sortDir, onSort, 
                     <h6 className="mb-0">
                       {item.name}
                     </h6>
+                {item.email}
                   </div>
                 </div>
               </td>
-              <td>
-                {item.email}
-              </td>
-              <td>
+              <td className='text-center'>
                 {
-                  new Date(item.createdAt).toLocaleString('en-US', {
-                    day: '2-digit',
-                    month: 'short',
-                    year: 'numeric'
+                  new Date(item.createdAt).toLocaleString('en-GB', {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit"
                   })
                 }
               </td>
-              <td>
+              <td className='text-center'>
                 {
-                  new Date(item.updatedAt).toLocaleString('en-US', {
-                    day: '2-digit',
-                    month: 'short',
-                    year: 'numeric'
+                  new Date(item.updatedAt).toLocaleString('en-GB', {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit"
                   })
                 }
               </td>
-              <td>
+              <td className='text-center'>
                 <span className={`badge text-bg-${item.isActivated ? 'success' : 'warning'}`}>
                   {item.isActivated ? 'Yes' : 'No'}
                 </span>
               </td>
               {
                 item.isActivated
-                  ? <td>
-                    <Button variant="warning-soft" size="sm" className="me-1 mb-1 mb-md-0" onClick={(e) => { e.stopPropagation(); onBlock(item._id); }}>
+                  ? <td className='text-center'>
+                    <Button variant="warning-soft" size="sm" className="mb-0" onClick={(e) => { e.stopPropagation(); onBlock(item._id); }}>
                       Block
                     </Button>
                   </td>
-                  : <td>
-                    <Button variant="primary-soft" size="sm" className="me-1 mb-1 mb-md-0" onClick={(e) => { e.stopPropagation(); onUnblock(item._id); }}>
+                  : <td className='text-center'>
+                    <Button variant="primary-soft" size="sm" className="mb-0" onClick={(e) => { e.stopPropagation(); onUnblock(item._id); }}>
                       Unblock
                     </Button>
                   </td>
@@ -113,8 +110,8 @@ const InstructorList = ({ instructorsData, isLoading, sortKey, sortDir, onSort, 
           ))
         ) : (
           <tr>
-            <td colSpan={COLS} className="empty-state-cell">
-              <FaUserTie className="empty-icon" />
+            <td colSpan={COLS} className="empty-state-cell text-center">
+              <FaUserTie size={26} className="mb-2" />
               <div className="fw-semibold">No instructors found</div>
               <div className="small mt-1">Try adjusting your search criteria</div>
             </td>

@@ -76,22 +76,22 @@ const AllStudents = () => {
       <TabContainer defaultActiveKey={1}>
         <CardHeader className="bg-transparent border-bottom px-0">
           <Row className="g-3 align-items-center justify-content-between">
-            <Col md={8}>
+            <Col md={12}>
               <form onSubmit={(e) => e.preventDefault()}>
                 <div className="input-group">
                   <input
-                    className="form-control"
+                    className="form-control bg-light"
                     type="text"
                     placeholder="Search by name or email"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                   />
                   {search && (
-                    <button type="button" className="btn btn-outline-secondary border-0" onClick={() => setSearch('')} aria-label="Clear search">
+                    <button type="button" className="btn btn-outline-secondary mb-0" onClick={() => setSearch('')} aria-label="Clear search">
                       <FaTimes className="small" />
                     </button>
                   )}
-                  <button type="submit" className="btn btn-outline-secondary border-0">
+                  <button type="submit" className="btn btn-outline-secondary mb-0">
                     <FaSearch />
                   </button>
                 </div>
