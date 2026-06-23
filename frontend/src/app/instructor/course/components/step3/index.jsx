@@ -343,6 +343,7 @@ const Step3 = ({ stepperInstance, activeStep }) => {
         onGenerate={ai.generate}
         onUpdate={ai.update}
         onDelete={ai.delete}
+        onCancel={ai.cancel}
       />
     </>
   );

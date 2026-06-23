@@ -129,7 +129,7 @@ export const useStep3 = (stepperInstance) => {
     const target = curriculum[sectionIdx]?.lectures?.[lectureIdx];
     if (!target?.lecId || !target?.videoId) return toast.warning("Missing lecture info or video.");
 
-    patchLecture(sectionIdx, lectureIdx, (l) => ({ aiData: { ...l.aiData, status: "processing" } }));
+    patchLecture(sectionIdx, lectureIdx, () => ({ aiData: { status: "processing" } }));
     toast.info("AI generation started.");
 
     const res = await handleRequest(authApi.post(
@@ -140,7 +140,7 @@ export const useStep3 = (stepperInstance) => {
       patchLecture(sectionIdx, lectureIdx, { aiData: res?.result });
       toast.success("AI contents generated!");
     } else {
-      patchLecture(sectionIdx, lectureIdx, (l) => ({ aiData: { ...l.aiData, status: "failed" } }));
+      patchLecture(sectionIdx, lectureIdx, () => ({ aiData: { status: "failed" } }));
       toast.error(res?.message || "Generation failed.");
     }
   };
@@ -196,6 +196,12 @@ export const useStep3 = (stepperInstance) => {
     } else {
       toast.error(res?.message || "Failed to remove AI generated contents..");
     }
+  };
+
+  const handleCancelAI = () => {
+    const { sectionIdx, lectureIdx } = selectedAILecture || {};
+    if (!validIndex(sectionIdx) || !validIndex(lectureIdx)) return;
+    patchLecture(sectionIdx, lectureIdx, () => ({ aiData: { status: "failed" } }));
   };
 
   // submission ---
@@ -263,6 +269,7 @@ export const useStep3 = (stepperInstance) => {
       generate: handleGenerateAI,
       update: handleUpdateAI,
       delete: handleDeleteAI,
+      cancel: handleCancelAI,
     },
 
     handlers: {

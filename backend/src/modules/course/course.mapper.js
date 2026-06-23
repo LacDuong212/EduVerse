@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { UPDATE_STATUS_ENUM } from "./course.model.js";
+import { AI_DATA_STATUS } from "./curriculum.model.js";
 
 const isPopulated = (val) => val instanceof mongoose.Model || (val && typeof val === "object" && val._id);
 const getStringId = (id) => isPopulated(id) ? id._id?.toString() : id?.toString();
@@ -111,7 +112,9 @@ export const getCourseCurriculum = (curriculum, hasAiData = false) => {
 
 export const getAiData = (aiData) => {
   aiData = typeof aiData?.toJSON === "function" ? aiData.toJSON() : aiData;
-  if (!aiData || Object.keys(aiData).length === 0) return null;
+  if (!aiData 
+    || Object.keys(aiData).length === 0 
+    || aiData.status === AI_DATA_STATUS.none) return null;
 
   const keyConcepts = (aiData.lessonNotes?.keyConcepts || []).map((kc) => ({
     term: kc.term,

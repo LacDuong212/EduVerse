@@ -15,10 +15,8 @@ const server = http.createServer(app);
 const startServer = async () => {
   try {
     await connectDB();
-    logger.info("📂 Database connection established");
 
     await seedBadges();
-    // Fire-and-forget: award badges for all existing data without blocking startup
     runRetroactiveBadges().catch((err) => logger.error("[badge-retro] failed:", err));
 
     initSocket(server);

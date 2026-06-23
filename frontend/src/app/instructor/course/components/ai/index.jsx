@@ -1,8 +1,7 @@
 import React, { useEffect, useRef } from "react";
-import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Alert, Tab, Nav, Badge, Accordion, Form, OverlayTrigger, Tooltip } from "react-bootstrap";
-import { FaClock } from "react-icons/fa";
-import { FaRobot, FaListUl, FaLightbulb, FaQuestionCircle, FaPlayCircle, FaCheckCircle, FaTrash, FaRedo, FaSave, FaTimes, FaEdit } from "react-icons/fa";
+import { Accordion, Alert, Badge, Button, Form, Modal, ModalBody, ModalFooter, ModalHeader, Nav, OverlayTrigger, Tab, Tooltip } from "react-bootstrap";
 import { BsXLg } from "react-icons/bs";
+import { FaCheckCircle, FaClock, FaEdit, FaLightbulb, FaListUl, FaPlayCircle, FaQuestionCircle, FaRedo, FaRobot, FaSave, FaTimes, FaTrash } from "react-icons/fa";
 import { useAiData } from "./useAiData";
 
 const secsToMMSS = (secs) => {
@@ -12,7 +11,7 @@ const secsToMMSS = (secs) => {
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 };
 
-const AiData = ({ show, onClose, lecture, onGenerate, onUpdate, onDelete }) => {
+const AiData = ({ show, onClose, lecture, onGenerate, onUpdate, onDelete, onCancel }) => {
   const { state, data, editedData, handlers } = useAiData(lecture, show, onUpdate);
   const videoRef = useRef(null);
   const displayVideoUrl = data?.videoUrl;
@@ -64,7 +63,7 @@ const AiData = ({ show, onClose, lecture, onGenerate, onUpdate, onDelete }) => {
                 variant={state.isEditing ? "" : "purple"}
                 size="sm"
                 onClick={state.isEditing ? handlers.handleCancel : handlers.startEditing}
-                className={`text-white btn rounded-circle mb-0 p-2 flex-shrink-0 ${state.isEditing ? "border-white border-2" : ""}`}
+                className={`text-white btn rounded-circle mb-0 p-2 flex-shrink-0 mb-0 ${state.isEditing ? "border-white border-2" : ""}`}
               >
                 <FaEdit size={18} />
               </Button>
@@ -87,6 +86,9 @@ const AiData = ({ show, onClose, lecture, onGenerate, onUpdate, onDelete }) => {
             <div className="spinner-border text-purple mb-3" role="status"></div>
             <h5 className="mb-0">Generating content...</h5>
             <p className="mb-0">This may take a minute. You can close this window safely.</p>
+            <div className="d-flex justify-content-center gap-2 mt-3">
+              <Button variant="outline-danger" size="sm" className="mb-0" onClick={() => onCancel?.()}>Cancel</Button>
+            </div>
           </div>
         )}
 
@@ -359,10 +361,10 @@ const AiData = ({ show, onClose, lecture, onGenerate, onUpdate, onDelete }) => {
           </>
         ) : (
           <>
-            <Button variant="outline-secondary" size="sm" onClick={onClose}>Close</Button>
+            <Button variant="outline-danger" size="sm" onClick={() => onCancel?.()}>Cancel</Button>
             {(state.hasData || state.isFailed) && (
               <div className="d-flex gap-2">
-                <Button variant="outline-danger" size="sm" className="mb-0" onClick={onDelete}><FaTrash className="me-1" /> Delete</Button>
+                {state.hasData && (<Button variant="outline-danger" size="sm" className="mb-0" onClick={onDelete}><FaTrash className="me-1" /> Delete</Button>)}
                 <Button variant="outline-purple" size="sm" className="mb-0" onClick={onGenerate}><FaRedo className="me-1" /> Regenerate</Button>
               </div>
             )}

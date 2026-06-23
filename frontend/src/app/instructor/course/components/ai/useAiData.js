@@ -15,7 +15,7 @@ export const useAiData = (lecture, show, onUpdate) => {
 
   const isProcessing = status === "processing";
   const isFailed = status === "failed";
-  const hasData = Object.keys(aiData).length > 0 || status === "completed";
+  const hasData = status === "completed";
 
   const rawData = useMemo(() => ({
     title: lecture?.title || "Unknown Lecture",
@@ -27,18 +27,24 @@ export const useAiData = (lecture, show, onUpdate) => {
     videoUrl: s3StreamUrl,
   }), [lecture?.title, aiData.summary, aiData.lessonNotes, aiData.quizzes, s3StreamUrl]);
 
+  const lastLoadedRawData = useRef(null);
+
   useEffect(() => {
-    if (!show || !hasData || !lecture?.lecId) {
+    if (!show || !lecture?.lecId || !hasData) {
       if (!show) {
         lastLoadedLecId.current = null;
-        setIsEditing(false);
       }
+      setIsEditing(false);
+      setEditedData(null);
+      lastLoadedRawData.current = null;
       return;
     }
 
-    if (lastLoadedLecId.current !== lecture.lecId) {
-      setEditedData(JSON.parse(JSON.stringify(rawData)));
+    const rawDataString = JSON.stringify(rawData);
+    if (lastLoadedLecId.current !== lecture.lecId || lastLoadedRawData.current !== rawDataString) {
+      setEditedData(JSON.parse(rawDataString));
       lastLoadedLecId.current = lecture.lecId;
+      lastLoadedRawData.current = rawDataString;
       setIsEditing(false);
     }
   }, [lecture?.lecId, show, hasData, rawData]);

@@ -1150,6 +1150,16 @@ export const handleLectureGenerateAi = async (insId, courseId, lecId) => {
     throw new AppError("Lecture or video not found in curriculum.", 404);
 
   try {
+    const pendingCurriculum = await Curriculum.findOne({ courseId });
+    const pendingSection = pendingCurriculum.sections.find(sec =>
+      sec.lectures.some(l => l._id.toString() === lecId.toString())
+    );
+    const pendingLecture = pendingSection?.lectures.id(lecId);
+    if (!pendingLecture) throw new AppError("Lecture disappeared before processing.", 404);
+
+    pendingLecture.aiData = { status: AI_DATA_STATUS.processing };
+    await pendingCurriculum.save();
+
     const aiGeneratedData = await processVideoWithGemini(lecture.videoId, lecture.duration);
 
     return await withTransaction(async (s) => {
@@ -1180,10 +1190,25 @@ export const handleLectureGenerateAi = async (insId, courseId, lecId) => {
     });
 
   } catch (error) {
+    try {
+      const failedCurriculum = await Curriculum.findOne({ courseId });
+      const failedSection = failedCurriculum?.sections.find(sec =>
+        sec.lectures.some(l => l._id.toString() === lecId.toString())
+      );
+      const failedLecture = failedSection?.lectures.id(lecId);
+      if (failedLecture) {
+        failedLecture.aiData = { status: AI_DATA_STATUS.failed };
+        await failedCurriculum.save();
+      }
+    } catch (secondaryError) {
+      // ignore secondary save issues, preserve original error.
+    }
+
     await sendNotification(
       insId,
       NOTIF_TYPE.failed,
-      `AI Processing Failed: Could not process video for "${lecture?.title}". Please try again.`
+      `AI Processing Failed: Could not process video for "${lecture?.title}". Please try again.`,
+      null
     );
 
     throw error;
