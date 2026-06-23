@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import adminModel from '../models/adminModel.js';
+import { logAction, ACTION, ENTITY } from '../utils/auditLogger.js';
 
 export const changePassword = async (req, res) => {
   try {
@@ -25,6 +26,16 @@ export const changePassword = async (req, res) => {
 
     admin.password = hashedPassword;
     await admin.save();
+
+    logAction({
+      adminId: admin._id,
+      adminName: admin.name,
+      action: ACTION.ADMIN_CHANGE_PASSWORD,
+      entityType: ENTITY.ADMIN,
+      entityId: admin._id,
+      entityLabel: admin.name,
+      req,
+    });
 
     res.json({ success: true, message: 'Password updated successfully.' });
 

@@ -1,5 +1,6 @@
 import userModel from "../models/userModel.js";
 import Fuse from "fuse.js";
+import { logAction, ACTION, ENTITY } from "../utils/auditLogger.js";
 
 
 export const getAllStudents  = async (req, res) => {
@@ -62,6 +63,18 @@ export const blockStudent = async (req, res) => {
       return res.status(404).json({ success: false, message: "Student not found" });
     }
 
+    logAction({
+      adminId: req.admin?._id || req.adminId,
+      adminName: req.admin?.name || "Admin",
+      action: ACTION.STUDENT_BLOCK,
+      entityType: ENTITY.STUDENT,
+      entityId: id,
+      entityLabel: updatedStudent.name,
+      before: { isActivated: true },
+      after: { isActivated: false },
+      req,
+    });
+
     res.json({ success: true, data: updatedStudent });
   } catch (error) {
     res.status(500).json({
@@ -86,6 +99,18 @@ export const unblockStudent = async (req, res) => {
       return res.status(404).json({ success: false, message: "Student not found" });
     }
 
+    logAction({
+      adminId: req.admin?._id || req.adminId,
+      adminName: req.admin?.name || "Admin",
+      action: ACTION.STUDENT_UNBLOCK,
+      entityType: ENTITY.STUDENT,
+      entityId: id,
+      entityLabel: updatedStudent.name,
+      before: { isActivated: false },
+      after: { isActivated: true },
+      req,
+    });
+
     res.json({ success: true, data: updatedStudent });
   } catch (error) {
     res.status(500).json({
@@ -105,6 +130,17 @@ export const deleteStudent = async (req, res) => {
     if (!deletedStudent) {
       return res.status(404).json({ success: false, message: "Student not found" });
     }
+
+    logAction({
+      adminId: req.admin?._id || req.adminId,
+      adminName: req.admin?.name || "Admin",
+      action: ACTION.STUDENT_DELETE,
+      entityType: ENTITY.STUDENT,
+      entityId: id,
+      entityLabel: deletedStudent.name,
+      before: { name: deletedStudent.name, email: deletedStudent.email },
+      req,
+    });
 
     res.json({ success: true, message: "Student deleted successfully" });
   } catch (error) {

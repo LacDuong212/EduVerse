@@ -127,6 +127,10 @@ export const updateCourseStatus = async (req, res) => {
     if (!newValue || !allowedStatus.includes(newValue))
       return res.status(400).json({ success: false, message: 'Invalid status provided.' });
 
+    const requiresReason = [COURSE_STATUS.blocked, COURSE_STATUS.rejected];
+    if (requiresReason.includes(newValue) && !message?.trim())
+      return res.status(400).json({ success: false, message: 'A reason is required when blocking or rejecting a course.' });
+
     session = await mongoose.startSession();
     session.startTransaction();
 
@@ -259,7 +263,7 @@ export const updateCourseStatus = async (req, res) => {
     }
 
     const actionMap = { blocked: ACTION.COURSE_BLOCK, rejected: ACTION.COURSE_REJECT, pending: ACTION.COURSE_REJECT };
-    logAction({ adminId: req.admin._id, adminName: req.admin.name, action: actionMap[newValue] || ACTION.COURSE_BLOCK, entityType: ENTITY.COURSE, entityId: course._id, entityLabel: course.title, before: { status: course.previousStatus }, after: { status: newValue, message }, req });
+    logAction({ adminId: req.admin._id, adminName: req.admin.name, action: actionMap[newValue] || ACTION.COURSE_BLOCK, entityType: ENTITY.COURSE, entityId: course._id, entityLabel: course.title, before: { status: course.previousStatus }, after: { status: newValue }, reason: message || null, req });
 
     return res.status(200).json({
       success: true,
@@ -289,6 +293,9 @@ export const softDeleteCourse = async (req, res) => {
     const admin = req.admin;
     if (!admin || !admin.isVerified || !admin.isApproved)
       return res.status(401).json({ success: false, message: 'Access denied.' });
+
+    if (!message?.trim())
+      return res.status(400).json({ success: false, message: 'A reason is required when deleting a course.' });
 
     session = await mongoose.startSession();
     session.startTransaction();
@@ -361,7 +368,7 @@ export const softDeleteCourse = async (req, res) => {
       console.error('[Soft Delete Course]: Real-time notification delivery failed (non-critical):', notifyErr.message);
     }
 
-    logAction({ adminId: req.admin._id, adminName: req.admin.name, action: ACTION.COURSE_DELETE, entityType: ENTITY.COURSE, entityId: course._id, entityLabel: course.title, before: { status: course.status }, after: { isDeleted: true, message }, req });
+    logAction({ adminId: req.admin._id, adminName: req.admin.name, action: ACTION.COURSE_DELETE, entityType: ENTITY.COURSE, entityId: course._id, entityLabel: course.title, before: { status: course.status }, after: { isDeleted: true }, reason: message || null, req });
 
     return res.status(200).json({
       success: true,

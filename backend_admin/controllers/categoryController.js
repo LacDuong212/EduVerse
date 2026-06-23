@@ -81,9 +81,21 @@ export const updateCategory = async (req, res) => {
       return res.status(404).json({ message: "Category not found." });
     }
 
+    const oldName = category.name;
     category.name = name || category.name;
-
     await category.save();
+
+    logAction({
+      adminId: req.admin?._id || req.adminId,
+      adminName: req.admin?.name || "Admin",
+      action: ACTION.CATEGORY_UPDATE,
+      entityType: ENTITY.CATEGORY,
+      entityId: category._id,
+      entityLabel: category.name,
+      before: { name: oldName },
+      after: { name: category.name },
+      req,
+    });
 
     res.status(200).json({
       success: true,
@@ -112,6 +124,17 @@ export const deleteCategory = async (req, res) => {
     }
 
     await Category.findByIdAndDelete(id);
+
+    logAction({
+      adminId: req.admin?._id || req.adminId,
+      adminName: req.admin?.name || "Admin",
+      action: ACTION.CATEGORY_DELETE,
+      entityType: ENTITY.CATEGORY,
+      entityId: id,
+      entityLabel: category.name,
+      before: { name: category.name },
+      req,
+    });
 
     res.status(200).json({
       success: true,

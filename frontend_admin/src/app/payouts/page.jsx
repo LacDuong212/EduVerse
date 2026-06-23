@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import {
-  Badge, Button, Card, CardBody, CardHeader,
-  Form, Modal, Spinner, Table,
+  Badge, Button, Card, CardBody, CardFooter, CardHeader,
+  Form, Modal, Spinner,
 } from "react-bootstrap";
 import { FaMoneyBillWave, FaSearch, FaTimes } from "react-icons/fa";
 import PageMetaData from "@/components/PageMetaData";
@@ -12,7 +12,8 @@ import PaginationBar from "@/components/PaginationBar";
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 const AXIOS_CFG   = { withCredentials: true };
 
-const STATUS_VARIANT = { pending: "warning", approved: "info", paid: "success", rejected: "danger" };
+const STATUS_VARIANT = { pending: "warning", paid: "success", approved: "success", rejected: "danger" };
+const STATUS_LABEL   = { pending: "Pending", paid: "Paid", approved: "Paid", rejected: "Rejected" };
 
 const formatDate = (d) =>
   d ? new Date(d).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) : "—";
@@ -23,9 +24,14 @@ const formatCurrency = (n) =>
 function ActionModal({ payout, onClose, onSuccess }) {
   const [status,    setStatus]    = useState("paid");
   const [adminNote, setAdminNote] = useState("");
+  const [noteError, setNoteError] = useState("");
   const [loading,   setLoading]   = useState(false);
 
   const handleSubmit = async () => {
+    if (status === "rejected" && !adminNote.trim()) {
+      setNoteError("A reason is required when rejecting a payout.");
+      return;
+    }
     setLoading(true);
     try {
       const res = await axios.patch(
@@ -86,22 +92,26 @@ function ActionModal({ payout, onClose, onSuccess }) {
 
         <Form.Group>
           <Form.Label className="small fw-semibold">Action</Form.Label>
-          <Form.Select value={status} onChange={(e) => setStatus(e.target.value)}>
+          <Form.Select value={status} onChange={(e) => { setStatus(e.target.value); setNoteError(""); }}>
             <option value="paid">Mark as Paid</option>
             <option value="rejected">Reject</option>
           </Form.Select>
         </Form.Group>
 
         <Form.Group>
-          <Form.Label className="small fw-semibold">Admin Note (optional)</Form.Label>
+          <Form.Label className="small fw-semibold">
+            {status === "rejected" ? <>Reason <span className="text-danger">*</span></> : "Admin Note (optional)"}
+          </Form.Label>
           <Form.Control
             as="textarea"
             rows={2}
-            placeholder="Transfer reference, rejection reason, etc."
+            placeholder={status === "rejected" ? "Explain why this payout is being rejected..." : "Transfer reference, etc."}
             value={adminNote}
-            onChange={(e) => setAdminNote(e.target.value)}
+            onChange={(e) => { setAdminNote(e.target.value); if (e.target.value.trim()) setNoteError(""); }}
             maxLength={500}
+            isInvalid={!!noteError}
           />
+          <Form.Control.Feedback type="invalid">{noteError}</Form.Control.Feedback>
         </Form.Group>
       </Modal.Body>
       <Modal.Footer className="border-0">
@@ -175,8 +185,8 @@ export default function AdminPayoutsPage() {
         </div>
       </div>
 
-      <Card className="bg-transparent border">
-        <CardHeader className="bg-light border-bottom">
+      <Card className="bg-transparent">
+        <CardHeader className="bg-transparent border-bottom px-0">
           <div className="row g-2 align-items-end">
             <div className="col-6 col-md-3">
               <label className="form-label small fw-semibold mb-1">Status</label>
@@ -205,7 +215,7 @@ export default function AdminPayoutsPage() {
           </div>
         </CardHeader>
 
-        <CardBody className="pb-0">
+        <CardBody className="px-0">
           {loading ? (
             <div className="text-center py-5">
               <Spinner animation="border" size="sm" className="text-body opacity-50" />
@@ -215,90 +225,75 @@ export default function AdminPayoutsPage() {
               No payout requests found.
             </div>
           ) : (
-            <div className="table-responsive">
-              <Table hover className="align-middle mb-0 table-dark-gray">
+            <div className="table-responsive border-0">
+              <table className="table table-dark-gray align-middle p-4 mb-0 table-hover">
                 <thead>
                   <tr>
-                    <th className="border-0">Instructor</th>
+                    <th className="border-0 rounded-start">Instructor</th>
+                    <th className="border-0">Email</th>
                     <th className="border-0">Amount</th>
                     <th className="border-0">Bank / Account</th>
-                    <th className="border-0">Period</th>
                     <th className="border-0">Status</th>
                     <th className="border-0">Submitted</th>
                     <th className="border-0">Processed</th>
                     <th className="border-0">Note</th>
-                    <th className="border-0">Action</th>
+                    <th className="border-0 rounded-end">Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   {payouts.map((p) => (
                     <tr key={p.id}>
                       <td>
-                        <div className="d-flex align-items-center gap-2">
-                          {p.instructor?.avatar ? (
-                            <img
-                              src={p.instructor.avatar}
-                              alt=""
-                              className="rounded-circle"
-                              width={32}
-                              height={32}
-                              style={{ objectFit: "cover" }}
-                            />
-                          ) : (
-                            <div
-                              className="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white fw-bold"
-                              style={{ width: 32, height: 32, fontSize: 13, flexShrink: 0 }}
-                            >
-                              {p.instructor?.name?.[0]?.toUpperCase() || "?"}
-                            </div>
-                          )}
-                          <div>
-                            <div className="fw-semibold small">{p.instructor?.name || "—"}</div>
-                            <div className="text-body-secondary" style={{ fontSize: "0.72rem" }}>{p.instructor?.email}</div>
+                        <div className="d-flex align-items-center position-relative">
+                          <div className="avatar avatar-md">
+                            {p.instructor?.avatar ? (
+                              <img src={p.instructor.avatar} className="rounded-circle" alt="avatar" />
+                            ) : (
+                              <div className="avatar-img rounded-circle border-white border-3 shadow d-flex align-items-center justify-content-center bg-light text-dark fw-bold fs-4">
+                                {p.instructor?.name?.[0]?.toUpperCase() || "?"}
+                              </div>
+                            )}
+                          </div>
+                          <div className="mb-0 ms-3">
+                            <h6 className="mb-0">{p.instructor?.name || "—"}</h6>
                           </div>
                         </div>
                       </td>
+                      <td>{p.instructor?.email || "—"}</td>
                       <td className="fw-semibold text-success">{formatCurrency(p.amount)}</td>
                       <td>
-                        <div className="small">{p.bankInfo?.bankName}</div>
-                        <div className="font-monospace text-body-secondary" style={{ fontSize: "0.72rem" }}>
-                          {p.bankInfo?.accountNumber}
-                        </div>
-                        <div className="small text-body-secondary">{p.bankInfo?.accountName}</div>
+                        <div>{p.bankInfo?.bankName}</div>
+                        <div className="font-monospace text-body-secondary">{p.bankInfo?.accountNumber}</div>
+                        <div className="text-body-secondary">{p.bankInfo?.accountName}</div>
                       </td>
-                      <td className="small">{p.periodLabel || "—"}</td>
                       <td>
-                        <Badge bg={STATUS_VARIANT[p.status] || "secondary"} className="text-capitalize">
-                          {p.status}
+                        <Badge bg={STATUS_VARIANT[p.status] || "secondary"}>
+                          {STATUS_LABEL[p.status] || p.status}
                         </Badge>
                       </td>
-                      <td className="small">{formatDate(p.createdAt)}</td>
-                      <td className="small">{formatDate(p.processedAt)}</td>
-                      <td className="small text-body-secondary" style={{ maxWidth: 140 }}>
+                      <td>{formatDate(p.createdAt)}</td>
+                      <td>{formatDate(p.processedAt)}</td>
+                      <td className="text-body-secondary" style={{ maxWidth: 160 }}>
                         {p.adminNote || "—"}
                       </td>
                       <td>
                         {p.status === "pending" ? (
-                          <Button
-                            variant="primary"
-                            size="sm"
-                            onClick={() => setActivePayout(p)}
-                          >
+                          <Button variant="primary-soft" size="sm" onClick={() => setActivePayout(p)}>
                             Process
                           </Button>
                         ) : (
-                          <span className="text-body-secondary small">—</span>
+                          <span className="text-body-secondary">—</span>
                         )}
                       </td>
                     </tr>
                   ))}
                 </tbody>
-              </Table>
+              </table>
             </div>
           )}
         </CardBody>
 
-        <CardHeader className="bg-transparent">
+        <CardFooter className="bg-transparent pt-0 px-0">
           <PaginationBar
             page={page}
             totalPages={pagination.totalPages}
@@ -307,7 +302,7 @@ export default function AdminPayoutsPage() {
             onPageChange={setPage}
             onPageSizeChange={(s) => { setPageSize(s); setPage(1); }}
           />
-        </CardHeader>
+        </CardFooter>
       </Card>
 
       {activePayout && (

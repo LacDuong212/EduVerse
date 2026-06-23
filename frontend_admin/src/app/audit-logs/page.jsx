@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import {
-  Badge, Button, Card, CardBody, CardHeader,
-  Col, Form, Modal, Row, Spinner, Table,
+  Badge, Card, CardBody, CardFooter, CardHeader,
+  Col, Form, Row, Spinner,
 } from "react-bootstrap";
-import { FaClipboardList, FaSearch, FaTimes } from "react-icons/fa";
+import { FaClipboardList, FaSearch, FaTimes, FaChevronDown, FaChevronRight } from "react-icons/fa";
 import PageMetaData from "@/components/PageMetaData";
 import PaginationBar from "@/components/PaginationBar";
 
@@ -12,69 +12,81 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 const AXIOS_CFG = { withCredentials: true };
 
 const ACTION_LABELS = {
-  LOGIN_SUCCESS: "Login Success",
-  LOGIN_FAILED: "Login Failed",
-  LOGOUT: "Logout",
-  COURSE_APPROVE: "Approve",
-  COURSE_REJECT: "Reject",
-  COURSE_BLOCK: "Block",
-  COURSE_UNBLOCK: "Unblock",
-  COURSE_DELETE: "Delete",
-  COURSE_RESTORE: "Restore",
-  INSTRUCTOR_APPROVE: "Approve",
-  INSTRUCTOR_REJECT: "Reject",
-  INSTRUCTOR_BLOCK: "Block",
-  INSTRUCTOR_UNBLOCK: "Unblock",
-  PAYOUT_MARK_PAID: "Mark as Paid",
-  PAYOUT_REJECT: "Reject",
-  COUPON_CREATE: "Create",
-  COUPON_UPDATE_STATUS: "Update Status",
-  COUPON_DELETE: "Delete",
-  CATEGORY_CREATE: "Create",
-  CATEGORY_UPDATE: "Update",
-  CATEGORY_DELETE: "Delete",
+  LOGIN_SUCCESS:        "Login",
+  LOGIN_FAILED:         "Login Failed",
+  LOGOUT:               "Logout",
+  COURSE_APPROVE:       "Approved",
+  COURSE_REJECT:        "Rejected",
+  COURSE_BLOCK:         "Blocked",
+  COURSE_UNBLOCK:       "Unblocked",
+  COURSE_DELETE:        "Deleted",
+  COURSE_RESTORE:       "Restored",
+  INSTRUCTOR_APPROVE:   "Approved",
+  INSTRUCTOR_REJECT:    "Rejected",
+  INSTRUCTOR_BLOCK:     "Blocked",
+  INSTRUCTOR_UNBLOCK:   "Unblocked",
+  STUDENT_BLOCK:        "Blocked",
+  STUDENT_UNBLOCK:      "Unblocked",
+  STUDENT_DELETE:       "Deleted",
+  PAYOUT_MARK_PAID:     "Mark Paid",
+  PAYOUT_REJECT:        "Rejected",
+  COUPON_CREATE:        "Created",
+  COUPON_UPDATE_STATUS: "Changed",
+  COUPON_DELETE:        "Deleted",
+  CATEGORY_CREATE:      "Created",
+  CATEGORY_UPDATE:      "Changed",
+  CATEGORY_DELETE:      "Deleted",
+  ADMIN_CHANGE_PASSWORD:"Changed",
+};
+
+const ACTION_VARIANT = {
+  LOGIN_SUCCESS:        "success",
+  LOGIN_FAILED:         "danger",
+  LOGOUT:               "secondary",
+  COURSE_APPROVE:       "success",
+  COURSE_REJECT:        "danger",
+  COURSE_BLOCK:         "warning",
+  COURSE_UNBLOCK:       "info",
+  COURSE_DELETE:        "danger",
+  COURSE_RESTORE:       "success",
+  INSTRUCTOR_APPROVE:   "success",
+  INSTRUCTOR_REJECT:    "danger",
+  INSTRUCTOR_BLOCK:     "warning",
+  INSTRUCTOR_UNBLOCK:   "info",
+  STUDENT_BLOCK:        "warning",
+  STUDENT_UNBLOCK:      "info",
+  STUDENT_DELETE:       "danger",
+  PAYOUT_MARK_PAID:     "success",
+  PAYOUT_REJECT:        "danger",
+  COUPON_CREATE:        "primary",
+  COUPON_UPDATE_STATUS: "info",
+  COUPON_DELETE:        "danger",
+  CATEGORY_CREATE:      "primary",
+  CATEGORY_UPDATE:      "info",
+  CATEGORY_DELETE:      "danger",
+  ADMIN_CHANGE_PASSWORD:"secondary",
 };
 
 const ACTION_GROUPS = [
-  { label: "Auth", actions: ["LOGIN_SUCCESS", "LOGIN_FAILED", "LOGOUT"] },
-  { label: "Course", actions: ["COURSE_APPROVE", "COURSE_REJECT", "COURSE_BLOCK", "COURSE_UNBLOCK", "COURSE_DELETE", "COURSE_RESTORE"] },
+  { label: "Auth",       actions: ["LOGIN_SUCCESS", "LOGIN_FAILED", "LOGOUT"] },
+  { label: "Course",     actions: ["COURSE_APPROVE", "COURSE_REJECT", "COURSE_BLOCK", "COURSE_UNBLOCK", "COURSE_DELETE", "COURSE_RESTORE"] },
   { label: "Instructor", actions: ["INSTRUCTOR_APPROVE", "INSTRUCTOR_REJECT", "INSTRUCTOR_BLOCK", "INSTRUCTOR_UNBLOCK"] },
-  { label: "Payout", actions: ["PAYOUT_MARK_PAID", "PAYOUT_REJECT"] },
-  { label: "Coupon", actions: ["COUPON_CREATE", "COUPON_UPDATE_STATUS", "COUPON_DELETE"] },
-  { label: "Category", actions: ["CATEGORY_CREATE", "CATEGORY_UPDATE", "CATEGORY_DELETE"] },
+  { label: "Student",    actions: ["STUDENT_BLOCK", "STUDENT_UNBLOCK", "STUDENT_DELETE"] },
+  { label: "Payout",     actions: ["PAYOUT_MARK_PAID", "PAYOUT_REJECT"] },
+  { label: "Coupon",     actions: ["COUPON_CREATE", "COUPON_UPDATE_STATUS", "COUPON_DELETE"] },
+  { label: "Category",   actions: ["CATEGORY_CREATE", "CATEGORY_UPDATE", "CATEGORY_DELETE"] },
+  { label: "Admin",      actions: ["ADMIN_CHANGE_PASSWORD"] },
 ];
 
-const ACTION_VARIANT = {
-  LOGIN_SUCCESS: "success",
-  LOGIN_FAILED: "danger",
-  LOGOUT: "secondary",
-  COURSE_APPROVE: "success",
-  COURSE_REJECT: "danger",
-  COURSE_BLOCK: "warning",
-  COURSE_UNBLOCK: "info",
-  COURSE_DELETE: "danger",
-  COURSE_RESTORE: "success",
-  INSTRUCTOR_APPROVE: "success",
-  INSTRUCTOR_REJECT: "danger",
-  INSTRUCTOR_BLOCK: "warning",
-  INSTRUCTOR_UNBLOCK: "info",
-  PAYOUT_MARK_PAID: "success",
-  PAYOUT_REJECT: "danger",
-  COUPON_CREATE: "primary",
-  COUPON_UPDATE_STATUS: "info",
-  COUPON_DELETE: "danger",
-  CATEGORY_CREATE: "primary",
-  CATEGORY_UPDATE: "info",
-  CATEGORY_DELETE: "danger",
-};
-
 const ENTITY_OPTIONS = [
-  { value: "AUTH", label: "Auth" },
-  { value: "COURSE", label: "Course" },
+  { value: "AUTH",       label: "Auth" },
+  { value: "COURSE",     label: "Course" },
   { value: "INSTRUCTOR", label: "Instructor" },
-  { value: "PAYOUT", label: "Payout" },
-  { value: "COUPON", label: "Coupon" },
-  { value: "CATEGORY", label: "Category" },
+  { value: "STUDENT",    label: "Student" },
+  { value: "PAYOUT",     label: "Payout" },
+  { value: "COUPON",     label: "Coupon" },
+  { value: "CATEGORY",   label: "Category" },
+  { value: "ADMIN",      label: "Admin" },
 ];
 
 const formatDatetime = (d) =>
@@ -85,78 +97,80 @@ const formatDatetime = (d) =>
       })
     : "—";
 
-function DiffModal({ log, onClose }) {
-  const hasDiff = log.before != null || log.after != null;
+function DiffPanel({ before, after }) {
+  if (before == null && after == null) return <span className="text-body-secondary small">No changes recorded</span>;
   return (
-    <Modal show onHide={onClose} centered size="lg">
-      <Modal.Header closeButton>
-        <Modal.Title style={{ fontSize: "1rem" }}>
-          <Badge bg={ACTION_VARIANT[log.action] || "secondary"} className="me-2">
+    <Row className="g-3 mt-0">
+      <Col xs={12} md={6}>
+        <div className="fw-semibold small mb-1 text-body-secondary">Before</div>
+        <pre
+          className="rounded-3 p-3 small mb-0"
+          style={{ background: "rgba(var(--bs-danger-rgb),0.06)", whiteSpace: "pre-wrap", wordBreak: "break-all", fontSize: "0.75rem" }}
+        >
+          {before != null ? JSON.stringify(before, null, 2) : "—"}
+        </pre>
+      </Col>
+      <Col xs={12} md={6}>
+        <div className="fw-semibold small mb-1 text-body-secondary">After</div>
+        <pre
+          className="rounded-3 p-3 small mb-0"
+          style={{ background: "rgba(var(--bs-success-rgb),0.06)", whiteSpace: "pre-wrap", wordBreak: "break-all", fontSize: "0.75rem" }}
+        >
+          {after != null ? JSON.stringify(after, null, 2) : "—"}
+        </pre>
+      </Col>
+    </Row>
+  );
+}
+
+function LogRow({ log }) {
+  const [expanded, setExpanded] = useState(false);
+  const hasDiff = log.before != null || log.after != null;
+
+  return (
+    <>
+      <tr>
+        <td style={{ width: 28, paddingRight: 0 }}>
+          {hasDiff && (
+            <button
+              className="btn btn-link p-0 text-body-secondary"
+              onClick={() => setExpanded((v) => !v)}
+              title={expanded ? "Collapse" : "Expand changes"}
+            >
+              {expanded ? <FaChevronDown /> : <FaChevronRight />}
+            </button>
+          )}
+        </td>
+        <td>
+          <Badge bg={ACTION_VARIANT[log.action] || "secondary"}>
             {ACTION_LABELS[log.action] || log.action}
           </Badge>
-          {log.entityLabel || log.entityId || "—"}
-        </Modal.Title>
-      </Modal.Header>
-      <Modal.Body className="p-4 vstack gap-3">
-        <div className="row g-2 small">
-          <div className="col-6">
-            <span className="text-body-secondary">Admin</span>
-            <div className="fw-semibold">{log.adminName}</div>
-          </div>
-          <div className="col-6">
-            <span className="text-body-secondary">Time</span>
-            <div>{formatDatetime(log.createdAt)}</div>
-          </div>
-          <div className="col-6">
-            <span className="text-body-secondary">Entity Type</span>
-            <div>{log.entityType}</div>
-          </div>
-          <div className="col-6">
-            <span className="text-body-secondary">IP Address</span>
-            <div className="font-monospace">{log.ipAddress || "—"}</div>
-          </div>
-          <div className="col-12">
-            <span className="text-body-secondary">Result</span>
-            <div>
-              {log.success ? (
-                <Badge bg="success">Success</Badge>
-              ) : (
-                <span>
-                  <Badge bg="danger" className="me-2">Failed</Badge>
-                  <span className="text-body-secondary small">{log.failReason || ""}</span>
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {hasDiff && (
-          <Row className="g-3">
-            <Col>
-              <div className="fw-semibold small mb-1 text-body-secondary">Before</div>
-              <pre
-                className="rounded-3 p-3 small mb-0"
-                style={{ background: "rgba(var(--bs-body-emphasis-color-rgb,0,0,0),0.04)", whiteSpace: "pre-wrap", wordBreak: "break-all" }}
-              >
-                {log.before != null ? JSON.stringify(log.before, null, 2) : "—"}
-              </pre>
-            </Col>
-            <Col>
-              <div className="fw-semibold small mb-1 text-body-secondary">After</div>
-              <pre
-                className="rounded-3 p-3 small mb-0"
-                style={{ background: "rgba(var(--bs-body-emphasis-color-rgb,0,0,0),0.04)", whiteSpace: "pre-wrap", wordBreak: "break-all" }}
-              >
-                {log.after != null ? JSON.stringify(log.after, null, 2) : "—"}
-              </pre>
-            </Col>
-          </Row>
-        )}
-      </Modal.Body>
-      <Modal.Footer className="border-0">
-        <Button variant="outline-secondary" size="sm" onClick={onClose}>Close</Button>
-      </Modal.Footer>
-    </Modal>
+        </td>
+        <td>
+          <div>{log.entityLabel || "—"}</div>
+          <div className="text-body-secondary">{log.entityType}</div>
+        </td>
+        <td className="text-body-secondary" style={{ maxWidth: 200 }}>
+          {log.reason || "—"}
+        </td>
+        <td>
+          <div className="fw-semibold">{log.adminName}</div>
+          <div className="font-monospace text-body-secondary">{log.ipAddress || "—"}</div>
+        </td>
+        <td>{log.adminEmail || "—"}</td>
+        <td className="text-body-secondary" style={{ whiteSpace: "nowrap" }}>
+          {formatDatetime(log.createdAt)}
+        </td>
+      </tr>
+      {expanded && hasDiff && (
+        <tr>
+          <td />
+          <td colSpan={7} className="py-2 px-3">
+            <DiffPanel before={log.before} after={log.after} />
+          </td>
+        </tr>
+      )}
+    </>
   );
 }
 
@@ -166,18 +180,19 @@ export default function AuditLogsPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [loading, setLoading] = useState(true);
-  const [activeLog, setActiveLog] = useState(null);
 
-  const [filters, setFilters] = useState({ entityType: "", from: "", to: "" });
-  const [applied, setApplied] = useState({ entityType: "", from: "", to: "" });
+  const [filters, setFilters] = useState({ search: "", entityType: "", action: "", from: "", to: "" });
+  const [applied, setApplied] = useState({ search: "", entityType: "", action: "", from: "", to: "" });
 
   const fetchLogs = useCallback(async (p = 1, f = {}) => {
     setLoading(true);
     try {
       const params = new URLSearchParams({ page: p, limit: pageSize });
+      if (f.search)     params.set("search", f.search.trim());
       if (f.entityType) params.set("entityType", f.entityType);
-      if (f.from) params.set("from", f.from);
-      if (f.to) params.set("to", f.to);
+      if (f.action)     params.set("action", f.action);
+      if (f.from)       params.set("from", f.from);
+      if (f.to)         params.set("to", f.to);
       const res = await axios.get(`${BACKEND_URL}/api/admin/audit-logs?${params}`, AXIOS_CFG);
       if (res.data.success) {
         setLogs(res.data.result || []);
@@ -200,13 +215,22 @@ export default function AuditLogsPage() {
   };
 
   const handleClear = () => {
-    const empty = { entityType: "", from: "", to: "" };
+    const empty = { search: "", entityType: "", action: "", from: "", to: "" };
     setFilters(empty);
     setApplied(empty);
     setPage(1);
   };
 
-  const hasFilter = applied.entityType || applied.from || applied.to;
+  const hasFilter = applied.search || applied.entityType || applied.action || applied.from || applied.to;
+
+  // When entity type filter changes, reset action filter since the group changes
+  const handleEntityChange = (val) => {
+    setFilters((f) => ({ ...f, entityType: val, action: "" }));
+  };
+
+  const actionOptionsForEntity = filters.entityType
+    ? ACTION_GROUPS.find((g) => g.label.toUpperCase() === filters.entityType)?.actions || []
+    : ACTION_GROUPS.flatMap((g) => g.actions);
 
   return (
     <>
@@ -220,20 +244,48 @@ export default function AuditLogsPage() {
         </div>
       </div>
 
-      <Card className="bg-transparent border">
-        <CardHeader className="bg-light border-bottom">
+      <Card className="bg-transparent">
+        <CardHeader className="bg-transparent border-bottom px-0">
           <div className="row g-2 align-items-end">
-            <div className="col-6 col-md-3">
+            <div className="col-12 col-md-4">
+              <label className="form-label small fw-semibold mb-1">Search</label>
+              <div className="input-group input-group-sm">
+                <span className="input-group-text bg-body"><FaSearch size={11} className="text-body-secondary" /></span>
+                <Form.Control
+                  size="sm"
+                  className="bg-body"
+                  placeholder="Admin name, email, or impact..."
+                  value={filters.search}
+                  onChange={(e) => setFilters((f) => ({ ...f, search: e.target.value }))}
+                  onKeyDown={(e) => e.key === "Enter" && handleApply()}
+                />
+              </div>
+            </div>
+            <div className="col-6 col-md-2">
               <label className="form-label small fw-semibold mb-1">Entity</label>
               <Form.Select
                 size="sm"
                 className="bg-body"
                 value={filters.entityType}
-                onChange={(e) => setFilters((f) => ({ ...f, entityType: e.target.value }))}
+                onChange={(e) => handleEntityChange(e.target.value)}
               >
-                <option value="">All</option>
+                <option value="">All entities</option>
                 {ENTITY_OPTIONS.map((o) => (
                   <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </Form.Select>
+            </div>
+            <div className="col-6 col-md-3">
+              <label className="form-label small fw-semibold mb-1">Action</label>
+              <Form.Select
+                size="sm"
+                className="bg-body"
+                value={filters.action}
+                onChange={(e) => setFilters((f) => ({ ...f, action: e.target.value }))}
+              >
+                <option value="">All actions</option>
+                {actionOptionsForEntity.map((a) => (
+                  <option key={a} value={a}>{ACTION_LABELS[a] || a}</option>
                 ))}
               </Form.Select>
             </div>
@@ -270,7 +322,7 @@ export default function AuditLogsPage() {
           </div>
         </CardHeader>
 
-        <CardBody className="pb-0">
+        <CardBody className="px-0">
           {loading ? (
             <div className="text-center py-5">
               <Spinner animation="border" size="sm" className="text-body opacity-50" />
@@ -280,73 +332,30 @@ export default function AuditLogsPage() {
               No audit logs found.
             </div>
           ) : (
-            <div className="table-responsive">
-              <Table hover className="align-middle mb-0 table-dark-gray">
+            <div className="table-responsive border-0">
+              <table className="table table-dark-gray align-middle p-4 mb-0 table-hover">
                 <thead>
                   <tr>
-                    <th className="border-0">Admin</th>
+                    <th className="border-0 rounded-start" style={{ width: 28 }} />
                     <th className="border-0">Action</th>
-                    <th className="border-0">Old Data</th>
-                    <th className="border-0">New Data</th>
-                    <th className="border-0">Timestamp</th>
-                    <th className="border-0">Details</th>
+                    <th className="border-0">Impact</th>
+                    <th className="border-0">Reason</th>
+                    <th className="border-0">Admin</th>
+                    <th className="border-0">Email</th>
+                    <th className="border-0 rounded-end">Timestamp</th>
                   </tr>
                 </thead>
                 <tbody>
                   {logs.map((log) => (
-                    <tr key={log._id}>
-                      <td className="small">
-                        <div className="fw-semibold">{log.adminName}</div>
-                        <div className="text-body-secondary font-monospace" style={{ fontSize: "0.68rem" }}>{log.ipAddress || "—"}</div>
-                      </td>
-                      <td>
-                        <Badge bg={ACTION_VARIANT[log.action] || "secondary"} style={{ fontSize: "0.7rem" }}>
-                          {ACTION_LABELS[log.action] || log.action}
-                        </Badge>
-                        <div className="text-body-secondary small mt-1" style={{ fontSize: "0.72rem" }}>
-                          {log.entityLabel || log.entityId || "—"}
-                        </div>
-                      </td>
-                      <td style={{ maxWidth: 180 }}>
-                        {log.before != null ? (
-                          <pre className="mb-0 small rounded-2 px-2 py-1" style={{ background: "rgba(var(--bs-danger-rgb),0.06)", fontSize: "0.68rem", whiteSpace: "pre-wrap", wordBreak: "break-all" }}>
-                            {JSON.stringify(log.before, null, 2)}
-                          </pre>
-                        ) : (
-                          <span className="text-body-secondary small">—</span>
-                        )}
-                      </td>
-                      <td style={{ maxWidth: 180 }}>
-                        {log.after != null ? (
-                          <pre className="mb-0 small rounded-2 px-2 py-1" style={{ background: "rgba(var(--bs-success-rgb),0.06)", fontSize: "0.68rem", whiteSpace: "pre-wrap", wordBreak: "break-all" }}>
-                            {JSON.stringify(log.after, null, 2)}
-                          </pre>
-                        ) : (
-                          <span className="text-body-secondary small">—</span>
-                        )}
-                      </td>
-                      <td className="small text-body-secondary" style={{ whiteSpace: "nowrap" }}>
-                        {formatDatetime(log.createdAt)}
-                      </td>
-                      <td>
-                        <Button
-                          variant="outline-secondary"
-                          size="sm"
-                          style={{ fontSize: "0.72rem", padding: "2px 8px" }}
-                          onClick={() => setActiveLog(log)}
-                        >
-                          View
-                        </Button>
-                      </td>
-                    </tr>
+                    <LogRow key={log._id} log={log} />
                   ))}
                 </tbody>
-              </Table>
+              </table>
             </div>
           )}
         </CardBody>
 
-        <CardHeader className="bg-transparent">
+        <CardFooter className="bg-transparent pt-0 px-0">
           <PaginationBar
             page={page}
             totalPages={pagination.totalPages}
@@ -355,12 +364,8 @@ export default function AuditLogsPage() {
             onPageChange={setPage}
             onPageSizeChange={(s) => { setPageSize(s); setPage(1); }}
           />
-        </CardHeader>
+        </CardFooter>
       </Card>
-
-      {activeLog && (
-        <DiffModal log={activeLog} onClose={() => setActiveLog(null)} />
-      )}
     </>
   );
 }

@@ -63,6 +63,9 @@ export const updatePayoutStatus = async (req, res) => {
       return res.status(400).json({ success: false, message: `Status must be one of: ${allowed.join(", ")}.` });
     }
 
+    if (status === "rejected" && !adminNote?.trim())
+      return res.status(400).json({ success: false, message: 'A reason is required when rejecting a payout.' });
+
     const payout = await Payout.findOne({ _id: id, isDeleted: false })
       .populate("instructor", "name email pfpImg");
 
@@ -87,7 +90,8 @@ export const updatePayoutStatus = async (req, res) => {
       entityId:    payout._id,
       entityLabel: `${payout.instructor?.name || "Unknown"} — ${payout.amount?.toLocaleString("vi-VN")}₫`,
       before:      { status: prevStatus },
-      after:       { status, adminNote: payout.adminNote },
+      after:       { status },
+      reason:      payout.adminNote || null,
       req,
     });
 

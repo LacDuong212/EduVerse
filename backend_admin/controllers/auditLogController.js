@@ -6,7 +6,7 @@ export const getAuditLogs = async (req, res) => {
     const limit = Math.min(100, parseInt(req.query.limit) || 20);
     const skip = (page - 1) * limit;
 
-    const { adminId, action, entityType, from, to } = req.query;
+    const { adminId, action, entityType, from, to, search } = req.query;
 
     const filter = {};
     if (adminId) filter.adminId = adminId;
@@ -20,6 +20,14 @@ export const getAuditLogs = async (req, res) => {
         end.setHours(23, 59, 59, 999);
         filter.createdAt.$lte = end;
       }
+    }
+    if (search) {
+      const regex = { $regex: search.trim(), $options: "i" };
+      filter.$or = [
+        { adminName: regex },
+        { adminEmail: regex },
+        { entityLabel: regex },
+      ];
     }
 
     const [logs, totalItems] = await Promise.all([

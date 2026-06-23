@@ -1,12 +1,8 @@
 import { Badge, Pagination, Spinner, Table } from "react-bootstrap";
 import { formatCurrency } from "@/utils/currency";
 
-const STATUS_VARIANT = {
-  pending:  "warning",
-  approved: "info",
-  paid:     "success",
-  rejected: "danger",
-};
+const STATUS_VARIANT = { pending: "warning", paid: "success", approved: "success", rejected: "danger" };
+const STATUS_LABEL   = { pending: "Pending", paid: "Paid", approved: "Paid", rejected: "Rejected" };
 
 const formatDate = (d) =>
   d ? new Date(d).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) : "—";
@@ -54,8 +50,8 @@ export default function PayoutHistoryTable({ payouts, loading, pagination, page,
                   <div className="text-body small" style={{ opacity: 0.5 }}>{p.bankInfo?.accountNumber}</div>
                 </td>
                 <td>
-                  <Badge bg={STATUS_VARIANT[p.status] || "secondary"} className="text-capitalize">
-                    {p.status}
+                  <Badge bg={STATUS_VARIANT[p.status] || "secondary"}>
+                    {STATUS_LABEL[p.status] || p.status}
                   </Badge>
                 </td>
                 <td className="text-body small">{formatDate(p.createdAt)}</td>

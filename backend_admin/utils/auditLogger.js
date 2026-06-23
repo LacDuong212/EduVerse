@@ -17,6 +17,10 @@ export const ACTION = {
   INSTRUCTOR_REJECT:    "INSTRUCTOR_REJECT",
   INSTRUCTOR_BLOCK:     "INSTRUCTOR_BLOCK",
   INSTRUCTOR_UNBLOCK:   "INSTRUCTOR_UNBLOCK",
+  // Student
+  STUDENT_BLOCK:        "STUDENT_BLOCK",
+  STUDENT_UNBLOCK:      "STUDENT_UNBLOCK",
+  STUDENT_DELETE:       "STUDENT_DELETE",
   // Payout
   PAYOUT_MARK_PAID:     "PAYOUT_MARK_PAID",
   PAYOUT_REJECT:        "PAYOUT_REJECT",
@@ -28,15 +32,19 @@ export const ACTION = {
   CATEGORY_CREATE:      "CATEGORY_CREATE",
   CATEGORY_UPDATE:      "CATEGORY_UPDATE",
   CATEGORY_DELETE:      "CATEGORY_DELETE",
+  // Admin account
+  ADMIN_CHANGE_PASSWORD: "ADMIN_CHANGE_PASSWORD",
 };
 
 export const ENTITY = {
   AUTH:        "AUTH",
   COURSE:      "COURSE",
   INSTRUCTOR:  "INSTRUCTOR",
+  STUDENT:     "STUDENT",
   PAYOUT:      "PAYOUT",
   COUPON:      "COUPON",
   CATEGORY:    "CATEGORY",
+  ADMIN:       "ADMIN",
 };
 
 /**
@@ -48,28 +56,32 @@ export const logAction = ({
   adminName,
   action,
   entityType,
-  entityId   = null,
+  entityId    = null,
   entityLabel = null,
-  before     = null,
-  after      = null,
-  success    = true,
-  failReason = null,
-  req        = null,
+  before      = null,
+  after       = null,
+  reason      = null,
+  success     = true,
+  failReason  = null,
+  req         = null,
 }) => {
   const ipAddress = req
     ? (req.headers["x-forwarded-for"]?.split(",")[0]?.trim() || req.ip || null)
     : null;
   const userAgent = req?.headers?.["user-agent"] || null;
+  const adminEmail = req?.admin?.email || null;
 
   AuditLog.create({
     adminId,
     adminName,
+    adminEmail,
     action,
     entityType,
     entityId:    entityId ? String(entityId) : null,
     entityLabel: entityLabel || null,
     before,
     after,
+    reason:      reason?.trim() || null,
     success,
     failReason,
     ipAddress,

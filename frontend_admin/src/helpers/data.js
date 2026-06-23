@@ -291,11 +291,11 @@ export const getInstructorDetailStats = async (id) => {
   }
 };
 
-export const blockInstructor = async (id) => {
+export const blockInstructor = async (id, message) => {
   try {
     const response = await axios.patch(
       `${backendUrl}/api/instructors/${id}/block`,
-      {},
+      { message },
       axiosConfig
     );
     return response.data;
@@ -333,11 +333,11 @@ export const approveInstructorRequest = async (id) => {
   }
 };
 
-export const rejectInstructorRequest = async (id) => {
+export const rejectInstructorRequest = async (id, message) => {
   try {
     const response = await axios.delete(
       `${backendUrl}/api/instructors/${id}/reject`,
-      axiosConfig
+      { ...axiosConfig, data: { message } }
     );
     return response.data;
   } catch (error) {

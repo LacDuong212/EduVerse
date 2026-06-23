@@ -79,19 +79,34 @@ const CourseActionModal = ({ show, actionType, handleClose, handleConfirm }) => 
       help = '';
   }
 
+  const REASON_REQUIRED = [ACTIONS.block, ACTIONS.reject, ACTIONS.delete];
+  const reasonRequired = REASON_REQUIRED.includes(actionType);
+
   const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
 
   const onConfirm = () => {
+    if (reasonRequired && !message.trim()) {
+      setError('Reason is required.');
+      return;
+    }
     if (typeof handleConfirm === 'function') handleConfirm(message);
     else toast.error('Action undefined.');
     setMessage('');
+    setError('');
+    handleClose();
+  };
+
+  const onHide = () => {
+    setMessage('');
+    setError('');
     handleClose();
   };
 
   return (
     <Modal
       show={show}
-      onHide={handleClose}
+      onHide={onHide}
       centered
       size="md"
       backdrop="static"
@@ -104,18 +119,22 @@ const CourseActionModal = ({ show, actionType, handleClose, handleConfirm }) => 
       </Modal.Header>
       <Modal.Body>
         <Form.Group controlId="modalTextArea">
-          <Form.Label className="fw-bold">Message (Optional)</Form.Label>
+          <Form.Label className="fw-bold">
+            Reason {reasonRequired ? <span className="text-danger">*</span> : <span className="text-body-secondary fw-normal">(optional)</span>}
+          </Form.Label>
           <Form.Control
             as="textarea"
             rows={3}
             placeholder="Reason for this action..."
             value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            onChange={(e) => { setMessage(e.target.value); if (e.target.value.trim()) setError(''); }}
+            isInvalid={!!error}
           />
+          <Form.Control.Feedback type="invalid">{error}</Form.Control.Feedback>
         </Form.Group>
       </Modal.Body>
       <Modal.Footer className="border-0 pt-0">
-        <Button variant="outline-secondary" size="sm" onClick={handleClose}>
+        <Button variant="outline-secondary" size="sm" onClick={onHide}>
           Cancel
         </Button>
         <Button variant={theme} size="sm" onClick={onConfirm}>

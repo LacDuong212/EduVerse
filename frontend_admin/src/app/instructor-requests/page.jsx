@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import PageMetaData from '@/components/PageMetaData';
 import ChoicesFormInput from '@/components/form/ChoicesFormInput';
-import { Button, Card, CardBody, CardFooter, CardHeader, Col, Modal, Row, Table } from 'react-bootstrap';
+import { Button, Card, CardBody, CardFooter, CardHeader, Col, Form, Modal, Row, Table } from 'react-bootstrap';
 import { FaSearch, FaTimes, FaUserTie } from 'react-icons/fa';
 import PaginationBar from '@/components/PaginationBar';
 import useSortableData from '@/hooks/useSortableData';
@@ -121,6 +121,8 @@ const InstructorRequests = () => {
   const [allData, setAllData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [rejectTarget, setRejectTarget] = useState(null);
+  const [rejectReason, setRejectReason] = useState('');
+  const [rejectError, setRejectError] = useState('');
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -172,18 +174,22 @@ const InstructorRequests = () => {
     }
   };
 
-  const handleRejectClick = (id) => setRejectTarget(id);
+  const handleRejectClick = (id) => { setRejectTarget(id); setRejectReason(''); setRejectError(''); };
 
   const confirmReject = async () => {
     if (!rejectTarget) return;
+    if (!rejectReason.trim()) { setRejectError('Reason is required.'); return; }
     try {
-      const response = await rejectInstructorRequest(rejectTarget);
+      const response = await rejectInstructorRequest(rejectTarget, rejectReason.trim());
       if (response && response.success) {
         setAllData(prev => prev.filter(item => item._id !== rejectTarget));
         toast.success("Request rejected.");
+      } else {
+        toast.error(response?.message || "Failed to reject.");
       }
     } catch (error) {
       console.error("Failed to reject:", error);
+      toast.error("Failed to reject.");
     }
     setRejectTarget(null);
   };
@@ -265,7 +271,21 @@ const InstructorRequests = () => {
         <Modal.Header closeButton>
           <Modal.Title>Reject Request</Modal.Title>
         </Modal.Header>
-        <Modal.Body>Are you sure you want to reject and delete this request? This action cannot be undone.</Modal.Body>
+        <Modal.Body>
+          <p className="text-body-secondary small mb-3">This action cannot be undone. The instructor will be notified.</p>
+          <Form.Group>
+            <Form.Label className="fw-semibold small">Reason <span className="text-danger">*</span></Form.Label>
+            <Form.Control
+              as="textarea"
+              rows={3}
+              placeholder="Explain why this request is being rejected..."
+              value={rejectReason}
+              onChange={(e) => { setRejectReason(e.target.value); if (e.target.value.trim()) setRejectError(''); }}
+              isInvalid={!!rejectError}
+            />
+            <Form.Control.Feedback type="invalid">{rejectError}</Form.Control.Feedback>
+          </Form.Group>
+        </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setRejectTarget(null)}>Cancel</Button>
           <Button variant="danger" onClick={confirmReject}>Reject</Button>

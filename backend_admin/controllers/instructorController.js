@@ -240,6 +240,9 @@ export const blockInstructor = async (req, res) => {
       return res.status(401).json({ success: false, message: 'Access denied.' });
     }
 
+    if (!message?.trim())
+      return res.status(400).json({ success: false, message: 'A reason is required when blocking an instructor.' });
+
     session = await mongoose.startSession();
     session.startTransaction();
 
@@ -273,7 +276,7 @@ export const blockInstructor = async (req, res) => {
       console.error('[Block Instructor]: Real-time notification delivery failed (non-critical):', notifyErr.message);
     }
 
-    logAction({ adminId: req.admin._id, adminName: req.admin.name, action: ACTION.INSTRUCTOR_BLOCK, entityType: ENTITY.INSTRUCTOR, entityId: id, entityLabel: instructor.name, before: { isActivated: true }, after: { isActivated: false }, req });
+    logAction({ adminId: req.admin._id, adminName: req.admin.name, action: ACTION.INSTRUCTOR_BLOCK, entityType: ENTITY.INSTRUCTOR, entityId: id, entityLabel: `${instructor.name} (${instructor.email})`, before: { isActivated: true }, after: { isActivated: false }, reason: message || null, req });
 
     return res.status(200).json({
       success: true,
@@ -340,7 +343,7 @@ export const unblockInstructor = async (req, res) => {
       console.error('[Unblock Instructor]: Real-time notification delivery failed (non-critical):', notifyErr.message);
     }
 
-    logAction({ adminId: req.admin._id, adminName: req.admin.name, action: ACTION.INSTRUCTOR_UNBLOCK, entityType: ENTITY.INSTRUCTOR, entityId: id, entityLabel: instructor.name, before: { isActivated: false }, after: { isActivated: true }, req });
+    logAction({ adminId: req.admin._id, adminName: req.admin.name, action: ACTION.INSTRUCTOR_UNBLOCK, entityType: ENTITY.INSTRUCTOR, entityId: id, entityLabel: `${instructor.name} (${instructor.email})`, before: { isActivated: false }, after: { isActivated: true }, reason: message || null, req });
 
     return res.status(200).json({
       success: true,
@@ -421,7 +424,7 @@ export const approveInstructor = async (req, res) => {
       console.error('[Approve Instructor]: Real-time notification delivery failed (non-critical):', notifyErr.message);
     }
 
-    logAction({ adminId: req.admin._id, adminName: req.admin.name, action: ACTION.INSTRUCTOR_APPROVE, entityType: ENTITY.INSTRUCTOR, entityId: id, entityLabel: updatedUser.name, before: { isApproved: false }, after: { isApproved: true, role: USER_ROLE.instructor }, req });
+    logAction({ adminId: req.admin._id, adminName: req.admin.name, action: ACTION.INSTRUCTOR_APPROVE, entityType: ENTITY.INSTRUCTOR, entityId: id, entityLabel: `${updatedUser.name} (${updatedUser.email})`, before: { isApproved: false }, after: { isApproved: true, role: USER_ROLE.instructor }, reason: message || null, req });
 
     return res.status(200).json({
       success: true,
@@ -455,12 +458,16 @@ export const rejectInstructor = async (req, res) => {
       return res.status(401).json({ success: false, message: 'Access denied.' });
     }
 
+    if (!message?.trim())
+      return res.status(400).json({ success: false, message: 'A reason is required when rejecting an instructor.' });
+
     session = await mongoose.startSession();
     session.startTransaction();
 
 
     const instructorRequest = await Instructor
       .findOne({ _id: id, isApproved: false })
+      .populate("user", "name")
       .session(session);
 
     if (!instructorRequest) {
@@ -490,7 +497,7 @@ export const rejectInstructor = async (req, res) => {
       console.error('[Reject Instructor]: Real-time notification delivery failed (non-critical):', notifyErr.message);
     }
 
-    logAction({ adminId: req.admin._id, adminName: req.admin.name, action: ACTION.INSTRUCTOR_REJECT, entityType: ENTITY.INSTRUCTOR, entityId: id, entityLabel: userId, before: { isApproved: false }, after: { deleted: true }, req });
+    logAction({ adminId: req.admin._id, adminName: req.admin.name, action: ACTION.INSTRUCTOR_REJECT, entityType: ENTITY.INSTRUCTOR, entityId: id, entityLabel: instructorRequest.user ? `${instructorRequest.user.name} (${instructorRequest.user.email})` : userId, before: { isApproved: false }, after: { deleted: true }, reason: message || null, req });
 
     return res.status(200).json({
       success: true,
