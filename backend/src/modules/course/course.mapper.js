@@ -128,7 +128,8 @@ export const getAiData = (aiData) => {
     options: q.options,
     correctAnswer: q.correctAnswer,
     explanation: q.explanation,
-    topic: q.topic
+    topic: q.topic,
+    timestamp: q.timestamp
   }));
 
   return {
