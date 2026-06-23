@@ -1,20 +1,23 @@
 import { Spinner } from "react-bootstrap";
 import Plyr from "plyr-react";
 import "plyr-react/plyr.css";
+import QuizOverlay from "./QuizOverlay";
 
-const VideoScreen = ({ 
-  playerContainerRef, 
-  source, 
-  playerKey, 
-  loading, 
-  error, 
-  streamLoading, 
-  streamError, 
+const VideoScreen = ({
+  playerContainerRef,
+  source,
+  playerKey,
+  loading,
+  error,
+  streamLoading,
+  streamError,
   hasCourse,
-  hasLecture 
+  hasLecture,
+  activeQuiz,
+  quizTotal,
+  onQuizAnswer,
+  onQuizContinue,
 }) => {
-  
-  // Logic hiển thị overlay thông báo
   const renderOverlay = () => {
     if (loading || streamLoading) {
       return (
@@ -37,7 +40,6 @@ const VideoScreen = ({
 
   return (
     <div className="overflow-hidden fullscreen-video position-relative p-1">
-      {/* Container có ref để tracking hook truy cập <video> */}
       <div className="video-player" ref={playerContainerRef}>
         {source && (
           <Plyr
@@ -50,6 +52,15 @@ const VideoScreen = ({
         )}
       </div>
       {renderOverlay()}
+      {activeQuiz && (
+        <QuizOverlay
+          quiz={activeQuiz.quiz}
+          index={activeQuiz.index}
+          total={quizTotal}
+          onAnswer={onQuizAnswer}
+          onContinue={onQuizContinue}
+        />
+      )}
     </div>
   );
 };

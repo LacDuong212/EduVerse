@@ -83,6 +83,18 @@ export const useAiData = (lecture, show, onUpdate) => {
     });
   }, []);
 
+  const handleQuizTimestampChange = useCallback((qIdx, mmss) => {
+    setEditedData(prev => {
+      const updatedQuizzes = [...prev.quizzes];
+      const parts = mmss.split(":").map(Number);
+      const secs = parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])
+        ? parts[0] * 60 + parts[1]
+        : null;
+      updatedQuizzes[qIdx] = { ...updatedQuizzes[qIdx], timestamp: secs };
+      return { ...prev, quizzes: updatedQuizzes };
+    });
+  }, []);
+
   const handleQuizOptionChange = useCallback((qIdx, oIdx, val) => {
     setEditedData(prev => {
       const updatedQuizzes = [...prev.quizzes];
@@ -134,6 +146,7 @@ export const useAiData = (lecture, show, onUpdate) => {
       handleConceptChange,
       handleQuizChange,
       handleQuizOptionChange,
+      handleQuizTimestampChange,
       handleSave,
       handleCancel
     }

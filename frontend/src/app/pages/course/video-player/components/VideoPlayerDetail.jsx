@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 import useVideoPlayerData from "../hooks/useVideoPlayerData";
 import useVideoPlayerTracking from "../hooks/useVideoPlayerTracking";
+import useQuizOverlay from "../hooks/useQuizOverlay";
 import useNotes from "../hooks/useNotes";
 
 import CoursePlaylistSidebar from "./CoursePlaylistSidebar";
@@ -64,6 +65,13 @@ export default function VideoPlayerDetail({
     setLocalProgressOverrides,
   });
 
+  const { activeQuiz, quizResults, hasTimestampQuizzes, onQuizAnswer, onQuizContinue } = useQuizOverlay({
+    playerContainerRef,
+    quizzes: currentLecture?.aiData?.quizzes || [],
+    source,
+    playerKey,
+  });
+
   // Notes state lifted here so both NoteProgressMarkers and NoteSidebar share it
   const notesApi = useNotes({ lectureId, courseId });
 
@@ -111,6 +119,10 @@ export default function VideoPlayerDetail({
               streamError={streamError}
               hasCourse={!!course}
               hasLecture={!!currentLecture}
+              activeQuiz={activeQuiz}
+              quizTotal={(currentLecture?.aiData?.quizzes || []).filter((q) => q.timestamp != null).length}
+              onQuizAnswer={onQuizAnswer}
+              onQuizContinue={onQuizContinue}
             />
           </div>
 
@@ -156,6 +168,7 @@ export default function VideoPlayerDetail({
         courseId={courseId}
         lectureId={currentLecture?.lecId}
         isLastLecture={isLastLecture}
+        quizResults={hasTimestampQuizzes ? quizResults : null}
       />
     </section>
   );

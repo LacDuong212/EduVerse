@@ -1,8 +1,16 @@
 import React, { useEffect, useRef } from "react";
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Alert, Tab, Nav, Badge, Accordion, Form, OverlayTrigger, Tooltip } from "react-bootstrap";
+import { FaClock } from "react-icons/fa";
 import { FaRobot, FaListUl, FaLightbulb, FaQuestionCircle, FaPlayCircle, FaCheckCircle, FaTrash, FaRedo, FaSave, FaTimes, FaEdit } from "react-icons/fa";
 import { BsXLg } from "react-icons/bs";
 import { useAiData } from "./useAiData";
+
+const secsToMMSS = (secs) => {
+  if (secs == null || isNaN(secs)) return "";
+  const m = Math.floor(secs / 60);
+  const s = Math.floor(secs % 60);
+  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+};
 
 const AiData = ({ show, onClose, lecture, onGenerate, onUpdate, onDelete }) => {
   const { state, data, editedData, handlers } = useAiData(lecture, show, onUpdate);
@@ -285,10 +293,29 @@ const AiData = ({ show, onClose, lecture, onGenerate, onUpdate, onDelete }) => {
                               rows={2}
                               value={q.explanation}
                               onChange={(e) => handlers.handleQuizChange(idx, "explanation", e.target.value)}
+                              className="mb-3"
                             />
+                            <Form.Label className="small fw-bold d-flex align-items-center gap-1">
+                              <FaClock size={12} /> Timestamp (MM:SS)
+                            </Form.Label>
+                            <Form.Control
+                              type="text"
+                              placeholder="e.g. 02:30"
+                              value={secsToMMSS(q.timestamp)}
+                              onChange={(e) => handlers.handleQuizTimestampChange(idx, e.target.value)}
+                              style={{ maxWidth: 120 }}
+                            />
+                            <Form.Text className="text-body-secondary">Video will pause here to show this question</Form.Text>
                           </>
                         ) : (
                           <>
+                            {q.timestamp != null && (
+                              <div className="mb-2">
+                                <Badge bg="secondary" className="d-inline-flex align-items-center gap-1">
+                                  <FaClock size={10} /> {secsToMMSS(q.timestamp)}
+                                </Badge>
+                              </div>
+                            )}
                             <div className="mb-3">
                               {q.options.map((opt, oIdx) => {
                                 const isCorrect = opt === q.correctAnswer;

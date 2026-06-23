@@ -30,6 +30,7 @@ export default function LectureConclusionModal({
   courseId,
   lectureId,
   isLastLecture,
+  quizResults = null,
 }) {
   const navigate = useNavigate();
 
@@ -42,6 +43,7 @@ export default function LectureConclusionModal({
     checkedState,
     loading,
     isLocked,
+    hasTimestampQuizzes,
     handleSelect,
     handleCheck,
     handleClose,
@@ -55,6 +57,7 @@ export default function LectureConclusionModal({
     onHide,
     onNext,
     navigate,
+    quizResults,
   });
 
   const hasContent = summary || lessonNotes || quizzes.length > 0;
@@ -192,7 +195,55 @@ export default function LectureConclusionModal({
           </div>
         )}
 
-        {quizzes.length > 0 && (
+        {/* Timestamp-based: score review */}
+        {hasTimestampQuizzes && quizResults && quizResults.length > 0 && (
+          <div className="mt-4">
+            <div className="d-flex align-items-center mb-3">
+              <BsQuestionCircle className="me-2 text-info fs-5" />
+              <h5 className="mb-0 fw-bold">Quiz Results</h5>
+              <span className={`ms-auto badge fs-6 bg-${quizResults.filter(r => r.isCorrect).length === quizResults.length ? "success" : "primary"}`}>
+                {quizResults.filter(r => r.isCorrect).length} / {quizResults.length} Correct
+              </span>
+            </div>
+
+            {quizResults.map((r, i) => (
+              <Card key={i} className={`border rounded-3 mb-3 border-${r.isCorrect ? "success" : "danger"}`}>
+                <CardBody className="py-3">
+                  <div className="d-flex align-items-start gap-2">
+                    {r.isCorrect
+                      ? <BsCheckCircleFill className="text-success flex-shrink-0 mt-1" />
+                      : <BsXCircleFill className="text-danger flex-shrink-0 mt-1" />
+                    }
+                    <div className="w-100">
+                      <p className="mb-2 fw-semibold small">{r.question}</p>
+                      <p className="mb-1 small">
+                        <span className="text-body-secondary">Your answer: </span>
+                        <span className={`fw-semibold text-${r.isCorrect ? "success" : "danger"}`}>{r.userAnswer}</span>
+                      </p>
+                      {!r.isCorrect && (
+                        <p className="mb-1 small">
+                          <span className="text-body-secondary">Correct answer: </span>
+                          <span className="fw-semibold text-success">{r.correctAnswer}</span>
+                        </p>
+                      )}
+                      {!r.isCorrect && r.explanation && (
+                        <Alert variant="info" className="mb-0 mt-2 py-2 small">
+                          <div className="d-flex">
+                            <BsLightbulb className="me-2 mt-1 flex-shrink-0" />
+                            <div><strong>Explanation:</strong> {r.explanation}</div>
+                          </div>
+                        </Alert>
+                      )}
+                    </div>
+                  </div>
+                </CardBody>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {/* Legacy: interactive quiz (no timestamps) */}
+        {!hasTimestampQuizzes && quizzes.length > 0 && (
           <div className="mt-4">
             <div className="d-flex align-items-center mb-3 mt-2">
               <BsQuestionCircle className="me-2 text-info fs-5" />
@@ -207,9 +258,7 @@ export default function LectureConclusionModal({
                 <Card key={qIndex} className="border rounded-3 mb-4 shadow-sm">
                   <CardHeader className="bg-light border-bottom">
                     <h6 className="mb-0">
-                      <span className="fw-bold me-2">
-                        Question {qIndex + 1}:
-                      </span>
+                      <span className="fw-bold me-2">Question {qIndex + 1}:</span>
                       {quiz.question}
                     </h6>
                   </CardHeader>
@@ -224,26 +273,18 @@ export default function LectureConclusionModal({
                         if (isChecked) {
                           if (opt === quiz.correctAnswer) {
                             labelClass += "btn-success";
-                            icon = (
-                              <BsCheckCircleFill className="ms-2 flex-shrink-0" />
-                            );
+                            icon = <BsCheckCircleFill className="ms-2 flex-shrink-0" />;
                           } else if (selected === oIndex) {
                             labelClass += "btn-danger";
-                            icon = (
-                              <BsXCircleFill className="ms-2 flex-shrink-0" />
-                            );
+                            icon = <BsXCircleFill className="ms-2 flex-shrink-0" />;
                           } else {
                             labelClass += "btn-light opacity-50";
                           }
                         } else {
-                          labelClass +=
-                            selected === oIndex
-                              ? "btn-primary"
-                              : "btn-outline-primary";
+                          labelClass += selected === oIndex ? "btn-primary" : "btn-outline-primary";
                         }
 
                         const inputId = `quiz-${qIndex}-opt-${oIndex}`;
-
                         return (
                           <div key={oIndex}>
                             <input
@@ -255,9 +296,8 @@ export default function LectureConclusionModal({
                               onChange={() => handleSelect(qIndex, oIndex)}
                               disabled={isChecked}
                             />
-
                             <label className={labelClass} htmlFor={inputId}>
-                              <span>{`${opt}`}</span>
+                              <span>{opt}</span>
                               {icon}
                             </label>
                           </div>
@@ -270,13 +310,10 @@ export default function LectureConclusionModal({
                         <Alert variant="info" className="mb-2">
                           <div className="d-flex">
                             <BsLightbulb className="me-2 mt-1 flex-shrink-0" />
-                            <div>
-                              <strong>Explanation:</strong> {quiz.explanation}
-                            </div>
+                            <div><strong>Explanation:</strong> {quiz.explanation}</div>
                           </div>
                         </Alert>
                       )}
-
                       {!isChecked && (
                         <div className="d-flex justify-content-end">
                           <Button

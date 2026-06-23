@@ -43,7 +43,8 @@ const curriculumSchema = new mongoose.Schema({
           options: [String],
           correctAnswer: String,
           explanation: String,
-          topic: { type: String, default: "General Knowledge" }
+          topic: { type: String, default: "General Knowledge" },
+          timestamp: { type: Number, default: null }
         }],
         status: { type: String, enum: AI_DATA_STATUS.values(), default: AI_DATA_STATUS.none }
       }

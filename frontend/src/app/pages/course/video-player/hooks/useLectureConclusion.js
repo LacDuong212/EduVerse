@@ -13,8 +13,10 @@ export default function useLectureConclusion({
   onHide,
   onNext,
   navigate,
+  quizResults = null, // pre-computed from timestamp-based quiz overlay
 }) {
   const quizzes = aiData?.quizzes || [];
+  const hasTimestampQuizzes = quizzes.some((q) => q.timestamp != null);
 
   const [userAnswers, setUserAnswers] = useState({});
   const [checkedState, setCheckedState] = useState({});
@@ -33,9 +35,10 @@ export default function useLectureConclusion({
   }, [show, aiData]);
 
   const allQuizzesCompleted = useMemo(() => {
+    if (hasTimestampQuizzes) return true; // answered inline during video
     if (!quizzes.length) return true;
     return Object.keys(checkedState).length === quizzes.length;
-  }, [quizzes.length, checkedState]);
+  }, [hasTimestampQuizzes, quizzes.length, checkedState]);
 
   const isLocked = !allQuizzesCompleted;
 
@@ -82,20 +85,31 @@ export default function useLectureConclusion({
   );
 
   const saveQuizResult = useCallback(async () => {
-    if (!backendUrl || !courseId || !lectureId || !quizzes.length) return;
+    if (!backendUrl || !courseId || !lectureId) return;
+
+    let score, total, wrong;
+
+    if (hasTimestampQuizzes && quizResults) {
+      score = quizResults.filter((r) => r.isCorrect).length;
+      total = quizResults.length;
+      wrong = quizResults
+        .filter((r) => !r.isCorrect)
+        .map((r) => ({ question: r.question, topic: r.topic }));
+    } else {
+      if (!quizzes.length) return;
+      score = quizScore;
+      total = quizzes.length;
+      wrong = wrongAnswers;
+    }
+
+    if (!total) return;
 
     await axios.post(
       `${backendUrl}/api/quizzes`,
-      {
-        courseId,
-        lectureId,
-        score: quizScore,
-        totalQuestions: quizzes.length,
-        wrongAnswers,
-      },
+      { courseId, lectureId, score, totalQuestions: total, wrongAnswers: wrong },
       { withCredentials: true }
     );
-  }, [courseId, lectureId, quizScore, quizzes.length, wrongAnswers]);
+  }, [courseId, lectureId, hasTimestampQuizzes, quizResults, quizzes.length, quizScore, wrongAnswers]);
 
   const generateAssessment = useCallback(async () => {
     const { data } = await axios.get(
@@ -110,7 +124,10 @@ export default function useLectureConclusion({
     try {
       setLoading(true);
 
-      if (quizzes.length > 0 && Object.keys(checkedState).length > 0) {
+      const hasAnswers = hasTimestampQuizzes
+        ? (quizResults?.length ?? 0) > 0
+        : quizzes.length > 0 && Object.keys(checkedState).length > 0;
+      if (hasAnswers) {
         await saveQuizResult();
       }
 
@@ -179,6 +196,7 @@ export default function useLectureConclusion({
     checkedState,
     loading,
     isLocked,
+    hasTimestampQuizzes,
     handleSelect,
     handleCheck,
     handleClose,

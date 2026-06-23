@@ -15,7 +15,7 @@ import { withTransaction } from "#utils/transaction.js";
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const fileManager = new GoogleAIFileManager(process.env.GEMINI_API_KEY);
 
-export const processVideoWithGemini = async (videoId) => {
+export const processVideoWithGemini = async (videoId, videoDuration = null) => {
   let tempFilePath = null;
   let uploadResult = null;
 
@@ -50,7 +50,7 @@ export const processVideoWithGemini = async (videoId) => {
 
     const result = await model.generateContent([
       { fileData: { mimeType: uploadResult.file.mimeType, fileUri: uploadResult.file.uri } },
-      { text: LECTURE_PROMPT }
+      { text: buildLecturePrompt(videoDuration) }
     ]);
 
     // [5/5] Finalize
@@ -117,7 +117,12 @@ const waitForGeminiFile = async (fileName) => {
   }
 };
 
-const LECTURE_PROMPT = `
+const buildLecturePrompt = (videoDuration = null) => {
+  const durationNote = videoDuration
+    ? `Video duration: ${Math.round(videoDuration)} seconds. Each timestamp must be between 10 and ${Math.max(10, Math.round(videoDuration) - 10)}.`
+    : ``;
+
+  return `
   You are a professional instructor. Analyze the video and generate high-quality learning content in **ENGLISH**:
     1. **Summary:** 2-3 sentences summarizing the video content.
 
@@ -126,11 +131,15 @@ const LECTURE_PROMPT = `
       - **Main Points:** Summarize 3-5 core ideas, steps, or logic flows.
       - **Practical Tips:** Provide 1-2 practical pieces of advice, common pitfalls, or real-world applications.
 
-    3. **Quizzes:** Create 5 multiple-choice questions. 
-      - **IMPORTANT:** For each question, identify a specific **"topic"** (2-3 words). Example: If asking about useState, the topic is "React State". This helps track student weaknesses.
+    3. **Quizzes:** Create 5 multiple-choice questions that test knowledge at specific moments in the video.
+      - For each question, identify a specific **"topic"** (2-3 words). Example: "React Hooks", "CSS Flexbox".
+      - For each question, assign a **"timestamp"** (integer, seconds) — the exact second in the video right after the relevant concept finishes being explained. The video will pause at this timestamp to ask the student.
+      - Timestamps must be spread evenly throughout the video. Do NOT cluster them together.
+      - ${durationNote}
 
   **OUTPUT MUST BE IN ENGLISH. RETURN STRICTLY JSON MATCHING THE SCHEMA.**
-`;
+  `;
+};
 
 const LECTURE_CONTENT_SCHEMA = {
   type: SchemaType.OBJECT,
@@ -168,7 +177,7 @@ const LECTURE_CONTENT_SCHEMA = {
       type: SchemaType.ARRAY,
       items: {
         type: SchemaType.OBJECT,
-        required: ["question", "options", "correctAnswer", "explanation", "topic"],
+        required: ["question", "options", "correctAnswer", "explanation", "topic", "timestamp"],
         properties: {
           question: { type: SchemaType.STRING },
           options: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
@@ -177,6 +186,10 @@ const LECTURE_CONTENT_SCHEMA = {
           topic: {
             type: SchemaType.STRING,
             description: "Specific technical topic (e.g., 'React Hooks', 'CSS Grid')"
+          },
+          timestamp: {
+            type: SchemaType.INTEGER,
+            description: "Second in the video right after the concept is explained — where the quiz will appear"
           }
         }
       }

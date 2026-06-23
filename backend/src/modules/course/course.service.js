@@ -1150,7 +1150,7 @@ export const handleLectureGenerateAi = async (insId, courseId, lecId) => {
     throw new AppError("Lecture or video not found in curriculum.", 404);
 
   try {
-    const aiGeneratedData = await processVideoWithGemini(lecture.videoId);
+    const aiGeneratedData = await processVideoWithGemini(lecture.videoId, lecture.duration);
 
     return await withTransaction(async (s) => {
       const currentCurriculum = await Curriculum.findOne({ courseId }).session(s);
