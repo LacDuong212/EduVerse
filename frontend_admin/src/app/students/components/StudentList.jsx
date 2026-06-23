@@ -2,8 +2,6 @@ import { Button } from 'react-bootstrap';
 import { FaUserGraduate } from 'react-icons/fa';
 import SortableTh from '@/components/SortableTh';
 
-const COLS = 7;
-
 const SkeletonRows = ({ count = 5 }) => (
   <>
     {[...Array(count)].map((_, i) => (
@@ -32,12 +30,11 @@ const StudentList = ({ studentsData, isLoading, sortKey, sortDir, onSort, onBloc
       <thead>
         <tr>
           <SortableTh label="Student name" sortKey="name" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0 rounded-start" />
-          <SortableTh label="Email" sortKey="email" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0" />
-          <SortableTh label="Join date" sortKey="createdAt" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0" />
-          <SortableTh label="Last updated" sortKey="updatedAt" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0" />
-          <th scope="col" className="border-0">Verified</th>
-          <th scope="col" className="border-0">Activated</th>
-          <th scope="col" className="border-0 rounded-end">Action</th>
+          <SortableTh label="Join date" sortKey="createdAt" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0 text-center" />
+          <SortableTh label="Last updated" sortKey="updatedAt" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0 text-center" />
+          <th scope="col" className="border-0" text-center>Verified</th>
+          <th scope="col" className="border-0" text-center>Activated</th>
+          <th scope="col" className="border-0 rounded-end text-center">Action</th>
         </tr>
       </thead>
       <tbody>
@@ -63,36 +60,34 @@ const StudentList = ({ studentsData, isLoading, sortKey, sortDir, onSort, onBloc
                     <h6 className="mb-0">
                       {item.name}
                     </h6>
+                    {item.email}
                   </div>
                 </div>
               </td>
               <td>
-                {item.email}
-              </td>
-              <td>
                 {
-                  new Date(item.createdAt).toLocaleString('en-US', {
-                    day: '2-digit',
-                    month: 'short',
-                    year: 'numeric'
+                  new Date(item.createdAt).toLocaleString('en-GB', {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit"
                   })
                 }
               </td>
               <td>
                 {
-                  new Date(item.updatedAt).toLocaleString('en-US', {
-                    day: '2-digit',
-                    month: 'short',
-                    year: 'numeric'
+                  new Date(item.updatedAt).toLocaleString('en-GB', {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit"
                   })
                 }
               </td>
-              <td>
+              <td className="text-center">
                 <span className={`badge text-bg-${item.isVerified ? 'success' : 'warning'}`}>
                   {item.isVerified ? 'Yes' : 'No'}
                 </span>
               </td>
-              <td>
+              <td className="text-center">
                 <span className={`badge text-bg-${item.isActivated ? 'success' : 'warning'}`}>
                   {item.isActivated ? 'Yes' : 'No'}
                 </span>
@@ -100,20 +95,20 @@ const StudentList = ({ studentsData, isLoading, sortKey, sortDir, onSort, onBloc
               {item.isVerified
                 ? (
                   item.isActivated
-                    ? <td>
-                      <Button variant="warning-soft" size="sm" className="me-1 mb-1 mb-md-0" onClick={() => onBlock(item._id)}>
+                    ? <td className="text-center">
+                      <Button variant="warning-soft" size="sm" className="mb-0" onClick={() => onBlock(item._id)}>
                         Block
                       </Button>
                     </td>
-                    : <td>
-                      <Button variant="primary-soft" size="sm" className="me-1 mb-1 mb-md-0" onClick={() => onUnblock(item._id)}>
+                    : <td className="text-center">
+                      <Button variant="primary-soft" size="sm" className="mb-0" onClick={() => onUnblock(item._id)}>
                         Unblock
                       </Button>
                     </td>
                 )
                 : (
                   <td>
-                    <Button variant="danger-soft" size="sm" className="me-1 mb-1 mb-md-0" onClick={() => onDelete(item._id)}>
+                    <Button variant="danger-soft" size="sm" className="mb-0" onClick={() => onDelete(item._id)}>
                       Remove
                     </Button>
                   </td>
@@ -123,8 +118,9 @@ const StudentList = ({ studentsData, isLoading, sortKey, sortDir, onSort, onBloc
           ))
         ) : (
           <tr>
-            <td colSpan="7" className="text-center">
-              No students found.
+            <td colSpan="7" className="empty-state-cell text-center">
+              <FaUserGraduate size={26} className='mb-2' />
+              <div>No students found.</div>
             </td>
           </tr>
         )}

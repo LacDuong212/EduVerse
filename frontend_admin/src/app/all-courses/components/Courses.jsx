@@ -364,7 +364,7 @@ const CourseCard = ({ course, index, onUpdate, onRefresh }) => {
 
         <td className="text-center">
           {deletable ? (
-            <div className="d-flex flex-wrap justify-content-center align-items-center gap-2">
+            <div className="d-flex flex-wrap justify-content-center align-items-center gap-1">
               {approvable && <OverlayTrigger
                 placement="top"
                 overlay={<Tooltip>Pending</Tooltip>}
@@ -505,7 +505,7 @@ const CoursesList = ({
           <Col md={12}>
             <form className="rounded position-relative" onSubmit={(e) => e.preventDefault()}>
               <input
-                className="form-control bg-body"
+                className="form-control bg-light"
                 type="text"
                 placeholder="Search courses..."
                 aria-label="Search"
@@ -558,7 +558,7 @@ const CoursesList = ({
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="8" className="text-center py-5">
+                    <td colSpan="8" className="empty-state-cell text-center">
                       No courses found matching "{search}".
                     </td>
                   </tr>

@@ -1,5 +1,6 @@
 import { Button } from 'react-bootstrap';
-import { FaEdit, FaTag, FaTrash } from 'react-icons/fa';
+import { BiSolidCoupon } from "react-icons/bi";
+import { FaEdit, FaTrash } from 'react-icons/fa';
 import SortableTh from '@/components/SortableTh';
 
 const COLS = 7;
@@ -33,12 +34,12 @@ const CouponList = ({ couponsData, isLoading, sortKey, sortDir, onSort, onToggle
         <thead>
           <tr>
             <SortableTh label="Code / Info" sortKey="code" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0 rounded-start" />
-            <SortableTh label="Discount" sortKey="discountPercent" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0" />
-            <th scope="col" className="border-0">Validity Period</th>
-            <th scope="col" className="border-0">Usage</th>
-            <th scope="col" className="border-0">Status</th>
-            <th scope="col" className="border-0">Active</th>
-            <th scope="col" className="border-0 rounded-end">Action</th>
+            <SortableTh label="Discount" sortKey="discountPercent" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0 text-center" />
+            <th scope="col" className="border-0 text-center">Validity Period</th>
+            <th scope="col" className="border-0 text-center">Usage</th>
+            <th scope="col" className="border-0 text-center">Status</th>
+            <th scope="col" className="border-0 text-center">Active</th>
+            <th scope="col" className="border-0 rounded-end text-center">Action</th>
           </tr>
         </thead>
         <tbody>
@@ -59,26 +60,26 @@ const CouponList = ({ couponsData, isLoading, sortKey, sortDir, onSort, onToggle
                 <tr key={item._id}>
                   <td>
                     <h6 className="mb-1 font-monospace text-primary">{item.code}</h6>
-                    <small className="text-body-secondary d-block text-truncate" style={{ maxWidth: "200px" }}>
+                    <small className="text-body d-block text-truncate" style={{ maxWidth: "200px" }}>
                       {item.description}
                     </small>
                   </td>
-                  <td>{item.discountPercent}%</td>
+                  <td className='text-center'>{item.discountPercent}%</td>
                   <td>
                     <div className="d-flex flex-column small">
                       <span>From: {start.toLocaleDateString('en-GB')}</span>
                       <span>To: {end.toLocaleDateString('en-GB')}</span>
                     </div>
                   </td>
-                  <td>
+                  <td className='text-center'>
                     <span className="badge bg-blue">{item.usersUsed?.length || 0} used</span>
                     {item.maxUsageLimit && (
                       <span className="text-body-secondary small d-block">/ {item.maxUsageLimit} max</span>
                     )}
                   </td>
-                  <td>{statusText}</td>
+                  <td className='text-center'>{statusText}</td>
                   <td>
-                    <div className="form-check form-switch">
+                    <div className="form-check form-switch mt-1 mb-0">
                       <input
                         className="form-check-input"
                         type="checkbox"
@@ -88,21 +89,23 @@ const CouponList = ({ couponsData, isLoading, sortKey, sortDir, onSort, onToggle
                       />
                     </div>
                   </td>
-                  <td>
-                    <Button variant="primary-soft" size="sm" className="me-1" onClick={() => onEdit(item)}>
-                      <FaEdit />
-                    </Button>
-                    <Button variant="danger-soft" size="sm" onClick={() => onDelete(item._id)}>
-                      <FaTrash />
-                    </Button>
+                  <td className='text-center'>
+                    <div className="d-flex flex-wrap justify-content-center align-items-center gap-1">
+                      <Button variant="primary-soft" size="sm" className="mb-0" onClick={() => onEdit(item)}>
+                        <FaEdit />
+                      </Button>
+                      <Button variant="danger-soft" size="sm" className="mb-0" onClick={() => onDelete(item._id)}>
+                        <FaTrash />
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               )
             })
           ) : (
             <tr>
-              <td colSpan={COLS} className="empty-state-cell">
-                <FaTag className="empty-icon" />
+              <td colSpan={COLS} className="empty-state-cell text-center">
+                <BiSolidCoupon size={26} className="mb-2" />
                 <div className="fw-semibold">No coupons found</div>
                 <div className="small mt-1">Try a different search or create a new coupon</div>
               </td>

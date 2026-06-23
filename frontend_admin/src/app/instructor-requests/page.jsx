@@ -15,22 +15,22 @@ const InstructorRequestRow = ({ item, onAccept, onReject }) => {
   const renderActionButtons = () => {
     if (item.status === 'approved') {
       return (
-        <Button variant="success" className="me-1 mb-1 mb-md-0 disabled" size="sm">
+        <Button variant="success" className="me-1 mb-0 disabled" size="sm">
           Accepted
         </Button>
       );
     } else if (item.status === 'rejected') {
       return (
-        <Button variant="secondary" className="me-1 mb-1 mb-md-0 disabled" size="sm">
+        <Button variant="secondary" className="me-1 mb-0 disabled" size="sm">
           Rejected
         </Button>
       );
     } else {
       return (
-        <>
+        <div className="d-flex flex-wrap justify-content-center align-items-center gap-1">
           <Button
             variant="success-soft"
-            className="me-1 mb-1 mb-lg-0"
+            className="me-1 mb-0"
             size="sm"
             onClick={() => onAccept(item._id)}
           >
@@ -38,13 +38,13 @@ const InstructorRequestRow = ({ item, onAccept, onReject }) => {
           </Button>
           <Button
             variant="danger-soft"
-            className="me-1 mb-1 mb-lg-0"
+            className="me-1 mb-0"
             size="sm"
             onClick={() => onReject(item._id)}
           >
             Reject
           </Button>
-        </>
+        </div>
       );
     }
   };
@@ -72,14 +72,14 @@ const InstructorRequestRow = ({ item, onAccept, onReject }) => {
       <td className="text-center text-sm-start">
         <h6 className="mb-0 fw-normal">{item.email}</h6>
       </td>
-      <td>
-        {new Date(item.createdAt).toLocaleString('en-US', {
-          day: '2-digit',
-          month: 'short',
-          year: 'numeric'
+      <td className="text-center">
+        {new Date(item.createdAt).toLocaleString('en-GB', {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit"
         })}
       </td>
-      <td>
+      <td className="text-center">
         {renderActionButtons()}
       </td>
     </tr>
@@ -93,19 +93,19 @@ const InstructorRequestsTable = ({ requests, isLoading, sortKey, sortDir, onSort
         <tr>
           <SortableTh label="Instructor Name" sortKey="name" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0 rounded-start" />
           <SortableTh label="Email" sortKey="email" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0" />
-          <SortableTh label="Requested Date" sortKey="createdAt" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0" />
-          <th scope="col" className="border-0 rounded-end">Action</th>
+          <SortableTh label="Requested Date" sortKey="createdAt" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0 text-center" />
+          <th scope="col" className="border-0 rounded-end text-center">Action</th>
         </tr>
       </thead>
       <tbody>
         {isLoading ? (
-          <tr><td colSpan="4" className="text-center py-4">Loading...</td></tr>
+          <tr><td colSpan="4" className="empty-state-cell text-center">Loading...</td></tr>
         ) : requests && requests.length > 0 ? (
           requests.map((item) => (
             <InstructorRequestRow key={item._id} item={item} onAccept={onAccept} onReject={onReject} />
           ))
         ) : (
-          <tr><td colSpan="4" className="text-center py-4">No pending requests found.</td></tr>
+          <tr><td colSpan="4" className="empty-state-cell text-center">No pending requests found.</td></tr>
         )}
       </tbody>
     </Table>
@@ -208,50 +208,50 @@ const InstructorRequests = () => {
       <Card>
         <CardHeader>
           <Row className="g-3 align-items-center justify-content-between">
-            <Col md={8}>
+            <Col md={12}>
               <form onSubmit={(e) => e.preventDefault()}>
                 <div className="input-group">
                   <input
-                    className="form-control bg-body"
+                    className="form-control bg-light"
                     type="text"
                     placeholder="Search by name or email"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                   />
                   {search && (
-                    <button type="button" className="btn btn-outline-secondary border-0" onClick={() => setSearch('')} aria-label="Clear search">
+                    <button type="button" className="btn btn-outline-secondary mb-0" onClick={() => setSearch('')} aria-label="Clear search">
                       <FaTimes className="small" />
                     </button>
                   )}
-                  <button type="submit" className="btn btn-outline-secondary border-0">
+                  <button type="submit" className="btn btn-outline-secondary mb-0">
                     <FaSearch />
                   </button>
                 </div>
               </form>
             </Col>
-            <Col md={3}>
+            {/* <Col md={4}>
               <form>
-                <ChoicesFormInput className="form-select js-choice border-0 z-index-9 bg-transparent" aria-label=".form-select-sm">
+                <ChoicesFormInput className="form-select js-choice border-0 z-index-9" aria-label=".form-select-sm">
                   <option>Sort by</option>
                   <option>Newest</option>
                   <option>Oldest</option>
                 </ChoicesFormInput>
               </form>
-            </Col>
+            </Col> */}
           </Row>
         </CardHeader>
 
         <CardBody>
           <div className="table-responsive border-0">
-<InstructorRequestsTable
-                requests={paginatedData}
-                isLoading={isLoading}
-                sortKey={sortKey}
-                sortDir={sortDir}
-                onSort={requestSort}
-                onAccept={handleAccept}
-                onReject={handleRejectClick}
-              />
+            <InstructorRequestsTable
+              requests={paginatedData}
+              isLoading={isLoading}
+              sortKey={sortKey}
+              sortDir={sortDir}
+              onSort={requestSort}
+              onAccept={handleAccept}
+              onReject={handleRejectClick}
+            />
           </div>
         </CardBody>
 

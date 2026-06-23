@@ -140,22 +140,22 @@ const AllCoupons = () => {
         <TabContainer defaultActiveKey={1}>
           <CardHeader className="bg-transparent border-bottom px-0">
             <Row className="g-3 align-items-center justify-content-between">
-              <Col md={6}>
+              <Col md={8}>
                 <form onSubmit={(e) => e.preventDefault()}>
                   <div className="input-group">
                     <input
-                      className="form-control"
+                      className="form-control bg-light"
                       type="text"
                       placeholder="Search coupon code..."
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
                     />
                     {search && (
-                      <button type="button" className="btn btn-outline-secondary border-0" onClick={() => setSearch('')} aria-label="Clear search">
+                      <button type="button" className="btn btn-outline-secondary mb-0" onClick={() => setSearch('')} aria-label="Clear search">
                         <FaTimes className="small" />
                       </button>
                     )}
-                    <button type="submit" className="btn btn-outline-secondary border-0">
+                    <button type="submit" className="btn btn-outline-secondary mb-0">
                       <FaSearch />
                     </button>
                   </div>
@@ -163,7 +163,7 @@ const AllCoupons = () => {
               </Col>
 
               <Col md={4} className="text-md-end">
-                <Button variant="primary" onClick={() => setShowCreateModal(true)}>
+                <Button variant="primary" className="mb-0" onClick={() => setShowCreateModal(true)}>
                   <FaPlus className="me-2" /> Create Coupon
                 </Button>
               </Col>

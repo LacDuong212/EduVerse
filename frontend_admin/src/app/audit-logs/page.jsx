@@ -12,108 +12,108 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 const AXIOS_CFG = { withCredentials: true };
 
 const ACTION_LABELS = {
-  LOGIN_SUCCESS:        "Login",
-  LOGIN_FAILED:         "Login Failed",
-  LOGOUT:               "Logout",
-  COURSE_APPROVE:       "Approved",
-  COURSE_REJECT:        "Rejected",
-  COURSE_BLOCK:         "Blocked",
-  COURSE_UNBLOCK:       "Unblocked",
-  COURSE_DELETE:        "Deleted",
-  COURSE_RESTORE:       "Restored",
-  INSTRUCTOR_APPROVE:   "Approved",
-  INSTRUCTOR_REJECT:    "Rejected",
-  INSTRUCTOR_BLOCK:     "Blocked",
-  INSTRUCTOR_UNBLOCK:   "Unblocked",
-  STUDENT_BLOCK:        "Blocked",
-  STUDENT_UNBLOCK:      "Unblocked",
-  STUDENT_DELETE:       "Deleted",
-  PAYOUT_MARK_PAID:     "Mark Paid",
-  PAYOUT_REJECT:        "Rejected",
-  COUPON_CREATE:        "Created",
+  LOGIN_SUCCESS: "Login",
+  LOGIN_FAILED: "Login Failed",
+  LOGOUT: "Logout",
+  COURSE_APPROVE: "Approved",
+  COURSE_REJECT: "Rejected",
+  COURSE_BLOCK: "Blocked",
+  COURSE_UNBLOCK: "Unblocked",
+  COURSE_DELETE: "Deleted",
+  COURSE_RESTORE: "Restored",
+  INSTRUCTOR_APPROVE: "Approved",
+  INSTRUCTOR_REJECT: "Rejected",
+  INSTRUCTOR_BLOCK: "Blocked",
+  INSTRUCTOR_UNBLOCK: "Unblocked",
+  STUDENT_BLOCK: "Blocked",
+  STUDENT_UNBLOCK: "Unblocked",
+  STUDENT_DELETE: "Deleted",
+  PAYOUT_MARK_PAID: "Mark Paid",
+  PAYOUT_REJECT: "Rejected",
+  COUPON_CREATE: "Created",
   COUPON_UPDATE_STATUS: "Changed",
-  COUPON_DELETE:        "Deleted",
-  CATEGORY_CREATE:      "Created",
-  CATEGORY_UPDATE:      "Changed",
-  CATEGORY_DELETE:      "Deleted",
-  ADMIN_CHANGE_PASSWORD:"Changed",
+  COUPON_DELETE: "Deleted",
+  CATEGORY_CREATE: "Created",
+  CATEGORY_UPDATE: "Changed",
+  CATEGORY_DELETE: "Deleted",
+  ADMIN_CHANGE_PASSWORD: "Changed",
 };
 
 const ACTION_VARIANT = {
-  LOGIN_SUCCESS:        "success",
-  LOGIN_FAILED:         "danger",
-  LOGOUT:               "secondary",
-  COURSE_APPROVE:       "success",
-  COURSE_REJECT:        "danger",
-  COURSE_BLOCK:         "warning",
-  COURSE_UNBLOCK:       "info",
-  COURSE_DELETE:        "danger",
-  COURSE_RESTORE:       "success",
-  INSTRUCTOR_APPROVE:   "success",
-  INSTRUCTOR_REJECT:    "danger",
-  INSTRUCTOR_BLOCK:     "warning",
-  INSTRUCTOR_UNBLOCK:   "info",
-  STUDENT_BLOCK:        "warning",
-  STUDENT_UNBLOCK:      "info",
-  STUDENT_DELETE:       "danger",
-  PAYOUT_MARK_PAID:     "success",
-  PAYOUT_REJECT:        "danger",
-  COUPON_CREATE:        "primary",
+  LOGIN_SUCCESS: "success",
+  LOGIN_FAILED: "danger",
+  LOGOUT: "secondary",
+  COURSE_APPROVE: "success",
+  COURSE_REJECT: "danger",
+  COURSE_BLOCK: "warning",
+  COURSE_UNBLOCK: "info",
+  COURSE_DELETE: "danger",
+  COURSE_RESTORE: "success",
+  INSTRUCTOR_APPROVE: "success",
+  INSTRUCTOR_REJECT: "danger",
+  INSTRUCTOR_BLOCK: "warning",
+  INSTRUCTOR_UNBLOCK: "info",
+  STUDENT_BLOCK: "warning",
+  STUDENT_UNBLOCK: "info",
+  STUDENT_DELETE: "danger",
+  PAYOUT_MARK_PAID: "success",
+  PAYOUT_REJECT: "danger",
+  COUPON_CREATE: "primary",
   COUPON_UPDATE_STATUS: "info",
-  COUPON_DELETE:        "danger",
-  CATEGORY_CREATE:      "primary",
-  CATEGORY_UPDATE:      "info",
-  CATEGORY_DELETE:      "danger",
-  ADMIN_CHANGE_PASSWORD:"secondary",
+  COUPON_DELETE: "danger",
+  CATEGORY_CREATE: "primary",
+  CATEGORY_UPDATE: "info",
+  CATEGORY_DELETE: "danger",
+  ADMIN_CHANGE_PASSWORD: "secondary",
 };
 
 const ACTION_GROUPS = [
-  { label: "Auth",       actions: ["LOGIN_SUCCESS", "LOGIN_FAILED", "LOGOUT"] },
-  { label: "Course",     actions: ["COURSE_APPROVE", "COURSE_REJECT", "COURSE_BLOCK", "COURSE_UNBLOCK", "COURSE_DELETE", "COURSE_RESTORE"] },
+  { label: "Auth", actions: ["LOGIN_SUCCESS", "LOGIN_FAILED", "LOGOUT"] },
+  { label: "Course", actions: ["COURSE_APPROVE", "COURSE_REJECT", "COURSE_BLOCK", "COURSE_UNBLOCK", "COURSE_DELETE", "COURSE_RESTORE"] },
   { label: "Instructor", actions: ["INSTRUCTOR_APPROVE", "INSTRUCTOR_REJECT", "INSTRUCTOR_BLOCK", "INSTRUCTOR_UNBLOCK"] },
-  { label: "Student",    actions: ["STUDENT_BLOCK", "STUDENT_UNBLOCK", "STUDENT_DELETE"] },
-  { label: "Payout",     actions: ["PAYOUT_MARK_PAID", "PAYOUT_REJECT"] },
-  { label: "Coupon",     actions: ["COUPON_CREATE", "COUPON_UPDATE_STATUS", "COUPON_DELETE"] },
-  { label: "Category",   actions: ["CATEGORY_CREATE", "CATEGORY_UPDATE", "CATEGORY_DELETE"] },
-  { label: "Admin",      actions: ["ADMIN_CHANGE_PASSWORD"] },
+  { label: "Student", actions: ["STUDENT_BLOCK", "STUDENT_UNBLOCK", "STUDENT_DELETE"] },
+  { label: "Payout", actions: ["PAYOUT_MARK_PAID", "PAYOUT_REJECT"] },
+  { label: "Coupon", actions: ["COUPON_CREATE", "COUPON_UPDATE_STATUS", "COUPON_DELETE"] },
+  { label: "Category", actions: ["CATEGORY_CREATE", "CATEGORY_UPDATE", "CATEGORY_DELETE"] },
+  { label: "Admin", actions: ["ADMIN_CHANGE_PASSWORD"] },
 ];
 
 const ENTITY_OPTIONS = [
-  { value: "AUTH",       label: "Auth" },
-  { value: "COURSE",     label: "Course" },
+  { value: "AUTH", label: "Auth" },
+  { value: "COURSE", label: "Course" },
   { value: "INSTRUCTOR", label: "Instructor" },
-  { value: "STUDENT",    label: "Student" },
-  { value: "PAYOUT",     label: "Payout" },
-  { value: "COUPON",     label: "Coupon" },
-  { value: "CATEGORY",   label: "Category" },
-  { value: "ADMIN",      label: "Admin" },
+  { value: "STUDENT", label: "Student" },
+  { value: "PAYOUT", label: "Payout" },
+  { value: "COUPON", label: "Coupon" },
+  { value: "CATEGORY", label: "Category" },
+  { value: "ADMIN", label: "Admin" },
 ];
 
 const formatDatetime = (d) =>
   d
-    ? new Date(d).toLocaleString("en-US", {
-        year: "numeric", month: "short", day: "numeric",
-        hour: "2-digit", minute: "2-digit", second: "2-digit",
-      })
+    ? new Date(d).toLocaleString("en-GB", {
+      year: "numeric", month: "2-digit", day: "2-digit",
+      hour: "2-digit", minute: "2-digit", second: "2-digit",
+    })
     : "—";
 
 function DiffPanel({ before, after }) {
-  if (before == null && after == null) return <span className="text-body-secondary small">No changes recorded</span>;
+  if (before == null && after == null) return <span className=" small">No changes recorded</span>;
   return (
     <Row className="g-3 mt-0">
-      <Col xs={12} md={6}>
-        <div className="fw-semibold small mb-1 text-body-secondary">Before</div>
+      <Col xs={12} md={6} className="mt-0">
+        <div className="fw-semibold small mb-1 ">Before</div>
         <pre
-          className="rounded-3 p-3 small mb-0"
+          className="rounded-3 p-2 small mb-0"
           style={{ background: "rgba(var(--bs-danger-rgb),0.06)", whiteSpace: "pre-wrap", wordBreak: "break-all", fontSize: "0.75rem" }}
         >
           {before != null ? JSON.stringify(before, null, 2) : "—"}
         </pre>
       </Col>
-      <Col xs={12} md={6}>
-        <div className="fw-semibold small mb-1 text-body-secondary">After</div>
+      <Col xs={12} md={6} className="mt-0">
+        <div className="fw-semibold small mb-1 ">After</div>
         <pre
-          className="rounded-3 p-3 small mb-0"
+          className="rounded-3 p-2 small mb-0"
           style={{ background: "rgba(var(--bs-success-rgb),0.06)", whiteSpace: "pre-wrap", wordBreak: "break-all", fontSize: "0.75rem" }}
         >
           {after != null ? JSON.stringify(after, null, 2) : "—"}
@@ -133,7 +133,7 @@ function LogRow({ log }) {
         <td style={{ width: 28, paddingRight: 0 }}>
           {hasDiff && (
             <button
-              className="btn btn-link p-0 text-body-secondary"
+              className="btn btn-link p-0"
               onClick={() => setExpanded((v) => !v)}
               title={expanded ? "Collapse" : "Expand changes"}
             >
@@ -141,24 +141,24 @@ function LogRow({ log }) {
             </button>
           )}
         </td>
-        <td>
+        <td className="text-center">
           <Badge bg={ACTION_VARIANT[log.action] || "secondary"}>
             {ACTION_LABELS[log.action] || log.action}
           </Badge>
         </td>
         <td>
           <div>{log.entityLabel || "—"}</div>
-          <div className="text-body-secondary">{log.entityType}</div>
+          <div>{log.entityType}</div>
         </td>
-        <td className="text-body-secondary" style={{ maxWidth: 200 }}>
+        <td style={{ maxWidth: 200 }}>
           {log.reason || "—"}
         </td>
         <td>
           <div className="fw-semibold">{log.adminName}</div>
-          <div className="font-monospace text-body-secondary">{log.ipAddress || "—"}</div>
+          <div>{log.adminEmail}</div>
+          <div className="font-monospace ">{log.ipAddress || "—"}</div>
         </td>
-        <td>{log.adminEmail || "—"}</td>
-        <td className="text-body-secondary" style={{ whiteSpace: "nowrap" }}>
+        <td className="text-center" style={{ whiteSpace: "nowrap" }}>
           {formatDatetime(log.createdAt)}
         </td>
       </tr>
@@ -188,11 +188,11 @@ export default function AuditLogsPage() {
     setLoading(true);
     try {
       const params = new URLSearchParams({ page: p, limit: pageSize });
-      if (f.search)     params.set("search", f.search.trim());
+      if (f.search) params.set("search", f.search.trim());
       if (f.entityType) params.set("entityType", f.entityType);
-      if (f.action)     params.set("action", f.action);
-      if (f.from)       params.set("from", f.from);
-      if (f.to)         params.set("to", f.to);
+      if (f.action) params.set("action", f.action);
+      if (f.from) params.set("from", f.from);
+      if (f.to) params.set("to", f.to);
       const res = await axios.get(`${BACKEND_URL}/api/admin/audit-logs?${params}`, AXIOS_CFG);
       if (res.data.success) {
         setLogs(res.data.result || []);
@@ -247,10 +247,10 @@ export default function AuditLogsPage() {
       <Card className="bg-transparent">
         <CardHeader className="bg-transparent border-bottom px-0">
           <div className="row g-2 align-items-end">
-            <div className="col-12 col-md-4">
+            <div className="col-12 col-md-6">
               <label className="form-label small fw-semibold mb-1">Search</label>
               <div className="input-group input-group-sm">
-                <span className="input-group-text bg-body"><FaSearch size={11} className="text-body-secondary" /></span>
+                <span className="input-group-text bg-body"><FaSearch size={11} /></span>
                 <Form.Control
                   size="sm"
                   className="bg-body"
@@ -261,7 +261,7 @@ export default function AuditLogsPage() {
                 />
               </div>
             </div>
-            <div className="col-6 col-md-2">
+            <div className="col-6 col-md-3">
               <label className="form-label small fw-semibold mb-1">Entity</label>
               <Form.Select
                 size="sm"
@@ -289,7 +289,7 @@ export default function AuditLogsPage() {
                 ))}
               </Form.Select>
             </div>
-            <div className="col-6 col-md-2">
+            <div className="col-6 col-md-3">
               <label className="form-label small fw-semibold mb-1">From</label>
               <Form.Control
                 size="sm"
@@ -299,7 +299,7 @@ export default function AuditLogsPage() {
                 onChange={(e) => setFilters((f) => ({ ...f, from: e.target.value }))}
               />
             </div>
-            <div className="col-6 col-md-2">
+            <div className="col-6 col-md-3">
               <label className="form-label small fw-semibold mb-1">To</label>
               <Form.Control
                 size="sm"
@@ -310,11 +310,11 @@ export default function AuditLogsPage() {
               />
             </div>
             <div className="col-12 col-md-3 d-flex gap-2">
-              <button className="btn btn-sm btn-primary" onClick={handleApply}>
+              <button className="btn btn-sm btn-primary mb-0" onClick={handleApply}>
                 <FaSearch className="me-1" /> Apply
               </button>
               {hasFilter && (
-                <button className="btn btn-sm btn-outline-secondary" onClick={handleClear}>
+                <button className="btn btn-sm btn-outline-secondary mb-0" onClick={handleClear}>
                   <FaTimes />
                 </button>
               )}
@@ -328,7 +328,7 @@ export default function AuditLogsPage() {
               <Spinner animation="border" size="sm" className="text-body opacity-50" />
             </div>
           ) : logs.length === 0 ? (
-            <div className="text-center py-5 text-body-secondary">
+            <div className="text-center py-5 ">
               No audit logs found.
             </div>
           ) : (
@@ -337,12 +337,11 @@ export default function AuditLogsPage() {
                 <thead>
                   <tr>
                     <th className="border-0 rounded-start" style={{ width: 28 }} />
-                    <th className="border-0">Action</th>
-                    <th className="border-0">Impact</th>
-                    <th className="border-0">Reason</th>
-                    <th className="border-0">Admin</th>
-                    <th className="border-0">Email</th>
-                    <th className="border-0 rounded-end">Timestamp</th>
+                    <th className="border-0 text-center">Action</th>
+                    <th className="border-0 text-center">Impact</th>
+                    <th className="border-0 text-center">Reason</th>
+                    <th className="border-0 text-center">Admin</th>
+                    <th className="border-0 rounded-end text-center">Timestamp</th>
                   </tr>
                 </thead>
                 <tbody>

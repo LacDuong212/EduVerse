@@ -1,5 +1,6 @@
 import { Button } from 'react-bootstrap';
-import { FaEdit, FaTrash, FaLayerGroup } from 'react-icons/fa';
+import { BiSolidCategory } from "react-icons/bi";
+import { FaEdit, FaTrash } from 'react-icons/fa';
 import SortableTh from '@/components/SortableTh';
 
 const SkeletonRows = () => (
@@ -24,9 +25,9 @@ const CategoryList = ({ categoriesData, isLoading, sortKey, sortDir, onSort, onE
           <tr>
             <SortableTh label="Category Name" sortKey="name" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0 rounded-start" />
             <SortableTh label="Slug" sortKey="slug" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0" />
-            <SortableTh label="Created At" sortKey="createdAt" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0" />
-            <SortableTh label="Updated At" sortKey="updatedAt" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0" />
-            <th scope="col" className="border-0 rounded-end">Action</th>
+            <SortableTh label="Created At" sortKey="createdAt" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0 text-center" />
+            <SortableTh label="Updated At" sortKey="updatedAt" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0 text-center" />
+            <th scope="col" className="border-0 rounded-end text-center">Action</th>
           </tr>
         </thead>
         <tbody>
@@ -39,30 +40,40 @@ const CategoryList = ({ categoriesData, isLoading, sortKey, sortDir, onSort, onE
                   <h6 className="mb-0">{item.name}</h6>
                 </td>
                 <td>{item.slug}</td>
-                <td>
-                  {new Date(item.createdAt).toLocaleString('en-US', {
-                    day: '2-digit', month: 'short', year: 'numeric'
+                <td className='text-center'>
+                  {new Date(item.createdAt).toLocaleString('en-GB', {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit"
                   })}
                 </td>
-                <td>
-                  {new Date(item.updatedAt).toLocaleString('en-US', {
-                    day: '2-digit', month: 'short', year: 'numeric'
+                <td className='text-center'>
+                  {new Date(item.updatedAt).toLocaleString('en-GB', {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit"
                   })}
                 </td>
-                <td>
-                  <Button variant="primary-soft" size="sm" className="me-1" onClick={() => onEdit(item)}>
-                    <FaEdit /> 
-                  </Button>
-                  <Button variant="danger-soft" size="sm" onClick={() => onDelete(item._id)}>
-                    <FaTrash />
-                  </Button>
+                <td className='text-center'>
+                  <div className="d-flex flex-wrap justify-content-center align-items-center gap-1">
+                    <Button variant="primary-soft" size="sm" className="mb-0" onClick={() => onEdit(item)}>
+                      <FaEdit />
+                    </Button>
+                    <Button variant="danger-soft" size="sm" className='mb-0' onClick={() => onDelete(item._id)}>
+                      <FaTrash />
+                    </Button>
+                  </div>
                 </td>
               </tr>
             ))
           ) : (
             <tr>
               <td colSpan="5" className="empty-state-cell text-center">
-                <FaLayerGroup className="empty-icon" />
+                <BiSolidCategory size={26} className="text-center mb-2" />
                 <div>No categories found.</div>
               </td>
             </tr>

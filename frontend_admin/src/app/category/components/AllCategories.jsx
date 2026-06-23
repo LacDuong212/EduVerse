@@ -114,21 +114,21 @@ const AllCategories = () => {
           <CardHeader className="border-bottom">
             <Row className="g-3 align-items-center justify-content-between">
               {/* Search Bar */}
-              <Col md={6}>
+              <Col md={8}>
                 <div className="input-group">
                   <input
-                    className="form-control"
+                    className="form-control bg-light"
                     type="text"
                     placeholder="Search Categories..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                   />
                   {search && (
-                    <button type="button" className="btn btn-outline-secondary border-0" onClick={() => setSearch('')} aria-label="Clear search">
+                    <button type="button" className="btn btn-outline-secondary mb-0" onClick={() => setSearch('')} aria-label="Clear search">
                       <FaTimes className="small" />
                     </button>
                   )}
-                  <button type="button" className="btn btn-outline-secondary border-0">
+                  <button type="button" className="btn btn-outline-secondary mb-0">
                     <FaSearch className="fs-6" />
                   </button>
                 </div>
@@ -136,7 +136,7 @@ const AllCategories = () => {
               
               {/* Add Button */}
               <Col md={4} className="text-md-end">
-                <Button variant="primary" onClick={handleShowAdd}>
+                <Button variant="primary" className="mb-0" onClick={handleShowAdd}>
                   <FaPlus className="me-2" /> Add Category
                 </Button>
               </Col>

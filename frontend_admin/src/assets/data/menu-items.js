@@ -1,8 +1,7 @@
 import { BiSolidCategory, BiSolidCoupon } from "react-icons/bi";
-import { BsBasket, BsHouse } from 'react-icons/bs';
-import { FaBook, FaChartBar, FaCheckSquare, FaClipboardList, FaList, FaMoneyBill, FaMoneyBillWave, FaRegCommentDots, FaUserCog } from 'react-icons/fa';
+import { BsHouse } from 'react-icons/bs';
+import { FaBook, FaCheckSquare, FaClipboardList, FaList, FaMoneyBill, FaMoneyBillWave } from 'react-icons/fa';
 import { FaUserGraduate, FaUserTie } from 'react-icons/fa6';
-import { IoSettingsSharp  } from 'react-icons/io5';
 
 export const ADMIN_MENU_ITEMS = [{
   key: 'admin',
