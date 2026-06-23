@@ -6,6 +6,7 @@ import NoteItem from "./NoteItem";
 import TagInput from "./TagInput";
 import { exportNotesToPDF } from "../../utils/exportNotes";
 import QnaModal from "@/app/student/learning/components/QnaModal";
+import { FaAngleRight } from "react-icons/fa";
 
 const formatTimestamp = (seconds) => {
   const t = Math.max(0, Math.floor(seconds));
@@ -212,8 +213,8 @@ export default function NoteSidebar({
           {hasExportable && (
             <Button
               size="sm"
-              variant="light"
-              className="d-flex align-items-center py-0 text-body"
+              variant="outline-orange"
+              className="d-flex align-items-center py-1 mb-0 border-0"
               style={{ lineHeight: "24px" }}
               title="Export notes as PDF"
               onClick={handleExport}
@@ -267,9 +268,11 @@ export default function NoteSidebar({
             }}
             maxLength={5000}
           />
-          <div className="mt-1 d-flex align-items-center justify-content-between">
-            <TagInput tags={composeTags} onChange={setComposeTags} />
-            {submitting && <Spinner size="sm" animation="border" className="ms-2 flex-shrink-0" />}
+          <div className="mt-2 d-flex align-items-center justify-content-between">
+            <div className="flex-grow-1 w-100">
+              <TagInput tags={composeTags} onChange={setComposeTags} />
+            </div>
+            {submitting && (<Spinner size="sm" animation="border" className="ms-2 flex-shrink-0" />)}
           </div>
         </div>
       )}
@@ -335,20 +338,19 @@ export default function NoteSidebar({
                 <div key={lecId} className="mb-3">
                   {/* Lecture group header */}
                   <div
-                    className={`d-flex align-items-center gap-1 mb-2 py-1 border-bottom small fw-semibold ${
-                      isCurrent ? "text-primary" : "text-body"
-                    }`}
+                    className={`d-flex align-items-center gap-1 mb-2 py-1 border-bottom small fw-semibold ${isCurrent ? "text-primary" : "text-body"
+                      }`}
                   >
                     <span className="text-truncate flex-grow-1">{lecTitle}</span>
                     <span className="opacity-50 flex-shrink-0">({lecNotes.length})</span>
                     {!isCurrent && (
                       <button
-                        className="btn btn-link btn-sm p-0 ms-1 flex-shrink-0 text-body opacity-50"
+                        className="btn btn-link btn-sm p-0 ms-2 mb-0 flex-shrink-0 fw-bold opacity-50"
                         style={{ fontSize: 11 }}
                         onClick={() => onNavigateToLecture?.({ lecId })}
                         title="Go to this lecture"
                       >
-                        Go →
+                        Go <FaAngleRight className="mb-1" size={14} />
                       </button>
                     )}
                   </div>

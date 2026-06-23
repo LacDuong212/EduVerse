@@ -17,13 +17,13 @@ export default function QnaModal({ show, onHide, lectureId, lectureTitle }) {
   const handleNewQuestion = (content) => postQuestion({ content });
 
   return (
-    <Modal show={show} onHide={onHide} size="lg" scrollable>
-      <Modal.Header closeButton>
+    <Modal show={show} onHide={onHide} size="lg" centered scrollable>
+      <Modal.Header closeButton className="bg-light">
         <Modal.Title className="fs-6">
           Q&amp;A
           {lectureTitle && (
-            <span className="text-body fw-normal opacity-50 ms-2 small">
-              — {lectureTitle}
+            <span className="text-body fw-normal small">
+            {` — ${lectureTitle}`}
             </span>
           )}
         </Modal.Title>

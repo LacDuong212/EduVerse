@@ -14,10 +14,12 @@ import QnaReply from "./QnaReply";
 
 const formatDate = (dateStr) => {
   if (!dateStr) return "";
-  return new Date(dateStr).toLocaleDateString("en-US", {
+  return new Date(dateStr).toLocaleDateString("en-GB", {
     year: "numeric",
-    month: "short",
-    day: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit"
   });
 };
 
@@ -41,7 +43,7 @@ export default function QnaQuestion({
     createdAt,
   } = question;
 
-  const [showReplies,      setShowReplies]      = useState(false);
+  const [showReplies, setShowReplies] = useState(false);
   const [showReplyCompose, setShowReplyCompose] = useState(false);
 
   const handleReplySubmit = async (text) => {
@@ -56,28 +58,26 @@ export default function QnaQuestion({
   const borderClass = isResolved
     ? "border-success"
     : isInstructorPost
-    ? "border-info"
-    : "";
+      ? "border-info"
+      : "";
 
   return (
     <div
-      className={`border rounded-3 p-4 position-relative ${borderClass}`}
+      className={`border rounded-3 p-3 position-relative ${borderClass} mt-3`}
       style={
         isResolved
           ? { background: "rgba(var(--bs-success-rgb), 0.03)" }
           : isInstructorPost
-          ? { background: "rgba(var(--bs-info-rgb), 0.03)" }
-          : undefined
+            ? { background: "rgba(var(--bs-info-rgb), 0.03)" }
+            : undefined
       }
     >
       {/* ── Top-right actions ── */}
       {(isMyPost || isInstructorPost) && (
         <div className="position-absolute top-0 end-0 p-3 d-flex align-items-center gap-2">
           <button
-            className={`btn btn-link p-0 text-decoration-none ${
-              isResolved ? "text-success" : "text-body"
-            }`}
-            style={{ opacity: isResolved ? 1 : 0.25 }}
+            className={`btn btn-link p-0 text-decoration-none mb-0 ${isResolved ? "text-success" : "text-body"
+              }`}
             onClick={() => onToggleResolve(id)}
             title={isResolved ? "Mark unresolved" : "Mark resolved"}
           >
@@ -86,8 +86,7 @@ export default function QnaQuestion({
 
           {isMyPost && (
             <button
-              className="btn btn-link p-0 text-body text-decoration-none"
-              style={{ opacity: 0.25 }}
+              className="btn btn-link p-0 text-danger opacity-75 text-decoration-none mb-0"
               onClick={() => onDelete(id)}
               disabled={submitting}
               title="Delete question"
@@ -137,19 +136,18 @@ export default function QnaQuestion({
           </div>
 
           <div className="d-flex align-items-center gap-2 flex-wrap mt-1">
-            <span className="text-body" style={{ opacity: 0.4, fontSize: "0.78rem" }}>
+            <span className="text-body" style={{ opacity: 0.6, fontSize: "0.78rem" }}>
               {formatDate(createdAt)}
             </span>
             {lectureLabel && (
-              <>
-                <span className="text-body" style={{ opacity: 0.25, fontSize: "0.78rem" }}>·</span>
+              <div className="border border-secondary bg-light rounded-2 p-1 pb-0">
                 <span
-                  className="d-inline-flex align-items-center gap-1 text-body"
-                  style={{ opacity: 0.45, fontSize: "0.78rem" }}
+                  className="d-inline-flex align-items-center gap-2 text-body"
+                  style={{ opacity: 0.7, fontSize: "0.78rem" }}
                 >
-                  <BsCameraVideo size={11} /> {lectureLabel}
+                  <BsCameraVideo size={14} className="flex-shrink-0" /> {lectureLabel}
                 </span>
-              </>
+              </div>
             )}
           </div>
         </div>
@@ -164,12 +162,12 @@ export default function QnaQuestion({
 
       {/* ── Action row ── */}
       <div
-        className="d-flex align-items-center gap-4 pt-3"
+        className="d-flex align-items-center gap-2 pt-2"
         style={{ borderTop: "1px solid var(--bs-border-color)" }}
       >
         <button
-          className="btn btn-link p-0 text-body text-decoration-none"
-          style={{ opacity: 0.55, fontSize: "0.82rem" }}
+          className="btn btn-link p-0 text-primary text-decoration-none mb-0"
+          style={{ fontSize: "0.82rem" }}
           onClick={() => {
             setShowReplyCompose((v) => !v);
             if (!showReplies && replies.length > 0) setShowReplies(true);
@@ -180,7 +178,7 @@ export default function QnaQuestion({
 
         {replies.length > 0 && (
           <button
-            className="btn btn-link p-0 text-body text-decoration-none d-flex align-items-center gap-1"
+            className="btn btn-link p-0 text-body text-decoration-none d-flex align-items-center gap-1 mb-0"
             style={{ opacity: 0.55, fontSize: "0.82rem" }}
             onClick={() => setShowReplies((v) => !v)}
           >
@@ -193,7 +191,7 @@ export default function QnaQuestion({
       {/* ── Thread ── */}
       {(showReplies || showReplyCompose) && (
         <div
-          className="mt-4 vstack gap-2"
+          className="mt-2 ms-1 vstack gap-2"
           style={{
             borderLeft: "2px solid var(--bs-border-color)",
             marginLeft: 8,

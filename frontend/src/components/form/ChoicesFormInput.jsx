@@ -11,6 +11,7 @@ const ChoicesFormInput = ({
   value,
   isInvalid,
   error,
+  style,
   ...props
 }) => {
   const choicesRef = useRef(null);
@@ -64,7 +65,10 @@ const ChoicesFormInput = ({
   }, [value]);
 
   return (
-    <div className={`choices-wrapper ${isInvalid ? "is-invalid" : ""}`}>
+    <div
+      className={`choices-wrapper ${isInvalid ? "is-invalid" : ""}`}
+      style={style}
+    >
       {allowInput ? (
         <input ref={choicesRef} multiple={multiple} className={className} {...props} />
       ) : (

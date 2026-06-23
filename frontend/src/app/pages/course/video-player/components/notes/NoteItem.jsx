@@ -34,11 +34,9 @@ const NoteItem = memo(function NoteItem({ note, isActive, onSeek, onEdit, onDele
 
   return (
     <div
-      className={`rounded-2 p-2 mb-2 border ${isActive ? "border-primary" : "border-light"}`}
-      style={isActive ? { backgroundColor: "#eef0fd" } : undefined}
+      className={`rounded-2 p-2 ${isActive ? "border border-primary bg-primary bg-opacity-10" : ""}`}
     >
-      {/* Timestamp + actions row */}
-      <div className="d-flex align-items-center justify-content-between mb-1">
+      <div className="d-flex align-items-center justify-content-between mb-2">
         <button
           className="btn btn-sm btn-outline-primary py-0 px-2 mb-0 fw-semibold flex-shrink-0"
           style={{ fontSize: 12, lineHeight: "20px" }}
@@ -51,14 +49,14 @@ const NoteItem = memo(function NoteItem({ note, isActive, onSeek, onEdit, onDele
         {!editing && (
           <div className="d-flex gap-2 ms-2">
             <button
-              className="btn btn-link btn-sm p-0 mb-0 text-body opacity-50"
+              className="btn btn-link btn-sm p-0 mb-0 opacity-75"
               onClick={handleStartEdit}
               title="Edit"
             >
               <BsPencil size={16} />
             </button>
             <button
-              className="btn btn-link btn-sm p-0 mb-0 text-danger"
+              className="btn btn-link btn-sm p-0 mb-0 text-danger opacity-75"
               onClick={() => onDelete(note.id)}
               title="Delete"
             >
@@ -80,7 +78,7 @@ const NoteItem = memo(function NoteItem({ note, isActive, onSeek, onEdit, onDele
             maxLength={5000}
             autoFocus
           />
-          <div className="mt-2">
+          <div className="mt-3">
             <TagInput tags={editTags} onChange={setEditTags} />
           </div>
           <div className="d-flex align-items-center justify-content-between mt-2">
@@ -116,7 +114,7 @@ const NoteItem = memo(function NoteItem({ note, isActive, onSeek, onEdit, onDele
       {!editing && note.tags?.length > 0 && (
         <div className="d-flex flex-wrap gap-1 mt-2">
           {note.tags.map((tag) => (
-            <Badge key={tag} bg="light" text="dark" className="fw-normal border" style={{ fontSize: 10 }}>
+            <Badge key={tag} bg="light" text="body" className="fw-normal border" style={{ fontSize: 11 }}>
               #{tag}
             </Badge>
           ))}
