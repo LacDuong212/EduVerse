@@ -141,22 +141,21 @@ function LogRow({ log }) {
             </button>
           )}
         </td>
+        <td>
+          <div className="fw-semibold">{log.adminName}</div>
+          <div>{log.adminEmail}</div>
+          <div className="font-monospace ">{log.ipAddress || "—"}</div>
+        </td>
+        <td>
+          <div className="fw-bold h6 mb-0">{log.entityType} &gt; {log.entityLabel || "—"}</div>
+        </td>
         <td className="text-center">
           <Badge bg={ACTION_VARIANT[log.action] || "secondary"}>
             {ACTION_LABELS[log.action] || log.action}
           </Badge>
         </td>
-        <td>
-          <div>{log.entityLabel || "—"}</div>
-          <div>{log.entityType}</div>
-        </td>
         <td style={{ maxWidth: 200 }}>
           {log.reason || "—"}
-        </td>
-        <td>
-          <div className="fw-semibold">{log.adminName}</div>
-          <div>{log.adminEmail}</div>
-          <div className="font-monospace ">{log.ipAddress || "—"}</div>
         </td>
         <td className="text-center" style={{ whiteSpace: "nowrap" }}>
           {formatDatetime(log.createdAt)}
@@ -337,10 +336,10 @@ export default function AuditLogsPage() {
                 <thead>
                   <tr>
                     <th className="border-0 rounded-start" style={{ width: 28 }} />
-                    <th className="border-0 text-center">Action</th>
+                    <th className="border-0">Admin</th>
                     <th className="border-0 text-center">Impact</th>
+                    <th className="border-0 text-center">Action</th>
                     <th className="border-0 text-center">Reason</th>
-                    <th className="border-0 text-center">Admin</th>
                     <th className="border-0 rounded-end text-center">Timestamp</th>
                   </tr>
                 </thead>
