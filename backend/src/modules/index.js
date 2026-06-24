@@ -21,6 +21,7 @@ import wishlistRoute from "#modules/wishlist/wishlist.route.js";
 import noteRoute from "#modules/note/note.route.js";
 import badgeRoute from "#modules/badge/badge.route.js";
 import payoutRoute from "#modules/payout/payout.route.js";
+import certificateRoute from "#modules/certificate/certificate.route.js";
 
 // @route /api
 const apiRouter = Router();
@@ -48,5 +49,6 @@ apiRouter.use("/notes", noteRoute);
 apiRouter.use("/badges", badgeRoute);
 apiRouter.use("/instructor/payouts", payoutRoute.instructorRoutes);
 apiRouter.use("/admin/payouts", payoutRoute.adminRoutes);
+apiRouter.use("/certificates", certificateRoute);
 
 export default apiRouter;

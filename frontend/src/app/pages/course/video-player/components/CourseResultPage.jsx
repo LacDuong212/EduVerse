@@ -4,12 +4,14 @@ import { Alert, Button, Card, Col, Container, Row } from "react-bootstrap";
 import {
   FaArrowLeft,
   FaCheckSquare,
+  FaCertificate,
   FaLightbulb,
   FaRobot,
   FaStar,
 } from "react-icons/fa";
 import { RiAlertFill } from "react-icons/ri";
 import axios from "axios";
+import { toast } from "react-toastify";
 import RatingModal from "./RatingModal";
 
 export default function CourseResultPage() {
@@ -51,6 +53,29 @@ export default function CourseResultPage() {
   const [activeKey, setActiveKey] = useState(
     searchParams.get("tab") || "overview"
   );
+
+  const [issuingCert, setIssuingCert] = useState(false);
+
+  const handleGetCertificate = async () => {
+    setIssuingCert(true);
+    try {
+      const res = await axios.post(
+        `${backendUrl}/api/certificates/courses/${courseId}/issue`,
+        {},
+        { withCredentials: true }
+      );
+      const certId = res.data?.result?.certId;
+      if (certId) {
+        navigate(`/certificates/${certId}`);
+      } else {
+        toast.error("Could not generate certificate.");
+      }
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Could not generate certificate.");
+    } finally {
+      setIssuingCert(false);
+    }
+  };
 
   useEffect(() => {
     const tab = searchParams.get("tab");
@@ -125,6 +150,16 @@ export default function CourseResultPage() {
         </div>
 
         <div className="mt-5 d-flex justify-content-center gap-3 flex-wrap">
+          <Button
+            variant="success"
+            onClick={handleGetCertificate}
+            disabled={issuingCert}
+            className="d-flex align-items-center"
+          >
+            <FaCertificate className="me-2" />
+            {issuingCert ? "Generating..." : "Get Certificate"}
+          </Button>
+
           <Button
             variant="outline-secondary"
             onClick={() => navigate(`/student/courses/${courseId}`)}

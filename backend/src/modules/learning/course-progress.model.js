@@ -39,6 +39,8 @@ const courseProgressSchema = new mongoose.Schema(
     firstStartedAt: Date,
     lastActivityAt: Date,
     isCompleted: { type: Boolean, default: false },
+    certId: { type: String, unique: true, sparse: true },
+    certIssuedAt: Date,
     aiAssessment: {
       generatedAt: Date,
       overallScore: { type: Number, default: 0 },
