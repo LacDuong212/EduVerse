@@ -1,7 +1,7 @@
 import PageMetaData from "@/components/PageMetaData";
-import { Button, Card, CardBody, Form } from "react-bootstrap";
+import { Button, Card, CardBody, CardHeader, Form } from "react-bootstrap";
 import { FaAngleLeft, FaAngleRight, FaSearch } from "react-icons/fa";
-import { BsArrowRepeat } from "react-icons/bs";
+import { BsArrowRepeat, BsChevronDown, BsChevronRight, BsReceipt } from "react-icons/bs";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -17,73 +17,173 @@ const shortOrderCode = (id) => {
 
 const OrderRow = ({ orderId, createdAt, status, totalAmount, courses }) => {
   const navigate = useNavigate();
+  const [expanded, setExpanded] = useState(false);
 
   const created = createdAt ? new Date(createdAt) : null;
   const createdText = created ? created.toLocaleString("vi-VN") : "N/A";
-  const coursesCount = Array.isArray(courses) ? courses.length : 0;
+  const courseList = Array.isArray(courses) ? courses : [];
+  const coursesCount = courseList.length;
 
-  const firstItem = Array.isArray(courses) && courses.length > 0 ? courses[0] : null;
-  const firstCourse = firstItem?.course || {};
-  const firstTitle = firstCourse?.title || "Untitled Course";
-  const firstThumb = firstCourse?.thumbnail || firstCourse?.image || "";
+  const firstItem = courseList[0] || null;
+  const firstTitle = firstItem?.title || "Untitled Course";
+  const firstThumb = firstItem?.thumbnail || firstItem?.image || "";
 
   return (
-    <tr>
-      <td>
-        <div className="d-flex align-items-center">
-          <div
-            className="rounded overflow-hidden bg-light flex-shrink-0"
-            style={{ width: 72, height: 52 }}
-          >
-            {firstThumb ? (
-              <img
-                src={firstThumb}
-                alt={firstTitle}
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-              />
-            ) : null}
-          </div>
+    <>
+      <tr>
+        <td>
+          <div className="d-flex align-items-center">
+            <button
+              type="button"
+              className="btn btn-link btn-sm p-0 me-2 text-body flex-shrink-0"
+              onClick={() => setExpanded((v) => !v)}
+              aria-label={expanded ? "Hide courses" : "Show courses"}
+              aria-expanded={expanded}
+            >
+              {expanded ? <BsChevronDown /> : <BsChevronRight />}
+            </button>
 
-          <div className="flex-grow-1 ms-2">
-            <h6 className="mb-1 text-truncate">
-              <span
-                className="text-decoration-none text-primary"
-                style={{ cursor: "pointer" }}
-                onClick={() => navigate(`/student/orders/${orderId}`)}
-                title={firstTitle}
-              >
-                Order #{shortOrderCode(orderId)}
-              </span>
-            </h6>
-
-            <div className="text-secondary small fw-bold">
-              {coursesCount} course{coursesCount > 1 ? "s" : ""}
+            <div
+              className="rounded overflow-hidden bg-light flex-shrink-0"
+              style={{ width: 72, height: 52, cursor: "pointer" }}
+              onClick={() => setExpanded((v) => !v)}
+            >
+              {firstThumb ? (
+                <img
+                  src={firstThumb}
+                  alt={firstTitle}
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                />
+              ) : null}
             </div>
 
-            <div className="text-secondary small">{createdText}</div>
+            <div className="flex-grow-1 ms-2 min-w-0">
+              <h6 className="mb-1 text-truncate">
+                <span
+                  className="text-decoration-none text-primary"
+                  style={{ cursor: "pointer" }}
+                  onClick={() => navigate(`/student/orders/${orderId}`)}
+                  title={firstTitle}
+                >
+                  Order #{shortOrderCode(orderId)}
+                </span>
+              </h6>
+
+              <div className="text-body small fw-bold">
+                {coursesCount} course{coursesCount > 1 ? "s" : ""}
+              </div>
+
+              <div className="text-body small">{createdText}</div>
+            </div>
           </div>
-        </div>
-      </td>
+        </td>
 
-      <td className="text-center">
-        <span className={`badge bg-${statusVariant(status)}`}>
-          {statusLabel(status)}
-        </span>
-      </td>
+        <td className="text-center">
+          <span className={`badge bg-${statusVariant(status)}`}>
+            {statusLabel(status)}
+          </span>
+        </td>
 
-      <td className="text-center fw-semibold">{formatCurrency(totalAmount)}</td>
+        <td className="text-center fw-semibold">{formatCurrency(totalAmount)}</td>
 
-      <td>
-        <Button
-          variant="primary-soft"
-          size="sm"
-          className="icons-center"
-          onClick={() => navigate(`/student/orders/${orderId}`)}
-        >
-          View Detail
+        <td>
+          <Button
+            variant="primary-soft"
+            size="sm"
+            className="icons-center"
+            onClick={() => navigate(`/student/orders/${orderId}`)}
+          >
+            View Detail
+          </Button>
+        </td>
+      </tr>
+
+      {expanded && (
+        <tr>
+          <td colSpan={4} className="pt-0 border-top-0">
+            <div className="bg-body-tertiary rounded-3 p-2 ms-4">
+              {courseList.map((item, i) => {
+                const title = item?.title || "Untitled Course";
+                const thumb = item?.thumbnail || item?.image || "";
+                const cid = item?.courseId;
+                const price = item?.pricePaid;
+
+                return (
+                  <div
+                    key={cid || i}
+                    className={`d-flex align-items-center gap-2 py-2 ${
+                      i < courseList.length - 1 ? "border-bottom" : ""
+                    }`}
+                  >
+                    <div
+                      className="rounded overflow-hidden bg-light flex-shrink-0"
+                      style={{ width: 48, height: 34 }}
+                    >
+                      {thumb ? (
+                        <img
+                          src={thumb}
+                          alt={title}
+                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                        />
+                      ) : null}
+                    </div>
+
+                    <span
+                      className={`small text-truncate ${cid ? "text-primary" : "text-body"}`}
+                      style={{ cursor: cid ? "pointer" : "default" }}
+                      onClick={() => cid && navigate(`/courses/${cid}`)}
+                      title={title}
+                    >
+                      {title}
+                    </span>
+
+                    {price != null && (
+                      <span className="ms-auto small fw-semibold text-body flex-shrink-0">
+                        {formatCurrency(price)}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </td>
+        </tr>
+      )}
+    </>
+  );
+};
+
+const OrdersEmptyState = ({ isFiltering, onClear }) => {
+  const navigate = useNavigate();
+
+  return (
+    <div className="text-center py-5 px-3">
+      <div
+        className="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 mb-3"
+        style={{ width: 88, height: 88 }}
+      >
+        <BsReceipt className="text-primary" size={40} />
+      </div>
+
+      <h5 className="mb-2">
+        {isFiltering ? "No orders match your filters" : "You haven’t placed any orders yet"}
+      </h5>
+      <p className="text-body mb-4">
+        {isFiltering
+          ? "Try adjusting or clearing your filters to see all your orders."
+          : "Browse our courses and make your first purchase to get started."}
+      </p>
+
+      {isFiltering ? (
+        <Button variant="outline-secondary" onClick={onClear}>
+          Clear filters
         </Button>
-      </td>
-    </tr>
+      ) : (
+        <Button variant="primary" onClick={() => navigate("/courses")}>
+          Browse Courses
+        </Button>
+      )}
+    </div>
   );
 };
 
@@ -130,10 +230,8 @@ export default function OrderListPage() {
       <PageMetaData title="My Orders" />
 
       <Card className="bg-transparent border rounded-3">
-        <CardBody>
-          <OrderCounter stats={stats} loading={loading} />
-
-          <div className="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
+        <CardHeader className="bg-transparent border-bottom">
+          <div className="d-flex flex-wrap gap-2 justify-content-between align-items-center">
             <div className="d-flex gap-2 align-items-center flex-wrap">
               <div className="position-relative">
                 <input
@@ -144,7 +242,7 @@ export default function OrderListPage() {
                   onChange={(e) => setQ(e.target.value)}
                 />
                 <FaSearch
-                  className="position-absolute top-50 end-0 translate-middle-y me-3 text-muted"
+                  className="position-absolute top-50 end-0 translate-middle-y me-3 text-body"
                 />
               </div>
 
@@ -185,12 +283,27 @@ export default function OrderListPage() {
               </Button>
             </div>
           </div>
+        </CardHeader>
+
+        <CardBody>
+          {!(orders.length === 0 && !filters.search && !filters.status) && (
+            <OrderCounter stats={stats} loading={loading} />
+          )}
 
           {loading ? (
             <div className="text-center py-5">
               <div className="spinner-border text-primary" role="status" />
               <p className="mt-3">Loading your orders...</p>
             </div>
+          ) : orders.length === 0 ? (
+            <OrdersEmptyState
+              isFiltering={!!filters.search || !!filters.status}
+              onClear={() => {
+                setQ("");
+                handleSearch("");
+                handleStatus("");
+              }}
+            />
           ) : (
             <div className="table-responsive border-0">
               <table className="table table-dark-gray align-middle p-4 mb-0 table-hover">
@@ -208,15 +321,9 @@ export default function OrderListPage() {
                 </thead>
 
                 <tbody>
-                  {orders.length > 0 ? (
-                    orders.map((o) => <OrderRow key={o.orderId} {...o} />)
-                  ) : (
-                    <tr>
-                      <td colSpan={4} className="text-center text-muted py-5">
-                        You don’t have any orders yet.
-                      </td>
-                    </tr>
-                  )}
+                  {orders.map((o) => (
+                    <OrderRow key={o.orderId} {...o} />
+                  ))}
                 </tbody>
               </table>
             </div>

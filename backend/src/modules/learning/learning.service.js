@@ -10,6 +10,7 @@ import { updateStreak } from "#modules/streak/streak.service.js";
 import { evaluateAndAward } from "#modules/badge/badge.evaluator.js";
 import Student from "#modules/student/student.model.js";
 import { withTransaction } from "#utils/transaction.js";
+import { generateCertId } from "#modules/certificate/certificate.util.js";
 import CourseProgress, { LECTURE_STATUS_ENUM as LECTURE_STATUS } from "./course-progress.model.js";
 import { toCourseProgressDto } from "./progress.mapper.js";
 
@@ -352,6 +353,11 @@ export const completeLecture = async (userId, courseId, lecId) => {
     ) {
       progress.isCompleted = true;
       progress.lastActivityAt = new Date();
+
+      if (!progress.certId) {
+        progress.certId = generateCertId();
+        progress.certIssuedAt = new Date();
+      }
 
       await Student.updateOne(
         { user: userId },

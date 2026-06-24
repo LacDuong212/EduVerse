@@ -55,7 +55,7 @@ const CommonCourseCard = ({ course }) => {
   };
 
   return (
-    <Card className="border">
+    <Card className="border h-100">
       {isFree ? (
         <div className="ribbon"><span>Free</span></div>
       ) : hasDiscount ? (
@@ -68,19 +68,24 @@ const CommonCourseCard = ({ course }) => {
           className="card-img-top"
           alt={title}
           onError={handleImageError}
-          style={{ cursor: courseId ? "pointer" : "default" }}
+          style={{
+            height: 180,
+            width: "100%",
+            objectFit: "cover",
+            cursor: courseId ? "pointer" : "default",
+          }}
         />
       </Link>
 
       <CardBody className="pb-0 d-flex flex-column flex-grow-1">
-        <div className="d-flex justify-content-between mb-3">
-          <div className="d-flex flex-wrap gap-1">
+        <div className="d-flex justify-content-between mb-2">
+          <div className="d-flex flex-wrap gap-1 align-content-start" style={{ height: "3rem", overflow: "hidden" }}>
             <span className={`badge ${levelBadge.class} bg-opacity-60`}>{levelBadge.text}</span>
             <span className={`badge ${categoryBadge.class} bg-opacity-60`}>{categoryBadge.text}</span>
           </div>
         </div>
 
-        <CardTitle className="mb-2">
+        <CardTitle className="mb-1" style={{ minHeight: "3.25rem" }}>
           <Link
             to={detailPath}
             className="text-decoration-none text-truncate-2"
@@ -90,7 +95,9 @@ const CommonCourseCard = ({ course }) => {
           </Link>
         </CardTitle>
 
-        {subtitle && <p className="mb-2 text-truncate-2">{subtitle}</p>}
+        <p className="mb-2 text-truncate-2" style={{ minHeight: "3.1rem" }}>
+          {subtitle || ""}
+        </p>
 
         <div className="d-flex justify-content-between align-items-center mb-2">
           <span className="h6 fw-light mb-0">
@@ -135,18 +142,19 @@ const CommonCourseCard = ({ course }) => {
             </div>
             <Link to={`/instructors/${instructor.insId || ""}`}>
               <p className="mb-0 ms-2">
-                <span className="h6 fw-light mb-0 text-wrap" style={{ maxWidth: "120px", display: "inline-block" }}>{instructor.name}</span>
+                <span className="h6 fw-light mb-0 text-truncate d-inline-block" style={{ maxWidth: "60px" }}>{instructor.name}</span>
               </p>
             </Link>
           </div>
 
           <div className="text-end">
             <div className="d-flex flex-column align-items-end">
-              {hasDiscount && !isFree && (
-                <span className="small text-body text-decoration-line-through">
-                  {formatCurrency(price)}
-                </span>
-              )}
+              <span
+                className="small text-body text-decoration-line-through"
+                style={{ visibility: hasDiscount && !isFree ? "visible" : "hidden" }}
+              >
+                {formatCurrency(price)}
+              </span>
               <h4 className="text-success mb-0">
                 {isFree ? "Free" : formatCurrency(hasDiscount ? discountPrice : price)}
               </h4>

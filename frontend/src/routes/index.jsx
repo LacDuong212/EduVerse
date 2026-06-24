@@ -31,6 +31,7 @@ import AccountSettingsPage from "../app/pages/accountSettings";
 import StudentDashboard from "../app/student/dashboard";
 import AchievementsPage from "../app/student/achievements";
 import CourseResultPage from "../app/pages/course/video-player/components/CourseResultPage";
+import StudentCertificatesPage from "../app/student/certificates/page";
 
 // PUBLIC
 import HomePage from "../app/pages/home/page";
@@ -40,6 +41,7 @@ import CourseDetails from "../app/pages/course/detail/page";
 import InstructorDetailsPage from "../app/pages/instructors/detail";
 import VideoPlayer from "../app/pages/course/video-player/page";
 import NotFoundPage from "../components/not-found";
+const CertificateVerifyPage = lazy(() => import("@/app/pages/certificate/page"));
 
 export const publicRoutes = [{
   path: "/home",
@@ -65,6 +67,10 @@ export const publicRoutes = [{
   path: "/student/become-instructor",
   name: "Become Instructor",
   element: <BecomeInstructorPage />
+}, {
+  path: "/certificates/:certId",
+  name: "Certificate",
+  element: <CertificateVerifyPage />
 }, {
   path: "/*",
   name: "Not Found",
@@ -206,6 +212,11 @@ export const studentRoutes = [{
   name: "Achievements",
   isNested: true,
   element: <AchievementsPage />
+}, {
+  path: "/student/certificates",
+  name: "My Certificates",
+  isNested: true,
+  element: <StudentCertificatesPage />
 }, {
   path: "/student/settings",
   name: "Settings",

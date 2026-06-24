@@ -12,6 +12,7 @@ const SkeletonRows = ({ count = 5 }) => (
             <span className="placeholder col-5 rounded" />
           </div>
         </td>
+        <td><span className="placeholder col-7 rounded" /></td>
         <td><span className="placeholder col-8 rounded" /></td>
         <td><span className="placeholder col-6 rounded" /></td>
         <td><span className="placeholder col-6 rounded" /></td>
@@ -30,6 +31,7 @@ const StudentList = ({ studentsData, isLoading, sortKey, sortDir, onSort, onBloc
       <thead>
         <tr>
           <SortableTh label="Student name" sortKey="name" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0 rounded-start" />
+          <th scope="col" className="border-0">Email</th>
           <SortableTh label="Join date" sortKey="createdAt" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0 text-center" />
           <SortableTh label="Last updated" sortKey="updatedAt" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0 text-center" />
           <th scope="col" className="border-0" text-center>Verified</th>
@@ -44,43 +46,25 @@ const StudentList = ({ studentsData, isLoading, sortKey, sortDir, onSort, onBloc
           studentsData.map((item) => (
             <tr key={item._id}>
               <td>
-                <div className="d-flex align-items-center position-relative">
+                <div className="d-flex align-items-center">
                   <div className="avatar avatar-md">
                     {item?.pfpImg ? (
-                      <img src={item.pfpImg}
-                        className="rounded-circle"
-                        alt={'avatar'}
-                      />) : (
+                      <img src={item.pfpImg} className="rounded-circle" alt="avatar" />
+                    ) : (
                       <div className="avatar-img rounded-circle border-white border-3 shadow d-flex align-items-center justify-content-center bg-light text-dark fw-bold fs-4">
                         {(item?.name?.[0] || "U").toUpperCase()}
                       </div>
                     )}
                   </div>
-                  <div className="mb-0 ms-3">
-                    <h6 className="mb-0">
-                      {item.name}
-                    </h6>
-                    {item.email}
-                  </div>
+                  <h6 className="mb-0 ms-3">{item.name}</h6>
                 </div>
               </td>
+              <td>{item.email || "—"}</td>
               <td>
-                {
-                  new Date(item.createdAt).toLocaleString('en-GB', {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit"
-                  })
-                }
+                { new Date(item.createdAt).toLocaleString('en-GB', { year: "numeric", month: "2-digit", day: "2-digit"}) }
               </td>
               <td>
-                {
-                  new Date(item.updatedAt).toLocaleString('en-GB', {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit"
-                  })
-                }
+                { new Date(item.updatedAt).toLocaleString('en-GB', { year: "numeric", month: "2-digit", day: "2-digit"}) }
               </td>
               <td className="text-center">
                 <span className={`badge text-bg-${item.isVerified ? 'success' : 'warning'}`}>
@@ -107,7 +91,7 @@ const StudentList = ({ studentsData, isLoading, sortKey, sortDir, onSort, onBloc
                     </td>
                 )
                 : (
-                  <td>
+                  <td className="text-center">
                     <Button variant="danger-soft" size="sm" className="mb-0" onClick={() => onDelete(item._id)}>
                       Remove
                     </Button>
@@ -118,7 +102,7 @@ const StudentList = ({ studentsData, isLoading, sortKey, sortDir, onSort, onBloc
           ))
         ) : (
           <tr>
-            <td colSpan="7" className="empty-state-cell text-center">
+            <td colSpan="8" className="empty-state-cell text-center">
               <FaUserGraduate size={26} className='mb-2' />
               <div>No students found.</div>
             </td>
@@ -128,4 +112,5 @@ const StudentList = ({ studentsData, isLoading, sortKey, sortDir, onSort, onBloc
     </table>
   </div>;
 };
+
 export default StudentList;

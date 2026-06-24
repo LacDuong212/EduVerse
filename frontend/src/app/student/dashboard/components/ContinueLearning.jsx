@@ -74,7 +74,7 @@ const ContinueCourseCard = ({ course }) => {
         >
           {title}
         </div>
-        <div className="small text-body" style={{ opacity: 0.65 }}>
+        <div className="small text-body" style={{ opacity: 0.85 }}>
           {completedLectures} / {totalLectures} lectures
         </div>
         <Link to={resumePath} className="btn btn-primary btn-sm mt-auto" style={{ width: "fit-content" }}>

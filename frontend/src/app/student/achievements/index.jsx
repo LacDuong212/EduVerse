@@ -66,7 +66,7 @@ const AchievementsPage = () => {
         {/* Right — badge catalog */}
         <Col xs={12} lg={9} className="d-flex flex-column gap-3">
           {/* Earned section */}
-          <div className="border rounded p-3">
+          <div className="bg-transparent border rounded-3 p-3">
             <SectionHead
               tag="Collected"
               title={`${earned.length} badge${earned.length !== 1 ? "s" : ""} earned`}
@@ -75,7 +75,7 @@ const AchievementsPage = () => {
           </div>
 
           {/* Locked section */}
-          <div className="border rounded p-3">
+          <div className="bg-transparent border rounded-3 p-3">
             <SectionHead
               tag="Locked"
               title={`${locked.length} remaining`}

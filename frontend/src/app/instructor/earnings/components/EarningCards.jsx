@@ -15,7 +15,7 @@ const EarningCards = ({ thisMonthEarning, toBePaid, totalEarning, totalPaid }) =
 
   return (
     <Row className="g-4">
-      <Col sm={6} lg={3}>
+      <Col sm={6}>
         <StatBox
           id="tip-month"
           label="This Month Earning"
@@ -25,7 +25,7 @@ const EarningCards = ({ thisMonthEarning, toBePaid, totalEarning, totalPaid }) =
           borderClass="border-primary"
         />
       </Col>
-      <Col sm={6} lg={3}>
+      <Col sm={6}>
         <StatBox
           id="tip-total"
           label="Total Earning"
@@ -35,7 +35,7 @@ const EarningCards = ({ thisMonthEarning, toBePaid, totalEarning, totalPaid }) =
           borderClass="border-secondary"
         />
       </Col>
-      <Col sm={6} lg={3}>
+      <Col sm={6}>
         <StatBox
           id="tip-balance"
           label="Available Balance"
@@ -45,7 +45,7 @@ const EarningCards = ({ thisMonthEarning, toBePaid, totalEarning, totalPaid }) =
           borderClass="border-warning"
         />
       </Col>
-      <Col sm={6} lg={3}>
+      <Col sm={6}>
         <StatBox
           id="tip-withdrawn"
           label="Total Withdrawn"

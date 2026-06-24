@@ -69,12 +69,12 @@ const AdminInstructorDetailPage = () => {
       </div>
 
       <Row className="g-4">
-        <Col lg={4}>
+        <Col sm={12} lg={4}>
           <Row className="g-4">
-            <Col md={6} lg={12}>
+            <Col sm={6} lg={12}>
               <InstructorAvatarCard data={{ ...instructor, ...stats }} />
             </Col>
-            <Col md={6} lg={12}>
+            <Col sm={6} lg={12}>
               <EducationAndSkillsCard
                 educationList={instructor.education || []}
                 skillsList={instructor.skills || []}
@@ -83,7 +83,7 @@ const AdminInstructorDetailPage = () => {
           </Row>
         </Col>
 
-        <Col lg={8}>
+        <Col sm={12} lg={8}>
           <Row>
             <InstructorInfo data={instructor} />
           </Row>

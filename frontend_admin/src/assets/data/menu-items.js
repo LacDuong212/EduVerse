@@ -1,6 +1,6 @@
 import { BiSolidCategory, BiSolidCoupon } from "react-icons/bi";
 import { BsHouse } from 'react-icons/bs';
-import { FaBook, FaCheckSquare, FaClipboardList, FaList, FaMoneyBill, FaMoneyBillWave } from 'react-icons/fa';
+import { FaBook, FaCertificate, FaCheckSquare, FaClipboardList, FaList, FaMoneyBill, FaMoneyBillWave } from 'react-icons/fa';
 import { FaUserGraduate, FaUserTie } from 'react-icons/fa6';
 
 export const ADMIN_MENU_ITEMS = [{
@@ -91,6 +91,11 @@ export const ADMIN_MENU_ITEMS = [{
   label: 'Payouts',
   icon: FaMoneyBillWave,
   url: '/payouts'
+}, {
+  key: 'certificates',
+  label: 'Certificates',
+  icon: FaCertificate,
+  url: '/certificates'
 }, {
   key: 'earnings',
   label: 'Earnings',

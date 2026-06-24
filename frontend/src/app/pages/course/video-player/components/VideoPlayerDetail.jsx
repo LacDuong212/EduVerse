@@ -10,6 +10,7 @@ import useNotes from "../hooks/useNotes";
 import CoursePlaylistSidebar from "./CoursePlaylistSidebar";
 import LectureConclusionModal from "./LectureConclusionModal";
 import NoteProgressMarkers from "./notes/NoteProgressMarkers";
+import QuizProgressMarkers from "./QuizProgressMarkers";
 import ResumeProgressDialog from "./ResumeProgressDialog";
 import VideoScreen from "./VideoScreen";
 
@@ -143,6 +144,13 @@ export default function VideoPlayerDetail({
       {/* Note timestamp markers on Plyr seek bar */}
       <NoteProgressMarkers
         notes={notesApi.notes}
+        playerContainerRef={playerContainerRef}
+        playerKey={playerKey}
+      />
+
+      {/* Quiz timestamp markers on Plyr seek bar */}
+      <QuizProgressMarkers
+        quizzes={currentLecture?.aiData?.quizzes || []}
         playerContainerRef={playerContainerRef}
         playerKey={playerKey}
       />

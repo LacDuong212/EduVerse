@@ -3,6 +3,11 @@ import Plyr from "plyr-react";
 import "plyr-react/plyr.css";
 import QuizOverlay from "./QuizOverlay";
 
+const PLYR_OPTIONS = {
+  speed: { selected: 1, options: [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2] },
+  seekTime: 5,
+};
+
 const VideoScreen = ({
   playerContainerRef,
   source,
@@ -48,12 +53,14 @@ const VideoScreen = ({
             crossOrigin="anonymous"
             controls
             source={source}
+            options={PLYR_OPTIONS}
           />
         )}
       </div>
       {renderOverlay()}
       {activeQuiz && (
         <QuizOverlay
+          key={activeQuiz.index}
           quiz={activeQuiz.quiz}
           index={activeQuiz.index}
           total={quizTotal}

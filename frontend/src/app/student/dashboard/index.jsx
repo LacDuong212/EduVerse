@@ -19,7 +19,7 @@ const SectionDivider = ({ label }) => (
   <div className="d-flex align-items-center gap-2 mb-3 mt-2">
     <span
       className="small fw-semibold text-body flex-shrink-0"
-      style={{ opacity: 0.5, textTransform: "uppercase", letterSpacing: "0.07em" }}
+      style={{ opacity: 0.8, textTransform: "uppercase", letterSpacing: "0.07em" }}
     >
       {label}
     </span>

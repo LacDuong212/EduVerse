@@ -46,7 +46,7 @@ const CoursesList = ({ instructorId }) => {
             <tr>
               <th className="border-0 rounded-start">Course</th>
               <th className="border-0 text-center">Status</th>
-              <th className="border-0 text-end">Price</th>
+              <th className="border-0 text-center">Price</th>
               <th className="border-0 text-center rounded-end">Last Updated</th>
             </tr>
           </thead>
@@ -55,8 +55,8 @@ const CoursesList = ({ instructorId }) => {
               <SkeletonRows count={5} />
             ) : courses.length === 0 ? (
               <tr>
-                <td colSpan={4} className="empty-state-cell">
-                  <FaBook className="empty-icon" />
+                <td colSpan={4} className="empty-state-cell text-center">
+                  <FaBook size={26} className="mb-2" />
                   <div className="fw-semibold">No courses found</div>
                 </td>
               </tr>

@@ -1,0 +1,202 @@
+/* ============ Certificate — blue & gold geometric template ============ */
+.cert-frame {
+  position: relative;
+  max-width: 980px;
+  aspect-ratio: 1.4 / 1;
+  margin: 0 auto;
+  background: linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%);
+  border-radius: 8px;
+  box-shadow: 0 14px 50px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+/* ---- Decorative diamonds / bars (top-left + bottom-left) ---- */
+.cert-frame .sq {
+  position: absolute;
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
+.sq-navy {
+  background: linear-gradient(135deg, #1e3a8a 0%, #3b5bd0 100%);
+}
+.sq-navy-dark {
+  background: linear-gradient(135deg, #14266b 0%, #1e3a8a 100%);
+}
+.sq-gold {
+  background: transparent;
+  border: 7px solid;
+  border-image: linear-gradient(135deg, #d4af37, #f6e27a, #c8932b) 1;
+}
+
+/* top-left cluster */
+.tl1 { width: 340px; height: 340px; top: -150px; left: -110px; }
+.tl2 { width: 300px; height: 300px; top: -60px;  left: -180px; }
+.tl3 { width: 230px; height: 230px; top: -30px;  left: -40px; }
+.tl4 { width: 170px; height: 170px; top: 150px;  left: -120px; }
+
+/* bottom-left cluster */
+.bl1 { width: 260px; height: 260px; bottom: -150px; left: -90px; }
+.bl2 { width: 180px; height: 180px; bottom: -70px;  left: 30px; }
+
+/* gold thin diagonal bars */
+.bar-gold {
+  position: absolute;
+  background: linear-gradient(135deg, #d4af37, #f6e27a, #c8932b);
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+.bar1 { width: 540px; height: 10px; top: 150px; left: -160px; }
+.bar2 { width: 420px; height: 8px;  top: 250px; left: -150px; }
+
+/* ---- Content (right-aligned) ---- */
+.cert-content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+  padding: 7% 6% 5% 42%;
+}
+
+.cert-title {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2rem, 5vw, 3.6rem);
+  font-weight: 700;
+  letter-spacing: 6px;
+  color: #14266b;
+  margin: 0;
+  line-height: 1;
+}
+
+.cert-type {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 14px 0 8%;
+  letter-spacing: 5px;
+  font-size: clamp(0.7rem, 1.4vw, 0.95rem);
+  color: #6b7280;
+  text-transform: uppercase;
+}
+.cert-type::before,
+.cert-type::after {
+  content: "";
+  height: 2px;
+  width: 36px;
+  background: linear-gradient(90deg, #d4af37, #f6e27a);
+}
+
+.cert-presented {
+  letter-spacing: 5px;
+  font-size: clamp(0.65rem, 1.3vw, 0.9rem);
+  color: #6b7280;
+  text-transform: uppercase;
+  margin: 0 0 10px;
+}
+
+.cert-name {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.8rem, 4.4vw, 3rem);
+  font-weight: 700;
+  color: #14266b;
+  margin: 0 0 18px;
+  line-height: 1.05;
+}
+
+.cert-desc {
+  font-size: clamp(0.78rem, 1.4vw, 0.98rem);
+  color: #4b5563;
+  line-height: 1.7;
+  max-width: 460px;
+  margin: 0 0 auto;
+}
+.cert-desc strong { color: #1e3a8a; }
+
+/* ---- Bottom row: signature | seal | signature ---- */
+.cert-bottom {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: clamp(16px, 4vw, 48px);
+  width: 100%;
+  margin-top: 6%;
+}
+
+.cert-sign {
+  text-align: center;
+  min-width: 110px;
+}
+.cert-sign-line {
+  height: 2px;
+  background: linear-gradient(90deg, #d4af37, #c8932b);
+  margin-bottom: 6px;
+}
+.cert-sign span {
+  font-size: 0.72rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+/* ---- Award medallion (CSS) ---- */
+.cert-medal {
+  position: relative;
+  width: 72px;
+  height: 92px;
+  flex-shrink: 0;
+}
+.cert-medal-ribbon {
+  position: absolute;
+  bottom: 0;
+  width: 16px;
+  height: 34px;
+  background: linear-gradient(180deg, #1e3a8a, #14266b);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 80%, 0 100%);
+}
+.cert-medal-ribbon.left { left: 18px; transform: rotate(12deg); }
+.cert-medal-ribbon.right { right: 18px; transform: rotate(-12deg); }
+.cert-medal-circle {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #f6e27a, #d4af37 60%, #c8932b);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+.cert-medal-inner {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1e3a8a, #14266b);
+  color: #f6e27a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+.cert-meta {
+  width: 100%;
+  text-align: right;
+  margin-top: 14px;
+  font-size: 0.7rem;
+  color: #9ca3af;
+  letter-spacing: 0.5px;
+}
+
+@media (max-width: 640px) {
+  .cert-content { padding: 8% 6% 6% 30%; }
+}
+
+@media print {
+  .cert-actions, header, footer, nav { display: none !important; }
+  .cert-frame { box-shadow: none; max-width: 100%; }
+}

@@ -63,7 +63,7 @@ const AchievementSummary = ({ earned, locked, stats }) => {
     <div className="d-flex flex-column gap-3">
 
       {/* Progress ring card */}
-      <div className="border rounded p-3 d-flex flex-column align-items-center gap-2">
+      <div className="bg-transparent border rounded-3 p-3 d-flex flex-column align-items-center gap-2">
         <div
           aria-label={`${earned.length} of ${total} badges earned`}
           style={{
@@ -92,7 +92,7 @@ const AchievementSummary = ({ earned, locked, stats }) => {
             <span style={{ fontSize: 24, fontWeight: 700, color: "#f0b429" }}>
               {earned.length}
             </span>
-            <span className="text-body" style={{ fontSize: 11, opacity: 0.55 }}>
+            <span className="text-body" style={{ fontSize: 11, opacity: 0.85 }}>
               / {total}
             </span>
           </div>
@@ -101,7 +101,7 @@ const AchievementSummary = ({ earned, locked, stats }) => {
         <div className="text-center">
           <div className="fw-semibold text-body small">badges earned</div>
           {total > 0 && (
-            <div className="text-body" style={{ fontSize: 11, opacity: 0.45 }}>
+            <div className="text-body" style={{ fontSize: 11, opacity: 0.78 }}>
               {Math.round(pct * 100)}% complete
             </div>
           )}
@@ -110,10 +110,10 @@ const AchievementSummary = ({ earned, locked, stats }) => {
 
       {/* Stats card */}
       {stats && (
-        <div className="border rounded p-3">
+        <div className="bg-transparent border rounded-3 p-3">
           <div
             className="text-body mb-2"
-            style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", opacity: 0.5 }}
+            style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", opacity: 0.8 }}
           >
             Your stats
           </div>
@@ -125,7 +125,7 @@ const AchievementSummary = ({ earned, locked, stats }) => {
                 className="d-flex align-items-center justify-content-between py-1"
                 style={{ borderBottom: "1px solid var(--bs-border-color)" }}
               >
-                <span className="small text-body" style={{ opacity: 0.65 }}>{label}</span>
+                <span className="small text-body" style={{ opacity: 0.85 }}>{label}</span>
                 <span className="fw-semibold small text-body">
                   {val}{suffix ? ` ${suffix}` : ""}
                   {icon && val > 0 && (
@@ -141,12 +141,12 @@ const AchievementSummary = ({ earned, locked, stats }) => {
       {/* Next milestone card */}
       {nextBadge && (
         <div
-          className="border rounded p-3"
+          className="bg-transparent border rounded-3 p-3"
           style={{ borderTopColor: accentColor, borderTopWidth: 2 }}
         >
           <div
             className="text-body mb-2"
-            style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", opacity: 0.5 }}
+            style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", opacity: 0.8 }}
           >
             Next milestone
           </div>
@@ -155,7 +155,7 @@ const AchievementSummary = ({ earned, locked, stats }) => {
             <span style={{ fontSize: 28 }}>{nextBadge.icon}</span>
             <div>
               <div className="fw-semibold text-body small">{nextBadge.name}</div>
-              <div className="text-body" style={{ fontSize: 11, opacity: 0.5 }}>
+              <div className="text-body" style={{ fontSize: 11, opacity: 0.8 }}>
                 {formatCondition(nextBadge.condition)}
               </div>
             </div>
@@ -175,14 +175,14 @@ const AchievementSummary = ({ earned, locked, stats }) => {
               </div>
               <div
                 className="d-flex justify-content-between small text-body mt-1"
-                style={{ opacity: 0.45 }}
+                style={{ opacity: 0.78 }}
               >
                 <span>{formatProgressValue(nextBadge.condition, progress.current)}</span>
                 <span>{formatProgressValue(nextBadge.condition, progress.max)}</span>
               </div>
             </div>
           ) : (
-            <div className="text-body" style={{ fontSize: 11, opacity: 0.4 }}>
+            <div className="text-body" style={{ fontSize: 11, opacity: 0.78 }}>
               {formatCondition(nextBadge.condition)}
             </div>
           )}
@@ -190,10 +190,10 @@ const AchievementSummary = ({ earned, locked, stats }) => {
       )}
 
       {/* Category legend */}
-      <div className="border rounded p-3">
+      <div className="bg-transparent border rounded-3 p-3">
         <div
           className="text-body mb-2"
-          style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", opacity: 0.5 }}
+          style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", opacity: 0.8 }}
         >
           Categories
         </div>

@@ -29,7 +29,7 @@ const CommonCourseSlider = ({ courses }) => {
     },
   };
 
-  if (!list.length) return <p className="text-center text-muted">No courses found.</p>;
+  if (!list.length) return <p className="text-center text-body">No courses found.</p>;
 
   return (
     <TinySlider settings={courseSliderSettings} className="pb-1">

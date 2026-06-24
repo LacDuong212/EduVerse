@@ -1,4 +1,4 @@
-import { BsBagCheck, BsBook, BsGear, BsPerson, BsTrophy, BsUiChecksGrid } from 'react-icons/bs';
+import { BsBagCheck, BsBook, BsGear, BsPatchCheck, BsPerson, BsTrophy, BsUiChecksGrid } from 'react-icons/bs';
 import { IoWalletOutline } from 'react-icons/io5';
 import { RiBook2Line } from 'react-icons/ri';
 
@@ -108,6 +108,11 @@ export const STUDENT_ACCOUNT_DROPDOWN_ITEMS = [{
   icon: BsTrophy,
   url: '/student/achievements'
 }, {
+  key: 'certificates',
+  label: 'My Certificates',
+  icon: BsPatchCheck,
+  url: '/student/certificates'
+}, {
   key: 'orders',
   label: 'My Orders',
   icon: BsBagCheck,
@@ -161,6 +166,12 @@ export const STUDENT_MENU_ITEMS = [{
   label: 'Achievements',
   icon: BsTrophy,
   url: '/student/achievements',
+  parentKey: 'student'
+}, {
+  key: 'certificates',
+  label: 'My Certificates',
+  icon: BsPatchCheck,
+  url: '/student/certificates',
   parentKey: 'student'
 }, {
   key: 'orders',

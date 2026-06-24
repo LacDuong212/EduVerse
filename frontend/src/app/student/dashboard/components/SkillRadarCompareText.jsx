@@ -37,13 +37,13 @@ const SkillRadarCompareText = ({ radar }) => {
   if (!rows.length || (!strengths.length && !focusAreas.length)) return null;
 
   return (
-    <div className="p-3 border rounded bg-transparent">
+    <div className="p-3 border rounded-3 bg-transparent">
       <div className="fw-bold mb-3 text-body">Skill Comparison</div>
 
       <div className="d-flex flex-column gap-3">
         {strengths.length > 0 && (
           <div>
-            <div className="small fw-semibold text-body mb-2" style={{ opacity: 0.6 }}>
+            <div className="small fw-semibold text-body mb-2" style={{ opacity: 0.85 }}>
               Above average
             </div>
             <div className="d-flex flex-wrap gap-2">
@@ -69,7 +69,7 @@ const SkillRadarCompareText = ({ radar }) => {
 
         {focusAreas.length > 0 && (
           <div>
-            <div className="small fw-semibold text-body mb-2" style={{ opacity: 0.6 }}>
+            <div className="small fw-semibold text-body mb-2" style={{ opacity: 0.85 }}>
               Focus areas — tap to browse courses
             </div>
             <div className="d-flex flex-wrap gap-2">
@@ -96,7 +96,7 @@ const SkillRadarCompareText = ({ radar }) => {
       </div>
 
       {totalActiveLearners > 0 && (
-        <div className="small text-muted mt-3">
+        <div className="small text-body mt-3">
           Compared to {totalActiveLearners} active learner{totalActiveLearners !== 1 ? "s" : ""} on EduVerse
         </div>
       )}

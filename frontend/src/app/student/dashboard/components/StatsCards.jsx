@@ -59,7 +59,7 @@ const StatsCards = ({ stats, courseStats }) => {
         const progress = card.key === "lectures" ? getLecturesProgress() : null;
         return (
           <Col xs={6} xl={3} key={card.key}>
-            <div className="border rounded p-3 h-100 d-flex align-items-center gap-3">
+            <div className="bg-transparent border rounded-3 p-3 h-100 d-flex align-items-center gap-3">
               <div
                 className={`rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 ${card.bgClass} ${card.colorClass}`}
                 style={{ width: 46, height: 46 }}

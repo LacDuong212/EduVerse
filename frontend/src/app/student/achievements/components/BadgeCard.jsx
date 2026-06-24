@@ -108,7 +108,7 @@ function BadgeTooltip({ badge, tokens, rarity, visible }) {
       {badge.description && (
         <div
           className="text-body"
-          style={{ fontSize: 11, lineHeight: 1.5, opacity: 0.7, marginBottom: 8 }}
+          style={{ fontSize: 11, lineHeight: 1.5, opacity: 0.85, marginBottom: 8 }}
         >
           {badge.description}
         </div>
@@ -138,7 +138,7 @@ function BadgeTooltip({ badge, tokens, rarity, visible }) {
           {CATEGORY_LABELS[badge.category] ?? badge.category}
         </span>
         {badge.earnedAt && (
-          <span className="text-body" style={{ fontSize: 10, opacity: 0.45 }}>
+          <span className="text-body" style={{ fontSize: 10, opacity: 0.78 }}>
             {formatDate(badge.earnedAt)}
           </span>
         )}
@@ -206,11 +206,11 @@ export function EarnedBadgeCard({ badge, index }) {
       </div>
 
       <div className="d-flex flex-column align-items-center gap-1">
-        <span className={rarity.cls} style={{ fontSize: 10, opacity: 0.7, fontStyle: "italic" }}>
+        <span className={rarity.cls} style={{ fontSize: 10, opacity: 0.85, fontStyle: "italic" }}>
           {rarity.label}
         </span>
         {badge.earnedAt && (
-          <span className="text-body" style={{ fontSize: 10, opacity: 0.45 }}>
+          <span className="text-body" style={{ fontSize: 10, opacity: 0.78 }}>
             {formatDate(badge.earnedAt)}
           </span>
         )}
@@ -294,14 +294,14 @@ export function LockedBadgeCard({ badge }) {
 
       <div
         className="text-center text-body"
-        style={{ fontSize: 11, fontWeight: 500, lineHeight: 1.3, maxWidth: 90, opacity: 0.55 }}
+        style={{ fontSize: 11, fontWeight: 500, lineHeight: 1.3, maxWidth: 90, opacity: 0.85 }}
       >
         {badge.name}
       </div>
 
       <div
         className="text-center text-body"
-        style={{ fontSize: 10, opacity: hasRing ? 0.5 : 0.35, lineHeight: 1.3, maxWidth: 90 }}
+        style={{ fontSize: 10, opacity: hasRing ? 0.75 : 0.65, lineHeight: 1.3, maxWidth: 90 }}
       >
         {formatProgressLabel(badge.condition, progress)}
       </div>

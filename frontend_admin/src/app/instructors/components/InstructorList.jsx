@@ -1,9 +1,9 @@
 import { Button } from 'react-bootstrap';
 import { FaUserTie } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import SortableTh from '@/components/SortableTh';
 
-const COLS = 6;
+const COLS = 7;
 
 const SkeletonRows = ({ count = 5 }) => (
   <>
@@ -15,6 +15,7 @@ const SkeletonRows = ({ count = 5 }) => (
             <span className="placeholder col-5 rounded" />
           </div>
         </td>
+        <td><span className="placeholder col-7 rounded" /></td>
         <td><span className="placeholder col-8 rounded" /></td>
         <td><span className="placeholder col-6 rounded" /></td>
         <td><span className="placeholder col-6 rounded" /></td>
@@ -33,6 +34,7 @@ const InstructorList = ({ instructorsData, isLoading, sortKey, sortDir, onSort, 
       <thead>
         <tr>
           <SortableTh label="Instructor name" sortKey="name" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0 rounded-start" />
+          <th scope="col" className="border-0">Email</th>
           <SortableTh label="Join date" sortKey="createdAt" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0 text-center" />
           <SortableTh label="Last updated" sortKey="updatedAt" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0 text-center" />
           <th scope="col" className="border-0 text-center">Activated</th>
@@ -46,46 +48,37 @@ const InstructorList = ({ instructorsData, isLoading, sortKey, sortDir, onSort, 
           instructorsData.map((item) => (
             <tr
               key={item._id}
-              onClick={() => navigate(`/instructors/${item._id}`)}
-              style={{ cursor: 'pointer' }}
             >
               <td>
-                <div className="d-flex align-items-center position-relative">
+                <div className="d-flex align-items-center">
                   <div className="avatar avatar-md">
                     {item?.pfpImg ? (
-                      <img src={item.pfpImg}
-                        className="rounded-circle"
-                        alt={'avatar'}
-                      />) : (
+                      <img src={item.pfpImg} className="rounded-circle" alt="avatar" />
+                    ) : (
                       <div className="avatar-img rounded-circle border-white border-3 shadow d-flex align-items-center justify-content-center bg-light text-dark fw-bold fs-4">
                         {(item?.name?.[0] || "U").toUpperCase()}
                       </div>
                     )}
                   </div>
-                  <div className="mb-0 ms-3">
-                    <h6 className="mb-0">
-                      {item.name}
-                    </h6>
-                {item.email}
-                  </div>
+                  <h6 className="mb-0 ms-3">
+                    <Link
+                      to={`/instructors/${item?._id || ""}`}
+                      className=""
+                    >
+                      {item.name || "(No title)"}
+                    </Link>
+                  </h6>
                 </div>
               </td>
+              <td>{item.email || "—"}</td>
               <td className='text-center'>
                 {
-                  new Date(item.createdAt).toLocaleString('en-GB', {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit"
-                  })
+                  new Date(item.createdAt).toLocaleString('en-GB', { year: "numeric", month: "2-digit", day: "2-digit" })
                 }
               </td>
               <td className='text-center'>
                 {
-                  new Date(item.updatedAt).toLocaleString('en-GB', {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit"
-                  })
+                  new Date(item.updatedAt).toLocaleString('en-GB', { year: "numeric", month: "2-digit", day: "2-digit" })
                 }
               </td>
               <td className='text-center'>
@@ -121,4 +114,5 @@ const InstructorList = ({ instructorsData, isLoading, sortKey, sortDir, onSort, 
     </table>
   </div>;
 };
+
 export default InstructorList;

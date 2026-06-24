@@ -36,7 +36,7 @@ const BadgesWidget = () => {
   const percentage = total > 0 ? Math.round((earned.length / total) * 100) : 0;
 
   return (
-    <div className="border rounded p-3 d-flex flex-column gap-2">
+    <div className="bg-transparent border rounded-3 p-3 d-flex flex-column gap-2">
 
       {/* Header */}
       <div className="d-flex align-items-center justify-content-between">
@@ -44,7 +44,7 @@ const BadgesWidget = () => {
         <Link
           to="/student/achievements"
           className="small text-body"
-          style={{ opacity: 0.45, textDecoration: "none" }}
+          style={{ opacity: 0.78, textDecoration: "none" }}
         >
           View all →
         </Link>
@@ -101,13 +101,13 @@ const BadgesWidget = () => {
               );
             })}
             {earned.length > 8 && (
-              <span className="text-body small align-self-center" style={{ opacity: 0.4 }}>
+              <span className="text-body small align-self-center" style={{ opacity: 0.78 }}>
                 +{earned.length - 8}
               </span>
             )}
           </>
         ) : (
-          <span className="text-body small" style={{ opacity: 0.45 }}>
+          <span className="text-body small" style={{ opacity: 0.78 }}>
             Complete your first lecture to earn a badge.
           </span>
         )}
@@ -122,12 +122,12 @@ const BadgesWidget = () => {
           <div>
             <div
               className="text-body"
-              style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", opacity: 0.45 }}
+              style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", opacity: 0.78 }}
             >
               Next up
             </div>
             <div className="fw-semibold text-body small">{nextBadge.name}</div>
-            <div className="text-body" style={{ fontSize: 11, opacity: 0.45 }}>
+            <div className="text-body" style={{ fontSize: 11, opacity: 0.78 }}>
               {formatCondition(nextBadge.condition)}
             </div>
           </div>

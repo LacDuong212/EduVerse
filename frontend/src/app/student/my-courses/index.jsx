@@ -10,7 +10,7 @@ import {
   ProgressBar,
   Row,
 } from "react-bootstrap";
-import { BsArrowRepeat, BsPlayCircle } from "react-icons/bs";
+import { BsArrowRepeat, BsJournalBookmark, BsPlayCircle } from "react-icons/bs";
 import { FaAngleLeft, FaAngleRight, FaSearch } from "react-icons/fa";
 import { useMyCourses } from "./useMyCourses";
 import { useNavigate } from "react-router-dom";
@@ -107,6 +107,40 @@ const CourseRow = ({
   );
 };
 
+const MyCoursesEmptyState = ({ isSearching, onClearSearch }) => {
+  const navigate = useNavigate();
+
+  return (
+    <div className="text-center py-5 px-3">
+      <div
+        className="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 mb-3"
+        style={{ width: 88, height: 88 }}
+      >
+        <BsJournalBookmark className="text-primary" size={40} />
+      </div>
+
+      <h5 className="mb-2">
+        {isSearching ? "No courses match your search" : "You haven’t enrolled in any courses yet"}
+      </h5>
+      <p className="text-body mb-4">
+        {isSearching
+          ? "Try a different keyword or clear the search to see all your courses."
+          : "Explore our catalog and start learning something new today."}
+      </p>
+
+      {isSearching ? (
+        <Button variant="outline-secondary" onClick={onClearSearch}>
+          Clear search
+        </Button>
+      ) : (
+        <Button variant="primary" onClick={() => navigate("/courses")}>
+          Browse Courses
+        </Button>
+      )}
+    </div>
+  );
+};
+
 const StudentMyCourses = () => {
   const {
     courseData,
@@ -193,13 +227,23 @@ const StudentMyCourses = () => {
         </CardHeader>
 
         <CardBody>
-          <Counter stats={stats} loading={loading} />
+          {!(courseData.length === 0 && !filters.search) && (
+            <Counter stats={stats} loading={loading} />
+          )}
 
           {(loading || progressLoading) && courseData.length === 0 ? (
             <div className="text-center py-5">
               <div className="spinner-border text-primary" role="status" />
               <p className="mt-3">Loading your courses...</p>
             </div>
+          ) : courseData.length === 0 ? (
+            <MyCoursesEmptyState
+              isSearching={!!filters.search}
+              onClearSearch={() => {
+                setSearchText("");
+                handleSearch("");
+              }}
+            />
           ) : (
             <div className="table-responsive border-0">
               <table className="table table-dark-gray align-middle p-4 mb-0 table-hover">
@@ -217,17 +261,9 @@ const StudentMyCourses = () => {
                 </thead>
 
                 <tbody>
-                  {courseData.length > 0 ? (
-                    courseData.map((item) => (
-                      <CourseRow key={item.courseId} {...item} />
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={4} className="text-center text-muted py-5">
-                        You don’t own any courses yet.
-                      </td>
-                    </tr>
-                  )}
+                  {courseData.map((item) => (
+                    <CourseRow key={item.courseId} {...item} />
+                  ))}
                 </tbody>
               </table>
             </div>

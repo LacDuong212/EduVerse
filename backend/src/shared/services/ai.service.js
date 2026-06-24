@@ -44,7 +44,7 @@ export const processVideoWithGemini = async (videoId, videoDuration = null) => {
       model: "gemini-2.5-flash",
       generationConfig: {
         responseMimeType: "application/json",
-        responseSchema: LECTURE_CONTENT_SCHEMA
+        responseSchema: buildContentSchema(videoDuration)
       }
     });
 
@@ -56,6 +56,18 @@ export const processVideoWithGemini = async (videoId, videoDuration = null) => {
     // [5/5] Finalize
     const aiResponse = JSON.parse(result.response.text());
     await fileManager.deleteFile(uploadResult.file.name);
+
+    // Clamp timestamps to valid range — Gemini may ignore text constraints
+    if (videoDuration > 0 && Array.isArray(aiResponse.quizzes)) {
+      const minTs = 10;
+      const maxTs = Math.max(minTs, Math.round(videoDuration) - 10);
+      aiResponse.quizzes = aiResponse.quizzes.map((quiz) => ({
+        ...quiz,
+        timestamp: quiz.timestamp != null
+          ? Math.min(maxTs, Math.max(minTs, Math.round(quiz.timestamp)))
+          : null,
+      }));
+    }
 
     logger.debug(`> [5/5] Video analysis complete.`);
     return aiResponse;
@@ -141,61 +153,69 @@ const buildLecturePrompt = (videoDuration = null) => {
   `;
 };
 
-const LECTURE_CONTENT_SCHEMA = {
-  type: SchemaType.OBJECT,
-  properties: {
-    summary: { type: SchemaType.STRING },
-    lessonNotes: {
-      type: SchemaType.OBJECT,
-      properties: {
-        keyConcepts: {
-          type: SchemaType.ARRAY,
-          items: {
-            type: SchemaType.OBJECT,
-            properties: {
-              term: { type: SchemaType.STRING },
-              definition: { type: SchemaType.STRING }
-            },
-            required: ["term", "definition"]
-          },
-          description: "Technical terms with short definitions"
-        },
-        mainPoints: {
-          type: SchemaType.ARRAY,
-          items: { type: SchemaType.STRING },
-          description: "Summary of core steps or logic"
-        },
-        practicalTips: {
-          type: SchemaType.ARRAY,
-          items: { type: SchemaType.STRING },
-          description: "Real-world advice or common pitfalls"
-        }
-      },
-      required: ["keyConcepts", "mainPoints", "practicalTips"]
-    },
-    quizzes: {
-      type: SchemaType.ARRAY,
-      items: {
+// Build schema dynamically so timestamp min/max are enforced by Gemini's structured output
+const buildContentSchema = (videoDuration = null) => {
+  const maxTs = videoDuration > 0 ? Math.max(10, Math.round(videoDuration) - 10) : undefined;
+
+  const timestampSchema = {
+    type: SchemaType.INTEGER,
+    description: "Second in the video right after the concept is explained — where the quiz will appear",
+    ...(maxTs != null ? { minimum: 10, maximum: maxTs } : {}),
+  };
+
+  return {
+    type: SchemaType.OBJECT,
+    properties: {
+      summary: { type: SchemaType.STRING },
+      lessonNotes: {
         type: SchemaType.OBJECT,
-        required: ["question", "options", "correctAnswer", "explanation", "topic", "timestamp"],
         properties: {
-          question: { type: SchemaType.STRING },
-          options: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
-          correctAnswer: { type: SchemaType.STRING },
-          explanation: { type: SchemaType.STRING },
-          topic: {
-            type: SchemaType.STRING,
-            description: "Specific technical topic (e.g., 'React Hooks', 'CSS Grid')"
+          keyConcepts: {
+            type: SchemaType.ARRAY,
+            items: {
+              type: SchemaType.OBJECT,
+              properties: {
+                term: { type: SchemaType.STRING },
+                definition: { type: SchemaType.STRING }
+              },
+              required: ["term", "definition"]
+            },
+            description: "Technical terms with short definitions"
           },
-          timestamp: {
-            type: SchemaType.INTEGER,
-            description: "Second in the video right after the concept is explained — where the quiz will appear"
+          mainPoints: {
+            type: SchemaType.ARRAY,
+            items: { type: SchemaType.STRING },
+            description: "Summary of core steps or logic"
+          },
+          practicalTips: {
+            type: SchemaType.ARRAY,
+            items: { type: SchemaType.STRING },
+            description: "Real-world advice or common pitfalls"
+          }
+        },
+        required: ["keyConcepts", "mainPoints", "practicalTips"]
+      },
+      quizzes: {
+        type: SchemaType.ARRAY,
+        items: {
+          type: SchemaType.OBJECT,
+          required: ["question", "options", "correctAnswer", "explanation", "topic", "timestamp"],
+          properties: {
+            question: { type: SchemaType.STRING },
+            options: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+            correctAnswer: { type: SchemaType.STRING },
+            explanation: { type: SchemaType.STRING },
+            topic: {
+              type: SchemaType.STRING,
+              description: "Specific technical topic (e.g., 'React Hooks', 'CSS Grid')"
+            },
+            timestamp: timestampSchema
           }
         }
       }
-    }
-  },
-  required: ["summary", "lessonNotes", "quizzes"]
+    },
+    required: ["summary", "lessonNotes", "quizzes"]
+  };
 };
 
 export const generateAssessmentService = async (userId, courseId) => {

@@ -3,7 +3,7 @@ import { LockedBadgeCard } from "./BadgeCard";
 const LockedBadgeGrid = ({ locked }) => {
   if (!locked.length) {
     return (
-      <div className="text-center py-4 text-body" style={{ opacity: 0.45 }}>
+      <div className="text-center py-4 text-body" style={{ opacity: 0.8 }}>
         <div style={{ fontSize: 32 }} className="mb-2">🎉</div>
         <p className="small mb-0 fw-semibold">You&rsquo;ve earned every badge!</p>
       </div>

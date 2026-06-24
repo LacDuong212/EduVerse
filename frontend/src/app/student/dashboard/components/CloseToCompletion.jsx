@@ -17,7 +17,7 @@ const CloseToCompletion = ({ courses }) => {
   const title = topPct >= 50 ? "Almost there!" : "Keep going!";
 
   return (
-    <div className="border rounded p-3 d-flex flex-column gap-2">
+    <div className="bg-transparent border rounded-3 p-3 d-flex flex-column gap-2">
       <div className="fw-bold text-body mb-1">{title}</div>
       {sorted.map((course) => (
         <CourseRow key={course.courseId} course={course} />
@@ -67,7 +67,7 @@ const CourseRow = ({ course }) => {
           </span>
         </div>
 
-        <div className="small text-body" style={{ opacity: 0.55 }}>
+        <div className="small text-body" style={{ opacity: 0.82 }}>
           {completedLectures} / {totalLectures} lectures
         </div>
       </div>

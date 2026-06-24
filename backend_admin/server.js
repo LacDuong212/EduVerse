@@ -17,6 +17,7 @@ import couponRoute from './routes/couponRoutes.js';
 import videoRoute from './routes/videoRoutes.js';
 import payoutRoute from './routes/payoutRoutes.js';
 import auditLogRoute from './routes/auditLogRoutes.js';
+import certificateRoute from './routes/certificateRoutes.js';
 
 
 //Initialize Express
@@ -51,6 +52,7 @@ app.use('/api/coupons', couponRoute);
 app.use('/api/videos', videoRoute);
 app.use('/api/admin/payouts', payoutRoute);
 app.use('/api/admin/audit-logs', auditLogRoute);
+app.use('/api/admin/certificates', certificateRoute);
 
 // Port
 const PORT = process.env.PORT;

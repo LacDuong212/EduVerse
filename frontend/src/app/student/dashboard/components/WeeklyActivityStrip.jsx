@@ -142,7 +142,7 @@ const WeeklyActivityStrip = ({ streak }) => {
         <div className="fw-semibold text-body" style={{ fontSize: "0.9rem" }}>
           {message}
         </div>
-        <div className="small text-body" style={{ opacity: 0.65 }}>
+        <div className="small text-body" style={{ opacity: 0.85 }}>
           {daysThisWeek === 0
             ? "No activity this week yet."
             : `Active ${daysThisWeek} of 7 days this week`}

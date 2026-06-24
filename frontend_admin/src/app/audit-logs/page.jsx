@@ -141,30 +141,27 @@ function LogRow({ log }) {
             </button>
           )}
         </td>
+        <td><h6 className="mb-0">{log.adminName || "—"}</h6></td>
+        <td><span className="opacity-75">{log.adminEmail || "—"}</span></td>
         <td>
-          <div className="fw-semibold">{log.adminName}</div>
-          <div>{log.adminEmail}</div>
-          <div className="font-monospace ">{log.ipAddress || "—"}</div>
-        </td>
-        <td>
-          <div className="fw-bold h6 mb-0">{log.entityType} &gt; {log.entityLabel || "—"}</div>
+          <span className="opacity-75">
+            {log.entityType ? log.entityType.charAt(0).toUpperCase() + log.entityType.slice(1).toLowerCase() : "—"}
+          </span>
+          <span className="opacity-50 mx-1">/</span>
+          <span>{log.entityLabel || "—"}</span>
         </td>
         <td className="text-center">
           <Badge bg={ACTION_VARIANT[log.action] || "secondary"}>
             {ACTION_LABELS[log.action] || log.action}
           </Badge>
         </td>
-        <td style={{ maxWidth: 200 }}>
-          {log.reason || "—"}
-        </td>
-        <td className="text-center" style={{ whiteSpace: "nowrap" }}>
-          {formatDatetime(log.createdAt)}
-        </td>
+        <td style={{ maxWidth: 200 }}>{log.reason || "—"}</td>
+        <td style={{ whiteSpace: "nowrap" }}>{formatDatetime(log.createdAt)}</td>
       </tr>
       {expanded && hasDiff && (
         <tr>
           <td />
-          <td colSpan={7} className="py-2 px-3">
+          <td colSpan={6} className="py-2 px-3">
             <DiffPanel before={log.before} after={log.after} />
           </td>
         </tr>
@@ -337,9 +334,10 @@ export default function AuditLogsPage() {
                   <tr>
                     <th className="border-0 rounded-start" style={{ width: 28 }} />
                     <th className="border-0">Admin</th>
+                    <th className="border-0">Email</th>
                     <th className="border-0 text-center">Impact</th>
                     <th className="border-0 text-center">Action</th>
-                    <th className="border-0 text-center">Reason</th>
+                    <th className="border-0">Reason</th>
                     <th className="border-0 rounded-end text-center">Timestamp</th>
                   </tr>
                 </thead>
