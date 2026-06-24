@@ -5,6 +5,7 @@ import EmptyCartPage from "@/app/shop/empty-cart/page";
 import { DEFAULT_COURSE_IMG } from "@/contexts/constants";
 import { formatCurrency } from "@/utils/currency";
 import useCartDetail from "../useCartDetails";
+import CartUpsell from "./CartUpsell";
 
 const CartCard = ({ item, isSelected, onSelect, onRemove }) => {
   const hasDiscount = item.enableDiscount ?? false;
@@ -179,6 +180,7 @@ const CartDetails = () => {
             </Card>
           </Col>
         </Row>
+        <CartUpsell />
       </Container>
     </section>
   )

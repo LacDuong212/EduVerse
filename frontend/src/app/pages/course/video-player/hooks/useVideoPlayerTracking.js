@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import useLectureTracking from "@/hooks/useLearningProgress";
+import useVideoControls from "./useVideoControls";
 
 export default function useVideoPlayerTracking({
   courseId,
@@ -12,6 +13,7 @@ export default function useVideoPlayerTracking({
   setLocalProgressOverrides,
 }) {
   const playerContainerRef = useRef(null);
+  useVideoControls(playerContainerRef);
 
   const [hasStartedPlayback, setHasStartedPlayback] = useState(false);
   const [showResumeDialog, setShowResumeDialog] = useState(false);
