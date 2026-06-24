@@ -134,7 +134,7 @@ const ActivityCalendar = ({ streak }) => {
   const svgH = 14 + 7 * COL_STEP - GAP;
 
   return (
-    <div className="border rounded p-3">
+    <div className="bg-transparent border rounded-3 p-3">
       <div className="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-1">
         <span className="fw-bold text-body" style={{ fontSize: "0.9rem" }}>
           {totalActive} active {totalActive === 1 ? "day" : "days"} in the last year

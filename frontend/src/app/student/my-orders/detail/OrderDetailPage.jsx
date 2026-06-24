@@ -147,7 +147,7 @@ export default function OrderDetailPage() {
 
   if (error && !order) {
     return (
-      <Card className="border-0 shadow-sm">
+      <Card className="bg-transparent border rounded-3">
         <Card.Body>
           <div className="d-flex align-items-center justify-content-between mb-3">
             <h4 className="mb-0">Order detail</h4>
@@ -186,8 +186,8 @@ export default function OrderDetailPage() {
 
           <div className="text-body small mt-1" title={order.orderId}>
             Order <span className="fw-semibold">#{orderCode}</span>
-            <span className="ms-2 text-muted">·</span>
-            <span className="ms-2 text-muted">
+            <span className="ms-2 text-body">·</span>
+            <span className="ms-2 text-body">
               ID: {String(order.orderId).slice(0, 8)}…
             </span>
           </div>
@@ -235,17 +235,17 @@ export default function OrderDetailPage() {
           </Alert>
         )}
 
-      <Card className="border-0 shadow-sm mb-3">
+      <Card className="bg-transparent border rounded-3 mb-3">
         <Card.Body>
           <div className="d-flex align-items-center gap-2 mb-3">
-            <FaInfoCircle className="text-muted" />
+            <FaInfoCircle className="text-body" />
             <h5 className="mb-0">Information</h5>
           </div>
 
           <Row className="g-3">
             <Col md={6}>
               <div className="d-flex align-items-center gap-2 mb-1">
-                <FaCalendarAlt className="text-muted" />
+                <FaCalendarAlt className="text-body" />
                 <span className="fw-semibold text-body">Created at</span>
               </div>
               <div className="text-body">{createdAt}</div>
@@ -253,7 +253,7 @@ export default function OrderDetailPage() {
 
             <Col md={6}>
               <div className="d-flex align-items-center gap-2 mb-1">
-                <FaCreditCard className="text-muted" />
+                <FaCreditCard className="text-body" />
                 <span className="fw-semibold text-body">Payment</span>
               </div>
 
@@ -262,7 +262,7 @@ export default function OrderDetailPage() {
                   {paymentLabel(order.paymentMethod)}
                 </span>
                 {!canLearn && (
-                  <span className="ms-2 text-muted small">
+                  <span className="ms-2 text-body small">
                     · Access locked until completed
                   </span>
                 )}
@@ -272,18 +272,18 @@ export default function OrderDetailPage() {
         </Card.Body>
       </Card>
 
-      <Card className="border-0 shadow-sm mb-3">
+      <Card className="bg-transparent border rounded-3 mb-3">
         <Card.Body>
           <div className="d-flex align-items-center justify-content-between mb-3">
             <h5 className="mb-0">Courses</h5>
-            <div className="text-muted small">
+            <div className="text-body small">
               {courseRows.length} course{courseRows.length > 1 ? "s" : ""}
             </div>
           </div>
 
           <Table responsive className="align-middle mb-0">
             <thead>
-              <tr className="text-muted small">
+              <tr className="text-body small">
                 <th style={{ width: 60 }}>#</th>
                 <th>Course</th>
                 <th className="text-end" style={{ width: 160 }}>
@@ -298,7 +298,7 @@ export default function OrderDetailPage() {
             <tbody>
               {courseRows.map((r) => (
                 <tr key={r.key}>
-                  <td className="text-muted">{r.index}</td>
+                  <td className="text-body">{r.index}</td>
 
                   <td>
                     <div className="d-flex align-items-center gap-3">
@@ -322,11 +322,11 @@ export default function OrderDetailPage() {
                       <div>
                         <div className="fw-semibold text-body">{r.title}</div>
                         {!canLearn ? (
-                          <div className="text-muted small">
+                          <div className="text-body small">
                             Access locked until order is completed
                           </div>
                         ) : (
-                          <div className="text-muted small">Ready to learn</div>
+                          <div className="text-body small">Ready to learn</div>
                         )}
                       </div>
                     </div>
@@ -369,10 +369,10 @@ export default function OrderDetailPage() {
         </Card.Body>
       </Card>
 
-      <Card className="border-0 shadow-sm">
+      <Card className="bg-transparent border rounded-3">
         <Card.Body>
           <div className="d-flex align-items-center gap-2 mb-3">
-            <FaReceipt className="text-muted" />
+            <FaReceipt className="text-body" />
             <h5 className="mb-0">Summary</h5>
           </div>
 

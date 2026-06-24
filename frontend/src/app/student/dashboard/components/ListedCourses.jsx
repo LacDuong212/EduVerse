@@ -10,7 +10,7 @@ const ListedCourses = () => {
   if (!recommendedCourses.length) return null;
 
   return (
-    <section className="border rounded mt-2 p-4">
+    <section className="bg-transparent border rounded-3 mt-2 p-4">
       <Container className="p-0">
         <h5 className="text-body">Recommended for You</h5>
         <div className="tiny-slider arrow-round arrow-blur arrow-hover">

@@ -21,7 +21,7 @@ const StreakWidget = ({ streak }) => {
   const todayCount = streak.activityLog?.[todayYMD()] ?? 0;
 
   return (
-    <div className="border rounded p-3 d-flex flex-column gap-2">
+    <div className="bg-transparent border rounded-3 p-3 d-flex flex-column gap-2">
       <div className="d-flex align-items-center justify-content-between mb-1">
         <div className="fw-bold text-body">Streak Milestones</div>
         <span
@@ -44,7 +44,7 @@ const StreakWidget = ({ streak }) => {
             <div className="fw-semibold text-body lh-1" style={{ fontSize: "0.88rem" }}>
               {todayCount} lecture{todayCount > 1 ? "s" : ""} today
             </div>
-            <div className="text-body" style={{ fontSize: "0.72rem", opacity: 0.5 }}>
+            <div className="text-body" style={{ fontSize: "0.72rem", opacity: 0.8 }}>
               streak active
             </div>
           </div>
@@ -67,13 +67,13 @@ const StreakWidget = ({ streak }) => {
               aria-valuemax={100}
             />
           </div>
-          <div className="small text-body mt-1" style={{ opacity: 0.45 }}>
+          <div className="small text-body mt-1" style={{ opacity: 0.78 }}>
             {next - current} more {next - current === 1 ? "day" : "days"} to go
           </div>
         </div>
       ) : (
         current > 0 && (
-          <div className="text-body small" style={{ opacity: 0.6 }}>
+          <div className="text-body small" style={{ opacity: 0.85 }}>
             All milestones reached! 🏆
           </div>
         )

@@ -88,7 +88,7 @@ const SkillRadarChart = ({
 
   if (!radar || !radar.labels?.length) {
     return (
-      <div className="p-4 border rounded bg-transparent text-body">
+      <div className="p-4 border rounded-3 bg-transparent text-body">
         No skill data available yet. Complete more courses to see your progress.
       </div>
     );
@@ -243,7 +243,7 @@ const SkillRadarChart = ({
   );
 
   return (
-    <div className="p-4 border rounded bg-transparent">
+    <div className="p-4 border rounded-3 bg-transparent">
       <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
         <div>
           <h5 className="mb-0 fw-bold text-body">{title}</h5>

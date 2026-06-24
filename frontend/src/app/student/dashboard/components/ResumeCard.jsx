@@ -48,7 +48,7 @@ const ResumeCard = () => {
   const ageLabel = timeAgoLabel(lastActivityAt);
 
   return (
-    <div className="border rounded overflow-hidden">
+    <div className="bg-transparent border rounded-3 overflow-hidden">
       <div className="d-flex align-items-stretch">
         {/* Thumbnail */}
         <div className="flex-shrink-0" style={{ width: 140 }}>
@@ -66,7 +66,7 @@ const ResumeCard = () => {
           <div className="d-flex align-items-center justify-content-between gap-2 mb-1">
             <span
               className="text-body"
-              style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", opacity: 0.45 }}
+              style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", opacity: 0.78 }}
             >
               Continue where you left off
             </span>
@@ -111,11 +111,11 @@ const ResumeCard = () => {
 
           {/* Progress text + age label */}
           <div className="d-flex align-items-center gap-2 flex-wrap mt-auto pt-1">
-            <span className="small text-body" style={{ opacity: 0.55 }}>
+            <span className="small text-body" style={{ opacity: 0.82 }}>
               {completedLectures} / {totalLectures} lectures
             </span>
             {ageLabel && (
-              <span className="small text-body" style={{ opacity: 0.5, fontStyle: "italic" }}>
+              <span className="small text-body" style={{ opacity: 0.8, fontStyle: "italic" }}>
                 · {ageLabel}
               </span>
             )}

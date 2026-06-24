@@ -181,10 +181,10 @@ const SkillBarChart = ({ radar }) => {
     : `${activeCount} of ${labels.length} areas active — study ${needed} more categor${needed === 1 ? "y" : "ies"} to unlock the full radar`;
 
   return (
-    <div className="p-4 border rounded bg-transparent">
+    <div className="p-4 border rounded-3 bg-transparent">
       <div className="mb-3">
         <h5 className="mb-0 fw-bold text-body">Skill Radar</h5>
-        <div className="small text-body mt-1" style={{ opacity: 0.5 }}>
+        <div className="small text-body mt-1" style={{ opacity: 0.8 }}>
           {subtitle}
         </div>
       </div>
