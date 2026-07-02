@@ -14,6 +14,7 @@ export default function SignInPage() {
   const navigate = useNavigate();
   const [showVerifyModal, setShowVerifyModal] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState("");
+  const [verifyMode, setVerifyMode] = useState("register");
 
   return <>
     <PageMetaData title="Sign-In" />
@@ -35,6 +36,12 @@ export default function SignInPage() {
             <SignInForm
               onSignUpSuccess={(email) => {
                 setRegisteredEmail(email);
+                setVerifyMode("register");
+                setShowVerifyModal(true);
+              }}
+              onReactivateRequired={(email) => {
+                setRegisteredEmail(email);
+                setVerifyMode("reactivate");
                 setShowVerifyModal(true);
               }}
             />
@@ -72,7 +79,7 @@ export default function SignInPage() {
         show={showVerifyModal}
         onHide={() => setShowVerifyModal(false)}
         email={registeredEmail}
-        mode="register"
+        mode={verifyMode}
         onVerifySuccess={() => {
           setShowVerifyModal(false);
           navigate("/auth/sign-in");

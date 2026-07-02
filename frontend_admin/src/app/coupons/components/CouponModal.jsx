@@ -4,8 +4,8 @@ import { Alert, Button, Col, Form, Modal, Row } from 'react-bootstrap';
 const EMPTY_FORM = {
   code: "",
   description: "",
-  discountPercent: "",
-  maxUsageLimit: "",
+  discountType: "percent",
+  discountValue: "",
   startDate: "",
   expiryDate: ""
 };
@@ -31,8 +31,8 @@ const CouponModal = ({ show, onHide, onSubmit, initialData }) => {
         setFormData({
           code: initialData.code || "",
           description: initialData.description || "",
-          discountPercent: String(initialData.discountPercent ?? ""),
-          maxUsageLimit: String(initialData.maxUsageLimit ?? ""),
+          discountType: initialData.discountType || "percent",
+          discountValue: String(initialData.discountValue ?? ""),
           startDate: initialData.startDate ? initialData.startDate.slice(0, 10) : "",
           expiryDate: initialData.expiryDate ? initialData.expiryDate.slice(0, 10) : ""
         });
@@ -49,23 +49,19 @@ const CouponModal = ({ show, onHide, onSubmit, initialData }) => {
   const handleSubmit = () => {
     setFormError("");
 
-    if (!formData.code || !formData.description || !formData.discountPercent || !formData.startDate || !formData.expiryDate) {
+    if (!formData.code || !formData.description || !formData.discountValue || !formData.startDate || !formData.expiryDate) {
       setFormError("Please fill in all required fields.");
       return;
     }
 
-    const discount = Number(formData.discountPercent);
-    if (isNaN(discount) || discount < 1 || discount > 100) {
-      setFormError("Discount must be between 1% and 100%.");
+    const discount = Number(formData.discountValue);
+    if (isNaN(discount) || discount < 1) {
+      setFormError("Discount value must be a positive number.");
       return;
     }
-
-    if (formData.maxUsageLimit !== "") {
-      const limit = Number(formData.maxUsageLimit);
-      if (isNaN(limit) || limit < 1) {
-        setFormError("Max usage limit must be a positive number.");
-        return;
-      }
+    if (formData.discountType === "percent" && discount > 100) {
+      setFormError("Percentage discount must be between 1% and 100%.");
+      return;
     }
 
     const start = new Date(formData.startDate);
@@ -75,10 +71,7 @@ const CouponModal = ({ show, onHide, onSubmit, initialData }) => {
       return;
     }
 
-    const payload = { ...formData };
-    if (payload.maxUsageLimit === "") delete payload.maxUsageLimit;
-
-    onSubmit(payload);
+    onSubmit({ ...formData, discountValue: discount });
   };
 
   return (
@@ -103,16 +96,31 @@ const CouponModal = ({ show, onHide, onSubmit, initialData }) => {
                 />
               </Form.Group>
             </Col>
-            <Col md={6}>
+            <Col md={3}>
               <Form.Group className="mb-3">
-                <Form.Label>Discount (%) <span className="text-danger">*</span></Form.Label>
+                <Form.Label>Discount Type <span className="text-danger">*</span></Form.Label>
+                <Form.Select
+                  name="discountType"
+                  value={formData.discountType}
+                  onChange={handleChange}
+                >
+                  <option value="percent">Percentage (%)</option>
+                  <option value="money">Fixed amount</option>
+                </Form.Select>
+              </Form.Group>
+            </Col>
+            <Col md={3}>
+              <Form.Group className="mb-3">
+                <Form.Label>
+                  Discount Value <span className="text-danger">*</span>
+                </Form.Label>
                 <Form.Control
                   type="number"
-                  name="discountPercent"
+                  name="discountValue"
                   min="1"
-                  max="100"
-                  placeholder="1 - 100"
-                  value={formData.discountPercent}
+                  max={formData.discountType === "percent" ? "100" : undefined}
+                  placeholder={formData.discountType === "percent" ? "1 - 100" : "e.g. 50000"}
+                  value={formData.discountValue}
                   onChange={handleChange}
                 />
               </Form.Group>
@@ -155,18 +163,6 @@ const CouponModal = ({ show, onHide, onSubmit, initialData }) => {
               </Form.Group>
             </Col>
           </Row>
-
-          <Form.Group className="mb-3">
-            <Form.Label>Max Usage Limit <span className="text-secondary small">(optional)</span></Form.Label>
-            <Form.Control
-              type="number"
-              name="maxUsageLimit"
-              min="1"
-              placeholder="Leave blank for unlimited"
-              value={formData.maxUsageLimit}
-              onChange={handleChange}
-            />
-          </Form.Group>
         </Form>
       </Modal.Body>
       <Modal.Footer>

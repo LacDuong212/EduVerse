@@ -1,8 +1,9 @@
 import { Modal, Button, Form, Row, Col } from "react-bootstrap";
 import useEmailVerify from "@/app/auth/email-verify/useEmailVerify";
 
-export default function EmailVerifyModal({ show, onHide, email, onVerifySuccess }) {
-  const emailVerify = useEmailVerify(email, onVerifySuccess);
+export default function EmailVerifyModal({ show, onHide, email, onVerifySuccess, mode = "register" }) {
+  const emailVerify = useEmailVerify(email, onVerifySuccess, mode);
+  const isReactivate = mode === "reactivate";
 
   return (
     <Modal
@@ -14,7 +15,7 @@ export default function EmailVerifyModal({ show, onHide, email, onVerifySuccess 
       <Form onSubmit={emailVerify.onSubmit} onPaste={emailVerify.handlePaste}>
         <Modal.Header className="border-0 position-relative">
           <Modal.Title className="w-100 text-center m-0">
-            Verify Your Email
+            {isReactivate ? "Reactivate Your Account" : "Verify Your Email"}
           </Modal.Title>
           <button
             type="button"
@@ -57,7 +58,9 @@ export default function EmailVerifyModal({ show, onHide, email, onVerifySuccess 
             className="w-50 mx-auto d-block"
             disabled={emailVerify.loading}
           >
-            {emailVerify.loading ? "Verifying..." : "Verify Email"}
+            {emailVerify.loading
+              ? (isReactivate ? "Reactivating..." : "Verifying...")
+              : (isReactivate ? "Reactivate Account" : "Verify Email")}
           </Button>
 
           <div className="text-center mt-3">

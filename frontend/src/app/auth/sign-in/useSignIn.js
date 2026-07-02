@@ -8,7 +8,7 @@ import { setLogin, setLogout } from "@/redux/authSlice";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema } from "./signInSchema";
 
-export default function useSignIn(onSignUpSuccess) {
+export default function useSignIn(onSignUpSuccess, onReactivateRequired) {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -86,6 +86,11 @@ export default function useSignIn(onSignUpSuccess) {
           return;
         }
 
+        if (status === 403 && errData.errors?.reactivate) {
+          handleReactivation(data.email);
+          return;
+        }
+
         toast.error(errData.message || "Invalid credentials.");
       } else {
         toast.error("Unable to connect to server.");
@@ -105,6 +110,19 @@ export default function useSignIn(onSignUpSuccess) {
       }
     } catch {
       toast.error("Failed to resend OTP.");
+    }
+  };
+
+  const handleReactivation = async (email) => {
+    toast.warning("Account deactivated. Sending reactivation OTP...");
+    try {
+      const res = await axios.post(`${backendUrl}/api/auth/reactivate/send-otp`, { email }, { withCredentials: true });
+      if (res.data.success) {
+        toast.success("Reactivation OTP sent!");
+        onReactivateRequired?.(email);
+      }
+    } catch {
+      toast.error("Failed to send reactivation OTP.");
     }
   };
 

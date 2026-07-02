@@ -152,7 +152,7 @@ async def recommend(req: RecommendRequest):
     Pipeline:
       1. Load user's signals (enrollments, wishlist, reviews, interests)
       2. Load candidate courses (exclude already enrolled)
-      3. Run hybrid ML prediction (K-means + Content + CF + Popularity)
+      3. Run hybrid ML prediction (gating: CF + BERT semantic + popularity)
       4. Return scored & ranked results
     """
     try:
@@ -203,7 +203,7 @@ async def recommend(req: RecommendRequest):
         has_interests = bool(user_signals["interests"])
         has_wishlist = bool(user_signals["wishlist"])
 
-        source_parts = ["KMeans"]
+        source_parts = ["Gated"]
         if has_enrollments:
             source_parts.append("History")
         if has_interests:

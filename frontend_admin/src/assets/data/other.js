@@ -1,33 +1,10 @@
 import { addOrSubtractDaysFromDate } from '@/utils/date';
 import avatar1 from '@/assets/images/avatar/01.jpg';
-import avatar2 from '@/assets/images/avatar/02.jpg';
 import avatar3 from '@/assets/images/avatar/03.jpg';
 import avatar5 from '@/assets/images/avatar/05.jpg';
 import avatar8 from '@/assets/images/avatar/08.jpg';
 import avatar9 from '@/assets/images/avatar/09.jpg';
 
-
-export const notificationData = [{
-  image: avatar8,
-  title: 'New request to apply for Instructor',
-  description: 'Congratulate Joan Wallace for graduating from Microverse university',
-  isDetails: true
-}, {
-  image: avatar2,
-  title: 'Larry Lawson Added a new course',
-  description: "What's new! Find out about new features",
-  isDetails: true
-}, {
-  image: avatar5,
-  title: 'New request to apply for Instructor',
-  description: 'Congratulate Joan Wallace for graduating from Microverse university',
-  isDetails: true
-}, {
-  image: avatar3,
-  title: 'Update v2.3 completed successfully',
-  description: "What's new! Find out about new features",
-  isTime: true
-}];
 
 export const studentReviewData = [{
   id: '01',

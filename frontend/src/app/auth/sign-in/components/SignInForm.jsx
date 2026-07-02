@@ -5,8 +5,8 @@ import IconTextFormInput from "@/components/form/IconTextFormInput";
 import IconPasswordFormInput from "@/components/form/IconPasswordFormInput";
 import useSignIn from "../useSignIn";
 
-export default function SignInForm({ onSignUpSuccess }) {
-  const { loading, login, control, errors } = useSignIn(onSignUpSuccess);
+export default function SignInForm({ onSignUpSuccess, onReactivateRequired }) {
+  const { loading, login, control, errors } = useSignIn(onSignUpSuccess, onReactivateRequired);
 
   const [searchParams] = useSearchParams();
   const emailFromUrl = searchParams.get("email") || "";
