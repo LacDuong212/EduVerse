@@ -2,8 +2,11 @@ import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 
-export default function useEmailVerify(initialEmail = "", onVerifySuccess) {
+export default function useEmailVerify(initialEmail = "", onVerifySuccess, mode = "register") {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  const isReactivate = mode === "reactivate";
+  const verifyUrl = isReactivate ? "/api/auth/reactivate" : "/api/auth/verify-email";
+  const resendUrl = isReactivate ? "/api/auth/reactivate/send-otp" : "/api/auth/resend-otp";
 
   const [userEmail, setUserEmail] = useState(initialEmail);
   const [otp, setOtp] = useState(new Array(6).fill(""));
@@ -73,7 +76,7 @@ export default function useEmailVerify(initialEmail = "", onVerifySuccess) {
 
     try {
       const { data } = await axios.post(
-        `${backendUrl}/api/auth/resend-otp`,
+        `${backendUrl}${resendUrl}`,
         { email: userEmail.toLowerCase().trim() },
         { withCredentials: true }
       );
@@ -112,13 +115,18 @@ export default function useEmailVerify(initialEmail = "", onVerifySuccess) {
     setLoading(true);
     try {
       const { data } = await axios.post(
-        `${backendUrl}/api/auth/verify-email`,
+        `${backendUrl}${verifyUrl}`,
         { email: userEmail.toLowerCase().trim(), otp: otpCode },
         { withCredentials: true }
       );
 
       if (data.success) {
-        toast.success(data.message || "Email verified! You can now log in.");
+        toast.success(
+          data.message ||
+          (isReactivate
+            ? "Account reactivated! You can now log in."
+            : "Email verified! You can now log in.")
+        );
 
         if (onVerifySuccess) {
           onVerifySuccess(userEmail);

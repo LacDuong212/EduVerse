@@ -1,12 +1,36 @@
 import Coupon from "../models/couponModel.js";
 import { logAction, ACTION, ENTITY } from "../utils/auditLogger.js";
 
+// Validate discountType + discountValue against the model rules.
+// Returns an error message string, or null when valid.
+const validateDiscount = (discountType, discountValue) => {
+  if (!['percent', 'money'].includes(discountType)) {
+    return "Discount type must be either 'percent' or 'money'";
+  }
+
+  const value = Number(discountValue);
+  if (isNaN(value) || value < 1) {
+    return "Discount value must be a positive number";
+  }
+
+  if (discountType === 'percent' && value > 100) {
+    return "The percentage reduction must be between 1 and 100";
+  }
+
+  return null;
+};
+
 export const createCoupon = async (req, res) => {
   try {
-    const { code, discountPercent, expiryDate, startDate, description } = req.body;
+    const { code, discountType, discountValue, expiryDate, startDate, description } = req.body;
 
-    if (!code || !discountPercent || !expiryDate || !startDate || !description) {
+    if (!code || !discountType || !discountValue || !expiryDate || !startDate || !description) {
       return res.status(400).json({ success: false, message: "Please fill in all fields" });
+    }
+
+    const discountError = validateDiscount(discountType, discountValue);
+    if (discountError) {
+      return res.status(400).json({ success: false, message: discountError });
     }
 
     const start = new Date(startDate);
@@ -21,14 +45,11 @@ export const createCoupon = async (req, res) => {
       return res.status(400).json({ success: false, message: "This code already exists" });
     }
 
-    if (discountPercent < 1 || discountPercent > 100) {
-      return res.status(400).json({ success: false, message: "The percentage reduction must be between 1 and 100" });
-    }
-
     const newCoupon = new Coupon({
       code: code.toUpperCase(),
       description,
-      discountPercent,
+      discountType,
+      discountValue: Number(discountValue),
       startDate: start,
       expiryDate: end
     });
@@ -42,7 +63,7 @@ export const createCoupon = async (req, res) => {
       entityType: ENTITY.COUPON,
       entityId: newCoupon._id,
       entityLabel: newCoupon.code,
-      after: { code: newCoupon.code, discountPercent, startDate, expiryDate },
+      after: { code: newCoupon.code, discountType, discountValue: Number(discountValue), startDate, expiryDate },
       req,
     });
 
@@ -50,6 +71,88 @@ export const createCoupon = async (req, res) => {
       success: true,
       message: `Coupon ${code.toUpperCase()} created successfully`,
       data: newCoupon
+    });
+
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const updateCoupon = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { code, discountType, discountValue, expiryDate, startDate, description } = req.body;
+
+    if (!code || !discountType || !discountValue || !expiryDate || !startDate || !description) {
+      return res.status(400).json({ success: false, message: "Please fill in all fields" });
+    }
+
+    const discountError = validateDiscount(discountType, discountValue);
+    if (discountError) {
+      return res.status(400).json({ success: false, message: discountError });
+    }
+
+    const start = new Date(startDate);
+    const end = new Date(expiryDate);
+
+    if (start >= end) {
+      return res.status(400).json({ success: false, message: "Start date must be before expiry date" });
+    }
+
+    const coupon = await Coupon.findById(id);
+    if (!coupon) {
+      return res.status(404).json({ success: false, message: "Coupon not found" });
+    }
+
+    const upperCode = code.toUpperCase();
+    if (upperCode !== coupon.code) {
+      const duplicate = await Coupon.findOne({ code: upperCode, _id: { $ne: id } });
+      if (duplicate) {
+        return res.status(400).json({ success: false, message: "This code already exists" });
+      }
+    }
+
+    const before = {
+      code: coupon.code,
+      description: coupon.description,
+      discountType: coupon.discountType,
+      discountValue: coupon.discountValue,
+      startDate: coupon.startDate,
+      expiryDate: coupon.expiryDate
+    };
+
+    coupon.code = upperCode;
+    coupon.description = description;
+    coupon.discountType = discountType;
+    coupon.discountValue = Number(discountValue);
+    coupon.startDate = start;
+    coupon.expiryDate = end;
+
+    await coupon.save();
+
+    logAction({
+      adminId: req.admin?._id || req.adminId,
+      adminName: req.admin?.name || "Admin",
+      action: ACTION.COUPON_UPDATE,
+      entityType: ENTITY.COUPON,
+      entityId: coupon._id,
+      entityLabel: coupon.code,
+      before,
+      after: {
+        code: coupon.code,
+        description: coupon.description,
+        discountType: coupon.discountType,
+        discountValue: coupon.discountValue,
+        startDate: coupon.startDate,
+        expiryDate: coupon.expiryDate
+      },
+      req,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: `Coupon ${coupon.code} updated successfully`,
+      data: coupon
     });
 
   } catch (error) {

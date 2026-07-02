@@ -2,6 +2,12 @@ import { Button } from 'react-bootstrap';
 import { BiSolidCoupon } from "react-icons/bi";
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import SortableTh from '@/components/SortableTh';
+import { formatCurrency } from '@/utils/currency';
+
+const formatDiscount = (item) =>
+  item.discountType === 'money'
+    ? formatCurrency(item.discountValue)
+    : `${item.discountValue}%`;
 
 const COLS = 7;
 
@@ -34,7 +40,7 @@ const CouponList = ({ couponsData, isLoading, sortKey, sortDir, onSort, onToggle
         <thead>
           <tr>
             <SortableTh label="Code / Info" sortKey="code" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0 rounded-start" />
-            <SortableTh label="Discount" sortKey="discountPercent" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0 text-center" />
+            <SortableTh label="Discount" sortKey="discountValue" currentSortKey={sortKey} currentDir={sortDir} onSort={onSort} className="border-0 text-center" />
             <th scope="col" className="border-0 text-center">Validity Period</th>
             <th scope="col" className="border-0 text-center">Usage</th>
             <th scope="col" className="border-0 text-center">Status</th>
@@ -64,7 +70,12 @@ const CouponList = ({ couponsData, isLoading, sortKey, sortDir, onSort, onToggle
                       {item.description}
                     </small>
                   </td>
-                  <td className='text-center'>{item.discountPercent}%</td>
+                  <td className='text-center'>
+                    <span className="fw-semibold">{formatDiscount(item)}</span>
+                    <span className={`badge ms-1 ${item.discountType === 'money' ? 'bg-warning bg-opacity-10 text-warning' : 'bg-info bg-opacity-10 text-info'}`}>
+                      {item.discountType === 'money' ? 'Fixed' : 'Percent'}
+                    </span>
+                  </td>
                   <td>
                     <div className="d-flex flex-column small">
                       <span>From: {start.toLocaleDateString('en-GB')}</span>
@@ -73,9 +84,6 @@ const CouponList = ({ couponsData, isLoading, sortKey, sortDir, onSort, onToggle
                   </td>
                   <td className='text-center'>
                     <span className="badge bg-blue">{item.usersUsed?.length || 0} used</span>
-                    {item.maxUsageLimit && (
-                      <span className="text-body-secondary small d-block">/ {item.maxUsageLimit} max</span>
-                    )}
                   </td>
                   <td className='text-center'>{statusText}</td>
                   <td>

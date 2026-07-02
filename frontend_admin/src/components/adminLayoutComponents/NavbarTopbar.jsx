@@ -7,7 +7,6 @@ import { Container } from 'react-bootstrap';
 import { IoMenu } from 'react-icons/io5';
 import { BsCalendar3, BsClock } from 'react-icons/bs';
 import { Link } from 'react-router-dom';
-import NotificationDropdown from './NotificationDropdown';
 
 const formatDateTime = (d) => ({
   weekday: d.toLocaleDateString('en-US', { weekday: 'short' }),
@@ -57,7 +56,6 @@ const NavbarTopbar = () => {
 
         <div className="d-flex align-items-center ms-auto">
           <ul className="navbar-nav flex-row align-items-center">
-            <NotificationDropdown className="ms-2 ms-md-3" />
             <ProfileDropdown className="ms-2 ms-md-3" />
           </ul>
         </div>

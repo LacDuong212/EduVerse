@@ -268,6 +268,21 @@ PERSONAS = [
 # Deterministic seed for reproducibility
 random.seed(42)
 
+# Flat pool of all known course ids (for cross-cluster exploration noise)
+ALL_COURSE_IDS = list(COURSE_INSTRUCTOR.keys())
+
+# Persona group index ranges (must match the PERSONAS ordering above)
+GROUP_RANGES = [(0, 8), (8, 16), (16, 23), (23, 30)]
+
+# Cross-cluster exploration: prob a persona enrolls outside its domain.
+# Realistic users explore — and this breaks the trivial intra-cluster
+# co-occurrence that otherwise inflates CF-only to ~0.99 recall.
+EXPLORE_PROB = 0.7
+
+# Number of cold-start users (few enrollments) to populate the cold stratum
+# so the cold-vs-warm analysis is statistically meaningful.
+N_COLD_USERS = 15
+
 
 def _random_email(name: str, idx: int) -> str:
     """Generate a unique email from name (strip all Vietnamese diacritics)."""
@@ -284,9 +299,19 @@ def _random_date(days_ago_max=90, days_ago_min=1):
     return datetime.utcnow() - timedelta(days=delta)
 
 
-def seed(dry_run=False):
-    """Insert synthetic users, students, and enrollments."""
+def seed(dry_run=False, diverse=False):
+    """Insert synthetic users, students, and enrollments.
+
+    diverse=True spreads enrollments much more across domains (higher explore
+    probability + more cross-domain courses + more cold users), thinning the
+    co-occurrence structure so CF is no longer artificially dominant. Used to
+    test how the hybrid behaves when data is less CF-friendly.
+    """
     database = db.get_db()
+
+    explore_prob = 1.0 if diverse else EXPLORE_PROB
+    explore_min, explore_max = (3, 5) if diverse else (1, 2)
+    n_cold = 25 if diverse else N_COLD_USERS
 
     users_to_insert = []
     students_to_insert = []
@@ -322,6 +347,17 @@ def seed(dry_run=False):
         n_secondary = max(1, int(len(persona["secondary"]) * random.uniform(0.5, 0.8)))
         secondary_sample = random.sample(persona["secondary"], n_secondary)
         enrolled_courses.extend(secondary_sample)
+
+        # Cross-cluster exploration: realistic users occasionally enroll outside
+        # their domain. Breaks trivial intra-cluster co-occurrence (CF=0.99 artifact).
+        own = set(persona["primary"]) | set(persona["secondary"])
+        others = [c for c in ALL_COURSE_IDS if c not in own]
+        if others and random.random() < explore_prob:
+            n_explore = random.randint(explore_min, explore_max)
+            enrolled_courses.extend(random.sample(others, min(n_explore, len(others))))
+
+        # Dedupe while preserving order
+        enrolled_courses = list(dict.fromkeys(enrolled_courses))
 
         # ── Student document ──
         students_to_insert.append({
@@ -363,8 +399,58 @@ def seed(dry_run=False):
                 "updatedAt": datetime.utcnow(),
             })
 
+    # ── Cold-start users: few enrollments, populate the cold stratum ──
+    # Each draws a coherent 2-course pair from a random domain, plus (sometimes)
+    # one cross-domain course — mimicking a brand-new learner with little history.
+    for ci in range(n_cold):
+        g_lo, g_hi = random.choice(GROUP_RANGES)
+        base = PERSONAS[random.randrange(g_lo, g_hi)]
+        pool = list(dict.fromkeys(base["primary"] + base["secondary"]))
+        if len(pool) < 2:
+            continue
+
+        cold_courses = random.sample(pool, 2)
+        # 30% of cold users also explore one cross-domain course (1 prior signal still)
+        if random.random() < 0.3:
+            others = [c for c in ALL_COURSE_IDS if c not in pool]
+            if others:
+                cold_courses.append(random.choice(others))
+
+        user_id = ObjectId()
+        name = f"Cold Learner {ci + 1}"
+        users_to_insert.append({
+            "_id": user_id,
+            "name": name,
+            "email": f"synthetic.cold{ci}@eduverse.test",
+            "bio": "", "website": "",
+            "socials": {"facebook": "", "instagram": "", "linkedin": "", "youtube": ""},
+            "pfpImg": "", "isVerified": True, "isActivated": True, "role": "student",
+            "verifyOtp": "", "verifyOtpExpireAt": 0,
+            "_synthetic": True, "_cold": True,
+            "createdAt": _random_date(30, 1), "updatedAt": datetime.utcnow(),
+        })
+        students_to_insert.append({
+            "_id": ObjectId(), "user": user_id,
+            "interests": base["interests"][:2],
+            "stats": {"totalCourses": len(cold_courses), "completedCourses": 0,
+                       "totalLectures": 0, "completedLectures": 0},
+            "_synthetic": True, "_cold": True,
+            "createdAt": _random_date(30, 1), "updatedAt": datetime.utcnow(),
+        })
+        for course_id in cold_courses:
+            instructor_id = COURSE_INSTRUCTOR.get(course_id)
+            if not instructor_id:
+                continue
+            enrollments_to_insert.append({
+                "_id": ObjectId(), "student": user_id,
+                "course": ObjectId(course_id), "instructor": ObjectId(instructor_id),
+                "status": "active", "enrolledAt": _random_date(20, 1),
+                "_synthetic": True, "_cold": True,
+                "createdAt": _random_date(20, 1), "updatedAt": datetime.utcnow(),
+            })
+
     # ── Summary ──
-    logger.info(f"Personas: {len(PERSONAS)}")
+    logger.info(f"Personas: {len(PERSONAS)} + {N_COLD_USERS} cold-start users")
     logger.info(f"Users to create: {len(users_to_insert)}")
     logger.info(f"Students to create: {len(students_to_insert)}")
     logger.info(f"Enrollments to create: {len(enrollments_to_insert)}")
@@ -454,12 +540,13 @@ def main():
     parser = argparse.ArgumentParser(description="Seed synthetic data for ML evaluation")
     parser.add_argument("--dry-run", action="store_true", help="Preview without inserting")
     parser.add_argument("--cleanup", action="store_true", help="Remove all synthetic data")
+    parser.add_argument("--diverse", action="store_true", help="Diverse/low-CF scenario (more cross-domain enrollments)")
     args = parser.parse_args()
 
     if args.cleanup:
         cleanup()
     else:
-        seed(dry_run=args.dry_run)
+        seed(dry_run=args.dry_run, diverse=args.diverse)
 
 
 if __name__ == "__main__":

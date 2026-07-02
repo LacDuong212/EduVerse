@@ -338,12 +338,8 @@ def predict(
     if not candidate_courses:
         return []
 
-    vectorizer = _cache["vectorizer"]
-    kmeans = _cache["kmeans"]
     trained_course_ids = _cache["course_ids"]
-    trained_course_vectors = _cache["course_vectors"]
     trained_bert_vectors = _cache["bert_vectors"]
-    course_clusters = _cache["course_clusters"]
     item_item = _cache["item_item"]
     id_to_idx = {cid: i for i, cid in enumerate(trained_course_ids)}
 
@@ -352,62 +348,37 @@ def predict(
     if not user_text.strip():
         return []
 
-    # ── Transform user profile to TF-IDF space (for content signal) ─────────
-    user_vector = vectorizer.transform([user_text])
-
-    # ── Encode user profile with BERT (for cluster signal) ──────────────────
+    # ── Encode user profile with BERT (for semantic similarity signal) ───────
     bert = _get_bert_model()
     user_bert_vector = bert.encode([user_text], show_progress_bar=False, normalize_embeddings=True)
 
-    # ── Find user's cluster (K-means on BERT space) ─────────────────────────
-    user_cluster = kmeans.predict(user_bert_vector)[0]
+    # ── Score each candidate: CF (collaborative) + BERT-cosine (semantic) + popularity ──
+    # NOTE: signals are combined via GATING (below), not weighted fusion. Experiments
+    # showed fixed linear fusion let dense/low-precision signals outvote the sparse,
+    # high-precision CF signal and degraded accuracy; gating routes to the right
+    # technique per context (mixture-of-experts). K-means/TF-IDF are no longer used
+    # for scoring (kept upstream for optional diversity/analysis).
+    uvec = user_bert_vector[0]
+    u_norm = float(np.linalg.norm(uvec)) + 1e-9
 
-    # ── Build candidate TF-IDF vectors (for content scoring) ────────────────
-    candidate_texts = [_build_course_text(c) for c in candidate_courses]
-    candidate_vectors = vectorizer.transform(candidate_texts)
-
-    # ── Get candidate clusters from precomputed labels ───────────────────────────
-    candidate_clusters = []
-
+    scored = []
     for course in candidate_courses:
         cid = str(course["_id"])
-        idx = id_to_idx.get(cid)
 
-        if idx is not None:
-            candidate_clusters.append(course_clusters[idx])
-        else:
-            # Safety fallback for new courses not included in last training run
-            text = _build_course_text(course)
-            emb = bert.encode([text], show_progress_bar=False, normalize_embeddings=True)
-            candidate_clusters.append(kmeans.predict(emb)[0])
-
-    candidate_clusters = np.array(candidate_clusters)
-
-    # ── Score each candidate across all 4 signals ────────────────────────────
-    scored = []
-    for i, course in enumerate(candidate_courses):
-        cid = str(course["_id"])
-
-        # Signal 1: CLUSTER proximity (BERT-based K-Means)
-        # Same cluster → 1.0; different → decaying by BERT centroid distance
-        if candidate_clusters[i] == user_cluster:
-            cluster_score = 1.0
-        else:
-            # Distance between user centroid and candidate centroid (BERT space)
-            user_centroid = kmeans.cluster_centers_[user_cluster]
-            cand_centroid = kmeans.cluster_centers_[candidate_clusters[i]]
-            dist = np.linalg.norm(user_centroid - cand_centroid)
-            cluster_score = 1.0 / (1.0 + dist)  # Sigmoid-like decay
-
-        # Signal 2: CONTENT similarity (TF-IDF cosine — best accuracy)
-        content_score = float(
-            cosine_similarity(user_vector, candidate_vectors[i:i + 1])[0, 0]
-        )
-
-        # Signal 3: COLLABORATIVE FILTERING (Jaccard)
+        # Collaborative signal — Jaccard item-item (sparse, high precision)
         cf_score = _compute_cf_score(user_signals, cid, item_item)
 
-        # Signal 4: POPULARITY prior
+        # Semantic signal — cosine between user & course BERT embeddings (deep learning)
+        idx = id_to_idx.get(cid)
+        if idx is not None:
+            cvec = trained_bert_vectors[idx]
+        else:
+            cvec = bert.encode([_build_course_text(course)],
+                               show_progress_bar=False,
+                               normalize_embeddings=True)[0]
+        bert_score = float(np.dot(uvec, cvec) / (u_norm * (np.linalg.norm(cvec) + 1e-9)))
+
+        # Popularity prior — cold-start fallback / tie-break
         enrolled = course.get("studentsEnrolled", 0) or 0
         rating_data = course.get("rating", {})
         avg_rating = (
@@ -421,40 +392,29 @@ def predict(
             {
                 "courseId": cid,
                 "scores": {
-                    "cluster": float(round(float(cluster_score), 4)),
-                    "content": float(round(float(content_score), 4)),
                     "cf": float(round(float(cf_score), 4)),
+                    "bert": float(round(float(bert_score), 4)),
                     "popularity": float(round(float(pop_score), 4)),
                 },
-                "cluster": int(candidate_clusters[i]),
-                "userCluster": int(user_cluster),
             }
         )
 
-    # ── Min-max normalize each signal ────────────────────────────────────────
-    for key in ["cluster", "content", "cf", "popularity"]:
-        values = [s["scores"][key] for s in scored]
-        min_v, max_v = min(values), max(values)
-        span = max_v - min_v
-        for s in scored:
-            if span == 0:
-                s["scores"][key] = 1.0 if max_v > 0 else 0.0
-            else:
-                s["scores"][key] = (s["scores"][key] - min_v) / span
+    # ── Gating fusion (mixture-of-experts) ───────────────────────────────────
+    # Tier 1: candidates WITH collaborative signal (cf>0) → trust CF (BERT tie-break).
+    # Tier 2: cf==0 (CF blind — cold-start / new course) → rank by BERT semantic
+    #         similarity, popularity tie-break. Tier 1 always ranks above Tier 2.
+    tier1 = [s for s in scored if s["scores"]["cf"] > 0]
+    tier2 = [s for s in scored if s["scores"]["cf"] == 0]
+    tier1.sort(key=lambda s: (s["scores"]["cf"], s["scores"]["bert"]), reverse=True)
+    tier2.sort(key=lambda s: (s["scores"]["bert"], s["scores"]["popularity"]), reverse=True)
 
-    # ── Weighted fusion ──────────────────────────────────────────────────────
-    for s in scored:
-        final_score = (
-            W_CLUSTER * float(s["scores"]["cluster"])
-            + W_CONTENT * float(s["scores"]["content"])
-            + W_CF * float(s["scores"]["cf"])
-            + W_POPULARITY * float(s["scores"]["popularity"])
-        )
-        s["score"] = float(round(final_score, 4))
+    ranked = tier1 + tier2
+    for s in ranked:
+        # Transparency score: CF when present, else semantic similarity
+        cf_v = s["scores"]["cf"]
+        s["score"] = float(round(cf_v if cf_v > 0 else s["scores"]["bert"], 4))
 
-    # ── Sort and return top-K ────────────────────────────────────────────────
-    scored.sort(key=lambda x: x["score"], reverse=True)
-    return scored[:top_k]
+    return ranked[:top_k]
 
 
 def _build_user_profile_text(user_signals: dict, candidate_courses: list) -> str:
