@@ -146,7 +146,7 @@ const CourseInfo = ({ col = 6, course }) => {
                   <li className="list-group-item">
                     <span>Average Rating:</span>
                     <span className="h6 mb-0">
-                      {course?.ratingCount > 0 ? course?.ratingTotal/course?.ratingCount : 0}
+                      {course?.ratingCount > 0 ? (course?.ratingTotal/course?.ratingCount)?.toFixed(1) : 0}
                     </span>
                   </li>
                   <li className="list-group-item">
