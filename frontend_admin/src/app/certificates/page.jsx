@@ -173,7 +173,7 @@ export default function AdminCertificatesPage() {
                           <h6 className="mb-0 ms-3">{c.student?.name || "—"}</h6>
                         </div>
                       </td>
-                      <td className="text-body-secondary">{c.student?.email || "—"}</td>
+                      <td><span className="opacity-75">{c.student?.email || "—"}</span></td>
                       <td>{c.courseTitle}</td>
                       <td>{c.instructorName || "—"}</td>
                       <td className="text-center">{formatDate(c.issuedAt)}</td>

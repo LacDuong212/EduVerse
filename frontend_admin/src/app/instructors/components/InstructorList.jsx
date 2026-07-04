@@ -1,6 +1,6 @@
 import { Button } from 'react-bootstrap';
 import { FaUserTie } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import SortableTh from '@/components/SortableTh';
 
 const COLS = 7;
@@ -48,8 +48,6 @@ const InstructorList = ({ instructorsData, isLoading, sortKey, sortDir, onSort, 
           instructorsData.map((item) => (
             <tr
               key={item._id}
-              onClick={() => navigate(`/instructors/${item._id}`)}
-              style={{ cursor: 'pointer' }}
             >
               <td>
                 <div className="d-flex align-items-center">
@@ -62,26 +60,25 @@ const InstructorList = ({ instructorsData, isLoading, sortKey, sortDir, onSort, 
                       </div>
                     )}
                   </div>
-                  <h6 className="mb-0 ms-3">{item.name}</h6>
+                  <h6 className="mb-0 ms-3">
+                    <Link
+                      to={`/instructors/${item?._id || ""}`}
+                      className=""
+                    >
+                      {item.name || "(No title)"}
+                    </Link>
+                  </h6>
                 </div>
               </td>
-              <td className="text-body-secondary">{item.email || "—"}</td>
+              <td>{item.email || "—"}</td>
               <td className='text-center'>
                 {
-                  new Date(item.createdAt).toLocaleString('en-GB', {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit"
-                  })
+                  new Date(item.createdAt).toLocaleString('en-GB', { year: "numeric", month: "2-digit", day: "2-digit" })
                 }
               </td>
               <td className='text-center'>
                 {
-                  new Date(item.updatedAt).toLocaleString('en-GB', {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit"
-                  })
+                  new Date(item.updatedAt).toLocaleString('en-GB', { year: "numeric", month: "2-digit", day: "2-digit" })
                 }
               </td>
               <td className='text-center'>
@@ -117,4 +114,5 @@ const InstructorList = ({ instructorsData, isLoading, sortKey, sortDir, onSort, 
     </table>
   </div>;
 };
+
 export default InstructorList;

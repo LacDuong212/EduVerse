@@ -43,12 +43,12 @@ const InstructorDetailsPage = () => {
       <PageMetaData title="Instructor Details" />
       <Container className="py-5">
         <Row className="g-5">
-          <Col lg={4}>
+          <Col sm={12} lg={4}>
             <Row className="g-4">
-              <Col md={6} lg={12}>
+              <Col sm={6} lg={12}>
                 <InstructorAvatarCard data={{ ...instructor, ...stats }} />
               </Col>
-              <Col md={6} lg={12}>
+              <Col sm={6} lg={12}>
                 <EducationAndSkillsCard
                   educationList={instructor?.education || []}
                   skillsList={instructor?.skills || []}
@@ -56,7 +56,7 @@ const InstructorDetailsPage = () => {
               </Col>
             </Row>
           </Col>
-          <Col lg={8}>
+          <Col sm={12} lg={8}>
             <Row>
               {hasNoData ? (
                 <div className="p-3">No instructor information available.</div>

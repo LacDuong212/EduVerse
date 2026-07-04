@@ -141,13 +141,13 @@ function LogRow({ log }) {
             </button>
           )}
         </td>
-        <td className="fw-semibold">{log.adminName || "—"}</td>
-        <td className="text-body-secondary">{log.adminEmail || "—"}</td>
+        <td><h6 className="mb-0">{log.adminName || "—"}</h6></td>
+        <td><span className="opacity-75">{log.adminEmail || "—"}</span></td>
         <td>
-          <span className="text-body-secondary">
+          <span className="opacity-75">
             {log.entityType ? log.entityType.charAt(0).toUpperCase() + log.entityType.slice(1).toLowerCase() : "—"}
           </span>
-          <span className="text-body-secondary mx-1">/</span>
+          <span className="opacity-50 mx-1">/</span>
           <span>{log.entityLabel || "—"}</span>
         </td>
         <td className="text-center">
@@ -335,10 +335,10 @@ export default function AuditLogsPage() {
                     <th className="border-0 rounded-start" style={{ width: 28 }} />
                     <th className="border-0">Admin</th>
                     <th className="border-0">Email</th>
-                    <th className="border-0">Impact</th>
-                    <th className="border-0">Action</th>
+                    <th className="border-0 text-center">Impact</th>
+                    <th className="border-0 text-center">Action</th>
                     <th className="border-0">Reason</th>
-                    <th className="border-0 rounded-end">Timestamp</th>
+                    <th className="border-0 rounded-end text-center">Timestamp</th>
                   </tr>
                 </thead>
                 <tbody>

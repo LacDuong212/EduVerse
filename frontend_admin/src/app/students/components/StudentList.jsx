@@ -59,24 +59,12 @@ const StudentList = ({ studentsData, isLoading, sortKey, sortDir, onSort, onBloc
                   <h6 className="mb-0 ms-3">{item.name}</h6>
                 </div>
               </td>
-              <td className="text-body-secondary">{item.email || "—"}</td>
+              <td>{item.email || "—"}</td>
               <td>
-                {
-                  new Date(item.createdAt).toLocaleString('en-GB', {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit"
-                  })
-                }
+                { new Date(item.createdAt).toLocaleString('en-GB', { year: "numeric", month: "2-digit", day: "2-digit"}) }
               </td>
               <td>
-                {
-                  new Date(item.updatedAt).toLocaleString('en-GB', {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit"
-                  })
-                }
+                { new Date(item.updatedAt).toLocaleString('en-GB', { year: "numeric", month: "2-digit", day: "2-digit"}) }
               </td>
               <td className="text-center">
                 <span className={`badge text-bg-${item.isVerified ? 'success' : 'warning'}`}>
@@ -103,7 +91,7 @@ const StudentList = ({ studentsData, isLoading, sortKey, sortDir, onSort, onBloc
                     </td>
                 )
                 : (
-                  <td>
+                  <td className="text-center">
                     <Button variant="danger-soft" size="sm" className="mb-0" onClick={() => onDelete(item._id)}>
                       Remove
                     </Button>
@@ -124,4 +112,5 @@ const StudentList = ({ studentsData, isLoading, sortKey, sortDir, onSort, onBloc
     </table>
   </div>;
 };
+
 export default StudentList;

@@ -263,7 +263,7 @@ export default function AdminPayoutsPage() {
                           <h6 className="mb-0 ms-3">{p.instructor?.name || "—"}</h6>
                         </div>
                       </td>
-                      <td className="text-body-secondary">{p.instructor?.email || "—"}</td>
+                      <td><span className="opacity-75">{p.instructor?.email || "—"}</span></td>
                       <td className="fw-semibold text-info text-end">{formatCurrency(p.amount)}</td>
                       <td>
                         <div className="font-monospace">{p.bankInfo?.bankName}</div>
@@ -277,9 +277,7 @@ export default function AdminPayoutsPage() {
                       </td>
                       <td>{formatDate(p.createdAt)}</td>
                       <td>{formatDate(p.processedAt)}</td>
-                      <td style={{ maxWidth: 160 }}>
-                        {p.adminNote || "—"}
-                      </td>
+                      <td style={{ maxWidth: 160 }}><span className="opacity-75">{p.adminNote || "—"}</span></td>
                       <td className="text-center">
                         {p.status === "pending" ? (
                           <Button variant="primary-soft" size="sm" onClick={() => setActivePayout(p)}>

@@ -78,7 +78,7 @@ export default function CertificateVerifyPage() {
     <Container className="py-5">
       <PageMetaData title={`Certificate — ${cert.courseTitle}`} />
 
-      <div className="cert-frame">
+      <div className="cert-frame" style={{ maxHeight: 600 }}>
         {/* Decorative blue & gold geometry (top-left + bottom-left) */}
         <div className="sq sq-navy-dark tl1" />
         <div className="sq sq-navy tl2" />
@@ -133,10 +133,10 @@ export default function CertificateVerifyPage() {
       </div>
 
       <div className="d-flex justify-content-center gap-3 mt-4 cert-actions">
-        <Button variant="primary" onClick={shareToLinkedIn}>
+        <Button variant="primary" className="mb-0" onClick={shareToLinkedIn}>
           <FaLinkedin className="me-2" /> Share on LinkedIn
         </Button>
-        <Button variant="outline-secondary" onClick={() => window.print()}>
+        <Button variant="outline-orange" className="mb-0" onClick={() => window.print()}>
           <FaPrint className="me-2" /> Print / Save PDF
         </Button>
       </div>

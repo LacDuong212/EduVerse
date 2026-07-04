@@ -69,9 +69,7 @@ const InstructorRequestRow = ({ item, onAccept, onReject }) => {
           </div>
         </div>
       </td>
-      <td className="text-center text-sm-start">
-        <h6 className="mb-0 fw-normal">{item.email}</h6>
-      </td>
+      <td className="text-center text-sm-start">{item.email}</td>
       <td className="text-center">
         {new Date(item.createdAt).toLocaleString('en-GB', {
           year: "numeric",
