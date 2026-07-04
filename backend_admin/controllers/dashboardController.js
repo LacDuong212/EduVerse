@@ -215,7 +215,7 @@ export const getTopCoursesChart = async (req, res) => {
   try {
     const topCourses = await Course.find(
       { isDeleted: false, status: 'live' },
-      { title: 1, studentsEnrolled: 1, 'rating.average': 1 }
+      { title: 1, studentsEnrolled: 1, rating: 1 }
     )
       .sort({ studentsEnrolled: -1 })
       .limit(10)
@@ -223,7 +223,12 @@ export const getTopCoursesChart = async (req, res) => {
 
     const categories = topCourses.map(c => c.title.length > 38 ? c.title.slice(0, 35) + '...' : c.title);
     const enrollmentData = topCourses.map(c => c.studentsEnrolled);
-    const ratingData = topCourses.map(c => parseFloat((c.rating?.average || 0).toFixed(1)));
+    // rating is stored as { count, total, stars } — average is derived, not a field.
+    const ratingData = topCourses.map(c => {
+      const count = c.rating?.count || 0;
+      const total = c.rating?.total || 0;
+      return count > 0 ? parseFloat((total / count).toFixed(1)) : 0;
+    });
 
     res.json({
       success: true,

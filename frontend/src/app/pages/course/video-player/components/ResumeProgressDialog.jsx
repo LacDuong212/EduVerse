@@ -38,24 +38,24 @@ export default function ResumeProgressDialog({
   return (
     <Modal show={show} onHide={onClose} centered>
       <Modal.Header closeButton>
-        <Modal.Title>Tiếp tục học?</Modal.Title>
+        <Modal.Title>Resume learning?</Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
         <p className="mb-2">
-          Bạn đã học bài này đến <strong>{formatTime(saved)}</strong>
+          You watched this lesson up to <strong>{formatTime(saved)}</strong>
           {duration > 0 && (
             <>
               {" "}
-              / <strong>{formatTime(duration)}</strong>, khoảng{" "}
+              / <strong>{formatTime(duration)}</strong>, about{" "}
               <strong>{percent}%</strong>.
             </>
           )}
         </p>
 
         <p className="mb-3">
-          Bạn muốn <strong>tiếp tục từ vị trí này</strong> hay{" "}
-          <strong>bắt đầu lại từ đầu</strong>?
+          Would you like to <strong>continue from where you left off</strong> or{" "}
+          <strong>start over from the beginning</strong>?
         </p>
 
         {duration > 0 && <ProgressBar now={percent} label={`${percent}%`} />}
@@ -63,11 +63,11 @@ export default function ResumeProgressDialog({
 
       <Modal.Footer>
         <Button variant="outline-danger" onClick={onRestart}>
-          Học lại từ đầu
+          Start over
         </Button>
 
         <Button variant="primary" onClick={onResume}>
-          Tiếp tục học
+          Resume
         </Button>
       </Modal.Footer>
     </Modal>
