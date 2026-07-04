@@ -4,10 +4,13 @@ import { FaEdit, FaTrash } from 'react-icons/fa';
 import SortableTh from '@/components/SortableTh';
 import { formatCurrency } from '@/utils/currency';
 
-const formatDiscount = (item) =>
-  item.discountType === 'money'
-    ? formatCurrency(item.discountValue)
-    : `${item.discountValue}%`;
+const formatDiscount = (item) => {
+  // Legacy coupons stored the percentage under `discountPercent` without a
+  // `discountType`; fall back to it so old data doesn't render "undefined%".
+  const value = item.discountValue ?? item.discountPercent;
+  if (value == null) return '—';
+  return item.discountType === 'money' ? formatCurrency(value) : `${value}%`;
+};
 
 const COLS = 7;
 
