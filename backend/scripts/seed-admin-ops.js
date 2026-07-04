@@ -52,7 +52,7 @@ const daysAgo = (d) => new Date(Date.now() - d * 86400000);
 
 const BANKS = ["Vietcombank", "Techcombank", "BIDV", "VietinBank", "MB Bank", "ACB", "VPBank", "Sacombank", "TPBank", "Agribank"];
 const VN_MONTHS = ["01", "02", "03", "04", "05", "06", "07"];
-const periodLabel = () => `Tháng ${pick(VN_MONTHS)}/2026`;
+const periodLabel = () => `Month ${pick(VN_MONTHS)}/2026`;
 const bankInfo = (name) => ({
   bankName: pick(BANKS),
   accountNumber: String(rint(1000000000, 9999999999)),
@@ -267,7 +267,7 @@ async function seed() {
         instructor: iu._id, amount,
         bankInfo: bankByUser.get(String(iu._id)) || bankInfo(iu.name),
         status, periodLabel: periodLabel(),
-        adminNote: status === "rejected" ? "Thông tin tài khoản chưa khớp, vui lòng cập nhật." : (status === "paid" ? "Đã chuyển khoản." : null),
+        adminNote: status === "rejected" ? "Account details do not match, please update them." : (status === "paid" ? "Bank transfer completed." : null),
         processedAt: status === "pending" ? null : new Date(created.getTime() + rint(1, 7) * 86400000),
         isDeleted: false,
         createdAt: created, updatedAt: new Date(),
@@ -292,32 +292,32 @@ async function seed() {
 
   // enrollment notifications (a subset)
   for (const e of sample(enrolls, Math.min(enrolls.length, 60))) {
-    pushNoti(e.student, TYPE_ENUM.succeeded, `Bạn đã đăng ký khóa học "${courseTitle.get(String(e.course)) || "khóa học"}" thành công.`, e.enrolledAt || daysAgo(rint(1, 60)));
+    pushNoti(e.student, TYPE_ENUM.succeeded, `You have successfully enrolled in the course "${courseTitle.get(String(e.course)) || "the course"}".`, e.enrolledAt || daysAgo(rint(1, 60)));
   }
   // completion + certificate notifications
   for (const p of progs.filter((x) => x.isCompleted)) {
-    pushNoti(p.user, TYPE_ENUM.approved, `Chúc mừng! Bạn đã hoàn thành khóa học "${courseTitle.get(String(p.course)) || "khóa học"}" và nhận chứng chỉ.`, daysAgo(rint(1, 30)));
+    pushNoti(p.user, TYPE_ENUM.approved, `Congratulations! You have completed the course "${courseTitle.get(String(p.course)) || "the course"}" and earned a certificate.`, daysAgo(rint(1, 30)));
   }
   // streak milestones
   for (const s of streaks) {
     if (s.longestStreak >= 3)
-      pushNoti(s.user, TYPE_ENUM.info, `Tuyệt vời! Bạn đang giữ chuỗi học ${s.currentStreak} ngày liên tiếp (kỷ lục ${s.longestStreak} ngày). Tiếp tục nhé!`, daysAgo(rint(0, 7)));
+      pushNoti(s.user, TYPE_ENUM.info, `Awesome! You're on a ${s.currentStreak}-day learning streak (record: ${s.longestStreak} days). Keep it up!`, daysAgo(rint(0, 7)));
   }
   // instructor payout notifications (correspond to payouts created above)
   for (const p of payouts) {
     if (p.status === "paid")
-      pushNoti(p.instructor, TYPE_ENUM.succeeded, `Yêu cầu rút tiền ${p.amount.toLocaleString("vi-VN")}đ (${p.periodLabel}) đã được thanh toán.`, p.processedAt);
+      pushNoti(p.instructor, TYPE_ENUM.succeeded, `Your payout request of ${p.amount.toLocaleString("vi-VN")}đ (${p.periodLabel}) has been paid.`, p.processedAt);
     else if (p.status === "rejected")
-      pushNoti(p.instructor, TYPE_ENUM.rejected, `Yêu cầu rút tiền ${p.amount.toLocaleString("vi-VN")}đ (${p.periodLabel}) bị từ chối: ${p.adminNote}`, p.processedAt);
+      pushNoti(p.instructor, TYPE_ENUM.rejected, `Your payout request of ${p.amount.toLocaleString("vi-VN")}đ (${p.periodLabel}) was rejected: ${p.adminNote}`, p.processedAt);
   }
   // instructor application notifications (approved / pending / rejected)
   for (const ev of instrEvents) {
     if (ev.kind === "approved")
-      pushNoti(ev.userId, TYPE_ENUM.approved, "Chúc mừng! Đơn đăng ký giảng viên của bạn đã được duyệt. Bạn có thể bắt đầu tạo khóa học.", ev.at);
+      pushNoti(ev.userId, TYPE_ENUM.approved, "Congratulations! Your instructor application has been approved. You can start creating courses.", ev.at);
     else if (ev.kind === "pending")
-      pushNoti(ev.userId, TYPE_ENUM.info, "Chúng tôi đã nhận được đơn đăng ký giảng viên của bạn và đang xem xét. Vui lòng chờ trong ít ngày.", ev.at);
+      pushNoti(ev.userId, TYPE_ENUM.info, "We have received your instructor application and are reviewing it. Please allow a few days.", ev.at);
     else
-      pushNoti(ev.userId, TYPE_ENUM.rejected, "Cảm ơn bạn đã quan tâm. Sau khi xem xét, đơn đăng ký giảng viên của bạn chưa được chấp thuận lần này.", ev.at);
+      pushNoti(ev.userId, TYPE_ENUM.rejected, "Thank you for your interest. After review, your instructor application was not approved at this time.", ev.at);
   }
 
   // ═══════════ 5. AUDIT LOGS ═══════════
