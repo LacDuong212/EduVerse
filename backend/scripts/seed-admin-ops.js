@@ -31,6 +31,7 @@ import Notification, { TYPE_ENUM } from "#modules/notification/notification.mode
 import CourseProgress from "#modules/learning/course-progress.model.js";
 import Streak from "#modules/streak/streak.model.js";
 import Enrollment from "#modules/enrollment/enrollment.model.js";
+import Order, { STATUS_ENUM as ORDER_STATUS } from "#modules/order/order.model.js";
 
 const ARGV = process.argv.slice(2);
 const DRY_RUN = ARGV.includes("--dry-run");
@@ -125,7 +126,7 @@ async function seed() {
   // ── load real entities ──
   const [courses, instructorDocs, existingAdmins] = await Promise.all([
     Course.find({ isDeleted: false }).select("_id title status instructor").lean(),
-    Instructor.find({}).select("user bankAccounts").lean(),
+    Instructor.find({}).select("user bankAccounts myCourses").lean(),
     adminsCol.find({}).project({ name: 1, email: 1 }).toArray(),
   ]);
   const instructorUserIds = instructorDocs.map((i) => i.user).filter(Boolean);
@@ -254,25 +255,61 @@ async function seed() {
   });
 
   // ═══════════ 3. PAYOUTS ═══════════
+  // Amounts must respect real earnings so total withdrawn (paid) never exceeds
+  // total earning (= Σ completed-order pricePaid × 0.8 over the instructor's courses).
+  const NET_PROFIT = 0.8, UNIT = 100000;
+  const floor100k = (x) => Math.floor(x / UNIT) * UNIT;
+  const mkPayout = (userId, name, status, amount, created) => ({
+    _id: new mongoose.Types.ObjectId(),
+    instructor: userId, amount,
+    bankInfo: bankByUser.get(String(userId)) || bankInfo(name),
+    status, periodLabel: periodLabel(),
+    adminNote: status === "rejected" ? "Account details do not match, please update them." : (status === "paid" ? "Bank transfer completed." : null),
+    processedAt: status === "pending" ? null : new Date(created.getTime() + rint(1, 7) * 86400000),
+    isDeleted: false,
+    createdAt: created, updatedAt: new Date(),
+  });
+
   const payouts = [];
-  for (const iu of instrUsers) {
-    const n = rint(4, 10); // scaled up + varied per instructor
-    for (let k = 0; k < n; k++) {
-      const status = pick(["paid", "paid", "paid", "pending", "rejected"]);
-      const created = daysAgo(rint(5, 200));
-      // wide spread: most small-mid, a few very large
-      const amount = (chance(0.15) ? rint(150, 400) : rint(3, 120)) * 100000; // 300k – 40M VND
-      const p = {
-        _id: new mongoose.Types.ObjectId(),
-        instructor: iu._id, amount,
-        bankInfo: bankByUser.get(String(iu._id)) || bankInfo(iu.name),
-        status, periodLabel: periodLabel(),
-        adminNote: status === "rejected" ? "Account details do not match, please update them." : (status === "paid" ? "Bank transfer completed." : null),
-        processedAt: status === "pending" ? null : new Date(created.getTime() + rint(1, 7) * 86400000),
-        isDeleted: false,
-        createdAt: created, updatedAt: new Date(),
-      };
-      payouts.push(p);
+  for (const idoc of instructorDocs) {
+    const iu = instrById.get(String(idoc.user));
+    if (!iu) continue;
+
+    const courseIds = idoc.myCourses || [];
+    let earning = 0;
+    if (courseIds.length) {
+      const agg = await Order.aggregate([
+        { $match: { status: ORDER_STATUS.completed, "courses.course": { $in: courseIds } } },
+        { $unwind: "$courses" },
+        { $match: { "courses.course": { $in: courseIds } } },
+        { $group: { _id: null, total: { $sum: { $multiply: ["$courses.pricePaid", NET_PROFIT] } } } },
+      ]);
+      earning = Math.round(agg[0]?.total ?? 0);
+    }
+    // No meaningful balance → no payout history (app blocks withdrawals with 0 balance)
+    if (earning < UNIT) continue;
+
+    // Withdraw ~40–60% of lifetime earnings across a few paid payouts
+    const targetPaid = floor100k(earning * (chance(0.5) ? 0.4 : 0.6));
+    let units = Math.floor(targetPaid / UNIT);
+    const nPaid = Math.max(1, Math.min(4, units));
+    const base = Math.floor(units / nPaid), rem = units % nPaid;
+    let paidSum = 0;
+    for (let k = 0; k < nPaid; k++) {
+      const amt = (base + (k < rem ? 1 : 0)) * UNIT;
+      paidSum += amt;
+      payouts.push(mkPayout(iu._id, iu.name, "paid", amt, daysAgo(rint(5, 200))));
+    }
+
+    // Optionally one pending request for the remaining available balance
+    const available = earning - paidSum;
+    if (available >= UNIT && chance(0.5)) {
+      payouts.push(mkPayout(iu._id, iu.name, "pending", floor100k(available), daysAgo(rint(1, 15))));
+    }
+    // Optionally one historical rejected request (does not affect balance) ≤ earning
+    if (chance(0.4)) {
+      const amt = Math.max(UNIT, floor100k(earning * (rint(2, 8) / 10)));
+      payouts.push(mkPayout(iu._id, iu.name, "rejected", amt, daysAgo(rint(10, 180))));
     }
   }
 
