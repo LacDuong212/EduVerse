@@ -1,192 +1,240 @@
-# 🎓 EDUVERSE  
-### NỀN TẢNG KHÓA HỌC TRỰC TUYẾN ỨNG DỤNG AI  
-*(Phát triển bằng công nghệ MERN Stack)*  
+# 🎓 EDUVERSE
+### NỀN TẢNG KHÓA HỌC TRỰC TUYẾN ỨNG DỤNG AI
+*(Phát triển bằng MERN Stack + Microservice ML)*
 
 ---
 
-## 🧭 Giới thiệu đề tài  
+## 🧭 Giới thiệu đề tài
 
-Trong bối cảnh giáo dục trực tuyến ngày càng phát triển, nhu cầu xây dựng các nền tảng học tập thông minh, dễ sử dụng và có khả năng cá nhân hóa trải nghiệm học tập trở nên cấp thiết.  
+Trong bối cảnh giáo dục trực tuyến ngày càng phát triển, nhu cầu xây dựng các nền tảng học tập thông minh, dễ sử dụng và có khả năng cá nhân hóa trải nghiệm học tập trở nên cấp thiết.
 
-**EduVerse** được phát triển với mục tiêu tạo ra một **nền tảng học trực tuyến thông minh** giúp người học và giảng viên có thể tương tác, chia sẻ và học tập hiệu quả thông qua các tính năng hiện đại và sự hỗ trợ từ **Trí tuệ nhân tạo (AI)**.  
-
----
-
-## 🎯 Mục tiêu dự án  
-
-- Xây dựng hệ thống học trực tuyến hoàn chỉnh, hỗ trợ ba nhóm người dùng: học viên, giảng viên và quản trị viên.  
-- Ứng dụng **AI** để gợi ý khóa học, đánh giá tiến độ học và cá nhân hóa trải nghiệm học tập.  
-- Phát triển bằng **MERN Stack** (MongoDB, ExpressJS, ReactJS, NodeJS) nhằm đảm bảo hiệu năng, dễ mở rộng và dễ bảo trì.  
-- Thiết kế giao diện trực quan, thân thiện, có khả năng hoạt động trên nhiều thiết bị.  
+**EduVerse** được phát triển với mục tiêu tạo ra một **nền tảng học trực tuyến thông minh** giúp người học và giảng viên có thể tương tác, chia sẻ và học tập hiệu quả thông qua các tính năng hiện đại và sự hỗ trợ từ **Trí tuệ nhân tạo (AI)**.
 
 ---
 
-## 🔧 Công nghệ sử dụng  
+## 🎯 Mục tiêu dự án
 
-| Công nghệ | Mô tả |
-|------------|--------|
-| **ReactJS** | Xây dựng giao diện người dùng (frontend) |
-| **NodeJS + ExpressJS** | Xử lý logic và xây dựng RESTful API |
-| **MongoDB** | Lưu trữ dữ liệu người dùng, khóa học, tiến trình học |
-| **JWT (JSON Web Token)** | Xác thực và phân quyền người dùng |
-| **Cloudinary API** | Lưu trữ hình ảnh và video học liệu |
-| **Bootstrap 5** | Xây dựng giao diện thân thiện, hiện đại |
-| **AI/ML (Machine Learning)** | Gợi ý khóa học và phân tích hành vi học tập |
+- Xây dựng hệ thống học trực tuyến hoàn chỉnh, hỗ trợ ba nhóm người dùng: **học viên**, **giảng viên** và **quản trị viên**.
+- Ứng dụng **AI** để gợi ý khóa học, tạo nội dung bài giảng, đánh giá năng lực (skill radar) và cá nhân hóa trải nghiệm học tập.
+- Phát triển trên nền **MERN Stack** kết hợp **microservice ML (Python/FastAPI)** nhằm đảm bảo hiệu năng, dễ mở rộng và dễ bảo trì.
+- Thiết kế giao diện trực quan, thân thiện, responsive trên nhiều thiết bị.
 
 ---
 
-## 🧩 Tính năng chính  
+## 🏛️ Kiến trúc hệ thống
 
-### 👨‍🎓 Học viên  
-- Đăng ký, đăng nhập, chỉnh sửa hồ sơ cá nhân  
-- Xem danh sách khóa học và nội dung chi tiết  
-- Theo dõi tiến độ và kết quả học tập  
-- Nhận gợi ý khóa học phù hợp bằng AI  
+EduVerse gồm **5 service tách biệt** dùng chung một MongoDB database:
 
-### 👩‍🏫 Giảng viên  
-- Tạo mới và quản lý khóa học của mình  
-- Cập nhật nội dung bài giảng, video và tài liệu học  
-- Theo dõi số lượng học viên và mức độ hoàn thành  
+| Service | Vai trò | Công nghệ | Port (dev) |
+|---|---|---|---|
+| `backend/` | API chính cho học viên + giảng viên + public | Node.js + Express (module MVC) | **5001** |
+| `backend_admin/` | API riêng cho quản trị viên (duyệt, thống kê, payout, audit log) | Node.js + Express (flat MVC) | **5000** |
+| `frontend/` | Web app chính (học viên + giảng viên + public) | React 18 + Vite | **5173** |
+| `frontend_admin/` | Web app riêng cho quản trị viên | React 19 + Vite 7 | **5174** |
+| `ml_service/` | Microservice gợi ý khóa học & phân tích | Python + FastAPI | **5002** |
 
-### 🛠️ Quản trị viên  
-- Quản lý người dùng (giảng viên, học viên)  
-- Duyệt, chỉnh sửa hoặc xóa khóa học  
-- Theo dõi hoạt động hệ thống và thống kê dữ liệu  
+> 🔑 **Xác thực tách biệt:** backend chính dùng JWT trong cookie `edv_token`; backend admin dùng cookie `adm_token`. **Admin là một collection riêng (`Admin`)** — không phải một `role` của `User` (User chỉ có `student | instructor`).
 
 ---
 
-## ⚙️ Cấu trúc dự án  
+## 🔧 Công nghệ sử dụng
+
+| Layer | Công nghệ |
+|---|---|
+| **Frontend** | ReactJS (Vite), React Router v6, Redux Toolkit, React Context, React Bootstrap (Bootstrap 5) |
+| **Backend** | Node.js + ExpressJS (ES Modules), Mongoose, Zod (validation), Socket.IO (realtime) |
+| **Database** | MongoDB |
+| **Auth** | JWT trong httpOnly cookie · Google OAuth 2.0 |
+| **Lưu trữ** | AWS S3 (video, signed URL) · Cloudinary (hình ảnh) |
+| **Thanh toán** | MoMo · VNPay (webhook/IPN) |
+| **AI/ML** | Google Gemini (sinh nội dung bài giảng, assessment, chatbot) · FastAPI ML service (recommendation, skill radar) |
+| **Rich text / Charts** | react-quill-new · ApexCharts (admin) |
+
+---
+
+## 🧩 Tính năng chính
+
+### 👨‍🎓 Học viên
+- Đăng ký / đăng nhập (email + OTP, Google OAuth), quản lý hồ sơ, đổi mật khẩu, vô hiệu hóa tài khoản
+- Duyệt & tìm kiếm khóa học, xem chi tiết, đánh giá (review)
+- Giỏ hàng, wishlist, mã giảm giá (coupon), thanh toán MoMo/VNPay, lịch sử đơn hàng
+- Học tập: trình phát video, theo dõi tiến độ, ghi chú (notes) theo mốc thời gian, quiz
+- **Q&A** theo khóa học / bài giảng, **chatbot AI** hỗ trợ
+- **Gợi ý khóa học bằng AI**, **skill radar**, **chuỗi ngày học (streak)**, **huy hiệu (badges)** và **chứng chỉ (certificate)** khi hoàn thành
+
+### 👩‍🏫 Giảng viên
+- Đăng ký trở thành giảng viên, quản lý hồ sơ (kỹ năng, học vấn, tài khoản ngân hàng)
+- Tạo/sửa khóa học qua wizard nhiều bước, quản lý curriculum (section/lecture/video)
+- **Sinh nội dung bài giảng bằng AI** (tóm tắt, ghi chú, quiz)
+- Dashboard: doanh thu, số lượng ghi danh, phân bố tiến độ học viên
+- Xem earnings & **yêu cầu rút tiền (payout)**, theo dõi Q&A và học viên
+
+### 🛠️ Quản trị viên (frontend_admin + backend_admin)
+- Dashboard thống kê (doanh thu, tăng trưởng người dùng, trạng thái khóa học…)
+- Quản lý học viên & giảng viên (block/unblock), **duyệt yêu cầu làm giảng viên**
+- Duyệt / chặn / khôi phục khóa học, quản lý danh mục & coupon
+- Quản lý **payout**, **chứng chỉ**, và **audit log** (nhật ký thao tác admin)
+
+---
+
+## ⚙️ Cấu trúc dự án
 
 ```bash
 EduVerse/
-├── backend/
-│   ├── configs/             # Cấu hình hệ thống (database, cloud, v.v.)
-│   ├── controllers/         # Xử lý logic cho từng module
-│   ├── middlewares/         # Middleware (xác thực, xử lý lỗi, v.v.)
-│   ├── models/              # Các mô hình dữ liệu Mongoose
-│   ├── routes/              # Định nghĩa các API endpoint
-│   ├── utils/               # Các hàm tiện ích dùng chung
-│   ├── tmp/                 # Lưu trữ tạm (nếu có)
-│   ├── .env.example         # Mẫu cấu hình môi trường
-│   ├── server.js            # Điểm khởi chạy backend
-│   └── package.json
+├── backend/                    # API chính — Node.js + Express, port 5001
+│   └── src/
+│       ├── modules/            # Feature modules theo MVC (auth, course, order, payment, qa,
+│       │                       #   badge, certificate, payout, note, streak, ...)
+│       │   └── <name>/         #   <name>.{model,validation,service,controller,route,mapper}.js
+│       ├── middlewares/        # auth, error handler, zod validator, logger
+│       ├── shared/
+│       │   ├── utils/          # asyncHandler, response, pagination, enum, scheduler
+│       │   ├── services/       # ai (Gemini), cron, mail, recommendation, s3
+│       │   ├── constants/ · exceptions/  (AppError)
+│       └── app.js · server.js  # Socket.IO + cron + seed badges
 │
-├── frontend/
-│   ├── public/              # File tĩnh (favicon, hình ảnh, v.v.)
-│   ├── src/
-│   │   ├── app/             # Các trang chức năng phân theo vai trò
-│   │   ├── assets/          # Ảnh, video, font, data tĩnh
-│   │   ├── components/      # Component giao diện tái sử dụng
-│   │   ├── context/         # React Context API
-│   │   ├── helpers/         # Hàm xử lý logic frontend
-│   │   ├── hooks/           # Custom hooks
-│   │   ├── layouts/         # Layouts chính (Admin, Student, Instructor, Guest)
-│   │   ├── redux/           # Slice + reducer
-│   │   ├── routes/          # Định tuyến trang (React Router)
-│   │   ├── utils/           # Hàm tiện ích frontend
-│   │   ├── App.jsx          # Component gốc
-│   │   └── main.jsx         # Entry point của ứng dụng
-│   ├── vite.config.js       # Cấu hình Vite
-│   └── package.json
+├── backend_admin/              # API admin — Node.js + Express (flat MVC), port 5000
+│   ├── controllers/ routes/ models/ middlewares/ configs/ validations/ utils/
+│   └── server.js               # Đăng ký route inline (cookie adm_token)
 │
-├── .gitignore
-├── README.md
+├── frontend/                   # Web app chính — React 18 + Vite, port 5173
+│   └── src/
+│       ├── app/                # Trang chức năng theo vai trò
+│       │   ├── auth/ pages/ student/ instructor/ shop/ chatbot/
+│       ├── components/ layouts/ routes/ redux/ contexts/ hooks/ utils/ configs/
+│
+├── frontend_admin/             # Web app admin — React 19 + Vite 7, port 5174
+│   └── src/ (app/ routes/ helpers/ redux/ ...)
+│
+├── ml_service/                 # Microservice ML — Python + FastAPI, port 5002
+│   ├── app.py engine.py db.py model/ requirements.txt
+│
+├── PROJECT_KNOWLEDGE.md        # Tài liệu kỹ thuật chi tiết (đọc trước khi code)
+├── ROADMAP.md · README.md
 └── package-lock.json
 ```
 
 ---
 
-## 🧠 Ứng dụng AI trong hệ thống  
+## 🧠 Ứng dụng AI trong hệ thống
 
-EduVerse ứng dụng các kỹ thuật **Machine Learning** để:  
-- Phân tích hành vi học tập của người dùng  
-- Gợi ý các khóa học phù hợp theo sở thích và năng lực  
-- Theo dõi tiến độ học tập và đề xuất lộ trình học tối ưu  
+- **Gợi ý khóa học**: microservice `ml_service` (FastAPI) tính toán recommendation lai (collaborative filtering + BERT semantic + popularity gating).
+- **Sinh nội dung bài giảng**: Google Gemini tạo tóm tắt, key concepts, quiz cho từng lecture.
+- **Đánh giá năng lực**: skill radar & AI final assessment cho học viên sau khi hoàn thành khóa.
+- **Chatbot AI**: hỗ trợ người học trực tiếp trên giao diện.
 
 ---
 
-## 🧰 Cài đặt và chạy thử  
+## 🧰 Cài đặt và chạy thử
 
-### 1️⃣ Clone dự án  
-
+### 1️⃣ Clone dự án
 ```bash
 git clone https://github.com/LacDuong212/EduVerse.git
 cd EduVerse
 ```
 
-### 2️⃣ Cài đặt dependencies  
-
+### 2️⃣ Cài đặt dependencies
 ```bash
 cd backend && npm install
-cd frontend && npm install
+cd ../backend_admin && npm install
+cd ../frontend && npm install
+cd ../frontend_admin && npm install
+cd ../ml_service && pip install -r requirements.txt
 ```
 
-### 3️⃣ Cấu hình biến môi trường  
+### 3️⃣ Cấu hình biến môi trường
 
-#### 📁 Trong thư mục `backend/`  
-
+#### 📁 `backend/.env` (tham khảo `backend/.env.example`)
 ```bash
-MONGODB_URI = 'your_mongodb_connection'
-JWT_SECRET = 'your_secret_key'
-NODE_ENV = 'development'
+PORT=5001
+NODE_ENV=development
+MONGODB_URI=your_mongodb_connection
+JWT_SECRET=your_secret_key
+JWT_EXPIRATION=7d
+SESSION_SECRET=... · MONGO_SESSION_SECRET=...
+BASE_URL=http://localhost:5001
+CLIENT_URL=http://localhost:5173
 
-EMAIL_USER = 'your@mail.com'
-EMAIL_PASS = 'your_app_password'
+# Email (OTP)
+EMAIL_USER=your@mail.com · EMAIL_PASS=your_app_password · MAIL_FROM=...
 
-CLOUDINARY_CLOUD_NAME = 'your_cloud_name'
-CLOUDINARY_API_KEY = 'your_api_key'
-CLOUDINARY_API_SECRET = 'your_api_secret'
+# Google OAuth
+GOOGLE_CLIENT_ID=... · GOOGLE_CLIENT_SECRET=...
 
-VNP_TMNCODE = 'xxxxxxxx'
-VNP_HASHSECRET = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
-VNP_RETURNURL =  'http://your_host:your_port/your_path/vnpay_return'
-VNP_URL = 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html'
+# AWS S3 (video)
+AWS_ACCESS_KEY=... · AWS_SECRET_KEY=... · AWS_REGION=... · AWS_S3_BUCKET=...
 
-MOMO_PARTNER_CODE = 'xxxx'
-MOMO_ACCESS_KEY = 'xxxxxxxxxxxxxx'
-MOMO_SECRET_KEY = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
-MOMO_API_ENDPOINT = 'https://test-payment.momo.vn/v2/gateway/api/create'
-MOMO_REDIRECT_URL = 'http://your_host:your_port/your_path/momo_return'
-MOMO_IPN_URL = 'http://your_host:your_port/your_path/momo_ipn'
+# Cloudinary (ảnh)
+CLOUDINARY_CLOUD_NAME=... · CLOUDINARY_API_KEY=... · CLOUDINARY_API_SECRET=...
 
-PROJECT_ID = 'project_id'
-KEY_FILENAME = 'key-filename.json'
+# AI (Google Gemini)
+GEMINI_API_KEY=... · PROJECT_ID=... · KEY_FILENAME=key-filename.json
 
-FRONTEND_URL = 'your_frontend_url'
+# Thanh toán
+VNP_TMNCODE=... · VNP_HASHSECRET=... · VNP_URL=https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+MOMO_PARTNER_CODE=... · MOMO_ACCESS_KEY=... · MOMO_SECRET_KEY=... · MOMO_API_ENDPOINT=...
 ```
 
-#### 📁 Trong thư mục `frontend/`  
-
+#### 📁 `backend_admin/.env`
 ```bash
-VITE_BACKEND_URL = 'your_backend_url'
-VITE_CURRENCY = '₫'
+PORT=5000
+MONGODB_URI=your_mongodb_connection   # cùng DB với backend
+JWT_SECRET=your_secret_key
+EDV_SERVER=http://localhost:5001      # trỏ về backend chính
+INTERNAL_API_KEY=your_internal_key
+CLIENT_URL=http://localhost:5174
+```
+
+#### 📁 `frontend/.env` và `frontend_admin/.env`
+```bash
+# frontend/
+VITE_BACKEND_URL=http://localhost:5001
+VITE_CURRENCY=₫
+
+# frontend_admin/
+VITE_BACKEND_URL=http://localhost:5000
+```
+
+#### 📁 `ml_service/.env`
+```bash
+ML_PORT=5002
+MONGODB_URI=your_mongodb_connection
 ```
 
 ---
 
-## 🚀 Chạy ứng dụng  
-
-### Chạy backend  
+## 🚀 Chạy ứng dụng
 
 ```bash
-cd backend
-npm run server
+# 1. Backend chính (http://localhost:5001)
+cd backend && npm run server
+
+# 2. Backend admin (http://localhost:5000)
+cd backend_admin && npm run server
+
+# 3. Frontend chính (http://localhost:5173)
+cd frontend && npm run dev
+
+# 4. Frontend admin (http://localhost:5174)
+cd frontend_admin && npm run dev
+
+# 5. ML service (http://localhost:5002)
+cd ml_service && python app.py
 ```
 
-### Chạy frontend  
+| Service | URL |
+|---|---|
+| 👉 Frontend (chính) | http://localhost:5173 |
+| 👉 Frontend (admin) | http://localhost:5174 |
+| 👉 Backend API (chính) | http://localhost:5001/api |
+| 👉 Backend API (admin) | http://localhost:5000/api |
+| 👉 ML service | http://localhost:5002 |
 
-```bash
-cd frontend
-npm run dev
-```
-
-Ứng dụng sẽ chạy tại:  
-👉 **Frontend:** http://localhost:5173  
-👉 **Backend API:** http://localhost:5000  
+> 📖 Chi tiết endpoint, model dữ liệu và quy ước code xem trong [`PROJECT_KNOWLEDGE.md`](PROJECT_KNOWLEDGE.md).
 
 ---
 
-## 🧑‍💻 Nhóm phát triển  
+## 🧑‍💻 Nhóm phát triển
 
 | Thành viên | MSSV | GitHub |
 |-------------|-------|--------|
@@ -196,25 +244,25 @@ npm run dev
 
 ---
 
-## 🧭 Phương pháp phát triển  
+## 🧭 Phương pháp phát triển
 
-Dự án được xây dựng theo **mô hình Waterfall (thác nước)** gồm các giai đoạn:  
-1. **Phân tích yêu cầu** – Thu thập, xác định yêu cầu chức năng và phi chức năng.  
-2. **Thiết kế hệ thống** – Xây dựng mô hình cơ sở dữ liệu, kiến trúc hệ thống và luồng xử lý.  
-3. **Triển khai & Lập trình** – Xây dựng frontend, backend và tích hợp AI.  
-4. **Kiểm thử** – Đảm bảo hệ thống hoạt động đúng yêu cầu.  
-5. **Triển khai & Bảo trì** – Đưa hệ thống vào hoạt động và tối ưu định kỳ.  
-
----
-
-## 🏆 Kết luận  
-
-**EduVerse** là nền tảng học trực tuyến hướng đến sự **thông minh, thân thiện và cá nhân hóa**, tận dụng **AI** để nâng cao trải nghiệm học tập của người dùng.  
-Dự án thể hiện khả năng ứng dụng công nghệ hiện đại vào giáo dục, đồng thời là minh chứng cho việc sử dụng hiệu quả **MERN Stack** trong phát triển hệ thống web toàn diện.  
+Dự án được xây dựng theo **mô hình Waterfall (thác nước)** gồm các giai đoạn:
+1. **Phân tích yêu cầu** – Thu thập, xác định yêu cầu chức năng và phi chức năng.
+2. **Thiết kế hệ thống** – Xây dựng mô hình cơ sở dữ liệu, kiến trúc hệ thống và luồng xử lý.
+3. **Triển khai & Lập trình** – Xây dựng frontend, backend và tích hợp AI.
+4. **Kiểm thử** – Đảm bảo hệ thống hoạt động đúng yêu cầu.
+5. **Triển khai & Bảo trì** – Đưa hệ thống vào hoạt động và tối ưu định kỳ.
 
 ---
 
-## 📄 Giấy phép  
+## 🏆 Kết luận
+
+**EduVerse** là nền tảng học trực tuyến hướng đến sự **thông minh, thân thiện và cá nhân hóa**, tận dụng **AI** để nâng cao trải nghiệm học tập của người dùng.
+Dự án thể hiện khả năng ứng dụng công nghệ hiện đại vào giáo dục, đồng thời là minh chứng cho việc sử dụng hiệu quả **MERN Stack** kết hợp microservice trong phát triển hệ thống web toàn diện.
+
+---
+
+## 📄 Giấy phép
 
 Dự án được phát hành theo giấy phép [MIT License](LICENSE).
 

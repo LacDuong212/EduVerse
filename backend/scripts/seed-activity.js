@@ -380,6 +380,34 @@ function genStudentActivity(userId, assignedCourses, { createEnrollment, level =
     const enrollDaysAgo = Math.max(1, rint(1, Math.max(2, joinedDaysAgo)));
     const enrolledAt = daysAgo(enrollDaysAgo);
     const insRef = String(course.instructor.ref);
+    const paid = pricePaidOf(course);
+    const orderOf = (status) => ({
+      user: userId,
+      courses: [{ course: course._id, pricePaid: paid }],
+      subTotal: paid, discountAmount: 0, totalAmount: paid,
+      paymentMethod: paid === 0 ? PAYMENT_METHOD_ENUM.free : pick([PAYMENT_METHOD_ENUM.momo, PAYMENT_METHOD_ENUM.vnpay]),
+      status, expiresAt: new Date(enrolledAt.getTime() + 3600000),
+      createdAt: enrolledAt, updatedAt: enrolledAt,
+    });
+
+    // Purchase outcome. New-student purchases may be owned / refunded / cancelled;
+    // existing students already own their assigned courses, so always "owned".
+    const outcome = createEnrollment
+      ? weightedPick([["owned", 0.9], ["refunded", 0.06], ["cancelled", 0.04]])
+      : "owned";
+
+    // Cancelled: purchase never completed → a cancelled order only (no enrollment/access/activity).
+    if (outcome === "cancelled") { buckets.orders.push(orderOf(ORDER_STATUS.cancelled)); continue; }
+
+    // Refunded: bought then refunded → refunded order + refunded enrollment, no cert/progress/activity.
+    if (outcome === "refunded") {
+      buckets.enrollments.push({
+        student: userId, course: course._id, instructor: course.instructor.ref,
+        status: ENROLL_STATUS.refunded, enrolledAt, createdAt: enrolledAt, updatedAt: enrolledAt,
+      });
+      buckets.orders.push(orderOf(ORDER_STATUS.refunded));
+      continue;
+    }
 
     // completion ratio driven by engagement level (adds strong variance)
     const ratio = pick(level.ratios);
@@ -427,26 +455,21 @@ function genStudentActivity(userId, assignedCourses, { createEnrollment, level =
     }
 
     if (createEnrollment) {
+      // Owned course: enrollment is always "active". Completion is tracked via
+      // CourseProgress.isCompleted (percentage), NOT enrollment status — this
+      // matches the real app, where "My Courses" lists active enrollments and
+      // marks completion by progress %. (A "completed" status would hide the
+      // course from "My Courses" while keeping its certificate — illogical.)
       buckets.enrollments.push({
         student: userId, course: course._id, instructor: course.instructor.ref,
-        status: built.isCompleted ? ENROLL_STATUS.completed : ENROLL_STATUS.active,
+        status: ENROLL_STATUS.active,
         enrolledAt, createdAt: enrolledAt, updatedAt: built.doc.lastActivityAt || enrolledAt,
       });
       bumpCourse(String(course._id), "enroll", 1);
       newInstructorStudents.add(insRef);
 
-      // ── Order (drives revenue + monthly-enrollment dashboards) ──
-      const paid = pricePaidOf(course);
-      const status = weightedPick([[ORDER_STATUS.completed, 0.9], [ORDER_STATUS.refunded, 0.06], [ORDER_STATUS.cancelled, 0.04]]);
-      buckets.orders.push({
-        user: userId,
-        courses: [{ course: course._id, pricePaid: paid }],
-        subTotal: paid, discountAmount: 0, totalAmount: paid,
-        paymentMethod: paid === 0 ? PAYMENT_METHOD_ENUM.free : pick([PAYMENT_METHOD_ENUM.momo, PAYMENT_METHOD_ENUM.vnpay]),
-        status,
-        expiresAt: new Date(enrolledAt.getTime() + 3600000),
-        createdAt: enrolledAt, updatedAt: enrolledAt,
-      });
+      // ── Order: owned course → completed order (drives revenue + dashboards) ──
+      buckets.orders.push(orderOf(ORDER_STATUS.completed));
     }
 
     built.activityDates.forEach((d) => activeDatesSet.add(ymd(d)));
