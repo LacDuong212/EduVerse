@@ -29,7 +29,7 @@ EduVerse gồm **5 service tách biệt** dùng chung một MongoDB database:
 |---|---|---|---|
 | `backend/` | API chính cho học viên + giảng viên + public | Node.js + Express (module MVC) | **5001** |
 | `backend_admin/` | API riêng cho quản trị viên (duyệt, thống kê, payout, audit log) | Node.js + Express (flat MVC) | **5000** |
-| `frontend/` | Web app chính (học viên + giảng viên + public) | React 18 + Vite | **5173** |
+| `frontend/` | Web app chính (học viên + giảng viên + public) | React 19 + Vite | **5173** |
 | `frontend_admin/` | Web app riêng cho quản trị viên | React 19 + Vite 7 | **5174** |
 | `ml_service/` | Microservice gợi ý khóa học & phân tích | Python + FastAPI | **5002** |
 
@@ -59,21 +59,21 @@ EduVerse gồm **5 service tách biệt** dùng chung một MongoDB database:
 - Duyệt & tìm kiếm khóa học, xem chi tiết, đánh giá (review)
 - Giỏ hàng, wishlist, mã giảm giá (coupon), thanh toán MoMo/VNPay, lịch sử đơn hàng
 - Học tập: trình phát video, theo dõi tiến độ, ghi chú (notes) theo mốc thời gian, quiz
-- **Q&A** theo khóa học / bài giảng, **chatbot AI** hỗ trợ
-- **Gợi ý khóa học bằng AI**, **skill radar**, **chuỗi ngày học (streak)**, **huy hiệu (badges)** và **chứng chỉ (certificate)** khi hoàn thành
+- Q&A theo khóa học / bài giảng, chatbot AI hỗ trợ
+- Gợi ý khóa học bằng AI, skill radar, chuỗi ngày học (streak), huy hiệu (badges) và chứng chỉ (certificate) khi hoàn thành
 
 ### 👩‍🏫 Giảng viên
 - Đăng ký trở thành giảng viên, quản lý hồ sơ (kỹ năng, học vấn, tài khoản ngân hàng)
 - Tạo/sửa khóa học qua wizard nhiều bước, quản lý curriculum (section/lecture/video)
-- **Sinh nội dung bài giảng bằng AI** (tóm tắt, ghi chú, quiz)
+- Sinh nội dung bài giảng bằng AI (tóm tắt, ghi chú, quiz)
 - Dashboard: doanh thu, số lượng ghi danh, phân bố tiến độ học viên
-- Xem earnings & **yêu cầu rút tiền (payout)**, theo dõi Q&A và học viên
+- Xem earnings & yêu cầu rút tiền (payout), theo dõi Q&A và học viên
 
 ### 🛠️ Quản trị viên (frontend_admin + backend_admin)
 - Dashboard thống kê (doanh thu, tăng trưởng người dùng, trạng thái khóa học…)
-- Quản lý học viên & giảng viên (block/unblock), **duyệt yêu cầu làm giảng viên**
+- Quản lý học viên & giảng viên (block/unblock), duyệt yêu cầu làm giảng viên
 - Duyệt / chặn / khôi phục khóa học, quản lý danh mục & coupon
-- Quản lý **payout**, **chứng chỉ**, và **audit log** (nhật ký thao tác admin)
+- Quản lý payout, chứng chỉ, và audit log (nhật ký thao tác admin)
 
 ---
 
@@ -97,7 +97,7 @@ EduVerse/
 │   ├── controllers/ routes/ models/ middlewares/ configs/ validations/ utils/
 │   └── server.js               # Đăng ký route inline (cookie adm_token)
 │
-├── frontend/                   # Web app chính — React 18 + Vite, port 5173
+├── frontend/                   # Web app chính — React 19 + Vite 7, port 5173
 │   └── src/
 │       ├── app/                # Trang chức năng theo vai trò
 │       │   ├── auth/ pages/ student/ instructor/ shop/ chatbot/
@@ -109,7 +109,6 @@ EduVerse/
 ├── ml_service/                 # Microservice ML — Python + FastAPI, port 5002
 │   ├── app.py engine.py db.py model/ requirements.txt
 │
-├── PROJECT_KNOWLEDGE.md        # Tài liệu kỹ thuật chi tiết (đọc trước khi code)
 ├── ROADMAP.md · README.md
 └── package-lock.json
 ```
@@ -230,8 +229,6 @@ cd ml_service && python app.py
 | 👉 Backend API (admin) | http://localhost:5000/api |
 | 👉 ML service | http://localhost:5002 |
 
-> 📖 Chi tiết endpoint, model dữ liệu và quy ước code xem trong [`PROJECT_KNOWLEDGE.md`](PROJECT_KNOWLEDGE.md).
-
 ---
 
 ## 🧑‍💻 Nhóm phát triển
@@ -268,4 +265,4 @@ Dự án được phát hành theo giấy phép [MIT License](LICENSE).
 
 ---
 
-✨ *Developed with ❤️ by d2v-team*
+✨ *Developed with ❤️ by @d2v-team*
