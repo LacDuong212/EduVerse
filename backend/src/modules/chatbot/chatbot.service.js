@@ -355,7 +355,7 @@ export const handleLearningProgress = (latestProgress, languageCode = "en") => {
   }
 
   // if successfully obtains all data
-  const resumeUrl = `/courses/${courseId}/watch/${targetLectureId}`;
+  const resumeUrl = `student/courses/${courseId}/watch/${targetLectureId}`;
 
   return {
     actionData: {
