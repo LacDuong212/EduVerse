@@ -27,6 +27,7 @@ export const useChatbot = () => {
     {
       from: "bot",
       text: "Hi! I'm your EduVerse Assistant, how may I help you?",
+      isWelcome: true,
     },
   ]);
   const [isSending, setIsSending] = useState(false);
@@ -50,23 +51,25 @@ export const useChatbot = () => {
     return guestId;
   }, [userData]);
 
-  const handleSendMessage = async (language = "en") => {
-    if (!input.trim() || isSending) return;
+  // Core send routine — takes explicit text so it works for both the input box
+  // and quick-reply chips (which don't go through the input state).
+  const sendText = async (text, language = "en") => {
+    const trimmed = (text || "").trim();
+    if (!trimmed || isSending) return;
 
-    const currentInput = input;
-    const userMessage = { from: "user", text: currentInput };
+    const userMessage = { from: "user", text: trimmed };
     setMessages((prev) => [...prev, userMessage]);
-    setInput("");
 
     setIsSending(true);
 
     try {
-      const data = await sendMessageToApi(currentInput, sessionId, language);
+      const data = await sendMessageToApi(trimmed, sessionId, language);
 
       const botMessage = {
         from: "bot",
         text: data.reply || (language === "vi" ? "(Không có phản hồi)" : "(No reply)"),
         action: data.action,
+        suggestions: data.suggestions,
       };
 
       setMessages((prev) => [...prev, botMessage]);
@@ -86,6 +89,18 @@ export const useChatbot = () => {
     } finally {
       setIsSending(false);
     }
+  };
+
+  const handleSendMessage = async (language = "en") => {
+    if (!input.trim() || isSending) return;
+    const currentInput = input;
+    setInput("");
+    await sendText(currentInput, language);
+  };
+
+  // Fired when a quick-reply chip is clicked.
+  const handleSuggestionClick = (query, language = "en") => {
+    sendText(query, language);
   };
 
   // close on click outside chat window
@@ -116,6 +131,7 @@ export const useChatbot = () => {
     input,
     setInput,
     handleSendMessage,
+    handleSuggestionClick,
     chatRef,
     messagesEndRef,
     isSending,

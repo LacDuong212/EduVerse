@@ -1,26 +1,51 @@
 import { FaAngleRight, FaBook, FaPlayCircle } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import { WELCOME_SUGGESTIONS } from "../chatbot.constants";
+import CourseCard from "./CourseCard";
+import SuggestionChips from "./SuggestionChips";
 
-export default function ChatMessage({ message, language = "en" }) {
+export default function ChatMessage({
+  message,
+  language = "en",
+  onSuggestion,
+  isSending,
+}) {
   const isUser = message.from === "user";
   const { action } = message;
 
   const isLearningProgress = action && action.courseTitle;
+  const hasCards = action && action.type === "cards" && action.courses?.length > 0;
+  const hasActionButton = action && action.url && !isLearningProgress;
+
+  // Welcome message shows the preset suggestions in the current language;
+  // bot replies carry their own resolved suggestions from the backend.
+  const suggestions = message.isWelcome
+    ? WELCOME_SUGGESTIONS[language] || WELCOME_SUGGESTIONS.en
+    : message.suggestions;
 
   return (
     <div className={`d-flex mb-2 ${isUser ? "justify-content-end" : "justify-content-start"}`}>
       <div
         className={`p-2 rounded-3 text-break ${isUser ? "text-white bg-primary" : "border"}`}
-        style={{ maxWidth: "80%" }}
+        style={{ maxWidth: "85%" }}
       >
         {/* Message Text */}
-        <div>{message.text}</div>
+        <div style={{ whiteSpace: "pre-wrap" }}>{message.text}</div>
 
-        {/* Action Button (chatbot only) */}
-        {!isUser && action && action.url && (
+        {/* Recommended course cards */}
+        {!isUser && hasCards && (
+          <div className="mt-2 border-top pt-2">
+            {action.courses.map((course) => (
+              <CourseCard key={course.courseId} course={course} language={language} />
+            ))}
+          </div>
+        )}
+
+        {/* Action button / redirect / learning-progress card */}
+        {!isUser && action && (hasActionButton || isLearningProgress) && (
           <div className="mt-2 border-top pt-2">
 
-            {/* if search courses */}
+            {/* if search courses / faq link */}
             {action.type === "link" && (
               <Link
                 to={action.url}
@@ -31,7 +56,7 @@ export default function ChatMessage({ message, language = "en" }) {
             )}
 
             {/* if navigate pages */}
-            {action.type === "redirect" && (
+            {action.type === "redirect" && !isLearningProgress && (
               <div>
                 <small className="d-block mb-1 fst-italic">
                   {language === "vi" ? "Tự động chuyển hướng sau 2s..." : "Redirecting in 2s..."}
@@ -86,6 +111,15 @@ export default function ChatMessage({ message, language = "en" }) {
               </div>
             )}
           </div>
+        )}
+
+        {/* Quick-reply suggestion chips */}
+        {!isUser && (
+          <SuggestionChips
+            suggestions={suggestions}
+            onSelect={onSuggestion}
+            disabled={isSending}
+          />
         )}
       </div>
     </div>

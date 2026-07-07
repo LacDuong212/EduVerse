@@ -23,22 +23,22 @@ export const processVideoWithGemini = async (videoId, videoDuration = null) => {
     const video = await DraftVideo.findOne({ videoId }).lean();
     if (!video) throw new AppError("Video not found.", 404);
 
-    // [1/5] S3 Download
+    // S3 Download
     logger.debug(`> [1/5] Downloading video from S3... (VideoId: ${videoId})`);
     tempFilePath = await downloadS3Video(video.key);
 
-    // [2/5] Upload to Gemini
+    // Upload to Gemini
     logger.debug(`> [2/5] Uploading video to Google Gemini...`);
     uploadResult = await fileManager.uploadFile(tempFilePath, {
       mimeType: video.contentType,
       displayName: "Lecture Video",
     });
 
-    // [3/5] Wait for Processing
+    // Wait for Processing
     logger.debug(`> [3/5] Waiting for Gemini processing (File URI: ${uploadResult.file.uri})...`);
     await waitForGeminiFile(uploadResult.file.name);
 
-    // [4/5] Generate Content
+    // Generate Content
     logger.debug(`> [4/5] Requesting AI Generation...`);
     const model = genAI.getGenerativeModel({
       model: "gemini-2.5-flash",
@@ -53,7 +53,7 @@ export const processVideoWithGemini = async (videoId, videoDuration = null) => {
       { text: buildLecturePrompt(videoDuration) }
     ]);
 
-    // [5/5] Finalize
+    // Finalize
     const aiResponse = JSON.parse(result.response.text());
     await fileManager.deleteFile(uploadResult.file.name);
 

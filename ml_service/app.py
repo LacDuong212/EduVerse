@@ -23,7 +23,7 @@ load_dotenv()
 import db
 import engine
 
-# ── Logging setup ────────────────────────────────────────────────────────────
+# Logging setup
 logging.basicConfig(
     level=logging.INFO,
     format="[%(name)s] %(levelname)s %(message)s",
@@ -31,7 +31,7 @@ logging.basicConfig(
 logger = logging.getLogger("ml_service")
 
 
-# ── Lifespan: load model on startup ─────────────────────────────────────────
+# Lifespan: load model on startup
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Load the trained model and BERT into memory when the service starts."""
@@ -59,7 +59,7 @@ app = FastAPI(
 )
 
 
-# ── Request/Response schemas ─────────────────────────────────────────────────
+# Request/Response schemas
 
 class TrainRequest(BaseModel):
     n_clusters: int | None = Field(
@@ -91,7 +91,7 @@ class RecommendResponse(BaseModel):
     model_status: str
 
 
-# ── Endpoints ────────────────────────────────────────────────────────────────
+# Endpoints
 
 @app.get("/api/health")
 async def health():
@@ -226,7 +226,7 @@ async def recommend(req: RecommendRequest):
         )
 
 
-# ── Main ─────────────────────────────────────────────────────────────────────
+# Main
 if __name__ == "__main__":
     import uvicorn
 

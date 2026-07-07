@@ -75,9 +75,7 @@ const ratingMultiplier = (rating) => {
   return Math.max(0, Math.min(2, 1 + (rating - 3) * 0.5));
 };
 
-// =============================================================================
 // MAIN ENTRY — used by course.controller.js (signature unchanged)
-// =============================================================================
 export const getRecommendedCourses = async (
   userId, recommendedSize = 8, candidatesLimit = 100
 ) => {
@@ -98,9 +96,7 @@ export const getRecommendedCourses = async (
   return getRecommendedCoursesNodeFallback(userId, recommendedSize, candidatesLimit);
 };
 
-// =============================================================================
 // PRIMARY — Python ML Service (K-means + TF-IDF + CF + Popularity)
-// =============================================================================
 const getRecommendationsFromMLService = async (userId, topK) => {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), ML_TIMEOUT_MS);
@@ -158,9 +154,7 @@ const getRecommendationsFromMLService = async (userId, topK) => {
   }
 };
 
-// =============================================================================
 // FALLBACK — Node.js BM25 + Jaccard + Popularity (existing logic)
-// =============================================================================
 const getRecommendedCoursesNodeFallback = async (
   userId, recommendedSize = 8, candidatesLimit = 100
 ) => {
@@ -309,9 +303,7 @@ const getRecommendedCoursesNodeFallback = async (
   return { courses: finalCourses, debugSource };
 };
 
-// =============================================================================
 // Helpers
-// =============================================================================
 
 /**
  * Build the searchable text representing the user's taste.

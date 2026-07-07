@@ -4,6 +4,36 @@ import LogoBox from "@/components/LogoBox";
 import MessageBubble from "./MessageBubble";
 import { CHAT_LANGUAGE } from "../chatbot.constants";
 
+// Animated "bot is typing" indicator (three bouncing dots).
+function TypingDots({ language }) {
+  return (
+    <div className="d-flex justify-content-start mb-2">
+      <div className="border p-2 rounded-3 small d-flex align-items-center gap-2">
+        <span className="fst-italic text-body">
+          {language === "en" ? "Assistant is typing" : "Trợ lý đang trả lời"}
+        </span>
+        <span className="edv-typing">
+          <span></span><span></span><span></span>
+        </span>
+        <style>{`
+          .edv-typing { display: inline-flex; gap: 3px; align-items: center; }
+          .edv-typing span {
+            width: 5px; height: 5px; border-radius: 50%;
+            background: currentColor; opacity: 0.4;
+            animation: edvTypingBounce 1.2s infinite ease-in-out;
+          }
+          .edv-typing span:nth-child(2) { animation-delay: 0.2s; }
+          .edv-typing span:nth-child(3) { animation-delay: 0.4s; }
+          @keyframes edvTypingBounce {
+            0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+            40% { transform: translateY(-4px); opacity: 1; }
+          }
+        `}</style>
+      </div>
+    </div>
+  );
+}
+
 export default function ChatWindow({
   containerRef,
   messagesEndRef,
@@ -11,6 +41,7 @@ export default function ChatWindow({
   input,
   onInputChange,
   onSend,
+  onSuggestion,
   onClose,
   isSending,
 }) {
@@ -87,15 +118,15 @@ export default function ChatWindow({
       {/* Messages Body */}
       <div className="card-body overflow-auto p-3 bg-secondary bg-opacity-10" style={{ flex: 1 }}>
         {messages.map((msg, i) => (
-          <MessageBubble key={i} message={msg} language={language} />
+          <MessageBubble
+            key={i}
+            message={msg}
+            language={language}
+            onSuggestion={(query) => onSuggestion(query, language)}
+            isSending={isSending}
+          />
         ))}
-        {isSending && (
-          <div className="d-flex justify-content-start mb-2">
-            <div className="border fst-italic p-2 rounded-3 small">
-              {language === "en" ? "Chatbot is cooking up a response..." : "Chatbot đang soạn câu trả lời..."}
-            </div>
-          </div>
-        )}
+        {isSending && <TypingDots language={language} />}
         <div ref={messagesEndRef} />
       </div>
 

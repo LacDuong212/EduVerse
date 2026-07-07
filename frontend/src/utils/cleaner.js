@@ -18,7 +18,7 @@ export function cleanQuillHtml(html, options = {}) {
     .replace(/\u200C/g, "")
     .replace(/\u200D/g, "");
 
-  // 3. Parse into DOM so we don"t destroy tags
+  // Parse into DOM so we don"t destroy tags
   const parser = new DOMParser();
   const doc = parser.parseFromString(cleaned, "text/html");
 

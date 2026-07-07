@@ -32,9 +32,7 @@ logging.basicConfig(level=logging.INFO, format="[seed] %(message)s",
                     stream=__import__("sys").stdout)
 logger = logging.getLogger("seed")
 
-# ═══════════════════════════════════════════════════════════════════════
 # COURSE → INSTRUCTOR MAPPING (from actual DB)
-# ═══════════════════════════════════════════════════════════════════════
 
 COURSE_INSTRUCTOR = {
     # DevOps / Cloud
@@ -75,12 +73,10 @@ COURSE_INSTRUCTOR = {
     "69513fa93f95cbe46155ff69": "694cf235ddf90206a887c3a6",  # Blockchain
 }
 
-# ═══════════════════════════════════════════════════════════════════════
 # PERSONA DEFINITIONS
-# ═══════════════════════════════════════════════════════════════════════
 
 PERSONAS = [
-    # ── DevOps / Cloud (8 users) ──
+    # DevOps / Cloud (8 users)
     {
         "name": "Nguyễn Minh Hùng", "interests": ["devops", "docker", "cloud"],
         "primary": ["694d09a9ddf90206a887c637", "694e8e85ed8f2ec45dc0d4ec",
@@ -132,7 +128,7 @@ PERSONAS = [
                      "694d09a9ddf90206a887c637", "694e8e85ed8f2ec45dc0d4ec"],
         "secondary": ["694ea5f0ed8f2ec45dc0e7fa"],
     },
-    # ── Web / Frontend (8 users) ──
+    # Web / Frontend (8 users)
     {
         "name": "Bùi Thị Lan", "interests": ["react", "javascript", "frontend"],
         "primary": ["69513a22712d2de88391a13d", "69514b09b08e6cc6cab50106",
@@ -180,7 +176,7 @@ PERSONAS = [
                      "69514b09b08e6cc6cab50106"],
         "secondary": ["695144b4b08e6cc6cab4ff7f"],
     },
-    # ── Data / ML (7 users) ──
+    # Data / ML (7 users)
     {
         "name": "Nguyễn Thị Ánh", "interests": ["data science", "python", "ml"],
         "primary": ["694e9d90ed8f2ec45dc0e653", "695164d5b08e6cc6cab5b496",
@@ -222,7 +218,7 @@ PERSONAS = [
                      "695166b4b08e6cc6cab5b4ff"],
         "secondary": ["695164d5b08e6cc6cab5b496"],
     },
-    # ── Mobile (7 users) ──
+    # Mobile (7 users)
     {
         "name": "Nguyễn Hoàng Anh", "interests": ["mobile", "android", "java"],
         "primary": ["695156ffb08e6cc6cab54731", "695155e7b08e6cc6cab546de",
@@ -320,7 +316,7 @@ def seed(dry_run=False, diverse=False):
     for idx, persona in enumerate(PERSONAS):
         user_id = ObjectId()
 
-        # ── User document ──
+        # User document
         users_to_insert.append({
             "_id": user_id,
             "name": persona["name"],
@@ -339,7 +335,7 @@ def seed(dry_run=False, diverse=False):
             "updatedAt": datetime.utcnow(),
         })
 
-        # ── Decide which courses to enroll ──
+        # Decide which courses to enroll
         # Primary courses: always enroll (core interest)
         enrolled_courses = list(persona["primary"])
 
@@ -359,7 +355,7 @@ def seed(dry_run=False, diverse=False):
         # Dedupe while preserving order
         enrolled_courses = list(dict.fromkeys(enrolled_courses))
 
-        # ── Student document ──
+        # Student document
         students_to_insert.append({
             "_id": ObjectId(),
             "user": user_id,
@@ -375,7 +371,7 @@ def seed(dry_run=False, diverse=False):
             "updatedAt": datetime.utcnow(),
         })
 
-        # ── Enrollment documents ──
+        # Enrollment documents
         for course_id in enrolled_courses:
             instructor_id = COURSE_INSTRUCTOR.get(course_id)
             if not instructor_id:
@@ -399,7 +395,7 @@ def seed(dry_run=False, diverse=False):
                 "updatedAt": datetime.utcnow(),
             })
 
-    # ── Cold-start users: few enrollments, populate the cold stratum ──
+    # Cold-start users: few enrollments, populate the cold stratum
     # Each draws a coherent 2-course pair from a random domain, plus (sometimes)
     # one cross-domain course — mimicking a brand-new learner with little history.
     for ci in range(n_cold):
@@ -449,7 +445,7 @@ def seed(dry_run=False, diverse=False):
                 "createdAt": _random_date(20, 1), "updatedAt": datetime.utcnow(),
             })
 
-    # ── Summary ──
+    # Summary
     logger.info(f"Personas: {len(PERSONAS)} + {N_COLD_USERS} cold-start users")
     logger.info(f"Users to create: {len(users_to_insert)}")
     logger.info(f"Students to create: {len(students_to_insert)}")
@@ -472,7 +468,7 @@ def seed(dry_run=False, diverse=False):
             logger.info(f"  User: {u['name']} ({u['email']})")
         return
 
-    # ── Insert ──
+    # Insert
     # Auto-cleanup existing synthetic data first (idempotent)
     existing = database.users.count_documents({"_synthetic": True})
     if existing > 0:
@@ -490,7 +486,7 @@ def seed(dry_run=False, diverse=False):
     result_enrollments = database.enrollments.insert_many(enrollments_to_insert)
     logger.info(f"  Enrollments inserted: {len(result_enrollments.inserted_ids)}")
 
-    # ── Update studentsEnrolled count on courses ──
+    # Update studentsEnrolled count on courses
     course_enroll_count = {}
     for e in enrollments_to_insert:
         cid = str(e["course"])
