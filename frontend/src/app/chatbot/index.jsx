@@ -10,6 +10,7 @@ export default function ChatbotWidget() {
     input,
     setInput,
     handleSendMessage,
+    handleSuggestionClick,
     chatRef,
     messagesEndRef,
     isSending,
@@ -29,6 +30,7 @@ export default function ChatbotWidget() {
           input={input}
           onInputChange={setInput}
           onSend={handleSendMessage}
+          onSuggestion={handleSuggestionClick}
           onClose={() => setIsOpen(false)}
           isSending={isSending}
         />

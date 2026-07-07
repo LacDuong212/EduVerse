@@ -23,7 +23,7 @@ export const getAllAdminitrators = async (page = 1, search = "") => {
   }
 };
 
-// COURSE --
+// COURSE
 export const approveCourse = async (id, message = null) => {
   try {
     const res = await axios.patch(
@@ -161,7 +161,7 @@ export const updateCourseStatus = async (id, status, message = null) => {
   }
 };
 
-// STUDENT --
+// STUDENT
 export const getAllStudents = async (page = 1, search = "", limit = 9999) => {
   try {
     const response = await axios.get(
@@ -219,7 +219,7 @@ export const deleteStudent = async (id) => {
   }
 };
 
-// INSTRUCTOR --
+// INSTRUCTOR
 export const getAllInstructors = async (page = 1, search = "", limit = 9999) => {
   try {
     const response = await axios.get(
@@ -346,7 +346,7 @@ export const rejectInstructorRequest = async (id, message) => {
   }
 };
 
-// CATEGORY --
+// CATEGORY
 export const getAllCategories = async () => {
   try {
     const response = await axios.get(`${backendUrl}/api/category`, { params: { mode: 'all' } });
@@ -387,7 +387,7 @@ export const deleteCategory = async (id) => {
   }
 };
 
-// COUPON --
+// COUPON
 export const getAllCoupons = async () => {
   try {
     const response = await axios.get(

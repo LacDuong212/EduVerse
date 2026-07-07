@@ -54,9 +54,7 @@ import Streak from "#modules/streak/streak.model.js";
 import Review from "#modules/review/review.model.js";
 import { generateCertId } from "#modules/certificate/certificate.util.js";
 
-// ─────────────────────────────────────────────────────────────────────────
 // CLI args
-// ─────────────────────────────────────────────────────────────────────────
 const ARGV = process.argv.slice(2);
 const DRY_RUN = ARGV.includes("--dry-run");
 const CLEANUP = ARGV.includes("--cleanup");
@@ -69,9 +67,7 @@ const N_NEW = Number((ARGV.find((a) => a.startsWith("--students=")) || "").split
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const MANIFEST_PATH = path.join(__dirname, "seed-activity.manifest.json");
 
-// ─────────────────────────────────────────────────────────────────────────
 // Deterministic PRNG (so dry-run matches the real run)
-// ─────────────────────────────────────────────────────────────────────────
 let _seed = 1337 >>> 0;
 function rnd() {
   _seed |= 0; _seed = (_seed + 0x6d2b79f5) | 0;
@@ -129,11 +125,9 @@ const weightedPick = (entries) => {
   return entries[entries.length - 1][0];
 };
 
-// ─────────────────────────────────────────────────────────────────────────
 // Engagement archetypes — drive strong between-record variance so the dataset
 // is heterogeneous (a few power users, many casual, some dormant) instead of
 // every student looking the same.
-// ─────────────────────────────────────────────────────────────────────────
 const LEVELS = [
   { key: "dormant", weight: 0.18, courses: [1, 2],  ratios: [0, 0, 0.05, 0.1],            noteMax: 1,  qnaP: 0.08, replyP: 0.4, reviewBaseP: 0.05 },
   { key: "casual",  weight: 0.37, courses: [2, 4],  ratios: [0.1, 0.2, 0.35, 0.5, 0.6],   noteMax: 3,  qnaP: 0.3,  replyP: 0.55, reviewBaseP: 0.35 },
@@ -189,9 +183,7 @@ const pricePaidOf = (course) => {
   return Number(base) > 0 ? Number(base) : 0;
 };
 
-// ─────────────────────────────────────────────────────────────────────────
 // Content pools
-// ─────────────────────────────────────────────────────────────────────────
 const FIRST = ["Nguyễn", "Trần", "Lê", "Phạm", "Hoàng", "Vũ", "Đặng", "Bùi", "Đỗ", "Ngô", "Dương", "Lý", "Phan", "Võ", "Đinh"];
 const MID = ["Minh", "Thị", "Văn", "Hoàng", "Thu", "Quốc", "Anh", "Đức", "Hải", "Ngọc", "Gia", "Khánh", "Bảo", "Thanh"];
 const LAST = ["Anh", "Hùng", "Hương", "Nam", "Mai", "Khoa", "Tùng", "Vinh", "Lan", "Tuấn", "Ngọc", "Hải", "Thu", "Phong", "Đạt", "Hạnh", "Ánh", "Bảo", "Diễm", "Kiệt", "Quân", "Ngân", "Thành", "Long", "Giang", "Hiền", "Dung", "Cường", "Bích"];
@@ -238,9 +230,7 @@ const REVIEWS = {
   3: ["Nội dung ổn nhưng còn hơi cơ bản với mình.", "Tạm ổn, cần cập nhật thêm một số phần."],
 };
 
-// ─────────────────────────────────────────────────────────────────────────
 // Manifest helpers
-// ─────────────────────────────────────────────────────────────────────────
 const manifest = {
   createdAt: new Date().toISOString(),
   ids: { users: [], students: [], enrollments: [], courseprogresses: [], qnas: [], notes: [], streaks: [], reviews: [], orders: [], quizprogresses: [] },
@@ -262,9 +252,7 @@ function bumpExistingStudent(userId, patch) {
   for (const k of Object.keys(patch)) s[k] += patch[k];
 }
 
-// ─────────────────────────────────────────────────────────────────────────
 // Build a CourseProgress doc for (user, course) with a target completion ratio
-// ─────────────────────────────────────────────────────────────────────────
 function buildProgress(userId, course, lectures, ratio, enrolledAt, endAt = new Date()) {
   const total = lectures.length;
   const completed = Math.min(total, Math.floor(total * ratio));
@@ -322,7 +310,6 @@ function buildProgress(userId, course, lectures, ratio, enrolledAt, endAt = new 
   return { doc, completed, isCompleted, activityDates: lectureDocs.map((l) => l.lastActivityAt || l.completedAt).filter(Boolean) };
 }
 
-// ─────────────────────────────────────────────────────────────────────────
 async function loadCatalog() {
   const courses = await Course.find({ status: COURSE_STATUS.live, isDeleted: false })
     .select("_id title tags lecturesCount instructor price discountPrice enableDiscount").lean();
@@ -413,7 +400,7 @@ function genStudentActivity(userId, assignedCourses, { createEnrollment, level =
     const ratio = pick(level.ratios);
     const built = buildProgress(userId, course, course.lectures, ratio, enrolledAt);
 
-    // ── AI assessment on completed courses + quiz results ──
+    // AI assessment on completed courses + quiz results
     const touchedLecs = built.doc.lectures;
     let quizAvgPct = null;
     if (touchedLecs.length) {
@@ -468,13 +455,13 @@ function genStudentActivity(userId, assignedCourses, { createEnrollment, level =
       bumpCourse(String(course._id), "enroll", 1);
       newInstructorStudents.add(insRef);
 
-      // ── Order: owned course → completed order (drives revenue + dashboards) ──
+      // Order: owned course → completed order (drives revenue + dashboards)
       buckets.orders.push(orderOf(ORDER_STATUS.completed));
     }
 
     built.activityDates.forEach((d) => activeDatesSet.add(ymd(d)));
 
-    // ── Notes (on completed / in-progress lectures) ──
+    // Notes (on completed / in-progress lectures)
     const touched = built.doc.lectures;
     const nNotes = touched.length ? rint(0, Math.min(level.noteMax, touched.length)) : 0;
     for (let i = 0; i < nNotes; i++) {
@@ -487,7 +474,7 @@ function genStudentActivity(userId, assignedCourses, { createEnrollment, level =
       });
     }
 
-    // ── Q&A: student question (+ maybe instructor reply, maybe resolved) ──
+    // Q&A: student question (+ maybe instructor reply, maybe resolved)
     if (touched.length && chance(level.qnaP)) {
       const lec = pick(touched);
       const qAt = lec.lastActivityAt || enrolledAt;
@@ -523,7 +510,7 @@ function genStudentActivity(userId, assignedCourses, { createEnrollment, level =
       buckets.qaQuestions.push(q);
     }
 
-    // ── Review: driven by engagement level; completed courses very likely ──
+    // Review: driven by engagement level; completed courses very likely
     const wantsReview = (built.isCompleted ? chance(level.reviewBaseP + 0.1) : (ratio >= 0.5 && chance(level.reviewBaseP * 0.6)));
     if (wantsReview && !existingReviewCourseIds.has(`${userId}:${course._id}`)) {
       const rating = pickRating(built.isCompleted); // 4-5 heavy, 3 rare, never < 3
@@ -542,7 +529,7 @@ function genStudentActivity(userId, assignedCourses, { createEnrollment, level =
   // instructor totalStudents for newly-enrolled unique students
   for (const insRef of newInstructorStudents) bumpInstructor(insRef, { totalStudents: 1 });
 
-  // ── Streak from active learning days ──
+  // Streak from active learning days
   const dates = [...activeDatesSet].sort();
   if (dates.length) {
     let cur = 1, longest = 1;
@@ -563,7 +550,6 @@ function genStudentActivity(userId, assignedCourses, { createEnrollment, level =
   return stat;
 }
 
-// ─────────────────────────────────────────────────────────────────────────
 async function stamp(model, ids) {
   if (!ids.length || DRY_RUN) return;
   await model.collection.updateMany({ _id: { $in: ids } }, { $set: { _synthetic: true } });
@@ -699,12 +685,10 @@ async function seed() {
   await persist(buckets, { merge: false, selfHeal: "blanket" });
 }
 
-// ─────────────────────────────────────────────────────────────────────────
 // Persist buckets + counter updates + manifest. Shared by seed() & fillExisting().
 //   merge=true   → combine with an existing on-disk manifest (append ids + deltas)
 //   selfHeal="blanket"  → on failure, hardCleanup() (only safe for the first batch)
 //   selfHeal="targeted" → on failure, delete only THIS run's recorded ids
-// ─────────────────────────────────────────────────────────────────────────
 async function persist(buckets, { merge = false, selfHeal = "blanket" } = {}) {
   try {
     console.log("\nInserting...");
@@ -867,13 +851,11 @@ function mergeManifests(a, b) {
   return out;
 }
 
-// ─────────────────────────────────────────────────────────────────────────
 // Fill activity for EXISTING REAL students that currently have ZERO enrollment.
 // Creates real enrollments + full activity for them (tagged _synthetic so it
 // rolls back), and merges into the existing manifest. Real user docs are never
 // deleted on cleanup — only the activity we added.
 //   --only=<substr>   restrict to real students whose name/email matches substr
-// ─────────────────────────────────────────────────────────────────────────
 async function fillExisting() {
   const catalog = await loadCatalog();
   if (!catalog.length) throw new Error("No usable live courses with curriculum + instructor found.");
@@ -1029,12 +1011,10 @@ async function cleanup() {
   console.log(`\n✅ Cleanup done. Reverted counters (courses:${courseOps.length} instructors:${insOps.length} students:${stuOps.length}).`);
 }
 
-// ─────────────────────────────────────────────────────────────────────────
 // Make already-seeded synthetic users look real: rewrite demo emails to
 // personal-looking ones (no "seed"/demo marker) + set a RANDOM non-human avatar
 // (~1/3 left blank). Also strips any human pravatar photo from real users that a
 // prior run added. Cleanup is unaffected (deletes by manifest id).
-// ─────────────────────────────────────────────────────────────────────────
 async function humanize() {
   const syn = await User.find({ _synthetic: true }).select("_id name email pfpImg").lean();
   // Real users that got a pravatar (human photo) from an earlier run — clean those too.

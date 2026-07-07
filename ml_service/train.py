@@ -55,7 +55,7 @@ def evaluate_model():
     labels = kmeans.labels_
     course_ids = joblib.load(engine.COURSE_IDS_PATH)
 
-    # 1. Silhouette Score
+    # Silhouette Score
     if len(set(labels)) >= 2:
         score = sil_score(vectors, labels)
         logger.info(f"Silhouette Score: {score:.4f}")
@@ -68,7 +68,7 @@ def evaluate_model():
     else:
         logger.info("Silhouette Score: N/A (only 1 cluster)")
 
-    # 2. Cluster distribution
+    # Cluster distribution
     logger.info(f"\nCluster Distribution:")
     dist = info.get("cluster_distribution", {})
     total = sum(dist.values())
@@ -77,12 +77,12 @@ def evaluate_model():
         bar = "█" * int(pct / 2)
         logger.info(f"  Cluster {cluster_id}: {count:3d} courses ({pct:5.1f}%) {bar}")
 
-    # 3. Inertia (within-cluster sum of squares)
+    # Inertia (within-cluster sum of squares)
     logger.info(f"\nInertia (WCSS): {info.get('inertia', 'N/A')}")
     logger.info(f"Features: {info.get('n_features', 'N/A')}")
     logger.info(f"Interactions: {info.get('n_interactions', 'N/A')}")
 
-    # 4. Coverage: what % of courses have at least 1 interaction
+    # Coverage: what % of courses have at least 1 interaction
     item_item = joblib.load(engine.ITEM_ITEM_PATH) if engine.ITEM_ITEM_PATH else {}
     courses_with_cf = len(item_item)
     logger.info(

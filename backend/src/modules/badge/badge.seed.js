@@ -14,7 +14,7 @@ import logger from "#utils/logger.js";
 import Badge from "./badge.model.js";
 
 const BADGES = [
-  // ── Streak (6) ────────────────────────────────────────────────────────────
+  // Streak (6)
   {
     key: "streak_3",
     name: "First Flame",
@@ -76,7 +76,7 @@ const BADGES = [
     sortOrder: 6,
   },
 
-  // ── Completion (5) ────────────────────────────────────────────────────────
+  // Completion (5)
   {
     key: "lecture_first",
     name: "First Step",
@@ -128,7 +128,7 @@ const BADGES = [
     sortOrder: 11,
   },
 
-  // ── Performance (4) ───────────────────────────────────────────────────────
+  // Performance (4)
   {
     key: "quiz_perfect",
     name: "Ace",

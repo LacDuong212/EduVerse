@@ -23,9 +23,7 @@
 
 import natural from "natural";
 
-// -----------------------------------------------------------------------------
-// 1. Tokenization
-// -----------------------------------------------------------------------------
+// Tokenization
 // Lightweight stop-word lists for the two languages EduVerse supports.
 // Keeping the lists short avoids over-pruning on a tiny corpus (~30 courses).
 const STOPWORDS = new Set([
@@ -47,9 +45,7 @@ export const tokenize = (text) => {
   return words.filter(w => w.length >= 2 && !STOPWORDS.has(w));
 };
 
-// -----------------------------------------------------------------------------
-// 2. BM25 index
-// -----------------------------------------------------------------------------
+// BM25 index
 // BM25 formula:
 //   score(D,Q) = Σ_{t∈Q} IDF(t) · ( f(t,D)·(k1+1) ) / ( f(t,D) + k1·(1 - b + b·|D|/avgdl) )
 const BM25_K1 = 1.5;
@@ -100,9 +96,7 @@ export const bm25Score = (queryTokens, index) => {
   return out;
 };
 
-// -----------------------------------------------------------------------------
-// 3. Cosine ranking (content arm of the hybrid)
-// -----------------------------------------------------------------------------
+// Cosine ranking (content arm of the hybrid)
 // Build BM25-weighted vectors over (target ∪ candidates), then cosine-rank.
 // Removes the long-doc bias of "sum of weights" used in the old engine.
 const candidateText = (c) => {
@@ -149,9 +143,7 @@ export const cosineRank = (targetText, candidates, limit = 8) => {
     .slice(0, limit);
 };
 
-// -----------------------------------------------------------------------------
-// 4. Item-Item Collaborative Filtering — Jaccard over interaction sets
-// -----------------------------------------------------------------------------
+// Item-Item Collaborative Filtering — Jaccard over interaction sets
 // similarity(A, B) = |Users(A) ∩ Users(B)| / |Users(A) ∪ Users(B)|.
 // Robust to extreme sparsity; needs no centering (unlike Pearson). Perfect for
 // 10 users × 30 courses where Pearson/cosine would produce mostly NaN.
@@ -196,9 +188,7 @@ export const buildItemItemMatrix = (interactions) => {
   return { matrix, courseUsers: courseUsersOut, builtAt: new Date() };
 };
 
-// -----------------------------------------------------------------------------
-// 5. Backward-compat shim
-// -----------------------------------------------------------------------------
+// Backward-compat shim
 // The old engine exported getRecommendations(profile, candidates, limit) and
 // is still called from getRelatedCourses. Route it through the new ranker.
 export const getRecommendations = (targetProfile, candidateCourses, limit = 8) => {

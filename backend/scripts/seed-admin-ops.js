@@ -123,7 +123,7 @@ async function seed() {
   const adminsCol = mongoose.connection.collection("admins");
   const auditCol = mongoose.connection.collection("auditlogs");
 
-  // ── load real entities ──
+  // load real entities
   const [courses, instructorDocs, existingAdmins] = await Promise.all([
     Course.find({ isDeleted: false }).select("_id title status instructor").lean(),
     Instructor.find({}).select("user bankAccounts myCourses").lean(),
@@ -138,7 +138,7 @@ async function seed() {
   const liveCourses = courses.filter((c) => c.status === COURSE_STATUS.live);
   const courseTitle = new Map(courses.map((c) => [String(c._id), c.title]));
 
-  // ═══════════ 1. ADMIN ACCOUNT ═══════════
+  // ADMIN ACCOUNT
   const adminId = new mongoose.Types.ObjectId();
   const existingAdmin = await adminsCol.findOne({ email: ADMIN_EMAIL });
   const adminDoc = existingAdmin ? null : {
@@ -153,7 +153,7 @@ async function seed() {
     { id: adminId, name: "Trần Quản Trị", email: ADMIN_EMAIL },
   ];
 
-  // ═══════════ 1b. NEW INSTRUCTORS + REQUESTS (no courses) ═══════════
+  // NEW INSTRUCTORS + REQUESTS (no courses)
   // approved  = User role=instructor + Instructor{isApproved:true}
   // pending   = User role=student    + Instructor{isApproved:false}  (shows in requests)
   // rejected  = User role=student    + NO instructor doc (reject deletes it) → rejected notification + audit
@@ -213,7 +213,7 @@ async function seed() {
     instrEvents.push({ userId: u._id, name: u.name, email: u.email, kind: "rejected", at });
   }
 
-  // ═══════════ 2. COUPONS ═══════════
+  // COUPONS
   const existingCodes = new Set((await Coupon.find({}).select("code").lean()).map((c) => c.code));
   const baseSpecs = [
     { code: "AUTUMN25", discountType: "percent", discountValue: 25, description: "Ưu đãi mùa thu 25% toàn bộ khóa học" },
@@ -254,7 +254,7 @@ async function seed() {
     };
   });
 
-  // ═══════════ 3. PAYOUTS ═══════════
+  // PAYOUTS
   // Amounts must respect real earnings so total withdrawn (paid) never exceeds
   // total earning (= Σ completed-order pricePaid × 0.8 over the instructor's courses).
   const NET_PROFIT = 0.8, UNIT = 100000;
@@ -313,7 +313,7 @@ async function seed() {
     }
   }
 
-  // ═══════════ 4. NOTIFICATIONS ═══════════
+  // NOTIFICATIONS
   const notifications = [];
   const pushNoti = (user, type, message, createdAt) =>
     notifications.push({ user, type, message, isRead: chance(0.5), createdAt, updatedAt: createdAt });
@@ -357,7 +357,7 @@ async function seed() {
       pushNoti(ev.userId, TYPE_ENUM.rejected, "Thank you for your interest. After review, your instructor application was not approved at this time.", ev.at);
   }
 
-  // ═══════════ 5. AUDIT LOGS ═══════════
+  // AUDIT LOGS
   const auditDocs = [];
   const addAudit = (actor, action, entityType, entity = {}, extra = {}) => {
     const at = daysAgo(rint(0, 120));
@@ -418,7 +418,7 @@ async function seed() {
     if (chance(0.4)) addAudit(pick(actorPool), ACTION.COUPON_UPDATE_STATUS, ENTITY.COUPON, { id: c._id, label: c.code }, { before: { isActive: true }, after: { isActive: false } });
   }
 
-  // ── summary ──
+  // summary
   const summary = {
     adminCreated: adminDoc ? 1 : 0,
     "instructors(approved)": instrEvents.filter(e=>e.kind==="approved").length,

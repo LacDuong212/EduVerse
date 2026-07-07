@@ -42,7 +42,7 @@ from sentence_transformers import SentenceTransformer
 
 logger = logging.getLogger("ml_engine")
 
-# ── BERT Model ───────────────────────────────────────────────────────────────
+# BERT Model
 BERT_MODEL_NAME = os.getenv("BERT_MODEL", "all-MiniLM-L6-v2")
 _bert_model = None
 
@@ -57,7 +57,7 @@ def _get_bert_model():
         logger.info(f"  BERT loaded in {time.time() - start:.1f}s")
     return _bert_model
 
-# ── Paths ────────────────────────────────────────────────────────────────────
+# Paths
 MODEL_DIR = os.getenv("MODEL_PATH", "./model")
 VECTORIZER_PATH = os.path.join(MODEL_DIR, "tfidf_vectorizer.joblib")
 KMEANS_PATH = os.path.join(MODEL_DIR, "kmeans_model.joblib")
@@ -68,13 +68,13 @@ COURSE_IDS_PATH = os.path.join(MODEL_DIR, "course_ids.joblib")
 ITEM_ITEM_PATH = os.path.join(MODEL_DIR, "item_item_matrix.joblib")
 METADATA_PATH = os.path.join(MODEL_DIR, "train_metadata.joblib")
 
-# ── Scoring weights ─────────────────────────────────────────────────────────
+# Scoring weights
 W_CLUSTER = 0.25  # K-means cluster proximity
 W_CONTENT = 0.35  # TF-IDF cosine similarity
 W_CF = 0.30  # Item-item Jaccard CF
 W_POPULARITY = 0.10  # Popularity prior
 
-# ── Action weights for user profile ─────────────────────────────────────────
+# Action weights for user profile
 ACTION_WEIGHT = {
     "completed": 3,
     "active": 2,
@@ -90,9 +90,7 @@ def _rating_multiplier(rating):
     return max(0.0, min(2.0, 1.0 + (rating - 3) * 0.5))
 
 
-# =============================================================================
 # TRAINING
-# =============================================================================
 
 def _build_course_text(course: dict) -> str:
     """
@@ -128,7 +126,7 @@ def train_model(courses: list, interactions: list, n_clusters: int = None) -> di
     if not courses:
         raise ValueError("No courses to train on")
 
-    # ── Step 1: TF-IDF Vectorization ────────────────────────────────────────
+    # TF-IDF Vectorization
     course_texts = [_build_course_text(c) for c in courses]
     course_ids = [str(c["_id"]) for c in courses]
 
@@ -147,7 +145,7 @@ def train_model(courses: list, interactions: list, n_clusters: int = None) -> di
         f"TF-IDF: {course_vectors.shape[0]} courses × {course_vectors.shape[1]} features"
     )
 
-    # ── Step 2: BERT Embeddings (Deep Learning) ─────────────────────────────
+    # BERT Embeddings (Deep Learning)
     bert = _get_bert_model()
     logger.info("Computing BERT embeddings for courses...")
     start_bert = time.time()
@@ -157,7 +155,7 @@ def train_model(courses: list, interactions: list, n_clusters: int = None) -> di
         f"({time.time() - start_bert:.2f}s)"
     )
 
-    # ── Step 3: K-means Clustering (on BERT embeddings) ─────────────────────
+    # K-means Clustering (on BERT embeddings)
     # Clustering on BERT space gives better semantic separation:
     # Silhouette BERT=0.1243 vs TF-IDF=0.0579 (2x improvement)
     if n_clusters is None:
@@ -187,10 +185,10 @@ def train_model(courses: list, interactions: list, n_clusters: int = None) -> di
         ]
         logger.info(f"  Cluster {cluster_id} ({count} courses): {cluster_course_names}")
 
-    # ── Step 4: Item-Item Jaccard Matrix ────────────────────────────────────
+    # Item-Item Jaccard Matrix
     item_item_matrix = _build_jaccard_matrix(interactions, course_ids)
 
-    # ── Step 5: Persist all artifacts ───────────────────────────────────────
+    # Persist all artifacts
     joblib.dump(vectorizer, VECTORIZER_PATH)
     joblib.dump(kmeans, KMEANS_PATH)
     joblib.dump(course_vectors, COURSE_VECTORS_PATH)
@@ -259,9 +257,7 @@ def _build_jaccard_matrix(interactions: list, course_ids: list) -> dict:
     return matrix
 
 
-# =============================================================================
 # PREDICTION
-# =============================================================================
 
 # In-memory cache for loaded model artifacts
 _cache = {}
@@ -343,16 +339,16 @@ def predict(
     item_item = _cache["item_item"]
     id_to_idx = {cid: i for i, cid in enumerate(trained_course_ids)}
 
-    # ── Build user profile text (weighted by action + rating) ────────────────
+    # Build user profile text (weighted by action + rating)
     user_text = _build_user_profile_text(user_signals, candidate_courses)
     if not user_text.strip():
         return []
 
-    # ── Encode user profile with BERT (for semantic similarity signal) ───────
+    # Encode user profile with BERT (for semantic similarity signal)
     bert = _get_bert_model()
     user_bert_vector = bert.encode([user_text], show_progress_bar=False, normalize_embeddings=True)
 
-    # ── Score each candidate: CF (collaborative) + BERT-cosine (semantic) + popularity ──
+    # Score each candidate: CF (collaborative) + BERT-cosine (semantic) + popularity
     # NOTE: signals are combined via GATING (below), not weighted fusion. Experiments
     # showed fixed linear fusion let dense/low-precision signals outvote the sparse,
     # high-precision CF signal and degraded accuracy; gating routes to the right
@@ -399,7 +395,7 @@ def predict(
             }
         )
 
-    # ── Gating fusion (mixture-of-experts) ───────────────────────────────────
+    # Gating fusion (mixture-of-experts)
     # Tier 1: candidates WITH collaborative signal (cf>0) → trust CF (BERT tie-break).
     # Tier 2: cf==0 (CF blind — cold-start / new course) → rank by BERT semantic
     #         similarity, popularity tie-break. Tier 1 always ranks above Tier 2.

@@ -28,7 +28,7 @@ export const useDashboard = () => {
   const [recLoading, setRecLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // ================= STATS =================
+  // STATS
   const [stats, setStats] = useState(null);
   const [courseStats, setCourseStats] = useState(null);
 
@@ -45,7 +45,7 @@ export const useDashboard = () => {
     }
   }, [backendUrl]);
 
-  // ================= IN-PROGRESS COURSES =================
+  // IN-PROGRESS COURSES
   const [inProgressCourses, setInProgressCourses] = useState([]);
 
   const fetchInProgressCourses = useCallback(async () => {
@@ -64,7 +64,7 @@ export const useDashboard = () => {
     }
   }, [backendUrl]);
 
-  // ================= RADAR =================
+  // RADAR
   const fetchRadar = useCallback(async () => {
     try {
       setRadarLoading(true);
@@ -113,7 +113,7 @@ export const useDashboard = () => {
     }
   }, [backendUrl]);
 
-  // ================= RECOMMEND =================
+  // RECOMMEND
   const fetchRecommendations = useCallback(
     async (force = false) => {
       if (!user || user.role !== "student") {
@@ -151,7 +151,7 @@ export const useDashboard = () => {
     [backendUrl, dispatch, user, recommendedCourses.length]
   );
 
-  // ================= INIT =================
+  // INIT
   const fetchDashboardData = useCallback(
     async (force = false) => {
       await Promise.all([

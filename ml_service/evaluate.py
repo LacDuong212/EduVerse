@@ -39,9 +39,7 @@ logging.basicConfig(level=logging.INFO, format="[%(name)s] %(message)s")
 logger = logging.getLogger("evaluator")
 
 
-# ═══════════════════════════════════════════════════════════════════════
 # METRICS
-# ═══════════════════════════════════════════════════════════════════════
 
 def precision_at_k(recommended: list, relevant: set, k: int) -> float:
     """Precision@K = |recommended ∩ relevant| / K"""
@@ -80,9 +78,7 @@ def ndcg_at_k(recommended: list, relevant: set, k: int) -> float:
     return dcg / idcg if idcg > 0 else 0.0
 
 
-# ═══════════════════════════════════════════════════════════════════════
 # BASELINE STRATEGIES
-# ═══════════════════════════════════════════════════════════════════════
 
 def _strategy_random(candidates, user_signals, vectorizer, kmeans, course_vectors,
                      course_ids, item_item, top_k):
@@ -184,7 +180,7 @@ def _strategy_weighted_old(candidates, user_signals, vectorizer, kmeans, course_
     return [rows[i][0] for i in order[:top_k]]
 
 
-# ── BERT-cosine + gating helpers (new pipeline) ──────────────────────────────
+# BERT-cosine + gating helpers (new pipeline)
 _bert_lookup_cache = None
 
 
@@ -327,9 +323,7 @@ def _build_profile(user_signals, candidate_courses):
     return " ".join(parts)
 
 
-# ═══════════════════════════════════════════════════════════════════════
 # EVALUATION 1: Leave-One-Out Cross-Validation
-# ═══════════════════════════════════════════════════════════════════════
 
 def leave_one_out_evaluation(top_k_values: list[int]):
     """
@@ -482,9 +476,7 @@ def leave_one_out_evaluation(top_k_values: list[int]):
     return results
 
 
-# ═══════════════════════════════════════════════════════════════════════
 # EVALUATION 2: Catalog Coverage & Diversity
-# ═══════════════════════════════════════════════════════════════════════
 
 def coverage_evaluation(top_k: int = 8):
     """
@@ -563,9 +555,7 @@ def coverage_evaluation(top_k: int = 8):
     }
 
 
-# ═══════════════════════════════════════════════════════════════════════
 # EVALUATION 3: Elbow Method & Silhouette Analysis
-# ═══════════════════════════════════════════════════════════════════════
 
 def elbow_silhouette_analysis(k_range=None):
     """
@@ -624,9 +614,7 @@ def elbow_silhouette_analysis(k_range=None):
     return results
 
 
-# ═══════════════════════════════════════════════════════════════════════
 # EVALUATION 4: Trained Matrix Factorization (implicit ALS) — model-based CF
-# ═══════════════════════════════════════════════════════════════════════
 
 def _train_als(R, dim=16, reg=0.1, iters=15, alpha=10.0):
     """Implicit-feedback ALS (Hu et al. 2008). Learns user/item latent factors
@@ -710,9 +698,7 @@ def mf_loo_evaluation(top_k_values):
     return results
 
 
-# ═══════════════════════════════════════════════════════════════════════
 # MAIN
-# ═══════════════════════════════════════════════════════════════════════
 
 def main():
     parser = argparse.ArgumentParser(description="Evaluate EduVerse ML recommendation model")
@@ -723,16 +709,16 @@ def main():
     logger.info("Loading model and data...")
     engine.reload_model()
 
-    # 1. LOO evaluation with baseline comparison
+    # LOO evaluation with baseline comparison
     loo_results = leave_one_out_evaluation(args.top_k)
 
-    # 2. Coverage & diversity
+    # Coverage & diversity
     coverage_results = coverage_evaluation(top_k=max(args.top_k))
 
-    # 3. Elbow & silhouette
+    # Elbow & silhouette
     elbow_results = elbow_silhouette_analysis()
 
-    # 4. Trained Matrix Factorization (model-based CF)
+    # Trained Matrix Factorization (model-based CF)
     mf_results = mf_loo_evaluation(args.top_k)
 
     # Save results to JSON

@@ -1,6 +1,9 @@
+import { toCourseCardDtoList } from "#modules/course/course.mapper.js";
 import { getLastLearningProgress } from "#modules/learning/learning.service.js";
+import { getRecommendedCourses } from "#services/recommendation.service.js";
 import { sendMessageToDialogflow } from "#services/dialogflow.service.js";
-import { INTENT, PAGE_MAP } from "./chatbot.config.js";
+import { INTENT, PAGE_MAP, RECOMMENDATION_CARD_LIMIT, SUGGESTIONS } from "./chatbot.config.js";
+import { FAQ_TOPICS, FAQ_FALLBACK, FAQ_KEYWORDS } from "./faq.config.js";
 import * as chatbotUtils from "./chatbot.utils.js";
 
 export const handleChatbotResponse = async (
@@ -18,6 +21,7 @@ export const handleChatbotResponse = async (
   // get default text response
   let botReply = chatbotUtils.getBotText(response, languageCode);
   let actionData = null;
+  let suggestions = null;
 
   // process custom payload
   if (response.fulfillmentMessages) {
@@ -29,6 +33,30 @@ export const handleChatbotResponse = async (
       // course search intent
       if (payload.type === INTENT.COURSE_SEARCH && payload.filters) {
         actionData = handleCourseSearch(payload.filters);
+      }
+
+      // FAQ intent
+      else if (payload.type === INTENT.FAQ) {
+        // Try the Dialogflow-extracted parameter first, then the payload, then
+        // fall back to keyword detection on the raw message (ES entity
+        // extraction on imported agents is unreliable).
+        const params = chatbotUtils.protoToJSON(response.parameters) || {};
+        const topic =
+          params.topic ||
+          (payload.topic && payload.topic !== "$topic" ? payload.topic : null) ||
+          detectFaqTopic(userMessage);
+
+        const result = handleFaq(topic, languageCode);
+        botReply = result.replyOverride;
+        if (result.actionData) actionData = result.actionData;
+        suggestions = SUGGESTIONS[isVi ? "vi" : "en"];
+      }
+
+      // course recommendation intent
+      else if (payload.type === INTENT.COURSE_RECOMMENDATION) {
+        const result = await handleCourseRecommendation(userId, languageCode);
+        botReply = result.replyOverride;
+        if (result.actionData) actionData = result.actionData;
       }
 
       // page navigation intent
@@ -76,9 +104,88 @@ export const handleChatbotResponse = async (
     }
   }
 
+  // When Dialogflow couldn't confidently match an intent, offer quick replies
+  // so the user discovers what the assistant can actually do.
+  if (!suggestions && response.intent?.isFallback) {
+    suggestions = SUGGESTIONS[isVi ? "vi" : "en"];
+  }
+
   return {
     reply: botReply,
-    action: actionData
+    action: actionData,
+    suggestions,
+  };
+};
+
+/**
+ * Infers the FAQ topic from the raw user message via keyword matching.
+ * Used as a fallback when Dialogflow doesn't extract the @faq_topic entity.
+ * @param {String} message
+ * @returns {String|null} topic key or null
+ */
+export const detectFaqTopic = (message) => {
+  if (!message) return null;
+  const text = message.toLowerCase();
+
+  for (const [topic, keywords] of Object.entries(FAQ_KEYWORDS)) {
+    if (keywords.some((kw) => text.includes(kw))) return topic;
+  }
+  return null;
+};
+
+/**
+ * Handles logic for FAQ intent.
+ * @param {String} topic - resolved from the Dialogflow @faq_topic entity
+ * @param {String} languageCode - "en" or "vi"
+ */
+export const handleFaq = (topic, languageCode = "en") => {
+  const lang = languageCode === "vi" ? "vi" : "en";
+  const entry = topic ? FAQ_TOPICS[topic] : null;
+
+  if (!entry || !entry[lang]) {
+    return { actionData: null, replyOverride: FAQ_FALLBACK[lang] };
+  }
+
+  return {
+    actionData: entry[lang].action || null,
+    replyOverride: entry[lang].answer,
+  };
+};
+
+/**
+ * Handles logic for Course Recommendation intent.
+ * Personalized for logged-in students; best-sellers for guests.
+ * @param {String|undefined} userId
+ * @param {String} languageCode - "en" or "vi"
+ */
+export const handleCourseRecommendation = async (userId, languageCode = "en") => {
+  const isVi = languageCode === "vi";
+
+  const { courses } = await getRecommendedCourses(userId, RECOMMENDATION_CARD_LIMIT);
+  const cards = toCourseCardDtoList(courses || []);
+
+  if (cards.length === 0) {
+    return {
+      actionData: {
+        type: "link",
+        url: "/courses",
+        label: isVi ? "Xem tất cả khóa học" : "Browse all courses",
+      },
+      replyOverride: isVi
+        ? "Hiện chưa có gợi ý phù hợp. Bạn có thể khám phá toàn bộ khóa học nhé!"
+        : "I couldn't find a recommendation right now. Feel free to browse all our courses!",
+    };
+  }
+
+  return {
+    actionData: { type: "cards", courses: cards },
+    replyOverride: userId
+      ? (isVi
+        ? "Dưới đây là vài khóa học mình nghĩ bạn sẽ thích:"
+        : "Here are a few courses I think you'll like:")
+      : (isVi
+        ? "Đây là những khóa học đang được yêu thích nhất:"
+        : "Here are some of our most popular courses:"),
   };
 };
 

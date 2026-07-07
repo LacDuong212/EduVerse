@@ -4,6 +4,31 @@ export const INTENT = {
   COURSE_SEARCH: "COURSE_SEARCH",
   PAGE_NAVIGATION: "PAGE_NAVIGATION",
   LEARNING_PROGRESS: "LEARNING_PROGRESS",
+  FAQ: "FAQ",
+  COURSE_RECOMMENDATION: "COURSE_RECOMMENDATION",
+};
+
+// How many recommended course cards to show in a single chatbot reply.
+export const RECOMMENDATION_CARD_LIMIT = 4;
+
+/**
+ * Quick-reply chips offered to the user. Used both on the welcome screen
+ * (frontend) and as follow-ups when Dialogflow can't match the message
+ * (backend fallback). `query` is the text sent back when a chip is clicked.
+ */
+export const SUGGESTIONS = {
+  en: [
+    { label: "Recommend courses", query: "Recommend some courses for me" },
+    { label: "Payment methods", query: "What payment methods do you accept?" },
+    { label: "Get a certificate", query: "How do I get a certificate?" },
+    { label: "Become an instructor", query: "How do I become an instructor?" },
+  ],
+  vi: [
+    { label: "Gợi ý khóa học", query: "Gợi ý vài khóa học cho tôi" },
+    { label: "Cách thanh toán", query: "Có những phương thức thanh toán nào?" },
+    { label: "Lấy chứng chỉ", query: "Làm sao để lấy chứng chỉ?" },
+    { label: "Trở thành giảng viên", query: "Làm sao để trở thành giảng viên?" },
+  ],
 };
 
 export const PAGE_MAP = {
