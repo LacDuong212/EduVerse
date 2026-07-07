@@ -1,3 +1,4 @@
+import { useSelector } from "react-redux";
 import { Route, Routes, useLocation } from "react-router-dom";
 import ChatbotWidget from "@/app/chatbot";
 import BaseRedirect from "@/components/BaseRedirect";
@@ -16,6 +17,7 @@ const HIDE_CHATBOT = [
 
 const AppRouter = props => {
   const location = useLocation();
+  const { userData } = useSelector((state) => state.auth);
 
   const shouldHideChat = HIDE_CHATBOT?.some(path => {
     if (path === "/") return location.pathname === "/";
@@ -26,7 +28,7 @@ const AppRouter = props => {
     <>
       <ScrollToTop />
       <RoutePreloaderListener />
-      {!shouldHideChat && <ChatbotWidget />}
+      {!shouldHideChat && userData?.role !== "instructor" && <ChatbotWidget />}
 
       <Routes>
         <Route path="/" element={<BaseRedirect />} />

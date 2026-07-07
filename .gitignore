@@ -163,10 +163,9 @@ ml_service/__pycache__/
 ml_service/venv/
 
 # Markdowns
-PROJECT.md
+*.md
+!README.md
 
 # Others
 /frontend_tailwind
 /knowledge
-/PROJECT_KNOWLEDGE.md
-/ROADMAP.md
