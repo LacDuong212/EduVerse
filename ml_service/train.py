@@ -1,14 +1,3 @@
-"""
-EduVerse ML — Standalone Training Script
-==========================================
-Usage:
-  python train.py
-
-Connects directly to MongoDB, trains the model (BERT embeddings +
-Item-Item Jaccard matrix), and saves it to disk. Can be run as a cron job
-or via the /api/train endpoint.
-"""
-
 import logging
 
 from dotenv import load_dotenv

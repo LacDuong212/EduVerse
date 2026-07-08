@@ -1,8 +1,3 @@
-"""
-EduVerse ML Service — Database connection & data loading utilities.
-Connects to the same MongoDB as the Node.js backend.
-"""
-
 import os
 from pymongo import MongoClient
 from dotenv import load_dotenv
@@ -14,7 +9,6 @@ _db = None
 
 
 def get_db():
-    """Lazy-initialize and return the MongoDB database handle."""
     global _client, _db
     if _db is not None:
         return _db
@@ -24,14 +18,12 @@ def get_db():
         raise RuntimeError("MONGODB_URI is not set")
 
     _client = MongoClient(uri)
-    # Extract DB name from URI, default to "test"
     db_name = uri.rsplit("/", 1)[-1].split("?")[0] or "test"
     _db = _client[db_name]
     return _db
 
 
 def load_courses():
-    """Load all published, non-deleted courses with their category names."""
     db = get_db()
     pipeline = [
         {"$match": {"status": "live", "isDeleted": False, "isPrivate": False}},
@@ -62,10 +54,6 @@ def load_courses():
 
 
 def load_interactions():
-    """
-    Load all user-course interactions: enrollments, wishlist, reviews.
-    Returns list of dicts: { userId, courseId, action, rating? }
-    """
     db = get_db()
 
     interactions = []
@@ -108,10 +96,6 @@ def load_interactions():
 
 
 def load_user_signals(user_id: str):
-    """
-    Load all signals for a specific user.
-    Returns: { enrollments, wishlist, reviews, interests }
-    """
     db = get_db()
     from bson import ObjectId
 

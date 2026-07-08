@@ -1,37 +1,12 @@
-/**
- * Recommendation Engine — Hybrid (Content BM25 + Item-Item Jaccard CF)
- * ---------------------------------------------------------------------
- * Pure-Node implementation. No Python, no external ML service.
- *
- * Why BM25 instead of the previous "sum of TF-IDF weights"?
- * ---------------------------------------------------------
- * The old engine summed TF-IDF weights of the user's terms across each
- * candidate document, which systematically favored *long* candidates
- * (more terms => higher sum). BM25 with cosine on the resulting weighted
- * vectors is length-normalized AND saturating (k1 controls TF saturation),
- * the standard upgrade for short documents like course titles and tag lists.
- *
- * Public API (used by recommendation.service.js):
- *   - tokenize(text)
- *   - buildBm25Index(documents)              -> { idf, avgdl, tfPerDoc, ... }
- *   - bm25Score(queryTokens, index)          -> [{ index, score } ...]
- *   - cosineRank(targetText, candidates, limit)  -> ranked candidates
- *   - jaccard(setA, setB)                    -> 0..1
- *   - buildItemItemMatrix(interactions)      -> { matrix, courseUsers, builtAt }
- *   - getRecommendations(profile, cands, limit)  -> backward-compat shim
- */
-
 import natural from "natural";
 
-// Tokenization
-// Lightweight stop-word lists for the two languages EduVerse supports.
-// Keeping the lists short avoids over-pruning on a tiny corpus (~30 courses).
+
 const STOPWORDS = new Set([
   // english
   "a","an","the","and","or","of","to","for","in","on","with","by","is","are",
   "be","this","that","you","your","i","we","it","as","at","from","but","not",
   "course","courses","learn","learning","intro","introduction","beginner","beginners",
-  // vietnamese (very small)
+  // vietnamese
   "và","hoặc","của","cho","trong","trên","là","các","một","những","này","đó",
   "khoá","khóa","học","cơ","bản","nâng","cao","giới","thiệu"
 ]);
@@ -46,8 +21,6 @@ export const tokenize = (text) => {
 };
 
 // BM25 index
-// BM25 formula:
-//   score(D,Q) = Σ_{t∈Q} IDF(t) · ( f(t,D)·(k1+1) ) / ( f(t,D) + k1·(1 - b + b·|D|/avgdl) )
 const BM25_K1 = 1.5;
 const BM25_B  = 0.75;
 
@@ -96,12 +69,9 @@ export const bm25Score = (queryTokens, index) => {
   return out;
 };
 
-// Cosine ranking (content arm of the hybrid)
-// Build BM25-weighted vectors over (target ∪ candidates), then cosine-rank.
-// Removes the long-doc bias of "sum of weights" used in the old engine.
+
 const candidateText = (c) => {
   const tags = (c.tags || []).join(" ");
-  // Repeat tags once for a cheap field-boost: tags are the strongest signal.
   return `${c.title || ""} ${c.subtitle || ""} ${tags} ${tags} ${c.category?.name || ""}`;
 };
 
@@ -143,10 +113,6 @@ export const cosineRank = (targetText, candidates, limit = 8) => {
     .slice(0, limit);
 };
 
-// Item-Item Collaborative Filtering — Jaccard over interaction sets
-// similarity(A, B) = |Users(A) ∩ Users(B)| / |Users(A) ∪ Users(B)|.
-// Robust to extreme sparsity; needs no centering (unlike Pearson). Perfect for
-// 10 users × 30 courses where Pearson/cosine would produce mostly NaN.
 export const jaccard = (setA, setB) => {
   if (!setA?.size || !setB?.size) return 0;
   let inter = 0;
@@ -188,9 +154,6 @@ export const buildItemItemMatrix = (interactions) => {
   return { matrix, courseUsers: courseUsersOut, builtAt: new Date() };
 };
 
-// Backward-compat shim
-// The old engine exported getRecommendations(profile, candidates, limit) and
-// is still called from getRelatedCourses. Route it through the new ranker.
 export const getRecommendations = (targetProfile, candidateCourses, limit = 8) => {
   if (!candidateCourses?.length) return [];
   const targetText = [

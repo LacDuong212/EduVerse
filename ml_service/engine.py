@@ -1,22 +1,3 @@
-"""
-EduVerse ML Recommendation Engine
-==================================
-Runtime pipeline (gating / mixture-of-experts):
-  - BERT embeddings (sentence-transformers all-MiniLM-L6-v2, 384-dim) for
-    semantic content similarity (cosine).
-  - Item-Item Jaccard collaborative filtering from interactions.
-  - Popularity prior: log(studentsEnrolled + 1) + 0.5 * avg_rating.
-
-Training persists: BERT course vectors, course ids, and the Jaccard matrix.
-
-Prediction:
-  - Build user profile text from enrollment/wishlist history + interests.
-  - BERT-encode the profile → cosine vs each candidate (semantic signal).
-  - Score CF (Jaccard) + BERT-cosine + popularity, then GATE:
-      Tier 1 (cf>0):  rank by (cf, bert)
-      Tier 2 (cf==0): rank by (bert, popularity), always below Tier 1.
-"""
-
 import os
 import math
 import time
@@ -29,13 +10,11 @@ from sentence_transformers import SentenceTransformer
 
 logger = logging.getLogger("ml_engine")
 
-# BERT Model
 BERT_MODEL_NAME = os.getenv("BERT_MODEL", "all-MiniLM-L6-v2")
 _bert_model = None
 
 
 def _get_bert_model():
-    """Lazy-load BERT model (avoids loading until first use)."""
     global _bert_model
     if _bert_model is None:
         logger.info(f"Loading BERT model: {BERT_MODEL_NAME}...")
@@ -61,7 +40,6 @@ ACTION_WEIGHT = {
 
 
 def _rating_multiplier(rating):
-    """Rating 5★ → 2.0x, 3★ → 1.0x, 1★ → 0.0x"""
     if not rating or rating < 1:
         return 1.0
     return max(0.0, min(2.0, 1.0 + (rating - 3) * 0.5))
@@ -70,10 +48,6 @@ def _rating_multiplier(rating):
 # TRAINING
 
 def _build_course_text(course: dict) -> str:
-    """
-    Combine course fields into a single text document for BERT embedding.
-    Tags are repeated for a field-boost effect (tags are strong signals).
-    """
     title = course.get("title", "") or ""
     subtitle = course.get("subtitle", "") or ""
     tags = " ".join(course.get("tags", []) or [])
@@ -84,18 +58,6 @@ def _build_course_text(course: dict) -> str:
 
 
 def train_model(courses: list, interactions: list) -> dict:
-    """
-    Train the recommendation pipeline:
-      1. BERT embeddings for each course (semantic content signal)
-      2. Item-item Jaccard matrix from interactions (collaborative signal)
-
-    Args:
-        courses: list of course dicts from DB
-        interactions: list of { userId, courseId, action, rating? }
-
-    Returns:
-        Training metadata dict
-    """
     os.makedirs(MODEL_DIR, exist_ok=True)
 
     if not courses:
@@ -137,10 +99,6 @@ def train_model(courses: list, interactions: list) -> dict:
 
 
 def _build_jaccard_matrix(interactions: list, course_ids: list) -> dict:
-    """
-    Build item-item Jaccard similarity matrix.
-    similarity(A, B) = |Users(A) ∩ Users(B)| / |Users(A) ∪ Users(B)|
-    """
     # Build course→users mapping
     course_users = {}
     for it in interactions:
@@ -185,7 +143,6 @@ _cache = {}
 
 
 def _load_model():
-    """Load trained model artifacts into memory (cached)."""
     if _cache.get("loaded"):
         return True
 
@@ -212,13 +169,11 @@ def _load_model():
 
 
 def reload_model():
-    """Force reload model from disk (after retraining)."""
     _cache.clear()
     return _load_model()
 
 
 def get_model_info() -> dict:
-    """Return training metadata."""
     if not _load_model():
         return {"status": "not_trained"}
     return {**_cache.get("metadata", {}), "status": "ready"}
@@ -229,17 +184,6 @@ def predict(
     candidate_courses: list,
     top_k: int = 8,
 ) -> list:
-    """
-    Generate course recommendations for a user.
-
-    Args:
-        user_signals: { enrollments, wishlist, reviews, interests }
-        candidate_courses: list of course dicts (already excludes purchased)
-        top_k: number of recommendations to return
-
-    Returns:
-        list of { courseId, score, scores: { cf, bert, popularity } }
-    """
     if not _load_model():
         logger.warning("Model not trained, returning empty recommendations")
         return []
@@ -261,10 +205,7 @@ def predict(
     bert = _get_bert_model()
     user_bert_vector = bert.encode([user_text], show_progress_bar=False, normalize_embeddings=True)
 
-    # Score each candidate: CF (collaborative) + BERT-cosine (semantic) + popularity,
-    # then combine via GATING (below), not weighted fusion. Fixed linear fusion let
-    # dense/low-precision signals outvote the sparse, high-precision CF signal;
-    # gating routes to the right technique per context (mixture-of-experts).
+# Compute CF, semantic similarity and popularity score
     uvec = user_bert_vector[0]
     u_norm = float(np.linalg.norm(uvec)) + 1e-9
 
@@ -272,10 +213,8 @@ def predict(
     for course in candidate_courses:
         cid = str(course["_id"])
 
-        # Collaborative signal — Jaccard item-item (sparse, high precision)
         cf_score = _compute_cf_score(user_signals, cid, item_item)
 
-        # Semantic signal — cosine between user & course BERT embeddings (deep learning)
         idx = id_to_idx.get(cid)
         if idx is not None:
             cvec = trained_bert_vectors[idx]
@@ -306,10 +245,6 @@ def predict(
             }
         )
 
-    # Gating fusion (mixture-of-experts)
-    # Tier 1: candidates WITH collaborative signal (cf>0) → trust CF (BERT tie-break).
-    # Tier 2: cf==0 (CF blind — cold-start / new course) → rank by BERT semantic
-    #         similarity, popularity tie-break. Tier 1 always ranks above Tier 2.
     tier1 = [s for s in scored if s["scores"]["cf"] > 0]
     tier2 = [s for s in scored if s["scores"]["cf"] == 0]
     tier1.sort(key=lambda s: (s["scores"]["cf"], s["scores"]["bert"]), reverse=True)
@@ -325,11 +260,6 @@ def predict(
 
 
 def _build_user_profile_text(user_signals: dict, candidate_courses: list) -> str:
-    """
-    Build a text representation of the user's taste.
-    Uses enrollment/wishlist course data + interests.
-    Courses with higher action weight and better rating are repeated more.
-    """
     from db import load_courses
 
     # Create a lookup for all course data
@@ -373,10 +303,6 @@ def _build_user_profile_text(user_signals: dict, candidate_courses: list) -> str
 
 
 def _compute_cf_score(user_signals: dict, candidate_id: str, item_item: dict) -> float:
-    """
-    Score a candidate course using item-item Jaccard CF.
-    score(c) = Σ_{h ∈ user_history} weight(h) × sim(h, c)
-    """
     if not item_item:
         return 0.0
 

@@ -11,9 +11,6 @@ import {
   getRecommendations
 } from "#utils/recommendationEngine.js";
 
-// Recommendations come from the Python ML service when it's reachable; otherwise
-// we fall back to the in-process version below. Both rank the same way: courses
-// the user's peers also took come first, then the rest by content match.
 
 const ML_SERVICE_URL = process.env.ML_SERVICE_URL || "http://localhost:5002";
 const ML_TIMEOUT_MS = parseInt(process.env.ML_TIMEOUT_MS || "3000", 10);
@@ -29,14 +26,12 @@ const coursePopulate = [
   }
 ];
 
-// How much each interaction counts when building the user's taste profile.
 const ACTION_WEIGHT = {
   completed: 3,
   active: 2,
   wishlist: 1,
 };
 
-// 5★ doubles a course's weight, 1★ zeroes it, 3★ leaves it unchanged.
 const ratingMultiplier = (rating) => {
   if (!rating || rating < 1) return 1;
   return Math.max(0, Math.min(2, 1 + (rating - 3) * 0.5));
@@ -206,7 +201,6 @@ const getRecommendedCoursesNodeFallback = async (
   );
 
   // Gating: anything with a collaborative signal outranks anything without it.
-  // Content breaks ties inside each group; popularity is the last resort.
   const scored = candidates.map(c => {
     const id = String(c._id);
     return {
@@ -249,8 +243,6 @@ const getRecommendedCoursesNodeFallback = async (
   return { courses: finalCourses, debugSource };
 };
 
-// Repeat each course's text by its weight so BM25 leans toward the courses the
-// user cares about most. Interests are tacked on once at the end.
 const buildUserProfileText = (weightedHistory, interests) => {
   const parts = [];
   for (const { course, weight } of weightedHistory) {

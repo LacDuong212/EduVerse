@@ -1,15 +1,3 @@
-"""
-EduVerse ML Recommendation Service — FastAPI Application
-=========================================================
-Endpoints:
-  POST /api/train           — Train/retrain the model from DB data
-  POST /api/recommend       — Get recommendations for a user
-  GET  /api/model/info      — Get training metadata & status
-  GET  /api/health          — Health check
-
-This service is called by the Node.js backend via HTTP.
-"""
-
 import os
 import logging
 from contextlib import asynccontextmanager
@@ -96,22 +84,12 @@ async def health():
 
 @app.get("/api/model/info")
 async def model_info():
-    """Return training metadata and model status."""
     info = engine.get_model_info()
     return info
 
 
 @app.post("/api/train", response_model=TrainResponse)
 async def train(req: TrainRequest = TrainRequest()):
-    """
-    Train the recommendation model from current DB data.
-    Steps:
-      1. Load all published courses from MongoDB
-      2. Load all user-course interactions
-      3. Compute BERT embeddings + Jaccard matrix
-      4. Persist to disk
-      5. Reload into memory
-    """
     try:
         logger.info("Training started...")
 
@@ -142,14 +120,6 @@ async def train(req: TrainRequest = TrainRequest()):
 
 @app.post("/api/recommend", response_model=RecommendResponse)
 async def recommend(req: RecommendRequest):
-    """
-    Get course recommendations for a user.
-    Pipeline:
-      1. Load user's signals (enrollments, wishlist, reviews, interests)
-      2. Load candidate courses (exclude already enrolled)
-      3. Run hybrid ML prediction (gating: CF + BERT semantic + popularity)
-      4. Return scored & ranked results
-    """
     try:
         model_status = engine.get_model_info().get("status", "not_trained")
 
