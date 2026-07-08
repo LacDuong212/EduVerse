@@ -1,30 +1,20 @@
 """
 EduVerse ML Recommendation Engine
 ==================================
-Hybrid pipeline (Option C — BERT + TF-IDF):
-  Layer 1 (Deep Learning) — K-means clustering on BERT embeddings (sentence-transformers)
-  Layer 2 (Content)       — Cosine similarity using TF-IDF vectors (best accuracy)
-  Layer 3 (CF)            — Item-Item Jaccard collaborative filtering
-  Layer 4 (Popularity)    — log(studentsEnrolled + 1) prior
+Runtime pipeline (gating / mixture-of-experts):
+  - BERT embeddings (sentence-transformers all-MiniLM-L6-v2, 384-dim) for
+    semantic content similarity (cosine).
+  - Item-Item Jaccard collaborative filtering from interactions.
+  - Popularity prior: log(studentsEnrolled + 1) + 0.5 * avg_rating.
 
-Training:
-  - BERT embeddings via sentence-transformers (all-MiniLM-L6-v2, 384-dim)
-  - K-means trained on BERT embeddings (better semantic clustering, Silhouette 2x)
-  - TF-IDF vectorizer fitted on course text (for content similarity signal)
-  - Item-Item Jaccard matrix precomputed from interactions
-  - All artifacts persisted via joblib for fast loading
+Training persists: BERT course vectors, course ids, and the Jaccard matrix.
 
 Prediction:
-  - Build user profile text from enrollment history + interests
-  - BERT-encode user profile → predict cluster (K-means on BERT space)
-  - TF-IDF transform user profile → cosine similarity (content signal)
-  - Score candidates using 4 weighted signals (cluster, content, CF, popularity)
-  - Min-max normalize + fuse → return top-K
-
-Architecture rationale (from evaluation):
-  - BERT clustering: Silhouette 0.1243 vs TF-IDF 0.0579 (2x better separation)
-  - TF-IDF content: NDCG@5 0.8265 vs BERT 0.7778 (6% better accuracy)
-  - Best of both worlds: BERT for semantic grouping, TF-IDF for keyword matching
+  - Build user profile text from enrollment/wishlist history + interests.
+  - BERT-encode the profile → cosine vs each candidate (semantic signal).
+  - Score CF (Jaccard) + BERT-cosine + popularity, then GATE:
+      Tier 1 (cf>0):  rank by (cf, bert)
+      Tier 2 (cf==0): rank by (bert, popularity), always below Tier 1.
 """
 
 import os
@@ -35,9 +25,6 @@ from datetime import datetime
 
 import numpy as np
 import joblib
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.cluster import KMeans
-from sklearn.metrics.pairwise import cosine_similarity
 from sentence_transformers import SentenceTransformer
 
 logger = logging.getLogger("ml_engine")
@@ -59,20 +46,10 @@ def _get_bert_model():
 
 # Paths
 MODEL_DIR = os.getenv("MODEL_PATH", "./model")
-VECTORIZER_PATH = os.path.join(MODEL_DIR, "tfidf_vectorizer.joblib")
-KMEANS_PATH = os.path.join(MODEL_DIR, "kmeans_model.joblib")
-COURSE_VECTORS_PATH = os.path.join(MODEL_DIR, "course_vectors.joblib")
 BERT_VECTORS_PATH = os.path.join(MODEL_DIR, "bert_vectors.joblib")
-COURSE_CLUSTERS_PATH = os.path.join(MODEL_DIR, "course_clusters.joblib")
 COURSE_IDS_PATH = os.path.join(MODEL_DIR, "course_ids.joblib")
 ITEM_ITEM_PATH = os.path.join(MODEL_DIR, "item_item_matrix.joblib")
 METADATA_PATH = os.path.join(MODEL_DIR, "train_metadata.joblib")
-
-# Scoring weights
-W_CLUSTER = 0.25  # K-means cluster proximity
-W_CONTENT = 0.35  # TF-IDF cosine similarity
-W_CF = 0.30  # Item-item Jaccard CF
-W_POPULARITY = 0.10  # Popularity prior
 
 # Action weights for user profile
 ACTION_WEIGHT = {
@@ -94,7 +71,7 @@ def _rating_multiplier(rating):
 
 def _build_course_text(course: dict) -> str:
     """
-    Combine course fields into a single text document for TF-IDF.
+    Combine course fields into a single text document for BERT embedding.
     Tags are repeated for a field-boost effect (tags are strong signals).
     """
     title = course.get("title", "") or ""
@@ -106,17 +83,15 @@ def _build_course_text(course: dict) -> str:
     return f"{title} {subtitle} {tags} {tags} {category} {level}"
 
 
-def train_model(courses: list, interactions: list, n_clusters: int = None) -> dict:
+def train_model(courses: list, interactions: list) -> dict:
     """
-    Train the full recommendation pipeline:
-      1. TF-IDF vectorizer on course text
-      2. K-means on BERT embeddings
-      3. Item-item Jaccard matrix from interactions
+    Train the recommendation pipeline:
+      1. BERT embeddings for each course (semantic content signal)
+      2. Item-item Jaccard matrix from interactions (collaborative signal)
 
     Args:
         courses: list of course dicts from DB
         interactions: list of { userId, courseId, action, rating? }
-        n_clusters: number of K-means clusters (auto-determined if None)
 
     Returns:
         Training metadata dict
@@ -126,26 +101,10 @@ def train_model(courses: list, interactions: list, n_clusters: int = None) -> di
     if not courses:
         raise ValueError("No courses to train on")
 
-    # TF-IDF Vectorization
     course_texts = [_build_course_text(c) for c in courses]
     course_ids = [str(c["_id"]) for c in courses]
 
-    vectorizer = TfidfVectorizer(
-        max_features=500,  # More than enough for ~30 courses
-        ngram_range=(1, 2),  # Capture bigrams like "machine learning"
-        min_df=1,  # Keep all terms (small corpus)
-        max_df=0.95,  # Remove terms appearing in >95% of docs
-        sublinear_tf=True,  # Apply 1 + log(tf) — similar to BM25 saturation
-        strip_accents="unicode",
-        lowercase=True,
-    )
-    course_vectors = vectorizer.fit_transform(course_texts)
-
-    logger.info(
-        f"TF-IDF: {course_vectors.shape[0]} courses × {course_vectors.shape[1]} features"
-    )
-
-    # BERT Embeddings (Deep Learning)
+    # BERT embeddings (semantic content)
     bert = _get_bert_model()
     logger.info("Computing BERT embeddings for courses...")
     start_bert = time.time()
@@ -155,59 +114,21 @@ def train_model(courses: list, interactions: list, n_clusters: int = None) -> di
         f"({time.time() - start_bert:.2f}s)"
     )
 
-    # K-means Clustering (on BERT embeddings)
-    # Clustering on BERT space gives better semantic separation:
-    # Silhouette BERT=0.1243 vs TF-IDF=0.0579 (2x improvement)
-    if n_clusters is None:
-        n_clusters = max(2, min(8, int(math.sqrt(len(courses) / 2))))
-        n_clusters = min(n_clusters, len(courses) - 1)
-
-    kmeans = KMeans(
-        n_clusters=n_clusters,
-        random_state=42,
-        n_init=10,
-        max_iter=300,
-    )
-    kmeans.fit(bert_vectors)
-    cluster_labels = kmeans.labels_
-
-    logger.info(
-        f"K-means (on BERT): {n_clusters} clusters, inertia={kmeans.inertia_:.2f}"
-    )
-
-    # Log cluster distribution
-    unique, counts = np.unique(cluster_labels, return_counts=True)
-    for cluster_id, count in zip(unique, counts):
-        cluster_course_names = [
-            courses[i].get("title", "?")
-            for i in range(len(courses))
-            if cluster_labels[i] == cluster_id
-        ]
-        logger.info(f"  Cluster {cluster_id} ({count} courses): {cluster_course_names}")
-
-    # Item-Item Jaccard Matrix
+    # Item-Item Jaccard matrix (collaborative)
     item_item_matrix = _build_jaccard_matrix(interactions, course_ids)
 
-    # Persist all artifacts
-    joblib.dump(vectorizer, VECTORIZER_PATH)
-    joblib.dump(kmeans, KMEANS_PATH)
-    joblib.dump(course_vectors, COURSE_VECTORS_PATH)
+    # Persist artifacts
     joblib.dump(bert_vectors, BERT_VECTORS_PATH)
-    joblib.dump(cluster_labels, COURSE_CLUSTERS_PATH)
     joblib.dump(course_ids, COURSE_IDS_PATH)
     joblib.dump(item_item_matrix, ITEM_ITEM_PATH)
 
     metadata = {
         "trained_at": datetime.utcnow().isoformat(),
         "n_courses": len(courses),
-        "n_features_tfidf": course_vectors.shape[1],
         "n_features_bert": bert_vectors.shape[1],
         "bert_model": BERT_MODEL_NAME,
-        "n_clusters": n_clusters,
         "n_interactions": len(interactions),
-        "cluster_distribution": {int(k): int(v) for k, v in zip(unique, counts)},
-        "inertia": float(kmeans.inertia_),
-        "architecture": "Option C: BERT clustering + TF-IDF content",
+        "architecture": "Gating: BERT semantic + Item-Item Jaccard CF + popularity",
     }
     joblib.dump(metadata, METADATA_PATH)
 
@@ -269,11 +190,7 @@ def _load_model():
         return True
 
     required = [
-        VECTORIZER_PATH,
-        KMEANS_PATH,
-        COURSE_VECTORS_PATH,
         BERT_VECTORS_PATH,
-        COURSE_CLUSTERS_PATH,
         COURSE_IDS_PATH,
     ]
     for path in required:
@@ -281,11 +198,7 @@ def _load_model():
             logger.warning(f"Model file missing: {path}")
             return False
 
-    _cache["vectorizer"] = joblib.load(VECTORIZER_PATH)
-    _cache["kmeans"] = joblib.load(KMEANS_PATH)
-    _cache["course_vectors"] = joblib.load(COURSE_VECTORS_PATH)
     _cache["bert_vectors"] = joblib.load(BERT_VECTORS_PATH)
-    _cache["course_clusters"] = joblib.load(COURSE_CLUSTERS_PATH)
     _cache["course_ids"] = joblib.load(COURSE_IDS_PATH)
     _cache["item_item"] = (
         joblib.load(ITEM_ITEM_PATH) if os.path.exists(ITEM_ITEM_PATH) else {}
@@ -325,7 +238,7 @@ def predict(
         top_k: number of recommendations to return
 
     Returns:
-        list of { courseId, score, scores: { cluster, content, cf, popularity }, cluster }
+        list of { courseId, score, scores: { cf, bert, popularity } }
     """
     if not _load_model():
         logger.warning("Model not trained, returning empty recommendations")
@@ -348,12 +261,10 @@ def predict(
     bert = _get_bert_model()
     user_bert_vector = bert.encode([user_text], show_progress_bar=False, normalize_embeddings=True)
 
-    # Score each candidate: CF (collaborative) + BERT-cosine (semantic) + popularity
-    # NOTE: signals are combined via GATING (below), not weighted fusion. Experiments
-    # showed fixed linear fusion let dense/low-precision signals outvote the sparse,
-    # high-precision CF signal and degraded accuracy; gating routes to the right
-    # technique per context (mixture-of-experts). K-means/TF-IDF are no longer used
-    # for scoring (kept upstream for optional diversity/analysis).
+    # Score each candidate: CF (collaborative) + BERT-cosine (semantic) + popularity,
+    # then combine via GATING (below), not weighted fusion. Fixed linear fusion let
+    # dense/low-precision signals outvote the sparse, high-precision CF signal;
+    # gating routes to the right technique per context (mixture-of-experts).
     uvec = user_bert_vector[0]
     u_norm = float(np.linalg.norm(uvec)) + 1e-9
 
