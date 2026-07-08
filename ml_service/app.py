@@ -62,9 +62,7 @@ app = FastAPI(
 # Request/Response schemas
 
 class TrainRequest(BaseModel):
-    n_clusters: int | None = Field(
-        None, description="Number of K-means clusters (auto if omitted)"
-    )
+    pass
 
 
 class TrainResponse(BaseModel):
@@ -81,8 +79,6 @@ class RecommendationItem(BaseModel):
     courseId: str
     score: float
     scores: dict = {}
-    cluster: int | None = None
-    userCluster: int | None = None
 
 
 class RecommendResponse(BaseModel):
@@ -112,7 +108,7 @@ async def train(req: TrainRequest = TrainRequest()):
     Steps:
       1. Load all published courses from MongoDB
       2. Load all user-course interactions
-      3. Fit TF-IDF + K-means + Jaccard matrix
+      3. Compute BERT embeddings + Jaccard matrix
       4. Persist to disk
       5. Reload into memory
     """
@@ -129,7 +125,6 @@ async def train(req: TrainRequest = TrainRequest()):
         metadata = engine.train_model(
             courses=courses,
             interactions=interactions,
-            n_clusters=req.n_clusters,
         )
 
         # Reload the newly trained model into memory

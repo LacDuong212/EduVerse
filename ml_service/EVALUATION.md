@@ -1,3 +1,100 @@
+# EduVerse ML — Cách đánh giá (Evaluation)
+
+> **Trạng thái:** các script đánh giá đã được **gỡ khỏi `ml_service/`** cho gọn (chúng chỉ là công cụ đo offline, KHÔNG tham gia lúc service chạy). File này lưu lại **toàn bộ**: phương pháp, cách chạy, ý nghĩa kết quả, và **mã nguồn đầy đủ** để thêm lại bất cứ lúc nào.
+>
+> Ba script đều **không được import bởi `app.py`/`engine.py`/`db.py`** — gỡ chúng không ảnh hưởng service (train + predict vẫn chạy bình thường).
+
+---
+
+## 1. Ba script đã gỡ
+
+| File | Vai trò | Lệnh chạy |
+|---|---|---|
+| `evaluate.py` | Đánh giá toàn diện: LOO cross-validation (Precision/Recall/HitRate/NDCG), so sánh baseline, elbow + silhouette, và Matrix Factorization (ALS) | `py evaluate.py -k 5 8` |
+| `grid_search.py` | Quét lưới trọng số fusion tìm cấu hình tối ưu NDCG; đo coverage + diversity từng chiến lược | `py grid_search.py --k 10 --step 0.1` |
+| `gate_check.py` | Kiểm tra dữ liệu tương tác có đủ để đánh giá offline không (chỉ đọc) | `py gate_check.py` |
+
+Kết quả `evaluate.py` ghi ra `model/evaluation_results.json`; `grid_search.py` ghi ra `model/grid_search_results.json`.
+
+---
+
+## 2. Khôi phục (thêm lại khi muốn)
+
+**Cách 1 — git (byte-exact, khuyến nghị):** cả 3 file đã được commit, nên chỉ cần:
+```bash
+git checkout HEAD -- ml_service/evaluate.py ml_service/grid_search.py ml_service/gate_check.py
+```
+(hoặc `git show HEAD:ml_service/evaluate.py > ml_service/evaluate.py` cho từng file).
+
+**Cách 2 — copy tay:** dán lại mã nguồn ở [mục 6](#6-mã-nguồn-đầy-đủ) vào đúng tên file.
+
+> ⚠️ **PHỤ THUỘC QUAN TRỌNG:** `engine.py` và `train.py` đã được **dọn** (bỏ K-means + TF-IDF). Các script eval cũ dùng `engine.W_CLUSTER/W_CONTENT/...`, `engine.VECTORIZER_PATH/KMEANS_PATH/COURSE_VECTORS_PATH/COURSE_CLUSTERS_PATH`, và `_cache["course_clusters"]` — những thứ **không còn** trong engine hiện tại. Muốn chạy lại eval, chọn 1 trong 2:
+> 1. **Khôi phục cả cụm từ commit TRƯỚC đợt dọn này** (an toàn nhất):
+>    ```bash
+>    git log --oneline -- ml_service/engine.py     # tìm commit trước khi dọn K-means/TF-IDF
+>    git checkout <commit_đó> -- ml_service/engine.py ml_service/train.py ml_service/evaluate.py ml_service/grid_search.py ml_service/gate_check.py
+>    ```
+> 2. Hoặc **tự thêm lại vào `engine.py`**: TF-IDF + K-means trong `train_model` (fit + `joblib.dump`), các hằng path/`W_*`, và nạp chúng trong `_load_model` (kèm vào danh sách `required`).
+>
+> Thư viện: `numpy, joblib, sentence-transformers` đã có trong `requirements.txt`, nhưng **`scikit-learn` đã bị gỡ** khỏi requirements (code hiện tại không dùng) — chạy eval cần cài lại: `pip install scikit-learn`.
+
+---
+
+## 3. Các độ đo (metrics) — công thức & ý nghĩa
+
+Cho một danh sách gợi ý `recommended` (đã xếp hạng), tập đúng `relevant`, và ngưỡng `K`:
+
+- **Precision@K** = `|top-K ∩ relevant| / K` — trong K khóa gợi ý, bao nhiêu phần đúng.
+- **Recall@K** = `|top-K ∩ relevant| / |relevant|` — trong các khóa đúng, bắt được bao nhiêu phần trong top-K.
+- **Hit Rate@K** = `1 nếu top-K chạm ít nhất 1 khóa đúng, ngược lại 0` — tỉ lệ "trúng ít nhất một".
+- **NDCG@K** (Normalized Discounted Cumulative Gain) — thưởng khi khóa đúng nằm **càng gần đầu** danh sách:
+  ```
+  DCG@K  = Σ_{i=0..K-1} [ recommended[i] ∈ relevant ] / log2(i + 2)
+  IDCG@K = Σ_{i=0..min(|relevant|,K)-1} 1 / log2(i + 2)
+  NDCG@K = DCG@K / IDCG@K
+  ```
+  Đây là metric chính để so sánh chất lượng xếp hạng (0→1, cao hơn tốt hơn).
+- **Silhouette Score** — chất lượng phân cụm K-means (−1→1): điểm càng cao thì các cụm càng tách bạch.
+- **Catalog Coverage** = `% số khóa xuất hiện trong top-K của BẤT KỲ user nào` — đo hệ có "chôn" phần lớn catalog không (đa dạng ở cấp hệ thống).
+- **Intra-list Diversity** = `1 − trung bình cosine giữa các cặp khóa trong một danh sách` — một danh sách gợi ý có đa dạng chủ đề không (tránh 8 khóa na ná).
+
+---
+
+## 4. Các phép đánh giá làm gì
+
+### 4.1. `evaluate.py`
+1. **Leave-One-Out (LOO) cross-validation** — với mỗi user có ≥2 enrollment: lần lượt **giấu 1 khóa**, dự đoán bằng phần còn lại, kiểm tra khóa bị giấu có nằm trong top-K không. Tính Precision/Recall/HitRate/NDCG, **phân tầng** theo:
+   - `cold` (2–3 enrollment) vs `warm` (4+),
+   - `cf+` (khóa giấu có tín hiệu CF) vs `cf0` (CF mù).
+2. **So sánh baseline** trên cùng khung LOO: `Random`, `Popularity`, `Content-only (TF-IDF)`, `BERT-only`, `CF-only`, `Hybrid-weighted (old, 4 tín hiệu cộng trọng số)`, `Gated-hard` (pipeline hiện tại), `Gated-soft (α)`, và `Engine.predict` (bản production).
+3. **Elbow + Silhouette** — train K-means với K=2..8, in inertia + silhouette để chọn số cụm.
+4. **Matrix Factorization (implicit ALS)** — CF *model-based* thật sự (học latent factors bằng tối ưu, Hu et al. 2008), LOO có **retrain mỗi fold** để công bằng với Jaccard.
+
+### 4.2. `grid_search.py`
+- Quét toàn bộ tổ hợp trọng số `(cluster, content, cf, popularity)` trên lưới `step` (mặc định 0.1), cache điểm từng tín hiệu **một lần/fold** rồi thử mọi trọng số → tìm cấu hình **tối đa NDCG@K** (LOO). Báo cáo DEFAULT vs CF-only vs BEST.
+- Đo **coverage + diversity** cho từng chiến lược (CF-only / Content-only / Hybrid-default / Hybrid-best) để thấy đánh đổi accuracy ↔ diversity.
+
+### 4.3. `gate_check.py`
+- Đếm dữ liệu thật (users/courses/enrollments/wishlist/reviews), phân bố tương tác/user, và **kết luận** dữ liệu có đủ để chạy LOO offline không (ngưỡng: ≥100 user có ≥2 tương tác + ≥30 khóa → OK; ít hơn → "thin/sparse", nên seed thêm bằng `seed_data.py`).
+
+---
+
+## 5. Đọc kết quả — các con số tiêu biểu (bối cảnh)
+
+- **Silhouette:** BERT ~0.1243 vs TF-IDF ~0.0579 → BERT tách cụm tốt hơn ~2×. (Lý do lịch sử chọn BERT cho clustering.)
+- **NDCG@5:** TF-IDF ~0.8265 vs BERT ~0.7778 (từ header `engine.py`).
+- **Gating vs weighted:** khung LOO cho thấy cộng trọng số tuyến tính để tín hiệu dày (content/popularity) lấn át CF thưa-nhưng-chính-xác; **gating** (Tier CF trên Tier còn lại) khắc phục điều này — đó là lý do pipeline hiện tại dùng gating.
+- **Lưu ý trung thực:** các số trên đo trên dữ liệu (một phần seed bằng `seed_data.py`). Nếu dữ liệu thật còn thưa, nên nêu rõ trong phần "Hạn chế" và coi kết quả là **định hướng**, không tuyệt đối. Chạy `gate_check.py` trước để biết mức độ đủ dữ liệu.
+
+---
+
+## 6. Mã nguồn đầy đủ
+
+> Dán lại vào `ml_service/<tên file>` là chạy được (hoặc dùng git ở [mục 2](#2-khôi-phục-thêm-lại-khi-muốn)).
+
+### 6.1. `evaluate.py`
+
+```python
 """
 EduVerse ML — Comprehensive Evaluation Script
 ===============================================
@@ -741,3 +838,319 @@ def main():
 
 if __name__ == "__main__":
     main()
+```
+
+### 6.2. `grid_search.py`
+
+```python
+"""
+EduVerse ML — Fusion Weight Grid-Search + Per-Strategy Coverage/Diversity
+=========================================================================
+Completes the evaluation story:
+  1. Grid-search fusion weights (cluster/content/cf/popularity) to find the
+     config that maximizes LOO NDCG@K. Caches per-signal normalized scores
+     ONCE per fold (weights don't affect normalization), so the sweep is cheap.
+  2. Per-strategy Coverage + Intra-list Diversity, to quantify the
+     accuracy-vs-diversity trade-off (CF-only vs Hybrid-default vs Hybrid-tuned).
+
+Usage:  py grid_search.py --k 10 --step 0.1
+Output: prints tables + writes model/grid_search_results.json
+"""
+import argparse
+import json
+import logging
+import math
+from collections import defaultdict
+from copy import deepcopy
+
+import numpy as np
+import joblib
+from dotenv import load_dotenv
+from sklearn.metrics.pairwise import cosine_similarity
+
+load_dotenv()
+import db
+import engine
+
+logging.basicConfig(level=logging.INFO, format="[grid] %(message)s",
+                    stream=__import__("sys").stdout)
+logger = logging.getLogger("grid")
+
+SIGNALS = ["cluster", "content", "cf", "popularity"]
+
+
+def ndcg_at_k(ranked_ids, relevant, k):
+    dcg = sum(1.0 / math.log2(i + 2) for i, cid in enumerate(ranked_ids[:k]) if cid in relevant)
+    idcg = sum(1.0 / math.log2(i + 2) for i in range(min(len(relevant), k)))
+    return dcg / idcg if idcg > 0 else 0.0
+
+
+def recall_at_k(ranked_ids, relevant, k):
+    return len(set(ranked_ids[:k]) & relevant) / len(relevant) if relevant else 0.0
+
+
+def weight_simplex(step):
+    """All weight tuples over SIGNALS on a `step` grid summing to 1.0."""
+    n = round(1.0 / step)
+    combos = []
+    for a in range(n + 1):
+        for b in range(n + 1 - a):
+            for c in range(n + 1 - a - b):
+                d = n - a - b - c
+                combos.append((a * step, b * step, c * step, d * step))
+    return combos
+
+
+def _all_scored(signals, candidates):
+    """Return list of (courseId, {signal: normalized_score}) for ALL candidates."""
+    res = engine.predict(signals, candidates, top_k=len(candidates))
+    return [(r["courseId"], r["scores"]) for r in res]
+
+
+def fuse_rank(scored, w):
+    """Re-rank cached per-signal scores under weight tuple w."""
+    wc, wo, wf, wp = w
+    ranked = sorted(
+        scored,
+        key=lambda x: wc * x[1]["cluster"] + wo * x[1]["content"]
+        + wf * x[1]["cf"] + wp * x[1]["popularity"],
+        reverse=True,
+    )
+    return [cid for cid, _ in ranked]
+
+
+def cache_loo_folds():
+    """For each LOO fold, cache (held_out_id, scored_candidates, stratum)."""
+    interactions = db.load_interactions()
+    user_enr = defaultdict(list)
+    for it in interactions:
+        if it["action"] in ("active", "completed"):
+            user_enr[it["userId"]].append(it["courseId"])
+    eligible = {u: c for u, c in user_enr.items() if len(c) >= 2}
+
+    all_courses = db.load_courses()
+    folds = []
+    for uid, enrolled in eligible.items():
+        strat = "cold" if len(enrolled) <= 3 else "warm"
+        full = db.load_user_signals(uid)
+        for i, held in enumerate(enrolled):
+            remaining = {cid for j, cid in enumerate(enrolled) if j != i}
+            sig = deepcopy(full)
+            sig["enrollments"] = [e for e in sig["enrollments"]
+                                  if str(e["course"]) != held]
+            candidates = [c for c in all_courses if str(c["_id"]) not in remaining]
+            folds.append((held, _all_scored(sig, candidates), strat))
+    logger.info(f"Cached {len(folds)} LOO folds ({sum(1 for f in folds if f[2]=='cold')} cold)")
+    return folds
+
+
+def grid_search(folds, k, step):
+    combos = weight_simplex(step)
+    logger.info(f"Sweeping {len(combos)} weight combos @k={k}...")
+    rows = []
+    for w in combos:
+        ndcgs = {"all": [], "cold": [], "warm": []}
+        for held, scored, strat in folds:
+            ranked = fuse_rank(scored, w)
+            v = ndcg_at_k(ranked, {held}, k)
+            ndcgs["all"].append(v)
+            ndcgs[strat].append(v)
+        rows.append({
+            "w": w,
+            "ndcg_all": round(float(np.mean(ndcgs["all"])), 4),
+            "ndcg_cold": round(float(np.mean(ndcgs["cold"])), 4) if ndcgs["cold"] else None,
+            "ndcg_warm": round(float(np.mean(ndcgs["warm"])), 4) if ndcgs["warm"] else None,
+        })
+    rows.sort(key=lambda r: r["ndcg_all"], reverse=True)
+    return rows
+
+
+def coverage_diversity(strategy_weights, k):
+    """Per-strategy catalog coverage + intra-list diversity over full-profile users."""
+    all_courses = db.load_courses()
+    n_catalog = len(all_courses)
+    course_txt = {str(c["_id"]): engine._build_course_text(c) for c in all_courses}
+    vectorizer = joblib.load(engine.VECTORIZER_PATH)
+
+    interactions = db.load_interactions()
+    uids = {it["userId"] for it in interactions}
+
+    # Cache full-profile scored candidates per user once
+    user_scored = {}
+    for uid in uids:
+        sig = db.load_user_signals(uid)
+        enrolled = {str(e["course"]) for e in sig.get("enrollments", [])}
+        cands = [c for c in all_courses if str(c["_id"]) not in enrolled]
+        if cands:
+            user_scored[uid] = _all_scored(sig, cands)
+
+    out = {}
+    for name, w in strategy_weights.items():
+        rec_union = set()
+        divs = []
+        for uid, scored in user_scored.items():
+            topk = fuse_rank(scored, w)[:k]
+            rec_union.update(topk)
+            if len(topk) >= 2:
+                vecs = vectorizer.transform([course_txt[c] for c in topk if c in course_txt])
+                sim = cosine_similarity(vecs)
+                n = sim.shape[0]
+                if n >= 2:
+                    off = (sim.sum() - n) / (n * (n - 1))  # mean off-diagonal
+                    divs.append(1.0 - off)
+        out[name] = {
+            "coverage_pct": round(len(rec_union) / n_catalog * 100, 1),
+            "diversity": round(float(np.mean(divs)), 4) if divs else None,
+        }
+    return out
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--k", type=int, default=10)
+    ap.add_argument("--step", type=float, default=0.1)
+    args = ap.parse_args()
+
+    engine._load_model()
+
+    folds = cache_loo_folds()
+    rows = grid_search(folds, args.k, args.step)
+
+    default_w = (engine.W_CLUSTER, engine.W_CONTENT, engine.W_CF, engine.W_POPULARITY)
+    cf_only = (0.0, 0.0, 1.0, 0.0)
+    best = rows[0]["w"]
+
+    def find(w):
+        wr = tuple(round(x, 2) for x in w)
+        for r in rows:
+            if tuple(round(x, 2) for x in r["w"]) == wr:
+                return r
+        return None
+
+    logger.info("\n" + "=" * 64)
+    logger.info(f"GRID-SEARCH RESULTS (NDCG@{args.k}) — weights = (cluster, content, cf, pop)")
+    logger.info("=" * 64)
+    logger.info(f"{'config':28s} {'all':>7s} {'cold':>7s} {'warm':>7s}")
+    for label, w in [("DEFAULT " + str(default_w), default_w),
+                     ("CF-only " + str(cf_only), cf_only),
+                     ("BEST    " + str(tuple(round(x,2) for x in best)), best)]:
+        r = find(w)
+        if r:
+            logger.info(f"{label:28s} {r['ndcg_all']:>7.4f} "
+                        f"{(r['ndcg_cold'] or 0):>7.4f} {(r['ndcg_warm'] or 0):>7.4f}")
+
+    logger.info("\nTop 8 configs by NDCG@%d (all):" % args.k)
+    for r in rows[:8]:
+        w = tuple(round(x, 2) for x in r["w"])
+        logger.info(f"  {str(w):30s} all={r['ndcg_all']:.4f} "
+                    f"cold={(r['ndcg_cold'] or 0):.4f} warm={(r['ndcg_warm'] or 0):.4f}")
+
+    logger.info("\n" + "=" * 64)
+    logger.info(f"COVERAGE / DIVERSITY @{args.k} (accuracy-vs-diversity trade-off)")
+    logger.info("=" * 64)
+    cov = coverage_diversity({
+        "CF-only": cf_only,
+        "Content-only": (0.0, 1.0, 0.0, 0.0),
+        "Hybrid-default": default_w,
+        "Hybrid-best": best,
+    }, args.k)
+    logger.info(f"{'strategy':18s} {'coverage%':>10s} {'diversity':>10s}")
+    for name, m in cov.items():
+        logger.info(f"{name:18s} {m['coverage_pct']:>10.1f} "
+                    f"{(m['diversity'] if m['diversity'] is not None else 0):>10.4f}")
+
+    with open("model/grid_search_results.json", "w") as f:
+        json.dump({"k": args.k, "step": args.step,
+                   "best_weights": best, "default_weights": default_w,
+                   "top_configs": rows[:20], "coverage_diversity": cov}, f, indent=2)
+    logger.info("\nSaved -> model/grid_search_results.json")
+
+
+if __name__ == "__main__":
+    main()
+```
+
+> ⚠️ Lưu ý khi khôi phục `grid_search.py`: nó tham chiếu `engine.W_CLUSTER/W_CONTENT/W_CF/W_POPULARITY` và `_cache["course_clusters"]` — các hằng/artefact của **pipeline weighted cũ**. Nếu `engine.py` đã bỏ chúng, cần thêm lại các hằng đó (hoặc chỉnh `grid_search.py`) trước khi chạy. Tương tự, `evaluate.py` dùng `_strategy_weighted_old` cũng cần `course_clusters`/`kmeans` — vốn vẫn được `train_model()` tạo ra.
+
+### 6.3. `gate_check.py`
+
+```python
+"""
+D1 GATE CHECK — quantify real interaction data to decide offline-eval feasibility.
+Reuses db.py loaders. Read-only.
+"""
+from collections import Counter, defaultdict
+from db import get_db, load_courses, load_interactions
+
+
+def main():
+    db = get_db()
+
+    # Raw collection counts
+    print("=" * 60)
+    print("RAW COLLECTION COUNTS")
+    print("=" * 60)
+    for col in ["users", "students", "courses", "enrollments", "wishlists", "reviews"]:
+        try:
+            print(f"  {col:14s}: {db[col].count_documents({}):>7d}")
+        except Exception as e:
+            print(f"  {col:14s}: ERR {e}")
+
+    courses = load_courses()
+    print(f"\n  live/public courses (eval catalog): {len(courses)}")
+
+    interactions = load_interactions()
+    print(f"  total interactions (enroll+wishlist+review): {len(interactions)}")
+
+    by_action = Counter(i["action"] for i in interactions)
+    print("\n  interactions by action:")
+    for a, c in by_action.most_common():
+        print(f"    {a:12s}: {c}")
+
+    # Per-user interaction distribution
+    per_user = defaultdict(set)
+    for i in interactions:
+        per_user[i["userId"]].add(i["courseId"])
+
+    counts = sorted((len(v) for v in per_user.values()), reverse=True)
+    n_users = len(counts)
+
+    print("\n" + "=" * 60)
+    print("PER-USER DISTINCT-COURSE INTERACTION DISTRIBUTION")
+    print("=" * 60)
+    print(f"  users with >=1 interaction : {n_users}")
+
+    def bucket(lo, hi=None):
+        if hi is None:
+            return sum(1 for c in counts if c >= lo)
+        return sum(1 for c in counts if lo <= c <= hi)
+
+    print(f"    exactly 1            : {bucket(1,1)}")
+    print(f"    2-3 (cold)           : {bucket(2,3)}")
+    print(f"    4-9 (warm)           : {bucket(4,9)}")
+    print(f"    10+ (power)          : {bucket(10)}")
+    print(f"  users >=2 (usable LOO) : {bucket(2)}")
+    print(f"  users >=5              : {bucket(5)}")
+
+    if counts:
+        print(f"\n  max interactions/user  : {counts[0]}")
+        print(f"  median                 : {counts[len(counts)//2]}")
+        print(f"  mean                   : {sum(counts)/len(counts):.2f}")
+
+    # Verdict for offline LOO eval
+    usable = bucket(2)
+    print("\n" + "=" * 60)
+    print("VERDICT")
+    print("=" * 60)
+    print(f"  Leave-one-out needs users with >=2 interactions: {usable}")
+    if usable >= 100 and len(courses) >= 30:
+        print("  [OK] ENOUGH real data - run offline eval as-is.")
+    elif usable >= 30:
+        print("  [THIN] eval possible but report sparsity; consider augmenting.")
+    else:
+        print("  [SPARSE] seed simulated data (seed_data.py) + state in Limitations.")
+
+
+if __name__ == "__main__":
+    main()
+```
