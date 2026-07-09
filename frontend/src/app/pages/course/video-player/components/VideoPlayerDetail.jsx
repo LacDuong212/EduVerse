@@ -137,6 +137,7 @@ export default function VideoPlayerDetail({
             seekTo={seekTo}
             getCurrentTime={getCurrentTime}
             notesApi={notesApi}
+            playlistLoading={loading || progressLoading || !progressReady}
           />
         </div>
       </Row>

@@ -15,6 +15,12 @@ export default function useVideoPlayerTracking({
   const playerContainerRef = useRef(null);
   useVideoControls(playerContainerRef);
 
+  // Synchronous flag for "the user actually pressed play". Kept in a ref so the
+  // timeupdate handler can read it without stale-closure issues. Distinct from a
+  // browser-fired timeupdate (which happens on reload when the browser restores
+  // the media element's last position) — only a real `play` event flips this.
+  const hasStartedRef = useRef(false);
+
   const [hasStartedPlayback, setHasStartedPlayback] = useState(false);
   const [showResumeDialog, setShowResumeDialog] = useState(false);
   const [resumeShownForLectureId, setResumeShownForLectureId] = useState(null);
@@ -39,6 +45,7 @@ export default function useVideoPlayerTracking({
     if (!lectureId) return;
 
     resetTracking?.();
+    hasStartedRef.current = false;
     setHasStartedPlayback(false);
     setShowResumeDialog(false);
     setShowConclusionDialog(false);
@@ -81,16 +88,23 @@ export default function useVideoPlayerTracking({
     const videoEl = playerContainerRef.current?.querySelector("video");
     if (!videoEl) return;
 
+    const handlePlay = () => {
+      // A genuine play — safe to hide the resume prompt and start tracking.
+      hasStartedRef.current = true;
+      setHasStartedPlayback(true);
+      setShowResumeDialog(false);
+    };
+
     const handleTimeUpdate = () => {
       const currentTime = videoEl.currentTime || 0;
       const duration = videoEl.duration || lectureDurationSec || 0;
 
       if (currentTime <= 0.5) return;
 
-      if (!hasStartedPlayback) {
-        setHasStartedPlayback(true);
-        setShowResumeDialog(false);
-      }
+      // Ignore time updates until the user has actually pressed play. On reload
+      // the browser fires a timeupdate with the restored position, which used to
+      // flip hasStartedPlayback and suppress the resume dialog before it showed.
+      if (!hasStartedRef.current) return;
 
       if (currentProgress?.status === "completed") return;
 
@@ -139,10 +153,12 @@ export default function useVideoPlayerTracking({
       }
     };
 
+    videoEl.addEventListener("play", handlePlay);
     videoEl.addEventListener("timeupdate", handleTimeUpdate);
     videoEl.addEventListener("ended", handleEnded);
 
     return () => {
+      videoEl.removeEventListener("play", handlePlay);
       videoEl.removeEventListener("timeupdate", handleTimeUpdate);
       videoEl.removeEventListener("ended", handleEnded);
     };

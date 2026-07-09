@@ -20,6 +20,11 @@ export default function useQuizOverlay({
   const quizzesRef = useRef(quizzes);
   const onAllAnsweredRef = useRef(onAllAnsweredAtVideoEnd);
 
+  // shownSeqRef: running count of quizzes displayed this session. Drives the
+  // "a / total" label so it reflects how many quizzes the student has reached
+  // (1st shown → 1, 2nd shown → 2, …), independent of the quiz's timestamp order.
+  const shownSeqRef = useRef(0);
+
   const hasTimestampQuizzes = (quizzes || []).some((q) => q.timestamp != null);
   const timestampQuizTotal = (quizzes || []).filter((q) => q.timestamp != null).length;
 
@@ -34,14 +39,17 @@ export default function useQuizOverlay({
     shownRef.current = new Set();
     quizQueueRef.current = [];
     activeQuizRef.current = null;
+    shownSeqRef.current = 0;
     setAnsweredCount(0);
     setActiveQuiz(null);
     setQuizResults([]);
   }, [source, playerKey]);
 
   const showQuiz = useCallback((quizObj) => {
-    activeQuizRef.current = quizObj;
-    setActiveQuiz(quizObj);
+    shownSeqRef.current += 1;
+    const withSeq = { ...quizObj, seq: shownSeqRef.current };
+    activeQuizRef.current = withSeq;
+    setActiveQuiz(withSeq);
   }, []);
 
   // timeupdate: normal playback — show one quiz at a time as timestamp is reached
