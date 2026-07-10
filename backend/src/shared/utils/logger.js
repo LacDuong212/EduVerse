@@ -31,10 +31,10 @@ const logger = {
     if (err.cause) {
       // console.error("\x1b[35mCause:\x1b[0m %s", err.cause.message || err.cause);
 
-      if (process.env.NODE_ENV === "development" && err.cause.stack) {
+      if (err.cause.stack) {
         console.error("\x1b[2m%s\x1b[0m", err.cause.stack);
       }
-    } else if (process.env.NODE_ENV === "development" && err.stack) {
+    } else if (err.stack) {
       console.error("\x1b[2m%s\x1b[0m", err.stack);
     }
 
