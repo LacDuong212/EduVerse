@@ -155,7 +155,7 @@ const Hero = () => {
               </li>
               <li className="list-inline-item me-3 icons-center">
                 <BsPatchCheckFill className="me-1 text-success" />
-                Skill Radar & Progress
+                Progress & Achievements
               </li>
               <li className="list-inline-item icons-center">
                 <BsPatchCheckFill className="me-1 text-success" />
