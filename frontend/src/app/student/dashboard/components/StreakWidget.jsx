@@ -21,7 +21,7 @@ const StreakWidget = ({ streak }) => {
   const todayCount = streak.activityLog?.[todayYMD()] ?? 0;
 
   return (
-    <div className="bg-transparent border rounded-3 p-3 d-flex flex-column gap-2">
+    <div className="bg-transparent border rounded-3 p-3 d-flex flex-column gap-2 h-100">
       <div className="d-flex align-items-center justify-content-between mb-1">
         <div className="fw-bold text-body">Streak Milestones</div>
         <span
@@ -80,7 +80,7 @@ const StreakWidget = ({ streak }) => {
       )}
 
       {longest > 0 && (
-        <div className="d-flex align-items-center gap-2 pt-1 border-top mt-1">
+        <div className="d-flex align-items-center gap-2 pt-2 border-top mt-1">
           <span className="text-body small">🏆 Best streak:</span>
           <span className="fw-semibold small text-body">
             {longest} {longest === 1 ? "day" : "days"}
