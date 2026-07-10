@@ -52,6 +52,21 @@ export default function useQuizOverlay({
     setActiveQuiz(withSeq);
   }, []);
 
+  // skipQuizzesBefore: silently mark every timestamp quiz strictly before `seconds`
+  // as already-handled so it is never displayed. Used when RESUMING a lecture at a
+  // saved position — those quizzes were already passed, so we don't re-prompt them.
+  // Their answers are not recorded (accepted trade-off: the end-of-lecture summary
+  // will be missing data for skipped quizzes). This is deliberately NOT called on
+  // user-initiated forward seeks, so students still can't skip quizzes mid-lecture.
+  const skipQuizzesBefore = useCallback((seconds) => {
+    if (seconds == null || !Number.isFinite(seconds)) return;
+    (quizzesRef.current || []).forEach((q, i) => {
+      if (q.timestamp != null && q.timestamp < seconds) {
+        shownRef.current.add(i);
+      }
+    });
+  }, []);
+
   // timeupdate: normal playback — show one quiz at a time as timestamp is reached
   const handleTimeUpdate = useCallback((videoEl) => {
     if (activeQuizRef.current) return; // already showing a quiz
@@ -193,5 +208,6 @@ export default function useQuizOverlay({
     hasPendingTimestampQuizzes,
     onQuizAnswer,
     onQuizContinue,
+    skipQuizzesBefore,
   };
 }

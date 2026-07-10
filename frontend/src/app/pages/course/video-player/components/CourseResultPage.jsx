@@ -1,5 +1,6 @@
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Alert, Button, Card, Col, Container, Row } from "react-bootstrap";
 import {
   FaArrowLeft,
@@ -13,6 +14,8 @@ import { RiAlertFill } from "react-icons/ri";
 import axios from "axios";
 import { toast } from "react-toastify";
 import RatingModal from "./RatingModal";
+import ListedCourses from "@/app/student/dashboard/components/ListedCourses";
+import { setRecommendedCourses } from "@/redux/coursesSlice";
 
 export default function CourseResultPage() {
   const { state } = useLocation();
@@ -21,22 +24,29 @@ export default function CourseResultPage() {
 
   const assessment = state?.assessment;
 
-  if (!assessment) {
-    return (
-      <Container className="py-2 text-center">
-        <Alert variant="warning">
-          No result found. Please finish the course first.
-        </Alert>
-
-        <Button onClick={() => navigate("/home")}>Back to Home</Button>
-      </Container>
-    );
-  }
-
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const [searchParams] = useSearchParams();
   const [showRating,   setShowRating]   = useState(false);
   const [hasReviewed,  setHasReviewed]  = useState(null);
+
+  const dispatch = useDispatch();
+  const recommendedCourses = useSelector(
+    (state) => state.courses?.recommended || []
+  );
+
+  useEffect(() => {
+    if (recommendedCourses.length > 0) return;
+    axios
+      .get(`${backendUrl}/api/courses/recommendations`, { withCredentials: true })
+      .then((res) => {
+        if (res?.data?.success) {
+          dispatch(setRecommendedCourses(res.data?.result?.courses || []));
+        }
+      })
+      .catch(() => {
+        // non-blocking — recommendations are optional
+      });
+  }, [backendUrl, dispatch, recommendedCourses.length]);
 
   useEffect(() => {
     if (!courseId) return;
@@ -81,6 +91,18 @@ export default function CourseResultPage() {
     const tab = searchParams.get("tab");
     if (tab) setActiveKey(tab);
   }, [searchParams]);
+
+  if (!assessment) {
+    return (
+      <Container className="py-2 text-center">
+        <Alert variant="warning">
+          No result found. Please finish the course first.
+        </Alert>
+
+        <Button onClick={() => navigate("/home")}>Back to Home</Button>
+      </Container>
+    );
+  }
 
   return (
     <Container className="py-4">
@@ -186,6 +208,9 @@ export default function CourseResultPage() {
           </Button>
         </div>
       </Card>
+
+      <ListedCourses />
+
       <RatingModal
         show={showRating}
         onHide={() => { setShowRating(false); setHasReviewed(true); }}
