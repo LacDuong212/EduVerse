@@ -1,5 +1,5 @@
 import { Col, Container, Row } from "react-bootstrap";
-import elementImg from "@/assets/images/02.svg";
+import elementImg from "@/assets/images/element/02.svg";
 
 export default function AuthLayout({ children }) {
   return (

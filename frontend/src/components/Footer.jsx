@@ -8,11 +8,7 @@ import logo from '@/assets/images/logo/logo.svg';
 import logoLight from '@/assets/images/logo/logo_light.svg';
 import playStore from '@/assets/images/client/app-store.svg';
 import googlePlay from '@/assets/images/client/google-play.svg';
-import grFlag from '@/assets/images/flags/gr.svg';
-import spFlag from '@/assets/images/flags/sp.svg';
-import ukFlag from '@/assets/images/flags/uk.svg';
 import { currentYear, TEAM_NAME, SUPPORT_EMAIL } from '@/contexts/constants';
-
 
 const Footer = ({
   className
@@ -82,74 +78,26 @@ const Footer = ({
                 </a>{" "}
               </span>
             </p>
-            <Row className="g-2 mt-2">
+            {/* <Row className="g-2 mt-2">
               <Col xs={6} sm={4} md={3} lg={6}>
                 <span role="button">
-
                   <img height={45} width={145} className="w-auto" src={googlePlay} alt="google-play" />
                 </span>
               </Col>
               <Col xs={6} sm={4} md={3} lg={6}>
                 <span role="button">
-
                   <img height={45} width={145} className="w-auto" src={playStore} alt="app-store" />
                 </span>
               </Col>
-            </Row>
+            </Row> */}
           </Col>
         </Row>
         <hr className="mt-4 mb-0" />
         <div className="py-3">
           <Container className="px-0">
-            <div className="d-lg-flex justify-content-between align-items-center py-3 text-center text-md-left">
+            <div className="d-lg-flex justify-content-between align-items-center text-center text-md-left">
               <div className="text-body text-primary-hover">
-
-                Copyrights ©{currentYear} EduVerse. Modified by{" "}
-                <Link target="_blank" className="text-body">
-                  {TEAM_NAME}
-                </Link>
-              </div>
-              <div className="justify-content-center mt-3 mt-lg-0">
-                <ul className="nav list-inline justify-content-center mb-0">
-                  <li className="list-inline-item">
-                    <Dropdown className="dropup mt-0 text-center text-sm-end">
-                      <DropdownToggle as="a" className="nav-link arrow-none" role="button" id="languageSwitcher" data-bs-toggle="dropdown" aria-expanded="false">
-                        <FaGlobe className="me-2" />
-                        Language <FaChevronUp size={12} />
-                      </DropdownToggle>
-                      <DropdownMenu as="ul" className="min-w-auto" aria-labelledby="languageSwitcher">
-                        <li>
-                          <DropdownItem className="me-4" href="#">
-                            <img alt="uk" height={12} width={18} className="fa-fw me-2" src={ukFlag} />
-                            English
-                          </DropdownItem>
-                        </li>
-                        <li>
-                          <DropdownItem className="me-4" href="#">
-                            <img alt="gr" height={12} width={18} className="fa-fw me-2" src={grFlag} />
-                            German
-                          </DropdownItem>
-                        </li>
-                        <li>
-                          <DropdownItem className="me-4" href="#">
-                            <img alt="sp" height={12} width={18} className="fa-fw me-2" src={spFlag} />
-                            French
-                          </DropdownItem>
-                        </li>
-                      </DropdownMenu>
-                    </Dropdown>
-                  </li>
-                  <li className="list-inline-item">
-                    <Link className="nav-link" href="#">
-                      Terms of use
-                    </Link>
-                  </li>
-                  <li className="list-inline-item">
-                    <Link className="nav-link pe-0" href="#">
-                      Privacy policy
-                    </Link>
-                  </li>
-                </ul>
+                Copyrights ©{currentYear} EduVerse. Modified with 💙 by <span className="text-primary font-monospace">{TEAM_NAME}</span>. {/*Originally Eduport, built by StackBros*/}
               </div>
             </div>
           </Container>

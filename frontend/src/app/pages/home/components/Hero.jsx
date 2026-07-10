@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import scienceImg from "@/assets/images/client/science.svg";
 import angularImg from "@/assets/images/client/angular.svg";
 import figmaImg from "@/assets/images/client/figma.svg";
-import homeImg from "@/assets/images/home1.png";
+import homeImg from "@/assets/images/element/home1.png";
 
 const Hero = () => {
   const navigate = useNavigate();
@@ -146,23 +146,20 @@ const Hero = () => {
               </span>
             </h1>
             <p className="my-4 lead">
-              An IT-focused learning platform with hands-on lessons, real projects, and one-on-one mentor support.
+              An IT-focused learning platform built for anyone passionate about technology. Master tech skills through hands-on lessons, Q&A with our experienced instructors, and get AI feedbacks to improve your learning.
             </p>
             <ul className="list-inline position-relative justify-content-center justify-content-lg-start mb-4">
-              <li className="list-inline-item me-2 icons-center">
-
-                <BsPatchCheckFill className="me-1 text-body" />
-                Learn with experts
+              <li className="list-inline-item me-3 icons-center">
+                <BsPatchCheckFill className="me-1 text-success" />
+                Interactive Quizzes & Notes
               </li>
-              <li className="list-inline-item me-2 icons-center">
-
-                <BsPatchCheckFill className="me-1 text-body" />
-                Get certificate
+              <li className="list-inline-item me-3 icons-center">
+                <BsPatchCheckFill className="me-1 text-success" />
+                Skill Radar & Progress
               </li>
               <li className="list-inline-item icons-center">
-
-                <BsPatchCheckFill className="me-1 text-body" />
-                Get membership
+                <BsPatchCheckFill className="me-1 text-success" />
+                Verified Certificates
               </li>
             </ul>
             <div className="d-sm-flex align-items-center justify-content-center justify-content-lg-start">

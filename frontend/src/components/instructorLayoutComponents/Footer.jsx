@@ -9,14 +9,19 @@ const Footer = () => {
     <footer className="bg-dark p-3">
       <Container>
         <Row className="align-items-center">
-          <Col md={4} className="text-center text-md-start mb-3 mb-md-0">
+          <Col md={3} className="text-center text-md-start mb-3 mb-md-0">
             <Link to="/home">
               <img className="h-20px" src={logoLight} height={20} width={94} alt="logo" />
             </Link>
           </Col>
-          <Col md={4} className="mb-3 mb-md-0">
-            <div className="text-center text-white text-primary-hover">
-              Copyrights ©2026 EduVerse. Modified by {TEAM_NAME}. {/*Originally Eduport, built by StackBros*/}
+          <Col md={5} className="mb-3 mb-md-0">
+            <div className="text-center text-white">
+              <div>
+                Copyrights ©2026 EduVerse.
+              </div>
+              <div>
+                Modified with 💙 by <span className="text-primary font-monospace">{TEAM_NAME}</span>. {/*Originally Eduport, built by StackBros*/}
+              </div>
             </div>
           </Col>
           <Col md={4}>

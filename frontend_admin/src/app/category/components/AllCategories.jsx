@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Card, CardBody, CardFooter, CardHeader, Col, Row, TabContainer, Button } from 'react-bootstrap';
 import { FaSearch, FaPlus, FaTimes } from 'react-icons/fa';
 import Fuse from 'fuse.js';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import PaginationBar from '@/components/PaginationBar';
 
@@ -28,7 +28,7 @@ const AllCategories = () => {
     threshold: 0.3,
     includeScore: true
   };
-  
+
   // Fetch Data
   const fetchCategories = async () => {
     setIsLoading(true);
@@ -68,7 +68,7 @@ const AllCategories = () => {
   // Handle Delete
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure? This action cannot be undone.")) return;
-    
+
     const response = await deleteCategory(id);
     if (response.success) {
       fetchCategories(); // Reload data
@@ -133,7 +133,7 @@ const AllCategories = () => {
                   </button>
                 </div>
               </Col>
-              
+
               {/* Add Button */}
               <Col md={4} className="text-md-end">
                 <Button variant="primary" className="mb-0" onClick={handleShowAdd}>
@@ -144,7 +144,7 @@ const AllCategories = () => {
           </CardHeader>
 
           <CardBody>
-            <CategoryList 
+            <CategoryList
               categoriesData={paginatedData}
               isLoading={isLoading}
               sortKey={sortKey}
@@ -155,7 +155,7 @@ const AllCategories = () => {
             />
           </CardBody>
         </TabContainer>
-        
+
         <CardFooter>
           <PaginationBar
             page={page}
@@ -169,8 +169,8 @@ const AllCategories = () => {
       </Card>
 
       {/* Modal Form */}
-      <CategoryModal 
-        show={showModal} 
+      <CategoryModal
+        show={showModal}
         onHide={() => setShowModal(false)}
         onSubmit={handleFormSubmit}
         editingCategory={editingCategory}
