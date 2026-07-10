@@ -5,7 +5,6 @@ import DashboardCounter from "./components/DashboardCounter";
 import RevenueChart from "./components/RevenueChart";
 import TopCoursesChart from "./components/TopCoursesChart";
 import EnrollmentTrendsChart from "./components/EnrollmentTrendsChart";
-import StudentProgressChart from "./components/StudentProgressChart";
 import StudentDistributionChart from "./components/StudentDistributionChart";
 import WelcomeBack from "./components/WelcomeBack";
 import { Container, Row, Spinner } from "react-bootstrap";
@@ -19,7 +18,6 @@ const InstructorDashboard = () => {
     revenueChart,
     topCourses,
     enrollmentTrends,
-    progressBreakdown,
     studentDistribution,
     loading,
     error,
@@ -80,15 +78,8 @@ const InstructorDashboard = () => {
             col={6}
             enrollmentData={enrollmentTrends}
           />
-          <StudentProgressChart
-            col={6}
-            progressData={progressBreakdown}
-          />
-        </Row>
-
-        <Row className="mt-4 g-4">
           <StudentDistributionChart
-            col={12}
+            col={6}
             distributionData={studentDistribution}
           />
         </Row>
