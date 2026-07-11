@@ -57,42 +57,85 @@ export const processVideoWithGemini = async (videoId, videoDuration = null) => {
     const aiResponse = JSON.parse(result.response.text());
     await fileManager.deleteFile(uploadResult.file.name);
 
-    // Clamp timestamps to the valid range, then keep markers from overlapping on
-    // the progress bar by nudging FORWARD only. The nudge is bounded: a quiz is
-    // never delayed more than MAX_DELAY seconds past where its concept was
-    // explained, so content placement stays the priority (the user accepts up to
-    // ~45s of slack). If separating fully would exceed that budget, we stop —
-    // content wins over spacing.
-    if (videoDuration > 0 && Array.isArray(aiResponse.quizzes)) {
-      const minTs = 10;
-      const maxTs = Math.max(minTs, Math.round(videoDuration) - 10);
-      const minGap = Math.max(10, Math.round(videoDuration * 0.05));
-      const MAX_DELAY = 45;
+    if (Array.isArray(aiResponse.quizzes)) {
+      const quizCount = getQuizCount(videoDuration);
 
-      const normalized = aiResponse.quizzes
-        .map((quiz) => ({
+      // Sort by timestamp so any trimming keeps a spread across the video.
+      let quizzes = [...aiResponse.quizzes].sort(
+        (a, b) => (a.timestamp ?? Infinity) - (b.timestamp ?? Infinity)
+      );
+
+      // Hard-cap the number of quizzes. Gemini often over-produces for long
+      // videos regardless of the "exactly N" instruction, and the schema has no
+      // size limit — so enforce it here. Selection only DROPS whole questions; it
+      // never moves a timestamp, so each kept question stays exactly where its
+      // own concept was explained.
+      if (quizzes.length > quizCount) {
+        const first = quizzes[0]?.timestamp;
+        const last = quizzes[quizzes.length - 1]?.timestamp;
+
+        if (Number.isFinite(first) && Number.isFinite(last) && last > first) {
+          // For each evenly-spaced TARGET TIME across the video, keep the
+          // question whose timestamp is nearest — so coverage is spread by real
+          // time, not just by list position.
+          const used = new Set();
+          const picked = [];
+          for (let i = 0; i < quizCount; i++) {
+            const target = first + (i * (last - first)) / (quizCount - 1);
+            let bestIdx = -1;
+            let bestDist = Infinity;
+            for (let j = 0; j < quizzes.length; j++) {
+              const ts = quizzes[j].timestamp;
+              if (used.has(j) || !Number.isFinite(ts)) continue;
+              const dist = Math.abs(ts - target);
+              if (dist < bestDist) { bestDist = dist; bestIdx = j; }
+            }
+            if (bestIdx !== -1) { used.add(bestIdx); picked.push(quizzes[bestIdx]); }
+          }
+          quizzes = picked.sort((a, b) => a.timestamp - b.timestamp);
+        } else {
+          // Timestamps unavailable/degenerate — fall back to spreading by position.
+          const picked = [];
+          for (let i = 0; i < quizCount; i++) {
+            picked.push(quizzes[Math.round((i * (quizzes.length - 1)) / (quizCount - 1))]);
+          }
+          quizzes = [...new Set(picked)];
+        }
+      }
+
+      // Normalize timestamps only when the duration is known: clamp into range,
+      // then keep markers from overlapping by nudging FORWARD only. The nudge is
+      // bounded — a quiz is never delayed more than MAX_DELAY seconds past where
+      // its concept was explained, so content placement stays the priority (the
+      // user accepts up to ~45s of slack). If full separation would exceed that
+      // budget, we stop — content wins over spacing.
+      if (videoDuration > 0) {
+        const minTs = 10;
+        const maxTs = Math.max(minTs, Math.round(videoDuration) - 10);
+        const minGap = Math.max(10, Math.round(videoDuration * 0.05));
+        const MAX_DELAY = 45;
+
+        quizzes = quizzes.map((quiz) => ({
           ...quiz,
           timestamp: quiz.timestamp != null
             ? Math.min(maxTs, Math.max(minTs, Math.round(quiz.timestamp)))
             : null,
-        }))
-        .sort((a, b) => (a.timestamp ?? Infinity) - (b.timestamp ?? Infinity));
+        }));
 
-      let prevTs = null;
-      for (const quiz of normalized) {
-        if (quiz.timestamp == null) continue;
-        const original = quiz.timestamp;
-        let ts = original;
-        if (prevTs != null && ts < prevTs + minGap) {
-          // Move forward toward the min gap, but not past the content spot by
-          // more than MAX_DELAY, and never past the end of the video.
-          ts = Math.min(original + MAX_DELAY, prevTs + minGap, maxTs);
+        let prevTs = null;
+        for (const quiz of quizzes) {
+          if (quiz.timestamp == null) continue;
+          const original = quiz.timestamp;
+          let ts = original;
+          if (prevTs != null && ts < prevTs + minGap) {
+            ts = Math.min(original + MAX_DELAY, prevTs + minGap, maxTs);
+          }
+          quiz.timestamp = Math.max(minTs, ts);
+          prevTs = quiz.timestamp;
         }
-        quiz.timestamp = Math.max(minTs, ts);
-        prevTs = quiz.timestamp;
       }
 
-      aiResponse.quizzes = normalized;
+      aiResponse.quizzes = quizzes;
     }
 
     logger.debug(`> [5/5] Video analysis complete.`);
@@ -155,12 +198,14 @@ const waitForGeminiFile = async (fileName) => {
   }
 };
 
+// Scale the number of quizzes to the video length (~1 per 2 minutes, capped 2-5),
+// so short clips aren't crammed and long ones aren't overloaded. Shared by the
+// prompt and the post-processing cap so both agree on the target count.
+const getQuizCount = (videoDuration = null) =>
+  videoDuration > 0 ? Math.min(5, Math.max(2, Math.round(videoDuration / 120))) : 5;
+
 const buildLecturePrompt = (videoDuration = null) => {
-  // Scale the number of quizzes to the video length (~1 per 2 minutes, 2-5),
-  // so short clips aren't crammed with clustered questions.
-  const quizCount = videoDuration > 0
-    ? Math.min(5, Math.max(2, Math.round(videoDuration / 120)))
-    : 5;
+  const quizCount = getQuizCount(videoDuration);
 
   // Soft spacing hint (~5% of the video): used only to guide WHICH concepts to
   // pick, never to move a timestamp away from its concept. Content placement wins.
