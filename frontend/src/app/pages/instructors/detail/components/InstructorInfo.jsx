@@ -1,4 +1,5 @@
 import { FaEnvelope, FaGlobe, FaHeadphones, FaMapMarkerAlt } from "react-icons/fa";
+import { sanitizeHtml } from "@/utils/sanitize";
 
 const InstructorInfo = ({ data = {} }) => {
   const {
@@ -17,7 +18,7 @@ const InstructorInfo = ({ data = {} }) => {
         <div className="mb-3">
           <div className="h4">Biography</div>
           <div className="clamped-html border-start border-3 border-light ms-1 ps-3">
-            <div className="ql-editor p-0" dangerouslySetInnerHTML={{ __html: String(introduction) }} />
+            <div className="ql-editor p-0" dangerouslySetInnerHTML={{ __html: sanitizeHtml(introduction) }} />
           </div>
         </div>
       )}

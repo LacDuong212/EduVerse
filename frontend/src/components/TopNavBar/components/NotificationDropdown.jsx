@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
 import { useSocketContext } from "@/contexts/SocketContext";
+import { sanitizeHtml } from "@/utils/sanitize";
 import { authApi } from "@/utils/api";
 import { handleRequest } from "@/utils/request";
 
@@ -105,7 +106,7 @@ const NotificationItem = ({ noti, onMarkRead }) => {
         </div>
         <div>
           <h6 className="mb-1 text-capitalize">{noti.type || "New Notification"}</h6>
-          <p className="text-body m-0" dangerouslySetInnerHTML={{ __html: noti.message || "" }} />
+          <p className="text-body m-0" dangerouslySetInnerHTML={{ __html: sanitizeHtml(noti.message) }} />
           <small className="text-secondary">{formatTimeAgo(noti.createdAt)}</small>
         </div>
         {!noti.isRead && (

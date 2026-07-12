@@ -2,6 +2,7 @@ import MongoStore from "connect-mongo";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import express from "express";
+import helmet from "helmet";
 import session from "express-session";
 import passport from "passport";
 
@@ -9,6 +10,7 @@ import configurePassport from "#config/passport.js";
 import { COOKIE_MAX_AGE, MONGO_SESSION_TTL } from "#constants/others.js";
 import AppError from "#exceptions/app.error.js";
 import errorMiddleware from "#middlewares/error.middleware.js";
+import { apiLimiter } from "#middlewares/rateLimit.middleware.js";
 import apiRouter from "#modules/index.js";
 
 const app = express();
@@ -21,6 +23,7 @@ if (process.env.NODE_ENV === "development") {
 
 // basic security & parsing
 app.set("trust proxy", 1);
+app.use(helmet()); // security headers (HSTS, X-Content-Type-Options, X-Frame-Options...)
 app.use(express.json({ limit: "5mb" }));
 app.use(express.urlencoded({ limit: "5mb", extended: true }));
 app.use(cookieParser());
@@ -68,7 +71,7 @@ app.use(passport.session());
 
 // routes
 app.get("/", (req, res) => res.send("EduVerse2 API is running"));
-app.use("/api", apiRouter);
+app.use("/api", apiLimiter, apiRouter);
 
 // catch-all route
 app.all("/*path", (req, res, next) => {
