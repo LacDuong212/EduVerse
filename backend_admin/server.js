@@ -1,9 +1,11 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import 'dotenv/config';
 import cookieParser from 'cookie-parser';
 
 import connectDB from './configs/mongodb.js';
+import { apiLimiter } from './middlewares/rateLimit.js';
 
 import accountRoute from './routes/accountRoutes.js';
 import authRoute from './routes/authRoutes.js';
@@ -34,9 +36,14 @@ const allowedOrigins = [
 ];
 
 //Middleware
+app.set('trust proxy', 1); // đứng sau Nginx — lấy đúng client IP cho rate limit
+app.use(helmet()); // security headers (HSTS, X-Content-Type-Options, X-Frame-Options...)
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({origin: allowedOrigins, credentials: true}));
+
+// Rate limiting — áp cho toàn bộ /api
+app.use('/api', apiLimiter);
 
 // API Endpoints
 app.get('/', (req, res) => res.send("EDV-ADM API is running"));

@@ -1,4 +1,5 @@
 import { Badge } from "react-bootstrap";
+import { sanitizeHtml } from "@/utils/sanitize";
 import "react-quill-new/dist/quill.snow.css";
 import { BsPersonCircle, BsTrash } from "react-icons/bs";
 
@@ -80,7 +81,7 @@ export default function QnaReply({ reply, onDelete, submitting }) {
       <div
         className="ql-editor p-0"
         style={{ fontSize: "0.9rem" }}
-        dangerouslySetInnerHTML={{ __html: content }}
+        dangerouslySetInnerHTML={{ __html: sanitizeHtml(content) }}
       />
     </div>
   );

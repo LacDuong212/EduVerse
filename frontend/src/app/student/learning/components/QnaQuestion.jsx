@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Badge } from "react-bootstrap";
+import { sanitizeHtml } from "@/utils/sanitize";
 import "react-quill-new/dist/quill.snow.css";
 import {
   BsCheckCircle,
@@ -157,7 +158,7 @@ export default function QnaQuestion({
       <div
         className="ql-editor p-0 mb-3"
         style={{ fontSize: "0.9rem" }}
-        dangerouslySetInnerHTML={{ __html: content }}
+        dangerouslySetInnerHTML={{ __html: sanitizeHtml(content) }}
       />
 
       {/* ── Action row ── */}
