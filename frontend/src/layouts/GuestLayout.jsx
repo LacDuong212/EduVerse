@@ -17,7 +17,7 @@ const GuestLayout = ({ children }) => {
       </main>
 
       <Suspense>
-        <Footer className="bg-light pt-5" />
+        <Footer className="bg-light pt-4" />
       </Suspense>
     </div>
   );

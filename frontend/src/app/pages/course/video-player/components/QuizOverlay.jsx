@@ -21,7 +21,7 @@ const CARD_STYLE = {
   boxShadow: "0 8px 40px rgba(0,0,0,0.5)",
 };
 
-export default function QuizOverlay({ quiz, index, total, onAnswer, onContinue }) {
+export default function QuizOverlay({ quiz, index, displayNumber, total, onAnswer, onContinue }) {
   const [selected, setSelected] = useState(null);
   const [submitted, setSubmitted] = useState(false);
 
@@ -78,7 +78,7 @@ export default function QuizOverlay({ quiz, index, total, onAnswer, onContinue }
           <span style={{ fontSize: "1.1rem", marginRight: "0.5rem" }}>🧠</span>
           <span style={{ fontWeight: 700, fontSize: "1rem" }}>Quick Check</span>
           <span style={{ marginLeft: "auto", fontSize: "0.8rem", color: "#6c757d", background: "#f1f3f5", borderRadius: "20px", padding: "2px 10px" }}>
-            {index + 1} / {total}
+            {displayNumber ?? index + 1} / {total}
           </span>
         </div>
 

@@ -20,6 +20,11 @@ export default function useQuizOverlay({
   const quizzesRef = useRef(quizzes);
   const onAllAnsweredRef = useRef(onAllAnsweredAtVideoEnd);
 
+  // shownSeqRef: running count of quizzes displayed this session. Drives the
+  // "a / total" label so it reflects how many quizzes the student has reached
+  // (1st shown → 1, 2nd shown → 2, …), independent of the quiz's timestamp order.
+  const shownSeqRef = useRef(0);
+
   const hasTimestampQuizzes = (quizzes || []).some((q) => q.timestamp != null);
   const timestampQuizTotal = (quizzes || []).filter((q) => q.timestamp != null).length;
 
@@ -34,14 +39,32 @@ export default function useQuizOverlay({
     shownRef.current = new Set();
     quizQueueRef.current = [];
     activeQuizRef.current = null;
+    shownSeqRef.current = 0;
     setAnsweredCount(0);
     setActiveQuiz(null);
     setQuizResults([]);
   }, [source, playerKey]);
 
   const showQuiz = useCallback((quizObj) => {
-    activeQuizRef.current = quizObj;
-    setActiveQuiz(quizObj);
+    shownSeqRef.current += 1;
+    const withSeq = { ...quizObj, seq: shownSeqRef.current };
+    activeQuizRef.current = withSeq;
+    setActiveQuiz(withSeq);
+  }, []);
+
+  // skipQuizzesBefore: silently mark every timestamp quiz strictly before `seconds`
+  // as already-handled so it is never displayed. Used when RESUMING a lecture at a
+  // saved position — those quizzes were already passed, so we don't re-prompt them.
+  // Their answers are not recorded (accepted trade-off: the end-of-lecture summary
+  // will be missing data for skipped quizzes). This is deliberately NOT called on
+  // user-initiated forward seeks, so students still can't skip quizzes mid-lecture.
+  const skipQuizzesBefore = useCallback((seconds) => {
+    if (seconds == null || !Number.isFinite(seconds)) return;
+    (quizzesRef.current || []).forEach((q, i) => {
+      if (q.timestamp != null && q.timestamp < seconds) {
+        shownRef.current.add(i);
+      }
+    });
   }, []);
 
   // timeupdate: normal playback — show one quiz at a time as timestamp is reached
@@ -185,5 +208,6 @@ export default function useQuizOverlay({
     hasPendingTimestampQuizzes,
     onQuizAnswer,
     onQuizContinue,
+    skipQuizzesBefore,
   };
 }

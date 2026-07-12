@@ -66,12 +66,21 @@ export default function VideoPlayerDetail({
     setLocalProgressOverrides,
   });
 
-  const { activeQuiz, quizResults, hasTimestampQuizzes, onQuizAnswer, onQuizContinue } = useQuizOverlay({
+  const { activeQuiz, quizResults, hasTimestampQuizzes, onQuizAnswer, onQuizContinue, skipQuizzesBefore } = useQuizOverlay({
     playerContainerRef,
     quizzes: currentLecture?.aiData?.quizzes || [],
     source,
     playerKey,
   });
+
+  // On resume, skip (don't re-prompt) quizzes before the saved position, then seek.
+  // Marking must happen before the programmatic seek fires its `seeked` event, so
+  // the quiz overlay's seek handler sees them as already-handled and ignores them.
+  const handleResumeWithQuizSkip = useCallback(() => {
+    const resumeTo = safeCurrentProgress?.lastPositionSec ?? savedPos;
+    skipQuizzesBefore(resumeTo);
+    handleResume();
+  }, [safeCurrentProgress?.lastPositionSec, savedPos, skipQuizzesBefore, handleResume]);
 
   // Notes state lifted here so both NoteProgressMarkers and NoteSidebar share it
   const notesApi = useNotes({ lectureId, courseId });
@@ -137,6 +146,7 @@ export default function VideoPlayerDetail({
             seekTo={seekTo}
             getCurrentTime={getCurrentTime}
             notesApi={notesApi}
+            playlistLoading={loading || progressLoading || !progressReady}
           />
         </div>
       </Row>
@@ -158,7 +168,7 @@ export default function VideoPlayerDetail({
       <ResumeProgressDialog
         show={showResumeDialog}
         onClose={() => setShowResumeDialog(false)}
-        onResume={handleResume}
+        onResume={handleResumeWithQuizSkip}
         onRestart={handleRestart}
         savedSeconds={safeCurrentProgress?.lastPositionSec || savedPos}
         durationSeconds={

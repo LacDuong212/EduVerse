@@ -63,6 +63,7 @@ const VideoScreen = ({
           key={activeQuiz.index}
           quiz={activeQuiz.quiz}
           index={activeQuiz.index}
+          displayNumber={activeQuiz.seq}
           total={quizTotal}
           onAnswer={onQuizAnswer}
           onContinue={onQuizContinue}

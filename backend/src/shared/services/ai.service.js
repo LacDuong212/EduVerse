@@ -57,16 +57,42 @@ export const processVideoWithGemini = async (videoId, videoDuration = null) => {
     const aiResponse = JSON.parse(result.response.text());
     await fileManager.deleteFile(uploadResult.file.name);
 
-    // Clamp timestamps to valid range — Gemini may ignore text constraints
+    // Clamp timestamps to the valid range, then keep markers from overlapping on
+    // the progress bar by nudging FORWARD only. The nudge is bounded: a quiz is
+    // never delayed more than MAX_DELAY seconds past where its concept was
+    // explained, so content placement stays the priority (the user accepts up to
+    // ~45s of slack). If separating fully would exceed that budget, we stop —
+    // content wins over spacing.
     if (videoDuration > 0 && Array.isArray(aiResponse.quizzes)) {
       const minTs = 10;
       const maxTs = Math.max(minTs, Math.round(videoDuration) - 10);
-      aiResponse.quizzes = aiResponse.quizzes.map((quiz) => ({
-        ...quiz,
-        timestamp: quiz.timestamp != null
-          ? Math.min(maxTs, Math.max(minTs, Math.round(quiz.timestamp)))
-          : null,
-      }));
+      const minGap = Math.max(10, Math.round(videoDuration * 0.05));
+      const MAX_DELAY = 45;
+
+      const normalized = aiResponse.quizzes
+        .map((quiz) => ({
+          ...quiz,
+          timestamp: quiz.timestamp != null
+            ? Math.min(maxTs, Math.max(minTs, Math.round(quiz.timestamp)))
+            : null,
+        }))
+        .sort((a, b) => (a.timestamp ?? Infinity) - (b.timestamp ?? Infinity));
+
+      let prevTs = null;
+      for (const quiz of normalized) {
+        if (quiz.timestamp == null) continue;
+        const original = quiz.timestamp;
+        let ts = original;
+        if (prevTs != null && ts < prevTs + minGap) {
+          // Move forward toward the min gap, but not past the content spot by
+          // more than MAX_DELAY, and never past the end of the video.
+          ts = Math.min(original + MAX_DELAY, prevTs + minGap, maxTs);
+        }
+        quiz.timestamp = Math.max(minTs, ts);
+        prevTs = quiz.timestamp;
+      }
+
+      aiResponse.quizzes = normalized;
     }
 
     logger.debug(`> [5/5] Video analysis complete.`);
@@ -130,24 +156,44 @@ const waitForGeminiFile = async (fileName) => {
 };
 
 const buildLecturePrompt = (videoDuration = null) => {
+  // Scale the number of quizzes to the video length (~1 per 2 minutes, 2-5),
+  // so short clips aren't crammed with clustered questions.
+  const quizCount = videoDuration > 0
+    ? Math.min(5, Math.max(2, Math.round(videoDuration / 120)))
+    : 5;
+
+  // Soft spacing hint (~5% of the video): used only to guide WHICH concepts to
+  // pick, never to move a timestamp away from its concept. Content placement wins.
+  const minGap = videoDuration > 0 ? Math.max(10, Math.round(videoDuration * 0.05)) : null;
+
   const durationNote = videoDuration
-    ? `Video duration: ${Math.round(videoDuration)} seconds. Each timestamp must be between 10 and ${Math.max(10, Math.round(videoDuration) - 10)}.`
-    : ``;
+    ? `The video is ${Math.round(videoDuration)} seconds long; every timestamp MUST be an integer between 10 and ${Math.max(10, Math.round(videoDuration) - 10)}.`
+    : `Every timestamp MUST fall inside the video's actual length and be at least 10 seconds.`;
+
+  const spacingNote = minGap
+    ? `so no two markers land closer than about ${minGap} seconds on the progress bar`
+    : `so no two markers land too close on the progress bar`;
 
   return `
-  You are a professional instructor. Analyze the video and generate high-quality learning content in **ENGLISH**:
-    1. **Summary:** 2-3 sentences summarizing the video content.
+  You are a professional instructor. Watch the video and produce high-quality learning content.
+  Base everything ONLY on what is actually taught in the video — do not invent facts that are not present.
+  Write ALL output in ENGLISH, as plain text (no markdown, asterisks, or bullet characters inside any field value).
+
+    1. **Summary:** 2-3 sentences capturing the main content of the video.
 
     2. **Lesson Notes:**
-      - **Key Concepts:** Extract 3-5 most important terms. For each term, provide a short definition (1 sentence).
-      - **Main Points:** Summarize 3-5 core ideas, steps, or logic flows.
-      - **Practical Tips:** Provide 1-2 practical pieces of advice, common pitfalls, or real-world applications.
+      - **Key Concepts:** the 3-5 most important terms; each with a one-sentence, self-contained definition.
+      - **Main Points:** 3-5 core ideas, steps, or logic flows, in the order they appear.
+      - **Practical Tips:** 1-2 pieces of practical advice, common pitfalls, or real-world applications.
 
-    3. **Quizzes:** Create 5 multiple-choice questions that test knowledge at specific moments in the video.
-      - For each question, identify a specific **"topic"** (2-3 words). Example: "React Hooks", "CSS Flexbox".
-      - For each question, assign a **"timestamp"** (integer, seconds) — the exact second in the video right after the relevant concept finishes being explained. The video will pause at this timestamp to ask the student.
-      - Timestamps must be spread evenly throughout the video. Do NOT cluster them together.
-      - ${durationNote}
+    3. **Quizzes:** exactly ${quizCount} multiple-choice questions that check understanding of what was explained. For each:
+      - "question": one clear question about a concept actually covered in the video.
+      - "options": EXACTLY 4 distinct, plausible answer choices as plain strings (no duplicates, no "All/None of the above"). Vary which position holds the correct answer across the ${quizCount} questions.
+      - "correctAnswer": MUST be an EXACT, character-for-character copy of one of the 4 options — identical text, casing and punctuation, with NO prefix such as "A)". The app matches it against the options by exact string, so any difference makes the question ungradable.
+      - "explanation": 1-2 sentences on why the correct answer is right.
+      - "topic": a specific 2-3 word topic. Example: "React Hooks", "CSS Flexbox".
+      - "timestamp": integer seconds, the moment right AFTER the relevant concept finishes being explained (the video pauses there to ask the student).
+      Timestamp rules: place each timestamp AFTER the concept it tests finishes being explained. It does NOT need to be exact — a delay of up to ~45 seconds after the concept is perfectly fine. Use that leeway (and prefer well-separated concepts) ${spacingNote}. Never place a timestamp before or during the concept. List them in increasing time order. ${durationNote}
 
   **OUTPUT MUST BE IN ENGLISH. RETURN STRICTLY JSON MATCHING THE SCHEMA.**
   `;

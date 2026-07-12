@@ -7,7 +7,6 @@ export default function useInstructorDashboard() {
   const [revenueChart, setRevenueChart] = useState([]);
   const [topCourses, setTopCourses] = useState([]);
   const [enrollmentTrends, setEnrollmentTrends] = useState([]);
-  const [progressBreakdown, setProgressBreakdown] = useState({});
   const [studentDistribution, setStudentDistribution] = useState([]);
 
   const [loading, setLoading] = useState(false);
@@ -18,12 +17,11 @@ export default function useInstructorDashboard() {
     setError(null);
 
     try {
-      const [statsRes, earningRes, topCoursesRes, trendsRes, progressRes, distributionRes] = await Promise.all([
+      const [statsRes, earningRes, topCoursesRes, trendsRes, distributionRes] = await Promise.all([
         handleRequest(authApi.get("/instructor/stats")),
         handleRequest(authApi.get("/instructor/courses/revenue")),
         handleRequest(authApi.get("/instructor/courses/top-courses?limit=5")),
         handleRequest(authApi.get("/instructor/dashboard/enrollment-trends")),
-        handleRequest(authApi.get("/instructor/dashboard/progress-breakdown")),
         handleRequest(authApi.get("/instructor/dashboard/student-distribution?limit=10"))
       ]);
 
@@ -31,10 +29,9 @@ export default function useInstructorDashboard() {
       if (earningRes.success) setRevenueChart(earningRes.result?.series || []);
       if (topCoursesRes.success) setTopCourses(topCoursesRes.result || []);
       if (trendsRes.success) setEnrollmentTrends(trendsRes.result?.series || []);
-      if (progressRes.success) setProgressBreakdown(progressRes.result || {});
       if (distributionRes.success) setStudentDistribution(distributionRes.result || []);
 
-      const failed = [statsRes, earningRes, topCoursesRes, trendsRes, progressRes, distributionRes].find((r) => !r.success);
+      const failed = [statsRes, earningRes, topCoursesRes, trendsRes, distributionRes].find((r) => !r.success);
       if (failed) setError(failed.message);
     } catch (err) {
       console.error("Dashboard data fetch error:", err);
@@ -54,7 +51,6 @@ export default function useInstructorDashboard() {
     revenueChart,
     topCourses,
     enrollmentTrends,
-    progressBreakdown,
     studentDistribution,
     loading,
     error,

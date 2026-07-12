@@ -13,6 +13,7 @@ export default function CoursePlaylistSidebar({
   seekTo,
   getCurrentTime,
   notesApi,
+  playlistLoading = false,
 }) {
   const { isTrue: isOpen, toggle } = useToggle(true);
   const [activeTab, setActiveTab] = useState("content");
@@ -73,6 +74,7 @@ export default function CoursePlaylistSidebar({
                 currentId={currentLectureId}
                 lectureProgress={lectureProgressMap}
                 onSelect={onSelectLecture}
+                loading={playlistLoading}
               />
             ) : (
               <NoteSidebar

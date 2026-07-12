@@ -7,22 +7,6 @@ const axiosConfig = {
   withCredentials: true,
 };
 
-export const getAllAdminitrators = async (page = 1, search = "") => {
-  try {
-    const response = await axios.get(
-      `${backendUrl}/api/admins?page=${page}&limit=7&search=${encodeURIComponent(search)}`,
-      axiosConfig
-    );
-    if (response.data.success) {
-      return response.data;
-    }
-    return { data: [], pagination: { total: 0, page: 1, totalPages: 1 } };
-  } catch (error) {
-    console.error("Error fetching administrators:", error);
-    return { data: [], pagination: { total: 0, page: 1, totalPages: 1 } };
-  }
-};
-
 // COURSE
 export const approveCourse = async (id, message = null) => {
   try {

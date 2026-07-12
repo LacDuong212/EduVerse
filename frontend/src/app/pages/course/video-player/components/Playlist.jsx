@@ -9,12 +9,14 @@ import { BsCheckCircleFill } from "react-icons/bs";
 import { FaLock, FaPlay } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import QnaModal from "@/app/student/learning/components/QnaModal";
+import PlaylistSkeleton from "./PlaylistSkeleton";
 
 export default function Playlist({
   course,
   onSelect,
   currentId,
   lectureProgress = {},
+  loading = false,
 }) {
   const navigate = useNavigate();
   const [showQna, setShowQna] = useState(false);
@@ -142,6 +144,9 @@ export default function Playlist({
       </CardHeader>
 
       <CardBody className="flex-grow-1 overflow-auto p-2">
+        {loading ? (
+          <PlaylistSkeleton />
+        ) : (
         <Col xs={12} className="px-0">
           <Accordion
             activeKey={activeKey}
@@ -164,11 +169,23 @@ export default function Playlist({
                     lectureProgress?.[lecture.lecId]?.status === "completed"
                 );
 
+              const isActiveSection = lectures.some(
+                (lecture) => lecture.lecId === currentId
+              );
+
               return (
                 <AccordionItem eventKey={eventKey} key={eventKey}>
                   <AccordionHeader>
-                    <span className="mb-0 fw-bold d-inline-flex align-items-center justify-content-between w-100">
-                      {section.title || `Section ${sectionIndex + 1}`}
+                    <span className="mb-0 fw-bold d-flex align-items-center justify-content-between w-100">
+                      <span className="d-inline-flex align-items-center">
+                        {section.title || `Section ${sectionIndex + 1}`}
+                        {isActiveSection && (
+                          <span
+                            className="now-playing-dot ms-2 flex-shrink-0"
+                            title="Now playing"
+                          />
+                        )}
+                      </span>
 
                       {isFutureSectionLocked && " 🔒"}
 
@@ -226,19 +243,27 @@ export default function Playlist({
                           );
                         }
 
-                        let titleColorClass = "";
+                        // The currently-playing lecture must stand out no matter
+                        // its progress status, so isActive takes priority here.
+                        let titleColorClass = "fw-light";
 
-                        if (isCompleted) {
+                        if (isActive) {
+                          titleColorClass = "fw-bold text-primary";
+                        } else if (isCompleted) {
                           titleColorClass = "text-success";
                         } else if (isInProgress) {
                           titleColorClass = "text-primary";
-                        } else if (isActive) {
-                          titleColorClass = "text-danger";
                         }
 
                         return (
                           <Fragment key={lecture.lecId || lectureIndex}>
-                            <div className="d-flex justify-content-between align-items-center">
+                            <div
+                              className={`d-flex justify-content-between align-items-center rounded-2 py-1 pe-1 ${
+                                isActive
+                                  ? "bg-primary bg-opacity-10 border-start border-3 border-primary ps-2"
+                                  : "ps-1"
+                              }`}
+                            >
                               <div className="position-relative d-flex align-items-center">
                                 <Button
                                   variant={buttonVariant}
@@ -253,11 +278,20 @@ export default function Playlist({
                                   {buttonContent}
                                 </Button>
 
-                                <span
-                                  className={`d-inline-block text-truncate ms-2 mb-0 h6 fw-light w-100px w-sm-200px ${titleColorClass}`}
-                                  title={lecture.title}
-                                >
-                                  {lecture.title || "Untitled"}
+                                <span className="ms-2 mb-0 w-100px w-sm-200px">
+                                  <span
+                                    className={`d-block text-truncate h6 mb-0 ${titleColorClass}`}
+                                    title={lecture.title}
+                                  >
+                                    {lecture.title || "Untitled"}
+                                  </span>
+
+                                  {isActive && (
+                                    <span className="d-flex align-items-center text-primary small fw-semibold mt-1">
+                                      <span className="now-playing-dot me-1" />
+                                      Now playing
+                                    </span>
+                                  )}
                                 </span>
                               </div>
 
@@ -275,6 +309,7 @@ export default function Playlist({
             })}
           </Accordion>
         </Col>
+        )}
       </CardBody>
 
       <CardFooter className="flex-shrink-0">
