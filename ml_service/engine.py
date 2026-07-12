@@ -42,7 +42,7 @@ ACTION_WEIGHT = {
 def _rating_multiplier(rating):
     if not rating or rating < 1:
         return 1.0
-    return max(0.0, min(2.0, 1.0 + (rating - 3) * 0.5))
+    return ((rating - 1) / 2) # = [0;2]
 
 
 # TRAINING
