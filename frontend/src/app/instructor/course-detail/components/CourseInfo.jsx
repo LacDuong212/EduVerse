@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { DEFAULT_COURSE_IMG } from "@/contexts/constants";
 import { formatCurrency } from "@/utils/currency";
 import { secondsToDurationHM } from "@/utils/duration";
+import { sanitizeHtml } from "@/utils/sanitize";
 
 const CourseInfo = ({ col = 6, course }) => {
   const statusBadge = (status) => {
@@ -56,7 +57,7 @@ const CourseInfo = ({ col = 6, course }) => {
                   {course?.description
                     ? <div
                       className="clamped-html"
-                      dangerouslySetInnerHTML={{ __html: course.description }}
+                      dangerouslySetInnerHTML={{ __html: sanitizeHtml(course.description) }}
                     />
                     : "(No full description)"}
                 </div>
