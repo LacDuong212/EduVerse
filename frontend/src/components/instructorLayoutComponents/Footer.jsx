@@ -8,13 +8,13 @@ const Footer = () => {
   return (
     <footer className="bg-dark p-3">
       <Container>
-        <Row className="align-items-center">
-          <Col md={3} className="text-center text-md-start mb-3 mb-md-0">
+        <Row className="align-items-center g-2 g-md-0">
+          <Col sm={3} md={4} className="text-center text-md-start mb-md-0">
             <Link to="/home">
               <img className="h-20px" src={logoLight} height={20} width={94} alt="logo" />
             </Link>
           </Col>
-          <Col md={5} className="mb-3 mb-md-0">
+          <Col sm={6} md={4} className="mb-md-0">
             <div className="text-center text-white">
               <div>
                 Copyrights ©2026 EduVerse.
@@ -24,24 +24,24 @@ const Footer = () => {
               </div>
             </div>
           </Col>
-          <Col md={4}>
+          <Col sm={3} md={4}>
             <ul className="list-inline mb-0 text-center text-md-end">
-              <li className="list-inline-item ms-2">
+              <li className="list-inline-item">
                 <Link to="">
                   <FaFacebook className="text-white" />
                 </Link>
               </li>
-              <li className="list-inline-item ms-2">
+              <li className="list-inline-item">
                 <Link to="">
                   <FaInstagram className="text-white" />
                 </Link>
               </li>
-              <li className="list-inline-item ms-2">
+              <li className="list-inline-item">
                 <Link to="">
                   <FaLinkedinIn className="text-white" />
                 </Link>
               </li>
-              <li className="list-inline-item ms-2">
+              <li className="list-inline-item">
                 <Link to="">
                   <FaTwitter className="text-white" />
                 </Link>

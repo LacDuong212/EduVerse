@@ -1,9 +1,10 @@
 import { useState } from "react";
 import ReactApexChart from "react-apexcharts";
-import { Card, CardHeader, CardBody, Col } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Card, CardBody, CardHeader, Col } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 
 const StudentDistributionChart = ({ col = 6, distributionData = [] }) => {
+  const navigate = useNavigate();
   const [theme, setTheme] = useState(localStorage.getItem("EDUVERSE_THEME_KEY") || "light");
 
   const courseNames = distributionData.map(item => item.courseName || item.courseId);
@@ -11,6 +12,7 @@ const StudentDistributionChart = ({ col = 6, distributionData = [] }) => {
 
   const elem = document.querySelector("h6");
   const elemStyle = elem ? getComputedStyle(elem) : getComputedStyle(document.documentElement);
+
   const chartOptions = {
     series: [{
       name: "Active Students",
@@ -18,7 +20,15 @@ const StudentDistributionChart = ({ col = 6, distributionData = [] }) => {
     }],
     chart: {
       toolbar: { show: true },
-      type: "bar"
+      type: "bar",
+      events: {
+        dataPointSelection: (event, chartContext, config) => {
+          const item = distributionData[config.dataPointIndex];
+          if (item?.courseId) {
+            navigate(`/instructor/courses/${item.courseId}`);
+          }
+        }
+      }
     },
     dataLabels: {
       enabled: true,
@@ -38,6 +48,15 @@ const StudentDistributionChart = ({ col = 6, distributionData = [] }) => {
         }
       }
     },
+    states: {
+      hover: {
+        filter: { type: "darken", value: 0.85 }
+      },
+      active: {
+        allowMultipleDataPointsSelection: false,
+        filter: { type: "none" }
+      }
+    },
     colors: [
       getComputedStyle(document.documentElement).getPropertyValue("--bs-info").trim()
     ],
@@ -50,6 +69,11 @@ const StudentDistributionChart = ({ col = 6, distributionData = [] }) => {
     yaxis: {
       axisBorder: { show: false },
       axisTicks: { show: false },
+      labels: {
+        style: {
+          cssClass: "apexcharts-yaxis-label-clickable"
+        }
+      }
     },
     tooltip: {
       theme: theme === "dark" ? "dark" : "light",
@@ -70,7 +94,7 @@ const StudentDistributionChart = ({ col = 6, distributionData = [] }) => {
         <CardHeader className="bg-light border-bottom">
           <h5 className="mb-0">Student Distribution by Course</h5>
         </CardHeader>
-        <CardBody>
+        <CardBody className="d-flex flex-column justify-content-between">
           <div className="mb-4">
             <div className="row g-3">
               <div className="col-6 col-md-4">
@@ -95,49 +119,17 @@ const StudentDistributionChart = ({ col = 6, distributionData = [] }) => {
           </div>
 
           {distributionData.length > 0 ? (
-            <ReactApexChart
-              options={chartOptions}
-              series={chartOptions.series}
-              type="bar"
-              height={300}
-            />
-          ) : (
-            <div className="text-center py-5">
-              <p>No course data available</p>
+            <div className="position-relative style-apex-clickable">
+              <ReactApexChart
+                options={chartOptions}
+                series={chartOptions.series}
+                type="bar"
+                height={320}
+              />
             </div>
-          )}
-
-          {distributionData.length > 0 && (
-            <div className="mt-4">
-              <h6 className="mb-3">Course Details</h6>
-              <div className="table-responsive">
-                <table className="table table-sm table-hover mb-0">
-                  <thead className="table-light">
-                    <tr>
-                      <th>Course Name</th>
-                      <th className="text-end">Students</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {distributionData.map((item, index) => (
-                      <tr key={item.courseId || index}>
-                        <td className="text-wrap">
-                          <Link
-                            to={`/instructor/courses/${item.courseId}`}
-                            className="text-decoration-none"
-                            title={item?.courseName}
-                          >
-                            {item?.courseName}
-                          </Link>
-                        </td>
-                        <td className="text-end">
-                          <span className="badge bg-info">{item.studentCount}</span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+          ) : (
+            <div className="text-center py-5 my-auto">
+              <p className="text-muted mb-0">No course data available</p>
             </div>
           )}
         </CardBody>
