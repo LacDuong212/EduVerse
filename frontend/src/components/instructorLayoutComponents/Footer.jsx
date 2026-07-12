@@ -16,12 +16,12 @@ const Footer = () => {
           </Col>
           <Col sm={6} md={4} className="mb-md-0">
             <div className="text-center text-white">
-              <div>
+              <span className="d-inline-block me-1">
                 Copyrights ©2026 EduVerse.
-              </div>
-              <div>
-                Modified with 💙 by <span className="text-primary font-monospace">{TEAM_NAME}</span>. {/*Originally Eduport, built by StackBros*/}
-              </div>
+              </span>
+              <span className="d-inline-block">
+                Modified with 💙 by <span className="text-primary font-monospace">{TEAM_NAME}</span>.
+              </span>
             </div>
           </Col>
           <Col sm={3} md={4}>

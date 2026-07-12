@@ -53,29 +53,27 @@ const StudentDashboard = () => {
       <div className="d-flex flex-column gap-3 mb-3">
         <ResumeCard />
         <StatsCards stats={stats} courseStats={courseStats} />
-        <WeeklyActivityStrip streak={streak} />
       </div>
 
       {hasNoActivity ? (
         <DashboardEmptyState />
       ) : (
         <>
-          <SectionDivider label="Progress & Achievements" />
+          <SectionDivider label="Activity & Achievements" />
           <Row className="g-3 mb-3">
-            <Col xs={12} lg={8} className="d-flex flex-column gap-3">
-              <CloseToCompletion courses={inProgressCourses} />
+            <Col xs={12}>
+              <WeeklyActivityStrip streak={streak} />
             </Col>
-
-            <Col xs={12} lg={4} className="d-flex flex-column gap-3">
+            <Col xs={12} md={6}>
               <StreakWidget streak={streak} />
-              <BadgesWidget />
+            </Col>
+            <Col xs={12} md={6}>
+              <BadgesWidget streak={streak} />
+            </Col>
+            <Col xs={12}>
+              <ActivityCalendar streak={streak} />
             </Col>
           </Row>
-
-          <SectionDivider label="Activity" />
-          <div className="mb-3">
-            <ActivityCalendar streak={streak} />
-          </div>
         </>
       )}
 

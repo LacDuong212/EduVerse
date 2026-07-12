@@ -50,30 +50,8 @@ const BadgesWidget = () => {
         </Link>
       </div>
 
-      {/* Count + progress bar */}
-      <div>
-        <div className="d-flex align-items-baseline gap-1 mb-1">
-          <span className="fw-bold text-body lh-1" style={{ fontSize: "1.25rem" }}>
-            {earned.length}
-          </span>
-          <span className="text-body small">/ {total} earned</span>
-        </div>
-        {total > 0 && (
-          <div className="progress" style={{ height: 4 }}>
-            <div
-              className="progress-bar"
-              style={{ width: `${percentage}%`, background: "#f0b429" }}
-              role="progressbar"
-              aria-valuenow={earned.length}
-              aria-valuemin={0}
-              aria-valuemax={total}
-            />
-          </div>
-        )}
-      </div>
-
       {/* Badge circles */}
-      <div className="d-flex flex-wrap gap-2 pt-1">
+      <div className="d-flex flex-wrap gap-2">
         {recentEarned.length > 0 ? (
           <>
             {recentEarned.map((badge) => {
@@ -83,15 +61,15 @@ const BadgesWidget = () => {
                   key={badge.key}
                   title={badge.name}
                   style={{
-                    width:          38,
-                    height:         38,
+                    width:          37,
+                    height:         37,
                     borderRadius:   "50%",
                     background:     `${color}18`,
                     border:         `1.5px solid ${color}`,
                     display:        "flex",
                     alignItems:     "center",
                     justifyContent: "center",
-                    fontSize:       17,
+                    fontSize:       18,
                     boxShadow:      `0 0 6px ${color}28`,
                     flexShrink:     0,
                   }}
@@ -110,6 +88,26 @@ const BadgesWidget = () => {
           <span className="text-body small" style={{ opacity: 0.78 }}>
             Complete your first lecture to earn a badge.
           </span>
+        )}
+      </div>
+
+      {/* Count + progress bar */}
+      <div>
+        <div className="d-flex align-items-baseline gap-1">
+          <span className="fw-bold text-body">{earned.length}</span>
+          <span className="text-body small">/ {total} earned</span>
+        </div>
+        {total > 0 && (
+          <div className="progress" style={{ height: 6 }}>
+            <div
+              className="progress-bar"
+              style={{ width: `${percentage}%`, background: "#f0b429" }}
+              role="progressbar"
+              aria-valuenow={earned.length}
+              aria-valuemin={0}
+              aria-valuemax={total}
+            />
+          </div>
         )}
       </div>
 
